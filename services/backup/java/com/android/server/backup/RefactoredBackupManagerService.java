@@ -188,30 +188,30 @@ import libcore.io.IoUtils;
 public class RefactoredBackupManagerService implements BackupManagerServiceInterface {
 
     private static final String TAG = "BackupManagerService";
-    static final boolean DEBUG = true;
-    static final boolean MORE_DEBUG = false;
-    static final boolean DEBUG_SCHEDULING = MORE_DEBUG || true;
+    private static final boolean DEBUG = true;
+    private static final boolean MORE_DEBUG = false;
+    private static final boolean DEBUG_SCHEDULING = MORE_DEBUG || true;
 
     // File containing backup-enabled state.  Contains a single byte;
     // nonzero == enabled.  File missing or contains a zero byte == disabled.
-    static final String BACKUP_ENABLE_FILE = "backup_enabled";
+    private static final String BACKUP_ENABLE_FILE = "backup_enabled";
 
     // System-private key used for backing up an app's widget state.  Must
     // begin with U+FFxx by convention (we reserve all keys starting
     // with U+FF00 or higher for system use).
-    static final String KEY_WIDGET_STATE = "\uffed\uffedwidget";
+    private static final String KEY_WIDGET_STATE = "\uffed\uffedwidget";
 
     // Historical and current algorithm names
-    static final String PBKDF_CURRENT = "PBKDF2WithHmacSHA1";
-    static final String PBKDF_FALLBACK = "PBKDF2WithHmacSHA1And8bit";
+    private static final String PBKDF_CURRENT = "PBKDF2WithHmacSHA1";
+    private static final String PBKDF_FALLBACK = "PBKDF2WithHmacSHA1And8bit";
 
     // Name and current contents version of the full-backup manifest file
     //
     // Manifest version history:
     //
     // 1 : initial release
-    static final String BACKUP_MANIFEST_FILENAME = "_manifest";
-    static final int BACKUP_MANIFEST_VERSION = 1;
+    private static final String BACKUP_MANIFEST_FILENAME = "_manifest";
+    private static final int BACKUP_MANIFEST_VERSION = 1;
 
     // External archive format version history:
     //
@@ -220,31 +220,31 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // 3 : introduced "_meta" metadata file; no other format change per se
     // 4 : added support for new device-encrypted storage locations
     // 5 : added support for key-value packages
-    static final int BACKUP_FILE_VERSION = 5;
-    static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
-    static final int BACKUP_PW_FILE_VERSION = 2;
-    static final String BACKUP_METADATA_FILENAME = "_meta";
-    static final int BACKUP_METADATA_VERSION = 1;
-    static final int BACKUP_WIDGET_METADATA_TOKEN = 0x01FFED01;
+    private static final int BACKUP_FILE_VERSION = 5;
+    private static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
+    private static final int BACKUP_PW_FILE_VERSION = 2;
+    private static final String BACKUP_METADATA_FILENAME = "_meta";
+    private static final int BACKUP_METADATA_VERSION = 1;
+    private static final int BACKUP_WIDGET_METADATA_TOKEN = 0x01FFED01;
 
-    static final int TAR_HEADER_LONG_RADIX = 8;
-    static final int TAR_HEADER_OFFSET_FILESIZE = 124;
-    static final int TAR_HEADER_LENGTH_FILESIZE = 12;
-    static final int TAR_HEADER_OFFSET_MODTIME = 136;
-    static final int TAR_HEADER_LENGTH_MODTIME = 12;
-    static final int TAR_HEADER_OFFSET_MODE = 100;
-    static final int TAR_HEADER_LENGTH_MODE = 8;
-    static final int TAR_HEADER_OFFSET_PATH_PREFIX = 345;
-    static final int TAR_HEADER_LENGTH_PATH_PREFIX = 155;
-    static final int TAR_HEADER_OFFSET_PATH = 0;
-    static final int TAR_HEADER_LENGTH_PATH = 100;
-    static final int TAR_HEADER_OFFSET_TYPE_CHAR = 156;
+    private static final int TAR_HEADER_LONG_RADIX = 8;
+    private static final int TAR_HEADER_OFFSET_FILESIZE = 124;
+    private static final int TAR_HEADER_LENGTH_FILESIZE = 12;
+    private static final int TAR_HEADER_OFFSET_MODTIME = 136;
+    private static final int TAR_HEADER_LENGTH_MODTIME = 12;
+    private static final int TAR_HEADER_OFFSET_MODE = 100;
+    private static final int TAR_HEADER_LENGTH_MODE = 8;
+    private static final int TAR_HEADER_OFFSET_PATH_PREFIX = 345;
+    private static final int TAR_HEADER_LENGTH_PATH_PREFIX = 155;
+    private static final int TAR_HEADER_OFFSET_PATH = 0;
+    private static final int TAR_HEADER_LENGTH_PATH = 100;
+    private static final int TAR_HEADER_OFFSET_TYPE_CHAR = 156;
 
-    static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
+    private static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
-    static final String SETTINGS_PACKAGE = "com.android.providers.settings";
-    static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
-    static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
+    private static final String SETTINGS_PACKAGE = "com.android.providers.settings";
+    private static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
+    private static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
 
     // Retry interval for clear/init when the transport is unavailable
     private static final long TRANSPORT_RETRY_INTERVAL = 1 * AlarmManager.INTERVAL_HOUR;
@@ -270,54 +270,56 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private static final int MSG_RESTORE_OPERATION_TIMEOUT = 18;
 
     // backup task state machine tick
-    static final int MSG_BACKUP_RESTORE_STEP = 20;
-    static final int MSG_OP_COMPLETE = 21;
+    private static final int MSG_BACKUP_RESTORE_STEP = 20;
+    private static final int MSG_OP_COMPLETE = 21;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
-    static final long TIMEOUT_INTERVAL = 10 * 1000;
+    private static final long TIMEOUT_INTERVAL = 10 * 1000;
 
     // Timeout intervals for agent backup & restore operations
-    static final long TIMEOUT_BACKUP_INTERVAL = 30 * 1000;
-    static final long TIMEOUT_FULL_BACKUP_INTERVAL = 5 * 60 * 1000;
-    static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
-    static final long TIMEOUT_RESTORE_INTERVAL = 60 * 1000;
-    static final long TIMEOUT_RESTORE_FINISHED_INTERVAL = 30 * 1000;
+    private static final long TIMEOUT_BACKUP_INTERVAL = 30 * 1000;
+    private static final long TIMEOUT_FULL_BACKUP_INTERVAL = 5 * 60 * 1000;
+    private static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
+    private static final long TIMEOUT_RESTORE_INTERVAL = 60 * 1000;
+    private static final long TIMEOUT_RESTORE_FINISHED_INTERVAL = 30 * 1000;
 
     // User confirmation timeout for a full backup/restore operation.  It's this long in
     // order to give them time to enter the backup password.
-    static final long TIMEOUT_FULL_CONFIRMATION = 60 * 1000;
+    private static final long TIMEOUT_FULL_CONFIRMATION = 60 * 1000;
 
     // How long between attempts to perform a full-data backup of any given app
-    static final long MIN_FULL_BACKUP_INTERVAL = 1000 * 60 * 60 * 24; // one day
+    private static final long MIN_FULL_BACKUP_INTERVAL = 1000 * 60 * 60 * 24; // one day
 
     // If an app is busy when we want to do a full-data backup, how long to defer the retry.
     // This is fuzzed, so there are two parameters; backoff_min + Rand[0, backoff_fuzz)
-    static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
-    static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
+    private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
+    private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
-    Context mContext;
+    private Context mContext;
     private PackageManager mPackageManager;
-    IPackageManager mPackageManagerBinder;
+    private IPackageManager mPackageManagerBinder;
     private IActivityManager mActivityManager;
     private PowerManager mPowerManager;
     private AlarmManager mAlarmManager;
     private IStorageManager mStorageManager;
 
-    IBackupManager mBackupManagerBinder;
+    private IBackupManager mBackupManagerBinder;
 
     private final TransportManager mTransportManager;
 
-    boolean mEnabled;   // access to this is synchronized on 'this'
-    boolean mProvisioned;
-    boolean mAutoRestore;
-    PowerManager.WakeLock mWakelock;
-    HandlerThread mHandlerThread;
-    BackupHandler mBackupHandler;
-    PendingIntent mRunBackupIntent, mRunInitIntent;
-    BroadcastReceiver mRunBackupReceiver, mRunInitReceiver;
+    private boolean mEnabled;   // access to this is synchronized on 'this'
+    private boolean mProvisioned;
+    private boolean mAutoRestore;
+    private PowerManager.WakeLock mWakelock;
+    private HandlerThread mHandlerThread;
+    private BackupHandler mBackupHandler;
+    private PendingIntent mRunBackupIntent;
+    private PendingIntent mRunInitIntent;
+    private BroadcastReceiver mRunBackupReceiver;
+    private BroadcastReceiver mRunInitReceiver;
     // map UIDs to the set of participating packages under that UID
-    final SparseArray<HashSet<String>> mBackupParticipants
-            = new SparseArray<HashSet<String>>();
+    private final SparseArray<HashSet<String>> mBackupParticipants
+            = new SparseArray<>();
     // set of backup services that have pending changes
     class BackupRequest {
         public String packageName;
@@ -331,42 +333,42 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
     // Backups that we haven't started yet.  Keys are package names.
-    HashMap<String,BackupRequest> mPendingBackups
-            = new HashMap<String,BackupRequest>();
+    private HashMap<String, BackupRequest> mPendingBackups
+            = new HashMap<>();
 
     // Pseudoname that we use for the Package Manager metadata "package"
-    static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
+    private static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
 
     // locking around the pending-backup management
-    final Object mQueueLock = new Object();
+    private final Object mQueueLock = new Object();
 
     // The thread performing the sequence of queued backups binds to each app's agent
     // in succession.  Bind notifications are asynchronously delivered through the
     // Activity Manager; use this lock object to signal when a requested binding has
     // completed.
-    final Object mAgentConnectLock = new Object();
-    IBackupAgent mConnectedAgent;
-    volatile boolean mBackupRunning;
-    volatile boolean mConnecting;
-    volatile long mLastBackupPass;
+    private final Object mAgentConnectLock = new Object();
+    private IBackupAgent mConnectedAgent;
+    private volatile boolean mBackupRunning;
+    private volatile boolean mConnecting;
+    private volatile long mLastBackupPass;
 
     // For debugging, we maintain a progress trace of operations during backup
-    static final boolean DEBUG_BACKUP_TRACE = true;
-    final List<String> mBackupTrace = new ArrayList<String>();
+    private static final boolean DEBUG_BACKUP_TRACE = true;
+    private final List<String> mBackupTrace = new ArrayList<>();
 
     // A similar synchronization mechanism around clearing apps' data for restore
-    final Object mClearDataLock = new Object();
-    volatile boolean mClearingData;
+    private final Object mClearDataLock = new Object();
+    private volatile boolean mClearingData;
 
     @GuardedBy("mPendingRestores")
     private boolean mIsRestoreInProgress;
     @GuardedBy("mPendingRestores")
     private final Queue<PerformUnifiedRestoreTask> mPendingRestores = new ArrayDeque<>();
 
-    ActiveRestoreSession mActiveRestoreSession;
+    private ActiveRestoreSession mActiveRestoreSession;
 
     // Watch the device provisioning operation during setup
-    ContentObserver mProvisionedObserver;
+    private ContentObserver mProvisionedObserver;
 
     // The published binder is actually to a singleton trampoline object that calls
     // through to the proper code.  This indirection lets us turn down the heavy
@@ -638,15 +640,15 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // Bookkeeping of in-flight operations for timeout etc. purposes.  The operation
     // token is the index of the entry in the pending-operations list.
-    static final int OP_PENDING = 0;
-    static final int OP_ACKNOWLEDGED = 1;
-    static final int OP_TIMEOUT = -1;
+    private static final int OP_PENDING = 0;
+    private static final int OP_ACKNOWLEDGED = 1;
+    private static final int OP_TIMEOUT = -1;
 
     // Waiting for backup agent to respond during backup operation.
-    static final int OP_TYPE_BACKUP_WAIT = 0;
+    private static final int OP_TYPE_BACKUP_WAIT = 0;
 
     // Waiting for backup agent to respond during restore operation.
-    static final int OP_TYPE_RESTORE_WAIT = 1;
+    private static final int OP_TYPE_RESTORE_WAIT = 1;
 
     // An entire backup operation spanning multiple packages.
     private static final int OP_TYPE_BACKUP = 2;
@@ -684,17 +686,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
      * cancel backup tasks.
      */
     @GuardedBy("mCurrentOpLock")
-    final SparseArray<Operation> mCurrentOperations = new SparseArray<Operation>();
-    final Object mCurrentOpLock = new Object();
-    final Random mTokenGenerator = new Random();
+    private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
+    private final Object mCurrentOpLock = new Object();
+    private final Random mTokenGenerator = new Random();
 
-    final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<AdbParams>();
+    private final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<>();
 
     // Where we keep our journal files and other bookkeeping
-    File mBaseStateDir;
-    File mDataDir;
-    File mJournalDir;
-    File mJournal;
+    private File mBaseStateDir;
+    private File mDataDir;
+    private File mJournalDir;
+    private File mJournal;
 
     // Backup password, if any, and the file where it's saved.  What is stored is not the
     // password text itself; it's the result of a PBKDF2 hash with a randomly chosen (but
@@ -710,29 +712,29 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private byte[] mPasswordSalt;
 
     // Configuration of PBKDF2 that we use for generating pw hashes and intermediate keys
-    static final int PBKDF2_HASH_ROUNDS = 10000;
-    static final int PBKDF2_KEY_SIZE = 256;     // bits
-    static final int PBKDF2_SALT_SIZE = 512;    // bits
-    static final String ENCRYPTION_ALGORITHM_NAME = "AES-256";
+    private static final int PBKDF2_HASH_ROUNDS = 10000;
+    private static final int PBKDF2_KEY_SIZE = 256;     // bits
+    private static final int PBKDF2_SALT_SIZE = 512;    // bits
+    private static final String ENCRYPTION_ALGORITHM_NAME = "AES-256";
 
     // Keep a log of all the apps we've ever backed up, and what the
     // dataset tokens are for both the current backup dataset and
     // the ancestral dataset.
     private File mEverStored;
-    HashSet<String> mEverStoredApps = new HashSet<String>();
+    private HashSet<String> mEverStoredApps = new HashSet<>();
 
-    static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;  // increment when the schema changes
-    File mTokenFile;
-    Set<String> mAncestralPackages = null;
-    long mAncestralToken = 0;
-    long mCurrentToken = 0;
+    private static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;  // increment when the schema changes
+    private File mTokenFile;
+    private Set<String> mAncestralPackages = null;
+    private long mAncestralToken = 0;
+    private long mCurrentToken = 0;
 
     // Persistently track the need to do a full init
-    static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
-    HashSet<String> mPendingInits = new HashSet<String>();  // transport names
+    private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
+    private HashSet<String> mPendingInits = new HashSet<>();  // transport names
 
     // Round-robin queue for scheduling full backup passes
-    static final int SCHEDULE_FILE_VERSION = 1; // current version of the schedule file
+    private static final int SCHEDULE_FILE_VERSION = 1; // current version of the schedule file
     class FullBackupEntry implements Comparable<FullBackupEntry> {
         String packageName;
         long lastBackup;
@@ -750,14 +752,14 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    File mFullBackupScheduleFile;
+    private File mFullBackupScheduleFile;
     // If we're running a schedule-driven full backup, this is the task instance doing it
 
     @GuardedBy("mQueueLock")
-    PerformFullTransportBackupTask mRunningFullBackupTask;
+    private PerformFullTransportBackupTask mRunningFullBackupTask;
 
     @GuardedBy("mQueueLock")
-    ArrayList<FullBackupEntry> mFullBackupQueue;
+    private ArrayList<FullBackupEntry> mFullBackupQueue;
 
     // Utility: build a new random integer token
     @Override
@@ -839,7 +841,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 }
 
                 // snapshot the pending-backup set and work on that
-                ArrayList<BackupRequest> queue = new ArrayList<BackupRequest>();
+                ArrayList<BackupRequest> queue = new ArrayList<>();
                 File oldJournal = mJournal;
                 synchronized (mQueueLock) {
                     // Do we have any work to do?  Construct the work queue
@@ -1002,7 +1004,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
                 // Snapshot the pending-init queue and work on that
                 synchronized (mQueueLock) {
-                    queue = new HashSet<String>(mPendingInits);
+                    queue = new HashSet<>(mPendingInits);
                     mPendingInits.clear();
                 }
 
@@ -1149,7 +1151,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     // ----- Debug-only backup operation trace -----
-    void addBackupTrace(String s) {
+    private void addBackupTrace(String s) {
         if (DEBUG_BACKUP_TRACE) {
             synchronized (mBackupTrace) {
                 mBackupTrace.add(s);
@@ -1157,7 +1159,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    void clearBackupTrace() {
+    private void clearBackupTrace() {
         if (DEBUG_BACKUP_TRACE) {
             synchronized (mBackupTrace) {
                 mBackupTrace.clear();
@@ -1388,7 +1390,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
                 int numPackages = tf.readInt();
                 if (numPackages >= 0) {
-                    mAncestralPackages = new HashSet<String>();
+                    mAncestralPackages = new HashSet<>();
                     for (int i = 0; i < numPackages; i++) {
                         String pkgName = tf.readUTF();
                         mAncestralPackages.add(pkgName);
@@ -1497,13 +1499,13 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 }
 
                 final int N = in.readInt();
-                schedule = new ArrayList<FullBackupEntry>(N);
+                schedule = new ArrayList<>(N);
 
                 // HashSet instead of ArraySet specifically because we want the eventual
                 // lookups against O(hundreds) of entries to be as fast as possible, and
                 // we discard the set immediately after the scan so the extra memory
                 // overhead is transient.
-                HashSet<String> foundApps = new HashSet<String>(N);
+                HashSet<String> foundApps = new HashSet<>(N);
 
                 for (int i = 0; i < N; i++) {
                     String pkgName = in.readUTF();
@@ -1557,7 +1559,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             // no prior queue record, or unable to read it.  Set up the queue
             // from scratch.
             changed = true;
-            schedule = new ArrayList<FullBackupEntry>(apps.size());
+            schedule = new ArrayList<>(apps.size());
             for (PackageInfo info : apps) {
                 if (appGetsFullBackup(info) && appIsEligibleForBackup(info.applicationInfo)) {
                     schedule.add(new FullBackupEntry(info.packageName, 0));
@@ -1571,7 +1573,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         return schedule;
     }
 
-    Runnable mFullBackupScheduleWriter = new Runnable() {
+    private Runnable mFullBackupScheduleWriter = new Runnable() {
         @Override public void run() {
             synchronized (mQueueLock) {
                 try {
@@ -1707,7 +1709,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         return array;
     }
 
-    boolean passwordMatchesSaved(String algorithm, String candidatePw, int rounds) {
+    private boolean passwordMatchesSaved(String algorithm, String candidatePw, int rounds) {
         if (mPasswordHash == null) {
             // no current password case -- require that 'currentPw' be null or empty
             if (candidatePw == null || "".equals(candidatePw)) {
@@ -1830,7 +1832,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // Maintain persistent state around whether need to do an initialize operation.
     // Must be called with the queue lock held.
-    void recordInitPendingLocked(boolean isPending, String transportName) {
+    private void recordInitPendingLocked(boolean isPending, String transportName) {
         if (MORE_DEBUG) Slog.i(TAG, "recordInitPendingLocked: " + isPending
                 + " on transport " + transportName);
         mBackupHandler.removeMessages(MSG_RETRY_INIT);
@@ -1882,7 +1884,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // Reset all of our bookkeeping, in response to having been told that
     // the backend data has been wiped [due to idle expiry, for example],
     // so we must re-upload all saved settings.
-    void resetBackupState(File stateFileDir) {
+    private void resetBackupState(File stateFileDir) {
         synchronized (mQueueLock) {
             // Wipe the "what we've ever backed up" tracking
             mEverStoredApps.clear();
@@ -1949,7 +1951,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     };
 
     // ----- Track installation/removal of packages -----
-    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (MORE_DEBUG) Slog.d(TAG, "Received broadcast " + intent);
 
@@ -2065,7 +2067,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // Add the backup agents in the given packages to our set of known backup participants.
     // If 'packageNames' is null, adds all backup agents in the whole system.
-    void addPackageParticipantsLocked(String[] packageNames) {
+    private void addPackageParticipantsLocked(String[] packageNames) {
         // Look for apps that define the android:backupAgent attribute
         List<PackageInfo> targetApps = allAgentPackages();
         if (packageNames != null) {
@@ -2106,7 +2108,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     // Remove the given packages' entries from our known active set.
-    void removePackageParticipantsLocked(String[] packageNames, int oldUid) {
+    private void removePackageParticipantsLocked(String[] packageNames, int oldUid) {
         if (packageNames == null) {
             Slog.w(TAG, "removePackageParticipants with null list");
             return;
@@ -2143,7 +2145,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     // Returns the set of all applications that define an android:backupAgent attribute
-    List<PackageInfo> allAgentPackages() {
+    private List<PackageInfo> allAgentPackages() {
         // !!! TODO: cache this and regenerate only when necessary
         int flags = PackageManager.GET_SIGNATURES;
         List<PackageInfo> packages = mPackageManager.getInstalledPackages(flags);
@@ -2175,7 +2177,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // Called from the backup tasks: record that the given app has been successfully
     // backed up at least once.  This includes both key/value and full-data backups
     // through the transport.
-    void logBackupComplete(String packageName) {
+    private void logBackupComplete(String packageName) {
         if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) return;
 
         synchronized (mEverStoredApps) {
@@ -2235,7 +2237,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // Persistently record the current and ancestral backup tokens as well
     // as the set of packages with data [supposedly] available in the
     // ancestral dataset.
-    void writeRestoreTokens() {
+    private void writeRestoreTokens() {
         try {
             RandomAccessFile af = new RandomAccessFile(mTokenFile, "rwd");
 
@@ -2321,7 +2323,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     // clear an application's data, blocking until the operation completes or times out
-    void clearApplicationDataSynchronous(String packageName) {
+    private void clearApplicationDataSynchronous(String packageName) {
         // Don't wipe packages marked allowClearUserData=false
         try {
             PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
@@ -2581,7 +2583,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         return finalState == OP_ACKNOWLEDGED;
     }
 
-    void handleCancel(int token, boolean cancelAll) {
+    private void handleCancel(int token, boolean cancelAll) {
         // Notify any synchronous waiters
         Operation op = null;
         synchronized (mCurrentOpLock) {
@@ -2622,7 +2624,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // ----- Back up a set of applications via a worker thread -----
 
-    enum BackupState {
+    private enum BackupState {
         INITIAL,
         RUNNING_QUEUE,
         FINAL
@@ -3726,7 +3728,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     }
 
-    static void routeSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
+    private static void routeSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
             throws IOException {
         // We do not take close() responsibility for the pipe FD
         FileInputStream raw = new FileInputStream(inPipe.getFileDescriptor());
@@ -3786,7 +3788,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         int preflightFullBackup(PackageInfo pkg, IBackupAgent agent);
 
         long getExpectedSizeOrErrorCode();
-    };
+    }
 
     class FullBackupEngine {
         OutputStream mOutput;
@@ -4062,8 +4064,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    static void writeAppManifest(PackageInfo pkg, PackageManager packageManager, File manifestFile,
-            boolean withApk, boolean withWidgets) throws IOException {
+    private static void writeAppManifest(PackageInfo pkg, PackageManager packageManager,
+            File manifestFile, boolean withApk, boolean withWidgets) throws IOException {
         // Manifest format. All data are strings ending in LF:
         //     BACKUP_MANIFEST_VERSION, currently 1
         //
@@ -4152,7 +4154,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    boolean deviceIsEncrypted() {
+    private boolean deviceIsEncrypted() {
         try {
             return mStorageManager.getEncryptionState()
                      != StorageManager.ENCRYPTION_STATE_NONE
@@ -4204,7 +4206,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             mIncludeSystem = doSystem;
             mPackages = (packages == null)
                     ? new ArrayList<String>()
-                    : new ArrayList<String>(Arrays.asList(packages));
+                    : new ArrayList<>(Arrays.asList(packages));
             mCurrentPassword = curPassword;
             // when backing up, if there is a current backup password, we require that
             // the user use a nonempty encryption password as well.  if one is supplied
@@ -4322,7 +4324,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             String includeKeyValue = mKeyValue ? ", including key-value backups" : "";
             Slog.i(TAG, "--- Performing adb backup" + includeKeyValue + " ---");
 
-            TreeMap<String, PackageInfo> packagesToBackup = new TreeMap<String, PackageInfo>();
+            TreeMap<String, PackageInfo> packagesToBackup = new TreeMap<>();
             FullBackupObbConnection obbConnection = new FullBackupObbConnection();
             obbConnection.establish();  // we'll want this later
 
@@ -4397,7 +4399,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
             // flatten the set of packages now so we can explicitly control the ordering
             ArrayList<PackageInfo> backupQueue =
-                    new ArrayList<PackageInfo>(packagesToBackup.values());
+                new ArrayList<>(packagesToBackup.values());
             FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
             OutputStream out = null;
 
@@ -4609,7 +4611,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
      *       mBackupRunner.getBackupResultBlocking().
      */
     class PerformFullTransportBackupTask extends FullBackupTask implements BackupRestoreTask {
-        static final String TAG = "PFTBT";
+        private static final String TAG = "PFTBT";
 
         private final Object mCancelLock = new Object();
 
@@ -4638,7 +4640,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             mUpdateSchedule = updateSchedule;
             mLatch = latch;
             mJob = runningJob;
-            mPackages = new ArrayList<PackageInfo>(whichPackages.length);
+            mPackages = new ArrayList<>(whichPackages.length);
             mBackupObserver = backupObserver;
             mMonitor = monitor;
             mUserInitiated = userInitiated;
@@ -5360,7 +5362,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     /**
      * Schedule a job to tell us when it's a good time to run a full backup
      */
-    void scheduleNextFullBackupJob(long transportMinLatency) {
+    private void scheduleNextFullBackupJob(long transportMinLatency) {
         synchronized (mQueueLock) {
             if (mFullBackupQueue.size() > 0) {
                 // schedule the next job at the point in the future when the least-recently
@@ -5388,7 +5390,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     /**
      * Remove a package from the full-data queue.
      */
-    void dequeueFullBackupLocked(String packageName) {
+    private void dequeueFullBackupLocked(String packageName) {
         final int N = mFullBackupQueue.size();
         for (int i = N-1; i >= 0; i--) {
             final FullBackupEntry e = mFullBackupQueue.get(i);
@@ -5401,7 +5403,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     /**
      * Enqueue full backup for the given app, with a note about when it last ran.
      */
-    void enqueueFullBackup(String packageName, long lastBackedUp) {
+    private void enqueueFullBackup(String packageName, long lastBackedUp) {
         FullBackupEntry newEntry = new FullBackupEntry(packageName, lastBackedUp);
         synchronized (mQueueLock) {
             // First, sanity check that we aren't adding a duplicate.  Slow but
@@ -5640,7 +5642,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // ----- Restore infrastructure -----
 
     abstract class RestoreEngine {
-        static final String TAG = "RestoreEngine";
+        private static final String TAG = "RestoreEngine";
 
         public static final int SUCCESS = 0;
         public static final int TARGET_FAILURE = -2;
@@ -5720,17 +5722,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         // possible handling states for a given package in the restore dataset
         final HashMap<String, RestorePolicy> mPackagePolicies
-                = new HashMap<String, RestorePolicy>();
+                = new HashMap<>();
 
         // installer package names for each encountered app, derived from the manifests
-        final HashMap<String, String> mPackageInstallers = new HashMap<String, String>();
+        final HashMap<String, String> mPackageInstallers = new HashMap<>();
 
         // Signatures for a given package found in its manifest file
         final HashMap<String, Signature[]> mManifestSignatures
-                = new HashMap<String, Signature[]>();
+                = new HashMap<>();
 
         // Packages we've already wiped data on when restoring their first file
-        final HashSet<String> mClearedPackages = new HashSet<String>();
+        final HashSet<String> mClearedPackages = new HashSet<>();
 
         // How much data have we moved?
         long mBytes;
@@ -7013,7 +7015,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Used for synchronizing doRestoreFinished during adb restore
     class AdbRestoreFinishedLatch implements BackupRestoreTask {
-        static final String TAG = "AdbRestoreFinishedLatch";
+        private static final String TAG = "AdbRestoreFinishedLatch";
         final CountDownLatch mLatch;
         private final int mCurrentOpToken;
 
@@ -7094,17 +7096,17 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         // possible handling states for a given package in the restore dataset
         final HashMap<String, RestorePolicy> mPackagePolicies
-                = new HashMap<String, RestorePolicy>();
+                = new HashMap<>();
 
         // installer package names for each encountered app, derived from the manifests
-        final HashMap<String, String> mPackageInstallers = new HashMap<String, String>();
+        final HashMap<String, String> mPackageInstallers = new HashMap<>();
 
         // Signatures for a given package found in its manifest file
         final HashMap<String, Signature[]> mManifestSignatures
-                = new HashMap<String, Signature[]>();
+                = new HashMap<>();
 
         // Packages we've already wiped data on when restoring their first file
-        final HashSet<String> mClearedPackages = new HashSet<String>();
+        final HashSet<String> mClearedPackages = new HashSet<>();
 
         PerformAdbRestoreTask(ParcelFileDescriptor fd, String curPassword, String decryptPassword,
                 IFullBackupRestoreObserver observer, AtomicBoolean latch) {
@@ -8399,7 +8401,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     // ----- Restore handling -----
 
     // Old style: directly match the stored vs on device signature blocks
-    static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
+    private static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null) {
             return false;
         }
@@ -8449,7 +8451,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     // Used by both incremental and full restore
-    void restoreWidgetData(String packageName, byte[] widgetData) {
+    private void restoreWidgetData(String packageName, byte[] widgetData) {
         // Apply the restored widget state and generate the ID update for the app
         // TODO: http://b/22388012
         if (MORE_DEBUG) {
@@ -8569,7 +8571,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             if (targetPackage != null) {
                 // Single package restore
-                mAcceptSet = new ArrayList<PackageInfo>();
+                mAcceptSet = new ArrayList<>();
                 mAcceptSet.add(targetPackage);
             } else {
                 // Everything possible, or a target set
@@ -8583,7 +8585,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     }
                 }
 
-                mAcceptSet = new ArrayList<PackageInfo>(filterSet.length);
+                mAcceptSet = new ArrayList<>(filterSet.length);
 
                 // Pro tem, we insist on moving the settings provider package to last place.
                 // Keep track of whether it's in the list, and bump it down if so.  We also
@@ -9804,7 +9806,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
 
         // a caller with full permission can ask to back up any participating app
-        HashSet<String> targets = new HashSet<String>();
+        HashSet<String> targets = new HashSet<>();
         if (PACKAGE_MANAGER_SENTINEL.equals(packageName)) {
             targets.add(PACKAGE_MANAGER_SENTINEL);
         } else {
@@ -9890,7 +9892,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             // a caller with full permission can ask to back up any participating app
             // !!! TODO: allow data-clear of ANY app?
             if (MORE_DEBUG) Slog.v(TAG, "Privileged caller, allowing clear of other apps");
-            apps = new HashSet<String>();
+            apps = new HashSet<>();
             int N = mBackupParticipants.size();
             for (int i = 0; i < N; i++) {
                 HashSet<String> s = mBackupParticipants.valueAt(i);
@@ -9953,7 +9955,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    boolean deviceIsProvisioned() {
+    private boolean deviceIsProvisioned() {
         final ContentResolver resolver = mContext.getContentResolver();
         return (Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0);
     }
@@ -10148,7 +10150,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    boolean startConfirmationUi(int token, String action) {
+    private boolean startConfirmationUi(int token, String action) {
         try {
             Intent confIntent = new Intent(action);
             confIntent.setClassName("com.android.backupconfirm",
@@ -10162,7 +10164,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         return true;
     }
 
-    void startConfirmationTimeout(int token, AdbParams params) {
+    private void startConfirmationTimeout(int token, AdbParams params) {
         if (MORE_DEBUG) Slog.d(TAG, "Posting conf timeout msg after "
                 + TIMEOUT_FULL_CONFIRMATION + " millis");
         Message msg = mBackupHandler.obtainMessage(MSG_FULL_CONFIRMATION_TIMEOUT,
@@ -10170,7 +10172,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         mBackupHandler.sendMessageDelayed(msg, TIMEOUT_FULL_CONFIRMATION);
     }
 
-    void waitForCompletion(AdbParams params) {
+    private void waitForCompletion(AdbParams params) {
         synchronized (params.latch) {
             while (params.latch.get() == false) {
                 try {
@@ -10180,7 +10182,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    void signalAdbBackupRestoreCompletion(AdbParams params) {
+    private void signalAdbBackupRestoreCompletion(AdbParams params) {
         synchronized (params.latch) {
             params.latch.set(true);
             params.latch.notifyAll();
@@ -10720,7 +10722,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         return mActiveRestoreSession;
     }
 
-    void clearRestoreSession(ActiveRestoreSession currentSession) {
+    private void clearRestoreSession(ActiveRestoreSession currentSession) {
         synchronized(this) {
             if (currentSession != mActiveRestoreSession) {
                 Slog.e(TAG, "ending non-current restore session");
