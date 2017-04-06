@@ -282,6 +282,25 @@ static jint nativeConfigDirectChannel(JNIEnv *_env, jclass _this, jlong sensorMa
     return mgr->configureDirectChannel(channelHandle, sensorHandle, rate);
 }
 
+static jint nativeSetOperationParameter(JNIEnv *_env, jclass _this, jlong sensorManager,
+        jint type, jfloatArray floats, jintArray ints) {
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    Vector<float> floatVector;
+    Vector<int32_t> int32Vector;
+
+    if (floats != nullptr) {
+        floatVector.resize(_env->GetArrayLength(floats));
+        _env->GetFloatArrayRegion(floats, 0, _env->GetArrayLength(floats), floatVector.editArray());
+    }
+
+    if (ints != nullptr) {
+        int32Vector.resize(_env->GetArrayLength(ints));
+        _env->GetIntArrayRegion(ints, 0, _env->GetArrayLength(ints), int32Vector.editArray());
+    }
+
+    return mgr->setOperationParameter(type, floatVector, int32Vector);
+}
+
 //----------------------------------------------------------------------------
 
 class Receiver : public LooperCallback {
@@ -499,6 +518,10 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeConfigDirectChannel",
             "(JIII)I",
             (void*)nativeConfigDirectChannel },
+
+    {"nativeSetOperationParameter",
+            "(JI[F[I)I",
+            (void*)nativeSetOperationParameter },
 };
 
 static const JNINativeMethod gBaseEventQueueMethods[] = {
