@@ -227,10 +227,16 @@ void Texture::colorTypeToGlFormatAndType(const Caches& caches, SkColorType color
         *outType = GL_UNSIGNED_BYTE;
         break;
     case kRGBA_F16_SkColorType:
-        // This format is always linear
-        *outFormat = GL_RGBA;
-        *outInternalFormat = GL_RGBA16F;
-        *outType = GL_HALF_FLOAT;
+        if (caches.extensions().getMajorGlVersion() >= 3) {
+            // This format is always linear
+            *outFormat = GL_RGBA;
+            *outInternalFormat = GL_RGBA16F;
+            *outType = GL_HALF_FLOAT;
+        } else {
+            *outFormat = GL_RGBA;
+            *outInternalFormat = caches.rgbaInternalFormat(true);
+            *outType = GL_UNSIGNED_BYTE;
+        }
         break;
     default:
         LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", colorType);
@@ -244,8 +250,17 @@ SkBitmap Texture::uploadToN32(const SkBitmap& bitmap, bool hasLinearBlending,
     rgbaBitmap.allocPixels(SkImageInfo::MakeN32(bitmap.width(), bitmap.height(),
             bitmap.info().alphaType(), hasLinearBlending ? sRGB : nullptr));
     rgbaBitmap.eraseColor(0);
-    SkCanvas canvas(rgbaBitmap);
-    canvas.drawBitmap(bitmap, 0.0f, 0.0f, nullptr);
+
+    if (bitmap.colorType() == kRGBA_F16_SkColorType) {
+        // Drawing RGBA_F16 onto ARGB_8888 is not supported
+        bitmap.readPixels(rgbaBitmap.info()
+                .makeColorSpace(SkColorSpace::MakeSRGB()),
+                rgbaBitmap.getPixels(), rgbaBitmap.rowBytes(), 0, 0);
+    } else {
+        SkCanvas canvas(rgbaBitmap);
+        canvas.drawBitmap(bitmap, 0.0f, 0.0f, nullptr);
+    }
+
     return rgbaBitmap;
 }
 
@@ -254,7 +269,9 @@ bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBle
         || info.colorType() == kIndex_8_SkColorType
         || (info.colorType() == kRGB_565_SkColorType
                 && hasLinearBlending
-                && info.colorSpace()->isSRGB());
+                && info.colorSpace()->isSRGB())
+        || (info.colorType() == kRGBA_F16_SkColorType
+                && Caches::getInstance().extensions().getMajorGlVersion() < 3);
 }
 
 void Texture::upload(Bitmap& bitmap) {
@@ -287,10 +304,16 @@ void Texture::upload(Bitmap& bitmap) {
     colorTypeToGlFormatAndType(mCaches, bitmap.colorType(),
             needSRGB && hasLinearBlending, &internalFormat, &format, &type);
 
+    // Some devices don't support GL_RGBA16F, so we need to compare the color type
+    // and internal GL format to decide what to do with 16 bit bitmaps
+    bool rgba16fNeedsConversion = bitmap.colorType() == kRGBA_F16_SkColorType
+            && internalFormat != GL_RGBA16F;
+
     mConnector.reset();
 
     // RGBA16F is always extended sRGB, alpha masks don't have color profiles
-    if (internalFormat != GL_RGBA16F && internalFormat != GL_ALPHA) {
+    // If an RGBA16F bitmap needs conversion, we know the target will be sRGB
+    if (internalFormat != GL_RGBA16F && internalFormat != GL_ALPHA && !rgba16fNeedsConversion) {
         SkColorSpace* colorSpace = bitmap.info().colorSpace();
         // If the bitmap is sRGB we don't need conversion
         if (colorSpace != nullptr && !colorSpace->isSRGB()) {
