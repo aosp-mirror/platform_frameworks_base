@@ -1164,6 +1164,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return false;
         }
 
+        // Check to see if we are in VR mode, and disallow PiP if so
+        if (service.shouldDisableNonVrUiLocked()) {
+            return false;
+        }
+
         boolean isCurrentAppLocked = mStackSupervisor.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         boolean isKeyguardLocked = service.isKeyguardLocked();
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;

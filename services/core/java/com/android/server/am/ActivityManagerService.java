@@ -2384,7 +2384,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 idleUids();
             } break;
             case VR_MODE_CHANGE_MSG: {
-                mVrController.onVrModeChanged((ActivityRecord) msg.obj);
+                if (mVrController.onVrModeChanged((ActivityRecord) msg.obj)) {
+                    synchronized (ActivityManagerService.this) {
+                        if (mVrController.shouldDisableNonVrUiLocked()) {
+                            // If we are in a VR mode where Picture-in-Picture mode is unsupported,
+                            // then remove the pinned stack.
+                            final PinnedActivityStack pinnedStack = mStackSupervisor.getStack(
+                                    PINNED_STACK_ID);
+                            if (pinnedStack != null) {
+                                mStackSupervisor.removeStackLocked(PINNED_STACK_ID);
+                            }
+                        }
+                    }
+                }
             } break;
             case NOTIFY_VR_SLEEPING_MSG: {
                 notifyVrManagerOfSleepState(msg.arg1 != 0);
@@ -13327,6 +13339,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             ActivityRecord r = getFocusedStack().topRunningActivityLocked();
             return (r != null) ? r.immersive : false;
         }
+    }
+
+    /**
+     * @return whether the system should disable UI modes incompatible with VR mode.
+     */
+    boolean shouldDisableNonVrUiLocked() {
+        return mVrController.shouldDisableNonVrUiLocked();
     }
 
     @Override
