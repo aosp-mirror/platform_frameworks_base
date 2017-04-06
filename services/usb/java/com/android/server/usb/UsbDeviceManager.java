@@ -65,6 +65,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -174,6 +175,22 @@ public class UsbDeviceManager {
     private final UsbSettingsManager mSettingsManager;
     private Intent mBroadcastedIntent;
     private boolean mPendingBootBroadcast;
+    private static Set<Integer> sBlackListedInterfaces;
+
+    static {
+        sBlackListedInterfaces = new HashSet<Integer>();
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_AUDIO);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_COMM);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_HID);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_PRINTER);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_MASS_STORAGE);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_HUB);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_CDC_DATA);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_CSCID);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_CONTENT_SEC);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_VIDEO);
+        sBlackListedInterfaces.add(UsbConstants.USB_CLASS_WIRELESS_CONTROLLER);
+    };
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -404,6 +421,7 @@ public class UsbDeviceManager {
         private boolean mUsbCharging;
         private String mCurrentOemFunctions;
         private boolean mHideUsbNotification;
+        private boolean mSupportsAllCombinations;
 
         public UsbHandler(Looper looper) {
             super(looper);
@@ -507,6 +525,17 @@ public class UsbDeviceManager {
             boolean hostConnected = status.getCurrentDataRole() == UsbPort.DATA_ROLE_HOST;
             boolean sourcePower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SOURCE;
             boolean sinkPower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SINK;
+            // Ideally we want to see if PR_SWAP and DR_SWAP is supported.
+            // But, this should be suffice, since, all four combinations are only supported
+            // when PR_SWAP and DR_SWAP are supported.
+            boolean supportsAllCombinations = status.isRoleCombinationSupported(
+                    UsbPort.POWER_ROLE_SOURCE, UsbPort.DATA_ROLE_HOST)
+                    && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
+                    UsbPort.DATA_ROLE_HOST)
+                    && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SOURCE,
+                    UsbPort.DATA_ROLE_DEVICE)
+                    && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
+                    UsbPort.DATA_ROLE_HOST);
 
             if (DEBUG) {
                 Slog.i(TAG, "updateHostState " + port + " status=" + status);
@@ -516,6 +545,7 @@ public class UsbDeviceManager {
             args.argi1 = hostConnected ? 1 : 0;
             args.argi2 = sourcePower ? 1 : 0;
             args.argi3 = sinkPower ? 1 : 0;
+            args.argi4 = supportsAllCombinations ? 1 : 0;
 
             removeMessages(MSG_UPDATE_PORT_STATE);
             Message msg = obtainMessage(MSG_UPDATE_PORT_STATE, args);
@@ -885,6 +915,7 @@ public class UsbDeviceManager {
                     mHostConnected = (args.argi1 == 1);
                     mSourcePower = (args.argi2 == 1);
                     mSinkPower = (args.argi3 == 1);
+                    mSupportsAllCombinations = (args.argi4 == 1);
                     args.recycle();
                     updateUsbNotification();
                     if (mBootCompleted) {
@@ -925,10 +956,7 @@ public class UsbDeviceManager {
                             while (interfaceCount >= 0) {
                                 UsbInterface intrface = config.getInterface(interfaceCount);
                                 interfaceCount--;
-                                if (intrface.getInterfaceClass() == UsbConstants.USB_CLASS_AUDIO) {
-                                    if (DEBUG) {
-                                        Slog.i(TAG, device + " is an Audio device");
-                                    }
+                                if (sBlackListedInterfaces.contains(intrface.getInterfaceClass())) {
                                     mHideUsbNotification = true;
                                     break;
                                 }
@@ -1010,7 +1038,9 @@ public class UsbDeviceManager {
         private void updateUsbNotification() {
             if (mNotificationManager == null || !mUseUsbNotification
                     || ("0".equals(SystemProperties.get("persist.charging.notify")))
-                    || mHideUsbNotification) {
+                    // Dont show the notification when connected to a USB peripheral
+                    // and the link does not support PR_SWAP and DR_SWAP
+                    || (mHideUsbNotification && !mSupportsAllCombinations)) {
                 return;
             }
             int id = 0;
