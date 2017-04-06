@@ -18,6 +18,7 @@ package com.android.settingslib.wifi;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import static org.mockito.Mockito.any;
@@ -302,7 +303,7 @@ public class WifiTrackerTest {
                 new ScoredNetwork(
                         NETWORK_KEY_2,
                         mockCurve2,
-                        false /* meteredHint */,
+                        true /* meteredHint */,
                         attr2);
 
         WifiNetworkScoreCache scoreCache = mScoreCacheCaptor.getValue();
@@ -510,6 +511,23 @@ public class WifiTrackerTest {
                 assertEquals(BADGE_1, ap.getBadge());
             } else if (ap.getSsidStr().equals(SSID_2)) {
                 assertEquals(BADGE_2, ap.getBadge());
+            }
+        }
+    }
+
+    @Test
+    public void scoreCacheUpdateMeteredShouldUpdateAccessPointMetering()
+            throws InterruptedException {
+        WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
+        updateScoresAndWaitForAccessPointsChangedCallback();
+
+        List<AccessPoint> aps = tracker.getAccessPoints();
+
+        for (AccessPoint ap : aps) {
+            if (ap.getSsidStr().equals(SSID_1)) {
+                assertFalse(ap.isMetered());
+            } else if (ap.getSsidStr().equals(SSID_2)) {
+                assertTrue(ap.isMetered());
             }
         }
     }
