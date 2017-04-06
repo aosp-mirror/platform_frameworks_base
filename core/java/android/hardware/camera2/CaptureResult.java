@@ -78,6 +78,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
          *
          * @hide
          */
+        public Key(String name, Class<T> type, long vendorId) {
+            mKey = new CameraMetadataNative.Key<T>(name, type, vendorId);
+        }
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
         public Key(String name, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name, type);
         }
@@ -107,6 +116,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
         @NonNull
         public String getName() {
             return mKey.getName();
+        }
+
+        /**
+         * Return vendor tag id.
+         *
+         * @hide
+         */
+        public long getVendorId() {
+            return mKey.getVendorId();
         }
 
         /**
@@ -186,6 +204,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
         if (mResults.isEmpty()) {
             throw new AssertionError("Results must not be empty");
         }
+        setNativeInstance(mResults);
         mRequest = parent;
         mSequenceId = extras.getRequestId();
         mFrameNumber = extras.getFrameNumber();
@@ -215,6 +234,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             throw new AssertionError("Results must not be empty");
         }
 
+        setNativeInstance(mResults);
         mRequest = null;
         mSequenceId = sequenceId;
         mFrameNumber = -1;
