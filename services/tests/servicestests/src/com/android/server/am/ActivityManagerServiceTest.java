@@ -137,7 +137,7 @@ public class ActivityManagerServiceTest {
         mHandler = new TestHandler(mHandlerThread.getLooper());
         mInjector = new TestInjector();
         mAms = new ActivityManagerService(mInjector);
-        mAms.mWaitForNetworkTimeoutMs = 100;
+        mAms.mWaitForNetworkTimeoutMs = 2000;
 
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
     }
