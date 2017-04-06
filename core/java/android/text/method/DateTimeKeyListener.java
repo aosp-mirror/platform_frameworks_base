@@ -68,7 +68,7 @@ public class DateTimeKeyListener extends NumberKeyListener
         final LinkedHashSet<Character> chars = new LinkedHashSet<>();
         // First add the digits. Then, add all the character in AM and PM markers. Finally, add all
         // the non-pattern characters seen in the patterns for "yMdhms" and "yMdHms".
-        boolean success = NumberKeyListener.addDigits(chars, locale)
+        final boolean success = NumberKeyListener.addDigits(chars, locale)
                           && NumberKeyListener.addAmPmChars(chars, locale)
                           && NumberKeyListener.addFormatCharsFromSkeleton(
                               chars, locale, SKELETON_12HOUR, SYMBOLS_TO_IGNORE)
@@ -76,7 +76,14 @@ public class DateTimeKeyListener extends NumberKeyListener
                               chars, locale, SKELETON_24HOUR, SYMBOLS_TO_IGNORE);
         if (success) {
             mCharacters = NumberKeyListener.collectionToArray(chars);
-            mNeedsAdvancedInput = !ArrayUtils.containsAll(CHARACTERS, mCharacters);
+            if (locale != null && "en".equals(locale.getLanguage())) {
+                // For backward compatibility reasons, assume we don't need advanced input for
+                // English locales, although English locales literally also need a comma and perhaps
+                // uppercase letters for AM and PM.
+                mNeedsAdvancedInput = false;
+            } else {
+                mNeedsAdvancedInput = !ArrayUtils.containsAll(CHARACTERS, mCharacters);
+            }
         } else {
             mCharacters = CHARACTERS;
             mNeedsAdvancedInput = false;
