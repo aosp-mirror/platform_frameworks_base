@@ -21,9 +21,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -75,8 +77,9 @@ public final class TvContract {
     private static final String PATH_PASSTHROUGH = "passthrough";
 
     /**
-     * Activity Action: sent by an application telling the system to set the given channel as
-     * browsable. This is only relevant to channels with {@link Channels#TYPE_PREVIEW} type.
+     * Broadcast Action: sent when an application requests the system to make the given channel
+     * browsable.  The operation is performed in the background without user interaction. This
+     * is only relevant to channels with {@link Channels#TYPE_PREVIEW} type.
      *
      * <p>The intent must contain the following bundle parameters:
      * <ul>
@@ -84,9 +87,26 @@ public final class TvContract {
      *     integer.</li>
      *     <li>{@link #EXTRA_PACKAGE_NAME}: the package name of the requesting application.</li>
      * </ul>
+     * @hide
      */
-    public static final String ACTION_MAKE_CHANNEL_BROWSABLE =
-            "android.media.tv.action.MAKE_CHANNEL_BROWSABLE";
+    @SystemApi
+    public static final String ACTION_CHANNEL_BROWSABLE_REQUESTED =
+            "android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED";
+
+    /**
+     * Activity Action: sent by an application telling the system to make the given channel
+     * browsable with user interaction. The system may show UI to ask user to approve the channel.
+     * This is only relevant to channels with {@link Channels#TYPE_PREVIEW} type. Use
+     * {@link Activity#startActivityForResult} to get the result of the request.
+     *
+     * <p>The intent must contain the following bundle parameters:
+     * <ul>
+     *     <li>{@link #EXTRA_CHANNEL_ID}: ID for the {@link Channels#TYPE_PREVIEW} channel as a long
+     *     integer.</li>
+     * </ul>
+     */
+    public static final String ACTION_REQUEST_CHANNEL_BROWSABLE =
+            "android.media.tv.action.REQUEST_CHANNEL_BROWSABLE";
 
     /**
      * Broadcast Action: sent by the system to tell the target TV input that one of its preview
@@ -146,10 +166,16 @@ public final class TvContract {
     public static final String ACTION_INITIALIZE_PROGRAMS =
             "android.media.tv.action.INITIALIZE_PROGRAMS";
 
-    /** The key for a bundle parameter containing a channel ID as a long integer */
+    /**
+     * The key for a bundle parameter containing a channel ID as a long integer
+     */
     public static final String EXTRA_CHANNEL_ID = "android.media.tv.extra.CHANNEL_ID";
 
-    /** The key for a bundle parameter containing a package name as a string. */
+    /**
+     * The key for a bundle parameter containing a package name as a string.
+     * @hide
+     */
+    @SystemApi
     public static final String EXTRA_PACKAGE_NAME = "android.media.tv.extra.PACKAGE_NAME";
 
     /** The key for a bundle parameter containing a program ID as a long integer. */
@@ -565,6 +591,24 @@ public final class TvContract {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PROGRAM);
     }
 
+    /**
+     * Requests to make a channel browsable.
+     *
+     * <p>Once called, the system will review the request and make the channel browsable based on
+     * its policy. The first request from a package is guaranteed to be approved. This is only
+     * relevant to channels with {@link Channels#TYPE_PREVIEW} type.
+     *
+     * @param context The context for accessing content provider.
+     * @param channelId The channel ID to be browsable.
+     * @see Channels#COLUMN_BROWSABLE
+     */
+    public static void requestChannelBrowsable(Context context, long channelId) {
+        TvInputManager manager = (TvInputManager) context.getSystemService(
+            Context.TV_INPUT_SERVICE);
+        if (manager != null) {
+            manager.requestChannelBrowsable(buildChannelUri(channelId));
+        }
+    }
 
     private TvContract() {}
 
