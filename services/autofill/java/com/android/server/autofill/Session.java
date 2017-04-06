@@ -609,6 +609,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private ViewState startPartitionLocked(AutofillId id, AutofillValue value) {
+        // TODO(b/33197203 , b/35707731): temporary workaround until partitioning supports auth
+        if (mResponseWaitingAuth != null) {
+            final ViewState viewState =
+                    new ViewState(this, id, value, this, ViewState.STATE_WAITING_RESPONSE_AUTH);
+            mViewStates.put(id, viewState);
+            return viewState;
+        }
         if (DEBUG) {
             Slog.d(TAG, "Starting partition for view id " + id);
         }
