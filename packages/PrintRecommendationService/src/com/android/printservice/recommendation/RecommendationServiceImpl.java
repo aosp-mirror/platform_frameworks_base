@@ -21,6 +21,8 @@ import android.printservice.recommendation.RecommendationInfo;
 import android.printservice.recommendation.RecommendationService;
 import android.printservice.PrintService;
 import android.util.Log;
+
+import com.android.printservice.recommendation.plugin.google.CloudPrintPlugin;
 import com.android.printservice.recommendation.plugin.hp.HPRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.MDNSFilterPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.VendorConfig;
@@ -58,6 +60,14 @@ public class RecommendationServiceImpl extends RecommendationService
             }
         } catch (IOException | XmlPullParserException e) {
             new RuntimeException("Could not parse vendorconfig", e);
+        }
+
+        try {
+            mPlugins.add(new RemotePrintServicePlugin(new CloudPrintPlugin(this), this,
+                    true));
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not initiate "
+                            + getString(R.string.plugin_vendor_google_cloud_print) + " plugin", e);
         }
 
         try {
