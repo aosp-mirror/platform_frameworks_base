@@ -190,7 +190,9 @@ public class ViewState {
             view.setScaleY(scaleY);
         }
 
-        boolean becomesInvisible = this.alpha == 0.0f || (this.hidden && !isAnimating(view));
+        int oldVisibility = view.getVisibility();
+        boolean becomesInvisible = this.alpha == 0.0f
+                || (this.hidden && (!isAnimating(view) || oldVisibility != View.VISIBLE));
         boolean animatingAlpha = isAnimating(view, TAG_ANIMATOR_ALPHA);
         if (animatingAlpha) {
             updateAlphaAnimation(view);
@@ -212,7 +214,6 @@ public class ViewState {
         }
 
         // apply visibility
-        int oldVisibility = view.getVisibility();
         int newVisibility = becomesInvisible ? View.INVISIBLE : View.VISIBLE;
         if (newVisibility != oldVisibility) {
             if (!(view instanceof ExpandableView) || !((ExpandableView) view).willBeGone()) {
