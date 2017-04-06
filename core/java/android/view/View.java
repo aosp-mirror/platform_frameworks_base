@@ -19691,13 +19691,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     <li>This view is not in touch mode.</li>
      *     <li>This view doesn't opt out for a default focus highlight, via
      *         {@link #setDefaultFocusHighlightEnabled(boolean)}.</li>
+     *     <li>This view is attached to window.</li>
      * </ul>
      * @return {@code true} if a default focus highlight is needed.
      */
     private boolean isDefaultFocusHighlightNeeded(Drawable background) {
         final boolean hasFocusStateSpecified = background == null || !background.isStateful()
                 || !background.hasFocusStateSpecified();
-        return !isInTouchMode() && getDefaultFocusHighlightEnabled() && hasFocusStateSpecified;
+        return !isInTouchMode() && getDefaultFocusHighlightEnabled() && hasFocusStateSpecified
+                && isAttachedToWindow();
     }
 
     /**
