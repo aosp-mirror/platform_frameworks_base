@@ -1145,8 +1145,6 @@ public class ActivityManager {
         private String mIconFilename;
         private int mColorPrimary;
         private int mColorBackground;
-        private int mStatusBarColor;
-        private int mNavigationBarColor;
 
         /**
          * Creates the TaskDescription to the specified values.
@@ -1157,7 +1155,7 @@ public class ActivityManager {
          *                     opaque.
          */
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
-            this(label, icon, null, colorPrimary, 0, 0, 0);
+            this(label, icon, null, colorPrimary, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1170,7 +1168,7 @@ public class ActivityManager {
          * @param icon An icon that represents the current state of this activity.
          */
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon, null, 0, 0, 0, 0);
+            this(label, icon, null, 0, 0);
         }
 
         /**
@@ -1179,26 +1177,24 @@ public class ActivityManager {
          * @param label A label and description of the current state of this activity.
          */
         public TaskDescription(String label) {
-            this(label, null, null, 0, 0, 0, 0);
+            this(label, null, null, 0, 0);
         }
 
         /**
          * Creates an empty TaskDescription.
          */
         public TaskDescription() {
-            this(null, null, null, 0, 0, 0, 0);
+            this(null, null, null, 0, 0);
         }
 
         /** @hide */
         public TaskDescription(String label, Bitmap icon, String iconFilename, int colorPrimary,
-                int colorBackground, int statusBarColor, int navigationBarColor) {
+                int colorBackground) {
             mLabel = label;
             mIcon = icon;
             mIconFilename = iconFilename;
             mColorPrimary = colorPrimary;
             mColorBackground = colorBackground;
-            mStatusBarColor = statusBarColor;
-            mNavigationBarColor = navigationBarColor;
         }
 
         /**
@@ -1218,8 +1214,6 @@ public class ActivityManager {
             mIconFilename = other.mIconFilename;
             mColorPrimary = other.mColorPrimary;
             mColorBackground = other.mColorBackground;
-            mStatusBarColor = other.mStatusBarColor;
-            mNavigationBarColor = other.mNavigationBarColor;
         }
 
         private TaskDescription(Parcel source) {
@@ -1256,20 +1250,6 @@ public class ActivityManager {
                 throw new RuntimeException("A TaskDescription's background color should be opaque");
             }
             mColorBackground = backgroundColor;
-        }
-
-        /**
-         * @hide
-         */
-        public void setStatusBarColor(int statusBarColor) {
-            mStatusBarColor = statusBarColor;
-        }
-
-        /**
-         * @hide
-         */
-        public void setNavigationBarColor(int navigationBarColor) {
-            mNavigationBarColor = navigationBarColor;
         }
 
         /**
@@ -1345,20 +1325,6 @@ public class ActivityManager {
             return mColorBackground;
         }
 
-        /**
-         * @hide
-         */
-        public int getStatusBarColor() {
-            return mStatusBarColor;
-        }
-
-        /**
-         * @hide
-         */
-        public int getNavigationBarColor() {
-            return mNavigationBarColor;
-        }
-
         /** @hide */
         public void saveToXml(XmlSerializer out) throws IOException {
             if (mLabel != null) {
@@ -1411,8 +1377,6 @@ public class ActivityManager {
             }
             dest.writeInt(mColorPrimary);
             dest.writeInt(mColorBackground);
-            dest.writeInt(mStatusBarColor);
-            dest.writeInt(mNavigationBarColor);
             if (mIconFilename == null) {
                 dest.writeInt(0);
             } else {
@@ -1426,8 +1390,6 @@ public class ActivityManager {
             mIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
             mColorPrimary = source.readInt();
             mColorBackground = source.readInt();
-            mStatusBarColor = source.readInt();
-            mNavigationBarColor = source.readInt();
             mIconFilename = source.readInt() > 0 ? source.readString() : null;
         }
 
@@ -1445,9 +1407,7 @@ public class ActivityManager {
         public String toString() {
             return "TaskDescription Label: " + mLabel + " Icon: " + mIcon +
                     " IconFilename: " + mIconFilename + " colorPrimary: " + mColorPrimary +
-                    " colorBackground: " + mColorBackground +
-                    " statusBarColor: " + mColorBackground +
-                    " navigationBarColor: " + mNavigationBarColor;
+                    " colorBackground: " + mColorBackground;
         }
     }
 
