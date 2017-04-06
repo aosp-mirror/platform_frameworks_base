@@ -89,6 +89,13 @@ public final class AutoFillUI {
     /**
      * Displays an error message to the user.
      */
+    public void showError(int resId) {
+        showError(mContext.getString(resId));
+    }
+
+    /**
+     * Displays an error message to the user.
+     */
     public void showError(@Nullable CharSequence message) {
         mHandler.post(() -> {
             if (!hasCallback()) {
