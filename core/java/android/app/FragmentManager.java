@@ -2893,8 +2893,15 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
     public void noteStateNotSaved() {
         mStateSaved = false;
+        final int addedCount = mAdded == null ? 0 : mAdded.size();
+        for (int i = 0; i < addedCount; i++) {
+            Fragment fragment = mAdded.get(i);
+            if (fragment != null) {
+                fragment.noteStateNotSaved();
+            }
+        }
     }
-    
+
     public void dispatchCreate() {
         mStateSaved = false;
         dispatchMoveToState(Fragment.CREATED);
