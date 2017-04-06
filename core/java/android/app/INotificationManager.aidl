@@ -104,10 +104,6 @@ interface INotificationManager
     void applyEnqueuedAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentsFromAssistant(in INotificationListener token, in List<Adjustment> adjustments);
-    void createNotificationChannelFromAssistant(in INotificationListener token, String pkg, in NotificationChannel channel);
-    void updateNotificationChannelFromAssistant(in INotificationListener token, String pkg, in NotificationChannel channel);
-    void deleteNotificationChannelFromAssistant(in INotificationListener token, String pkg, String channelId);
-    ParceledListSlice getNotificationChannelsFromAssistant(in INotificationListener token, String pkg);
     void unsnoozeNotificationFromAssistant(in INotificationListener token, String key);
 
     ComponentName getEffectsSuppressor();

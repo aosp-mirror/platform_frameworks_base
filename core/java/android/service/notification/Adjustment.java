@@ -36,10 +36,6 @@ public final class Adjustment implements Parcelable {
     private final int mUser;
 
     /**
-     * Data type: {@code String}. See {@link NotificationChannel#getId()}.
-     */
-    public static final String KEY_CHANNEL_ID = "key_channel_id";
-    /**
      * Data type: ArrayList of {@code String}, where each is a representation of a
      * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
      * See {@link android.app.Notification.Builder#addPerson(String)}.

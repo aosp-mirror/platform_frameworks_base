@@ -138,69 +138,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         }
     }
 
-    /**
-     * Creates a notification channel that notifications can be posted to for a given package.
-     *
-     * @param pkg The package to create a channel for.
-     * @param channel  the channel to attempt to create.
-     */
-    public void createNotificationChannel(@NonNull String pkg,
-            @NonNull NotificationChannel channel) {
-        if (!isBound()) return;
-        try {
-            getNotificationInterface().createNotificationChannelFromAssistant(
-                    mWrapper, pkg, channel);
-        } catch (RemoteException e) {
-            Log.v(TAG, "Unable to contact notification manager", e);
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Updates a notification channel for a given package.
-     *
-     * @param pkg The package to the channel belongs to.
-     * @param channel the channel to attempt to update.
-     */
-    public void updateNotificationChannel(@NonNull String pkg,
-            @NonNull NotificationChannel channel) {
-        if (!isBound()) return;
-        try {
-            getNotificationInterface().updateNotificationChannelFromAssistant(
-                    mWrapper, pkg, channel);
-        } catch (RemoteException e) {
-            Log.v(TAG, "Unable to contact notification manager", e);
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns all notification channels belonging to the given package.
-     */
-    public List<NotificationChannel> getNotificationChannels(@NonNull String pkg) {
-        if (!isBound()) return null;
-        try {
-            return getNotificationInterface().getNotificationChannelsFromAssistant(
-                    mWrapper, pkg).getList();
-        } catch (RemoteException e) {
-            Log.v(TAG, "Unable to contact notification manager", e);
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Deletes the given notification channel.
-     */
-    public void deleteNotificationChannel(@NonNull String pkg, @NonNull String channelId) {
-        if (!isBound()) return;
-        try {
-            getNotificationInterface().deleteNotificationChannelFromAssistant(
-                    mWrapper, pkg, channelId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
 
     private class NotificationAssistantServiceWrapper extends NotificationListenerWrapper {
         @Override
