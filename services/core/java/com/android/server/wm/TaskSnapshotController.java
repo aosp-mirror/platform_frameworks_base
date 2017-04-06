@@ -28,7 +28,6 @@ import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
-import android.graphics.Rect;
 import android.os.Environment;
 import android.util.ArraySet;
 import android.view.WindowManagerPolicy.StartingSurface;
@@ -153,7 +152,7 @@ class TaskSnapshotController {
      * MANAGER LOCK WHEN CALLING THIS METHOD!
      */
     StartingSurface createStartingSurface(AppWindowToken token,
-            TaskSnapshot snapshot) {
+            GraphicBuffer snapshot) {
         return TaskSnapshotSurface.create(mService, token, snapshot);
     }
 
@@ -167,17 +166,8 @@ class TaskSnapshotController {
         if (buffer == null) {
             return null;
         }
-        final WindowState mainWindow = top.findMainWindow();
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
-                minRect(mainWindow.mContentInsets, mainWindow.mStableInsets), false /* reduced */,
-                1f /* scale */);
-    }
-
-    private Rect minRect(Rect rect1, Rect rect2) {
-        return new Rect(Math.min(rect1.left, rect2.left),
-                Math.min(rect1.top, rect2.top),
-                Math.min(rect1.right, rect2.right),
-                Math.min(rect1.bottom, rect2.bottom));
+                top.findMainWindow().mStableInsets, false /* reduced */, 1f /* scale */);
     }
 
     /**

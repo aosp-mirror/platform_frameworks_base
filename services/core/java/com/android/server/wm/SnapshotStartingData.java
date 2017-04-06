@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.GraphicBuffer;
 import android.view.WindowManagerPolicy.StartingSurface;
 
@@ -26,9 +25,9 @@ import android.view.WindowManagerPolicy.StartingSurface;
 class SnapshotStartingData extends StartingData {
 
     private final WindowManagerService mService;
-    private final TaskSnapshot mSnapshot;
+    private final GraphicBuffer mSnapshot;
 
-    SnapshotStartingData(WindowManagerService service, TaskSnapshot snapshot) {
+    SnapshotStartingData(WindowManagerService service, GraphicBuffer snapshot) {
         super(service);
         mService = service;
         mSnapshot = snapshot;

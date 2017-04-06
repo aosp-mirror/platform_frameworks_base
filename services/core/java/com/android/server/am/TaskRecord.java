@@ -1594,9 +1594,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             String iconFilename = null;
             int colorPrimary = 0;
             int colorBackground = 0;
-            int statusBarColor = 0;
-            int navigationBarColor = 0;
-            boolean topActivity = true;
             for (--activityNdx; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = mActivities.get(activityNdx);
                 if (r.taskDescription != null) {
@@ -1609,16 +1606,13 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                     if (colorPrimary == 0) {
                         colorPrimary = r.taskDescription.getPrimaryColor();
                     }
-                    if (topActivity) {
+                    if (colorBackground == 0) {
                         colorBackground = r.taskDescription.getBackgroundColor();
-                        statusBarColor = r.taskDescription.getStatusBarColor();
-                        navigationBarColor = r.taskDescription.getNavigationBarColor();
                     }
                 }
-                topActivity = false;
             }
             lastTaskDescription = new TaskDescription(label, null, iconFilename, colorPrimary,
-                    colorBackground, statusBarColor, navigationBarColor);
+                    colorBackground);
             if (mWindowContainerController != null) {
                 mWindowContainerController.setTaskDescription(lastTaskDescription);
             }
