@@ -211,6 +211,9 @@ public class ActivityOptions {
     private static final String KEY_USAGE_TIME_REPORT = "android:activity.usageTimeReport";
     private static final String KEY_ROTATION_ANIMATION_HINT = "android:activity.rotationAnimationHint";
 
+    private static final String KEY_INSTANT_APP_VERIFICATION_BUNDLE
+            = "android:instantapps.installerbundle";
+
     /** @hide */
     public static final int ANIM_NONE = 0;
     /** @hide */
@@ -264,6 +267,7 @@ public class ActivityOptions {
     private boolean mTaskOverlayCanResume;
     private AppTransitionAnimationSpec mAnimSpecs[];
     private int mRotationAnimationHint = -1;
+    private Bundle mAppVerificationBundle;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -886,6 +890,7 @@ public class ActivityOptions {
                     opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
         }
         mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT);
+        mAppVerificationBundle = opts.getBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE);
     }
 
     /**
@@ -1275,6 +1280,9 @@ public class ActivityOptions {
             b.putBinder(KEY_ANIMATION_FINISHED_LISTENER, mAnimationFinishedListener.asBinder());
         }
         b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
+        if (mAppVerificationBundle != null) {
+            b.putBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE, mAppVerificationBundle);
+        }
 
         return b;
     }
@@ -1340,6 +1348,30 @@ public class ActivityOptions {
      */
     public void setRotationAnimationHint(int hint) {
         mRotationAnimationHint = hint;
+    }
+
+    /**
+     * Pop the extra verification bundle for the installer.
+     * This removes the bundle from the ActivityOptions to make sure the installer bundle
+     * is only available once.
+     * @hide
+     */
+    public Bundle popAppVerificationBundle() {
+        Bundle out = mAppVerificationBundle;
+        mAppVerificationBundle = null;
+        return out;
+    }
+
+    /**
+     * Set the {@link Bundle} that is provided to the app installer for additional verification
+     * if the call to {@link Context#startActivity} results in an app being installed.
+     *
+     * This Bundle is not provided to any other app besides the installer.
+     */
+    public ActivityOptions setAppVerificationBundle(Bundle bundle) {
+        mAppVerificationBundle = bundle;
+        return this;
+
     }
 
     /** @hide */
