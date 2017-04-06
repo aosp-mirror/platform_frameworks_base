@@ -150,10 +150,14 @@ public class PackageDexOptimizer {
 
         // TODO(calin,jeffhao): shared library paths should be adjusted to include previous code
         // paths (b/34169257).
-        final String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
+        String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
+        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         final int dexoptFlags = getDexFlags(pkg, compilerFilter);
 
         int result = DEX_OPT_SKIPPED;
+        // TODO: Iterate based on dependency hierarchy (currently alphabetically by name)
+        // (b/37480811).
+        String basePathCheck = null;
         for (String path : paths) {
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter, profileUpdated,
@@ -164,6 +168,22 @@ public class PackageDexOptimizer {
                 //  - SKIPPED when all paths are up to date
                 if ((result != DEX_OPT_FAILED) && (newResult != DEX_OPT_SKIPPED)) {
                     result = newResult;
+                }
+                // Add the relative path of code we just compiled to the shared libraries.
+                int slashIndex = path.lastIndexOf('/') + 1;
+                String relativePath = path.substring(slashIndex);
+                if (sharedLibrariesPath == null) {
+                    sharedLibrariesPath = relativePath;
+                } else {
+                    sharedLibrariesPath += ":" + relativePath;
+                }
+                // Sanity check that the base paths are all the same.
+                String basePath = path.substring(0, slashIndex);
+                if (basePathCheck == null) {
+                    basePathCheck = basePath;
+                } else if (!basePath.equals(basePathCheck)) {
+                    Slog.wtf(TAG, "Split paths have different base paths: " + basePath + " and " +
+                        basePathCheck);
                 }
             }
         }
