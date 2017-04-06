@@ -360,6 +360,19 @@ public class DexManagerTests {
         assertNull(mDexManager.getPackageUseInfo(frameworkDex));
     }
 
+    @Test
+    public void testNotifySecondaryFromProtected() {
+        // Foo loads its own secondary files.
+        List<String> fooSecondaries = mFooUser0.getSecondaryDexPathsFromProtectedDirs();
+        notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
+    }
+
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
             List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId) {
         for (String dex : secondaries) {
@@ -394,6 +407,8 @@ public class DexManagerTests {
         ai.setBaseCodePath(codeDir + "/base.dex");
         ai.setSplitCodePaths(new String[] {codeDir + "/split-1.dex", codeDir + "/split-2.dex"});
         ai.dataDir = "/data/user/" + userId + "/" + packageName;
+        ai.deviceProtectedDataDir = "/data/user_de/" + userId + "/" + packageName;
+        ai.credentialProtectedDataDir = "/data/user_ce/" + userId + "/" + packageName;
         ai.packageName = packageName;
         return ai;
     }
@@ -423,6 +438,13 @@ public class DexManagerTests {
             List<String> paths = new ArrayList<>();
             paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary4.dex");
             paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary5.dex");
+            return paths;
+        }
+
+        List<String> getSecondaryDexPathsFromProtectedDirs() {
+            List<String> paths = new ArrayList<>();
+            paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary6.dex");
+            paths.add(mPackageInfo.applicationInfo.dataDir + "/secondary7.dex");
             return paths;
         }
 
