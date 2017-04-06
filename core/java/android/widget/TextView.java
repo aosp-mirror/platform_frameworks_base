@@ -57,6 +57,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.fonts.FontVariationAxis;
+import android.icu.text.DecimalFormatSymbols;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -11056,6 +11057,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (hasPasswordTransformationMethod()) {
             // passwords fields should be LTR
             return TextDirectionHeuristics.LTR;
+        }
+
+        if (mEditor != null
+                && (mEditor.mInputType & EditorInfo.TYPE_MASK_CLASS)
+                    == EditorInfo.TYPE_CLASS_PHONE) {
+            // Phone numbers must be in the direction of the locale's digits. Most locales have LTR
+            // digits, but some locales, such as those written in the Adlam or N'Ko scripts, have
+            // RTL digits.
+            final DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(getTextLocale());
+            final String zero = symbols.getDigitStrings()[0];
+            // In case the zero digit is multi-codepoint, just use the first codepoint to determine
+            // direction.
+            final int firstCodepoint = zero.codePointAt(0);
+            final byte digitDirection = Character.getDirectionality(firstCodepoint);
+            if (digitDirection == Character.DIRECTIONALITY_RIGHT_TO_LEFT
+                    || digitDirection == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC) {
+                return TextDirectionHeuristics.RTL;
+            } else {
+                return TextDirectionHeuristics.LTR;
+            }
         }
 
         // Always need to resolve layout direction first
