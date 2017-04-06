@@ -670,7 +670,7 @@ final class UserController {
             }
             mInjector.systemServiceManagerCleanupUser(userId);
             synchronized (mLock) {
-                mInjector.stackSupervisorRemoveUserLocked(userId);
+                mInjector.getActivityStackSupervisor().removeUserLocked(userId);
             }
             // Remove the user if it is ephemeral.
             if (getUserInfo(userId).isEphemeral()) {
@@ -823,8 +823,10 @@ final class UserController {
                     return true;
                 }
 
-                mInjector.stackSupervisorSetLockTaskModeLocked(null,
-                        ActivityManager.LOCK_TASK_MODE_NONE, "startUser", false);
+                if (foreground) {
+                    mInjector.getActivityStackSupervisor().setLockTaskModeLocked(
+                            null, ActivityManager.LOCK_TASK_MODE_NONE, "startUser", false);
+                }
 
                 final UserInfo userInfo = getUserInfo(userId);
                 if (userInfo == null) {
@@ -1202,11 +1204,12 @@ final class UserController {
     }
 
     void moveUserToForegroundLocked(UserState uss, int oldUserId, int newUserId) {
-        boolean homeInFront = mInjector.stackSupervisorSwitchUserLocked(newUserId, uss);
+        boolean homeInFront =
+                mInjector.getActivityStackSupervisor().switchUserLocked(newUserId, uss);
         if (homeInFront) {
             mInjector.startHomeActivityLocked(newUserId, "moveUserToForeground");
         } else {
-            mInjector.stackSupervisorResumeFocusedStackTopActivityLocked();
+            mInjector.getActivityStackSupervisor().resumeFocusedStackTopActivityLocked();
         }
         EventLogTags.writeAmSwitchUser(newUserId);
         sendUserSwitchBroadcastsLocked(oldUserId, newUserId);
@@ -1680,10 +1683,6 @@ final class UserController {
             mService.mSystemServiceManager.cleanupUser(userId);
         }
 
-        void stackSupervisorRemoveUserLocked(int userId) {
-            mService.mStackSupervisor.removeUserLocked(userId);
-        }
-
         protected UserManagerService getUserManager() {
             if (mUserManager == null) {
                 IBinder b = ServiceManager.getService(Context.USER_SERVICE);
@@ -1743,22 +1742,8 @@ final class UserController {
             return mService.checkComponentPermission(permission, pid, uid, owningUid, exported);
         }
 
-        boolean stackSupervisorSwitchUserLocked(int userId, UserState uss) {
-            return mService.mStackSupervisor.switchUserLocked(userId, uss);
-        }
-
         void startHomeActivityLocked(int userId, String reason) {
             mService.startHomeActivityLocked(userId, reason);
-        }
-
-        void stackSupervisorResumeFocusedStackTopActivityLocked() {
-            mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
-        }
-
-        void stackSupervisorSetLockTaskModeLocked(TaskRecord task, int lockTaskModeState,
-                String reason, boolean andResume) {
-            mService.mStackSupervisor.setLockTaskModeLocked(task, lockTaskModeState, reason,
-                    andResume);
         }
 
         void updateUserConfigurationLocked() {
@@ -1777,6 +1762,10 @@ final class UserController {
             Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromUser, toUser,
                     true /* above system */);
             d.show();
+        }
+
+        ActivityStackSupervisor getActivityStackSupervisor() {
+            return mService.mStackSupervisor;
         }
     }
 }
