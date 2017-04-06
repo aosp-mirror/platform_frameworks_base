@@ -301,7 +301,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private void updateDozeVisibleViews() {
         for (View child : mVisibleInDoze) {
-            child.setAlpha(mDark && mPulsing ? 0.5f : 1);
+            child.setAlpha(mDark && mPulsing ? 0.8f : 1);
         }
     }
 }
