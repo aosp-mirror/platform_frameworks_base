@@ -64,9 +64,10 @@ final class EphemeralResolverConnection implements DeathRecipient {
     private volatile boolean mBindRequested;
     private IInstantAppResolver mRemoteInstance;
 
-    public EphemeralResolverConnection(Context context, ComponentName componentName) {
+    public EphemeralResolverConnection(
+            Context context, ComponentName componentName, String action) {
         mContext = context;
-        mIntent = new Intent(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE).setComponent(componentName);
+        mIntent = new Intent(action).setComponent(componentName);
     }
 
     public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(int hashPrefix[],
