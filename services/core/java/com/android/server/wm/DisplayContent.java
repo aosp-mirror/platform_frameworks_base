@@ -665,7 +665,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     }
                 }
             }
-            if (!winAnimator.isAnimationStarting() && !winAnimator.isWaitingForOpening()) {
+            if ((!winAnimator.isAnimationStarting() && !winAnimator.isWaitingForOpening()) ||
+                    winAnimator.isDummyAnimation()) {
                 // Updates the shown frame before we set up the surface. This is needed
                 // because the resizing could change the top-left position (in addition to
                 // size) of the window. setSurfaceBoundariesLocked uses mShownPosition to
