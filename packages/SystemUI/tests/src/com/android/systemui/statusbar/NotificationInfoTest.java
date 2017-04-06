@@ -240,7 +240,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     public void testBindNotification_SettingsButtonReappersAfterSecondBind() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
-                null, null, null, null);
+                mNotificationChannel.getImportance(), mSbn, null, null, null, null, null);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
                 mNotificationChannel.getImportance(), mSbn,
