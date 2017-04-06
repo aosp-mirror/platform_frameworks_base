@@ -1294,19 +1294,14 @@ public class NotificationManagerService extends SystemService {
         sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
     }
 
-    private void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel,
-            boolean fromAssistant) {
+    private void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel) {
         if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
             // cancel
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
                     UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
                     null);
         }
-        if (fromAssistant) {
-            mRankingHelper.updateNotificationChannelFromAssistant(pkg, uid, channel);
-        } else {
-            mRankingHelper.updateNotificationChannel(pkg, uid, channel);
-        }
+        mRankingHelper.updateNotificationChannel(pkg, uid, channel);
 
         synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
@@ -1709,7 +1704,7 @@ public class NotificationManagerService extends SystemService {
                 NotificationChannel channel) {
             enforceSystemOrSystemUI("Caller not system or systemui");
             Preconditions.checkNotNull(channel);
-            updateNotificationChannelInt(pkg, uid, channel, false);
+            updateNotificationChannelInt(pkg, uid, channel);
         }
 
         @Override
@@ -2646,47 +2641,6 @@ public class NotificationManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
         }
-
-        @Override
-        public void createNotificationChannelFromAssistant(INotificationListener token, String pkg,
-                NotificationChannel channel) throws RemoteException {
-            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
-            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
-            mRankingHelper.createNotificationChannel(pkg, uid, channel, false /* fromTargetApp */);
-            savePolicyFile();
-        }
-
-        @Override
-        public void deleteNotificationChannelFromAssistant(INotificationListener token, String pkg,
-                String channelId) throws RemoteException {
-            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
-            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
-                throw new IllegalArgumentException("Cannot delete default channel");
-            }
-
-            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
-            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    info.userid, REASON_CHANNEL_BANNED, null);
-            mRankingHelper.deleteNotificationChannel(pkg, uid, channelId);
-            savePolicyFile();
-        }
-
-        @Override
-        public void updateNotificationChannelFromAssistant(INotificationListener token, String pkg,
-                NotificationChannel channel) throws RemoteException {
-            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
-            Preconditions.checkNotNull(channel);
-            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
-            updateNotificationChannelInt(pkg, uid, channel, true);
-        }
-
-        @Override
-        public ParceledListSlice<NotificationChannel> getNotificationChannelsFromAssistant(
-                INotificationListener token, String pkg) throws RemoteException {
-            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
-            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
-            return mRankingHelper.getNotificationChannels(pkg, uid, false /* includeDeleted */);
-        }
     };
 
     private void applyAdjustment(NotificationRecord n, Adjustment adjustment) {
@@ -2695,17 +2649,10 @@ public class NotificationManagerService extends SystemService {
         }
         if (adjustment.getSignals() != null) {
             Bundle.setDefusable(adjustment.getSignals(), true);
-            final String overrideChannelId =
-                    adjustment.getSignals().getString(Adjustment.KEY_CHANNEL_ID, null);
             final ArrayList<String> people =
                     adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
             final ArrayList<SnoozeCriterion> snoozeCriterionList =
                     adjustment.getSignals().getParcelableArrayList(Adjustment.KEY_SNOOZE_CRITERIA);
-            if (!TextUtils.isEmpty(overrideChannelId)) {
-                n.updateNotificationChannel(mRankingHelper.getNotificationChannel(
-                        n.sbn.getPackageName(), n.sbn.getUid(), overrideChannelId,
-                        false /* includeDeleted */));
-            }
             n.setPeopleOverride(people);
             n.setSnoozeCriteria(snoozeCriterionList);
         }
