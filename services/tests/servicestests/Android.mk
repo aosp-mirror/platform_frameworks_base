@@ -27,6 +27,10 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     ShortcutManagerTestUtils \
     truth-prebuilt
 
+LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
+
+LOCAL_SRC_FILES += aidl/com/android/servicestests/aidl/INetworkStateObserver.aidl
+
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
 LOCAL_PACKAGE_NAME := FrameworksServicesTests
