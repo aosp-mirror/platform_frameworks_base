@@ -265,7 +265,7 @@ public class Dependency extends SystemUI {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dump(fd, pw, args);
         pw.println("Dumping existing controllers:");
         mDependencies.values().stream().filter(obj -> obj instanceof Dumpable)
@@ -273,7 +273,7 @@ public class Dependency extends SystemUI {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
+    protected synchronized void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDependencies.values().stream().filter(obj -> obj instanceof ConfigurationChangedReceiver)
                 .forEach(o -> ((ConfigurationChangedReceiver) o).onConfigurationChanged(newConfig));
@@ -287,7 +287,7 @@ public class Dependency extends SystemUI {
         return getDependencyInner(key);
     }
 
-    private <T> T getDependencyInner(Object key) {
+    private synchronized <T> T getDependencyInner(Object key) {
         @SuppressWarnings("unchecked")
         T obj = (T) mDependencies.get(key);
         if (obj == null) {
