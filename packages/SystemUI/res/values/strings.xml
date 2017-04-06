@@ -1466,6 +1466,15 @@
         <item quantity="other"><xliff:g id="channel_name_1">%1$s</xliff:g>, <xliff:g id="channel_name_2">%2$s</xliff:g>, and <xliff:g id="number">%3$d</xliff:g> others</item>
     </plurals>
 
+    <!-- Notification: Control panel: Accessibility description for expanded inline controls view, used
+        to control settings about notifications related to the current notification.  -->
+    <string name="notification_channel_controls_opened_accessibility">Notification controls for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> opened</string>
+    <!-- Notification: Control panel: Accessibility description for announcing the closing of the
+        inline controls view.  -->
+    <string name="notification_channel_controls_closed_accessibility">Notification controls for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> closed</string>
+    <!-- Notification: Control panel: Accessibility description for switch that is used to enable
+        or disable notifications from this channel -->
+    <string name="notification_channel_switch_accessibility">Allow notifications from this channel</string>
     <!-- Notification: Control panel: Label for button that launches notification settings. Used
         when this app has defined more than a single channel for notifications. -->
     <string name="notification_all_categories">All Categories</string>

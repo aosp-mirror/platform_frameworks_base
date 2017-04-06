@@ -35,6 +35,7 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -57,6 +58,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private INotificationManager mINotificationManager;
     private String mPkg;
+    private String mAppName;
     private int mAppUid;
     private List<NotificationChannel> mNotificationChannels;
     private NotificationChannel mSingleNotificationChannel;
@@ -125,7 +127,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             }
         }
 
-        String appName = mPkg;
+        mAppName = mPkg;
         Drawable pkgicon = null;
         CharSequence channelNameText = "";
         ApplicationInfo info = null;
@@ -137,7 +139,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
                 mAppUid = info.uid;
-                appName = String.valueOf(pm.getApplicationLabel(info));
+                mAppName = String.valueOf(pm.getApplicationLabel(info));
                 pkgicon = pm.getApplicationIcon(info);
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -189,7 +191,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         } else {
             channelNameText = mSingleNotificationChannel.getName();
         }
-        ((TextView) findViewById(R.id.pkgname)).setText(appName);
+        ((TextView) findViewById(R.id.pkgname)).setText(mAppName);
         ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
 
         // Set group information if this channel has an associated group.
@@ -307,6 +309,21 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             updateSecondaryText();
             updateAppSettingsLink();
         });
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        if (mGutsContainer != null &&
+                event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            if (mGutsContainer.isExposed()) {
+                event.getText().add(mContext.getString(
+                        R.string.notification_channel_controls_opened_accessibility, mAppName));
+            } else {
+                event.getText().add(mContext.getString(
+                        R.string.notification_channel_controls_closed_accessibility, mAppName));
+            }
+        }
     }
 
     private void updateSecondaryText() {

@@ -114,6 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
             android:layout_weight="1"
+            android:contentDescription="@string/notification_channel_switch_accessibility"
             android:background="@null" />
     </LinearLayout>
 
