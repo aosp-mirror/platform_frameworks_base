@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadata;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.text.Layout.Alignment;
@@ -191,9 +192,16 @@ public abstract class Ticker {
     }
 
 
-    public void addEntry(StatusBarNotification n) {
+    public void addEntry(StatusBarNotification n, boolean isMusic, MediaMetadata mediaMetaData) {
         int initialCount = mSegments.size();
         ContentResolver resolver = mContext.getContentResolver();
+
+        if (isMusic) {
+            CharSequence artist = mediaMetaData.getText(MediaMetadata.METADATA_KEY_ARTIST);
+            CharSequence album = mediaMetaData.getText(MediaMetadata.METADATA_KEY_ALBUM);
+            CharSequence title = mediaMetaData.getText(MediaMetadata.METADATA_KEY_TITLE);
+            n.getNotification().tickerText = artist.toString() + " - " + album.toString() + " - " + title.toString();
+        }
 
         // If what's being displayed has the same text and icon, just drop it
         // (which will let the current one finish, this happens when apps do
