@@ -8576,6 +8576,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean performDexOptSecondary(String packageName, String compilerFilter,
             boolean force) {
+        mDexManager.reconcileSecondaryDexFiles(packageName);
         return mDexManager.dexoptSecondaryDex(packageName, compilerFilter, force);
     }
 
