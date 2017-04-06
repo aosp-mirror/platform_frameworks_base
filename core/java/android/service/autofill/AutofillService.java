@@ -216,24 +216,9 @@ public abstract class AutofillService extends Service {
      *     handling this fill request in order to save resources.
      * @param callback object used to notify the result of the request.
      */
-    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data, int flags,
-            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback) {
-        //TODO(b/33197203): make non-abstract once older method is removed
-        onFillRequest(structure, data, cancellationSignal, callback);
-    }
-
-    /**
-     * @hide
-     * @deprecated - use {@link #onFillRequest(AssistStructure, Bundle, int,
-     * CancellationSignal, FillCallback)} instead
-     */
-    //TODO(b/33197203): remove once clients are not using anymore
-    @Deprecated
-    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
-            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback) {
-        // Should never be called because it was abstract before.
-        throw new UnsupportedOperationException("deprecated");
-    }
+    public abstract void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
+            int flags, @NonNull CancellationSignal cancellationSignal,
+            @NonNull FillCallback callback);
 
     /**
      * Called when user requests service to save the fields of an {@link Activity}.
