@@ -5026,7 +5026,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 r.forceNewConfig = true;
                 r.ensureActivityConfigurationLocked(0 /* globalChanges */,
-                        false /* preserveWindow */);
+                        true /* preserveWindow */);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
