@@ -173,6 +173,7 @@ import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
@@ -396,7 +397,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** REMOVE. According to Svet, this was only used to reset permissions during development. */
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
-    private static final boolean DISABLE_EPHEMERAL_APPS = false;
     private static final boolean HIDE_EPHEMERAL_APIS = false;
 
     private static final boolean ENABLE_FREE_CACHE_V2 =
@@ -829,6 +829,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     volatile boolean mSystemReady;
     volatile boolean mSafeMode;
     volatile boolean mHasSystemUidErrors;
+    private volatile boolean mEphemeralAppsDisabled;
 
     ApplicationInfo mAndroidApplication;
     final ActivityInfo mResolveActivity = new ActivityInfo();
@@ -5699,24 +5700,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /**
      * Returns whether or not instant apps have been disabled remotely.
-     * <p><em>IMPORTANT</em> This should not be called with the package manager lock
-     * held. Otherwise we run the risk of deadlock.
      */
     private boolean isEphemeralDisabled() {
-        // ephemeral apps have been disabled across the board
-        if (DISABLE_EPHEMERAL_APPS) {
-            return true;
-        }
-        // system isn't up yet; can't read settings, so, assume no ephemeral apps
-        if (!mSystemReady) {
-            return true;
-        }
-        // we can't get a content resolver until the system is ready; these checks must happen last
-        final ContentResolver resolver = mContext.getContentResolver();
-        if (Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0) {
-            return true;
-        }
-        return Secure.getInt(resolver, Secure.WEB_ACTION_ENABLED, 1) == 0;
+        return mEphemeralAppsDisabled;
     }
 
     private boolean isEphemeralAllowed(
@@ -20170,6 +20156,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     @Override
     public void systemReady() {
         mSystemReady = true;
+        final ContentResolver resolver = mContext.getContentResolver();
+        ContentObserver co = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                mEphemeralAppsDisabled =
+                        (Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0) ||
+                                (Secure.getInt(resolver, Secure.WEB_ACTION_ENABLED, 1) == 0);
+            }
+        };
+        mContext.getContentResolver().registerContentObserver(android.provider.Settings.Global
+                        .getUriFor(Global.ENABLE_EPHEMERAL_FEATURE),
+                false, co, UserHandle.USER_SYSTEM);
+        mContext.getContentResolver().registerContentObserver(android.provider.Settings.Global
+                        .getUriFor(Secure.WEB_ACTION_ENABLED), false, co, UserHandle.USER_SYSTEM);
+        co.onChange(true);
 
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
