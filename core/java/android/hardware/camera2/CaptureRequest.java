@@ -101,6 +101,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *
          * @hide
          */
+        public Key(String name, Class<T> type, long vendorId) {
+            mKey = new CameraMetadataNative.Key<T>(name, type, vendorId);
+        }
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
         public Key(String name, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name, type);
         }
@@ -130,6 +139,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         @NonNull
         public String getName() {
             return mKey.getName();
+        }
+
+        /**
+         * Return vendor tag id.
+         *
+         * @hide
+         */
+        public long getVendorId() {
+            return mKey.getVendorId();
         }
 
         /**
@@ -199,6 +217,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     private CaptureRequest() {
         mSettings = new CameraMetadataNative();
+        setNativeInstance(mSettings);
         mSurfaceSet = new HashSet<Surface>();
         mIsReprocess = false;
         mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
@@ -212,6 +231,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @SuppressWarnings("unchecked")
     private CaptureRequest(CaptureRequest source) {
         mSettings = new CameraMetadataNative(source.mSettings);
+        setNativeInstance(mSettings);
         mSurfaceSet = (HashSet<Surface>) source.mSurfaceSet.clone();
         mIsReprocess = source.mIsReprocess;
         mIsPartOfCHSRequestList = source.mIsPartOfCHSRequestList;
@@ -242,6 +262,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     private CaptureRequest(CameraMetadataNative settings, boolean isReprocess,
             int reprocessableSessionId) {
         mSettings = CameraMetadataNative.move(settings);
+        setNativeInstance(mSettings);
         mSurfaceSet = new HashSet<Surface>();
         mIsReprocess = isReprocess;
         if (isReprocess) {
@@ -441,6 +462,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     private void readFromParcel(Parcel in) {
         mSettings.readFromParcel(in);
+        setNativeInstance(mSettings);
 
         mSurfaceSet.clear();
 
