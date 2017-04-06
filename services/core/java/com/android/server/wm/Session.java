@@ -81,6 +81,7 @@ public class Session extends IWindowSession.Stub
     private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
     final boolean mCanAddInternalSystemWindow;
     private AlertWindowNotification mAlertWindowNotification;
+    private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
     private float mLastReportedAnimatorScale;
     private String mPackageName;
@@ -95,6 +96,7 @@ public class Session extends IWindowSession.Stub
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
         mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
                 INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
+        mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
@@ -591,6 +593,9 @@ public class Session extends IWindowSession.Stub
                     cancelAlertWindowNotification();
                 } else if (mAlertWindowNotification == null){
                     mAlertWindowNotification = new AlertWindowNotification(mService, mPackageName);
+                    if (mShowingAlertWindowNotificationAllowed) {
+                        mAlertWindowNotification.post();
+                    }
                 }
             }
         }
@@ -609,6 +614,17 @@ public class Session extends IWindowSession.Stub
             // Notify activity manager of changes to app overlay windows so it can adjust the
             // importance score for the process.
             setHasOverlayUi(!mAppOverlaySurfaces.isEmpty());
+        }
+    }
+
+    void setShowingAlertWindowNotificationAllowed(boolean allowed) {
+        mShowingAlertWindowNotificationAllowed = allowed;
+        if (mAlertWindowNotification != null) {
+            if (allowed) {
+                mAlertWindowNotification.post();
+            } else {
+                mAlertWindowNotification.cancel();
+            }
         }
     }
 
