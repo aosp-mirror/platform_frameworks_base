@@ -505,6 +505,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             getController().removeStartingWindow();
         }
 
+        // If this window was animating, then we need to ensure that the app transition notifies
+        // that animations have completed in WMS.handleAnimatingStoppedAndTransitionLocked(), so
+        // add to that list now
+        if (mAppAnimator.animating) {
+            mService.mNoAnimationNotifyOnTransitionFinished.add(token);
+        }
+
         final TaskStack stack = getTask().mStack;
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
