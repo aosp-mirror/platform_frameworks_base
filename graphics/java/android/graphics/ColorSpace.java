@@ -3530,7 +3530,7 @@ public abstract class ColorSpace {
          *
          * @see RenderIntent
          */
-        public RenderIntent getIntent() {
+        public RenderIntent getRenderIntent() {
             return mIntent;
         }
 
