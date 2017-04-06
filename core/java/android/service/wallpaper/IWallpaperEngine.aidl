@@ -30,5 +30,5 @@ oneway interface IWallpaperEngine {
     void dispatchPointer(in MotionEvent event);
     void dispatchWallpaperCommand(String action, int x, int y,
             int z, in Bundle extras);
-	void destroy();
+    void destroy();
 }

@@ -52,13 +52,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.WindowManagerGlobal;
 
 import libcore.io.IoUtils;
@@ -71,6 +71,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -271,15 +273,20 @@ public class WallpaperManager {
         }
     }
 
-    static class Globals extends IWallpaperManagerCallback.Stub {
+    private static class Globals extends IWallpaperManagerCallback.Stub {
         private final IWallpaperManager mService;
+        private boolean mColorCallbackRegistered;
+        private final ArrayList<Pair<OnColorsChangedListener, Handler>> mColorListeners =
+                new ArrayList<>();
         private Bitmap mCachedWallpaper;
         private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
+        private Handler mMainLooperHandler;
 
         Globals(Looper looper) {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
             mService = IWallpaperManager.Stub.asInterface(b);
+            mMainLooperHandler = new Handler(looper);
             forgetLoadedWallpaper();
         }
 
@@ -290,6 +297,88 @@ public class WallpaperManager {
              * fetch it.
              */
             forgetLoadedWallpaper();
+        }
+
+        /**
+         * Start listening to wallpaper color events.
+         * Will be called whenever someone changes their wallpaper or if a live wallpaper
+         * changes its colors.
+         * @param callback Listener
+         * @param handler Thread to call it from. Main thread if null.
+         */
+        public void addOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
+                @Nullable Handler handler) {
+            synchronized (this) {
+                if (!mColorCallbackRegistered) {
+                    try {
+                        mService.registerWallpaperColorsCallback(this);
+                        mColorCallbackRegistered = true;
+                    } catch (RemoteException e) {
+                        // Failed, service is gone
+                        Log.w(TAG, "Can't register for color updates", e);
+                    }
+                }
+                mColorListeners.add(new Pair<>(callback, handler));
+            }
+        }
+
+        /**
+         * Stop listening to wallpaper color events.
+         *
+         * @param callback listener
+         */
+        public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback) {
+            synchronized (this) {
+                mColorListeners.removeIf(pair -> pair.first == callback);
+
+                if (mColorListeners.size() == 0 && mColorCallbackRegistered) {
+                    mColorCallbackRegistered = false;
+                    try {
+                        mService.unregisterWallpaperColorsCallback(this);
+                    } catch (RemoteException e) {
+                        // Failed, service is gone
+                        Log.w(TAG, "Can't unregister color updates", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onWallpaperColorsChanged(WallpaperColors colors, int which) {
+            synchronized (this) {
+                for (Pair<OnColorsChangedListener, Handler> listener : mColorListeners) {
+                    Handler handler = listener.second;
+                    if (listener.second == null) {
+                        handler = mMainLooperHandler;
+                    }
+                    handler.post(() -> {
+                        // Dealing with race conditions between posting a callback and
+                        // removeOnColorsChangedListener being called.
+                        boolean stillExists;
+                        synchronized (sGlobals) {
+                            stillExists = mColorListeners.contains(listener);
+                        }
+                        if (stillExists) {
+                            listener.first.onColorsChanged(colors, which);
+                        }
+                    });
+                }
+            }
+        }
+
+        WallpaperColors getWallpaperColors(int which) {
+            synchronized (this) {
+                if (which != FLAG_LOCK && which != FLAG_SYSTEM)
+                    throw new IllegalArgumentException(
+                            "which should be either FLAG_LOCK or FLAG_SYSTEM");
+
+                try {
+                    return mService.getWallpaperColors(which);
+                } catch (RemoteException e) {
+                    // Can't get colors, connection lost.
+                }
+                return null;
+            }
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
@@ -746,7 +835,6 @@ public class WallpaperManager {
         return getWallpaperFile(which, mContext.getUserId());
     }
 
-
     /**
      * Registers a listener to get notified when the wallpaper colors change.
      * Callback might be called from an arbitrary background thread.
@@ -754,16 +842,18 @@ public class WallpaperManager {
      * @param listener A listener to register
      */
     public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener) {
+        sGlobals.addOnColorsChangedListener(listener, null);
     }
 
     /**
      * Registers a listener to get notified when the wallpaper colors change
      * @param listener A listener to register
-     * @param handler Where to call it from. Might be called from a background thread
+     * @param handler Where to call it from. Will be called from the main thread
      *                if null.
      */
     public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener,
-            @Nullable Handler handler) {
+            @NonNull Handler handler) {
+        sGlobals.addOnColorsChangedListener(listener, handler);
     }
 
     /**
@@ -771,6 +861,7 @@ public class WallpaperManager {
      * @param callback A callback to unsubscribe
      */
     public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback) {
+        sGlobals.removeOnColorsChangedListener(callback);
     }
 
     /**
@@ -780,7 +871,7 @@ public class WallpaperManager {
      * @return a list of colors ordered by priority
      */
     public @Nullable WallpaperColors getWallpaperColors(int which) {
-        return null;
+        return sGlobals.getWallpaperColors(which);
     }
 
     /**
@@ -1772,6 +1863,12 @@ public class WallpaperManager {
         @Override
         public void onWallpaperChanged() throws RemoteException {
             mLatch.countDown();
+        }
+
+        @Override
+        public void onWallpaperColorsChanged(WallpaperColors colors, int which)
+            throws RemoteException {
+            sGlobals.onWallpaperColorsChanged(colors, which);
         }
     }
 

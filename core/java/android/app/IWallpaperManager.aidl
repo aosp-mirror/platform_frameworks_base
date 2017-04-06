@@ -22,6 +22,7 @@ import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
 import android.app.WallpaperInfo;
 import android.content.ComponentName;
+import android.app.WallpaperColors;
 
 /** @hide */
 interface IWallpaperManager {
@@ -135,4 +136,23 @@ interface IWallpaperManager {
      * wallpaper content has changed.
      */
     boolean setLockWallpaperCallback(IWallpaperManagerCallback cb);
+
+    /**
+     * Returns the colors used by the lock screen or system wallpaper.
+     *
+     * @param which either {@link WallpaperManager#FLAG_LOCK}
+     * or {@link WallpaperManager#FLAG_SYSTEM}
+     * @return colors of chosen wallpaper
+     */
+    WallpaperColors getWallpaperColors(int which);
+
+    /**
+     * Register a callback to receive color updates
+     */
+    void registerWallpaperColorsCallback(IWallpaperManagerCallback cb);
+
+    /**
+     * Unregister a callback that was receiving color updates
+     */
+    void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb);
 }

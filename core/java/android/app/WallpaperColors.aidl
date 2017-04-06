@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,4 @@
 
 package android.app;
 
-import android.app.WallpaperColors;
-
-/**
- * Callback interface used by IWallpaperManager to send asynchronous 
- * notifications back to its clients.  Note that this is a
- * one-way interface so the server does not block waiting for the client.
- *
- * @hide
- */
-oneway interface IWallpaperManagerCallback {
-    /**
-     * Called when the wallpaper has changed
-     */
-    void onWallpaperChanged();
-
-    /**
-     * Called when wallpaper colors change
-     */
-    void onWallpaperColorsChanged(in WallpaperColors colors, int which);
-
-}
+parcelable WallpaperColors;
