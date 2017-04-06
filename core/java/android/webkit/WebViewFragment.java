@@ -50,7 +50,7 @@ public class WebViewFragment extends Fragment {
     }
 
     /**
-     * Called when the fragment is visible to the user and actively running. Resumes the WebView.
+     * Called when the fragment is no longer resumed. Pauses the WebView.
      */
     @Override
     public void onPause() {
@@ -59,7 +59,7 @@ public class WebViewFragment extends Fragment {
     }
 
     /**
-     * Called when the fragment is no longer resumed. Pauses the WebView.
+     * Called when the fragment is visible to the user and actively running. Resumes the WebView.
      */
     @Override
     public void onResume() {
