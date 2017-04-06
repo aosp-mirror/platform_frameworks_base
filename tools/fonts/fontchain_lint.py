@@ -413,6 +413,11 @@ def parse_ucd(ucd_path):
     global _emoji_sequences, _emoji_zwj_sequences
     _emoji_properties = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-data.txt'), reverse=True)
+    emoji_properties_additions = parse_unicode_datafile(
+        path.join(ucd_path, 'additions', 'emoji-data.txt'), reverse=True)
+    for prop in emoji_properties_additions.keys():
+        _emoji_properties[prop].update(emoji_properties_additions[prop])
+
     _chars_by_age = parse_unicode_datafile(
         path.join(ucd_path, 'DerivedAge.txt'), reverse=True)
     sequences = parse_standardized_variants(
@@ -420,6 +425,7 @@ def parse_ucd(ucd_path):
     _text_variation_sequences, _emoji_variation_sequences = sequences
     _emoji_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-sequences.txt'))
+
     _emoji_zwj_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
     _emoji_zwj_sequences.update(parse_unicode_datafile(
@@ -449,22 +455,6 @@ EQUIVALENT_FLAGS = {
 }
 
 COMBINING_KEYCAP = 0x20E3
-
-# Characters that Android defaults to emoji style, different from the recommendations in UTR #51
-ANDROID_DEFAULT_EMOJI = frozenset({
-    0x2600, # BLACK SUN WITH RAYS
-    0x2601, # CLOUD
-    0x260E, # BLACK TELEPHONE
-    0x261D, # WHITE UP POINTING INDEX
-    0x263A, # WHITE SMILING FACE
-    0x2660, # BLACK SPADE SUIT
-    0x2663, # BLACK CLUB SUIT
-    0x2665, # BLACK HEART SUIT
-    0x2666, # BLACK DIAMOND SUIT
-    0x270C, # VICTORY HAND
-    0x2744, # SNOWFLAKE
-    0x2764, # HEAVY BLACK HEART
-})
 
 LEGACY_ANDROID_EMOJI = {
     0xFE4E5: flag_sequence('JP'),
@@ -554,7 +544,6 @@ def compute_expected_emoji():
         set(LEGACY_ANDROID_EMOJI.keys()))
     default_emoji = (
         _emoji_properties['Emoji_Presentation'] |
-        ANDROID_DEFAULT_EMOJI |
         all_sequences |
         set(LEGACY_ANDROID_EMOJI.keys()))
 
