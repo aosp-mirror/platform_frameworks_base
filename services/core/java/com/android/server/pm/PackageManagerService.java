@@ -1916,7 +1916,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             // survive long enough to benefit of background optimizations.
             for (int userId : firstUsers) {
                 PackageInfo info = getPackageInfo(packageName, /*flags*/ 0, userId);
-                mDexManager.notifyPackageInstalled(info, userId);
+                // There's a race currently where some install events may interleave with an uninstall.
+                // This can lead to package info being null (b/36642664).
+                if (info != null) {
+                    mDexManager.notifyPackageInstalled(info, userId);
+                }
             }
         }
 
