@@ -272,6 +272,7 @@ class InstantAppRegistry {
             } else {
                 // Deleting an app prunes all instant state such as cookie
                 deleteDir(getInstantApplicationDir(pkg.packageName, userId));
+                mCookiePersistence.cancelPendingPersistLPw(pkg, userId);
                 removeAppLPw(userId, ps.appId);
             }
         }
