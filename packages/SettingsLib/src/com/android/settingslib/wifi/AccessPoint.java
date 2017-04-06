@@ -149,6 +149,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private int mRankingScore = Integer.MIN_VALUE;
     private int mBadge = NetworkBadging.BADGING_NONE;
+    private boolean mIsScoredNetworkMetered = false;
 
     // used to co-relate internal vs returned accesspoint.
     int mId;
@@ -248,6 +249,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mScanResultCache.putAll(that.mScanResultCache);
         this.mId = that.mId;
         this.mBadge = that.mBadge;
+        this.mIsScoredNetworkMetered = that.mIsScoredNetworkMetered;
         this.mRankingScore = that.mRankingScore;
     }
 
@@ -336,8 +338,24 @@ public class AccessPoint implements Comparable<AccessPoint> {
         builder.append(",level=").append(getLevel());
         builder.append(",rankingScore=").append(mRankingScore);
         builder.append(",badge=").append(mBadge);
+        builder.append(",metered=").append(isMetered());
 
         return builder.append(')').toString();
+    }
+
+    /**
+     * Updates the AccessPoint rankingScore, metering, and badge, returning true if the data has
+     * changed.
+     *
+     * @param scoreCache The score cache to use to retrieve scores.
+     * @param scoringUiEnabled Whether to show scoring and badging UI.
+     */
+    boolean update(WifiNetworkScoreCache scoreCache, boolean scoringUiEnabled) {
+        boolean scoreChanged = false;
+        if (scoringUiEnabled) {
+            scoreChanged = updateScores(scoreCache);
+        }
+        return updateMetered(scoreCache) || scoreChanged;
     }
 
     /**
@@ -345,7 +363,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
      *
      * @param scoreCache The score cache to use to retrieve scores.
      */
-    boolean updateScores(WifiNetworkScoreCache scoreCache) {
+    private boolean updateScores(WifiNetworkScoreCache scoreCache) {
         int oldBadge = mBadge;
         int oldRankingScore = mRankingScore;
         mBadge = NetworkBadging.BADGING_NONE;
@@ -364,6 +382,23 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
 
         return (oldBadge != mBadge || oldRankingScore != mRankingScore);
+    }
+
+    /**
+     * Updates the AccessPoint's metering based on {@link ScoredNetwork#meteredHint}, returning
+     * true if the metering changed.
+     */
+    private boolean updateMetered(WifiNetworkScoreCache scoreCache) {
+        boolean oldMetering = mIsScoredNetworkMetered;
+        mIsScoredNetworkMetered = false;
+        for (ScanResult result : mScanResultCache.values()) {
+            ScoredNetwork score = scoreCache.getScoredNetwork(result);
+            if (score == null) {
+                continue;
+            }
+            mIsScoredNetworkMetered |= score.meteredHint;
+        }
+        return oldMetering == mIsScoredNetworkMetered;
     }
 
     private void evictOldScanResults() {
@@ -472,6 +507,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
 
         mSeen = seen;
+    }
+
+    /**
+     * Returns if the network is marked metered. Metering can be marked through its config in
+     * {@link WifiConfiguration}, after connection in {@link WifiInfo}, or from a score config in
+     * {@link ScoredNetwork}.
+     */
+    public boolean isMetered() {
+        return mIsScoredNetworkMetered
+                || (mConfig != null && mConfig.meteredHint)
+                || (mInfo != null && mInfo.getMeteredHint());
     }
 
     public NetworkInfo getNetworkInfo() {

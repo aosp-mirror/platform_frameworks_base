@@ -183,7 +183,7 @@ public class AccessPointPreference extends Preference {
         }
         if (mAccessPoint.getSecurity() != AccessPoint.SECURITY_NONE) {
             mFrictionSld.setState(STATE_SECURED);
-        } else if (mAccessPoint.getConfig() != null && mAccessPoint.getConfig().meteredHint) {
+        } else if (mAccessPoint.isMetered()) {
             mFrictionSld.setState(STATE_METERED);
         }
         Drawable drawable = mFrictionSld.getCurrent();
