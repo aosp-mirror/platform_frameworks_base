@@ -199,6 +199,8 @@
     <protected-broadcast android:name="android.btopp.intent.action.OPEN_INBOUND" />
     <protected-broadcast android:name="android.btopp.intent.action.TRANSFER_COMPLETE" />
     <protected-broadcast android:name="com.android.bluetooth.gatt.REFRESH_BATCHED_SCAN" />
+    <protected-broadcast android:name="android.btopp.intent.action.ACCEPT" />
+    <protected-broadcast android:name="android.btopp.intent.action.DECLINE" />
     <protected-broadcast android:name="com.android.bluetooth.pbap.authchall" />
     <protected-broadcast android:name="com.android.bluetooth.pbap.userconfirmtimeout" />
     <protected-broadcast android:name="com.android.bluetooth.pbap.authresponse" />
