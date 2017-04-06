@@ -48,8 +48,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -5705,7 +5707,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                        .findViewById(com.android.internal.R.id.media_actions) != null;
     }
 
-    // The (i) button in the guts that links to the system notification settings for that app
+    // The button in the guts that links to the system notification settings for that app
     private void startAppNotificationSettingsActivity(String packageName, final int appUid,
             final NotificationChannel channel) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
@@ -5785,10 +5787,17 @@ public class StatusBar extends SystemUI implements DemoMode,
                     startAppNotificationSettingsActivity(pkg, appUid, channel);
                 };
             }
+            final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick = (View v,
+                    Intent intent) -> {
+                mMetricsLogger.action(MetricsEvent.ACTION_APP_NOTE_SETTINGS);
+                guts.resetFalsingCheck();
+                startNotificationGutsIntent(intent, sbn.getUid());
+            };
             final View.OnClickListener onDoneClick = (View v) -> {
                 saveAndCloseNotificationMenu(info, row, guts, v);
             };
-            final NotificationInfo.CheckSaveListener checkSaveListener = (Runnable saveImportance) -> {
+            final NotificationInfo.CheckSaveListener checkSaveListener =
+                    (Runnable saveImportance) -> {
                 // If the user has security enabled, show challenge if the setting is changed.
                 if (isLockscreenPublicMode(userHandle.getIdentifier())
                         && (mState == StatusBarState.KEYGUARD
@@ -5821,7 +5830,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             try {
                 info.bindNotification(pmUser, iNotificationManager, pkg, new ArrayList(channels),
-                        onSettingsClick, onDoneClick, checkSaveListener, mNonBlockablePkgs);
+                        row.getEntry().channel.getImportance(), sbn, onSettingsClick,
+                        onAppSettingsClick, onDoneClick, checkSaveListener,
+                        mNonBlockablePkgs);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
