@@ -1927,4 +1927,12 @@ public abstract class SensorManager {
         }
         return delay;
     }
+
+    /** @hide */
+    public boolean setOperationParameter(SensorAdditionalInfo parameter) {
+        return setOperationParameterImpl(parameter);
+    }
+
+    /** @hide */
+    protected abstract boolean setOperationParameterImpl(SensorAdditionalInfo parameter);
 }
