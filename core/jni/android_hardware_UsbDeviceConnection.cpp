@@ -220,7 +220,7 @@ android_hardware_UsbDeviceConnection_bulk_request(JNIEnv *env, jobject thiz,
 }
 
 static jobject
-android_hardware_UsbDeviceConnection_request_wait(JNIEnv *env, jobject thiz, jint timeoutMillis)
+android_hardware_UsbDeviceConnection_request_wait(JNIEnv *env, jobject thiz, jlong timeoutMillis)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
@@ -243,8 +243,17 @@ android_hardware_UsbDeviceConnection_request_wait(JNIEnv *env, jobject thiz, jin
                                - currentTime).count());
 
             int error = errno;
+            if (request != NULL) {
+                break;
+            }
+
             currentTime = steady_clock::now();
-            if (request != NULL || error != EAGAIN || currentTime >= endTime) {
+            if (currentTime >= endTime) {
+                jniThrowException(env, "java/util/concurrent/TimeoutException", "");
+                break;
+            }
+
+            if (error != EAGAIN) {
                 break;
             }
         };
@@ -300,7 +309,7 @@ static const JNINativeMethod method_table[] = {
                                         (void *)android_hardware_UsbDeviceConnection_control_request},
     {"native_bulk_request",     "(I[BIII)I",
                                         (void *)android_hardware_UsbDeviceConnection_bulk_request},
-    {"native_request_wait",             "(I)Landroid/hardware/usb/UsbRequest;",
+    {"native_request_wait",             "(J)Landroid/hardware/usb/UsbRequest;",
                                         (void *)android_hardware_UsbDeviceConnection_request_wait},
     { "native_get_serial",      "()Ljava/lang/String;",
                                         (void*)android_hardware_UsbDeviceConnection_get_serial },
