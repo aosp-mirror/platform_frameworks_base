@@ -68,6 +68,34 @@ public final class PhoneAccount implements Parcelable {
             "android.telecom.extra.CALL_SUBJECT_CHARACTER_ENCODING";
 
     /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
+     * indicates whether this {@link PhoneAccount} is capable of supporting a request to handover a
+     * connection (see {@link android.telecom.Call#EVENT_REQUEST_HANDOVER}) to this
+     * {@link PhoneAccount} from a {@link PhoneAccount} specifying
+     * {@link #EXTRA_SUPPORTS_HANDOVER_FROM}.
+     * <p>
+     * A handover request is initiated by the user from the default dialer app to indicate a desire
+     * to handover a call from one {@link PhoneAccount}/{@link ConnectionService} to another.
+     * @hide
+     */
+    public static final String EXTRA_SUPPORTS_HANDOVER_TO =
+            "android.telecom.extra.SUPPORTS_HANDOVER_TO";
+
+    /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
+     * indicates whether this {@link PhoneAccount} is capable of supporting a request to handover a
+     * connection from this {@link PhoneAccount} to another {@link PhoneAccount}.
+     * (see {@link android.telecom.Call#EVENT_REQUEST_HANDOVER}) which specifies
+     * {@link #EXTRA_SUPPORTS_HANDOVER_TO}.
+     * <p>
+     * A handover request is initiated by the user from the default dialer app to indicate a desire
+     * to handover a call from one {@link PhoneAccount}/{@link ConnectionService} to another.
+     * @hide
+     */
+    public static final String EXTRA_SUPPORTS_HANDOVER_FROM =
+            "android.telecom.extra.SUPPORTS_HANDOVER_FROM";
+
+    /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}
      * will be allowed to manage phone calls including using its own proprietary phone-call

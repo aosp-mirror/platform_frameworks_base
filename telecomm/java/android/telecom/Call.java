@@ -132,6 +132,54 @@ public final class Call {
     public static final String EXTRA_LAST_EMERGENCY_CALLBACK_TIME_MILLIS =
             "android.telecom.extra.LAST_EMERGENCY_CALLBACK_TIME_MILLIS";
 
+    /**
+     * Call event sent from a {@link Call} via {@link #sendCallEvent(String, Bundle)} to inform
+     * Telecom that the user has requested that the current {@link Call} should be handed over
+     * to another {@link ConnectionService}.
+     * <p>
+     * The caller must specify the {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE} to indicate to
+     * Telecom which {@link PhoneAccountHandle} the {@link Call} should be handed over to.
+     * @hide
+     */
+    public static final String EVENT_REQUEST_HANDOVER =
+            "android.telecom.event.REQUEST_HANDOVER";
+
+    /**
+     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
+     * {@link PhoneAccountHandle} to which a call should be handed over to.
+     * @hide
+     */
+    public static final String EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE =
+            "android.telecom.extra.HANDOVER_PHONE_ACCOUNT_HANDLE";
+
+    /**
+     * Integer extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
+     * video state of the call when it is handed over to the new {@link PhoneAccount}.
+     * <p>
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL}, {@link VideoProfile#STATE_RX_ENABLED}, and
+     * {@link VideoProfile#STATE_TX_ENABLED}.
+     * @hide
+     */
+    public static final String EXTRA_HANDOVER_VIDEO_STATE =
+            "android.telecom.extra.HANDOVER_VIDEO_STATE";
+
+    /**
+     * Call event sent from Telecom via {@link Connection#onCallEvent(String, Bundle)} to
+     * inform a {@link Connection} that a handover initiated via {@link #EVENT_REQUEST_HANDOVER}
+     * has completed.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_COMPLETE = "android.telecom.event.HANDOVER_COMPLETE";
+
+    /**
+     * Call event sent from Telecom via {@link Connection#onCallEvent(String, Bundle)} to
+     * inform a {@link Connection} that a handover initiated via {@link #EVENT_REQUEST_HANDOVER}
+     * has failed to complete.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_FAILED = "android.telecom.event.HANDOVER_FAILED";
+
     public static class Details {
 
         /** Call can currently be put on hold or unheld. */
