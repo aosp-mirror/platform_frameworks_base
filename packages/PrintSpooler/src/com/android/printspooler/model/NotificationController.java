@@ -20,13 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.Notification.Action;
-import android.app.Notification.InboxStyle;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -57,13 +56,13 @@ final class NotificationController {
 
     public static final String LOG_TAG = "NotificationController";
 
+    private static final String NOTIFICATION_CHANNEL_PROGRESS = "PRINT_PROGRESS";
+    private static final String NOTIFICATION_CHANNEL_FAILURES = "PRINT_FAILURES";
+
     private static final String INTENT_ACTION_CANCEL_PRINTJOB = "INTENT_ACTION_CANCEL_PRINTJOB";
     private static final String INTENT_ACTION_RESTART_PRINTJOB = "INTENT_ACTION_RESTART_PRINTJOB";
 
     private static final String EXTRA_PRINT_JOB_ID = "EXTRA_PRINT_JOB_ID";
-
-    private static final String PRINT_JOB_NOTIFICATION_GROUP_KEY = "PRINT_JOB_NOTIFICATIONS";
-    private static final String PRINT_JOB_NOTIFICATION_SUMMARY = "PRINT_JOB_NOTIFICATIONS_SUMMARY";
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
@@ -78,6 +77,15 @@ final class NotificationController {
         mNotificationManager = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotifications = new ArraySet<>(0);
+
+        mNotificationManager.createNotificationChannel(
+                new NotificationChannel(NOTIFICATION_CHANNEL_PROGRESS,
+                        context.getString(R.string.notification_channel_progress),
+                        NotificationManager.IMPORTANCE_LOW));
+        mNotificationManager.createNotificationChannel(
+                new NotificationChannel(NOTIFICATION_CHANNEL_FAILURES,
+                        context.getString(R.string.notification_channel_failure),
+                        NotificationManager.IMPORTANCE_DEFAULT));
     }
 
     public void onUpdateNotifications(List<PrintJobInfo> printJobs) {
@@ -103,13 +111,6 @@ final class NotificationController {
         ArraySet<PrintJobId> removedPrintJobs = new ArraySet<>(mNotifications);
 
         final int numPrintJobs = printJobs.size();
-
-        // Create summary notification
-        if (numPrintJobs > 1) {
-            createStackedNotification(printJobs);
-        } else {
-            mNotificationManager.cancel(PRINT_JOB_NOTIFICATION_SUMMARY, 0);
-        }
 
         // Create per print job notification
         for (int i = 0; i < numPrintJobs; i++) {
@@ -178,16 +179,16 @@ final class NotificationController {
      */
     private void createNotification(@NonNull PrintJobInfo printJob, @Nullable Action firstAction,
             @Nullable Action secondAction) {
-        Notification.Builder builder = new Notification.Builder(mContext)
+        Notification.Builder builder = new Notification.Builder(mContext, computeChannel(printJob))
                 .setContentIntent(createContentIntent(printJob.getId()))
                 .setSmallIcon(computeNotificationIcon(printJob))
                 .setContentTitle(computeNotificationTitle(printJob))
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true)
+                .setOnlyAlertOnce(true)
                 .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setGroup(PRINT_JOB_NOTIFICATION_GROUP_KEY);
+                        com.android.internal.R.color.system_notification_accent_color));
 
         if (firstAction != null) {
             builder.addAction(firstAction);
@@ -236,43 +237,6 @@ final class NotificationController {
 
     private void createCancellingNotification(PrintJobInfo printJob) {
         createNotification(printJob, null, null);
-    }
-
-    private void createStackedNotification(List<PrintJobInfo> printJobs) {
-        Notification.Builder builder = new Notification.Builder(mContext)
-                .setContentIntent(createContentIntent(null))
-                .setWhen(System.currentTimeMillis())
-                .setOngoing(true)
-                .setShowWhen(true)
-                .setGroup(PRINT_JOB_NOTIFICATION_GROUP_KEY)
-                .setGroupSummary(true);
-
-        final int printJobCount = printJobs.size();
-
-        InboxStyle inboxStyle = new InboxStyle();
-
-        int icon = com.android.internal.R.drawable.ic_print;
-        for (int i = printJobCount - 1; i>= 0; i--) {
-            PrintJobInfo printJob = printJobs.get(i);
-
-            inboxStyle.addLine(computeNotificationTitle(printJob));
-
-            // if any print job is in an error state show an error icon for the summary
-            if (printJob.getState() == PrintJobInfo.STATE_FAILED
-                    || printJob.getState() == PrintJobInfo.STATE_BLOCKED) {
-                icon = com.android.internal.R.drawable.ic_print_error;
-            }
-        }
-
-        builder.setSmallIcon(icon);
-        builder.setLargeIcon(
-                ((BitmapDrawable) mContext.getResources().getDrawable(icon, null)).getBitmap());
-        builder.setNumber(printJobCount);
-        builder.setStyle(inboxStyle);
-        builder.setColor(mContext.getColor(
-                com.android.internal.R.color.system_notification_accent_color));
-
-        mNotificationManager.notify(PRINT_JOB_NOTIFICATION_SUMMARY, 0, builder.build());
     }
 
     private String computeNotificationTitle(PrintJobInfo printJob) {
@@ -355,6 +319,22 @@ final class NotificationController {
                 } else {
                     return R.drawable.stat_notify_cancelling;
                 }
+            }
+        }
+    }
+
+    private static String computeChannel(PrintJobInfo printJob) {
+        if (printJob.isCancelling()) {
+            return NOTIFICATION_CHANNEL_PROGRESS;
+        }
+
+        switch (printJob.getState()) {
+            case PrintJobInfo.STATE_FAILED:
+            case PrintJobInfo.STATE_BLOCKED: {
+                return NOTIFICATION_CHANNEL_FAILURES;
+            }
+            default: {
+                return NOTIFICATION_CHANNEL_PROGRESS;
             }
         }
     }
