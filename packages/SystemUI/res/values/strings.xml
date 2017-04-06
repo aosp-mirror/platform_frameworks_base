@@ -1472,6 +1472,9 @@
     <!-- Notification: Control panel: Label for button that launches notification settings. Used
         when this app has only defined a single channel for notifications. -->
     <string name="notification_more_settings">More settings</string>
+    <!-- Notification: Control panel: Label for a link that launches notification settings in the
+        app that sent the notification. -->
+    <string name="notification_app_settings">Customize: <xliff:g id="sub_category" example="Work chats">%1$s</xliff:g></string>
     <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="notification_done">Done</string>
 

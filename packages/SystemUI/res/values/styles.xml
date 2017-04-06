@@ -370,6 +370,10 @@
         <item name="android:textColor">?android:attr/colorError</item>
     </style>
 
+    <style name="TextAppearance.NotificationInfo.Secondary.Link">
+        <item name="android:textColor">?android:attr/colorAccent</item>
+    </style>
+
     <style name="TextAppearance.NotificationInfo.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">14sp</item>

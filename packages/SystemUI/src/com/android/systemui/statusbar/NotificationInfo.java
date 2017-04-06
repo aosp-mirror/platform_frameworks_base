@@ -16,45 +16,34 @@
 
 package com.android.systemui.statusbar;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
+import static android.app.NotificationManager.IMPORTANCE_NONE;
+
 import android.app.INotificationManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
-import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
-import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
+import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationGuts.OnSettingsClickListener;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.lang.IllegalArgumentException;
 import java.util.List;
@@ -71,12 +60,16 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private int mAppUid;
     private List<NotificationChannel> mNotificationChannels;
     private NotificationChannel mSingleNotificationChannel;
+    private StatusBarNotification mSbn;
     private int mStartingUserImportance;
 
     private TextView mNumChannelsView;
     private View mChannelDisabledView;
+    private TextView mSettingsLinkView;
     private Switch mChannelEnabledSwitch;
     private CheckSaveListener mCheckSaveListener;
+    private OnAppSettingsClickListener mAppSettingsClickListener;
+    private PackageManager mPm;
 
     private NotificationGuts mGutsContainer;
 
@@ -95,11 +88,18 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         void onClick(View v, NotificationChannel channel, int appUid);
     }
 
+    public interface OnAppSettingsClickListener {
+        void onClick(View v, Intent intent);
+    }
+
     public void bindNotification(final PackageManager pm,
             final INotificationManager iNotificationManager,
             final String pkg,
             final List<NotificationChannel> notificationChannels,
+            int startingUserImportance,
+            final StatusBarNotification sbn,
             OnSettingsClickListener onSettingsClick,
+            OnAppSettingsClickListener onAppSettingsClick,
             OnClickListener onDoneClick,
             CheckSaveListener checkSaveListener,
             final Set<String> nonBlockablePkgs)
@@ -108,16 +108,21 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mPkg = pkg;
         mNotificationChannels = notificationChannels;
         mCheckSaveListener = checkSaveListener;
+        mSbn = sbn;
+        mPm = pm;
+        mAppSettingsClickListener = onAppSettingsClick;
         boolean isSingleDefaultChannel = false;
+        mStartingUserImportance = startingUserImportance;
         if (mNotificationChannels.isEmpty()) {
             throw new IllegalArgumentException("bindNotification requires at least one channel");
-        } else if (mNotificationChannels.size() == 1) {
-            mSingleNotificationChannel = mNotificationChannels.get(0);
-            mStartingUserImportance = mSingleNotificationChannel.getImportance();
-            isSingleDefaultChannel = mSingleNotificationChannel.getId()
-                    .equals(NotificationChannel.DEFAULT_CHANNEL_ID);
-        } else {
-            mSingleNotificationChannel = null;
+        } else  {
+            if (mNotificationChannels.size() == 1) {
+                mSingleNotificationChannel = mNotificationChannels.get(0);
+                isSingleDefaultChannel = mSingleNotificationChannel.getId()
+                        .equals(NotificationChannel.DEFAULT_CHANNEL_ID);
+            } else {
+                mSingleNotificationChannel = null;
+            }
         }
 
         String appName = mPkg;
@@ -248,6 +253,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         final TextView doneButton = (TextView) findViewById(R.id.done);
         doneButton.setText(R.string.notification_done);
         doneButton.setOnClickListener(onDoneClick);
+
+        // Optional settings link
+        updateAppSettingsLink();
     }
 
     private boolean hasImportanceChanged() {
@@ -276,7 +284,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private int getSelectedImportance() {
         if (!mChannelEnabledSwitch.isChecked()) {
-            return NotificationManager.IMPORTANCE_NONE;
+            return IMPORTANCE_NONE;
         } else {
             return mStartingUserImportance;
         }
@@ -286,7 +294,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         // Enabled Switch
         mChannelEnabledSwitch = (Switch) findViewById(R.id.channel_enabled_switch);
         mChannelEnabledSwitch.setChecked(
-                mStartingUserImportance != NotificationManager.IMPORTANCE_NONE);
+                mStartingUserImportance != IMPORTANCE_NONE);
         final boolean visible = !nonBlockable && mSingleNotificationChannel != null;
         mChannelEnabledSwitch.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
 
@@ -296,12 +304,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 mGutsContainer.resetFalsingCheck();
             }
             updateSecondaryText();
+            updateAppSettingsLink();
         });
     }
 
     private void updateSecondaryText() {
         final boolean disabled = mSingleNotificationChannel != null &&
-                getSelectedImportance() == NotificationManager.IMPORTANCE_NONE;
+                getSelectedImportance() == IMPORTANCE_NONE;
         if (disabled) {
             mChannelDisabledView.setVisibility(View.VISIBLE);
             mNumChannelsView.setVisibility(View.GONE);
@@ -309,6 +318,45 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             mChannelDisabledView.setVisibility(View.GONE);
             mNumChannelsView.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void updateAppSettingsLink() {
+        mSettingsLinkView = findViewById(R.id.app_settings);
+        Intent settingsIntent = getAppSettingsIntent(mPm, mPkg, mSingleNotificationChannel,
+                mSbn.getId(), mSbn.getTag());
+        if (settingsIntent != null && getSelectedImportance() != IMPORTANCE_NONE
+                && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
+            mSettingsLinkView.setVisibility(View.VISIBLE);
+            mSettingsLinkView.setText(mContext.getString(R.string.notification_app_settings,
+                    mSbn.getNotification().getSettingsText()));
+            mSettingsLinkView.setOnClickListener((View view) -> {
+                mAppSettingsClickListener.onClick(view, settingsIntent);
+            });
+        } else {
+            mSettingsLinkView.setVisibility(View.GONE);
+        }
+    }
+
+    private Intent getAppSettingsIntent(PackageManager pm, String packageName,
+            NotificationChannel channel, int id, String tag) {
+        Intent intent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES)
+                .setPackage(packageName);
+        final List<ResolveInfo> resolveInfos = pm.queryIntentActivities(
+                intent,
+                PackageManager.MATCH_DEFAULT_ONLY
+        );
+        if (resolveInfos == null || resolveInfos.size() == 0 || resolveInfos.get(0) == null) {
+            return null;
+        }
+        final ActivityInfo activityInfo = resolveInfos.get(0).activityInfo;
+        intent.setClassName(activityInfo.packageName, activityInfo.name);
+        if (channel != null) {
+            intent.putExtra(Notification.EXTRA_CHANNEL_ID, channel.getId());
+        }
+        intent.putExtra(Notification.EXTRA_NOTIFICATION_ID, id);
+        intent.putExtra(Notification.EXTRA_NOTIFICATION_TAG, tag);
+        return intent;
     }
 
     @Override
