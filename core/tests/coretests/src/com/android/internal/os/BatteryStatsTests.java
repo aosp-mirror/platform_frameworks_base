@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
         BatteryStatsDurationTimerTest.class,
         BatteryStatsSamplingTimerTest.class,
         BatteryStatsServTest.class,
+        BatteryStatsStopwatchTimerTest.class,
         BatteryStatsTimeBaseTest.class,
         BatteryStatsTimerTest.class,
         BatteryStatsUidTest.class,
