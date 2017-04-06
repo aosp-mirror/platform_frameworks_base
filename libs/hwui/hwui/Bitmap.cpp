@@ -228,7 +228,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
     bool hasLinearBlending = caches.extensions().hasLinearBlending();
     GLint format, type, internalFormat;
     uirenderer::Texture::colorTypeToGlFormatAndType(caches, skBitmap.colorType(),
-            needSRGB, &internalFormat, &format, &type);
+            needSRGB && hasLinearBlending, &internalFormat, &format, &type);
 
     PixelFormat pixelFormat = internalFormatToPixelFormat(internalFormat);
     sp<GraphicBuffer> buffer = new GraphicBuffer(info.width(), info.height(), pixelFormat,
