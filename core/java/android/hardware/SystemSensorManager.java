@@ -67,6 +67,9 @@ public class SystemSensorManager extends SensorManager {
     private static native int nativeConfigDirectChannel(
             long nativeInstance, int channelHandle, int sensorHandle, int rate);
 
+    private static native int nativeSetOperationParameter(
+            long nativeInstance, int type, float[] floatValues, int[] intValues);
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static boolean sNativeClassInited = false;
@@ -927,5 +930,10 @@ public class SystemSensorManager extends SensorManager {
         protected void removeSensorEvent(Sensor sensor) {
 
         }
+    }
+
+    protected boolean setOperationParameterImpl(SensorAdditionalInfo parameter) {
+        return nativeSetOperationParameter(
+                mNativeInstance, parameter.type, parameter.floatValues, parameter.intValues) == 0;
     }
 }
