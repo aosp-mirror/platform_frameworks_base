@@ -297,6 +297,9 @@ public final class FillResponse implements Parcelable {
          * android.os.CancellationSignal, FillCallback)} and {@link AutofillService#onSaveRequest(
          * android.app.assist.AssistStructure, Bundle, SaveCallback)}.
          *
+         * <p>If this method is called on multiple {@link FillResponse} objects for the same
+         * activity, just the latest bundle is passed back to the service.
+         *
          * @param extras The response extras.
          * @return This builder.
          */

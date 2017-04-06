@@ -133,12 +133,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Assist structure sent by the app; it will be updated (sanitized, change values for save)
      * before sent to {@link AutofillService}.
      */
-    @GuardedBy("mLock") AssistStructure mStructure;
+    @GuardedBy("mLock")
+    private AssistStructure mStructure;
 
     /**
      * Whether the client has an {@link android.view.autofill.AutofillManager.AutofillCallback}.
      */
     private boolean mHasCallback;
+
+    /**
+     * Extras sent by service on {@code onFillRequest()} calls; the first non-null extra is saved
+     * and used on subsequent {@code onFillRequest()} and {@code onSaveRequest()} calls.
+     */
+    @GuardedBy("mLock")
+    private Bundle mExtras;
 
     /**
      * Flags used to start the session.
@@ -353,6 +361,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHasCallback = hasIt;
     }
 
+    public void setStructureLocked(AssistStructure structure) {
+        mStructure = structure;
+    }
+
     /**
      * Shows the save UI, when session can be saved.
      *
@@ -475,9 +487,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.d(TAG, "callSaveLocked(): mViewStates=" + mViewStates);
         }
 
-        // TODO(b/33197203 , b/35707731): decide how to handle bundle in multiple partitions
-        final Bundle extras = mResponses != null ? mResponses.get(0).getExtras() : null;
-
         for (Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
             final AutofillValue value = entry.getValue().getCurrentValue();
             if (value == null) {
@@ -507,7 +516,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mStructure.dump();
         }
 
-        mRemoteFillService.onSaveRequest(mStructure, extras);
+        mRemoteFillService.onSaveRequest(mStructure, mExtras);
     }
 
     void updateLocked(AutofillId id, Rect virtualBounds, AutofillValue value, int flags) {
@@ -593,13 +602,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 new ViewState(this, id, value, this,ViewState.STATE_STARTED_PARTITION);
         mViewStates.put(id, newViewState);
 
-        /*
-         * TODO(b/33197203 , b/35707731): when start a new partition, it should
-         *
-         * - pass the first onFillRequest() bundle
-         * - optional: perhaps add a new flag onFilLRequest() to indicate it's a new partition?
-         */
-
         // Must update value of nodes so:
         // - proper node is focused
         // - autofillValue is sent back to service when it was previously autofilled
@@ -621,7 +623,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             overlay.focused = id.equals(viewState.id);
             node.setAutofillOverlay(overlay);
         }
-        mRemoteFillService.onFillRequest(mStructure, null, 0);
+        mRemoteFillService.onFillRequest(mStructure, mExtras, 0);
 
         return newViewState;
     }
@@ -671,6 +673,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mResponses = new ArrayList<>(4);
         }
         mResponses.add(response);
+        if (response != null) {
+            mExtras = response.getExtras();
+        }
 
         setViewStatesLocked(response, ViewState.STATE_FILLABLE);
 
@@ -812,6 +817,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         pw.print(prefix); pw.print("mHasCallback: "); pw.println(mHasCallback);
+        pw.print(prefix); pw.print("mExtras: "); pw.println(Helper.bundleToString(mExtras));
         mRemoteFillService.dump(prefix, pw);
     }
 
