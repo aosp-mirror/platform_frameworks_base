@@ -27,7 +27,7 @@ public class WifiTrackerFactory {
 
     private static WifiTracker sTestingWifiTracker;
 
-    @Keep
+    @Keep // Keep proguard from stripping this method since it is only used in tests
     public static void setTestingWifiTracker(WifiTracker tracker) {
         sTestingWifiTracker = tracker;
     }
