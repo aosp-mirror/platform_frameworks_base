@@ -129,6 +129,23 @@ public final class TvContract {
     public static final String ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT =
             "android.media.tv.action.PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT";
 
+    /**
+     * Broadcast Action: sent to the target TV input after it is first installed to notify the input
+     * to initialize its channels and programs to the system content provider.
+     *
+     * <p>Note that this intent is sent only on devices with
+     * {@link android.content.pm.PackageManager#FEATURE_LEANBACK} enabled. Besides that, in order
+     * to receive this intent, the target TV input must:
+     * <ul>
+     *     <li>Declare a broadcast receiver for this intent in its
+     *         <code>AndroidManifest.xml</code>.</li>
+     *     <li>Declare appropriate permissions to write channel and program data in its
+     *         <code>AndroidManifest.xml</code>.</li>
+     * </ul>
+     */
+    public static final String ACTION_INITIALIZE_PROGRAMS =
+            "android.media.tv.action.INITIALIZE_PROGRAMS";
+
     /** The key for a bundle parameter containing a channel ID as a long integer */
     public static final String EXTRA_CHANNEL_ID = "android.media.tv.extra.CHANNEL_ID";
 
