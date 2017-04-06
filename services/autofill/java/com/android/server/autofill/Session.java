@@ -311,12 +311,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void requestShowFillUi(AutofillId id, int width, int height,
             IAutofillWindowPresenter presenter) {
-        try {
-            final ViewState currentView = mViewStates.get(mCurrentViewId);
-            mClient.requestShowFillUi(mWindowToken, id, width, height,
-                    currentView.getVirtualBounds(), presenter);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error requesting to show fill UI", e);
+        synchronized (mLock) {
+            if (id.equals(mCurrentViewId)) {
+                try {
+                    final ViewState view = mViewStates.get(id);
+                    mClient.requestShowFillUi(mWindowToken, id, width, height,
+                            view.getVirtualBounds(),
+                            presenter);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error requesting to show fill UI", e);
+                }
+            } else {
+                if (DEBUG) {
+                    Slog.d(TAG, "Do not show full UI on " + id + " as it is not the current view ("
+                            + mCurrentViewId + ") anymore");
+                }
+            }
         }
     }
 
