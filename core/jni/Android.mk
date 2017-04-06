@@ -208,6 +208,7 @@ LOCAL_C_INCLUDES += \
     $(TOP)/system/core/include \
     $(TOP)/system/core/libappfuse/include \
     $(TOP)/system/media/camera/include \
+    $(TOP)/system/media/private/camera/include \
     $(TOP)/system/netd/include \
     external/giflib \
     external/pdfium/public \
