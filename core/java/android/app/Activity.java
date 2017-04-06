@@ -4177,25 +4177,14 @@ public class Activity extends ContextThemeWrapper
                 mTaskDescription.setPrimaryColor(colorPrimary);
             }
         }
-
-        int colorBackground = a.getColor(
-                com.android.internal.R.styleable.ActivityTaskDescription_colorBackground, 0);
-        if (colorBackground != 0 && Color.alpha(colorBackground) == 0xFF) {
-            mTaskDescription.setBackgroundColor(colorBackground);
+        // For dev-preview only.
+        if (mTaskDescription.getBackgroundColor() == 0) {
+            int colorBackground = a.getColor(
+                    com.android.internal.R.styleable.ActivityTaskDescription_colorBackground, 0);
+            if (colorBackground != 0 && Color.alpha(colorBackground) == 0xFF) {
+                mTaskDescription.setBackgroundColor(colorBackground);
+            }
         }
-
-        final int statusBarColor = a.getColor(
-                com.android.internal.R.styleable.ActivityTaskDescription_statusBarColor, 0);
-        if (statusBarColor != 0) {
-            mTaskDescription.setStatusBarColor(statusBarColor);
-        }
-
-        final int navigationBarColor = a.getColor(
-                com.android.internal.R.styleable.ActivityTaskDescription_navigationBarColor, 0);
-        if (navigationBarColor != 0) {
-            mTaskDescription.setNavigationBarColor(navigationBarColor);
-        }
-
         a.recycle();
         setTaskDescription(mTaskDescription);
     }
