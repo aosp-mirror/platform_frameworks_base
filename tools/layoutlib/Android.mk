@@ -36,20 +36,18 @@ built_core_classes := $(call java-lib-files,core-libart)
 
 built_ext_dep := $(call java-lib-deps,ext)
 built_ext_classes := $(call java-lib-files,ext)
-built_ext_data := $(call intermediates-dir-for, \
-			JAVA_LIBRARIES,ext,,COMMON)/javalib.jar
+
 built_icudata_dep := $(call java-lib-deps,icu4j-icudata-host-jarjar,HOST)
 built_icutzdata_dep := $(call java-lib-deps,icu4j-icutzdata-host-jarjar,HOST)
 
-built_layoutlib_create_jar := $(call intermediates-dir-for, \
-			JAVA_LIBRARIES,layoutlib_create,HOST)/javalib.jar
+built_layoutlib_create_jar := $(call java-lib-files,layoutlib_create,HOST)
 
 # This is mostly a copy of config/host_java_library.mk
 LOCAL_MODULE := temp_layoutlib
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_MODULE_SUFFIX := $(COMMON_JAVA_PACKAGE_SUFFIX)
 LOCAL_IS_HOST_MODULE := true
-LOCAL_BUILT_MODULE_STEM := javalib.jar
+LOCAL_BUILT_MODULE_STEM := classes.jar
 
 #######################################
 include $(BUILD_SYSTEM)/base_rules.mk
@@ -59,7 +57,6 @@ $(LOCAL_BUILT_MODULE): $(built_oj_dep) \
                        $(built_core_dep) \
                        $(built_framework_dep) \
                        $(built_ext_dep) \
-                       $(built_ext_data) \
 		       $(built_icudata_dep) \
 		       $(built_icutzdata_dep) \
                        $(built_layoutlib_create_jar)
