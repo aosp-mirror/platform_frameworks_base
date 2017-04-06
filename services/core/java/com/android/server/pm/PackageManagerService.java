@@ -849,8 +849,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Component used to show resolver settings for Instant Apps */
     final ComponentName mInstantAppResolverSettingsComponent;
 
-    /** Component used to install ephemeral applications */
-    ComponentName mInstantAppInstallerComponent;
+    /** Activity used to install instant applications */
     ActivityInfo mInstantAppInstallerActivity;
     final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
@@ -2829,7 +2828,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mInstantAppResolverConnection = null;
                 mInstantAppResolverSettingsComponent = null;
             }
-            updateInstantAppInstallerLocked();
+            updateInstantAppInstallerLocked(null);
 
             // Read and update the usage of dex files.
             // Do this at the end of PM init so that all the packages have their
@@ -2869,22 +2868,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void updateInstantAppInstallerLocked() {
-        final ComponentName oldInstantAppInstallerComponent = mInstantAppInstallerComponent;
-        final ActivityInfo newInstantAppInstaller = getInstantAppInstallerLPr();
-        ComponentName newInstantAppInstallerComponent = newInstantAppInstaller == null
-                ? null : newInstantAppInstaller.getComponentName();
-
-        if (newInstantAppInstallerComponent != null
-                && !newInstantAppInstallerComponent.equals(oldInstantAppInstallerComponent)) {
-            if (DEBUG_EPHEMERAL) {
-                Slog.d(TAG, "Set ephemeral installer: " + newInstantAppInstallerComponent);
-            }
-            setUpInstantAppInstallerActivityLP(newInstantAppInstaller);
-        } else if (DEBUG_EPHEMERAL && newInstantAppInstallerComponent == null) {
-            Slog.d(TAG, "Unset ephemeral installer; none available");
+    private void updateInstantAppInstallerLocked(String modifiedPackage) {
+        // we're only interested in updating the installer appliction when 1) it's not
+        // already set or 2) the modified package is the installer
+        if (mInstantAppInstallerActivity != null
+                && !mInstantAppInstallerActivity.getComponentName().getPackageName()
+                        .equals(modifiedPackage)) {
+            return;
         }
-        mInstantAppInstallerComponent = newInstantAppInstallerComponent;
+        setUpInstantAppInstallerActivityLP(getInstantAppInstallerLPr());
     }
 
     private static File preparePackageParserCache(boolean isUpgrade) {
@@ -5737,7 +5729,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (mInstantAppResolverConnection == null) {
             return false;
         }
-        if (mInstantAppInstallerComponent == null) {
+        if (mInstantAppInstallerActivity == null) {
             return false;
         }
         if (intent.getComponent() != null) {
@@ -17092,7 +17084,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                 updateSequenceNumberLP(pkgName, res.newUsers);
-                updateInstantAppInstallerLocked();
+                updateInstantAppInstallerLocked(pkgName);
             }
         }
     }
@@ -17668,7 +17660,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mInstantAppRegistry.onPackageUninstalledLPw(pkg, info.removedUsers);
                     }
                     updateSequenceNumberLP(packageName, info.removedUsers);
-                    updateInstantAppInstallerLocked();
+                    updateInstantAppInstallerLocked(packageName);
                 }
             }
         }
@@ -20031,7 +20023,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             updateSequenceNumberLP(packageName, new int[] { userId });
             final long callingId = Binder.clearCallingIdentity();
             try {
-                updateInstantAppInstallerLocked();
+                updateInstantAppInstallerLocked(packageName);
             } finally {
                 Binder.restoreCallingIdentity(callingId);
             }
@@ -23226,7 +23218,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public boolean isInstantAppInstallerComponent(ComponentName component) {
             synchronized (mPackages) {
-                return component != null && component.equals(mInstantAppInstallerComponent);
+                return mInstantAppInstallerActivity != null
+                        && mInstantAppInstallerActivity.getComponentName().equals(component);
             }
         }
 
