@@ -779,13 +779,17 @@ public final class MediaDrm {
      * response is for an offline key request, a keySetId is returned that can be
      * used to later restore the keys to a new session with the method
      * {@link #restoreKeys}.
-     * When the response is for a streaming or release request, null is returned.
+     * When the response is for a streaming or release request, an empty byte array
+     * is returned.
      *
      * @param scope may be a sessionId or keySetId depending on the type of the
      * response.  Scope should be set to the sessionId when the response is for either
      * streaming or offline key requests.  Scope should be set to the keySetId when
      * the response is for a release request.
      * @param response the byte array response from the server
+     * @return If the response is for an offline request, the keySetId for the offline
+     * keys will be returned. If the response is for a streaming or release request
+     * an empty byte array will be returned.
      *
      * @throws NotProvisionedException if the response indicates that
      * reprovisioning is required
