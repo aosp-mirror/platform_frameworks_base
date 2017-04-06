@@ -17,6 +17,7 @@
 package android.os;
 
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import java.util.function.Consumer;
 
@@ -49,16 +50,19 @@ import java.util.function.Consumer;
  * implements the {@link #onCallbackDied} method.
  */
 public class RemoteCallbackList<E extends IInterface> {
+    private static final String TAG = "RemoteCallbackList";
+
     /*package*/ ArrayMap<IBinder, Callback> mCallbacks
             = new ArrayMap<IBinder, Callback>();
     private Object[] mActiveBroadcast;
     private int mBroadcastCount = -1;
     private boolean mKilled = false;
+    private StringBuilder mRecentCallers;
 
     private final class Callback implements IBinder.DeathRecipient {
         final E mCallback;
         final Object mCookie;
-        
+
         Callback(E callback, Object cookie) {
             mCallback = callback;
             mCookie = cookie;
@@ -111,6 +115,8 @@ public class RemoteCallbackList<E extends IInterface> {
             if (mKilled) {
                 return false;
             }
+            // Flag unusual case that could be caused by a leak. b/36778087
+            logExcessiveCallbacks();
             IBinder binder = callback.asBinder();
             try {
                 Callback cb = new Callback(callback, cookie);
@@ -390,6 +396,27 @@ public class RemoteCallbackList<E extends IInterface> {
                 return null;
             }
             return mCallbacks.valueAt(index).mCookie;
+        }
+    }
+
+    private void logExcessiveCallbacks() {
+        final long size = mCallbacks.size();
+        final long TOO_MANY = 3000;
+        final long MAX_CHARS = 1000;
+        if (size >= TOO_MANY) {
+            if (size == TOO_MANY && mRecentCallers == null) {
+                mRecentCallers = new StringBuilder();
+            }
+            if (mRecentCallers != null && mRecentCallers.length() < MAX_CHARS) {
+                mRecentCallers.append(Debug.getCallers(5));
+                mRecentCallers.append('\n');
+                if (mRecentCallers.length() >= MAX_CHARS) {
+                    Slog.wtf(TAG, "More than "
+                            + TOO_MANY + " remote callbacks registered. Recent callers:\n"
+                            + mRecentCallers.toString());
+                    mRecentCallers = null;
+                }
+            }
         }
     }
 }
