@@ -21,6 +21,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.InstantAppResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -28,9 +29,12 @@ import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.os.SomeArgs;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,6 +43,9 @@ import java.util.List;
  */
 @SystemApi
 public abstract class InstantAppResolverService extends Service {
+    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
+    private static final String TAG = "PackageManager";
+
     /** @hide */
     public static final String EXTRA_RESOLVE_INFO = "android.app.extra.RESOLVE_INFO";
     /** @hide */
@@ -132,11 +139,19 @@ public abstract class InstantAppResolverService extends Service {
     @Deprecated
     void _onGetInstantAppResolveInfo(int[] digestPrefix, String token,
             InstantAppResolutionCallback callback) {
+        if (DEBUG_EPHEMERAL) {
+            Slog.d(TAG, "Instant resolver; getInstantAppResolveInfo;"
+                    + " prefix: " + Arrays.toString(digestPrefix));
+        }
         onGetInstantAppResolveInfo(digestPrefix, token, callback);
     }
     @Deprecated
     void _onGetInstantAppIntentFilter(int digestPrefix[], String token, String hostName,
             InstantAppResolutionCallback callback) {
+        if (DEBUG_EPHEMERAL) {
+            Slog.d(TAG, "Instant resolver; getInstantAppIntentFilter;"
+                    + " prefix: " + Arrays.toString(digestPrefix));
+        }
         onGetInstantAppIntentFilter(digestPrefix, token, callback);
     }
 
