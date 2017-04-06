@@ -7431,6 +7431,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             structure.setChildCount(1);
             ViewStructure root = structure.newChild(0);
+            if (forAutofill) {
+                setAutofillId(root);
+            }
             populateVirtualStructure(root, provider, info, forAutofill);
             info.recycle();
         }
