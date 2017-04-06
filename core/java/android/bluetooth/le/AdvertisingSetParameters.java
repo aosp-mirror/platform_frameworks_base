@@ -241,8 +241,8 @@ public final class AdvertisingSetParameters implements Parcelable {
      */
     public static final class Builder {
 
-        private boolean connectable = true;
-        private boolean scannable = true;
+        private boolean connectable = false;
+        private boolean scannable = false;
         private boolean isLegacy = false;
         private boolean isAnonymous = false;
         private boolean includeTxPower = false;
@@ -254,10 +254,10 @@ public final class AdvertisingSetParameters implements Parcelable {
         /**
          * Set whether the advertisement type should be connectable or
          * non-connectable.
-         * Legacy advertisements must be both connectable and scannable. Nonlegacy
+         * Legacy advertisements can be both connectable and scannable. Non-legacy
          * advertisements can be only scannable or only connectable.
          * @param connectable Controls whether the advertisment type will be
-         * connectable (true) or nonconnectable (false).
+         * connectable (true) or non-connectable (false).
          */
         public Builder setConnectable(boolean connectable) {
             this.connectable = connectable;
@@ -266,10 +266,10 @@ public final class AdvertisingSetParameters implements Parcelable {
 
         /**
          * Set whether the advertisement type should be scannable.
-         * Legacy advertisements must be both connectable and scannable. Nonlegacy
+         * Legacy advertisements can be both connectable and scannable. Non-legacy
          * advertisements can be only scannable or only connectable.
          * @param scannable Controls whether the advertisment type will be
-         * scannable (true) or nonscannable (false).
+         * scannable (true) or non-scannable (false).
          */
         public Builder setScannable(boolean scannable) {
             this.scannable = scannable;
