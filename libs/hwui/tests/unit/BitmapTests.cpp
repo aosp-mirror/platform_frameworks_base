@@ -29,16 +29,15 @@ using namespace android::uirenderer;
 
 TEST(Bitmap, colorTableRefCounting) {
     const SkPMColor c[] = { SkPackARGB32(0x80, 0x80, 0, 0) };
-    SkColorTable* ctable = new SkColorTable(c, SK_ARRAY_COUNT(c));
+    sk_sp<SkColorTable> ctable = SkColorTable::Make(c, SK_ARRAY_COUNT(c));
 
     SkBitmap* bm = new SkBitmap();
     bm->allocPixels(SkImageInfo::Make(1, 1, kIndex_8_SkColorType, kPremul_SkAlphaType),
-            nullptr, ctable);
-    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(bm, ctable);
+            ctable);
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(bm, ctable.get());
     EXPECT_FALSE(ctable->unique());
     delete bm;
     bitmap.reset();
     EXPECT_TRUE(ctable->unique());
-    ctable->unref();
 }
 
