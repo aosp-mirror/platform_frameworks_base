@@ -34,7 +34,9 @@ public class PluginDependencyProvider extends DependencyProvider {
     }
 
     public <T> void allowPluginDependency(Class<T> cls, T obj) {
-        mDependencies.put(cls, obj);
+        synchronized (mDependencies) {
+            mDependencies.put(cls, obj);
+        }
     }
 
     @Override
@@ -42,9 +44,11 @@ public class PluginDependencyProvider extends DependencyProvider {
         if (!mManager.dependsOn(p, cls)) {
             throw new IllegalArgumentException(p.getClass() + " does not depend on " + cls);
         }
-        if (!mDependencies.containsKey(cls)) {
-            throw new IllegalArgumentException("Unknown dependency " + cls);
+        synchronized (mDependencies) {
+            if (!mDependencies.containsKey(cls)) {
+                throw new IllegalArgumentException("Unknown dependency " + cls);
+            }
+            return (T) mDependencies.get(cls);
         }
-        return (T) mDependencies.get(cls);
     }
 }
