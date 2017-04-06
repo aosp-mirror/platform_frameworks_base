@@ -33,6 +33,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.util.DumpUtils;
@@ -65,6 +66,18 @@ public class Trampoline extends IBackupManager.Stub {
         mGlobalDisable = SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
     }
 
+    private BackupManagerServiceInterface createService() {
+        boolean refactoredServiceEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+            Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 1) == 0;
+        if (refactoredServiceEnabled) {
+            Slog.i(TAG, "Instantiating RefactoredBackupManagerService");
+            return new RefactoredBackupManagerService(mContext, this);
+        }
+
+        Slog.i(TAG, "Instantiating BackupManagerService");
+        return new BackupManagerService(mContext, this);
+    }
+
     // internal control API
     public void initialize(final int whichUser) {
         // Note that only the owner user is currently involved in backup/restore
@@ -78,7 +91,7 @@ public class Trampoline extends IBackupManager.Stub {
 
             synchronized (this) {
                 if (!mSuppressFile.exists()) {
-                    mService = new BackupManagerService(mContext, this);
+                    mService = createService();
                 } else {
                     Slog.i(TAG, "Backup inactive in user " + whichUser);
                 }
@@ -105,7 +118,7 @@ public class Trampoline extends IBackupManager.Stub {
                     Slog.i(TAG, "Making backup "
                             + (makeActive ? "" : "in") + "active in user " + userHandle);
                     if (makeActive) {
-                        mService = new BackupManagerService(mContext, this);
+                        mService = createService();
                         mSuppressFile.delete();
                     } else {
                         mService = null;
