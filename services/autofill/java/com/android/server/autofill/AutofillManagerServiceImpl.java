@@ -194,13 +194,17 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    private String getComponentNameFromSettings() {
+        return Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, mUserId);
+    }
+
     void updateLocked(boolean disabled) {
         final boolean wasEnabled = isEnabled();
         mDisabled = disabled;
         ComponentName serviceComponent = null;
         ServiceInfo serviceInfo = null;
-        final String componentName = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, mUserId);
+        final String componentName = getComponentNameFromSettings();
         if (!TextUtils.isEmpty(componentName)) {
             try {
                 serviceComponent = ComponentName.unflattenFromString(componentName);
@@ -413,8 +417,7 @@ final class AutofillManagerServiceImpl {
     void disableSelf() {
         final long identity = Binder.clearCallingIdentity();
         try {
-            final String autoFillService = Settings.Secure.getStringForUser(
-                    mContext.getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, mUserId);
+            final String autoFillService = getComponentNameFromSettings();
             if (mInfo.getServiceInfo().getComponentName().equals(
                     ComponentName.unflattenFromString(autoFillService))) {
                 Settings.Secure.putStringForUser(mContext.getContentResolver(),
@@ -432,12 +435,14 @@ final class AutofillManagerServiceImpl {
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
 
-        pw.print(prefix); pw.print("User :"); pw.println(mUserId);
-        pw.print(prefix); pw.print("Component:"); pw.println(mInfo != null
+        pw.print(prefix); pw.print("User: "); pw.println(mUserId);
+        pw.print(prefix); pw.print("Component: "); pw.println(mInfo != null
                 ? mInfo.getServiceInfo().getComponentName() : null);
+        pw.print(prefix); pw.print("Component from settings: ");
+            pw.println(getComponentNameFromSettings());
         pw.print(prefix); pw.print("Default component: ");
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
-        pw.print(prefix); pw.print("Disabled:"); pw.println(mDisabled);
+        pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
 
         if (VERBOSE && mInfo != null) {
             // ServiceInfo dump is too noisy and redundant (it can be obtained through other dumps)
