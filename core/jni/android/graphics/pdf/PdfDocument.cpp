@@ -21,6 +21,7 @@
 
 #include "CreateJavaOutputStreamAdaptor.h"
 
+#include "SkColorSpaceXformCanvas.h"
 #include "SkDocument.h"
 #include "SkPicture.h"
 #include "SkPictureRecorder.h"
@@ -94,8 +95,10 @@ public:
 
             SkCanvas* canvas = document->beginPage(page->mWidth, page->mHeight,
                     &(page->mContentRect));
+            std::unique_ptr<SkCanvas> toSRGBCanvas =
+                    SkCreateColorSpaceXformCanvas(canvas, SkColorSpace::MakeSRGB());
 
-            canvas->drawPicture(page->mPicture);
+            toSRGBCanvas->drawPicture(page->mPicture);
 
             document->endPage();
         }
@@ -128,7 +131,7 @@ static jlong nativeStartPage(JNIEnv* env, jobject thiz, jlong documentPtr,
     PdfDocument* document = reinterpret_cast<PdfDocument*>(documentPtr);
     SkCanvas* canvas = document->startPage(pageWidth, pageHeight,
             contentLeft, contentTop, contentRight, contentBottom);
-    return reinterpret_cast<jlong>(Canvas::create_canvas(canvas));
+    return reinterpret_cast<jlong>(Canvas::create_canvas(canvas, Canvas::XformToSRGB::kDefer));
 }
 
 static void nativeFinishPage(JNIEnv* env, jobject thiz, jlong documentPtr) {

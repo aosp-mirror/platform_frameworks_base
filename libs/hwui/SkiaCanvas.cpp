@@ -23,6 +23,7 @@
 #include "hwui/MinikinUtils.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 
+#include <SkColorSpaceXformCanvas.h>
 #include <SkDrawable.h>
 #include <SkDeque.h>
 #include <SkDrawFilter.h>
@@ -44,18 +45,22 @@ Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
     return new SkiaCanvas(bitmap);
 }
 
-Canvas* Canvas::create_canvas(SkCanvas* skiaCanvas) {
-    return new SkiaCanvas(skiaCanvas);
+Canvas* Canvas::create_canvas(SkCanvas* skiaCanvas, XformToSRGB xformToSRGB) {
+    return new SkiaCanvas(skiaCanvas, xformToSRGB);
 }
 
 SkiaCanvas::SkiaCanvas() {}
 
-SkiaCanvas::SkiaCanvas(SkCanvas* canvas)
-    : mCanvas(canvas) {}
+SkiaCanvas::SkiaCanvas(SkCanvas* canvas, XformToSRGB xformToSRGB)
+    : mCanvas(canvas)
+{
+    LOG_ALWAYS_FATAL_IF(XformToSRGB::kImmediate == xformToSRGB);
+}
 
 SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
     mCanvasOwned = std::unique_ptr<SkCanvas>(new SkCanvas(bitmap));
-    mCanvas = mCanvasOwned.get();
+    mCanvasWrapper = SkCreateColorSpaceXformCanvas(mCanvasOwned.get(), SkColorSpace::MakeSRGB());
+    mCanvas = mCanvasWrapper.get();
 }
 
 SkiaCanvas::~SkiaCanvas() {}
@@ -92,19 +97,22 @@ private:
 };
 
 void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
-    SkCanvas* newCanvas = new SkCanvas(bitmap);
+    std::unique_ptr<SkCanvas> newCanvas = std::unique_ptr<SkCanvas>(new SkCanvas(bitmap));
+    std::unique_ptr<SkCanvas> newCanvasWrapper =
+            SkCreateColorSpaceXformCanvas(newCanvas.get(), SkColorSpace::MakeSRGB());
 
     if (!bitmap.isNull()) {
         // Copy the canvas matrix & clip state.
-        newCanvas->setMatrix(mCanvas->getTotalMatrix());
+        newCanvasWrapper->setMatrix(mCanvas->getTotalMatrix());
 
-        ClipCopier copier(newCanvas);
+        ClipCopier copier(newCanvasWrapper.get());
         mCanvas->replayClips(&copier);
     }
 
     // deletes the previously owned canvas (if any)
-    mCanvasOwned = std::unique_ptr<SkCanvas>(newCanvas);
-    mCanvas = newCanvas;
+    mCanvasOwned = std::move(newCanvas);
+    mCanvasWrapper = std::move(newCanvasWrapper);
+    mCanvas = mCanvasWrapper.get();
 
     // clean up the old save stack
     mSaveStack.reset(nullptr);
