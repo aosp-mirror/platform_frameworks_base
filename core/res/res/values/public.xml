@@ -2825,6 +2825,10 @@
         <public name="autofill" />
     </public-group>
 
+    <public-group type="drawable" first-id="0x010800b4">
+        <public name="autofilled_highlight" />
+    </public-group>
+
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
