@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager;
 import android.app.IUserSwitchObserver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -49,16 +50,20 @@ import java.util.Set;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.am.ActivityManagerService.CONTINUE_USER_SWITCH_MSG;
+import static com.android.server.am.ActivityManagerService.REPORT_LOCKED_BOOT_COMPLETE_MSG;
 import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_COMPLETE_MSG;
 import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
 import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -71,9 +76,29 @@ public class UserControllerTest extends AndroidTestCase {
     private UserController mUserController;
     private TestInjector mInjector;
 
+    private static final List<String> START_FOREGROUND_USER_ACTIONS =
+            Arrays.asList(
+                    Intent.ACTION_USER_STARTED,
+                    Intent.ACTION_USER_SWITCHED,
+                    Intent.ACTION_USER_STARTING);
+
+    private static final List<String> START_BACKGROUND_USER_ACTIONS =
+            Arrays.asList(
+                    Intent.ACTION_USER_STARTED,
+                    Intent.ACTION_LOCKED_BOOT_COMPLETED,
+                    Intent.ACTION_USER_STARTING);
+
+    private static final Set<Integer> START_FOREGROUND_USER_MESSAGE_CODES =
+            new HashSet<>(Arrays.asList(REPORT_USER_SWITCH_MSG, USER_SWITCH_TIMEOUT_MSG,
+                    SYSTEM_USER_START_MSG, SYSTEM_USER_CURRENT_MSG));
+
+    private static final Set<Integer> START_BACKGROUND_USER_MESSAGE_CODES =
+            new HashSet<>(Arrays.asList(SYSTEM_USER_START_MSG, REPORT_LOCKED_BOOT_COMPLETE_MSG));
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        System.setProperty("dexmaker.share_classloader", "true");
         mInjector = new TestInjector(getContext());
         mUserController = new UserController(mInjector);
         setUpUser(TEST_USER_ID, 0);
@@ -83,39 +108,62 @@ public class UserControllerTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         mInjector.handlerThread.quit();
-
     }
 
     @SmallTest
-    public void testStartUser() throws RemoteException {
-        mUserController.startUser(TEST_USER_ID, true);
+    public void testStartUser_foreground() throws RemoteException {
+        mUserController.startUser(TEST_USER_ID, true /* foreground */);
         Mockito.verify(mInjector.getWindowManager()).startFreezingScreen(anyInt(), anyInt());
         Mockito.verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         Mockito.verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         Mockito.verify(mInjector.getWindowManager()).setSwitchingUser(true);
-        startUserAssertions();
+        Mockito.verify(mInjector.getActivityStackSupervisor()).setLockTaskModeLocked(
+                nullable(TaskRecord.class),
+                eq(ActivityManager.LOCK_TASK_MODE_NONE),
+                anyString(),
+                anyBoolean());
+        startForegroundUserAssertions();
+    }
+
+    @SmallTest
+    public void testStartUser_background() throws RemoteException {
+        mUserController.startUser(TEST_USER_ID, false /* foreground */);
+        Mockito.verify(
+                mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        Mockito.verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
+        Mockito.verify(mInjector.getActivityStackSupervisor(), never()).setLockTaskModeLocked(
+                nullable(TaskRecord.class),
+                eq(ActivityManager.LOCK_TASK_MODE_NONE),
+                anyString(),
+                anyBoolean());
+        startBackgroundUserAssertions();
     }
 
     @SmallTest
     public void testStartUserUIDisabled() throws RemoteException {
         mUserController.mUserSwitchUiEnabled = false;
-        mUserController.startUser(TEST_USER_ID, true);
+        mUserController.startUser(TEST_USER_ID, true /* foreground */);
         Mockito.verify(mInjector.getWindowManager(), never())
                 .startFreezingScreen(anyInt(), anyInt());
         Mockito.verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         Mockito.verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
-        startUserAssertions();
+        startForegroundUserAssertions();
     }
 
-    private void startUserAssertions() throws RemoteException {
-        List<String> expectedActions = Arrays.asList(Intent.ACTION_USER_STARTED,
-                Intent.ACTION_USER_SWITCHED, Intent.ACTION_USER_STARTING);
+    private void startUserAssertions(
+            List<String> expectedActions, Set<Integer> expectedMessageCodes)
+            throws RemoteException {
         assertEquals(expectedActions, getActions(mInjector.sentIntents));
-        Set<Integer> expectedCodes = new HashSet<>(
-                Arrays.asList(REPORT_USER_SWITCH_MSG, USER_SWITCH_TIMEOUT_MSG,
-                        SYSTEM_USER_START_MSG, SYSTEM_USER_CURRENT_MSG));
         Set<Integer> actualCodes = mInjector.handler.getMessageCodes();
-        assertEquals("Unexpected message sent", expectedCodes, actualCodes);
+        assertEquals("Unexpected message sent", expectedMessageCodes, actualCodes);
+    }
+
+    private void startBackgroundUserAssertions() throws RemoteException {
+        startUserAssertions(START_BACKGROUND_USER_ACTIONS, START_BACKGROUND_USER_MESSAGE_CODES);
+    }
+
+    private void startForegroundUserAssertions() throws RemoteException {
+        startUserAssertions(START_FOREGROUND_USER_ACTIONS, START_FOREGROUND_USER_MESSAGE_CODES);
         Message reportMsg = mInjector.handler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -275,6 +323,7 @@ public class UserControllerTest extends AndroidTestCase {
         UserManagerService userManagerMock;
         UserManagerInternal userManagerInternalMock;
         WindowManagerService windowManagerMock;
+        ActivityStackSupervisor activityStackSupervisor;
         private Context mCtx;
         List<Intent> sentIntents = new ArrayList<>();
 
@@ -287,6 +336,7 @@ public class UserControllerTest extends AndroidTestCase {
             userManagerMock = mock(UserManagerService.class);
             userManagerInternalMock = mock(UserManagerInternal.class);
             windowManagerMock = mock(WindowManagerService.class);
+            activityStackSupervisor = mock(ActivityStackSupervisor.class);
         }
 
         @Override
@@ -321,12 +371,6 @@ public class UserControllerTest extends AndroidTestCase {
         }
 
         @Override
-        void stackSupervisorSetLockTaskModeLocked(TaskRecord task, int lockTaskModeState,
-                String reason, boolean andResume) {
-            Log.i(TAG, "stackSupervisorSetLockTaskModeLocked");
-        }
-
-        @Override
         WindowManagerService getWindowManager() {
             return windowManagerMock;
         }
@@ -347,16 +391,15 @@ public class UserControllerTest extends AndroidTestCase {
         }
 
         @Override
-        boolean stackSupervisorSwitchUserLocked(int userId, UserState uss) {
-            Log.i(TAG, "stackSupervisorSwitchUserLocked " + userId);
-            return true;
-        }
-
-        @Override
         void startHomeActivityLocked(int userId, String reason) {
             Log.i(TAG, "startHomeActivityLocked " + userId);
         }
-   }
+
+        @Override
+        ActivityStackSupervisor getActivityStackSupervisor() {
+            return activityStackSupervisor;
+        }
+    }
 
     private static class TestHandler extends Handler {
         private final List<Message> mMessages = new ArrayList<>();
