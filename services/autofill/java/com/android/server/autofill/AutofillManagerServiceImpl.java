@@ -148,7 +148,7 @@ final class AutofillManagerServiceImpl {
                 // TODO(b/33197203): since service is fetching the data (to use for save later),
                 // we should optimize what's sent (for example, remove layout containers,
                 // color / font info, etc...)
-                session.mStructure = structure;
+                session.setStructureLocked(structure);
             }
 
 
