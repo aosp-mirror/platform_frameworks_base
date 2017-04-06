@@ -2750,7 +2750,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                    1              PFLAG3_SCROLL_INDICATOR_END
      *                   1               PFLAG3_ASSIST_BLOCKED
      *                  1                PFLAG3_CLUSTER
-     *                 x                 * NO LONGER NEEDED, SHOULD BE REUSED *
+     *                 1                 PFLAG3_IS_AUTOFILLED
      *                1                  PFLAG3_FINGER_DOWN
      *               1                   PFLAG3_FOCUSED_BY_DEFAULT
      *             11                    PFLAG3_AUTO_FILL_MODE_MASK
@@ -2959,6 +2959,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setKeyboardNavigationCluster(boolean)
      */
     private static final int PFLAG3_CLUSTER = 0x8000;
+
+    /**
+     * Flag indicating that the view is autofilled
+     *
+     * @see #isAutofilled()
+     * @see #setAutofilled(boolean)
+     */
+    private static final int PFLAG3_IS_AUTOFILLED = 0x10000;
 
     /**
      * Indicates that the user is currently touching the screen.
@@ -7440,16 +7448,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <ol>
      * <li>Calling the proper getter method on {@link AutofillValue} to fetch the actual value.
      * <li>Passing the actual value to the equivalent setter in the view.
-     * <ol>
+     * </ol>
      *
      * <p>For example, a text-field view would call:
-     *
      * <pre class="prettyprint">
      * CharSequence text = value.getTextValue();
      * if (text != null) {
      *     setText(text);
      * }
      * </pre>
+     *
+     * <p>If the value is updated asyncronously the next call to
+     * {@link AutofillManager#notifyValueChanged(View)} must happen <u>after</u> the value was
+     * changed to the autofilled value. If not, the view will not be considered autofilled.
      *
      * @param value value to be autofilled.
      */
@@ -7461,6 +7472,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p>See {@link #autofill(AutofillValue)} and
      * {@link #onProvideAutofillVirtualStructure(ViewStructure, int)} for more info.
+     * <p>To indicate that a virtual view was autofilled
+     * <code>@android:drawable/autofilled_highlight</code> should be drawn over it until the data
+     * changes.
      *
      * @param values map of values to be autofilled, keyed by virtual child id.
      */
@@ -7488,6 +7502,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty()
     @Nullable public String[] getAutofillHints() {
         return mAutofillHints;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isAutofilled() {
+        return (mPrivateFlags3 & PFLAG3_IS_AUTOFILLED) != 0;
     }
 
     /**
@@ -9127,6 +9148,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAutofillHints = null;
         } else {
             mAutofillHints = autofillHints;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setAutofilled(boolean isAutofilled) {
+        boolean wasChanged = isAutofilled != isAutofilled();
+
+        if (wasChanged) {
+            if (isAutofilled) {
+                mPrivateFlags3 |= PFLAG3_IS_AUTOFILLED;
+            } else {
+                mPrivateFlags3 &= ~PFLAG3_IS_AUTOFILLED;
+            }
+
+            invalidate();
         }
     }
 
@@ -17117,9 +17156,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected Parcelable onSaveInstanceState() {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
-        if (mStartActivityRequestWho != null) {
+        if (mStartActivityRequestWho != null || isAutofilled()) {
             BaseSavedState state = new BaseSavedState(AbsSavedState.EMPTY_STATE);
+
+            if (mStartActivityRequestWho != null) {
+                state.mSavedData |= BaseSavedState.START_ACTIVITY_REQUESTED_WHO_SAVED;
+            }
+
+            if (isAutofilled()) {
+                state.mSavedData |= BaseSavedState.IS_AUTOFILLED;
+            }
+
             state.mStartActivityRequestWhoSaved = mStartActivityRequestWho;
+            state.mIsAutofilled = isAutofilled();
             return state;
         }
         return BaseSavedState.EMPTY_STATE;
@@ -17189,7 +17238,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     + "other views do not use the same id.");
         }
         if (state != null && state instanceof BaseSavedState) {
-            mStartActivityRequestWho = ((BaseSavedState) state).mStartActivityRequestWhoSaved;
+            BaseSavedState baseState = (BaseSavedState) state;
+
+            if ((baseState.mSavedData & BaseSavedState.START_ACTIVITY_REQUESTED_WHO_SAVED) != 0) {
+                mStartActivityRequestWho = baseState.mStartActivityRequestWhoSaved;
+            }
+            if ((baseState.mSavedData & BaseSavedState.IS_AUTOFILLED) != 0) {
+                setAutofilled(baseState.mIsAutofilled);
+            }
         }
     }
 
@@ -17570,6 +17626,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // Fast path for layouts with no backgrounds
                     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                         dispatchDraw(canvas);
+                        drawAutofilledHighlight(canvas);
                         if (mOverlay != null && !mOverlay.isEmpty()) {
                             mOverlay.getOverlayView().draw(canvas);
                         }
@@ -17870,6 +17927,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
             dispatchDraw(canvas);
+            drawAutofilledHighlight(canvas);
             if (mOverlay != null && !mOverlay.isEmpty()) {
                 mOverlay.getOverlayView().draw(canvas);
             }
@@ -17946,6 +18004,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Fast path for layouts with no backgrounds
         if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
             dispatchDraw(canvas);
+            drawAutofilledHighlight(canvas);
             if (mOverlay != null && !mOverlay.isEmpty()) {
                 mOverlay.getOverlayView().draw(canvas);
             }
@@ -18630,6 +18689,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Step 4, draw the children
             dispatchDraw(canvas);
 
+            drawAutofilledHighlight(canvas);
+
             // Overlay is part of the content and draws beneath Foreground
             if (mOverlay != null && !mOverlay.isEmpty()) {
                 mOverlay.getOverlayView().dispatchDraw(canvas);
@@ -18782,6 +18843,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         canvas.restoreToCount(saveCount);
+
+        drawAutofilledHighlight(canvas);
 
         // Overlay is part of the content and draws beneath Foreground
         if (mOverlay != null && !mOverlay.isEmpty()) {
@@ -20137,6 +20200,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mForegroundInfo.mDrawable.setState(getDrawableState());
                 }
             }
+        }
+    }
+
+    /**
+     * Get the drawable to be overlayed when a view is autofilled
+     *
+     * @return The drawable
+     *
+     * @throws IllegalStateException if the drawable could not be found.
+     */
+    @NonNull private Drawable getAutofilledDrawable() {
+        // Lazily load the isAutofilled drawable.
+        if (mAttachInfo.mAutofilledDrawable == null) {
+            mAttachInfo.mAutofilledDrawable = mContext.getDrawable(R.drawable.autofilled_highlight);
+
+            if (mAttachInfo.mAutofilledDrawable == null) {
+                throw new IllegalStateException(
+                        "Could not find android:drawable/autofilled_highlight");
+            }
+        }
+
+        return mAttachInfo.mAutofilledDrawable;
+    }
+
+    /**
+     * Draw {@link View#isAutofilled()} highlight over view if the view is autofilled.
+     *
+     * @param canvas The canvas to draw on
+     */
+    private void drawAutofilledHighlight(@NonNull Canvas canvas) {
+        if (isAutofilled()) {
+            Drawable autofilledHighlight = getAutofilledDrawable();
+
+            autofilledHighlight.setBounds(0, 0, getWidth(), getHeight());
+            autofilledHighlight.draw(canvas);
         }
     }
 
@@ -24305,7 +24403,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * state in {@link android.view.View#onSaveInstanceState()}.
      */
     public static class BaseSavedState extends AbsSavedState {
+        static final int START_ACTIVITY_REQUESTED_WHO_SAVED = 0b1;
+        static final int IS_AUTOFILLED = 0b10;
+
+        // Flags that describe what data in this state is valid
+        int mSavedData;
         String mStartActivityRequestWhoSaved;
+        boolean mIsAutofilled;
 
         /**
          * Constructor used when reading from a parcel. Reads the state of the superclass.
@@ -24325,7 +24429,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public BaseSavedState(Parcel source, ClassLoader loader) {
             super(source, loader);
+            mSavedData = source.readInt();
             mStartActivityRequestWhoSaved = source.readString();
+            mIsAutofilled = source.readBoolean();
         }
 
         /**
@@ -24340,7 +24446,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
+
+            out.writeInt(mSavedData);
             out.writeString(mStartActivityRequestWhoSaved);
+            out.writeBoolean(mIsAutofilled);
         }
 
         public static final Parcelable.Creator<BaseSavedState> CREATOR
@@ -24739,6 +24848,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * The drawable for highlighting accessibility focus.
          */
         Drawable mAccessibilityFocusDrawable;
+
+        /**
+         * The drawable for highlighting autofilled views.
+         *
+         * @see #isAutofilled()
+         */
+        Drawable mAutofilledDrawable;
 
         /**
          * Show where the margins, bounds and layout bounds are for each view.
