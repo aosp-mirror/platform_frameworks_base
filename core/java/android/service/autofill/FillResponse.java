@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.service.autofill;
 
 import static android.view.autofill.Helper.DEBUG;
@@ -23,6 +24,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.widget.RemoteViews;
 
@@ -112,7 +114,7 @@ import java.util.ArrayList;
  *
  * <p>The service could require user authentication at the {@link FillResponse} or the
  * {@link Dataset} level, prior to autofilling an activity - see
- * {@link FillResponse.Builder#setAuthentication(IntentSender, RemoteViews)} and
+ * {@link FillResponse.Builder#setAuthentication(AutofillId[], IntentSender, RemoteViews)} and
  * {@link Dataset.Builder#setAuthentication(IntentSender)}.
  *
  * <p>It is recommended that you encrypt only the sensitive data but leave the labels unencrypted
@@ -126,7 +128,7 @@ import java.util.ArrayList;
  * possible options) which will start your auth flow and after successfully authenticating
  * the user will be presented with the Home and Work options to pick one. Hence, you have
  * flexibility how to implement your auth while storing labels non-encrypted and data
- * encrypted provides a better user experience.</p>
+ * encrypted provides a better user experience.
  */
 public final class FillResponse implements Parcelable {
 
@@ -135,6 +137,7 @@ public final class FillResponse implements Parcelable {
     private final Bundle mExtras;
     private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
+    private AutofillId[] mAuthenticationIds;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
@@ -142,6 +145,7 @@ public final class FillResponse implements Parcelable {
         mExtras = builder.mExtras;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
+        mAuthenticationIds = builder.mAuthenticationIds;
     }
 
     /** @hide */
@@ -169,6 +173,11 @@ public final class FillResponse implements Parcelable {
         return mAuthentication;
     }
 
+    /** @hide */
+    public @Nullable AutofillId[] getAuthenticationIds() {
+        return mAuthenticationIds;
+    }
+
     /**
      * Builder for {@link FillResponse} objects. You must to provide at least
      * one dataset or set an authentication intent with a presentation view.
@@ -179,6 +188,7 @@ public final class FillResponse implements Parcelable {
         private Bundle mExtras;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
+        private AutofillId[] mAuthenticationIds;
         private boolean mDestroyed;
 
         /**
@@ -193,7 +203,7 @@ public final class FillResponse implements Parcelable {
          * be encrypted. The provided {@link android.app.PendingIntent intent} must be an
          * activity which implements your authentication flow. Also if you provide an auth
          * intent you also need to specify the presentation view to be shown in the fill UI
-         * for the user to trigger your authentication flow.</p>
+         * for the user to trigger your authentication flow.
          *
          * <p>When a user triggers autofill, the system launches the provided intent
          * whose extras will have the {@link AutofillManager#EXTRA_ASSIST_STRUCTURE screen
@@ -205,32 +215,46 @@ public final class FillResponse implements Parcelable {
          * user's data was locked and marked that the response needs an authentication then
          * in the response returned if authentication succeeds you need to provide all
          * available data sets some of which may need to be further authenticated, for
-         * example a credit card whose CVV needs to be entered.</p>
+         * example a credit card whose CVV needs to be entered.
          *
          * <p>If you provide an authentication intent you must also provide a presentation
          * which is used to visualize visualize the response for triggering the authentication
-         * flow.</p>
+         * flow.
          *
          * <p></><strong>Note:</strong> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
-         * platform needs to fill in the authentication arguments.</p>
+         * platform needs to fill in the authentication arguments.
          *
          * @param authentication Intent to an activity with your authentication flow.
          * @param presentation The presentation to visualize the response.
-         * @return This builder.
+         * @param ids id of Views that when focused will display the authentication UI affordance.
          *
+         * @return This builder.
          * @see android.app.PendingIntent#getIntentSender()
          */
-        public @NonNull Builder setAuthentication(@Nullable IntentSender authentication,
-                @Nullable RemoteViews presentation) {
+        public @NonNull Builder setAuthentication(@NonNull AutofillId[] ids,
+                @Nullable IntentSender authentication, @Nullable RemoteViews presentation) {
             throwIfDestroyed();
+            // TODO(b/33197203): assert ids is not null nor empty once old version is removed
             if (authentication == null ^ presentation == null) {
                 throw new IllegalArgumentException("authentication and presentation"
                         + " must be both non-null or null");
             }
             mAuthentication = authentication;
             mPresentation = presentation;
+            mAuthenticationIds = ids;
             return this;
+        }
+
+        /**
+         * TODO(b/33197203): will be removed once clients use the version that takes ids
+         * @hide
+         * @deprecated
+         */
+        @Deprecated
+        public @NonNull Builder setAuthentication(@Nullable IntentSender authentication,
+                @Nullable RemoteViews presentation) {
+            return setAuthentication(null, authentication, presentation);
         }
 
         /**
@@ -238,7 +262,7 @@ public final class FillResponse implements Parcelable {
          *
          * @return This builder.
          */
-        public@NonNull Builder addDataset(@Nullable Dataset dataset) {
+        public @NonNull Builder addDataset(@Nullable Dataset dataset) {
             throwIfDestroyed();
             if (dataset == null) {
                 return this;
@@ -282,6 +306,7 @@ public final class FillResponse implements Parcelable {
             return this;
         }
 
+
         /**
          * Builds a new {@link FillResponse} instance. You must provide at least
          * one dataset or some savable ids or an authentication with a presentation
@@ -308,7 +333,7 @@ public final class FillResponse implements Parcelable {
     }
 
     /////////////////////////////////////
-    //  Object "contract" methods. //
+    // Object "contract" methods. //
     /////////////////////////////////////
     @Override
     public String toString() {
@@ -320,11 +345,13 @@ public final class FillResponse implements Parcelable {
                 .append(", hasExtras=").append(mExtras != null)
                 .append(", hasPresentation=").append(mPresentation != null)
                 .append(", hasAuthentication=").append(mAuthentication != null)
+                .append(", authenticationSize=").append(mAuthenticationIds != null
+                        ? mAuthenticationIds.length : "N/A")
                 .toString();
     }
 
     /////////////////////////////////////
-    //  Parcelable "contract" methods. //
+    // Parcelable "contract" methods. //
     /////////////////////////////////////
 
     @Override
@@ -337,6 +364,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeTypedArrayList(mDatasets, flags);
         parcel.writeParcelable(mSaveInfo, flags);
         parcel.writeParcelable(mExtras, flags);
+        parcel.writeParcelableArray(mAuthenticationIds, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
     }
@@ -356,8 +384,8 @@ public final class FillResponse implements Parcelable {
             }
             builder.setSaveInfo(parcel.readParcelable(null));
             builder.setExtras(parcel.readParcelable(null));
-            builder.setAuthentication(parcel.readParcelable(null),
-                    parcel.readParcelable(null));
+            builder.setAuthentication(parcel.readParcelableArray(null, AutofillId.class),
+                    parcel.readParcelable(null), parcel.readParcelable(null));
             return builder.build();
         }
 
