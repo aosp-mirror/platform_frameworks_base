@@ -660,7 +660,7 @@ public class Process {
      * @hide
      * @param tid The identifier of the thread to change.
      * @param group The target group for this thread from THREAD_GROUP_*.
-     * 
+     *
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does
@@ -673,6 +673,21 @@ public class Process {
      * libcutils::set_sched_policy().
      */
     public static final native void setThreadGroup(int tid, int group)
+            throws IllegalArgumentException, SecurityException;
+
+    /**
+     * Sets the scheduling group and the corresponding cpuset group
+     * @hide
+     * @param tid The identifier of the thread to change.
+     * @param group The target group for this thread from THREAD_GROUP_*.
+     *
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * priority.
+     */
+    public static final native void setThreadGroupAndCpuset(int tid, int group)
             throws IllegalArgumentException, SecurityException;
 
     /**
