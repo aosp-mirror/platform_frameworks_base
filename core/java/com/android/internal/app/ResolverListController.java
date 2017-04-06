@@ -32,8 +32,10 @@ import android.os.RemoteException;
 import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.InterruptedException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
 import java.util.List;
 
 /**
@@ -205,14 +207,42 @@ public class ResolverListController {
         return listToReturn;
     }
 
+    private class ComputeCallback implements ResolverComparator.AfterCompute {
+
+        private CountDownLatch mFinishComputeSignal;
+
+        public ComputeCallback(CountDownLatch finishComputeSignal) {
+            mFinishComputeSignal = finishComputeSignal;
+        }
+
+        public void afterCompute () {
+            mFinishComputeSignal.countDown();
+        }
+    }
+
     @VisibleForTesting
     @WorkerThread
     public void sort(List<ResolverActivity.ResolvedComponentInfo> inputList) {
+        final CountDownLatch finishComputeSignal = new CountDownLatch(1);
+        ComputeCallback callback = new ComputeCallback(finishComputeSignal);
         if (mResolverComparator == null) {
-            mResolverComparator = new ResolverComparator(mContext, mTargetIntent, mReferrerPackage);
+            mResolverComparator =
+                    new ResolverComparator(mContext, mTargetIntent, mReferrerPackage, callback);
+        } else {
+            mResolverComparator.setCallBack(callback);
         }
-        mResolverComparator.compute(inputList);
-        Collections.sort(inputList, mResolverComparator);
+        try {
+            long beforeRank = System.currentTimeMillis();
+            mResolverComparator.compute(inputList);
+            finishComputeSignal.await();
+            Collections.sort(inputList, mResolverComparator);
+            long afterRank = System.currentTimeMillis();
+            if (DEBUG) {
+                Log.d(TAG, "Time Cost: " + Long.toString(afterRank - beforeRank));
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Compute & Sort was interrupted: " + e);
+        }
     }
 
     private static boolean isSameResolvedComponent(ResolveInfo a,
@@ -233,7 +263,7 @@ public class ResolverListController {
     @VisibleForTesting
     public float getScore(ResolverActivity.DisplayResolveInfo target) {
         if (mResolverComparator == null) {
-            mResolverComparator = new ResolverComparator(mContext, mTargetIntent, mReferrerPackage);
+            return 0.0f;
         }
         return mResolverComparator.getScore(target.getResolvedComponentName());
     }
@@ -247,6 +277,12 @@ public class ResolverListController {
     public void updateChooserCounts(String packageName, int userId, String action) {
         if (mResolverComparator != null) {
             mResolverComparator.updateChooserCounts(packageName, userId, action);
+        }
+    }
+
+    public void destroy() {
+        if (mResolverComparator != null) {
+            mResolverComparator.destroy();
         }
     }
 }
