@@ -2507,6 +2507,11 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
+    public void onMovedToDisplay(int displayId, Configuration config) {
+        mProvider.getViewDelegate().onMovedToDisplay(displayId, config);
+    }
+
+    @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
         mProvider.getViewDelegate().setLayoutParams(params);
     }
