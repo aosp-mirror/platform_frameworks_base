@@ -57,6 +57,7 @@ import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -190,6 +191,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     public void onFillRequestSuccess(@Nullable FillResponse response,
             @NonNull String servicePackageName) {
         if (response == null) {
+            if ((mFlags & FLAG_MANUAL_REQUEST) != 0) {
+                getUiForShowing().showError(R.string.autofill_error_cannot_autofill);
+            }
             // Nothing to be done, but need to notify client.
             notifyUnavailableToClient();
             removeSelf();
