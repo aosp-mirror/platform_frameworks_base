@@ -203,7 +203,7 @@ public class PackageDexOptimizer {
             long startTime = System.currentTimeMillis();
 
             mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
-                    compilerFilter, pkg.volumeUuid, sharedLibrariesPath);
+                    compilerFilter, pkg.volumeUuid, sharedLibrariesPath, pkg.applicationInfo.seInfo);
 
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
@@ -280,7 +280,7 @@ public class PackageDexOptimizer {
                 // TODO(calin): maybe add a separate call.
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
-                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK);
+                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK, info.seInfoUser);
             }
 
             return DEX_OPT_PERFORMED;
