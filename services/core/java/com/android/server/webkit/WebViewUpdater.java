@@ -315,15 +315,6 @@ class WebViewUpdater {
             }
         }
 
-        // Could not find any installed and enabled package either, use the most stable and
-        // default-available provider.
-        // TODO(gsennton) remove this when we have a functional WebView stub.
-        for (ProviderAndPackageInfo providerAndPackage : providers) {
-            if (providerAndPackage.provider.availableByDefault) {
-                return providerAndPackage.packageInfo;
-            }
-        }
-
         // This should never happen during normal operation (only with modified system images).
         mAnyWebViewInstalled = false;
         throw new WebViewPackageMissingException("Could not find a loadable WebView package");
