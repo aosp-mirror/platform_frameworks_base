@@ -98,4 +98,8 @@ final class BasePermission {
     public boolean isInstant() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0;
     }
+
+    public boolean isRuntimeOnly() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) != 0;
+    }
 }
