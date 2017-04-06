@@ -19,7 +19,7 @@ package com.android.server.pm.dex;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageParser;
+import android.os.FileUtils;
 import android.os.RemoteException;
 import android.os.storage.StorageManager;
 import android.os.UserHandle;
@@ -93,7 +93,7 @@ public class DexManager {
      * Note that this method is invoked when apps load dex files and it should
      * return as fast as possible.
      *
-     * @param loadingPackage the package performing the load
+     * @param loadingAppInfo the package performing the load
      * @param dexPaths the list of dex files being loaded
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
@@ -191,8 +191,7 @@ public class DexManager {
             throw new IllegalArgumentException(
                 "notifyPackageInstalled called with USER_ALL");
         }
-        cachePackageCodeLocation(pi.packageName, pi.applicationInfo.sourceDir,
-                pi.applicationInfo.splitSourceDirs, pi.applicationInfo.dataDir, userId);
+        cachePackageInfo(pi, userId);
     }
 
     /**
@@ -231,13 +230,32 @@ public class DexManager {
         }
     }
 
-    public void cachePackageCodeLocation(String packageName, String baseCodePath,
-            String[] splitCodePaths, String dataDir, int userId) {
+    /**
+     * Caches the code location from the given package info.
+     */
+    private void cachePackageInfo(PackageInfo pi, int userId) {
+        ApplicationInfo ai = pi.applicationInfo;
+        String[] dataDirs = new String[] {ai.dataDir, ai.deviceProtectedDataDir,
+                ai.credentialProtectedDataDir};
+        cachePackageCodeLocation(pi.packageName, ai.sourceDir, ai.splitSourceDirs,
+                dataDirs, userId);
+    }
+
+    private void cachePackageCodeLocation(String packageName, String baseCodePath,
+            String[] splitCodePaths, String[] dataDirs, int userId) {
         PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
                 new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
         pcl.updateCodeLocation(baseCodePath, splitCodePaths);
-        if (dataDir != null) {
-            pcl.mergeAppDataDirs(dataDir, userId);
+        if (dataDirs != null) {
+            for (String dataDir : dataDirs) {
+                // The set of data dirs includes deviceProtectedDataDir and
+                // credentialProtectedDataDir which might be null for shared
+                // libraries. Currently we don't track these but be lenient
+                // and check in case we ever decide to store their usage data.
+                if (dataDir != null) {
+                    pcl.mergeAppDataDirs(dataDir, userId);
+                }
+            }
         }
     }
 
@@ -250,8 +268,7 @@ public class DexManager {
             int userId = entry.getKey();
             for (PackageInfo pi : packageInfoList) {
                 // Cache the code locations.
-                cachePackageCodeLocation(pi.packageName, pi.applicationInfo.sourceDir,
-                        pi.applicationInfo.splitSourceDirs, pi.applicationInfo.dataDir, userId);
+                cachePackageInfo(pi, userId);
 
                 // Cache a map from package name to the set of user ids who installed the package.
                 // We will use it to sync the data and remove obsolete entries from
@@ -329,6 +346,7 @@ public class DexManager {
                 mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
                 continue;
             }
+
             int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
                     dexUseInfo.getLoaderIsas(), compilerFilter, dexUseInfo.isUsedByOtherApps());
             success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
@@ -350,7 +368,7 @@ public class DexManager {
             // Nothing to reconcile.
             return;
         }
-        Set<String> dexFilesToRemove = new HashSet<>();
+
         boolean updated = false;
         for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
             String dexPath = entry.getKey();
@@ -378,14 +396,16 @@ public class DexManager {
             }
             ApplicationInfo info = pkg.applicationInfo;
             int flags = 0;
-            if (info.dataDir.equals(info.deviceProtectedDataDir)) {
+            if (info.deviceProtectedDataDir != null &&
+                    FileUtils.contains(info.deviceProtectedDataDir, dexPath)) {
                 flags |= StorageManager.FLAG_STORAGE_DE;
-            } else if (info.dataDir.equals(info.credentialProtectedDataDir)) {
+            } else if (info.credentialProtectedDataDir!= null &&
+                    FileUtils.contains(info.credentialProtectedDataDir, dexPath)) {
                 flags |= StorageManager.FLAG_STORAGE_CE;
             } else {
-                Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
-                updated = mPackageDexUsage.removeUserPackage(
-                        packageName, dexUseInfo.getOwnerUserId()) || updated;
+                Slog.e(TAG, "Could not infer CE/DE storage for path " + dexPath);
+                updated = mPackageDexUsage.removeDexFile(
+                        packageName, dexPath, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
             }
 
