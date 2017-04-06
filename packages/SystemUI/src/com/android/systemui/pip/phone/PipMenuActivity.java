@@ -87,7 +87,9 @@ public class PipMenuActivity extends Activity {
 
     private boolean mMenuVisible;
     private boolean mAllowMenuTimeout = true;
+
     private final List<RemoteAction> mActions = new ArrayList<>();
+
     private View mViewRoot;
     private Drawable mBackgroundDrawable;
     private View mMenuContainer;
@@ -266,7 +268,6 @@ public class PipMenuActivity extends Activity {
             }
             notifyMenuVisibility(true);
             updateExpandButtonFromBounds(stackBounds, movementBounds);
-            setDecorViewVisibility(true);
             mMenuContainerAnimator = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
@@ -311,11 +312,15 @@ public class PipMenuActivity extends Activity {
                     if (animationFinishedRunnable != null) {
                         animationFinishedRunnable.run();
                     }
-                    setDecorViewVisibility(false);
+
+                    finish();
                 }
             });
             mMenuContainerAnimator.addUpdateListener(mMenuBgUpdateListener);
             mMenuContainerAnimator.start();
+        } else {
+            // If the menu is not visible, just finish now
+            finish();
         }
     }
 
@@ -431,7 +436,6 @@ public class PipMenuActivity extends Activity {
             alpha = (int) (fraction * DISMISS_BACKGROUND_ALPHA * 255);
         }
         mBackgroundDrawable.setAlpha(alpha);
-        setDecorViewVisibility(alpha > 0);
     }
 
     private void notifyRegisterInputConsumer() {
@@ -507,17 +511,5 @@ public class PipMenuActivity extends Activity {
         View v = getWindow().getDecorView();
         v.removeCallbacks(mFinishRunnable);
         v.postDelayed(mFinishRunnable, delay);
-    }
-
-    /**
-     * Sets the visibility of the root view of the window to disable drawing and touches for the
-     * activity.  This differs from {@link Activity#setVisible(boolean)} in that it does not set
-     * the internal mVisibleFromClient state.
-     */
-    private void setDecorViewVisibility(boolean visible) {
-        final View decorView = getWindow().getDecorView();
-        if (decorView != null) {
-            decorView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        }
     }
 }

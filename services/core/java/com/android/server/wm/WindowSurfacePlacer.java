@@ -441,6 +441,8 @@ class WindowSurfacePlacer {
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
             appAnimator.clearThumbnail();
             appAnimator.setNullAnimation();
+            // TODO: Do we need to add to mNoAnimationNotifyOnTransitionFinished like above if not
+            //       animating?
             wtoken.setVisibility(animLp, false, transit, false, voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
             // Force the allDrawn flag, because we want to start

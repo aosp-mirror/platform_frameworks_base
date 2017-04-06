@@ -50,6 +50,7 @@ import java.util.List;
 public class PipMenuActivityController {
 
     private static final String TAG = "PipMenuActController";
+    private static final boolean DEBUG = false;
 
     public static final String EXTRA_CONTROLLER_MESSENGER = "messenger";
     public static final String EXTRA_ACTIONS = "actions";
@@ -195,6 +196,10 @@ public class PipMenuActivityController {
      * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
      */
     public void setDismissFraction(float fraction) {
+        if (DEBUG) {
+            Log.d(TAG, "setDismissFraction() hasActivity=" + (mToActivityMessenger != null)
+                    + " fraction=" + fraction);
+        }
         if (mToActivityMessenger != null) {
             mTmpDismissFractionData.clear();
             mTmpDismissFractionData.putFloat(EXTRA_DISMISS_FRACTION, fraction);
@@ -216,6 +221,9 @@ public class PipMenuActivityController {
      * Shows the menu activity.
      */
     public void showMenu(Rect stackBounds, Rect movementBounds, boolean allowMenuTimeout) {
+        if (DEBUG) {
+            Log.d(TAG, "showMenu() hasActivity=" + (mToActivityMessenger != null));
+        }
         if (mToActivityMessenger != null) {
             Bundle data = new Bundle();
             data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
@@ -238,6 +246,9 @@ public class PipMenuActivityController {
      * Pokes the menu, indicating that the user is interacting with it.
      */
     public void pokeMenu() {
+        if (DEBUG) {
+            Log.d(TAG, "pokeMenu() hasActivity=" + (mToActivityMessenger != null));
+        }
         if (mToActivityMessenger != null) {
             Message m = Message.obtain();
             m.what = PipMenuActivity.MESSAGE_POKE_MENU;
@@ -253,6 +264,9 @@ public class PipMenuActivityController {
      * Hides the menu activity.
      */
     public void hideMenu() {
+        if (DEBUG) {
+            Log.d(TAG, "hideMenu() hasActivity=" + (mToActivityMessenger != null));
+        }
         if (mToActivityMessenger != null) {
             Message m = Message.obtain();
             m.what = PipMenuActivity.MESSAGE_HIDE_MENU;
@@ -365,6 +379,10 @@ public class PipMenuActivityController {
      * Handles changes in menu visibility.
      */
     private void onMenuVisibilityChanged(boolean visible, boolean resize) {
+        if (DEBUG) {
+            Log.d(TAG, "onMenuVisibilityChanged() mMenuVisible=" + mMenuVisible
+                    + " menuVisible=" + visible + " resize=" + resize);
+        }
         if (visible) {
             mInputConsumerController.unregisterInputConsumer();
         } else {
@@ -389,6 +407,7 @@ public class PipMenuActivityController {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mMenuVisible=" + mMenuVisible);
+        pw.println(innerPrefix + "mToActivityMessenger=" + mToActivityMessenger);
         pw.println(innerPrefix + "mListeners=" + mListeners.size());
     }
 }

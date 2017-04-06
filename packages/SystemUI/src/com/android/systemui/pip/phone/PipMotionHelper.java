@@ -23,6 +23,7 @@ import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN;
 
 import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
@@ -253,7 +254,7 @@ public class PipMotionHelper {
      * Flings the PiP to the closest snap target.
      */
     Rect flingToSnapTarget(float velocity, float velocityX, float velocityY, Rect movementBounds,
-            AnimatorUpdateListener listener) {
+            AnimatorUpdateListener updateListener, AnimatorListener listener) {
         cancelAnimations();
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds,
                 velocityX, velocityY);
@@ -263,8 +264,11 @@ public class PipMotionHelper {
             mFlingAnimationUtils.apply(mBoundsAnimator, 0,
                     distanceBetweenRectOffsets(mBounds, toBounds),
                     velocity);
-            if (listener != null) {
-                mBoundsAnimator.addUpdateListener(listener);
+            if (updateListener != null) {
+                mBoundsAnimator.addUpdateListener(updateListener);
+            }
+            if (listener != null){
+                mBoundsAnimator.addListener(listener);
             }
             mBoundsAnimator.start();
         }
@@ -274,14 +278,18 @@ public class PipMotionHelper {
     /**
      * Animates the PiP to the closest snap target.
      */
-    Rect animateToClosestSnapTarget(Rect movementBounds, AnimatorUpdateListener listener) {
+    Rect animateToClosestSnapTarget(Rect movementBounds, AnimatorUpdateListener updateListener,
+            AnimatorListener listener) {
         cancelAnimations();
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, SNAP_STACK_DURATION,
                     FAST_OUT_SLOW_IN, mUpdateBoundsListener);
-            if (listener != null) {
-                mBoundsAnimator.addUpdateListener(listener);
+            if (updateListener != null) {
+                mBoundsAnimator.addUpdateListener(updateListener);
+            }
+            if (listener != null){
+                mBoundsAnimator.addListener(listener);
             }
             mBoundsAnimator.start();
         }
