@@ -5753,20 +5753,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final int count = (resolvedActivities == null ? 0 : resolvedActivities.size());
             for (int n = 0; n < count; n++) {
-                ResolveInfo info = resolvedActivities.get(n);
-                String packageName = info.activityInfo.packageName;
-                PackageSetting ps = mSettings.mPackages.get(packageName);
+                final ResolveInfo info = resolvedActivities.get(n);
+                final String packageName = info.activityInfo.packageName;
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null) {
-                    // Try to get the status from User settings first
-                    long packedStatus = getDomainVerificationStatusLPr(ps, userId);
-                    int status = (int) (packedStatus >> 32);
-                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
+                    // only check domain verification status if the app is not a browser
+                    if (!info.handleAllWebDataURI) {
+                        // Try to get the status from User settings first
+                        final long packedStatus = getDomainVerificationStatusLPr(ps, userId);
+                        final int status = (int) (packedStatus >> 32);
+                        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
                             || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                        if (DEBUG_EPHEMERAL) {
-                            Slog.v(TAG, "DENY ephemeral apps;"
-                                + " pkg: " + packageName + ", status: " + status);
+                            if (DEBUG_EPHEMERAL) {
+                                Slog.v(TAG, "DENY instant app;"
+                                    + " pkg: " + packageName + ", status: " + status);
+                            }
+                            return false;
                         }
-                        return false;
                     }
                     if (ps.getInstantApp(userId)) {
                         if (DEBUG_EPHEMERAL) {
