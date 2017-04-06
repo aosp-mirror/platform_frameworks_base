@@ -2921,11 +2921,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     if (stack != null) {
                         stack.getBounds(frame);
                     }
-
-                    // We want to screenshot with the exact bounds of the surface of the app. Thus,
-                    // intersect it with the frame.
-                    frame.intersect(w.mFrame);
-                }else if (!mutableIncludeFullDisplay.value && !w.mIsWallpaper) {
+                } else if (!mutableIncludeFullDisplay.value && !w.mIsWallpaper) {
                     final Rect wf = w.mFrame;
                     final Rect cr = w.mContentInsets;
                     int left = wf.left + cr.left;
