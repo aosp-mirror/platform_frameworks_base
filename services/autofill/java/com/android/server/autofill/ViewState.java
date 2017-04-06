@@ -61,6 +61,8 @@ final class ViewState {
     public static final int STATE_STARTED_PARTITION = 0x20;
     /** User select a dataset in this view, but service must authenticate first. */
     public static final int STATE_WAITING_DATASET_AUTH = 0x40;
+    // TODO(b/33197203 , b/35707731): temporary workaround until partitioning supports auth
+    public static final int STATE_WAITING_RESPONSE_AUTH = 0x80;
 
     public final AutofillId id;
     private final Listener mListener;
