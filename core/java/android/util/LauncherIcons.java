@@ -20,11 +20,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
-import android.graphics.Path;
-import android.graphics.RectF;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -49,7 +46,7 @@ public final class LauncherIcons {
     public LauncherIcons(Context context) {
         mRes = context.getResources();
         DisplayMetrics metrics = mRes.getDisplayMetrics();
-        mShadowInset = (int) metrics.density / DisplayMetrics.DENSITY_DEFAULT;
+        mShadowInset = (int)(2 * metrics.density);
         mCanvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.DITHER_FLAG,
             Paint.FILTER_BITMAP_FLAG));
         mIconSize = (int) mRes.getDimensionPixelSize(android.R.dimen.app_icon_size);
@@ -91,7 +88,6 @@ public final class LauncherIcons {
             return mShadowBitmap;
         }
 
-        int shadowSize = mIconSize - mShadowInset;
         mShadowBitmap = Bitmap.createBitmap(mIconSize, mIconSize, Bitmap.Config.ALPHA_8);
         mCanvas.setBitmap(mShadowBitmap);
 

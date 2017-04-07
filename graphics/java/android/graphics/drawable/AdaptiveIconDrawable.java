@@ -29,6 +29,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Outline;
@@ -51,12 +52,27 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * This drawable supports two layers: foreground and background.
- *
- * <p>The layers are clipped when rendering using the mask path defined in the device configuration.
- *
  * <p>This class can also be created via XML inflation using <code>&lt;adaptive-icon></code> tag
  * in addition to dynamic creation.
+ *
+ * <p>This drawable supports two drawable layers: foreground and background. The layers are clipped
+ * when rendering using the mask defined in the device configuration.
+ *
+ * <ul>
+ * <li>Both foreground and background layers should be sized at 108 x 108 dp.</li>
+ * <li>The inner 72 x 72 dp  of the icon appears within the masked viewport.</li>
+ * <li>The outer 18 dp on each of the 4 sides of the layers is reserved for use by the system UI
+ * surfaces to create interesting visual effects, such as parallax or pulsing.</li>
+ * </ul>
+ *
+ * Such motion effect is achieved by internally setting the bounds of the foreground and
+ * background layer as following:
+ * <pre>
+ * Rect(getBounds().left - getBounds().getWidth() * #getExtraInsetFraction(),
+ *      getBounds().top - getBounds().getHeight() * #getExtraInsetFraction(),
+ *      getBounds().right + getBounds().getWidth() * #getExtraInsetFraction(),
+ *      getBounds().bottom + getBounds().getHeight() * #getExtraInsetFraction())
+ * </pre>
  */
 public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback {
 
@@ -65,7 +81,11 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * @hide
      */
     public static final float MASK_SIZE = 100f;
-    private static final float SAFEZONE_SCALE = .9f;
+
+    /**
+     * Launcher icons design guideline
+     */
+    private static final float SAFEZONE_SCALE = 72f/66f;
 
     /**
      * All four sides of the layers are padded with extra inset so as to provide
@@ -80,7 +100,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     private static final float DEFAULT_VIEW_PORT_SCALE = 1f / (1 + 2 * EXTRA_INSET_PERCENTAGE);
 
     /**
-     * Clip path defined in {@link com.android.internal.R.string.config_icon_mask}.
+     * Clip path defined in R.string.config_icon_mask.
      */
     private static Path sMask;
 
@@ -134,9 +154,10 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
         if (sMask == null) {
             sMask = PathParser.createPathFromPathData(
-                Resources.getSystem().getString(com.android.internal.R.string.config_icon_mask));
+                Resources.getSystem().getString(R.string.config_icon_mask));
         }
-        mMask = new Path();
+        mMask = PathParser.createPathFromPathData(
+            Resources.getSystem().getString(R.string.config_icon_mask));
         mMaskMatrix = new Matrix();
         mCanvas = new Canvas();
         mTransparentRegion = new Region();
@@ -212,13 +233,24 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * All four sides of the layers are padded with extra inset so as to provide
      * extra content to reveal within the clip path when performing affine transformations on the
      * layers.
+     *
+     * @see #getForeground() and #getBackground() for more info on how this value is used
+     */
+    public static float getExtraInsetFraction() {
+        return EXTRA_INSET_PERCENTAGE;
+    }
+
+    /**
+     * @hide
      */
     public static float getExtraInsetPercentage() {
         return EXTRA_INSET_PERCENTAGE;
     }
 
     /**
-     * Only call this method after bound is set on this drawable.
+     * When called before the bound is set, the returned path is identical to
+     * R.string.config_icon_mask. After the bound is set, the
+     * returned path's computed bound is same as the #getBounds().
      *
      * @return the mask path object used to clip the drawable
      */
@@ -227,6 +259,10 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     /**
+     * Returns the foreground drawable managed by this class. The bound of this drawable is
+     * extended by {@link #getExtraInsetFraction()} * getBounds().width on left/right sides and by
+     * {@link #getExtraInsetFraction()} * getBounds().height on top/bottom sides.
+     *
      * @return the foreground drawable managed by this drawable
      */
     public Drawable getForeground() {
@@ -234,6 +270,10 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     /**
+     * Returns the foreground drawable managed by this class. The bound of this drawable is
+     * extended by {@link #getExtraInsetFraction()} * getBounds().width on left/right sides and by
+     * {@link #getExtraInsetFraction()} * getBounds().height on top/bottom sides.
+     *
      * @return the background drawable managed by this drawable
      */
     public Drawable getBackground() {
@@ -293,10 +333,15 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
             mMaskBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ALPHA_8);
             mLayersBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ARGB_8888);
         }
+        // mMaskBitmap bound [0, w] x [0, h]
         mCanvas.setBitmap(mMaskBitmap);
         mPaint.setShader(null);
         mCanvas.drawPath(mMask, mPaint);
 
+        // mMask bound [left, top, right, bottom]
+        mMaskMatrix.postTranslate(b.left, b.top);
+        mMask.reset();
+        sMask.transform(mMaskMatrix, mMask);
         // reset everything that depends on the view bounds
         mTransparentRegion.setEmpty();
         mLayersShader = null;
@@ -309,6 +354,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         }
         if (mLayersShader == null) {
             mCanvas.setBitmap(mLayersBitmap);
+            mCanvas.drawColor(Color.BLACK);
             for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
                 if (mLayerState.mChildren[i] == null) {
                     continue;

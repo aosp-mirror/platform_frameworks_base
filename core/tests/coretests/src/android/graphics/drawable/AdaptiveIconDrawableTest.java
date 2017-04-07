@@ -2,18 +2,22 @@ package android.graphics.drawable;
 
 import static org.junit.Assert.assertTrue;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.test.AndroidTestCase;
 import android.util.Log;
+import android.util.PathParser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
@@ -35,7 +39,7 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
      * Nothing is drawn.
      */
     @Test
-    public void testDrawWithoutSetBounds() throws Exception {
+    public void testDraw_withoutBounds() throws Exception {
         mBackgroundDrawable = new ColorDrawable(Color.BLUE);
         mForegroundDrawable = new ColorDrawable(Color.RED);
         mIconDrawable = new AdaptiveIconDrawable(mBackgroundDrawable, mForegroundDrawable);
@@ -59,7 +63,7 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
      * When setBound is called, translate accordingly.
      */
     @Test
-    public void testDrawSetBounds() throws Exception {
+    public void testDraw_withBounds() throws Exception {
         int dpi = 4 ;
         int top = 18 * dpi;
         int left = 18 * dpi;
@@ -100,6 +104,71 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
             findBitmapDifferences(bm_test, bm_org);
             fail("bm differs, check " + mDir);
         }
+    }
+
+    /**
+     * When setBound isn't called before getIconMask method is called.
+     * default device config mask is returned.
+     */
+    @Test
+    public void testGetIconMask_withoutBounds() throws Exception {
+        mIconDrawable = new AdaptiveIconDrawable(mBackgroundDrawable, mForegroundDrawable);
+        Path pathFromDrawable = mIconDrawable.getIconMask();
+        Path pathFromDeviceConfig = PathParser.createPathFromPathData(
+            Resources.getSystem().getString(com.android.internal.R.string.config_icon_mask));
+
+        RectF boundFromDrawable = new RectF();
+        pathFromDrawable.computeBounds(boundFromDrawable, true);
+
+        RectF boundFromDeviceConfig = new RectF();
+        pathFromDeviceConfig.computeBounds(boundFromDeviceConfig, true);
+
+        double delta = 0.01;
+        assertEquals("left", boundFromDrawable.left, boundFromDeviceConfig.left, delta);
+        assertEquals("top", boundFromDrawable.top, boundFromDeviceConfig.top, delta);
+        assertEquals("right", boundFromDrawable.right, boundFromDeviceConfig.right, delta);
+        assertEquals("bottom", boundFromDrawable.bottom, boundFromDeviceConfig.bottom, delta);
+
+        assertTrue("path from device config is convex.", pathFromDeviceConfig.isConvex());
+        assertTrue("path from drawable is convex.", pathFromDrawable.isConvex());
+    }
+
+    @Test
+    public void testGetIconMaskAfterSetBounds() throws Exception {
+        int dpi = 4;
+        int top = 18 * dpi;
+        int left = 18 * dpi;
+        int right = 90 * dpi;
+        int bottom = 90 * dpi;
+
+        mIconDrawable = new AdaptiveIconDrawable(mBackgroundDrawable, mForegroundDrawable);
+        mIconDrawable.setBounds(left, top, right, bottom);
+        RectF maskBounds = new RectF();
+
+        mIconDrawable.getIconMask().computeBounds(maskBounds, true);
+
+        double delta = 0.01;
+        assertEquals("left", left, maskBounds.left, delta);
+        assertEquals("top", top, maskBounds.top, delta);
+        assertEquals("right", right, maskBounds.right, delta);
+        assertEquals("bottom", bottom, maskBounds.bottom, delta);
+
+        assertTrue(mIconDrawable.getIconMask().isConvex());
+    }
+
+    @Test
+    public void testGetOutline_withBounds() throws Exception {
+        int dpi = 4;
+        int top = 18 * dpi;
+        int left = 18 * dpi;
+        int right = 90 * dpi;
+        int bottom = 90 * dpi;
+
+        mIconDrawable = new AdaptiveIconDrawable(mBackgroundDrawable, mForegroundDrawable);
+        mIconDrawable.setBounds(left, top, right, bottom);
+        Outline outline = new Outline();
+        mIconDrawable.getOutline(outline);
+        assertTrue("outline path should be convex", outline.mPath.isConvex());
     }
 
     //

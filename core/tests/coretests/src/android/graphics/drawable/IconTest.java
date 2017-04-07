@@ -119,13 +119,13 @@ public class IconTest extends AndroidTestCase {
         final AdaptiveIconDrawable draw1 = (AdaptiveIconDrawable) im1.loadDrawable(mContext);
 
         final Bitmap test1 = Bitmap.createBitmap(
-            (int)(draw1.getIntrinsicWidth() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetPercentage())),
-            (int)(draw1.getIntrinsicHeight() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetPercentage())),
+            (int)(draw1.getIntrinsicWidth() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction())),
+            (int)(draw1.getIntrinsicHeight() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction())),
             Bitmap.Config.ARGB_8888);
 
         draw1.setBounds(0, 0,
-            (int) (draw1.getIntrinsicWidth() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetPercentage())),
-            (int) (draw1.getIntrinsicHeight() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetPercentage())));
+            (int) (draw1.getIntrinsicWidth() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction())),
+            (int) (draw1.getIntrinsicHeight() * (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction())));
         draw1.draw(new Canvas(test1));
 
         final File dir = getContext().getExternalFilesDir(null);
