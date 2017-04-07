@@ -2478,16 +2478,19 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (mActions != null && !mActions.isEmpty()) {
             final int actionCount = mActions.size();
-            parcel.writeInt(actionCount);
 
+            int nonLegacyActionCount = 0;
             int defaultLegacyStandardActions = 0;
             for (int i = 0; i < actionCount; i++) {
                 AccessibilityAction action = mActions.get(i);
                 if (isDefaultLegacyStandardAction(action)) {
                     defaultLegacyStandardActions |= action.getId();
+                } else {
+                    nonLegacyActionCount++;
                 }
             }
             parcel.writeInt(defaultLegacyStandardActions);
+            parcel.writeInt(nonLegacyActionCount);
 
             for (int i = 0; i < actionCount; i++) {
                 AccessibilityAction action = mActions.get(i);
@@ -2497,6 +2500,7 @@ public class AccessibilityNodeInfo implements Parcelable {
                 }
             }
         } else {
+            parcel.writeInt(0);
             parcel.writeInt(0);
         }
 
@@ -2656,16 +2660,13 @@ public class AccessibilityNodeInfo implements Parcelable {
         mBoundsInScreen.left = parcel.readInt();
         mBoundsInScreen.right = parcel.readInt();
 
-        final int actionCount = parcel.readInt();
-        if (actionCount > 0) {
-            final int legacyStandardActions = parcel.readInt();
-            addLegacyStandardActions(legacyStandardActions);
-            final int nonLegacyActionCount = actionCount - Integer.bitCount(legacyStandardActions);
-            for (int i = 0; i < nonLegacyActionCount; i++) {
-                AccessibilityAction action = new AccessibilityAction(
-                        parcel.readInt(), parcel.readCharSequence());
-                addAction(action);
-            }
+        final int legacyStandardActions = parcel.readInt();
+        addLegacyStandardActions(legacyStandardActions);
+        final int nonLegacyActionCount = parcel.readInt();
+        for (int i = 0; i < nonLegacyActionCount; i++) {
+            final AccessibilityAction action = new AccessibilityAction(
+            parcel.readInt(), parcel.readCharSequence());
+            addAction(action);
         }
 
         mMaxTextLength = parcel.readInt();
