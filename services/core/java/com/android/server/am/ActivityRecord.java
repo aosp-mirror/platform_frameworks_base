@@ -420,8 +420,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                         pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
                         pw.print(" label=\""); pw.print(taskDescription.getLabel());
                                 pw.print("\"");
-                        pw.print(" color=");
+                        pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
+                        pw.print(" backgroundColor=");
+                        pw.println(Integer.toHexString(taskDescription.getBackgroundColor()));
+                        pw.print(" statusBarColor=");
+                        pw.println(Integer.toHexString(taskDescription.getStatusBarColor()));
+                        pw.print(" navigationBarColor=");
+                        pw.println(Integer.toHexString(taskDescription.getNavigationBarColor()));
             }
             if (iconFilename == null && taskDescription.getIcon() != null) {
                 pw.print(prefix); pw.println("taskDescription contains Bitmap");

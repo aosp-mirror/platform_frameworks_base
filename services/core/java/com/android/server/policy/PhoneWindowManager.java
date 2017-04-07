@@ -5255,11 +5255,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        // Don't allow snapshots to influence SystemUI visibility flags.
-        // TODO: Revisit this once SystemUI flags for snapshots are handled correctly
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
-                && attrs.type < FIRST_SYSTEM_WINDOW
-                && (attrs.privateFlags & PRIVATE_FLAG_TASK_SNAPSHOT) == 0;
+                && attrs.type < FIRST_SYSTEM_WINDOW;
         final int stackId = win.getStackId();
         if (mTopFullscreenOpaqueWindowState == null && visible) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
