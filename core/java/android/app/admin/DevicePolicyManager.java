@@ -2753,8 +2753,8 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile or device owner to provision a token which can later be used to reset the
-     * device lockscreen password (if called by device owner), or work challenge (if called by
-     * profile owner), via {@link #resetPasswordWithToken}.
+     * device lockscreen password (if called by device owner), or managed profile challenge (if
+     * called by profile owner), via {@link #resetPasswordWithToken}.
      * <p>
      * If the user currently has a lockscreen password, the provisioned token will not be
      * immediately usable; it only becomes active after the user performs a confirm credential
@@ -2832,8 +2832,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owner to force set a new device unlock password or a work profile
-     * challenge on current user. This takes effect immediately.
+     * Called by device or profile owner to force set a new device unlock password or a managed
+     * profile challenge on current user. This takes effect immediately.
      * <p>
      * Unlike {@link #resetPassword}, this API can change the password even before the user or
      * device is unlocked or decrypted. The supplied token must have been previously provisioned via
@@ -5550,7 +5550,7 @@ public class DevicePolicyManager {
      * Calling with a null value for the list disables the restriction so that all services can be
      * used, calling with an empty list only allows the builtin system's services.
      * <p>
-     * System accesibility services are always available to the user the list can't modify this.
+     * System accessibility services are always available to the user the list can't modify this.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of accessibility service package names.
@@ -5660,7 +5660,8 @@ public class DevicePolicyManager {
      *         non-system input methods currently enabled that are not in the packageNames list.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public boolean setPermittedInputMethods(@NonNull ComponentName admin, List<String> packageNames) {
+    public boolean setPermittedInputMethods(
+            @NonNull ComponentName admin, List<String> packageNames) {
         throwIfParentInstance("setPermittedInputMethods");
         if (mService != null) {
             try {
@@ -5739,6 +5740,85 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to set the packages that are allowed to use
+     * a {@link android.service.notification.NotificationListenerService} in the primary user to
+     * see notifications from the managed profile. By default all packages are permitted by this
+     * policy. When zero or more packages have been added, notification listeners installed on the
+     * primary user that are not in the list and are not part of the system won't receive events
+     * for managed profile notifications.
+     * <p>
+     * Calling with a {@code null} value for the list disables the restriction so that all
+     * notification listener services be used. Calling with an empty list disables all but the
+     * system's own notification listeners. System notification listener services are always
+     * available to the user.
+     * <p>
+     * If a device or profile owner want to stop notification listeners in their user from seeing
+     * that user's notifications they should prevent that service from running instead (e.g. via
+     * {@link #setApplicationHidden(ComponentName, String, boolean)})
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageList List of package names to whitelist
+     * @return true if setting the restriction succeeded. It will fail if called outside a managed
+     * profile
+     * @throws SecurityException if {@code admin} is not a profile owner.
+     *
+     * @see android.service.notification.NotificationListenerService
+     */
+    public boolean setPermittedCrossProfileNotificationListeners(
+            @NonNull ComponentName admin, @Nullable List<String> packageList) {
+        throwIfParentInstance("setPermittedCrossProfileNotificationListeners");
+        if (mService != null) {
+            try {
+                return mService.setPermittedCrossProfileNotificationListeners(admin, packageList);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the list of packages installed on the primary user that allowed to use a
+     * {@link android.service.notification.NotificationListenerService} to receive
+     * notifications from this managed profile, as set by the profile owner.
+     * <p>
+     * An empty list means no notification listener services except system ones are allowed.
+     * A {@code null} return value indicates that all notification listeners are allowed.
+     */
+    public @Nullable List<String> getPermittedCrossProfileNotificationListeners(
+            @NonNull ComponentName admin) {
+        throwIfParentInstance("getPermittedCrossProfileNotificationListeners");
+        if (mService != null) {
+            try {
+                return mService.getPermittedCrossProfileNotificationListeners(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if {@code NotificationListenerServices} from the given package are allowed to
+     * receive events for notifications from the given user id. Can only be called by the system uid
+     *
+     * @see #setPermittedCrossProfileNotificationListeners(ComponentName, List)
+     *
+     * @hide
+     */
+    public boolean isNotificationListenerServicePermitted(
+            @NonNull String packageName, @UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                return mService.isNotificationListenerServicePermitted(packageName, userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return true;
     }
 
     /**
