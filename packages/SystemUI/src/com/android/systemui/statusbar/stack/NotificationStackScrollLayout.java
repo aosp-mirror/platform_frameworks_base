@@ -150,6 +150,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mBottomInset = 0;
 
     /**
+     * The width of each child View in this layout. A value of -1 or
+     * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT} will make it so that the children
+     * match this View's width.
+     */
+    private int mChildWidth;
+
+    /**
      * The algorithm which calculates the properties for our children
      */
     protected final StackScrollAlgorithm mStackScrollAlgorithm;
@@ -205,6 +212,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected DismissView mDismissView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
+    private boolean mFadeNotificationsOnDismiss;
 
     /**
      * Was the scroller scrolled to the top when the down motion was observed?
@@ -391,6 +399,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBgColor = context.getColor(R.color.notification_shade_background_color);
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = res.getDimensionPixelSize(R.dimen.notification_max_height);
+        mChildWidth = res.getDimensionPixelSize(R.dimen.notification_child_width);
         mExpandHelper = new ExpandHelper(getContext(), this,
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
@@ -402,6 +411,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mFalsingManager = FalsingManager.getInstance(context);
         mShouldDrawNotificationBackground =
                 res.getBoolean(R.bool.config_drawNotificationBackground);
+        mFadeNotificationsOnDismiss =
+                res.getBoolean(R.bool.config_fadeNotificationsOnDismiss);
 
         updateWillNotDraw();
         if (DEBUG) {
@@ -536,11 +547,18 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        // If the children want to match the parent's width, then simply pass this View's width
+        // MeasureSpec. It should contain the width to measure at.
+        int childWidthSpec = mChildWidth == LayoutParams.MATCH_PARENT
+                ? widthMeasureSpec
+                : MeasureSpec.makeMeasureSpec(mChildWidth, MeasureSpec.EXACTLY);
+
         // We need to measure all children even the GONE ones, such that the heights are calculated
         // correctly as they are used to calculate how many we can fit on the screen.
         final int size = getChildCount();
         for (int i = 0; i < size; i++) {
-            measureChild(getChildAt(i), widthMeasureSpec, heightMeasureSpec);
+            measureChild(getChildAt(i), childWidthSpec, heightMeasureSpec);
         }
     }
 
@@ -964,7 +982,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             mScrimController.setTopHeadsUpDragAmount(animView,
                     Math.min(Math.abs(swipeProgress / 2f - 1.0f), 1.0f));
         }
-        return true; // Don't fade out the notification
+        // Returning true prevents alpha fading.
+        return !mFadeNotificationsOnDismiss;
     }
 
     @Override

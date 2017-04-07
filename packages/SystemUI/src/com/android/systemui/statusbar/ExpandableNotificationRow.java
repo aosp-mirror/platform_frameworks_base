@@ -24,6 +24,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -1143,9 +1144,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
         mMaxHeadsUpHeightIncreased = getFontScaledHeight(
                 R.dimen.notification_max_heads_up_height_increased);
-        mIncreasedPaddingBetweenElements = getResources()
-                .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
-        mIconTransformContentShiftNoIcon = getResources().getDimensionPixelSize(
+        Resources res = getResources();
+        mIncreasedPaddingBetweenElements = res.getDimensionPixelSize(
+                R.dimen.notification_divider_height_increased);
+        mIconTransformContentShiftNoIcon = res.getDimensionPixelSize(
                 R.dimen.notification_icon_transform_content_shift);
     }
 
@@ -1199,30 +1201,39 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mChildrenContainer.setIsLowPriority(mIsLowPriority);
                 mChildrenContainer.setContainingNotification(ExpandableNotificationRow.this);
                 mChildrenContainer.onNotificationUpdated();
-                mTranslateableViews.add(mChildrenContainer);
+
+                if (mShouldTranslateContents) {
+                    mTranslateableViews.add(mChildrenContainer);
+                }
             }
         });
 
-        // Add the views that we translate to reveal the menu
-        mTranslateableViews = new ArrayList<View>();
-        for (int i = 0; i < getChildCount(); i++) {
-            mTranslateableViews.add(getChildAt(i));
+        if (mShouldTranslateContents) {
+            // Add the views that we translate to reveal the menu
+            mTranslateableViews = new ArrayList<>();
+            for (int i = 0; i < getChildCount(); i++) {
+                mTranslateableViews.add(getChildAt(i));
+            }
+            // Remove views that don't translate
+            mTranslateableViews.remove(mChildrenContainerStub);
+            mTranslateableViews.remove(mGutsStub);
         }
-        // Remove views that don't translate
-        mTranslateableViews.remove(mChildrenContainerStub);
-        mTranslateableViews.remove(mGutsStub);
     }
 
     public void resetTranslation() {
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
         }
-        if (mTranslateableViews != null) {
+
+        if (!mShouldTranslateContents) {
+            setTranslationX(0);
+        } else if (mTranslateableViews != null) {
             for (int i = 0; i < mTranslateableViews.size(); i++) {
                 mTranslateableViews.get(i).setTranslationX(0);
             }
+            invalidateOutline();
         }
-        invalidateOutline();
+
         mMenuRow.resetMenu();
     }
 
@@ -1242,13 +1253,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             // Don't translate if guts are showing.
             return;
         }
-        // Translate the group of views
-        for (int i = 0; i < mTranslateableViews.size(); i++) {
-            if (mTranslateableViews.get(i) != null) {
-                mTranslateableViews.get(i).setTranslationX(translationX);
+        if (!mShouldTranslateContents) {
+            setTranslationX(translationX);
+        } else if (mTranslateableViews != null) {
+            // Translate the group of views
+            for (int i = 0; i < mTranslateableViews.size(); i++) {
+                if (mTranslateableViews.get(i) != null) {
+                    mTranslateableViews.get(i).setTranslationX(translationX);
+                }
             }
+            invalidateOutline();
         }
-        invalidateOutline();
         if (mMenuRow.getMenuView() != null) {
             mMenuRow.onTranslationUpdate(translationX);
         }
@@ -1256,10 +1271,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public float getTranslation() {
+        if (mShouldTranslateContents) {
+            return getTranslationX();
+        }
+
         if (mTranslateableViews != null && mTranslateableViews.size() > 0) {
             // All of the views in the list should have same translation, just use first one.
             return mTranslateableViews.get(0).getTranslationX();
         }
+
         return 0;
     }
 
