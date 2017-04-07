@@ -273,6 +273,11 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         @Override
         public void unregisterReceiver(BroadcastReceiver receiver) {
         }
+
+        @Override
+        public void sendBroadcast(Intent intent) {
+            // Do nothing.
+        }
     }
 
     // This target class doesn't matter, it just needs to have a Requires to hit the flow where
