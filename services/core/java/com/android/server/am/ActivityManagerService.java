@@ -2385,16 +2385,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 idleUids();
             } break;
             case VR_MODE_CHANGE_MSG: {
-                if (mVrController.onVrModeChanged((ActivityRecord) msg.obj)) {
-                    synchronized (ActivityManagerService.this) {
-                        if (mVrController.shouldDisableNonVrUiLocked()) {
-                            // If we are in a VR mode where Picture-in-Picture mode is unsupported,
-                            // then remove the pinned stack.
-                            final PinnedActivityStack pinnedStack = mStackSupervisor.getStack(
-                                    PINNED_STACK_ID);
-                            if (pinnedStack != null) {
-                                mStackSupervisor.removeStackLocked(PINNED_STACK_ID);
-                            }
+                if (!mVrController.onVrModeChanged((ActivityRecord) msg.obj)) {
+                    return;
+                }
+                synchronized (ActivityManagerService.this) {
+                    final boolean disableNonVrUi = mVrController.shouldDisableNonVrUiLocked();
+                    mWindowManager.disableNonVrUi(disableNonVrUi);
+                    if (disableNonVrUi) {
+                        // If we are in a VR mode where Picture-in-Picture mode is unsupported,
+                        // then remove the pinned stack.
+                        final PinnedActivityStack pinnedStack = mStackSupervisor.getStack(
+                                PINNED_STACK_ID);
+                        if (pinnedStack != null) {
+                            mStackSupervisor.removeStackLocked(PINNED_STACK_ID);
                         }
                     }
                 }

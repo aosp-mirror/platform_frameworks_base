@@ -402,6 +402,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final DisplaySettings mDisplaySettings;
 
+    /** If the system should display notifications for apps displaying an alert window. */
+    boolean mShowAlertWindowNotifications = true;
+
     /**
      * All currently active sessions with clients.
      */
@@ -7367,6 +7370,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 exec.run();
             } finally {
                 SurfaceControl.closeTransaction();
+            }
+        }
+    }
+
+    /** Called to inform window manager if non-Vr UI shoul be disabled or not. */
+    public void disableNonVrUi(boolean disable) {
+        synchronized (mWindowMap) {
+            // Allow alert window notifications to be shown if non-vr UI is enabled.
+            final boolean showAlertWindowNotifications = !disable;
+            if (showAlertWindowNotifications == mShowAlertWindowNotifications) {
+                return;
+            }
+            mShowAlertWindowNotifications = showAlertWindowNotifications;
+
+            for (int i = mSessions.size() - 1; i >= 0; --i) {
+                final Session s = mSessions.valueAt(i);
+                s.setShowingAlertWindowNotificationAllowed(mShowAlertWindowNotifications);
             }
         }
     }
