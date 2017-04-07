@@ -170,8 +170,8 @@ public class BoundsAnimationController {
 
             // If we are animating to a new fullscreen state (either to/from fullscreen), then
             // notify the target of the change with the new frozen task bounds
-            if (mAnimatingToNewFullscreenState) {
-                mTarget.updatePictureInPictureMode(mMoveToFullScreen ? null : mTo);
+            if (mAnimatingToNewFullscreenState && mMoveToFullScreen) {
+                mTarget.updatePictureInPictureMode(null);
             }
 
             // Immediately update the task bounds if they have to become larger, but preserve

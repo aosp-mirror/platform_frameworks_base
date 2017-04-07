@@ -42,6 +42,7 @@ import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
@@ -166,7 +167,6 @@ import android.view.Surface;
 
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
@@ -2321,7 +2321,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mWindowManager.deferSurfaceLayout();
         try {
             if (fromStackId == DOCKED_STACK_ID) {
-
                 // We are moving all tasks from the docked stack to the fullscreen stack,
                 // which is dismissing the docked stack, so resize all other stacks to
                 // fullscreen here already so we don't end up with resize trashing.
@@ -2340,13 +2339,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // resize when we remove task from it below and it is detached from the
                 // display because it no longer contains any tasks.
                 mAllowDockedStackResize = false;
+            } else if (fromStackId == PINNED_STACK_ID) {
+                if (onTop) {
+                    // Log if we are expanding the PiP to fullscreen
+                    MetricsLogger.action(mService.mContext,
+                            ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
+                }
             }
             ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
             final boolean isFullscreenStackVisible = fullscreenStack != null &&
                     fullscreenStack.shouldBeVisible(null) == STACK_VISIBLE;
             // If we are moving from the pinned stack, then the animation takes care of updating
             // the picture-in-picture mode.
-            final boolean schedulePictureInPictureModeChange = (fromStackId != PINNED_STACK_ID);
+            final boolean schedulePictureInPictureModeChange = (fromStackId == PINNED_STACK_ID);
             final ArrayList<TaskRecord> tasks = stack.getAllTasks();
             final int size = tasks.size();
             if (onTop) {
@@ -2359,8 +2364,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // pinned stack is recreated. See moveActivityToPinnedStackLocked().
                         task.setTaskToReturnTo(isFullscreenStackVisible && onTop ?
                                 APPLICATION_ACTIVITY_TYPE : HOME_ACTIVITY_TYPE);
-                        MetricsLogger.action(mService.mContext,
-                                MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
                     }
                     // Defer resume until all the tasks have been moved to the fullscreen stack
                     task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
@@ -2515,27 +2518,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         final ArrayList<TaskRecord> tasks = stack.getAllTasks();
         if (stack.getStackId() == PINNED_STACK_ID) {
-            final ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
-            if (fullscreenStack != null) {
-                final boolean isFullscreenStackVisible =
-                        fullscreenStack.shouldBeVisible(null) == STACK_VISIBLE;
-                for (int i = 0; i < tasks.size(); i++) {
-                    // Insert the task either at the top of the fullscreen stack if it is hidden,
-                    // or to the bottom if it is currently visible
-                    final int insertPosition = isFullscreenStackVisible ? 0
-                            : fullscreenStack.getChildCount();
-                    final TaskRecord task = tasks.get(i);
-                    // Defer resume until we remove all the tasks
-                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, insertPosition,
-                            REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE, DEFER_RESUME, "removeStack");
-                }
-                ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                resumeFocusedStackTopActivityLocked();
-            } else {
-                // If there is no fullscreen stack, then create the stack and move all the tasks
-                // onto the stack
-                moveTasksToFullscreenStackLocked(PINNED_STACK_ID, !ON_TOP);
-            }
+            /**
+             * Workaround: Force-stop all the activities in the pinned stack before we reparent them
+             * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
+             * that the client receives onStop() before it is reparented.  We do this by detaching
+             * the stack from the display so that it will be considered invisible when
+             * ensureActivitiesVisibleLocked() is called, and all of its activitys will be marked
+             * invisible as well and added to the stopping list.  After which we process the
+             * stopping list by handling the idle.
+             */
+            final PinnedActivityStack pinnedStack = (PinnedActivityStack) stack;
+            pinnedStack.mForceHidden = true;
+            pinnedStack.ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
+            pinnedStack.mForceHidden = false;
+            activityIdleInternalLocked(null, false /* fromTimeout */,
+                    true /* processPausingActivites */, null /* configuration */);
+
+            // Move all the tasks to the bottom of the fullscreen stack
+            moveTasksToFullscreenStackLocked(PINNED_STACK_ID, !ON_TOP);
         } else {
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 removeTaskByIdLocked(tasks.get(i).taskId, true /* killProcess */,
@@ -2903,6 +2903,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // with the visibility of the stack / windows.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
+
+        // TODO(b/36099777): Schedule the PiP mode change here immediately until we can defer all
+        // callbacks until after the bounds animation
+        scheduleUpdatePictureInPictureModeIfNeeded(r.getTask(), destBounds, true /* immediate */);
 
         stack.animateResizePinnedStack(sourceBounds, destBounds, -1 /* animationDuration */);
         mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName);
