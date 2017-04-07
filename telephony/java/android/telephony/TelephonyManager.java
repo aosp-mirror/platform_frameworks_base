@@ -3106,30 +3106,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Send the special dialer code. The IPC caller must be the current default dialer.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     *
-     * @param inputCode The special dialer code to send which follows the format of *#*#<code>#*#*
-     * @return true if sent sucessfully, false otherwise
-     * @deprecated use {@link #sendDialerSpecialCode(String)} ()} instead.
-     */
-    public boolean sendDialerCode(String inputCode) {
-        try {
-            final ITelephony telephony = getITelephony();
-            if (telephony == null) {
-                Log.e(TAG, "Telephony service unavailable");
-                return false;
-            }
-            return telephony.sendDialerCode(mContext.getOpPackageName(), inputCode);
-        } catch (RemoteException | NullPointerException ex) {
-            // This could happen before phone restarts due to crashing
-            return false;
-        }
-    }
-
-    /**
      * Send the special dialer code. The IPC caller must be the current default dialer or has
      * carrier privileges.
      * @see #hasCarrierPrivileges
