@@ -2285,6 +2285,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports running activities on secondary displays.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS
+            = "android.software.activities_on_secondary_displays";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports creating secondary users and managed profiles via
      * {@link DevicePolicyManager}.
      */

@@ -30,6 +30,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
@@ -13763,7 +13764,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow();
         final boolean supportsSplitScreenMultiWindow =
                 ActivityManager.supportsSplitScreenMultiWindow();
-        final boolean supportsMultiDisplay = ActivityManager.supportsMultiDisplay();
+        final boolean supportsMultiDisplay = mContext.getPackageManager()
+                .hasSystemFeature(FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS);
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
