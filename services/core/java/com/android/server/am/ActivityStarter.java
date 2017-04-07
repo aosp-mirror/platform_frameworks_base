@@ -118,14 +118,11 @@ import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Slog;
-import android.view.Display;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.server.LocalServices;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.pm.InstantAppResolver;
-import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
 import java.util.ArrayList;
@@ -152,7 +149,6 @@ class ActivityStarter {
 
     // Share state variable among methods when starting an activity.
     private ActivityRecord mStartActivity;
-    private ActivityRecord mReusedActivity;
     private Intent mIntent;
     private int mCallingUid;
     private ActivityOptions mOptions;
@@ -520,7 +516,7 @@ class ActivityStarter {
         doPendingActivityLaunchesLocked(false);
 
         return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags, true,
-                options, inTask);
+                options, inTask, outActivity);
     }
 
     /**
@@ -821,15 +817,19 @@ class ActivityStarter {
                     }
                 }
                 if (res == START_TASK_TO_FRONT) {
-                    ActivityRecord r = stack.topRunningActivityLocked();
+                    final ActivityRecord r = outRecord[0];
+
+                    // ActivityRecord may represent a different activity, but it should not be in
+                    // the resumed state.
                     if (r.nowVisible && r.state == RESUMED) {
                         outResult.timeout = false;
-                        outResult.who = new ComponentName(r.info.packageName, r.info.name);
+                        outResult.who = r.realActivity;
                         outResult.totalTime = 0;
                         outResult.thisTime = 0;
                     } else {
                         outResult.thisTime = SystemClock.uptimeMillis();
-                        mSupervisor.mWaitingActivityVisible.add(outResult);
+                        mSupervisor.waitActivityVisible(r.realActivity, outResult);
+                        // Note: the timeout variable is not currently not ever set.
                         do {
                             try {
                                 mService.wait();
@@ -840,9 +840,7 @@ class ActivityStarter {
                 }
             }
 
-            final ActivityRecord launchedActivity = mReusedActivity != null
-                    ? mReusedActivity : outRecord[0];
-            mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, launchedActivity);
+            mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, outRecord[0]);
             return res;
         }
     }
@@ -954,12 +952,13 @@ class ActivityStarter {
 
     private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+            ActivityRecord[] outActivity) {
         int result = START_CANCELED;
         try {
             mService.mWindowManager.deferSurfaceLayout();
             result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
-                    startFlags, doResume, options, inTask);
+                    startFlags, doResume, options, inTask, outActivity);
         } finally {
             // If we are not able to proceed, disassociate the activity from the task. Leaving an
             // activity in an incomplete state can lead to issues, such as performing operations
@@ -979,7 +978,8 @@ class ActivityStarter {
     // Note: This method should only be called from {@link startActivity}.
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+            ActivityRecord[] outActivity) {
 
         setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
                 voiceInteractor);
@@ -990,16 +990,16 @@ class ActivityStarter {
 
         mIntent.setFlags(mLaunchFlags);
 
-        mReusedActivity = getReusableIntentActivity();
+        ActivityRecord reusedActivity = getReusableIntentActivity();
 
         final int preferredLaunchStackId =
                 (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
 
-        if (mReusedActivity != null) {
+        if (reusedActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
             // still needs to be a lock task mode violation since the task gets cleared out and
             // the device would otherwise leave the locked task.
-            if (mSupervisor.isLockTaskModeViolation(mReusedActivity.getTask(),
+            if (mSupervisor.isLockTaskModeViolation(reusedActivity.getTask(),
                     (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                             == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))) {
                 mSupervisor.showLockTaskToast();
@@ -1008,12 +1008,12 @@ class ActivityStarter {
             }
 
             if (mStartActivity.getTask() == null) {
-                mStartActivity.setTask(mReusedActivity.getTask());
+                mStartActivity.setTask(reusedActivity.getTask());
             }
-            if (mReusedActivity.getTask().intent == null) {
+            if (reusedActivity.getTask().intent == null) {
                 // This task was started because of movement of the activity based on affinity...
                 // Now that we are actually launching it, we can assign the base intent.
-                mReusedActivity.getTask().setIntent(mStartActivity);
+                reusedActivity.getTask().setIntent(mStartActivity);
             }
 
             // This code path leads to delivering a new intent, we want to make sure we schedule it
@@ -1022,7 +1022,7 @@ class ActivityStarter {
             if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                     || isDocumentLaunchesIntoExisting(mLaunchFlags)
                     || mLaunchSingleInstance || mLaunchSingleTask) {
-                final TaskRecord task = mReusedActivity.getTask();
+                final TaskRecord task = reusedActivity.getTask();
 
                 // In this situation we want to remove all activities from the task up to the one
                 // being started. In most cases this means we are resetting the task to its initial
@@ -1030,12 +1030,12 @@ class ActivityStarter {
                 final ActivityRecord top = task.performClearTaskForReuseLocked(mStartActivity,
                         mLaunchFlags);
 
-                // The above code can remove {@code mReusedActivity} from the task, leading to the
+                // The above code can remove {@code reusedActivity} from the task, leading to the
                 // the {@code ActivityRecord} removing its reference to the {@code TaskRecord}. The
                 // task reference is needed in the call below to
                 // {@link setTargetStackAndMoveToFrontIfNeeded}.
-                if (mReusedActivity.getTask() == null) {
-                    mReusedActivity.setTask(task);
+                if (reusedActivity.getTask() == null) {
+                    reusedActivity.setTask(task);
                 }
 
                 if (top != null) {
@@ -1052,7 +1052,10 @@ class ActivityStarter {
 
             sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
-            mReusedActivity = setTargetStackAndMoveToFrontIfNeeded(mReusedActivity);
+            reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
+            if (outActivity.length > 0) {
+                outActivity[0] = reusedActivity;
+            }
 
             if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                 // We don't need to start a new activity, and the client said not to do anything
@@ -1061,7 +1064,7 @@ class ActivityStarter {
                 resumeTargetStackIfNeeded();
                 return START_RETURN_INTENT_TO_CALLER;
             }
-            setTaskFromIntentActivity(mReusedActivity);
+            setTaskFromIntentActivity(reusedActivity);
 
             if (!mAddingToTask && mReuseTask == null) {
                 // We didn't do anything...  but it was needed (a.k.a., client don't use that
@@ -1963,7 +1966,7 @@ class ActivityStarter {
             final boolean resume = doResume && mPendingActivityLaunches.isEmpty();
             try {
                 startActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags, resume, null,
-                        null);
+                        null, null /*outRecords*/);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());

@@ -505,7 +505,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     else TimeUtils.formatDuration(startTime, now, pw);
                     pw.println();
         }
-        final boolean waitingVisible = mStackSupervisor.mWaitingVisibleActivities.contains(this);
+        final boolean waitingVisible =
+                mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(this);
         if (lastVisibleTime != 0 || waitingVisible || nowVisible) {
             pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
                     pw.print(" nowVisible="); pw.print(nowVisible);
@@ -1912,13 +1913,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     // If this activity was already idle, then we now need to make sure we perform
                     // the full stop of any activities that are waiting to do so. This is because
                     // we won't do that while they are still waiting for this one to become visible.
-                    final int size = mStackSupervisor.mWaitingVisibleActivities.size();
+                    final int size = mStackSupervisor.mActivitiesWaitingForVisibleActivity.size();
                     if (size > 0) {
                         for (int i = 0; i < size; i++) {
-                            ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
+                            final ActivityRecord r =
+                                    mStackSupervisor.mActivitiesWaitingForVisibleActivity.get(i);
                             if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "Was waiting for visible: " + r);
                         }
-                        mStackSupervisor.mWaitingVisibleActivities.clear();
+                        mStackSupervisor.mActivitiesWaitingForVisibleActivity.clear();
                         mStackSupervisor.scheduleIdleLocked();
                     }
                 }
@@ -1959,7 +1961,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // First find the real culprit...  if this activity is waiting for
         // another activity to start or has stopped, then the key dispatching
         // timeout should not be caused by this.
-        if (mStackSupervisor.mWaitingVisibleActivities.contains(this) || stopped) {
+        if (mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(this) || stopped) {
             final ActivityStack stack = mStackSupervisor.getFocusedStack();
             // Try to use the one which is closest to top.
             ActivityRecord r = stack.mResumedActivity;
