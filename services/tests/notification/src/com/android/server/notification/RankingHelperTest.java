@@ -490,6 +490,19 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testLoadingOldChannelsDoesNotDeleteNewlyCreatedChannels() throws Exception {
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false,
+                NotificationChannel.DEFAULT_CHANNEL_ID, "bananas");
+        mHelper.createNotificationChannel(PKG, UID,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_LOW), true);
+
+        loadStreamXml(baos);
+
+        // Should still have the newly created channel that wasn't in the xml.
+        assertTrue(mHelper.getNotificationChannel(PKG, UID, "bananas", false) != null);
+    }
+
+    @Test
     public void testCreateChannel_blocked() throws Exception {
         mHelper.setImportance(PKG, UID, NotificationManager.IMPORTANCE_NONE);
 
