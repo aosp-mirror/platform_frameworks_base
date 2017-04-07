@@ -3901,6 +3901,11 @@ message MetricsEvent {
     // FIELD: Action for a nav button event
     FIELD_NAV_ACTION = 933;
 
+    // OPEN: Settings > Security > Nexus Imprint > [Fingerprint] > Delete
+    // CATEGORY: SETTINGS
+    // OS: O
+    FINGERPRINT_REMOVE_SIDECAR = 934;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
