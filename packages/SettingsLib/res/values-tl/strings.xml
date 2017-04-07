@@ -33,8 +33,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"Walang access sa Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Na-save ni <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Awtomatikong nakakonekta sa pamamagitan ng %1$s"</string>
-    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
-    <skip />
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Awtomatikong nakakonekta sa pamamagitan ng provider ng rating ng network"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Nakakonekta sa pamamagitan ng %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Available sa pamamagitan ng %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Nakakonekta, walang Internet"</string>
@@ -140,8 +139,7 @@
     <item msgid="5194774745031751806">"Napakatulin"</item>
     <item msgid="9085102246155045744">"Pinakamabilis"</item>
   </string-array>
-    <!-- no translation found for choose_profile (6921016979430278661) -->
-    <skip />
+    <string name="choose_profile" msgid="6921016979430278661">"Pumili ng profile"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
     <string name="category_work" msgid="8699184680584175622">"Trabaho"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Mga opsyon ng developer"</string>
@@ -318,35 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Pagtatama ng kulay"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ang feature na ito ay pinag-eeksperimentuhan at maaaring makaapekto sa performance."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Na-override ng <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> na lang ang natitira"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> ang natitira"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> ang natitira bago makumpleto ang charge"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> pa"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - humigit-kumulang <xliff:g id="TIME">%2$s</xliff:g> pa ang natitira"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> pa"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang sa makumpleto ang charge"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang sa matapos mag-charge sa AC"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang sa matapos mag-charge sa USB"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang sa matapos mag-charge sa wireless"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Hindi Kilala"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Nagcha-charge"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Nagcha-charge sa AC"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Nagcha-charge"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Nagcha-charge sa USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Nagcha-charge"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Wireless nag-charge"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Nagcha-charge"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"nagcha-charge"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Hindi nagcha-charge"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Hindi nagkakarga"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Puno"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Pinapamahalaan ng admin"</string>
-    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
-    <skip />
-    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
-    <skip />
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Na-enable ng admin"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Na-disable ng admin"</string>
     <string name="home" msgid="3256884684164448244">"Home ng Mga Setting"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -369,4 +355,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Kinakailangan ang password"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Mga aktibong paraan ng pag-input"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Gamitin ang mga wika ng system"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nabigong buksan ang mga setting para sa <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Maaaring magawa ng pamamaraan ng pag-input na ito na kolektahin ang lahat ng tekstong iyong tina-type, kabilang ang personal na data katulad ng mga password at mga numero ng credit card. Nagmumula ito sa app na <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Gamitin ang pamamaraan ng pag-input na ito?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Tandaan: Pagkatapos ng pag-reboot, hindi makakapagsimula ang app na ito hangga\'t hindi mo ina-unlock ang iyong telepono"</string>
 </resources>
