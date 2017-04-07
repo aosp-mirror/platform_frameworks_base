@@ -16,12 +16,16 @@
 
 package com.android.printservice.recommendation.plugin.hp;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.annotation.NonNull;
 import android.text.TextUtils;
+
 import com.android.printservice.recommendation.PrintServicePlugin;
+
+import java.net.InetAddress;
+import java.util.ArrayList;
 
 public abstract class ServiceRecommendationPlugin implements PrintServicePlugin, ServiceListener.Observer {
 
@@ -71,7 +75,7 @@ public abstract class ServiceRecommendationPlugin implements PrintServicePlugin,
     @Override
     public void dataSetChanged() {
         synchronized (mLock) {
-            if (mCallback != null) mCallback.onChanged(getCount());
+            if (mCallback != null) mCallback.onChanged(getPrinters());
         }
     }
 
@@ -80,7 +84,7 @@ public abstract class ServiceRecommendationPlugin implements PrintServicePlugin,
         return TextUtils.equals(vendor, mVendorInfo.mVendorID);
     }
 
-    public int getCount() {
-        return mListener.getCount().second;
+    public ArrayList<InetAddress> getPrinters() {
+        return mListener.getPrinters();
     }
 }
