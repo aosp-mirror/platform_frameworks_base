@@ -16,13 +16,11 @@
 
 package com.android.mtp;
 
-import android.annotation.Nullable;
-
 class TestServiceIntentSender extends ServiceIntentSender {
     TestServiceIntentSender() {
         super(null);
     }
 
     @Override
-    void sendUpdateNotificationIntent(@Nullable MtpDeviceRecord record) {}
+    void sendUpdateNotificationIntent(MtpDeviceRecord[] record) {}
 }
