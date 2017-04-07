@@ -135,7 +135,15 @@ public class TileUtils {
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the title that should be displayed for the preference.
      */
+    @Deprecated
     public static final String META_DATA_PREFERENCE_TITLE = "com.android.settings.title";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the title that should be displayed for the preference.
+     */
+    public static final String META_DATA_PREFERENCE_TITLE_RES_ID =
+            "com.android.settings.title.resid";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
@@ -364,7 +372,16 @@ public class TileUtils {
                     if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
                         icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
                     }
-                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+                    int resId = 0;
+                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE_RES_ID)) {
+                        resId = metaData.getInt(META_DATA_PREFERENCE_TITLE_RES_ID);
+                        if (resId != 0) {
+                            title = res.getString(resId);
+                        }
+                    }
+                    // Fallback to legacy title extraction if we couldn't get the title through
+                    // res id.
+                    if ((resId == 0) && metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
                         if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                             title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
                         } else {
