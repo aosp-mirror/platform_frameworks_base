@@ -276,7 +276,8 @@ static jobject JHwBinder_native_getService(
         jstring ifaceNameObj,
         jstring serviceNameObj) {
 
-    using ::android::vintf::operator<<;
+    using ::android::hidl::base::V1_0::IBase;
+    using ::android::hidl::manager::V1_0::IServiceManager;
 
     if (ifaceNameObj == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", NULL);
@@ -318,13 +319,20 @@ static jobject JHwBinder_native_getService(
               << "/"
               << serviceName;
 
-    ::android::vintf::Transport transport =
-            ::android::hardware::getTransport(ifaceName, serviceName);
-    if (   transport != ::android::vintf::Transport::EMPTY
-        && transport != ::android::vintf::Transport::HWBINDER) {
+    Return<IServiceManager::Transport> transportRet =
+            manager->getTransport(ifaceNameHStr, serviceNameHStr);
+
+    if (!transportRet.isOk()) {
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+        return NULL;
+    }
+
+    IServiceManager::Transport transport = transportRet;
+
+    if (   transport != IServiceManager::Transport::EMPTY
+        && transport != IServiceManager::Transport::HWBINDER) {
         LOG(ERROR) << "service " << ifaceName << " declares transport method "
-                   << transport << " but framework expects "
-                   << ::android::vintf::Transport::HWBINDER;
+                   << toString(transport) << " but framework expects hwbinder.";
         signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
         return NULL;
     }
