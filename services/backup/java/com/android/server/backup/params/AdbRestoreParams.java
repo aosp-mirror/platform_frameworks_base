@@ -14,19 +14,13 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.params;
 
-/**
- * Interface and methods used by the asynchronous-with-timeout backup/restore operations.
- */
-public interface BackupRestoreTask {
+import android.os.ParcelFileDescriptor;
 
-    // Execute one tick of whatever state machine the task implements
-    void execute();
+public class AdbRestoreParams extends AdbParams {
 
-    // An operation that wanted a callback has completed
-    void operationComplete(long result);
-
-    // An operation that wanted a callback has timed out
-    void handleCancel(boolean cancelAll);
+    public AdbRestoreParams(ParcelFileDescriptor input) {
+        fd = input;
+    }
 }

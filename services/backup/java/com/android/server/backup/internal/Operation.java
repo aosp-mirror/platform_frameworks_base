@@ -14,19 +14,19 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.internal;
 
-/**
- * Interface and methods used by the asynchronous-with-timeout backup/restore operations.
- */
-public interface BackupRestoreTask {
+import com.android.server.backup.BackupRestoreTask;
 
-    // Execute one tick of whatever state machine the task implements
-    void execute();
+public class Operation {
 
-    // An operation that wanted a callback has completed
-    void operationComplete(long result);
+    public int state;
+    public final BackupRestoreTask callback;
+    public final int type;
 
-    // An operation that wanted a callback has timed out
-    void handleCancel(boolean cancelAll);
+    public Operation(int initialState, BackupRestoreTask callbackObj, int type) {
+        state = initialState;
+        callback = callbackObj;
+        this.type = type;
+    }
 }

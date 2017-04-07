@@ -14,19 +14,20 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.internal;
 
 /**
- * Interface and methods used by the asynchronous-with-timeout backup/restore operations.
+ * Set of backup services that have pending changes.
  */
-public interface BackupRestoreTask {
+public class BackupRequest {
 
-    // Execute one tick of whatever state machine the task implements
-    void execute();
+    public String packageName;
 
-    // An operation that wanted a callback has completed
-    void operationComplete(long result);
+    public BackupRequest(String pkgName) {
+        packageName = pkgName;
+    }
 
-    // An operation that wanted a callback has timed out
-    void handleCancel(boolean cancelAll);
+    public String toString() {
+        return "BackupRequest{pkg=" + packageName + "}";
+    }
 }

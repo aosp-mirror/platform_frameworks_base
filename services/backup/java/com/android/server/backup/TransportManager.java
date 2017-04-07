@@ -53,7 +53,7 @@ import java.util.Set;
 /**
  * Handles in-memory bookkeeping of all BackupTransport objects.
  */
-class TransportManager {
+public class TransportManager {
 
     private static final String TAG = "BackupTransportManager";
 
@@ -149,7 +149,7 @@ class TransportManager {
         }
     }
 
-    IBackupTransport getTransportBinder(String transportName) {
+    public IBackupTransport getTransportBinder(String transportName) {
         synchronized (mTransportLock) {
             ComponentName component = mBoundTransports.get(transportName);
             if (component == null) {
@@ -165,11 +165,11 @@ class TransportManager {
         }
     }
 
-    IBackupTransport getCurrentTransportBinder() {
+    public IBackupTransport getCurrentTransportBinder() {
         return getTransportBinder(mCurrentTransportName);
     }
 
-    String getTransportName(IBackupTransport binder) {
+    public String getTransportName(IBackupTransport binder) {
         synchronized (mTransportLock) {
             for (TransportConnection conn : mValidTransports.values()) {
                 if (conn.getBinder() == binder) {

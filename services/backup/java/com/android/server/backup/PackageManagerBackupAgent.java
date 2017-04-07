@@ -108,11 +108,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     // We're constructed with the set of applications that are participating
     // in backup.  This set changes as apps are installed & removed.
-    PackageManagerBackupAgent(PackageManager packageMgr, List<PackageInfo> packages) {
+    public PackageManagerBackupAgent(PackageManager packageMgr, List<PackageInfo> packages) {
         init(packageMgr, packages);
     }
 
-    PackageManagerBackupAgent(PackageManager packageMgr) {
+    public PackageManagerBackupAgent(PackageManager packageMgr) {
         init(packageMgr, null);
 
         evaluateStorablePackages();

@@ -33,7 +33,7 @@ import java.util.Map;
  * TODO: We should create unified backup/restore engines that can be used for both transport and
  * adb backup/restore, and for fullbackup and key-value backup.
  */
-class KeyValueAdbRestoreEngine implements Runnable {
+public class KeyValueAdbRestoreEngine implements Runnable {
     private static final String TAG = "KeyValueAdbRestoreEngine";
     private static final boolean DEBUG = false;
 
@@ -46,8 +46,9 @@ class KeyValueAdbRestoreEngine implements Runnable {
     IBackupAgent mAgent;
     int mToken;
 
-    KeyValueAdbRestoreEngine(BackupManagerServiceInterface backupManagerService, File dataDir,
-            FileMetadata info, ParcelFileDescriptor inFD, IBackupAgent agent, int token) {
+    public KeyValueAdbRestoreEngine(BackupManagerServiceInterface backupManagerService,
+            File dataDir, FileMetadata info, ParcelFileDescriptor inFD, IBackupAgent agent,
+            int token) {
         mBackupManagerService = backupManagerService;
         mDataDir = dataDir;
         mInfo = info;

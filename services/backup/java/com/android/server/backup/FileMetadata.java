@@ -19,15 +19,15 @@ package com.android.server.backup;
 /**
  * Description of a file in the restore datastream.
  */
-class FileMetadata {
-    String packageName;             // name of the owning app
-    String installerPackageName;    // name of the market-type app that installed the owner
-    int type;                       // e.g. BackupAgent.TYPE_DIRECTORY
-    String domain;                  // e.g. FullBackup.DATABASE_TREE_TOKEN
-    String path;                    // subpath within the semantic domain
-    long mode;                      // e.g. 0666 (actually int)
-    long mtime;                     // last mod time, UTC time_t (actually int)
-    long size;                      // bytes of content
+public class FileMetadata {
+    public String packageName;             // name of the owning app
+    public String installerPackageName;    // name of the market-type app that installed the owner
+    public int type;                       // e.g. BackupAgent.TYPE_DIRECTORY
+    public String domain;                  // e.g. FullBackup.DATABASE_TREE_TOKEN
+    public String path;                    // subpath within the semantic domain
+    public long mode;                      // e.g. 0666 (actually int)
+    public long mtime;                     // last mod time, UTC time_t (actually int)
+    public long size;                      // bytes of content
 
     @Override
     public String toString() {
