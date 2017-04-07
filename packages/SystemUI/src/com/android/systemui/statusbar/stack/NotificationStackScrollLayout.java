@@ -821,7 +821,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             } else {
                 appearPosition = 0;
             }
-            if (getNotGoneChildCount() >= minNotificationsForShelf) {
+            if (getNotGoneChildCount() >= minNotificationsForShelf
+                    && mShelf.getVisibility() != GONE) {
                 appearPosition += mShelf.getIntrinsicHeight();
             }
         } else {
@@ -2209,10 +2210,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                 top = (int) firstView.getTranslationY();
             }
         }
-        ActivatableNotificationView lastView = mShelf.hasItemsInStableShelf()
-                ? mShelf
-                : mLastVisibleBackgroundChild;
-        int bottom = 0;
+        ActivatableNotificationView lastView =
+                mShelf.hasItemsInStableShelf() && mShelf.getVisibility() != GONE
+                        ? mShelf
+                        : mLastVisibleBackgroundChild;
+        int bottom;
         if (lastView != null) {
             int finalTranslationY;
             if (lastView == mShelf) {
@@ -2362,7 +2364,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getLayoutMinHeight() {
-        return mShelf.getIntrinsicHeight();
+        return mShelf.getVisibility() == GONE ? 0 : mShelf.getIntrinsicHeight();
     }
 
     public int getFirstChildIntrinsicHeight() {
@@ -2387,7 +2389,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int firstChildMinHeight = firstChild != null ? firstChild.getCollapsedHeight()
                 : mCollapsedSize;
         int shelfHeight = 0;
-        if (mLastVisibleBackgroundChild != null) {
+        if (mLastVisibleBackgroundChild != null && mShelf.getVisibility() != GONE) {
             shelfHeight = mShelf.getIntrinsicHeight();
         }
         return mIntrinsicPadding + firstChildMinHeight + shelfHeight;
@@ -3401,7 +3403,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     endPosition += row.getNotificationParent().getTranslationY();
                 }
                 int layoutEnd = mMaxLayoutHeight + (int) mStackTranslation;
-                if (row != mLastVisibleBackgroundChild) {
+                if (row != mLastVisibleBackgroundChild && mShelf.getVisibility() != GONE) {
                     layoutEnd -= mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
                 }
                 if (endPosition > layoutEnd) {
