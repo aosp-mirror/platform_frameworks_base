@@ -872,10 +872,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      */
     @Override
     public void notifyAccessibilityButtonClicked() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
+                    + android.Manifest.permission.STATUS_BAR_SERVICE);
         }
         synchronized (mLock) {
             notifyAccessibilityButtonClickedLocked();
@@ -891,10 +891,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      */
     @Override
     public void notifyAccessibilityButtonAvailabilityChanged(boolean available) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
+                    + android.Manifest.permission.STATUS_BAR_SERVICE);
         }
         synchronized (mLock) {
             notifyAccessibilityButtonAvailabilityChangedLocked(available);
