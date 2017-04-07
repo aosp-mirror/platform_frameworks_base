@@ -248,8 +248,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     static final String TAG = "NetworkPolicy";
-    private static final boolean LOGD = true; // UNDO
-    private static final boolean LOGV = true; // UNDO
+    private static final boolean LOGD = false;
+    private static final boolean LOGV = false;
 
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADDED_SNOOZE = 2;
