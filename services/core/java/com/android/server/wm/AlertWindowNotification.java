@@ -50,7 +50,7 @@ class AlertWindowNotification {
     private String mNotificationTag;
     private final NotificationManager mNotificationManager;
     private final String mPackageName;
-    private boolean mCancelled;
+    private boolean mPosted;
     private IconUtilities mIconUtilities;
 
     AlertWindowNotification(WindowManagerService service, String packageName) {
@@ -61,7 +61,9 @@ class AlertWindowNotification {
         mNotificationTag = CHANNEL_PREFIX + mPackageName;
         mRequestCode = sNextRequestCode++;
         mIconUtilities = new IconUtilities(mService.mContext);
+    }
 
+    void post() {
         // We can't create/post the notification while the window manager lock is held since it will
         // end up calling into activity manager. So, we post a message to do it later.
         mService.mH.post(this::onPostNotification);
@@ -76,16 +78,21 @@ class AlertWindowNotification {
 
     /** Don't call with the window manager lock held! */
     private void onCancelNotification() {
+        if (!mPosted) {
+            // Notification isn't currently posted...
+            return;
+        }
+        mPosted = false;
         mNotificationManager.cancel(mNotificationTag, NOTIFICATION_ID);
-        mCancelled = true;
     }
 
     /** Don't call with the window manager lock held! */
     private void onPostNotification() {
-        if (mCancelled) {
-            // Notification was cancelled, so nothing more to do...
+        if (mPosted) {
+            // Notification already posted...
             return;
         }
+        mPosted = true;
 
         final Context context = mService.mContext;
         final PackageManager pm = context.getPackageManager();
