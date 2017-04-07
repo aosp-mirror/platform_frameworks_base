@@ -2151,7 +2151,7 @@ int Link(const std::vector<StringPiece>& args) {
   }
 
   AxisConfigFilter filter;
-  if (configs.empty()) {
+  if (!configs.empty()) {
     for (const std::string& config_arg : configs) {
       for (const StringPiece& config_str : util::Tokenize(config_arg, ',')) {
         ConfigDescription config;
