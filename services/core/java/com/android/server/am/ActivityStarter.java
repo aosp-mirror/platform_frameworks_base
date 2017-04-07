@@ -74,7 +74,6 @@ import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
@@ -558,31 +557,17 @@ class ActivityStarter {
             startedActivityStackId = targetStack.mStackId;
         }
 
-        // If we launched the activity from a no display activity that was launched from the home
-        // screen, we also need to start recents to un-minimize the docked stack, since the
-        // noDisplay activity will be finished shortly after.
-        // Note that some apps have trampoline activities without noDisplay being set. In that case,
-        // we have another heuristic in DockedStackDividerController.notifyAppTransitionStarting
-        // that tries to detect that case.
-        // TODO: We should prevent noDisplay activities from affecting task/stack ordering and
-        // visibility instead of using this flag.
-        final boolean noDisplayActivityOverHome = sourceRecord != null
-                && sourceRecord.noDisplay
-                && sourceRecord.getTask().getTaskToReturnTo() == HOME_ACTIVITY_TYPE;
-        if (startedActivityStackId == DOCKED_STACK_ID
-                && (prevFocusedStackId == HOME_STACK_ID || noDisplayActivityOverHome)) {
+        if (startedActivityStackId == DOCKED_STACK_ID) {
             final ActivityStack homeStack = mSupervisor.getStack(HOME_STACK_ID);
-            final ActivityRecord topActivityHomeStack = homeStack != null
-                    ? homeStack.topRunningActivityLocked() : null;
-            if (topActivityHomeStack == null
-                    || topActivityHomeStack.mActivityType != RECENTS_ACTIVITY_TYPE) {
+            final boolean homeStackVisible = homeStack != null && homeStack.isVisible();
+            if (homeStackVisible) {
                 // We launch an activity while being in home stack, which means either launcher or
                 // recents into docked stack. We don't want the launched activity to be alone in a
                 // docked stack, so we want to immediately launch recents too.
                 if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
                 mWindowManager.showRecentApps(true /* fromHome */);
-                return;
             }
+            return;
         }
 
         if (startedActivityStackId == PINNED_STACK_ID
@@ -2153,7 +2138,7 @@ class ActivityStarter {
                 // activity into parent's stack, because we can't find a better place.
                 final ActivityStack dockedStack = mSupervisor.getStack(DOCKED_STACK_ID);
                 if (dockedStack != null
-                        && dockedStack.getStackVisibilityLocked(r) == STACK_INVISIBLE) {
+                        && dockedStack.shouldBeVisible(r) == STACK_INVISIBLE) {
                     // There is a docked stack, but it isn't visible, so we can't launch into that.
                     return null;
                 } else {
