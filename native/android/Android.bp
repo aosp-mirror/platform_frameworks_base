@@ -14,7 +14,7 @@
 
 // The headers module is in frameworks/native/Android.bp.
 ndk_library {
-    name: "libandroid.ndk",
+    name: "libandroid",
     symbol_file: "libandroid.map.txt",
     first_version: "9",
     unversioned_until: "current",
