@@ -434,6 +434,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // status bar notification ticker
     private boolean mTickerEnabled;
+    private boolean mTrackTickerEnabled;
     private Ticker mTicker;
     private View mTickerView;
     private boolean mTicking;
@@ -560,6 +561,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.STATUS_BAR_SHOW_TICKER),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_TRACK_TICKER),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUSBAR_CLOCK_STYLE),
                     false, this, UserHandle.USER_ALL);
             update();
@@ -614,6 +618,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             mClockLocation = Settings.System.getIntForUser(resolver,
                     Settings.System.STATUSBAR_CLOCK_STYLE, 0, UserHandle.USER_CURRENT);
+
+            mTrackTickerEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_TRACK_TICKER, 1, UserHandle.USER_CURRENT) == 1;
         }
     }
 
@@ -755,7 +762,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onMetadataChanged: " + metadata);
             mMediaMetadata = metadata;
             updateMediaMetaData(true, true);
-            tickTrackInfo();
+            if (mTrackTickerEnabled) {
+                tickTrackInfo();
+            }
         }
     };
 
