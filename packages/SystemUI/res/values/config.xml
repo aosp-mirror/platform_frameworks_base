@@ -356,4 +356,7 @@
          off-screen. -->
     <bool name="config_fadeDependingOnAmountSwiped">false</bool>
 
+    <!-- Whether or not to show the expand button at the end of the notification header. -->
+    <bool name="config_showNotificationExpandButtonAtEnd">false</bool>
+
 </resources>

@@ -185,8 +185,15 @@
 
     <!-- The top padding for the notification header -->
     <dimen name="notification_header_padding_top">10dp</dimen>
+
     <!-- The bottom padding for the notification header -->
     <dimen name="notification_header_padding_bottom">11dp</dimen>
+
+    <!-- The margin at the bottom of the notification header. -->
+    <dimen name="notification_header_margin_bottom">5dp</dimen>
+
+    <!-- The end margin after the application icon in the notification header -->
+    <dimen name="notification_header_icon_margin_end">3dp</dimen>
 
     <!-- size (width and height) of the icon in the notification header -->
     <dimen name="notification_header_icon_size">18dp</dimen>
@@ -194,11 +201,24 @@
     <!-- size (width and height) of the icon in the notification header -->
     <dimen name="notification_header_icon_size_ambient">20dp</dimen>
 
+    <!-- The margin before the start of the app name in the header. -->
+    <dimen name="notification_header_app_name_margin_start">3dp</dimen>
+
+    <!-- The margin before and after each of the items in the notification header. -->
+    <dimen name="notification_header_separating_margin">2dp</dimen>
+
+    <!-- The absolute size of the notification expand icon. -2 for wrap_content. -->
+    <dimen name="notification_header_expand_icon_size">-2px</dimen>
+
+    <!-- The top padding for the notification expand button. -->
+    <dimen name="notification_expand_button_padding_top">1dp</dimen>
+
     <!-- Height of a small notification in the status bar -->
     <dimen name="notification_min_height">92dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
+
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_height">64dp</dimen>
 
@@ -213,6 +233,9 @@
 
     <!-- The maximum size of the image in the expanded media notification -->
     <dimen name="media_notification_expanded_image_margin_bottom">20dp</dimen>
+
+    <!-- The absolute height for the header in a media notification. -->
+    <dimen name="media_notification_header_height">53dp</dimen>
 
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>

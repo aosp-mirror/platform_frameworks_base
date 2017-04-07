@@ -1290,7 +1290,7 @@ please see styles_device_defaults.xml.
     <style name="Notification.Header" parent="">
         <item name="paddingTop">@dimen/notification_header_padding_top</item>
         <item name="paddingBottom">@dimen/notification_header_padding_bottom</item>
-        <item name="layout_marginBottom">5dp</item>
+        <item name="layout_marginBottom">@dimen/notification_header_margin_bottom</item>
         <item name="paddingStart">@dimen/notification_content_margin_start</item>
         <item name="paddingEnd">16dp</item>
     </style>
