@@ -14,7 +14,7 @@
 
 // The headers module is in frameworks/native/Android.bp.
 ndk_library {
-    name: "libjnigraphics.ndk",
+    name: "libjnigraphics",
     symbol_file: "libjnigraphics.map.txt",
     first_version: "9",
     unversioned_until: "current",
