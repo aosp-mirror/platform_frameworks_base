@@ -50,6 +50,11 @@ public class NetworkStatsFactory {
     private static final boolean USE_NATIVE_PARSING = true;
     private static final boolean SANITY_CHECK_NATIVE = false;
 
+    private static final String CLATD_INTERFACE_PREFIX = "v4-";
+    // Delta between IPv4 header (20b) and IPv6 header (40b).
+    // Used for correct stats accounting on clatd interfaces.
+    private static final int IPV4V6_HEADER_DELTA = 20;
+
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
     private final File mStatsXtIfaceAll;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_fmt}. */
@@ -57,6 +62,7 @@ public class NetworkStatsFactory {
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
 
+    // TODO: to improve testability and avoid global state, do not use a static variable.
     @GuardedBy("sStackedIfaces")
     private static final ArrayMap<String, String> sStackedIfaces = new ArrayMap<>();
 
@@ -124,9 +130,7 @@ public class NetworkStatsFactory {
                 stats.addValues(entry);
                 reader.finishLine();
             }
-        } catch (NullPointerException e) {
-            throw new ProtocolException("problem parsing stats", e);
-        } catch (NumberFormatException e) {
+        } catch (NullPointerException|NumberFormatException e) {
             throw new ProtocolException("problem parsing stats", e);
         } finally {
             IoUtils.closeQuietly(reader);
@@ -171,9 +175,7 @@ public class NetworkStatsFactory {
                 stats.addValues(entry);
                 reader.finishLine();
             }
-        } catch (NullPointerException e) {
-            throw new ProtocolException("problem parsing stats", e);
-        } catch (NumberFormatException e) {
+        } catch (NullPointerException|NumberFormatException e) {
             throw new ProtocolException("problem parsing stats", e);
         } finally {
             IoUtils.closeQuietly(reader);
@@ -188,26 +190,32 @@ public class NetworkStatsFactory {
 
     public NetworkStats readNetworkStatsDetail(int limitUid, String[] limitIfaces, int limitTag,
             NetworkStats lastStats) throws IOException {
-        final NetworkStats stats = readNetworkStatsDetailInternal(limitUid, limitIfaces, limitTag,
-                lastStats);
+        final NetworkStats stats =
+              readNetworkStatsDetailInternal(limitUid, limitIfaces, limitTag, lastStats);
+        NetworkStats.Entry entry = null; // for recycling
 
         synchronized (sStackedIfaces) {
-            // Sigh, xt_qtaguid ends up double-counting tx traffic going through
-            // clatd interfaces, so we need to subtract it here.
+            // For 464xlat traffic, xt_qtaguid sees every IPv4 packet twice, once as a native IPv4
+            // packet on the stacked interface, and once as translated to an IPv6 packet on the
+            // base interface. For correct stats accounting on the base interface, every 464xlat
+            // packet needs to be subtracted from the root UID on the base interface both for tx
+            // and rx traffic (http://b/12249687, http:/b/33681750).
             final int size = sStackedIfaces.size();
             for (int i = 0; i < size; i++) {
                 final String stackedIface = sStackedIfaces.keyAt(i);
                 final String baseIface = sStackedIfaces.valueAt(i);
+                if (!stackedIface.startsWith(CLATD_INTERFACE_PREFIX)) {
+                    continue;
+                }
 
-                // Count up the tx traffic and subtract from root UID on the
-                // base interface.
-                NetworkStats.Entry adjust = new NetworkStats.Entry(baseIface, 0, 0, 0, 0L, 0L, 0L,
-                        0L, 0L);
-                NetworkStats.Entry entry = null;
+                NetworkStats.Entry adjust =
+                    new NetworkStats.Entry(baseIface, 0, 0, 0, 0L, 0L, 0L, 0L, 0L);
                 for (int j = 0; j < stats.size(); j++) {
                     entry = stats.getValues(j, entry);
                     if (Objects.equals(entry.iface, stackedIface)) {
-                        adjust.txBytes -= entry.txBytes;
+                        adjust.rxBytes -= (entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
+                        adjust.txBytes -= (entry.txBytes + entry.txPackets * IPV4V6_HEADER_DELTA);
+                        adjust.rxPackets -= entry.rxPackets;
                         adjust.txPackets -= entry.txPackets;
                     }
                 }
@@ -215,19 +223,20 @@ public class NetworkStatsFactory {
             }
         }
 
-        // Double sigh, all rx traffic on clat needs to be tweaked to
-        // account for the dropped IPv6 header size post-unwrap.
-        NetworkStats.Entry entry = null;
+        // For 464xlat traffic, xt_qtaguid only counts the bytes of the inner IPv4 packet sent on
+        // the stacked interface with prefix "v4-" and drops the IPv6 header size after unwrapping.
+        // To account correctly for on-the-wire traffic, add the 20 additional bytes difference
+        // for all packets (http://b/12249687, http:/b/33681750).
         for (int i = 0; i < stats.size(); i++) {
             entry = stats.getValues(i, entry);
-            if (entry.iface != null && entry.iface.startsWith("clat")) {
-                // Delta between IPv4 header (20b) and IPv6 header (40b)
-                entry.rxBytes = entry.rxPackets * 20;
-                entry.rxPackets = 0;
-                entry.txBytes = 0;
-                entry.txPackets = 0;
-                stats.combineValues(entry);
+            if (entry.iface == null || !entry.iface.startsWith(CLATD_INTERFACE_PREFIX)) {
+                continue;
             }
+            entry.rxBytes = entry.rxPackets * IPV4V6_HEADER_DELTA;
+            entry.txBytes = entry.txPackets * IPV4V6_HEADER_DELTA;
+            entry.rxPackets = 0;
+            entry.txPackets = 0;
+            stats.combineValues(entry);
         }
 
         return stats;
@@ -305,9 +314,7 @@ public class NetworkStatsFactory {
 
                 reader.finishLine();
             }
-        } catch (NullPointerException e) {
-            throw new ProtocolException("problem parsing idx " + idx, e);
-        } catch (NumberFormatException e) {
+        } catch (NullPointerException|NumberFormatException e) {
             throw new ProtocolException("problem parsing idx " + idx, e);
         } finally {
             IoUtils.closeQuietly(reader);
