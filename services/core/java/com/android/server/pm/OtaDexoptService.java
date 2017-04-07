@@ -278,7 +278,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             public void dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
-                    @Nullable String sharedLibraries) throws InstallerException {
+                    @Nullable String sharedLibraries, @Nullable String seInfo) throws InstallerException {
                 commands.add(buildCommand("dexopt",
                         apkPath,
                         uid,
@@ -289,7 +289,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                         dexFlags,
                         compilerFilter,
                         volumeUuid,
-                        sharedLibraries));
+                        sharedLibraries,
+                        seInfo));
             }
         };
 

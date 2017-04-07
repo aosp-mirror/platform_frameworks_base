@@ -548,10 +548,11 @@ public class ZygoteInit {
                 final int dexFlags = 0;
                 final String compilerFilter = "speed";
                 final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
+                final String seInfo = null;
                 try {
                     installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
                             instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
-                            uuid, sharedLibraries);
+                            uuid, sharedLibraries, seInfo);
                 } catch (RemoteException | ServiceSpecificException e) {
                     // Ignore (but log), we need this on the classpath for fallback mode.
                     Log.w(TAG, "Failed compiling classpath element for system server: "
