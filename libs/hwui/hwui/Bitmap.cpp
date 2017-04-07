@@ -322,6 +322,12 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
     return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info));
 }
 
+void Bitmap::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
+    // TODO: See todo in reconfigure() below
+    SkImageInfo* myInfo = const_cast<SkImageInfo*>(&this->info());
+    *myInfo = info().makeColorSpace(std::move(colorSpace));
+}
+
 void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
     if (kIndex_8_SkColorType != newInfo.colorType()) {
         ctable = nullptr;

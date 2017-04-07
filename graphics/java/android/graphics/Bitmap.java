@@ -20,6 +20,7 @@ import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
@@ -77,8 +78,6 @@ public final class Bitmap implements Parcelable {
 
     /** @hide */
     public int mDensity = getDefaultDensity();
-
-    private static volatile Matrix sScaleMatrix;
 
     private static volatile int sDefaultDensity = -1;
 
@@ -606,7 +605,7 @@ public final class Bitmap implements Parcelable {
      * setting the new bitmap's config to the one specified, and then copying
      * this bitmap's pixels into the new bitmap. If the conversion is not
      * supported, or the allocator fails, then this returns NULL.  The returned
-     * bitmap initially has the same density as the original.
+     * bitmap has the same density and color space as the original.
      *
      * @param config    The desired config for the resulting bitmap
      * @param isMutable True if the resulting bitmap should be mutable (i.e.
@@ -629,7 +628,8 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Creates a new immutable bitmap backed by ashmem which can efficiently
-     * be passed between processes.
+     * be passed between processes. The bitmap is assumed to be in the sRGB
+     * color space.
      *
      * @hide
      */
@@ -645,7 +645,8 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Creates a new immutable bitmap backed by ashmem which can efficiently
-     * be passed between processes.
+     * be passed between processes. The bitmap is assumed to be in the sRGB
+     * color space.
      *
      * @hide
      */
@@ -666,7 +667,7 @@ public final class Bitmap implements Parcelable {
      *         currently PIXEL_FORMAT_RGBA_8888 is the only supported format
      * @hide
      */
-    public static Bitmap createHardwareBitmap(GraphicBuffer graphicBuffer) {
+    public static Bitmap createHardwareBitmap(@NonNull GraphicBuffer graphicBuffer) {
         return nativeCreateHardwareBitmap(graphicBuffer);
     }
 
@@ -683,50 +684,34 @@ public final class Bitmap implements Parcelable {
      * @return The new scaled bitmap or the source bitmap if no scaling is required.
      * @throws IllegalArgumentException if width is <= 0, or height is <= 0
      */
-    public static Bitmap createScaledBitmap(Bitmap src, int dstWidth, int dstHeight,
+    public static Bitmap createScaledBitmap(@NonNull Bitmap src, int dstWidth, int dstHeight,
             boolean filter) {
-        Matrix m;
-        synchronized (Bitmap.class) {
-            // small pool of just 1 matrix
-            m = sScaleMatrix;
-            sScaleMatrix = null;
-        }
-
-        if (m == null) {
-            m = new Matrix();
-        }
+        Matrix m = new Matrix();
 
         final int width = src.getWidth();
         final int height = src.getHeight();
-        final float sx = dstWidth  / (float)width;
-        final float sy = dstHeight / (float)height;
-        m.setScale(sx, sy);
-        Bitmap b = Bitmap.createBitmap(src, 0, 0, width, height, m, filter);
-
-        synchronized (Bitmap.class) {
-            // do we need to check for null? why not just assign everytime?
-            if (sScaleMatrix == null) {
-                sScaleMatrix = m;
-            }
+        if (width != dstWidth || height != dstHeight) {
+            final float sx = dstWidth / (float) width;
+            final float sy = dstHeight / (float) height;
+            m.setScale(sx, sy);
         }
-
-        return b;
+        return Bitmap.createBitmap(src, 0, 0, width, height, m, filter);
     }
 
     /**
      * Returns an immutable bitmap from the source bitmap. The new bitmap may
      * be the same object as source, or a copy may have been made.  It is
-     * initialized with the same density as the original bitmap.
+     * initialized with the same density and color space as the original bitmap.
      */
-    public static Bitmap createBitmap(Bitmap src) {
+    public static Bitmap createBitmap(@NonNull Bitmap src) {
         return createBitmap(src, 0, 0, src.getWidth(), src.getHeight());
     }
 
     /**
      * Returns an immutable bitmap from the specified subset of the source
      * bitmap. The new bitmap may be the same object as source, or a copy may
-     * have been made. It is initialized with the same density as the original
-     * bitmap.
+     * have been made. It is initialized with the same density and color space
+     * as the original bitmap.
      *
      * @param source   The bitmap we are subsetting
      * @param x        The x coordinate of the first pixel in source
@@ -738,7 +723,7 @@ public final class Bitmap implements Parcelable {
      *         outside of the dimensions of the source bitmap, or width is <= 0,
      *         or height is <= 0
      */
-    public static Bitmap createBitmap(Bitmap source, int x, int y, int width, int height) {
+    public static Bitmap createBitmap(@NonNull Bitmap source, int x, int y, int width, int height) {
         return createBitmap(source, x, y, width, height, null, false);
     }
 
@@ -746,7 +731,8 @@ public final class Bitmap implements Parcelable {
      * Returns an immutable bitmap from subset of the source bitmap,
      * transformed by the optional matrix. The new bitmap may be the
      * same object as source, or a copy may have been made. It is
-     * initialized with the same density as the original bitmap.
+     * initialized with the same density and color space as the original
+     * bitmap.
      *
      * If the source bitmap is immutable and the requested subset is the
      * same as the source bitmap itself, then the source bitmap is
@@ -766,8 +752,8 @@ public final class Bitmap implements Parcelable {
      *         outside of the dimensions of the source bitmap, or width is <= 0,
      *         or height is <= 0
      */
-    public static Bitmap createBitmap(Bitmap source, int x, int y, int width, int height,
-            Matrix m, boolean filter) {
+    public static Bitmap createBitmap(@NonNull Bitmap source, int x, int y, int width, int height,
+            @Nullable Matrix m, boolean filter) {
 
         checkXYSign(x, y);
         checkWidthHeight(width, height);
@@ -847,6 +833,8 @@ public final class Bitmap implements Parcelable {
             }
         }
 
+        nativeCopyColorSpace(source.mNativePtr, bitmap.mNativePtr);
+
         // The new bitmap was created from a known bitmap source so assume that
         // they use the same density
         bitmap.mDensity = source.mDensity;
@@ -866,7 +854,8 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Returns a mutable bitmap with the specified width and height.  Its
-     * initial density is as per {@link #getDensity}.
+     * initial density is as per {@link #getDensity}. The newly created
+     * bitmap is in the {@link ColorSpace.Named#SRGB sRGB} color space.
      *
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
@@ -874,13 +863,15 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
-    public static Bitmap createBitmap(int width, int height, Config config) {
+    public static Bitmap createBitmap(int width, int height, @NonNull Config config) {
         return createBitmap(width, height, config, true);
     }
 
     /**
      * Returns a mutable bitmap with the specified width and height.  Its
      * initial density is determined from the given {@link DisplayMetrics}.
+     * The newly created bitmap is in the {@link ColorSpace.Named#SRGB sRGB}
+     * color space.
      *
      * @param display  Display metrics for the display this bitmap will be
      *                 drawn on.
@@ -890,9 +881,29 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
-    public static Bitmap createBitmap(DisplayMetrics display, int width,
-            int height, Config config) {
+    public static Bitmap createBitmap(@Nullable DisplayMetrics display, int width,
+            int height, @NonNull Config config) {
         return createBitmap(display, width, height, config, true);
+    }
+
+    /**
+     * Returns a mutable bitmap with the specified width and height.  Its
+     * initial density is as per {@link #getDensity}. The newly created
+     * bitmap is in the {@link ColorSpace.Named#SRGB sRGB} color space.
+     *
+     * @param width    The width of the bitmap
+     * @param height   The height of the bitmap
+     * @param config   The bitmap config to create.
+     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
+     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
+     *                 instead of transparent.
+     *
+     * @throws IllegalArgumentException if the width or height are <= 0, or if
+     *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
+     */
+    public static Bitmap createBitmap(int width, int height,
+            @NonNull Config config, boolean hasAlpha) {
+        return createBitmap(null, width, height, config, hasAlpha);
     }
 
     /**
@@ -905,17 +916,26 @@ public final class Bitmap implements Parcelable {
      * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
      *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
+     * @param colorSpace The color space of the bitmap. If null,
+     *                   {@link ColorSpace.Named#SRGB sRGB} is assumed. This argument is
+     *                   ignored if the config is not {@link Config#ARGB_8888}.
      *
-     * @throws IllegalArgumentException if the width or height are <= 0, or if
-     *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
+     * @throws IllegalArgumentException if the width or height are <= 0, if
+     *         Config is Config.HARDWARE (because hardware bitmaps are always
+     *         immutable), if the specified color space is not {@link ColorSpace.Model#RGB RGB},
+     *         or if the specified color space's transfer function is not an
+     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
-    public static Bitmap createBitmap(int width, int height, Config config, boolean hasAlpha) {
-        return createBitmap(null, width, height, config, hasAlpha);
+    public static Bitmap createBitmap(int width, int height, @NonNull Config config,
+            boolean hasAlpha, @Nullable ColorSpace colorSpace) {
+        return createBitmap(null, width, height, config, hasAlpha, colorSpace);
     }
 
     /**
      * Returns a mutable bitmap with the specified width and height.  Its
      * initial density is determined from the given {@link DisplayMetrics}.
+     * The newly created bitmap is in the {@link ColorSpace.Named#SRGB sRGB}
+     * color space.
      *
      * @param display  Display metrics for the display this bitmap will be
      *                 drawn on.
@@ -929,15 +949,63 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
-    public static Bitmap createBitmap(DisplayMetrics display, int width, int height,
-            Config config, boolean hasAlpha) {
+    public static Bitmap createBitmap(@Nullable DisplayMetrics display, int width, int height,
+            @NonNull Config config, boolean hasAlpha) {
+        return createBitmap(display, width, height, config, hasAlpha, null);
+    }
+
+    /**
+     * Returns a mutable bitmap with the specified width and height.  Its
+     * initial density is determined from the given {@link DisplayMetrics}.
+     * The newly created bitmap is in the {@link ColorSpace.Named#SRGB sRGB}
+     * color space.
+     *
+     * @param display  Display metrics for the display this bitmap will be
+     *                 drawn on.
+     * @param width    The width of the bitmap
+     * @param height   The height of the bitmap
+     * @param config   The bitmap config to create.
+     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
+     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
+     *                 instead of transparent.
+     * @param colorSpace The color space of the bitmap. If null,
+     *                   {@link ColorSpace.Named#SRGB sRGB} is assumed. This argument is
+     *                   ignored if the config is not {@link Config#ARGB_8888}.
+     *
+     * @throws IllegalArgumentException if the width or height are <= 0, if
+     *         Config is Config.HARDWARE (because hardware bitmaps are always
+     *         immutable), if the specified color space is not {@link ColorSpace.Model#RGB RGB},
+     *         or if the specified color space's transfer function is not an
+     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
+     */
+    public static Bitmap createBitmap(@Nullable DisplayMetrics display, int width, int height,
+            @NonNull Config config, boolean hasAlpha, @Nullable ColorSpace colorSpace) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("width and height must be > 0");
         }
         if (config == Config.HARDWARE) {
             throw new IllegalArgumentException("can't create mutable bitmap with Config.HARDWARE");
         }
-        Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);
+
+        Bitmap bm;
+        if (colorSpace == null || config != Config.ARGB_8888) {
+            bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true, null, null);
+        } else {
+            if (!(colorSpace instanceof ColorSpace.Rgb)) {
+                throw new IllegalArgumentException("colorSpace must be an RGB color space");
+            }
+            ColorSpace.Rgb rgb = (ColorSpace.Rgb) colorSpace;
+            ColorSpace.Rgb.TransferParameters parameters = rgb.getTransferParameters();
+            if (parameters == null) {
+                throw new IllegalArgumentException("colorSpace must use an ICC "
+                        + "parametric transfer function");
+            }
+
+            ColorSpace.Rgb d50 = (ColorSpace.Rgb) ColorSpace.adapt(rgb, ColorSpace.ILLUMINANT_D50);
+            bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true,
+                    d50.getTransform(), parameters);
+        }
+
         if (display != null) {
             bm.mDensity = display.densityDpi;
         }
@@ -954,9 +1022,10 @@ public final class Bitmap implements Parcelable {
     /**
      * Returns a immutable bitmap with the specified width and height, with each
      * pixel value set to the corresponding value in the colors array.  Its
-     * initial density is as per {@link #getDensity}.
+     * initial density is as per {@link #getDensity}. The newly created
+     * bitmap is in the {@link ColorSpace.Named#SRGB sRGB} color space.
      *
-     * @param colors   Array of {@link Color} used to initialize the pixels.
+     * @param colors   Array of sRGB {@link Color colors} used to initialize the pixels.
      * @param offset   Number of values to skip before the first color in the
      *                 array of colors.
      * @param stride   Number of colors in the array between rows (must be >=
@@ -969,8 +1038,8 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         the color array's length is less than the number of pixels.
      */
-    public static Bitmap createBitmap(int colors[], int offset, int stride,
-            int width, int height, Config config) {
+    public static Bitmap createBitmap(@NonNull @ColorInt int[] colors, int offset, int stride,
+            int width, int height, @NonNull Config config) {
         return createBitmap(null, colors, offset, stride, width, height, config);
     }
 
@@ -978,10 +1047,12 @@ public final class Bitmap implements Parcelable {
      * Returns a immutable bitmap with the specified width and height, with each
      * pixel value set to the corresponding value in the colors array.  Its
      * initial density is determined from the given {@link DisplayMetrics}.
+     * The newly created bitmap is in the {@link ColorSpace.Named#SRGB sRGB}
+     * color space.
      *
      * @param display  Display metrics for the display this bitmap will be
      *                 drawn on.
-     * @param colors   Array of {@link Color} used to initialize the pixels.
+     * @param colors   Array of sRGB {@link Color colors} used to initialize the pixels.
      * @param offset   Number of values to skip before the first color in the
      *                 array of colors.
      * @param stride   Number of colors in the array between rows (must be >=
@@ -994,8 +1065,9 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         the color array's length is less than the number of pixels.
      */
-    public static Bitmap createBitmap(DisplayMetrics display, int colors[],
-            int offset, int stride, int width, int height, Config config) {
+    public static Bitmap createBitmap(@NonNull DisplayMetrics display,
+            @NonNull @ColorInt int[] colors, int offset, int stride,
+            int width, int height, @NonNull Config config) {
 
         checkWidthHeight(width, height);
         if (Math.abs(stride) < width) {
@@ -1011,7 +1083,7 @@ public final class Bitmap implements Parcelable {
             throw new IllegalArgumentException("width and height must be > 0");
         }
         Bitmap bm = nativeCreate(colors, offset, stride, width, height,
-                            config.nativeInt, false);
+                            config.nativeInt, false, null, null);
         if (display != null) {
             bm.mDensity = display.densityDpi;
         }
@@ -1021,9 +1093,10 @@ public final class Bitmap implements Parcelable {
     /**
      * Returns a immutable bitmap with the specified width and height, with each
      * pixel value set to the corresponding value in the colors array.  Its
-     * initial density is as per {@link #getDensity}.
+     * initial density is as per {@link #getDensity}. The newly created
+     * bitmap is in the {@link ColorSpace.Named#SRGB sRGB} color space.
      *
-     * @param colors   Array of {@link Color} used to initialize the pixels.
+     * @param colors   Array of sRGB {@link Color colors} used to initialize the pixels.
      *                 This array must be at least as large as width * height.
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
@@ -1033,7 +1106,8 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         the color array's length is less than the number of pixels.
      */
-    public static Bitmap createBitmap(int colors[], int width, int height, Config config) {
+    public static Bitmap createBitmap(@NonNull @ColorInt int[] colors,
+            int width, int height, Config config) {
         return createBitmap(null, colors, 0, width, width, height, config);
     }
 
@@ -1041,10 +1115,12 @@ public final class Bitmap implements Parcelable {
      * Returns a immutable bitmap with the specified width and height, with each
      * pixel value set to the corresponding value in the colors array.  Its
      * initial density is determined from the given {@link DisplayMetrics}.
+     * The newly created bitmap is in the {@link ColorSpace.Named#SRGB sRGB}
+     * color space.
      *
      * @param display  Display metrics for the display this bitmap will be
      *                 drawn on.
-     * @param colors   Array of {@link Color} used to initialize the pixels.
+     * @param colors   Array of sRGB {@link Color colors} used to initialize the pixels.
      *                 This array must be at least as large as width * height.
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
@@ -1054,8 +1130,8 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         the color array's length is less than the number of pixels.
      */
-    public static Bitmap createBitmap(DisplayMetrics display, int colors[],
-            int width, int height, Config config) {
+    public static Bitmap createBitmap(@Nullable DisplayMetrics display,
+            @NonNull @ColorInt int colors[], int width, int height, @NonNull Config config) {
         return createBitmap(display, colors, 0, width, width, height, config);
     }
 
@@ -1806,7 +1882,9 @@ public final class Bitmap implements Parcelable {
 
     private static native Bitmap nativeCreate(int[] colors, int offset,
                                               int stride, int width, int height,
-                                              int nativeConfig, boolean mutable);
+                                              int nativeConfig, boolean mutable,
+                                              @Nullable @Size(9) float[] xyzD50,
+                                              @Nullable ColorSpace.Rgb.TransferParameters p);
     private static native Bitmap nativeCopy(long nativeSrcBitmap, int nativeConfig,
                                             boolean isMutable);
     private static native Bitmap nativeCopyAshmem(long nativeSrcBitmap);
@@ -1865,4 +1943,5 @@ public final class Bitmap implements Parcelable {
     private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
     private static native boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params);
     private static native boolean nativeIsSRGB(long nativePtr);
+    private static native void nativeCopyColorSpace(long srcBitmap, long dstBitmap);
 }

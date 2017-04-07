@@ -16,6 +16,7 @@
 #pragma once
 
 #include <SkBitmap.h>
+#include <SkColorSpace.h>
 #include <SkColorTable.h>
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
@@ -82,6 +83,7 @@ public:
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     void reconfigure(const SkImageInfo& info);
+    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     void setAlphaType(SkAlphaType alphaType);
 
     void getSkBitmap(SkBitmap* outBitmap);

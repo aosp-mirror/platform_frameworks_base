@@ -44,6 +44,14 @@ static jmethodID gBitmap_constructorMethodID;
 static jmethodID gBitmap_reinitMethodID;
 static jmethodID gBitmap_getAllocationByteCountMethodID;
 
+static jfieldID gTransferParams_aFieldID;
+static jfieldID gTransferParams_bFieldID;
+static jfieldID gTransferParams_cFieldID;
+static jfieldID gTransferParams_dFieldID;
+static jfieldID gTransferParams_eFieldID;
+static jfieldID gTransferParams_fFieldID;
+static jfieldID gTransferParams_gFieldID;
+
 namespace android {
 
 class BitmapWrapper {
@@ -685,6 +693,22 @@ static ToColorProc ChooseToColorProc(const SkBitmap& src) {
     return NULL;
 }
 
+static void ToF16_SA8(void* dst, const void* src, int width) {
+    SkASSERT(width > 0);
+    uint64_t* d = (uint64_t*)dst;
+    const uint8_t* s = (const uint8_t*)src;
+
+    for (int i = 0; i < width; i++) {
+        uint8_t c = *s++;
+        SkPM4f a;
+        a.fVec[SkPM4f::R] = 0.0f;
+        a.fVec[SkPM4f::G] = 0.0f;
+        a.fVec[SkPM4f::B] = 0.0f;
+        a.fVec[SkPM4f::A] = c / 255.0f;
+        *d++ = a.toF16();
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -696,7 +720,8 @@ static int getPremulBitmapCreateFlags(bool isMutable) {
 
 static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                               jint offset, jint stride, jint width, jint height,
-                              jint configHandle, jboolean isMutable) {
+                              jint configHandle, jboolean isMutable,
+                              jfloatArray xyzD50, jobject transferParameters) {
     SkColorType colorType = GraphicsJNI::legacyBitmapConfigToColorType(configHandle);
     if (NULL != jColors) {
         size_t n = env->GetArrayLength(jColors);
@@ -712,8 +737,37 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     }
 
     SkBitmap bitmap;
-    bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType,
-            GraphicsJNI::colorSpaceForType(colorType)));
+    sk_sp<SkColorSpace> colorSpace;
+
+    if (colorType != kN32_SkColorType || xyzD50 == nullptr || transferParameters == nullptr) {
+        colorSpace = GraphicsJNI::colorSpaceForType(colorType);
+    } else {
+        SkColorSpaceTransferFn p;
+        p.fA = (float) env->GetDoubleField(transferParameters, gTransferParams_aFieldID);
+        p.fB = (float) env->GetDoubleField(transferParameters, gTransferParams_bFieldID);
+        p.fC = (float) env->GetDoubleField(transferParameters, gTransferParams_cFieldID);
+        p.fD = (float) env->GetDoubleField(transferParameters, gTransferParams_dFieldID);
+        p.fE = (float) env->GetDoubleField(transferParameters, gTransferParams_eFieldID);
+        p.fF = (float) env->GetDoubleField(transferParameters, gTransferParams_fFieldID);
+        p.fG = (float) env->GetDoubleField(transferParameters, gTransferParams_gFieldID);
+
+        SkMatrix44 xyzMatrix(SkMatrix44::kIdentity_Constructor);
+        jfloat* array = env->GetFloatArrayElements(xyzD50, NULL);
+        xyzMatrix.setFloat(0, 0, array[0]);
+        xyzMatrix.setFloat(1, 0, array[1]);
+        xyzMatrix.setFloat(2, 0, array[2]);
+        xyzMatrix.setFloat(0, 1, array[3]);
+        xyzMatrix.setFloat(1, 1, array[4]);
+        xyzMatrix.setFloat(2, 1, array[5]);
+        xyzMatrix.setFloat(0, 2, array[6]);
+        xyzMatrix.setFloat(1, 2, array[7]);
+        xyzMatrix.setFloat(2, 2, array[8]);
+        env->ReleaseFloatArrayElements(xyzD50, array, 0);
+
+        colorSpace = SkColorSpace::MakeRGB(p, xyzMatrix);
+    }
+
+    bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType, colorSpace));
 
     sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(&bitmap, NULL);
     if (!nativeBitmap) {
@@ -739,6 +793,9 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
         SkPixmap srcPixmap = srcUnlocker.pixmap();
 
         SkImageInfo dstInfo = src.info().makeColorType(dstCT);
+        if (dstCT == kRGBA_F16_SkColorType) {
+             dstInfo = dstInfo.makeColorSpace(SkColorSpace::MakeSRGBLinear());
+        }
         if (!dst->setInfo(dstInfo)) {
             return false;
         }
@@ -763,6 +820,14 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
                 }
                 return true;
             }
+            case kRGBA_F16_SkColorType: {
+               for (int y = 0; y < src.height(); y++) {
+                   const uint8_t* srcRow = srcPixmap.addr8(0, y);
+                   void* dstRow = dst->getAddr(0, y);
+                   ToF16_SA8(dstRow, srcRow, src.width());
+               }
+               return true;
+           }
             default:
                 return false;
         }
@@ -1562,6 +1627,13 @@ static jobject Bitmap_createGraphicBufferHandle(JNIEnv* env, jobject, jlong bitm
     return createJavaGraphicBuffer(env, buffer);
 }
 
+static void Bitmap_copyColorSpace(JNIEnv* env, jobject, jlong srcBitmapPtr, jlong dstBitmapPtr) {
+    LocalScopedBitmap srcBitmapHandle(srcBitmapPtr);
+    LocalScopedBitmap dstBitmapHandle(dstBitmapPtr);
+
+    dstBitmapHandle->bitmap().setColorSpace(srcBitmapHandle->bitmap().info().refColorSpace());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 static jclass make_globalref(JNIEnv* env, const char classname[])
 {
@@ -1579,7 +1651,7 @@ static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
 }
 
 static const JNINativeMethod gBitmapMethods[] = {
-    {   "nativeCreate",             "([IIIIIIZ)Landroid/graphics/Bitmap;",
+    {   "nativeCreate",             "([IIIIIIZ[FLandroid/graphics/ColorSpace$Rgb$TransferParameters;)Landroid/graphics/Bitmap;",
         (void*)Bitmap_creator },
     {   "nativeCopy",               "(JIZ)Landroid/graphics/Bitmap;",
         (void*)Bitmap_copy },
@@ -1628,10 +1700,21 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*) Bitmap_createGraphicBufferHandle },
     {   "nativeGetColorSpace",      "(J[F[F)Z", (void*)Bitmap_getColorSpace },
     {   "nativeIsSRGB",             "(J)Z", (void*)Bitmap_isSRGB },
+    {   "nativeCopyColorSpace",     "(JJ)V",
+        (void*)Bitmap_copyColorSpace },
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
+    jclass transfer_params_class = FindClassOrDie(env, "android/graphics/ColorSpace$Rgb$TransferParameters");
+    gTransferParams_aFieldID = GetFieldIDOrDie(env, transfer_params_class, "a", "D");
+    gTransferParams_bFieldID = GetFieldIDOrDie(env, transfer_params_class, "b", "D");
+    gTransferParams_cFieldID = GetFieldIDOrDie(env, transfer_params_class, "c", "D");
+    gTransferParams_dFieldID = GetFieldIDOrDie(env, transfer_params_class, "d", "D");
+    gTransferParams_eFieldID = GetFieldIDOrDie(env, transfer_params_class, "e", "D");
+    gTransferParams_fFieldID = GetFieldIDOrDie(env, transfer_params_class, "f", "D");
+    gTransferParams_gFieldID = GetFieldIDOrDie(env, transfer_params_class, "g", "D");
+
     gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
     gBitmap_nativePtr = getFieldIDCheck(env, gBitmap_class, "mNativePtr", "J");
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(JIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
