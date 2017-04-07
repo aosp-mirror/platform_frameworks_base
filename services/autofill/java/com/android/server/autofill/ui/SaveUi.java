@@ -24,7 +24,7 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.os.Handler;
 import android.service.autofill.SaveInfo;
-import android.text.format.DateUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.Window;
@@ -105,31 +105,44 @@ final class SaveUi {
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
         final TextView titleView = (TextView) view.findViewById(R.id.autofill_save_title);
-        final String type;
 
-        switch(info.getType()) {
-            case SaveInfo.SAVE_DATA_TYPE_PASSWORD:
-                type = context.getString(R.string.autofill_save_type_password);
-                break;
-            case SaveInfo.SAVE_DATA_TYPE_ADDRESS:
-                type = context.getString(R.string.autofill_save_type_address);
-                break;
-            case SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD:
-                type = context.getString(R.string.autofill_save_type_credit_card);
-                break;
-            case SaveInfo.SAVE_DATA_TYPE_USERNAME:
-                type = context.getString(R.string.autofill_save_type_username);
-                break;
-            case SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS:
-                type = context.getString(R.string.autofill_save_type_email_address);
-                break;
-            default:
-                type = null;
+        final ArraySet<String> types = new ArraySet<>(3);
+        final int type = info.getType();
+
+        if ((type & SaveInfo.SAVE_DATA_TYPE_PASSWORD) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_password));
+        }
+        if ((type & SaveInfo.SAVE_DATA_TYPE_ADDRESS) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_address));
+        }
+        if ((type & SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_credit_card));
+        }
+        if ((type & SaveInfo.SAVE_DATA_TYPE_USERNAME) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_username));
+        }
+        if ((type & SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS) != 0) {
+            types.add(context.getString(R.string.autofill_save_type_email_address));
         }
 
-        final String title = (type == null)
-                ? context.getString(R.string.autofill_save_title, providerLabel)
-                : context.getString(R.string.autofill_save_title_with_type, type, providerLabel);
+        final String title;
+        switch (types.size()) {
+            case 1:
+                title = context.getString(R.string.autofill_save_title_with_type,
+                        types.valueAt(0), providerLabel);
+                break;
+            case 2:
+                title = context.getString(R.string.autofill_save_title_with_2types,
+                        types.valueAt(0), types.valueAt(1), providerLabel);
+                break;
+            case 3:
+                title = context.getString(R.string.autofill_save_title_with_3types,
+                        types.valueAt(0), types.valueAt(1), types.valueAt(2), providerLabel);
+                break;
+            default:
+                // Use generic if more than 3 or invalid type (size 0).
+                title = context.getString(R.string.autofill_save_title, providerLabel);
+        }
 
         titleView.setText(title);
         final CharSequence subTitle = info.getDescription();
@@ -137,6 +150,10 @@ final class SaveUi {
             final TextView subTitleView = (TextView) view.findViewById(R.id.autofill_save_subtitle);
             subTitleView.setText(subTitle);
             subTitleView.setVisibility(View.VISIBLE);
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "Title: " + title + " SubTitle: " + subTitle);
         }
 
         final TextView noButton = view.findViewById(R.id.autofill_save_no);
