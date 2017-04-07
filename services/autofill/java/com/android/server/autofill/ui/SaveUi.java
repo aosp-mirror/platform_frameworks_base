@@ -98,7 +98,7 @@ final class SaveUi {
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
-            @NonNull OnSaveListener listener, int lifeTimeMs) {
+            @NonNull OnSaveListener listener) {
         mListener = new OneTimeListener(listener);
 
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -169,13 +169,6 @@ final class SaveUi {
         window.getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
 
         mDialog.show();
-
-        mHandler.postDelayed(() -> {
-            if (!mListener.mDone) {
-                mListener.onCancel(null);
-                Slog.d(TAG, "Save snackbar timed out after " + lifeTimeMs + "ms");
-            }
-        }, lifeTimeMs);
     }
 
     void destroy() {

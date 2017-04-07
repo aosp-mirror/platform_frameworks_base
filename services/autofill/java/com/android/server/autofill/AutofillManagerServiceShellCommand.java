@@ -47,8 +47,6 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         switch (cmd) {
             case "save":
                 return requestSave();
-            case "set":
-                return requestSet();
             case "list":
                 return requestList(pw);
             case "destroy":
@@ -76,9 +74,6 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  save [--user USER_ID]");
             pw.println("    Request provider to save contents of the top activity.");
             pw.println("");
-            pw.println("  set save_timeout MS");
-            pw.println("    Sets how long (in ms) the save snack bar is shown.");
-            pw.println("");
             pw.println("  reset");
             pw.println("    Reset all pending sessions and cached service connections.");
             pw.println("");
@@ -88,18 +83,6 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
     private int requestSave() {
         final int userId = getUserIdFromArgsOrCurrentUser();
         mService.requestSaveForUser(userId);
-        return 0;
-    }
-
-    private int requestSet() {
-        final String type = getNextArgRequired();
-        switch (type) {
-            case "save_timeout":
-                mService.setSaveTimeout(Integer.parseInt(getNextArgRequired()));
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid 'set' type: " + type);
-        }
         return 0;
     }
 
