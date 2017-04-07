@@ -798,7 +798,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mMenuRow;
     }
 
+    @Override
     public void onDensityOrFontScaleChanged() {
+        super.onDensityOrFontScaleChanged();
         initDimens();
         if (mIsSummaryWithChildren) {
             if (mChildrenContainer != null) {

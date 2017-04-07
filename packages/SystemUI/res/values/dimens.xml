@@ -200,6 +200,13 @@
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
     <dimen name="standard_notification_panel_width">416dp</dimen>
+
+    <!-- The top margin of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_margin_top">0dp</dimen>
+
+    <!-- The bottom margin of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_margin_bottom">0dp</dimen>
+
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
     <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
@@ -319,6 +326,9 @@
 
     <!-- The height of the divider between the individual notifications. -->
     <dimen name="notification_divider_height">0.5dp</dimen>
+
+    <!-- The corner radius of the shadow behind the notification. -->
+    <dimen name="notification_shadow_radius">0dp</dimen>
 
     <!-- The height of a notification header -->
     <dimen name="notification_header_height">53dp</dimen>

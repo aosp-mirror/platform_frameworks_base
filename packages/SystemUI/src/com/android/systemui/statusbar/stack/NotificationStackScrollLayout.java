@@ -147,6 +147,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
     private int mTopPadding;
+    private int mBottomMargin;
     private int mBottomInset = 0;
 
     /**
@@ -510,17 +511,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverflingDistance = configuration.getScaledOverflingDistance();
-        mCollapsedSize = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_min_height);
+
+        Resources res = context.getResources();
+        mCollapsedSize = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mStackScrollAlgorithm.initView(context);
         mAmbientState.reload(context);
-        mPaddingBetweenElements = Math.max(1, context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_divider_height));
-        mIncreasedPaddingBetweenElements = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
-        mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
+        mPaddingBetweenElements = Math.max(1,
+                res.getDimensionPixelSize(R.dimen.notification_divider_height));
+        mIncreasedPaddingBetweenElements =
+                res.getDimensionPixelSize(R.dimen.notification_divider_height_increased);
+        mMinTopOverScrollToEscape = res.getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
-        mStatusBarHeight = getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
+        mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
+        mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
@@ -1993,7 +1996,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
             }
         }
-        mContentHeight = height + mTopPadding;
+        mContentHeight = height + mTopPadding + mBottomMargin;
         updateScrollability();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
     }

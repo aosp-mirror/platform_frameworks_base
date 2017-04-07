@@ -17,10 +17,10 @@
 package com.android.systemui.statusbar.stack;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.android.systemui.R;
 import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -48,6 +48,7 @@ public class StackScrollAlgorithm {
 
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
     private boolean mIsExpanded;
+    private boolean mClipNotificationScrollToTop;
     private int mStatusBarHeight;
 
     public StackScrollAlgorithm(Context context) {
@@ -59,13 +60,14 @@ public class StackScrollAlgorithm {
     }
 
     private void initConstants(Context context) {
-        mPaddingBetweenElements = context.getResources().getDimensionPixelSize(
+        Resources res = context.getResources();
+        mPaddingBetweenElements = res.getDimensionPixelSize(
                 R.dimen.notification_divider_height);
-        mIncreasedPaddingBetweenElements = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
-        mCollapsedSize = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_min_height);
-        mStatusBarHeight = context.getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+        mIncreasedPaddingBetweenElements =
+                res.getDimensionPixelSize(R.dimen.notification_divider_height_increased);
+        mCollapsedSize = res.getDimensionPixelSize(R.dimen.notification_min_height);
+        mStatusBarHeight = res.getDimensionPixelSize(R.dimen.status_bar_height);
+        mClipNotificationScrollToTop = res.getBoolean(R.bool.config_clipNotificationScrollToTop);
     }
 
     public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
@@ -142,7 +144,8 @@ public class StackScrollAlgorithm {
             float newNotificationEnd = newYTranslation + newHeight;
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow)
                     && ((ExpandableNotificationRow) child).isPinned();
-            if (!state.inShelf && newYTranslation < previousNotificationEnd
+            if (mClipNotificationScrollToTop
+                    && !state.inShelf && newYTranslation < previousNotificationEnd
                     && (!isHeadsUp || ambientState.isShadeExpanded())) {
                 // The previous view is overlapping on top, clip!
                 float overlapAmount = previousNotificationEnd - newYTranslation;
