@@ -16,10 +16,15 @@
 
 package com.android.printservice.recommendation;
 
-import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
+
 import com.android.internal.util.Preconditions;
+
+import java.net.InetAddress;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Wrapper for a {@link PrintServicePlugin}, isolating issues with the plugin as good as possible
@@ -41,13 +46,13 @@ class RemotePrintServicePlugin implements PrintServicePlugin.PrinterDiscoveryCal
     /** Wrapped plugin */
     private final @NonNull PrintServicePlugin mPlugin;
 
-    /** The number of printers discovered by the plugin */
-    private @IntRange(from = 0) int mNumPrinters;
+    /** The printers discovered by the plugin */
+    private @NonNull List<InetAddress> mPrinters;
 
     /** If the plugin is started by not yet stopped */
     private boolean isRunning;
 
-    /** Listener for changes to {@link #mNumPrinters}. */
+    /** Listener for changes to {@link #mPrinters}. */
     private @NonNull OnChangedListener mListener;
 
     /**
@@ -65,6 +70,8 @@ class RemotePrintServicePlugin implements PrintServicePlugin.PrinterDiscoveryCal
             throws PluginException {
         mListener = listener;
         mPlugin = plugin;
+        mPrinters = Collections.emptyList();
+
         this.recommendsMultiVendorService = recommendsMultiVendorService;
 
         // We handle any throwable to isolate our self from bugs in the plugin code.
@@ -116,26 +123,28 @@ class RemotePrintServicePlugin implements PrintServicePlugin.PrinterDiscoveryCal
      *
      * @return The number of printers reported by the stub.
      */
-    public @IntRange(from = 0) int getNumPrinters() {
-        return mNumPrinters;
+    public @NonNull List<InetAddress> getPrinters() {
+        return mPrinters;
     }
 
     @Override
-    public void onChanged(@IntRange(from = 0) int numDiscoveredPrinters) {
+    public void onChanged(@Nullable List<InetAddress> discoveredPrinters) {
         synchronized (mLock) {
             Preconditions.checkState(isRunning);
 
-            mNumPrinters = Preconditions.checkArgumentNonnegative(numDiscoveredPrinters,
-                    "numDiscoveredPrinters");
-
-            if (mNumPrinters > 0) {
-                mListener.onChanged();
+            if (discoveredPrinters == null) {
+                mPrinters = Collections.emptyList();
+            } else {
+                mPrinters = Preconditions.checkCollectionElementsNotNull(discoveredPrinters,
+                        "discoveredPrinters");
             }
+
+            mListener.onChanged();
         }
     }
 
     /**
-     * Listener to listen for changes to {@link #getNumPrinters}
+     * Listener to listen for changes to {@link #getPrinters}
      */
     public interface OnChangedListener {
         void onChanged();
