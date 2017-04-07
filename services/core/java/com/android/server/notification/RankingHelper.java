@@ -152,7 +152,8 @@ public class RankingHelper implements RankingConfig {
         if (type != XmlPullParser.START_TAG) return;
         String tag = parser.getName();
         if (!TAG_RANKING.equals(tag)) return;
-        mRecords.clear();
+        // Clobber groups and channels with the xml, but don't delete other data that wasn't present
+        // at the time of serialization.
         mRestoredWithoutUids.clear();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
