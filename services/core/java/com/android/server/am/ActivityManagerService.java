@@ -13763,6 +13763,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow();
         final boolean supportsSplitScreenMultiWindow =
                 ActivityManager.supportsSplitScreenMultiWindow();
+        final boolean supportsMultiDisplay = ActivityManager.supportsMultiDisplay();
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
@@ -13800,6 +13801,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mSupportsSplitScreenMultiWindow = supportsSplitScreenMultiWindow;
             mSupportsPictureInPicture = supportsPictureInPicture;
+            mSupportsMultiDisplay = supportsMultiDisplay;
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
             mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
             // This happens before any activities are started, so we can change global configuration
@@ -13828,8 +13830,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
             }
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
-            mSupportsMultiDisplay = res.getBoolean(
-                    com.android.internal.R.bool.config_supportsMultiDisplay);
         }
     }
 
