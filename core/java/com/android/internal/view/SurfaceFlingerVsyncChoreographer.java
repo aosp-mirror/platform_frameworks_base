@@ -31,7 +31,7 @@ public class SurfaceFlingerVsyncChoreographer {
     private static final long ONE_S_IN_NS = ONE_MS_IN_NS * 1000;
 
     private final Handler mHandler;
-    private final Choreographer mChoreographer = Choreographer.getInstance();
+    private final Choreographer mChoreographer;
 
     /**
      * The offset between vsync-app and vsync-surfaceflinger. See
@@ -39,8 +39,10 @@ public class SurfaceFlingerVsyncChoreographer {
      */
     private long mSurfaceFlingerOffsetMs;
 
-    public SurfaceFlingerVsyncChoreographer(Handler handler, Display display) {
+    public SurfaceFlingerVsyncChoreographer(Handler handler, Display display,
+            Choreographer choreographer) {
         mHandler = handler;
+        mChoreographer = choreographer;
         mSurfaceFlingerOffsetMs = calculateAppSurfaceFlingerVsyncOffsetMs(display);
     }
 

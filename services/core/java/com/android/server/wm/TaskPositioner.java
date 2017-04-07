@@ -262,7 +262,8 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mService.mInputManager.registerInputChannel(mServerChannel, null);
 
         mInputEventReceiver = new WindowPositionerEventReceiver(
-                mClientChannel, mService.mH.getLooper(), mService.mChoreographer);
+                mClientChannel, mService.mAnimationHandler.getLooper(),
+                mService.mAnimator.getChoreographer());
 
         mDragApplicationHandle = new InputApplicationHandle(null);
         mDragApplicationHandle.name = TAG;
