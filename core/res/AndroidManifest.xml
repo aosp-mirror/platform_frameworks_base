@@ -3365,6 +3365,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.AccessibilityButtonChooserActivity"
+                  android:exported="false"
                   android:theme="@style/Theme.DeviceDefault.Resolver"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true"
@@ -3374,7 +3375,7 @@
                   android:process=":ui"
                   android:visibleToInstantApps="true">
             <intent-filter>
-                <action android:name="android.intent.action.CHOOSE_ACCESSIBILITY_BUTTON" />
+                <action android:name="com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
