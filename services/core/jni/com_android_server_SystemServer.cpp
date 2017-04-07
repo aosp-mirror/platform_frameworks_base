@@ -19,6 +19,7 @@
 
 #include <hidl/HidlTransportSupport.h>
 
+#include <schedulerservice/SchedulingPolicyService.h>
 #include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
 
@@ -39,17 +40,23 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
 }
 
 static void android_server_SystemServer_startHidlServices(JNIEnv* /* env */, jobject /* clazz */) {
+    using ::android::frameworks::schedulerservice::V1_0::ISchedulingPolicyService;
+    using ::android::frameworks::schedulerservice::V1_0::implementation::SchedulingPolicyService;
     using ::android::frameworks::sensorservice::V1_0::ISensorManager;
     using ::android::frameworks::sensorservice::V1_0::implementation::SensorManager;
     using ::android::hardware::configureRpcThreadpool;
 
+    status_t err;
+
     configureRpcThreadpool(1, false /* callerWillJoin */);
+
     sp<ISensorManager> sensorService = new SensorManager();
-    status_t err = sensorService->registerAsService();
-    if (err != OK) {
-        ALOGE("Cannot register ::android::frameworks::sensorservice::V1_0::"
-              "implementation::SensorManager: %d", err);
-    }
+    err = sensorService->registerAsService();
+    ALOGE_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
+
+    sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
+    err = schedulingService->registerAsService();
+    ALOGE_IF(err != OK, "Cannot register %s: %d", ISchedulingPolicyService::descriptor, err);
 }
 
 /*
