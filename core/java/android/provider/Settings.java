@@ -6922,7 +6922,8 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String WEB_ACTION_ENABLED = "web_action_enabled";
+        @SystemApi
+        public static final String INSTANT_APPS_ENABLED = "instant_apps_enabled";
 
         /**
          * Has this pairable device been paired or upgraded from a previously paired system.
