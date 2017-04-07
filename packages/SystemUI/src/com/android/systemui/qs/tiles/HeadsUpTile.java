@@ -56,7 +56,7 @@ public class HeadsUpTile extends QSTile<QSTile.BooleanState> {
     private boolean getUserHeadsUpState() {
          return Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.HEADS_UP_USER_ENABLED,
-                Settings.System.HEADS_UP_USER_ON) != 0;
+                Settings.System.HEADS_UP_USER_OFF) != 0;
     }
 
     private void setEnabled() {
