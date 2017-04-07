@@ -283,13 +283,6 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
-    // Called by Shell command.
-    public void setSaveTimeout(int timeout) {
-        Slog.i(TAG, "setSaveTimeout("  + timeout + ")");
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-        mUi.setSaveTimeout(timeout);
-    }
-
     /**
      * Removes a cached service for a given user.
      */

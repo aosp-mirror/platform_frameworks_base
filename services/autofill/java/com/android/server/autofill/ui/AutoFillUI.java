@@ -255,7 +255,7 @@ public final class AutoFillUI {
                     }
                     mMetricsLogger.write(log);
                 }
-            }, mSaveTimeoutMs);
+            });
         });
     }
 
