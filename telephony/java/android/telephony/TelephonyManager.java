@@ -1087,14 +1087,15 @@ public class TelephonyManager {
      * this method will return null. The implementation must not to try add LTE
      * identifiers into the existing cdma/gsm classes.
      *<p>
-     * In the future this call will be deprecated.
-     *<p>
      * @return Current location of the device or null if not available.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_FINE_LOCATION}.
+     *
+     * @deprecated use {@link #getAllCellInfo} instead, which returns a superset of this API.
      */
+    @Deprecated
     public CellLocation getCellLocation() {
         try {
             ITelephony telephony = getITelephony();
