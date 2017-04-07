@@ -63,6 +63,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.WindowManagerInternal;
 
+import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -257,13 +258,13 @@ public final class DisplayManagerService extends SystemService {
     }
 
     public void setupSchedulerPolicies() {
-	/*
-	 * android.display is critical to user experience and we should
-	 * make sure it is not in the default foregroup groups, add it to
-	 * top-app to make sure it uses all the cores and scheduling
-	 * settings for top-app when it runs.
-	 */
-	Process.setThreadGroupAndCpuset(DisplayThread.get().getThreadId(), Process.THREAD_GROUP_TOP_APP);
+        // android.display and android.anim is critical to user experience and we should make sure
+        // it is not in the default foregroup groups, add it to top-app to make sure it uses all the
+        // cores and scheduling settings for top-app when it runs.
+        Process.setThreadGroupAndCpuset(DisplayThread.get().getThreadId(),
+                Process.THREAD_GROUP_TOP_APP);
+        Process.setThreadGroupAndCpuset(AnimationThread.get().getThreadId(),
+                Process.THREAD_GROUP_TOP_APP);
     }
 
     @Override
