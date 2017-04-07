@@ -183,9 +183,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final SimpleStringSplitter mStringColonSplitter =
             new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
 
-    private final List<AccessibilityServiceInfo> mEnabledServicesForFeedbackTempList =
-            new ArrayList<>();
-
     private final Rect mTempRect = new Rect();
 
     private final Rect mTempRect1 = new Rect();
@@ -568,7 +565,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     @Override
     public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType,
             int userId) {
-        List<AccessibilityServiceInfo> result = null;
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -577,24 +573,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
             // The automation service can suppress other services.
-            UserState userState = getUserStateLocked(resolvedUserId);
+            final UserState userState = getUserStateLocked(resolvedUserId);
             if (userState.isUiAutomationSuppressingOtherServices()) {
                 return Collections.emptyList();
             }
 
-            result = mEnabledServicesForFeedbackTempList;
-            result.clear();
-            List<Service> services = userState.mBoundServices;
-            for (int serviceCount = services.size(), i = 0; i < serviceCount; ++i) {
-                Service service = services.get(i);
+            final List<Service> services = userState.mBoundServices;
+            final int serviceCount = services.size();
+            final List<AccessibilityServiceInfo> result = new ArrayList<>(serviceCount);
+            for (int i = 0; i < serviceCount; ++i) {
+                final Service service = services.get(i);
                 // Don't report the UIAutomation (fake service)
                 if (!sFakeAccessibilityServiceComponentName.equals(service.mComponentName)
                         && (service.mFeedbackType & feedbackType) != 0) {
                     result.add(service.mAccessibilityServiceInfo);
                 }
             }
+            return result;
         }
-        return result;
     }
 
     @Override
