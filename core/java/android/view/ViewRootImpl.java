@@ -1249,6 +1249,13 @@ public final class ViewRootImpl implements ViewParent,
         mIsAmbientMode = ambient;
     }
 
+    void setWindowVisibility(int visibility) {
+        if (visibility != mAttachInfo.mWindowVisibility) {
+            mAttachInfo.mWindowVisibility = visibility;
+            mView.dispatchWindowVisibilityChanged(visibility);
+        }
+    }
+
     void setWindowStopped(boolean stopped) {
         if (mStopped != stopped) {
             mStopped = stopped;
@@ -1263,6 +1270,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (renderer != null) {
                     renderer.destroyHardwareResources(mView);
                 }
+                mView.dispatchWindowVisibilityChanged(View.GONE);
             }
         }
     }
@@ -1297,7 +1305,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     int getHostVisibility() {
-        return (mAppVisible || mForceDecorViewVisibility) ? mView.getVisibility() : View.GONE;
+        return (mAppVisible || mForceDecorViewVisibility) && !mStopped
+            ? mView.getVisibility() : View.GONE;
     }
 
     /**
@@ -1654,8 +1663,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (viewVisibilityChanged) {
-            mAttachInfo.mWindowVisibility = viewVisibility;
-            host.dispatchWindowVisibilityChanged(viewVisibility);
+            setWindowVisibility(viewVisibility);
+
             if (viewUserVisibilityChanged) {
                 host.dispatchVisibilityAggregated(viewVisibility == View.VISIBLE);
             }
