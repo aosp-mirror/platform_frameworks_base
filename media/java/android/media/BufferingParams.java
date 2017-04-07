@@ -63,6 +63,7 @@ import java.lang.annotation.RetentionPolicy;
  * </ul>
  * </ul>
  * <p>Users should use {@link Builder} to change {@link BufferingParams}.
+ * @hide
  */
 public final class BufferingParams implements Parcelable {
     /**
