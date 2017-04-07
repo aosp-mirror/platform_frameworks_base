@@ -32,9 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"ຈະບໍ່ເຊື່ອມຕໍ່ອັດຕະໂນມັດ"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="saved_network" msgid="4352716707126620811">"ບັນທຶກ​​​ໂດຍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automatically connected via %1$s"</string>
-    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"ເຊື່ອມຕໍ່ຜ່ານທາງ %1$s ໂດຍອັດຕະໂນມັດ"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ເຊື່ອມຕໍ່ກັບອັດຕະໂນມັດແລ້ວຜ່ານຜູ້ໃຫ້ບໍລິການຄະແນນເຄືອຂ່າຍ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"​ເຊື່ອມຕໍ່​ຜ່ານ %1$s ​ແລ້ວ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"ມີ​ໃຫ້​ຜ່ານ %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"​ເຊື່ອມ​ຕໍ່​ແລ້ວ,​ ບໍ່​ມີ​ອິນ​ເຕີ​ເນັດ"</string>
@@ -140,8 +139,7 @@
     <item msgid="5194774745031751806">"ໄວສຸດໆ"</item>
     <item msgid="9085102246155045744">"ໄວທີ່ສຸດ"</item>
   </string-array>
-    <!-- no translation found for choose_profile (6921016979430278661) -->
-    <skip />
+    <string name="choose_profile" msgid="6921016979430278661">"ເລືອກໂປຣໄຟລ໌"</string>
     <string name="category_personal" msgid="1299663247844969448">"​ສ່ວນ​ໂຕ"</string>
     <string name="category_work" msgid="8699184680584175622">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="development_settings_title" msgid="215179176067683667">"ໂຕເລືອກນັກພັດທະນາ"</string>
@@ -170,12 +168,12 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ການ​ສ້າງເຄືອຂ່າຍ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ສະແດງການຮັບຮອງຂອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"​ເປີດ​ນຳ​ໃຊ້ການ​ເກັບ​ປະ​ຫວັດ​ Verbose Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Aggressive Wi‑Fi to mobile handover"</string>
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ສະຫຼັບເປັນ Wi-Fi ເມື່ອມືຖືສັນຍານອ່ອນ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ອະ​ນຸ​ຍາດ​ການ​ສະ​ແກນ​ການ​ໂຣມ Wi‑Fi ​ສະ​ເໝີ"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobile data always active"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ປິດໃຊ້ລະດັບສຽງສົມບູນ"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Version"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Select Bluetooth AVRCP Version"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ເວີຊັນ Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ເລືອກເວີຊັນ Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio Codec"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Select Bluetooth Audio Codec"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth Audio Sample Rate"</string>
@@ -189,7 +187,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ເມື່ອ​ເປີດ​ນຳ​ໃຊ້​ແລ້ວ, ເຄືອ​ຂ່າຍ Wi-Fi ຈະ​ຖືກ​ປ່ຽນ​ໄປ​ໃຊ້​ເຄືອ​ຂ່າຍ​ໂທ​ລະ​ສັບ​ແທນ​ຫາກ​ສັນ​ຍານ Wi-Fi ອ່ອນ"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ເມື່ອເປີດໃຊ້ແລ້ວ, Wi-Fi ຈະສົ່ງຜ່ານການເຊື່ອມຕໍ່ຂໍ້ມູນໄປຫາເຄືອຂ່າຍມືຖືເມື່ອສັນຍານ Wi-Fi ອ່ອນ"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"​ອະ​ນຸ​ຍາດ/ບໍ່​ອະ​ນຸ​ຍາດການ​ສະ​ແກນ​ການ​ໂຣມ Wi-Fi ອີງ​ຕາມ​ຈຳ​ນວນ​ຂໍ້​ມູນທີ່​ເກີດ​ຂຶ້ນ​ໃນ​ລະ​ດັບ​ສ່ວນ​ຕິດ​ຕໍ່"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ຂະ​ໜາດ​​ບັບ​ເຟີໂຕ​ລັອກ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ເລືອກ​ຂະ​ໜາດ​ລັອກ​ຕໍ່​ບັບ​ເຟີ"</string>
@@ -318,35 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ການ​ປັບ​ແຕ່ງ​ສີ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"​ຄຸນ​ສົມ​ບັດ​ນີ້​ກຳ​ລັງ​ຢູ່​ໃນ​ການ​ທົດ​ລອງ​ແລະ​ອາດ​ມີ​ຜົນ​ຕໍ່​ປະ​ສິດ​ທິ​ພາບ."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"ຖືກແທນໂດຍ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"ຍັງເຫຼືອປະມານ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"ອີກປະມານ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"ຍັງເຫຼືອ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ຍັງເຫຼືອ <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ຍັງເຫຼືອປະມານ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - ຍັງເຫຼືອ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> until fully charged"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> until fully charged on AC"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> until fully charged over USB"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> until fully charged from wireless"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ກຳລັງສາກໄຟ"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"ກຳ​​ລັງ​ສາກ​ຜ່ານ​ໝໍ້​ໄຟ"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"ກຳລັງສາກໄຟ"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"ກຳ​ລັງ​ສາກ​ຜ່ານ USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"ກຳລັງສາກໄຟ"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"ກຳ​ລັງ​ສາກ​ໄຮ້​ສາຍ"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"ກຳລັງສາກໄຟ"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ກຳລັງສາກໄຟ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ບໍ່ໄດ້ສາກໄຟ"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ບໍ່ໄດ້ສາກໄຟ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ເຕັມ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ຄວບຄຸມໂດຍຜູ້ເບິ່ງແຍງ"</string>
-    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
-    <skip />
-    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
-    <skip />
+    <string name="enabled_by_admin" msgid="5302986023578399263">"ຜູ້ເບິ່ງແຍງລະບົບເປີດໃຫ້ໃຊ້ແລ້ວ"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"ຖືກຜູ້ເບິ່ງແຍງລະບົບປິດໄວ້"</string>
     <string name="home" msgid="3256884684164448244">"ໜ້າທຳອິດຂອງການຕັ້ງຄ່າ"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -369,4 +355,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"​ຕ້ອງ​ໃສ່​ລະ​ຫັດ​ຜ່ານ"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"ວິທີປ້ອນຂໍ້ມູນທີ່ເຮັດວຽກຢູ່"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"ໃຊ້ພາສາຂອງລະບົບ"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"ລົ້ມເຫລວໃນການເປີດການຕັ້ງຄ່າຂອງ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"ວິທີການປ້ອນຂໍ້ມູນນີ້ ອາດສາມາດເກັບກຳທຸກຂໍ້ຄວາມທີ່ທ່ານພິມ, ຮວມເຖິງຂໍ້ມູນສ່ວນໂຕເຊັ່ນລະຫັດຜ່ານ ແລະໝາຍເລກບັດເຄຣດິດນຳ. ມັນມາຈາກແອັບຯ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. ທ່ານຕ້ອງການໃຊ້ວິທີການປ້ອນຂໍ້ມູນນີ້ບໍ່?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"ໝາຍເຫດ: ຫຼັງຈາກເປີດຂຶ້ນມາໃໝ່ແລ້ວ, ແອັບນີ້ຈະບໍ່ສາມາດເລີ່ມໄດ້ຈົນກວ່າທ່ານຈະປົດລັອກໂທລະສັບຂອງທ່ານ"</string>
 </resources>
