@@ -3727,9 +3727,17 @@ public final class ActivityThread {
                         impl.notifyChildRebuilt();
                     }
                 }
-                if (a.mVisibleFromClient && !a.mWindowAdded) {
-                    a.mWindowAdded = true;
-                    wm.addView(decor, l);
+                if (a.mVisibleFromClient) {
+                    if (!a.mWindowAdded) {
+                        a.mWindowAdded = true;
+                        wm.addView(decor, l);
+                    } else {
+                        // The activity will get a callback for this {@link LayoutParams} change
+                        // earlier. However, at that time the decor will not be set (this is set
+                        // in this method), so no action will be taken. This call ensures the
+                        // callback occurs with the decor set.
+                        a.onWindowAttributesChanged(l);
+                    }
                 }
 
             // If the window has already been added, but during resume
@@ -3769,6 +3777,7 @@ public final class ActivityThread {
                         wm.updateViewLayout(decor, l);
                     }
                 }
+
                 r.activity.mVisibleFromServer = true;
                 mNumVisibleActivities++;
                 if (r.activity.mVisibleFromClient) {
