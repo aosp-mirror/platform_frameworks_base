@@ -4258,7 +4258,7 @@ public class PackageParser {
                     a.intents.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -4291,7 +4291,7 @@ public class PackageParser {
                     owner.preferredActivityFilters.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -4307,12 +4307,12 @@ public class PackageParser {
                     owner.visibleToInstantApps = true;
                     // cycle through any filters already seen
                     for (int i = a.intents.size() - 1; i >= 0; --i) {
-                        a.intents.get(i).setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                        a.intents.get(i).setVisibleToInstantApp(true /*visibleToInstantApp*/);
                     }
                     if (owner.preferredActivityFilters != null) {
                         for (int i = owner.preferredActivityFilters.size() - 1; i >= 0; --i) {
                             owner.preferredActivityFilters.get(i)
-                                    .setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                                    .setVisibleToInstantApp(true /*visibleToInstantApp*/);
                         }
                     }
                 }
@@ -4618,7 +4618,7 @@ public class PackageParser {
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
-                    intent.setVisibleToEphemeral(
+                    intent.setVisibleToInstantApp(
                             visibleToEphemeral || isWebBrowsableIntent(intent));
                     a.intents.add(intent);
                 }
@@ -4821,7 +4821,7 @@ public class PackageParser {
                 }
                 outInfo.intents.add(intent);
                 // adjust provider flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     outInfo.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -4838,7 +4838,7 @@ public class PackageParser {
                     owner.visibleToInstantApps = true;
                     // cycle through any filters already seen
                     for (int i = outInfo.intents.size() - 1; i >= 0; --i) {
-                        outInfo.intents.get(i).setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                        outInfo.intents.get(i).setVisibleToInstantApp(true /*visibleToInstantApp*/);
                     }
                 }
 
@@ -5126,7 +5126,7 @@ public class PackageParser {
                     return null;
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -5143,7 +5143,7 @@ public class PackageParser {
                     owner.visibleToInstantApps = true;
                     // cycle through any filters already seen
                     for (int i = s.intents.size() - 1; i >= 0; --i) {
-                        s.intents.get(i).setVisibleToEphemeral(true /*visibleToEmphemeral*/);
+                        s.intents.get(i).setVisibleToInstantApp(true /*visibleToInstantApp*/);
                     }
                 }
             } else {
