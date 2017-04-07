@@ -1118,6 +1118,16 @@ public class ActivityManager {
     }
 
     /**
+     * Returns true if the system supports running activities on secondary displays.
+     * @hide
+     */
+    static public boolean supportsMultiDisplay() {
+        return !isLowRamDeviceStatic()
+                && Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_supportsMultiDisplay);
+    }
+
+    /**
      * Return the maximum number of actions that will be displayed in the picture-in-picture UI when
      * the user interacts with the activity currently in picture-in-picture mode.
      */

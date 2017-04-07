@@ -2386,7 +2386,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(res.getBoolean(com.android.internal.R.bool.config_supportsMultiWindow));
+        pw.println(ActivityManager.supportsMultiWindow());
         return 0;
     }
 
@@ -2395,8 +2395,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(
-                res.getBoolean(com.android.internal.R.bool.config_supportsSplitScreenMultiWindow));
+        pw.println(ActivityManager.supportsSplitScreenMultiWindow());
         return 0;
     }
 
@@ -2405,7 +2404,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(res.getBoolean(com.android.internal.R.bool.config_supportsMultiDisplay));
+        pw.println(ActivityManager.supportsMultiDisplay());
         return 0;
     }
 
