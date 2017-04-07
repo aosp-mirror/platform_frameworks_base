@@ -836,16 +836,16 @@ public final class Sensor {
     }
 
     /**
-     * Test if sensor support direct channel backed by a specific type of shared memory.
+     * Test if a sensor supports a specified direct channel type.
      *
      * @param sharedMemType type of shared memory used by direct channel.
-     * @return <code>true</code> if the shared memory type is supported.
-     * @see SensorDirectChannel#TYPE_ASHMEM
+     * @return <code>true</code> if the specified shared memory type is supported.
+     * @see SensorDirectChannel#TYPE_MEMORY_FILE
      * @see SensorDirectChannel#TYPE_HARDWARE_BUFFER
      */
     public boolean isDirectChannelTypeSupported(@SensorDirectChannel.MemoryType int sharedMemType) {
         switch (sharedMemType) {
-            case SensorDirectChannel.TYPE_ASHMEM:
+            case SensorDirectChannel.TYPE_MEMORY_FILE:
                 return (mFlags & (1 << DIRECT_CHANNEL_SHIFT)) > 0;
             case SensorDirectChannel.TYPE_HARDWARE_BUFFER:
                 return (mFlags & (1 << DIRECT_CHANNEL_SHIFT + 1)) > 0;
