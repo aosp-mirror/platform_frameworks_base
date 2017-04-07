@@ -19,9 +19,11 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.text.TextUtils;
+
 import com.android.printservice.recommendation.util.DiscoveryListenerMultiplexer;
 import com.android.printservice.recommendation.util.NsdResolveQueue;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -192,8 +194,13 @@ class ServiceResolver {
         }
     }
 
-    public int getCount() {
-        return mPrinterHashMap.size();
+    public ArrayList<InetAddress> getPrinters() {
+        ArrayList<InetAddress> printerAddresses = new ArrayList<>();
+        for (NsdServiceInfo printer : mPrinterHashMap.values()) {
+            printerAddresses.add(printer.getHost());
+        }
+
+        return printerAddresses;
     }
 
 }

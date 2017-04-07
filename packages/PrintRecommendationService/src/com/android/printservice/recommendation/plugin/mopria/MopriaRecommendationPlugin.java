@@ -20,12 +20,14 @@ package com.android.printservice.recommendation.plugin.mopria;
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;
 import android.text.TextUtils;
-import android.util.Pair;
 
+import com.android.printservice.recommendation.R;
 import com.android.printservice.recommendation.plugin.hp.MDnsUtils;
 import com.android.printservice.recommendation.plugin.hp.ServiceRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.hp.VendorInfo;
-import com.android.printservice.recommendation.R;
+
+import java.net.InetAddress;
+import java.util.ArrayList;
 
 public class MopriaRecommendationPlugin extends ServiceRecommendationPlugin {
 
@@ -47,8 +49,7 @@ public class MopriaRecommendationPlugin extends ServiceRecommendationPlugin {
     }
 
     @Override
-    public int getCount() {
-        Pair<Integer, Integer> count = mListener.getCount();
-        return ((count.first > 1) ? count.second : 0);
+    public ArrayList<InetAddress> getPrinters() {
+        return mListener.getPrinters();
     }
 }
