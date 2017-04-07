@@ -3104,13 +3104,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             if (!mCancelAll && mStatus == BackupTransport.TRANSPORT_OK &&
                     mPendingFullBackups != null && !mPendingFullBackups.isEmpty()) {
                 Slog.d(TAG, "Starting full backups for: " + mPendingFullBackups);
-                CountDownLatch latch = new CountDownLatch(1);
-                String[] fullBackups =
-                        mPendingFullBackups.toArray(new String[mPendingFullBackups.size()]);
-                PerformFullTransportBackupTask task =
-                        new PerformFullTransportBackupTask(/*fullBackupRestoreObserver*/ null,
-                                fullBackups, /*updateSchedule*/ false, /*runningJob*/ null, latch,
-                                mObserver, mMonitor, mUserInitiated);
                 // Acquiring wakelock for PerformFullTransportBackupTask before its start.
                 mWakelock.acquire();
                 (new Thread(mFullBackupTask, "full-transport-requested")).start();
