@@ -1490,6 +1490,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mSupportsSplitScreenMultiWindow;
     boolean mSupportsFreeformWindowManagement;
     boolean mSupportsPictureInPicture;
+    boolean mSupportsMultiDisplay;
     boolean mSupportsLeanbackOnly;
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
@@ -13827,6 +13828,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
             }
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
+            mSupportsMultiDisplay = res.getBoolean(
+                    com.android.internal.R.bool.config_supportsMultiDisplay);
         }
     }
 
