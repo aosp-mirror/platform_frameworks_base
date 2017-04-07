@@ -200,7 +200,11 @@ public abstract class Ticker {
             CharSequence artist = mediaMetaData.getText(MediaMetadata.METADATA_KEY_ARTIST);
             CharSequence album = mediaMetaData.getText(MediaMetadata.METADATA_KEY_ALBUM);
             CharSequence title = mediaMetaData.getText(MediaMetadata.METADATA_KEY_TITLE);
-            n.getNotification().tickerText = artist.toString() + " - " + album.toString() + " - " + title.toString();
+            if (artist != null && album != null && title != null) {
+                n.getNotification().tickerText = artist.toString() + " - " + album.toString() + " - " + title.toString();
+            } else {
+                return;
+            }
         }
 
         // If what's being displayed has the same text and icon, just drop it
