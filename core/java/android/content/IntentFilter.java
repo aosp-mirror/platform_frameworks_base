@@ -284,8 +284,8 @@ public class IntentFilter implements Parcelable {
 
     private int mVerifyState;
 
-    /** Whether or not the intent filter is visible to ephemeral apps. */
-    private boolean mVisibleToEphemeral;
+    /** Whether or not the intent filter is visible to instant apps. */
+    private boolean mVisibleToInstantApp;
     // These functions are the start of more optimized code for managing
     // the string sets...  not yet implemented.
 
@@ -452,6 +452,7 @@ public class IntentFilter implements Parcelable {
         }
         mHasPartialTypes = o.mHasPartialTypes;
         mVerifyState = o.mVerifyState;
+        mVisibleToInstantApp = o.mVisibleToInstantApp;
     }
 
     /**
@@ -654,12 +655,12 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    public void setVisibleToEphemeral(boolean visibleToEmphemeral) {
-        mVisibleToEphemeral = visibleToEmphemeral;
+    public void setVisibleToInstantApp(boolean visibleToInstantApp) {
+        mVisibleToInstantApp = visibleToInstantApp;
     }
     /** @hide */
     public boolean isVisibleToInstantApp() {
-        return mVisibleToEphemeral;
+        return mVisibleToInstantApp;
     }
 
     /**
@@ -1858,6 +1859,7 @@ public class IntentFilter implements Parcelable {
         dest.writeInt(mPriority);
         dest.writeInt(mHasPartialTypes ? 1 : 0);
         dest.writeInt(getAutoVerify() ? 1 : 0);
+        dest.writeInt(isVisibleToInstantApp() ? 1 : 0);
     }
 
     /**
@@ -1926,6 +1928,7 @@ public class IntentFilter implements Parcelable {
         mPriority = source.readInt();
         mHasPartialTypes = source.readInt() > 0;
         setAutoVerify(source.readInt() > 0);
+        setVisibleToInstantApp(source.readInt() > 0);
     }
 
     private final boolean findMimeType(String type) {
