@@ -46,7 +46,6 @@ import android.view.SurfaceHolder;
 import android.widget.VideoView;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
-import android.media.BufferingParams;
 import android.media.MediaDrm;
 import android.media.MediaFormat;
 import android.media.MediaMetricsSet;
@@ -493,11 +492,6 @@ import java.util.Vector;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
- * <tr><td>setBufferingParams</p></td>
- *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted, Error}</p></td>
- *     <td>{Idle} </p></td>
- *     <td>This method does not change the object state.
- *         </p></td></tr>
  * <tr><td>setPlaybackParams</p></td>
  *     <td>{Initialized, Prepared, Started, Paused, PlaybackCompleted, Error}</p></td>
  *     <td>{Idle, Stopped} </p></td>
@@ -1529,6 +1523,7 @@ public class MediaPlayer extends PlayerBase
      * @return the default buffering management params supported by the source component.
      * @throws IllegalStateException if the internal player engine has not been
      * initialized, or {@code setDataSource} has not been called.
+     * @hide
      */
     @NonNull
     public native BufferingParams getDefaultBufferingParams();
@@ -1540,6 +1535,7 @@ public class MediaPlayer extends PlayerBase
      * @return the current buffering management params used by the source component.
      * @throws IllegalStateException if the internal player engine has not been
      * initialized, or {@code setDataSource} has not been called.
+     * @hide
      */
     @NonNull
     public native BufferingParams getBufferingParams();
@@ -1557,6 +1553,7 @@ public class MediaPlayer extends PlayerBase
      * @throws IllegalStateException if the internal player engine has not been
      * initialized or has been released, or {@code setDataSource} has not been called.
      * @throws IllegalArgumentException if params is invalid or not supported.
+     * @hide
      */
     public native void setBufferingParams(@NonNull BufferingParams params);
 
