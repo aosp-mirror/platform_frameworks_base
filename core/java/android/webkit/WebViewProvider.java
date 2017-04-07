@@ -378,6 +378,8 @@ public interface WebViewProvider {
 
         public void onDetachedFromWindow();
 
+        public default void onMovedToDisplay(int displayId, Configuration config) {}
+
         public void onVisibilityChanged(View changedView, int visibility);
 
         public void onWindowFocusChanged(boolean hasWindowFocus);
