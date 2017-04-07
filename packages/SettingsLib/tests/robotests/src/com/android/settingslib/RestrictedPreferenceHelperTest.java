@@ -52,7 +52,7 @@ public class RestrictedPreferenceHelperTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mViewHolder = new PreferenceViewHolder(mock(View.class));
+        mViewHolder = PreferenceViewHolder.createInstanceForTests(mock(View.class));
         mHelper = new RestrictedPreferenceHelper(mContext, mPreference, null);
     }
 
