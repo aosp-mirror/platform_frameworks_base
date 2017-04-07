@@ -52,7 +52,7 @@ public class TwoTargetPreferenceTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mPreference = spy(new TwoTargetPreference(mContext));
-        mViewHolder = new PreferenceViewHolder(mock(View.class));
+        mViewHolder = PreferenceViewHolder.createInstanceForTests(mock(View.class));
         when(mViewHolder.findViewById(R.id.two_target_divider))
                 .thenReturn(mDivider);
         when(mViewHolder.findViewById(android.R.id.widget_frame))
