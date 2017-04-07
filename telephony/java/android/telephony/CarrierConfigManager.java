@@ -771,6 +771,13 @@ public class CarrierConfigManager {
     public static final String KEY_EDITABLE_ENHANCED_4G_LTE_BOOL = "editable_enhanced_4g_lte_bool";
 
     /**
+     * Determines whether the Enhanced 4G LTE toggle will be shown in the settings. When this
+     * option is {@code true}, the toggle will be hidden regardless of whether the device and
+     * carrier supports 4G LTE or not.
+     */
+    public static final String KEY_HIDE_ENHANCED_4G_LTE_BOOL = "hide_enhanced_4g_lte_bool";
+
+    /**
      * Determine whether IMS apn can be shown.
      */
     public static final String KEY_HIDE_IMS_APN_BOOL = "hide_ims_apn_bool";
@@ -1529,6 +1536,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_CONFERENCE_SIZE_LIMIT_INT, 5);
         sDefaults.putBoolean(KEY_DISPLAY_HD_AUDIO_PROPERTY_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
+        sDefaults.putBoolean(KEY_HIDE_ENHANCED_4G_LTE_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_VIDEO_CALLS_BOOL, false);
