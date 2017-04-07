@@ -1219,14 +1219,11 @@ public class WebViewUpdateServiceTest {
 
         runWebViewBootPreparationOnMainSync();
 
-        checkPreparationPhasesForPackage(testPackageName, 1 /* first preparation phase */);
-        // TODO(gsennton) change this logic to use the code below when we have created a functional
-        // stub.
-        //Mockito.verify(mTestSystemImpl, Mockito.never()).onWebViewProviderChanged(
-        //        Matchers.anyObject());
-        //WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        //assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
-        //assertEquals(null, mWebViewUpdateServiceImpl.getCurrentWebViewPackage());
+        Mockito.verify(mTestSystemImpl, Mockito.never()).onWebViewProviderChanged(
+                Matchers.anyObject());
+        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
+        assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
+        assertEquals(null, mWebViewUpdateServiceImpl.getCurrentWebViewPackage());
     }
 
     @Test
