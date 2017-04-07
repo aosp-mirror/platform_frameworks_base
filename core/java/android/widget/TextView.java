@@ -913,10 +913,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         break;
 
                     case com.android.internal.R.styleable.TextAppearance_fontFamily:
-                        try {
-                            fontTypeface = appearance.getFont(attr);
-                        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-                            // Expected if it is not a font resource.
+                        if (!context.isRestricted()) {
+                            try {
+                                fontTypeface = appearance.getFont(attr);
+                            } catch (UnsupportedOperationException
+                                    | Resources.NotFoundException e) {
+                                // Expected if it is not a font resource.
+                            }
                         }
                         if (fontTypeface == null) {
                             fontFamily = appearance.getString(attr);
@@ -1230,11 +1233,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_fontFamily:
-                    try {
-                        fontTypeface = a.getFont(attr);
-                    } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-                        // Expected if it is not a resource reference or if it is a reference to
-                        // another resource type.
+                    if (!context.isRestricted()) {
+                        try {
+                            fontTypeface = a.getFont(attr);
+                        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
+                            // Expected if it is not a resource reference or if it is a reference to
+                            // another resource type.
+                        }
                     }
                     if (fontTypeface == null) {
                         fontFamily = a.getString(attr);
@@ -3381,10 +3386,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Typeface fontTypeface = null;
         String fontFamily = null;
-        try {
-            fontTypeface = ta.getFont(R.styleable.TextAppearance_fontFamily);
-        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-            // Expected if it is not a font resource.
+        if (!context.isRestricted()) {
+            try {
+                fontTypeface = ta.getFont(R.styleable.TextAppearance_fontFamily);
+            } catch (UnsupportedOperationException | Resources.NotFoundException e) {
+                // Expected if it is not a font resource.
+            }
         }
         if (fontTypeface == null) {
             fontFamily = ta.getString(R.styleable.TextAppearance_fontFamily);
