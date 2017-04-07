@@ -398,8 +398,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return true;
         }
 
-        // TODO(b/33197203 , b/35707731): must iterate over all responses
-        final FillResponse response = mResponses.get(0);
+        final FillResponse response = mResponses.get(mResponses.size() - 1);
 
         final SaveInfo saveInfo = response.getSaveInfo();
         if (DEBUG) {

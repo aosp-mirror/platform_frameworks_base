@@ -25,6 +25,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.DebugUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -111,51 +112,40 @@ public final class SaveInfo implements Parcelable {
      * Type used on when the service can save the contents of an activity, but cannot describe what
      * the content is for.
      */
-    public static final int SAVE_DATA_TYPE_GENERIC = 0;
+    public static final int SAVE_DATA_TYPE_GENERIC = 0x0;
 
     /**
      * Type used when the {@link FillResponse} represents user credentials that have a password.
      */
-    public static final int SAVE_DATA_TYPE_PASSWORD = 1;
+    public static final int SAVE_DATA_TYPE_PASSWORD = 0x01;
 
     /**
      * Type used on when the {@link FillResponse} represents a physical address (such as street,
      * city, state, etc).
      */
-    public static final int SAVE_DATA_TYPE_ADDRESS = 2;
+    public static final int SAVE_DATA_TYPE_ADDRESS = 0x02;
 
     /**
      * Type used when the {@link FillResponse} represents a credit card.
      */
-    public static final int SAVE_DATA_TYPE_CREDIT_CARD = 3;
+    public static final int SAVE_DATA_TYPE_CREDIT_CARD = 0x04;
 
     /**
      * Type used when the {@link FillResponse} represents just an username, without a password.
      */
-    public static final int SAVE_DATA_TYPE_USERNAME = 4;
+    public static final int SAVE_DATA_TYPE_USERNAME = 0x08;
 
     /**
      * Type used when the {@link FillResponse} represents just an email address, without a password.
      */
-    public static final int SAVE_DATA_TYPE_EMAIL_ADDRESS = 5;
+    public static final int SAVE_DATA_TYPE_EMAIL_ADDRESS = 0x10;
 
-    private final @SaveDataType int mType;
+    private final int mType;
     private final CharSequence mNegativeActionTitle;
     private final IntentSender mNegativeActionListener;
     private final AutofillId[] mRequiredIds;
     private final AutofillId[] mOptionalIds;
     private final CharSequence mDescription;
-
-    /** @hide */
-    @IntDef({
-        SAVE_DATA_TYPE_GENERIC,
-        SAVE_DATA_TYPE_PASSWORD,
-        SAVE_DATA_TYPE_ADDRESS,
-        SAVE_DATA_TYPE_CREDIT_CARD
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SaveDataType {
-    }
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
@@ -201,7 +191,7 @@ public final class SaveInfo implements Parcelable {
      */
     public static final class Builder {
 
-        private final @SaveDataType int mType;
+        private final int mType;
         private CharSequence mNegativeActionTitle;
         private IntentSender mNegativeActionListener;
         // TODO(b/33197203): make mRequiredIds final once addSavableIds() is gone
@@ -213,32 +203,24 @@ public final class SaveInfo implements Parcelable {
         /**
          * Creates a new builder.
          *
-         * @param type the type of information the associated {@link FillResponse} represents. Must
-         * be {@link SaveInfo#SAVE_DATA_TYPE_GENERIC}, {@link SaveInfo#SAVE_DATA_TYPE_PASSWORD},
-         * {@link SaveInfo#SAVE_DATA_TYPE_ADDRESS}, or {@link SaveInfo#SAVE_DATA_TYPE_CREDIT_CARD};
-         * otherwise it will assume {@link SaveInfo#SAVE_DATA_TYPE_GENERIC}.
+         * @param type the type of information the associated {@link FillResponse} represents, can
+         * be any combination of {@link SaveInfo#SAVE_DATA_TYPE_GENERIC},
+         * {@link SaveInfo#SAVE_DATA_TYPE_PASSWORD},
+         * {@link SaveInfo#SAVE_DATA_TYPE_ADDRESS}, {@link SaveInfo#SAVE_DATA_TYPE_CREDIT_CARD},
+         * {@link SaveInfo#SAVE_DATA_TYPE_USERNAME}, or
+         * {@link SaveInfo#SAVE_DATA_TYPE_EMAIL_ADDRESS}.
          * @param requiredIds ids of all required views that will trigger a save request.
          *
          * <p>See {@link SaveInfo} for more info.
          *
          * @throws IllegalArgumentException if {@code requiredIds} is {@code null} or empty.
          */
-        public Builder(@SaveDataType int type, @NonNull AutofillId[] requiredIds) {
+        public Builder(int type, @NonNull AutofillId[] requiredIds) {
             if (false) {// TODO(b/33197203): re-move when clients use it
             Preconditions.checkArgument(requiredIds != null && requiredIds.length > 0,
                     "must have at least one required id: " + Arrays.toString(requiredIds));
             }
-            switch (type) {
-                case SAVE_DATA_TYPE_PASSWORD:
-                case SAVE_DATA_TYPE_ADDRESS:
-                case SAVE_DATA_TYPE_CREDIT_CARD:
-                case SAVE_DATA_TYPE_USERNAME:
-                case SAVE_DATA_TYPE_EMAIL_ADDRESS:
-                    mType = type;
-                    break;
-                default:
-                    mType = SAVE_DATA_TYPE_GENERIC;
-            }
+            mType = type;
             mRequiredIds = requiredIds;
         }
 
@@ -248,7 +230,7 @@ public final class SaveInfo implements Parcelable {
          * // TODO(b/33197203): make sure is removed when clients migrated
          */
         @Deprecated
-        public Builder(@SaveDataType int type) {
+        public Builder(int type) {
             this(type, null);
         }
 
@@ -355,7 +337,8 @@ public final class SaveInfo implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        return new StringBuilder("SaveInfo: [type=").append(mType)
+        return new StringBuilder("SaveInfo: [type=")
+                .append(DebugUtils.flagsToString(SaveInfo.class, "SAVE_DATA_TYPE_", mType))
                 .append(", requiredIds=").append(Arrays.toString(mRequiredIds))
                 .append(", optionalIds=").append(Arrays.toString(mOptionalIds))
                 .append(", description=").append(mDescription)
