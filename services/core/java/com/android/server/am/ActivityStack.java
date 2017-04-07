@@ -116,7 +116,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
@@ -1560,12 +1559,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return true;
     }
 
+    /** Returns true if the stack is currently considered visible. */
+    boolean isVisible() {
+        return mWindowContainerController != null && mWindowContainerController.isVisible();
+    }
+
     /**
-     * Returns stack's visibility: {@link #STACK_INVISIBLE}, {@link #STACK_VISIBLE} or
-     * {@link #STACK_VISIBLE_ACTIVITY_BEHIND}.
+     * Returns what the stack visibility should be: {@link #STACK_INVISIBLE}, {@link #STACK_VISIBLE}
+     * or {@link #STACK_VISIBLE_ACTIVITY_BEHIND}.
+     *
      * @param starting The currently starting activity or null if there is none.
      */
-    int getStackVisibilityLocked(ActivityRecord starting) {
+    int shouldBeVisible(ActivityRecord starting) {
         if (!isAttached()) {
             return STACK_INVISIBLE;
         }
@@ -1715,7 +1720,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // If the top activity is not fullscreen, then we need to
             // make sure any activities under it are now visible.
             boolean aboveTop = top != null;
-            final int stackVisibility = getStackVisibilityLocked(starting);
+            final int stackVisibility = shouldBeVisible(starting);
             final boolean stackInvisible = stackVisibility != STACK_VISIBLE;
             final boolean stackVisibleBehind = stackVisibility == STACK_VISIBLE_ACTIVITY_BEHIND;
             boolean behindFullscreenActivity = stackInvisible;
@@ -2097,7 +2102,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // activities as we need to display their starting window until they are done initializing.
         boolean behindFullscreenActivity = false;
 
-        if (getStackVisibilityLocked(null) == STACK_INVISIBLE) {
+        if (shouldBeVisible(null) == STACK_INVISIBLE) {
             // The stack is not visible, so no activity in it should be displaying a starting
             // window. Mark all activities below top and behind fullscreen.
             aboveTop = false;
@@ -4184,7 +4189,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (hasVisibleBehindActivity() &&
                 !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
             if (r == topRunningActivityLocked()
-                    && getStackVisibilityLocked(null) == STACK_VISIBLE) {
+                    && shouldBeVisible(null) == STACK_VISIBLE) {
                 // Don't release the top activity if it has requested to run behind the next
                 // activity and the stack is currently visible.
                 return;

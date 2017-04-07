@@ -164,7 +164,6 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.Surface;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -174,7 +173,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.wm.StackWindowController;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -2184,7 +2182,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             for (int j = stacks.size() - 1; j >= 0; --j) {
                 final ActivityStack stack = stacks.get(j);
                 if (stack != currentFocus && stack.isFocusable()
-                        && stack.getStackVisibilityLocked(null) != STACK_INVISIBLE) {
+                        && stack.shouldBeVisible(null) != STACK_INVISIBLE) {
                     return stack;
                 }
             }
@@ -2345,7 +2343,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
             ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
             final boolean isFullscreenStackVisible = fullscreenStack != null &&
-                    fullscreenStack.getStackVisibilityLocked(null) == STACK_VISIBLE;
+                    fullscreenStack.shouldBeVisible(null) == STACK_VISIBLE;
             // If we are moving from the pinned stack, then the animation takes care of updating
             // the picture-in-picture mode.
             final boolean schedulePictureInPictureModeChange = (fromStackId != PINNED_STACK_ID);
@@ -2520,7 +2518,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
             if (fullscreenStack != null) {
                 final boolean isFullscreenStackVisible =
-                        fullscreenStack.getStackVisibilityLocked(null) == STACK_VISIBLE;
+                        fullscreenStack.shouldBeVisible(null) == STACK_VISIBLE;
                 for (int i = 0; i < tasks.size(); i++) {
                     // Insert the task either at the top of the fullscreen stack if it is hidden,
                     // or to the bottom if it is currently visible
@@ -3545,7 +3543,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                     ActivityStack stack = stacks.get(stackNdx);
                     if (!dumpVisibleStacksOnly ||
-                            stack.getStackVisibilityLocked(null) == STACK_VISIBLE) {
+                            stack.shouldBeVisible(null) == STACK_VISIBLE) {
                         activities.addAll(stack.getDumpActivitiesLocked(name));
                     }
                 }
@@ -3852,7 +3850,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         info.displayId = DEFAULT_DISPLAY;
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;
-        info.visible = stack.getStackVisibilityLocked(null) == STACK_VISIBLE;
+        info.visible = stack.shouldBeVisible(null) == STACK_VISIBLE;
         info.position = display != null
                 ? display.mStacks.indexOf(stack)
                 : 0;
@@ -4971,7 +4969,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             for (int j = display.mStacks.size() - 1; j >= 0; j--) {
                 final ActivityStack stack = display.mStacks.get(j);
                 // Get top activity from a visible stack and add it to the list.
-                if (stack.getStackVisibilityLocked(null /* starting */)
+                if (stack.shouldBeVisible(null /* starting */)
                         == ActivityStack.STACK_VISIBLE) {
                     final ActivityRecord top = stack.topActivity();
                     if (top != null) {
