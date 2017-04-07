@@ -81,14 +81,14 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
 
     private GetDownloadableSubscriptionMetadataResult(Parcel in) {
         this.result = in.readInt();
-        this.subscription = DownloadableSubscription.CREATOR.createFromParcel(in);
+        this.subscription = in.readTypedObject(DownloadableSubscription.CREATOR);
         this.detailedCode = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
-        this.subscription.writeToParcel(dest, 0);
+        dest.writeTypedObject(this.subscription, flags);
         dest.writeInt(detailedCode);
     }
 
