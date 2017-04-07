@@ -66,4 +66,8 @@
     <!-- The small screens of watch devices makes multi-window support undesireable. -->
     <bool name="config_supportsMultiWindow">false</bool>
     <bool name="config_supportsSplitScreenMultiWindow">false</bool>
+
+    <!-- Disable Multi-Display because of small screen space and lack of external display connection
+         options. -->
+    <bool name="config_supportsMultiDisplay">false</bool>
 </resources>
