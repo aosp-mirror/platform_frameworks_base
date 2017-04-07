@@ -22,6 +22,7 @@ import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -577,7 +578,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClickable(mInteractive);
         setFocusable(mInteractive);
         setImportantForAccessibility(mInteractive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                : View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
     }
 
     @Override
@@ -601,6 +602,19 @@ public class NotificationShelf extends ActivatableNotificationView implements
     @Override
     public boolean hasOverlappingRendering() {
         return false;  // Shelf only uses alpha for transitions where the difference can't be seen.
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (mInteractive) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+            AccessibilityNodeInfo.AccessibilityAction unlock
+                    = new AccessibilityNodeInfo.AccessibilityAction(
+                    AccessibilityNodeInfo.ACTION_CLICK,
+                    getContext().getString(R.string.accessibility_overflow_action));
+            info.addAction(unlock);
+        }
     }
 
     @Override
