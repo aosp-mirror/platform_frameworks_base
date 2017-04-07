@@ -8,7 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
@@ -279,7 +279,7 @@ class CompatibilityDisplay {
      */
     private void startImageReader() {
         if (mImageReader == null) {
-            mImageReader = ImageReader.newInstance(WIDTH, HEIGHT, ImageFormat.RAW_PRIVATE,
+            mImageReader = ImageReader.newInstance(WIDTH, HEIGHT, PixelFormat.RGBA_8888,
                 2 /* maxImages */);
         }
         synchronized (mVdLock) {
