@@ -412,7 +412,7 @@
     <string name="accessibility_notifications_button">Notifications.</string>
 
     <!-- Content description of overflow icon container of the notifications for accessibility (not shown on the screen)[CHAR LIMIT=NONE] -->
-    <string name="notification_shelf_content_description">Notification overflow container</string>
+    <string name="accessibility_overflow_action">See all notifications</string>
 
     <!-- Content description of the button for removing a notification in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_remove_notification">Clear notification.</string>
