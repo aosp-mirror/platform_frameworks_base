@@ -3220,8 +3220,25 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         r.addResultLocked(null, resultWho, requestCode, resultCode, data);
     }
 
+    /** Returns true if the task is one of the task finishing on-top of the top running task. */
+    boolean isATopFinishingTask(TaskRecord task) {
+        for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
+            final TaskRecord current = mTaskHistory.get(i);
+            final ActivityRecord r = current.topRunningActivityLocked();
+            if (r != null) {
+                // We got a top running activity, so there isn't a top finishing task...
+                return false;
+            }
+            if (current == task) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void adjustFocusedActivityStackLocked(ActivityRecord r, String reason) {
-        if (!mStackSupervisor.isFocusedStack(this) || mResumedActivity != r) {
+        if (!mStackSupervisor.isFocusedStack(this) ||
+                ((mResumedActivity != r) && (mResumedActivity != null))) {
             return;
         }
 
@@ -3236,8 +3253,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 final TaskRecord task = r.getTask();
                 final boolean isAssistantOrOverAssistant = task.getStack().isAssistantStack() ||
                         task.isOverAssistantStack();
-                if (r.frontOfTask && task == topTask() &&
-                        (task.isOverHomeStack() || isAssistantOrOverAssistant)) {
+                if (r.frontOfTask && isATopFinishingTask(task)
+                        && (task.isOverHomeStack() || isAssistantOrOverAssistant)) {
                     // For non-fullscreen or assistant stack, we want to move the focus to the next
                     // visible stack to prevent the home screen from moving to the top and obscuring
                     // other visible stacks.
