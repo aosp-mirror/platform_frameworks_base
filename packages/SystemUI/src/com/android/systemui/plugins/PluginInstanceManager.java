@@ -48,7 +48,7 @@ public class PluginInstanceManager<T extends Plugin> {
     private static final boolean DEBUG = false;
 
     private static final String TAG = "PluginInstanceManager";
-    private static final String PLUGIN_PERMISSION = "com.android.systemui.permission.PLUGIN";
+    public static final String PLUGIN_PERMISSION = "com.android.systemui.permission.PLUGIN";
 
     private final Context mContext;
     private final PluginListener<T> mListener;
