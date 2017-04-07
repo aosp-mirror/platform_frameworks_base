@@ -2782,6 +2782,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     + " reparent task=" + task + " to stackId=" + stackId);
         }
 
+        // Ensure that we're not moving a task to a dynamic stack if device doesn't support
+        // multi-display.
+        // TODO(multi-display): Support non-dynamic stacks on secondary displays.
+        // TODO: Check ActivityView after fixing b/35349678.
+        if (StackId.isDynamicStack(stackId) && !mService.mSupportsMultiDisplay) {
+            throw new IllegalArgumentException("Device doesn't support multi-display, can not"
+                    + " reparent task=" + task + " to stackId=" + stackId);
+        }
+
         // Ensure that we aren't trying to move into a freeform stack without freeform
         // support
         if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {

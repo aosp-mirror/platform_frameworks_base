@@ -2178,7 +2178,8 @@ class ActivityStarter {
             case ASSISTANT_STACK_ID:
                 return r.isAssistantActivity();
             default:
-                if (StackId.isDynamicStack(stackId)) {
+                // TODO: Check ActivityView after fixing b/35349678.
+                if (StackId.isDynamicStack(stackId) && mService.mSupportsMultiDisplay) {
                     return true;
                 }
                 Slog.e(TAG, "isValidLaunchStackId: Unexpected stackId=" + stackId);
