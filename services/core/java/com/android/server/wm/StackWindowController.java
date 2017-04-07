@@ -94,6 +94,12 @@ public class StackWindowController
         }
     }
 
+    public boolean isVisible() {
+        synchronized (mWindowMap) {
+            return mContainer != null && mContainer.isVisible();
+        }
+    }
+
     public void reparent(int displayId, Rect outStackBounds) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
@@ -363,7 +369,7 @@ public class StackWindowController
     }
 
     /** Calls directly into activity manager so window manager lock shouldn't held. */
-    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
+    void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
         if (mListener != null) {
             mListener.updatePictureInPictureModeForPinnedStackAnimation(targetStackBounds);
         }

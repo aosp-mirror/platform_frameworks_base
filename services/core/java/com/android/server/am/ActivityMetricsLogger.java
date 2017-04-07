@@ -102,7 +102,7 @@ class ActivityMetricsLogger {
         mLastLogTimeSecs = now;
 
         ActivityStack stack = mSupervisor.getStack(DOCKED_STACK_ID);
-        if (stack != null && stack.getStackVisibilityLocked(null) != STACK_INVISIBLE) {
+        if (stack != null && stack.shouldBeVisible(null) != STACK_INVISIBLE) {
             mWindowState = WINDOW_STATE_SIDE_BY_SIDE;
             return;
         }
