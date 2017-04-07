@@ -236,6 +236,51 @@ public class TileUtilsTest {
     }
 
     @Test
+    public void getTilesForIntent_shouldReadMetadataTitleAsString() throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, "my title", 0);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).title).isEqualTo("my title");
+    }
+
+    @Test
+    public void getTilesForIntent_shouldReadMetadataTitleFromResource() throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, null, 123);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        when(mResources.getString(eq(123)))
+                .thenReturn("my localized title");
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).title).isEqualTo("my localized title");
+    }
+
+    @Test
     public void getTilesForIntent_shouldNotProcessInvalidUriContentSystemApp()
             throws RemoteException {
         Intent intent = new Intent();
@@ -327,7 +372,13 @@ public class TileUtilsTest {
     }
 
     private static ResolveInfo newInfo(boolean systemApp, String category, String keyHint,
-        String iconUri, String summaryUri) {
+            String iconUri, String summaryUri) {
+        return newInfo(systemApp, category, keyHint, iconUri, summaryUri, null, 0);
+    }
+
+    private static ResolveInfo newInfo(boolean systemApp, String category, String keyHint,
+            String iconUri, String summaryUri, String title, int titleResId) {
+
         ResolveInfo info = new ResolveInfo();
         info.system = systemApp;
         info.activityInfo = new ActivityInfo();
@@ -345,6 +396,13 @@ public class TileUtilsTest {
         }
         if (summaryUri != null) {
             info.activityInfo.metaData.putString("com.android.settings.summary_uri", summaryUri);
+        }
+        if (title != null) {
+            info.activityInfo.metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
+        }
+        if (titleResId != 0) {
+            info.activityInfo.metaData.putInt(
+                    TileUtils.META_DATA_PREFERENCE_TITLE_RES_ID, titleResId);
         }
         info.activityInfo.applicationInfo = new ApplicationInfo();
         if (systemApp) {
