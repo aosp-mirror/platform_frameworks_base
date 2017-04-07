@@ -6239,7 +6239,7 @@ public abstract class PackageManager {
      * @return true if the calling package is trusted by the user to request install packages on
      * the device, false otherwise.
      * @see {@link android.content.Intent#ACTION_INSTALL_PACKAGE}
-     * @see {@link android.provider.Settings#ACTION_MANAGE_EXTERNAL_SOURCES}
+     * @see {@link android.provider.Settings#ACTION_MANAGE_UNKNOWN_APP_SOURCES}
      */
     public abstract boolean canRequestPackageInstalls();
 
