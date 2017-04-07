@@ -570,12 +570,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
      * @return true if caller can use fingerprint API
      */
     private boolean canUseFingerprint(String opPackageName, boolean requireForeground, int uid,
-            int pid) {
+            int pid, int userId) {
         checkPermission(USE_FINGERPRINT);
         if (isKeyguard(opPackageName)) {
             return true; // Keyguard is always allowed
         }
-        if (!isCurrentUserOrProfile(UserHandle.getCallingUserId())) {
+        if (!isCurrentUserOrProfile(userId)) {
             Slog.w(TAG,"Rejecting " + opPackageName + " ; not a current user or profile");
             return false;
         }
@@ -906,7 +906,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 @Override
                 public void run() {
                     if (!canUseFingerprint(opPackageName, true /* foregroundOnly */,
-                            callingUid, pid)) {
+                            callingUid, pid, callingUserId)) {
                         if (DEBUG) Slog.v(TAG, "authenticate(): reject " + opPackageName);
                         return;
                     }
@@ -933,10 +933,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         public void cancelAuthentication(final IBinder token, final String opPackageName) {
             final int uid = Binder.getCallingUid();
             final int pid = Binder.getCallingPid();
+            final int callingUserId = UserHandle.getCallingUserId();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (!canUseFingerprint(opPackageName, true /* foregroundOnly */, uid, pid)) {
+                    if (!canUseFingerprint(opPackageName, true /* foregroundOnly */, uid, pid,
+                            callingUserId)) {
                         if (DEBUG) Slog.v(TAG, "cancelAuthentication(): reject " + opPackageName);
                     } else {
                         ClientMonitor client = mCurrentClient;
@@ -996,7 +998,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         @Override // Binder call
         public boolean isHardwareDetected(long deviceId, String opPackageName) {
             if (!canUseFingerprint(opPackageName, false /* foregroundOnly */,
-                    Binder.getCallingUid(), Binder.getCallingPid())) {
+                    Binder.getCallingUid(), Binder.getCallingPid(),
+                    UserHandle.getCallingUserId())) {
                 return false;
             }
 
@@ -1027,7 +1030,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         @Override // Binder call
         public List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName) {
             if (!canUseFingerprint(opPackageName, false /* foregroundOnly */,
-                    Binder.getCallingUid(), Binder.getCallingPid())) {
+                    Binder.getCallingUid(), Binder.getCallingPid(),
+                    UserHandle.getCallingUserId())) {
                 return Collections.emptyList();
             }
 
@@ -1037,7 +1041,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         @Override // Binder call
         public boolean hasEnrolledFingerprints(int userId, String opPackageName) {
             if (!canUseFingerprint(opPackageName, false /* foregroundOnly */,
-                    Binder.getCallingUid(), Binder.getCallingPid())) {
+                    Binder.getCallingUid(), Binder.getCallingPid(),
+                    UserHandle.getCallingUserId())) {
                 return false;
             }
 
