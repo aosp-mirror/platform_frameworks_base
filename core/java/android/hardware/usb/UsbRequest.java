@@ -17,11 +17,13 @@
 package android.hardware.usb;
 
 import android.annotation.Nullable;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
@@ -276,7 +278,7 @@ public class UsbRequest {
         return wasQueued;
     }
 
-    /* package */ void dequeue() {
+    /* package */ void dequeue(boolean useBufferOverflowInsteadOfIllegalArg) {
         boolean isSend = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
         int bytesTransferred;
 
@@ -313,7 +315,18 @@ public class UsbRequest {
                     bytesTransferred = native_dequeue_array(mBuffer.array(), mLength, isSend);
                 }
                 if (bytesTransferred >= 0) {
-                    mBuffer.position(Math.min(bytesTransferred, mLength));
+                    int bytesToStore = Math.min(bytesTransferred, mLength);
+                    try {
+                        mBuffer.position(bytesToStore);
+                    } catch (IllegalArgumentException e) {
+                        if (useBufferOverflowInsteadOfIllegalArg) {
+                            Log.e(TAG, "Buffer " + mBuffer + " does not have enough space to read "
+                                    + bytesToStore + " bytes", e);
+                            throw new BufferOverflowException();
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
             }
 
