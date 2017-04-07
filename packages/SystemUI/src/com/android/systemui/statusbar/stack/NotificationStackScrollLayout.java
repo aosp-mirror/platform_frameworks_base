@@ -38,6 +38,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -3574,7 +3575,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void goToFullShade(long delay) {
-        mDismissView.setInvisible();
+        if (mDismissView != null) {
+            mDismissView.setInvisible();
+        }
         mEmptyShadeView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
@@ -3701,7 +3704,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return -1;
     }
 
-    public void setDismissView(DismissView dismissView) {
+    public void setDismissView(@NonNull DismissView dismissView) {
         int index = -1;
         if (mDismissView != null) {
             index = indexOfChild(mDismissView);
@@ -3757,6 +3760,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void updateDismissView(boolean visible) {
+        if (mDismissView == null) {
+            return;
+        }
+
         int oldVisibility = mDismissView.willBeGone() ? GONE : mDismissView.getVisibility();
         int newVisibility = visible ? VISIBLE : GONE;
         if (oldVisibility != newVisibility) {
@@ -3814,15 +3821,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public boolean isDismissViewNotGone() {
-        return mDismissView.getVisibility() != View.GONE && !mDismissView.willBeGone();
+        return mDismissView != null
+                && mDismissView.getVisibility() != View.GONE
+                && !mDismissView.willBeGone();
     }
 
     public boolean isDismissViewVisible() {
-        return mDismissView.isVisible();
+        return mDismissView != null && mDismissView.isVisible();
     }
 
     public int getDismissViewHeight() {
-        return mDismissView.getHeight() + mPaddingBetweenElements;
+        return mDismissView == null ? 0 : mDismissView.getHeight() + mPaddingBetweenElements;
     }
 
     public int getEmptyShadeViewHeight() {
