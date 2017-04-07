@@ -44,6 +44,8 @@ import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Predicate;
@@ -114,7 +116,7 @@ public class ResourcesManager {
      * A cache of DisplayId, Resources to Display. These display adjustments associated with these
      * {@link Display}s will change as the resources change.
      */
-    private final ArrayMap<Pair<Integer, Resources>, WeakReference<Display>> mResourceDisplays =
+    private final ArrayMap<Pair<Integer, ResourcesKey>, WeakReference<Display>> mResourceDisplays =
         new ArrayMap<>();
 
     public static ResourcesManager getInstance() {
@@ -137,10 +139,7 @@ public class ResourcesManager {
             for (int i = 0; i < mResourceImpls.size();) {
                 final ResourcesKey key = mResourceImpls.keyAt(i);
                 if (key.isPathReferenced(path)) {
-                    final ResourcesImpl res = mResourceImpls.removeAt(i).get();
-                    if (res != null) {
-                        res.flushLayoutCache();
-                    }
+                    cleanupResourceImpl(key);
                     count++;
                 } else {
                     i++;
@@ -251,8 +250,14 @@ public class ResourcesManager {
      * @param resources The {@link Resources} backing the display adjustments.
      */
     public Display getAdjustedDisplay(final int displayId, Resources resources) {
-        final Pair<Integer, Resources> key = Pair.create(displayId, resources);
         synchronized (this) {
+            // Note that the ResourcesKey might be {@code null} in the case that the
+            // {@link Resources} is actually from {@link Resources#getSystem}. In this case, it is
+            // not managed by {@link ResourcesManager}, but we still want to cache the display
+            // object.
+            final Pair<Integer, ResourcesKey> key = Pair.create(displayId,
+                    findKeyForResourceImplLocked(resources.getImpl()));
+
             WeakReference<Display> wd = mResourceDisplays.get(key);
             if (wd != null) {
                 final Display display = wd.get();
@@ -270,6 +275,32 @@ public class ResourcesManager {
                 mResourceDisplays.put(key, new WeakReference<>(display));
             }
             return display;
+        }
+    }
+
+    private void cleanupResourceImpl(ResourcesKey removedKey) {
+        // Remove any resource to display mapping based on this key.
+        final Iterator<Map.Entry<Pair<Integer, ResourcesKey>, WeakReference<Display>>> iter =
+                mResourceDisplays.entrySet().iterator();
+        while (iter.hasNext()) {
+            final Map.Entry<Pair<Integer, ResourcesKey>, WeakReference<Display>> entry =
+                    iter.next();
+            final ResourcesKey key = entry.getKey().second;
+
+            // Do not touch system resource displays (indicated by a {@code null} key) or
+            // non-matching keys.
+            if (key == null || !key.equals(removedKey)) {
+                continue;
+            }
+
+            iter.remove();
+        }
+
+        // Remove resource key to resource impl mapping and flush cache
+        final ResourcesImpl res = mResourceImpls.remove(removedKey).get();
+
+        if (res != null) {
+            res.flushLayoutCache();
         }
     }
 
