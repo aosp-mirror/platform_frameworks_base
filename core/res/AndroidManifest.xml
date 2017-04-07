@@ -1257,6 +1257,13 @@
     <permission android:name="android.permission.REQUEST_NETWORK_SCORES"
         android:protectionLevel="signature" />
 
+    <!-- Allows network stack services (Connectivity and Wifi) to coordinate
+         <p>Not for use by third-party or privileged applications.
+         @hide This should only be used by Connectivity and Wifi Services.
+    -->
+    <permission android:name="android.permission.NETWORK_STACK"
+        android:protectionLevel="signature" />
+
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
     <!-- ======================================= -->
