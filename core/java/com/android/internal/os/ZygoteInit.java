@@ -26,7 +26,9 @@ import android.icu.text.DecimalFormatSymbols;
 import android.icu.util.ULocale;
 import android.net.LocalServerSocket;
 import android.opengl.EGL14;
+import android.os.Build;
 import android.os.IInstalld;
+import android.os.Environment;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Seccomp;
@@ -60,6 +62,7 @@ import dalvik.system.ZygoteHooks;
 import libcore.io.IoUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -457,6 +460,23 @@ public class ZygoteInit {
         final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
         if (systemServerClasspath != null) {
             performSystemServerDexOpt(systemServerClasspath);
+            // Capturing profiles is only supported for debug or eng builds since selinux normally
+            // prevents it.
+            boolean profileSystemServer = SystemProperties.getBoolean(
+                    "dalvik.vm.profilesystemserver", false);
+            if (profileSystemServer && (Build.IS_USERDEBUG || Build.IS_ENG)) {
+                try {
+                    File profileDir = Environment.getDataProfilesDePackageDirectory(
+                            Process.SYSTEM_UID, "system_server");
+                    File profile = new File(profileDir, "primary.prof");
+                    profile.getParentFile().mkdirs();
+                    profile.createNewFile();
+                    String[] codePaths = systemServerClasspath.split(":");
+                    VMRuntime.registerAppInfo(profile.getPath(), codePaths);
+                } catch (Exception e) {
+                    Log.wtf(TAG, "Failed to set up system server profile", e);
+                }
+            }
         }
 
         if (parsedArgs.invokeWith != null) {
