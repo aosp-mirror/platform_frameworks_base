@@ -75,8 +75,7 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"No se pudo guardar la captura de pantalla."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Se produjo un error al guardar la captura de pantalla."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"No se puede guardar la captura de pantalla debido al almacenamiento limitado."</string>
-    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
-    <skip />
+    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"La app o tu organización no permiten las capturas de pantalla"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opciones de transferencia de archivos por USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Activar como reproductor de medios (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Activar como cámara (PTP)"</string>
@@ -91,8 +90,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Asistente voz"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloquear"</string>
-    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
-    <skip />
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Esperando huella digital"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloquear sin utilizar la huella digital"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>
@@ -280,8 +278,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillo"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotación automática"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Girar la pantalla automáticamente"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"Modo de <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotación bloqueada"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Vertical"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Horizontal"</string>
@@ -417,68 +414,40 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"Es posible que se supervise el perfil."</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Es posible que la red esté supervisada."</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Es posible que la red esté supervisada"</string>
-    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"Tu organización administra este dispositivo y podría controlar el tráfico de red"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> administra este dispositivo y podría controlar el tráfico de red"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"Tu organización administra el dispositivo, el cual está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> administra el dispositivo, el cual está conectado a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"Tu organización administra el dispositivo"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> administra este dispositivo"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"Tu organización administra el dispositivo, el cual está conectado a varias VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> administra el dispositivo, el cual está conectado a varias VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"Tu organización puede controlar el tráfico de red en tu perfil de trabajo"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"Es posible que <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> controle el tráfico de red en tu perfil de trabajo"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Es posible que la red esté supervisada"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"Dispositivo conectado a varias VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Perfil de trabajo conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Perfil personal conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Dispositivo conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Supervisión del dispositivo"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Supervisión del perfil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Supervisión de red"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
-    <skip />
+    <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"Registro de red"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"Certificados de CA"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Inhabilitar VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconectar VPN"</string>
-    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
-    <skip />
-    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
-    <skip />
-    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
-    <skip />
-    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
-    <skip />
-    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
-    <skip />
+    <string name="monitoring_button_view_policies" msgid="100913612638514424">"Ver políticas"</string>
+    <string name="monitoring_description_named_management" msgid="4872859182820011954">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> administra tu dispositivo.\n\nTu administrador puede controlar las opciones de configuración, el acceso corporativo, las apps, los datos asociados con tu dispositivo y la información de ubicación.\n\nPara obtener más información, comunícate con tu administrador."</string>
+    <string name="monitoring_description_management" msgid="3115563193381106341">"Tu organización administra tu dispositivo.\n\nTu administrador puede controlar y administrar la configuración, el acceso corporativo, las apps, los datos asociados y la información de ubicación de tu dispositivo.\n\nPara obtener más información, comunícate con tu administrador."</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Tu organización instaló una autoridad de certificación en este dispositivo. Es posible que se controle o modifique el tráfico de tu red segura."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Tu organización instaló una autoridad de certificación en tu perfil de trabajo. Es posible que se controle o modifique el tráfico de tu red segura."</string>
+    <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Hay una autoridad de certificación instalada en este dispositivo. Es posible que se controle o modifique el tráfico de tu red segura."</string>
+    <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Tu administrador activó el registro de red, que supervisa el tráfico en tu dispositivo."</string>
+    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"Estás conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede controlar la actividad de tu red, incluidos los correos electrónicos, las apps y los sitios web."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"Estás conectado a <xliff:g id="VPN_APP_0">%1$s</xliff:g> y <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que pueden controlar tu actividad de red, incluidos los correos electrónicos, las apps y los sitios web."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Tu perfil de trabajo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede controlar tu actividad de red, incluidos los correos electrónicos, las apps y los sitios web."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Tu perfil personal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede controlar tu actividad de red, incluidos los correos electrónicos, las apps y los sitios web."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> administra tu dispositivo."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> usa <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> para administrar tu dispositivo."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Tu administrador controla la configuración, el acceso corporativo, las apps, los datos asociados a tu dispositivo y la información de ubicación."</string>
@@ -487,22 +456,17 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Estás conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede controlar la actividad de tu red, incluidos los correos electrónicos, las apps y los sitios web."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Abrir configuración de VPN"</string>
-    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
-    <skip />
-    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
-    <skip />
+    <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Abrir credenciales de confianza"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Tu administrador activó el registro de red, que controla el tráfico en tu dispositivo.\n\nComunícate con él para obtener más información."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Permitiste que una aplicación configurara una conexión VPN.\n\nEsta aplicación puede supervisar la actividad de la red y del dispositivo, incluidos los correos electrónicos, las aplicaciones y los sitios web."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> administra tu perfil de trabajo.\n\nTu administrador puede controlar tu actividad en la red, como los correos electrónicos, las apps y los sitios web.\n\nComunícate con él para obtener más información.\n\nTambién estás conectado a una VPN, que puede controlar tu actividad en la red."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="1828472472674709532">"Estás conectado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que puede controlar la actividad de la red, incluidos los correos electrónicos, las apps y los sitios web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Tienes conexión a la aplicación <xliff:g id="APPLICATION">%1$s</xliff:g>, que puede supervisar la actividad de la red personal, incluidos los correos electrónicos, las aplicaciones y los sitios web."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Te conectaste a <xliff:g id="APPLICATION">%1$s</xliff:g>, que puede supervisar la actividad de tu red personal, incluidos los correos electrónicos, las apps y los sitios web."</string>
-    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> administra tu perfil de trabajo. El perfil está conectado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que puede controlar tu actividad de red de trabajo, incluidos los correos electrónicos, apps y sitios web.\n\nPara obtener más información, comunícate con tu administrador."</string>
+    <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> administra tu perfil de red. El perfil está conectado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que puede controlar tu actividad de red de trabajo, incluidos los correos electrónicos, las apps y los sitios web.\n\nTambién estás conectado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que puede controlar tu actividad de red personal."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositivo permanecerá bloqueado hasta que lo desbloquees manualmente."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recibe notificaciones más rápido"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ver antes de desbloquear"</string>
@@ -586,9 +550,11 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificaciones"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Ya no recibirás estas notificaciones."</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categorías de notificaciones"</string>
-    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
-    <skip />
-    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Esta app no tiene categorías de notificación"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
+      <item quantity="other">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categorías de notificación de esta app</item>
+      <item quantity="one">1 de <xliff:g id="NUMBER_0">%d</xliff:g> categoría de notificación de esta app</item>
+    </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> y <xliff:g id="NUMBER_5">%3$d</xliff:g> más</item>
@@ -596,6 +562,8 @@
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"Todas las categorías"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Más opciones de configuración"</string>
+    <!-- no translation found for notification_app_settings (3743278649182392015) -->
+    <skip />
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"controles de notificación"</string>
@@ -745,6 +713,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Expandir"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Cerrar"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Arrastra hacia abajo para descartar"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Menú de Imagen en imagen"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> está en modo de imagen en imagen"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Si no quieres que <xliff:g id="NAME">%s</xliff:g> use esta función, presiona para abrir la configuración y desactivarla."</string>
@@ -773,4 +742,13 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Las Apps instantáneas no requieren instalación."</string>
     <string name="app_info" msgid="6856026610594615344">"Información de la app"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Datos móviles"</string>
+    <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi desactivado"</string>
+    <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth desactivado"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"No molestar desactivado"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"Una regla automática activó No molestar (<xliff:g id="ID_1">%s</xliff:g>). ¿Deseas mantener la configuración actual?"</string>
+    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"Una app (<xliff:g id="ID_1">%s</xliff:g>) activó No molestar. ¿Deseas mantener la configuración actual?"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"Una app o regla automática activó No molestar. ¿Deseas mantener la configuración actual?"</string>
+    <string name="qs_dnd_until" msgid="3469471136280079874">"Hasta las <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="qs_dnd_keep" msgid="1825009164681928736">"Mantener"</string>
+    <string name="qs_dnd_replace" msgid="8019520786644276623">"Reemplazar"</string>
 </resources>
