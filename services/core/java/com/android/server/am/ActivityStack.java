@@ -312,6 +312,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     boolean mConfigWillChange;
 
+    /**
+     * When set, will force the stack to report as invisible.
+     */
+    boolean mForceHidden = false;
+
     // Whether or not this stack covers the entire screen; by default stacks are fullscreen
     boolean mFullscreen = true;
     // Current bounds of the stack or null if fullscreen.
@@ -1561,7 +1566,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     /** Returns true if the stack is currently considered visible. */
     boolean isVisible() {
-        return mWindowContainerController != null && mWindowContainerController.isVisible();
+        return mWindowContainerController != null && mWindowContainerController.isVisible()
+                && !mForceHidden;
     }
 
     /**
@@ -1571,7 +1577,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @param starting The currently starting activity or null if there is none.
      */
     int shouldBeVisible(ActivityRecord starting) {
-        if (!isAttached()) {
+        if (!isAttached() || mForceHidden) {
             return STACK_INVISIBLE;
         }
 
