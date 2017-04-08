@@ -9,6 +9,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for no_data_notification_detail (3112125343857014825) -->
     <skip />
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"وضعیت داده تلفن همراه"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"ورود به سیستم شبکه تلفن همراه"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"شبکه‌ای که می‌خواهید به آن بپیوندید مشکلات امنیتی دارد."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"به عنوان مثال، صفحه ورود به سیستم ممکن است متعلق به سازمان نشان داده شده نباشد."</string>

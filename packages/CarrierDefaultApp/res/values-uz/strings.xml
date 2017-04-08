@@ -7,6 +7,7 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Mobil internet o‘chirildi"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s saytiga o‘tish uchun bosing"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"%s xizmat ta’minotchisi bilan bog‘laning"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Mobil internet holati"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Mobil tarmoqqa ulanish"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Siz ulanmoqchi bo‘lgan tarmoqda xavfsizlik bilan bog‘liq muammolar mavjud."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Masalan, tizimga kirish sahifasi ko‘rsatilgan tashkilotga tegishli bo‘lmasligi mumkin."</string>
