@@ -89,22 +89,14 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"El ID de emisor presenta el valor predeterminado de no restringido. Siguiente llamada: No restringido"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"El servicio no se suministra."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"No puedes modificar el ID de emisor."</string>
-    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
-    <skip />
-    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
-    <skip />
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Sin servicio de datos"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Sin servicio de emergencia"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Sin servicio de voz"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sin servicio de emergencia ni de voz"</string>
+    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Tu operador ha suspendido temporalmente el servicio de datos en esta ubicación"</string>
+    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Tu operador ha suspendido temporalmente las llamadas de emergencia en esta ubicación"</string>
+    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Tu operador ha suspendido temporalmente las llamadas de voz en esta ubicación"</string>
+    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Tu operador ha suspendido temporalmente las llamadas de emergencia y de voz en esta ubicación"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mejorar la recepción, prueba a cambiar el tipo de red seleccionado en Sistema &gt; Red e Internet &gt; Redes móviles &gt; Tipo de red preferida."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Un dispositivo ha solicitado el modo TTY FULL"</string>
@@ -184,21 +176,16 @@
       <item quantity="one">Entidad de certificación instalada</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por un tercero desconocido"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Por el administrador de tu perfil de trabajo"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Perfil de trabajo eliminado"</string>
-    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
-    <skip />
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Se ha eliminado el perfil de trabajo porque falta la aplicación de administración"</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"Falta la aplicación de administración del perfil de trabajo o está dañada. Por ello, se han eliminado tu perfil de trabajo y los datos relacionados. Ponte en contacto con el administrador para obtener ayuda."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Tu perfil de trabajo ya no está disponible en este dispositivo"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"El dispositivo está administrado"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Tu organización administra este dispositivo y puede supervisar el tráfico de red. Toca la notificación para obtener más información."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Tu dispositivo se borrará"</string>
-    <!-- no translation found for factory_reset_message (7972496262232832457) -->
-    <skip />
+    <string name="factory_reset_message" msgid="7972496262232832457">"No se puede utilizar la aplicación de administración. Se borrarán los datos del dispositivo. \n\nSi tienes alguna pregunta, ponte en contacto con el administrador de tu organización."</string>
     <string name="me" msgid="6545696007631404292">"Yo"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opciones del tablet"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Opciones de la TV"</string>
@@ -419,8 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"direccionar llamadas a través del sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permite a la aplicación direccionar sus llamadas hacia el sistema para mejorar la calidad de estas."</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"leer el número de teléfono"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Permite que la aplicación acceda al número de teléfono del dispositivo."</string>
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"leer números de teléfono"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Permite que la aplicación acceda a los números de teléfono del dispositivo."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir que el tablet entre en modo de suspensión"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"evitar que la TV entre en suspensión"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir que el teléfono entre en modo de suspensión"</string>
@@ -560,8 +547,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite que la aplicación lea y modifique la configuración de No molestar."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controla la longitud y los caracteres permitidos en los PIN y en las contraseñas de bloqueo de pantalla."</string>
-    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
-    <skip />
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Supervisar los intentos de desbloqueo de pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el tablet o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea la TV o borra todos los datos de la TV si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el teléfono o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
@@ -1188,8 +1174,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Creando informe de errores…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartiendo informe de errores…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"El administrador ha solicitado un informe de errores para solucionar problemas de este dispositivo. Es posible que se compartan las aplicaciones y los datos."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECHAZAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
@@ -1200,7 +1185,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras aplicaciones"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras apps."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si no quieres que <xliff:g id="NAME">%s</xliff:g> utilice esta función, toca la notificación para abrir los ajustes y desactivarla."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESACTIVAR"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparando <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1474,29 +1459,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
-    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
-    <skip />
-    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
-    <skip />
-    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
-    <skip />
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"¿Utilizar acceso directo de accesibilidad?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Si el acceso directo está activado, pulsa los dos botones de volumen durante tres segundos para iniciar una función de accesibilidad.\n\n Función de accesibilidad actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puedes cambiar la función en Ajustes &gt; Accesibilidad."</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Desactivar acceso directo"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Utilizar acceso directo"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"El acceso directo a accesibilidad ha activado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"El acceso directo a accesibilidad ha desactivado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
-    <skip />
-    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Selecciona la función que se utilizará cuando toques el botón Accesibilidad:"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Para cambiar las funciones, mantén pulsado el botón Accesibilidad."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ampliación"</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuario actual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Cambiando a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Cerrando la sesión de <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"El administrador no permite realizar este cambio"</string>
     <string name="app_not_found" msgid="3429141853498927379">"No se ha encontrado ninguna aplicación que pueda realizar esta acción."</string>
     <string name="revoke" msgid="5404479185228271586">"Revocar"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1588,8 +1565,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Servicio de impresión no habilitado"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"El servicio <xliff:g id="NAME">%s</xliff:g> se ha instalado"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Tocar para habilitar"</string>
-    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
-    <skip />
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Introducir el PIN del administrador"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Introducir PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Incorrecto"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN actual"</string>
@@ -1617,21 +1593,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
-    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"Mantén pulsado el botón Atrás y el de aplicaciones recientes para dejar de fijar esta pantalla"</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Esta aplicación no se puede dejar de fijar"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fijada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"La pantalla ya no está fija"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para desactivar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar patrón de desbloqueo para desactivar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para desactivar"</string>
-    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
-    <skip />
-    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado por el administrador"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizado por el administrador"</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado por el administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se muestren hasta que no las toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar ahorro de datos?"</string>
@@ -1716,10 +1687,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos los idiomas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Todas las regiones"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Buscar"</string>
-    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="2615362773958585967">"¿Activar modo de trabajo?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"Se activará tu perfil de trabajo, incluidas las aplicaciones, la sincronización en segundo plano y las funciones relacionadas"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activar"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tienes mensajes nuevos"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Abre la aplicación de SMS para ver el mensaje"</string>
@@ -1763,6 +1732,8 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Cambia al modo de introducción de texto para escribir la hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Cambia al modo de reloj para escribir la hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opciones de Autocompletar"</string>
+    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"¿Guardar en <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"¿Guardar <xliff:g id="TYPE">%1$s</xliff:g> en <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Guardar"</string>
@@ -1770,17 +1741,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"contraseña"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"dirección"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"tarjeta de crédito"</string>
+    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
+    <skip />
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantén la calma y busca refugio en algún lugar cercano."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Aléjate inmediatamente de las zonas costeras y situadas junto a un río para dirigirte hacia un lugar más seguro, por ejemplo, un terreno elevado."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantén la calma y busca refugio en algún lugar cercano."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Prueba de mensajes de emergencia"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM no compatible"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM no proporcionada"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM no compatible"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Teléfono no compatible"</string>
 </resources>

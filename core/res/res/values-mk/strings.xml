@@ -89,22 +89,14 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: не е ограничен"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не може да го промените поставувањето за ID на повикувач."</string>
-    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
-    <skip />
-    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
-    <skip />
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Нема услуга за интернет"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Нема услуга за итни повици"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Нема услуга за говорни повици"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Нема услуга за говорни/итни повици"</string>
+    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Вашиот оператор привремено ја суспендираше услугата за интернет на локацијава"</string>
+    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Вашиот оператор привремено ги суспендираше итните повици на локацијава"</string>
+    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Вашиот оператор привремено ги суспендираше говорните повици на локацијава"</string>
+    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Вашиот оператор привремено ги суспендираше говорните и итните повици на локацијава"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се дојде до мрежата"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"За подобрување на приемот, обидете се да го промените избраниот тип во: Систем &gt; Мрежа и интернет &gt; Мобилни мрежи &gt; Претпочитан тип мрежа."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Рамноправен уред го побара режимот на TTY „FULL“"</string>
@@ -184,21 +176,16 @@
       <item quantity="other">Инсталирани се авторитети за сертификатот</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Од страна на непознато трето лице"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Од администраторот на вашиот работен профил"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Од <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Работниот профил е избришан"</string>
-    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
-    <skip />
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Работниот профил е избришан поради исчезнувањето на апликацијата на администратор"</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"Апликацијата на администраторот за работниот профил или исчезна или е оштетена. Како резултат на тоа, вашиот работен профил и поврзаните податоци ќе се избришат. За помош, контактирајте со администраторот."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Вашиот работен профил веќе не е достапен на уредов"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Некој управува со уредот"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Вашата организација управува со уредов и можно е да го следи сообраќајот на мрежата. Допрете за детали."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Уредот ќе се избрише"</string>
-    <!-- no translation found for factory_reset_message (7972496262232832457) -->
-    <skip />
+    <string name="factory_reset_message" msgid="7972496262232832457">"Апликацијата на администраторот не може да се користи. Вашиот уред сега ќе се избрише.\n\nАко имате прашања, контактирајте со администраторот на вашата организација."</string>
     <string name="me" msgid="6545696007631404292">"Јас"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Опции на таблет"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Опции на телевизорот"</string>
@@ -419,8 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Овозможува апликацијата да пристапи кон карактеристиките на телефонот на уредот. Оваа дозвола овозможува апликацијата да ги утврди телефонскиот број и ID на уредот, дали повикот е активен и далечинскиот број поврзан со повикот."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"пренасочи повици преку системот"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозволете ѝ на апликацијата да ги пренасочи повиците преку системот за да го подобри искуството при јавувањето."</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"да го чита телефонскиот број"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Ѝ дозволува на апликацијата да пристапи до телефонскиот број на уредот."</string>
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"да чита телефонски броеви"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Ѝ дозволува на апликацијата да пристапи до телефонските броеви на уредот."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречи режим на штедење кај таблет"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"спречи го телевизорот да премине во режим на мирување"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"спречи телефон од режим на штедење"</string>
@@ -560,8 +547,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Дозволува апликацијата да чита и пишува конфигурација Не вознемирувај."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Постави правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
-    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
-    <skip />
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Следи ги обидите за отклучување на екранот"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Посматрај го бројот на неточни лозинки што се напишани за да се отклучи екранот и заклучи го таблетот или избриши ги сите податоци од него ако бидат напишани премногу неточни лозинки."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го телевизорот или избриши ги сите негови податоци доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Посматрај го бројот на неточни лозинки што се напишани за да се отклучи екранот и заклучи го телефонот или избриши ги сите податоци од него ако бидат напишани премногу неточни лозинки."</string>
@@ -1189,8 +1175,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Се зема извештајот за грешки…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели извештајот за грешки?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Се споделува извештај за грешки…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Вашиот IT-администратор побара извештај за грешки за да ви помогне при отстранувањето грешки на уредов. Апликациите и податоците може да бидат споделени."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"СПОДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
@@ -1201,7 +1186,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> се прикажува врз други апликации"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> се прикажува врз апликации."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> се прикажува врз апликации"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ако не сакате <xliff:g id="NAME">%s</xliff:g> да ја користи функцијава, допрете за да ги отворите поставките и исклучете ја."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ИСКЛУЧИ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Се подготвува <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1477,29 +1462,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Отстрани"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
-    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
-    <skip />
-    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
-    <skip />
-    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
-    <skip />
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Да се користи кратенка за „Пристапност“?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција на пристапност.\n\n Тековна функција на пристапност:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Функцијата може да ја промените во „Поставки“ &gt; „Пристапност“."</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Исклучи ја кратенката"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Користи кратенка"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Кратенката за пристапност ја вклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Кратенката за пристапност ја исклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
-    <skip />
-    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Изберете функција за користење кога ќе го допрете копчето за „Пристапност“."</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"За променување функции, допрете го и задржете го копчето за „Пристапност“."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Зголемување"</string>
     <string name="user_switched" msgid="3768006783166984410">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Се префрла на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> се одјавува…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Сопственик"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
-    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"Администраторот не ја дозволува промената"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Не се пронајдени апликации да се изврши ова дејство"</string>
     <string name="revoke" msgid="5404479185228271586">"Отповикај"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1591,8 +1568,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Услугата печатење не е овозможена"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Услугате <xliff:g id="NAME">%s</xliff:g> е инсталирана"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Допри да се овозможи"</string>
-    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
-    <skip />
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Внесете PIN на админстратор"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Внеси PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Неточно"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Тековен PIN"</string>
@@ -1620,21 +1596,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Втора деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Трета деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"За откачување на екранов, допрете и задржете ги копчињата „Назад“ и „Краток преглед“."</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Апликацијава не може да се откачи"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екранот е откачен"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за PIN пред откачување"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Побарај шема за откл. пред откачување"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
-    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
-    <skip />
-    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирано од администраторот"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирано од администраторот"</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избришано од администраторот"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци во заднина. Е-поштата, испраќањето пораки и другите апликации што користат синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
@@ -1719,10 +1690,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Сите јазици"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Сите региони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Пребарај"</string>
-    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="2615362773958585967">"Да се вклучи работен режим?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"Ова ќе го вклучи вашиот работен профил, заедно со апликациите, синхронизирањето во заднина и слични функции"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Вклучи"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Имате нови пораки"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Отворете ја апликацијата за SMS за приказ"</string>
@@ -1766,6 +1735,8 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Префрлете се на режимот за внесување текст за да внесете време."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Префрлете се на режимот за часовник за да внесете време."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Опции за автоматско пополнување"</string>
+    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Да се зачува во <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Да се зачува <xliff:g id="TYPE">%1$s</xliff:g> во <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зачувај"</string>
@@ -1773,17 +1744,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"лозинка"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредитна картичка"</string>
+    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
+    <skip />
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Бидете смирени и побарајте засолниште во близина."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Итна евакуација од крајбрежните региони и областите покрај реки на побезбедно место, како на пр., терени на повисока надморска височина."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Бидете смирени и побарајте засолниште во близина."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Тестирање пораки за итни случаи"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Не е дозволена SIM-картичка"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Не е обезбедена SIM-картичка"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Не е дозволена SIM-картичка"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Не е дозволен телефон"</string>
 </resources>
