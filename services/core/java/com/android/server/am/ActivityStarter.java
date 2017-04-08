@@ -1457,17 +1457,11 @@ class ActivityStarter {
     }
 
     /**
-     * Returns the ID of the display to use for a new activity. If the source activity has
-     * a explicit display ID set, use that to launch the activity. If not and the device is in VR
-     * mode, then return the Vr mode's virtual display ID.
+     * Returns the ID of the display to use for a new activity. If the device is in VR mode,
+     * then return the Vr mode's virtual display ID. If not, if the source activity has
+     * a explicit display ID set, use that to launch the activity.
      */
     private int getSourceDisplayId(ActivityRecord sourceRecord, ActivityRecord startingActivity) {
-        int displayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
-        // If the activity has a displayId set explicitly, launch it on the same displayId.
-        if (displayId != INVALID_DISPLAY) {
-            return displayId;
-        }
-
         // Check if the Activity is a VR activity. If so, the activity should be launched in
         // main display.
         if (startingActivity != null && startingActivity.requestedVrComponent != null) {
@@ -1475,12 +1469,18 @@ class ActivityStarter {
         }
 
         // Get the virtual display id from ActivityManagerService.
-        displayId = mService.mVrCompatibilityDisplayId;
+        int displayId = mService.mVrCompatibilityDisplayId;
         if (displayId != INVALID_DISPLAY) {
             if (DEBUG_STACK) {
                 Slog.d(TAG, "getSourceDisplayId :" + displayId);
             }
             mUsingVrCompatibilityDisplay = true;
+            return displayId;
+        }
+
+        displayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
+        // If the activity has a displayId set explicitly, launch it on the same displayId.
+        if (displayId != INVALID_DISPLAY) {
             return displayId;
         }
         return DEFAULT_DISPLAY;
