@@ -247,8 +247,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSupportsMultiwindow(pw);
                 case "supports-split-screen-multi-window":
                     return runSupportsSplitScreenMultiwindow(pw);
-                case "supports-multi-display":
-                    return runSupportsMultiDisplay(pw);
                 case "update-appinfo":
                     return runUpdateApplicationInfo(pw);
                 case "no-home-screen":
@@ -2399,15 +2397,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    int runSupportsMultiDisplay(PrintWriter pw) throws RemoteException {
-        final Resources res = getResources(pw);
-        if (res == null) {
-            return -1;
-        }
-        pw.println(ActivityManager.supportsMultiDisplay());
-        return 0;
-    }
-
     int runUpdateApplicationInfo(PrintWriter pw) throws RemoteException {
         int userid = UserHandle.parseUserArg(getNextArgRequired());
         ArrayList<String> packages = new ArrayList<>();
@@ -2637,8 +2626,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Returns true if the device supports multiwindow.");
             pw.println("  supports-split-screen-multi-window");
             pw.println("      Returns true if the device supports split screen multiwindow.");
-            pw.println("  supports-multi-display");
-            pw.println("      Returns true if the device supports multi-display.");
             pw.println("  suppress-resize-config-changes <true|false>");
             pw.println("      Suppresses configuration changes due to user resizing an activity/task.");
             pw.println("  set-inactive [--user <USER_ID>] <PACKAGE> true|false");
