@@ -114,8 +114,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Профильдерді ауыстырғанда өрнекті енгізу қажет"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Профильдерді ауыстырғанда PIN кодын енгізу қажет"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Профильдерді ауыстырғанда құпия сөзді енгізу қажет"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Құрылғыны әкімші құлыптаған"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Құрылғы қолмен құлыпталды"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">Құрылғы құлпы <xliff:g id="NUMBER_1">%d</xliff:g> сағаттан бері ашылмаған. Өрнекті растаңыз.</item>

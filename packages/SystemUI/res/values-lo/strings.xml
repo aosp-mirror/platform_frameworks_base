@@ -75,8 +75,7 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ເກີດບັນຫາໃນການບັນທຶກພາບໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້ເນື່ອງຈາກພື້ນທີ່ຈັດເກັບຂໍ້ມູນມີຈຳກັດ."</string>
-    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
-    <skip />
+    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ແອັບ ຫຼື ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຖ່າຍຮູບໜ້າຈໍ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ໂຕເລືອກການຍ້າຍໄຟລ໌"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ເຊື່ອມຕໍ່ເປັນ media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ເຊື່ອມຕໍ່ເປັນກ້ອງຖ່າຍຮູບ (PTP)"</string>
@@ -91,8 +90,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ໂທລະສັບ"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ຊ່ວຍ​ເຫຼືອ​ທາງ​ສຽງ"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ປົດລັອກ"</string>
-    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
-    <skip />
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ກຳລັງລໍຖ້າລາຍນິ້ວມື"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ປົດ​ລັອກ​ໂດຍ​ບໍ່​ມີ​ການ​ໃຊ້​ລາຍ​ນີ້ວ​ມື​ຂອງ​ທ່ານ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ປົດລັອກ"</string>
     <string name="phone_label" msgid="2320074140205331708">"​ເປີດ​​ແປ້ນ​ໂທ​ລະ​ສັບ"</string>
@@ -278,8 +276,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ຄວາມສະຫວ່າງ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ໝຸນ​ອັດ​ຕະ​ໂນ​ມັດ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ໝຸນໜ້າຈໍອັດຕະໂນມັດ"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"ໂໝດ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"​ລັອກ​ການ​ໝຸນ​ຈ​ໍ​ແລ້ວ"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ລວງຕັ້ງ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ລວງນອນ"</string>
@@ -415,68 +412,40 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"ໂປຣ​ໄຟລ໌​ອາດ​ຖືກ​ເຝົ້າ​ຕິດ​ຕາມ​ຢູ່"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"​ເຄືອ​ຂ່າຍ​ອາດ​ມີ​ການ​ເຝົ້າ​ຕິດ​ຕາມ"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
-    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"ອົງກອນຂອງທ່ານຈັດການອຸປະກອນນີ້ ແລະ ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໄດ້"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ຈັດການອຸປະກອນນີ້ ແລະ ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໄດ້"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"ອຸປະກອນຂອງທ່ານຖືກຈັດການໂດຍອົງກອນຂອງທ່ານ ແລະ ເຊື່ອມຕໍ່ກັບ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"ອຸປະກອນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ແລະ ເຊື່ອມຕໍ່ຫາ <xliff:g id="VPN_APP">%2$s</xliff:g> ແລ້ວ"</string>
+    <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"ອຸປະກອນຖືກຈັດການໂດຍອົງກອນຂອງທ່ານ"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"ອຸປະກອນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"ອຸປະກອນຂອງທ່ານຖືກຈັດການໂດຍອົງກອນຂອງທ່ານ ແລະ ເຊື່ອມຕໍ່ກັບ VPN ແລ້ວ"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"ອຸປະກອນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ແລະ ເຊື່ອມຕໍ່ຫາ VPN ແລ້ວ"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"ອົງກອນຂອງທ່ານສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານໄດ້"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານໄດ້"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"ເຄືອຂ່າຍອາດຖືກຕິດຕາມ"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"ອຸປະກອນເຊື່ອມຕໍ່ຫາ VPN ແລ້ວ"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກເຊື່ອມຕໍ່ຫາ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"ໂປຣໄຟລ໌ສ່ວນຕົວເຊື່ອມຕໍ່ຫາ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"ອຸປະກອນເຊື່ອມຕໍ່ຫາ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ອຸ​ປະ​ກອນ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"ການ​ຕິດ​ຕາມ​ໂປຣ​ໄຟລ໌"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ເຄືອ​ຂ່າຍ"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
-    <skip />
+    <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"ການບັນທຶກເຄືອຂ່າຍ"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"ໃບຮັບຮອງ CA"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"ປິດ​ການ​ໃຊ້ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ຕັດ​ການ​ເຊື່ອມ​ຕໍ່ VPN"</string>
-    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
-    <skip />
-    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
-    <skip />
-    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
-    <skip />
-    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
-    <skip />
-    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
-    <skip />
+    <string name="monitoring_button_view_policies" msgid="100913612638514424">"ເບິ່ງນະໂຍບາຍ"</string>
+    <string name="monitoring_description_named_management" msgid="4872859182820011954">"ອຸປະກອນຂອງທ່ານຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານສາມາດຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ການເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນທ່ານແລະ ຂໍ້ມູນສະຖານທີ່ຂອງອຸປະກອນທ່ານໄດ້ັ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງຂອງທ່ານ.\""</string>
+    <string name="monitoring_description_management" msgid="3115563193381106341">"ອຸປະກອນຂອງທ່ານຖືກຈັດການໂດຍອົງກອນຂອງທ່ານ.\n\nຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານສາມາດຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ການເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານ ແລະ ຂໍ້ມູນສະຖານທີ່ຂອງທ່ານ.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງຂອງທ່ານ.\""</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"ອົງກອນຂອງທ່ານຕິດຕັ້ງອຳນາດໃບຮັບຮອງໄວ້ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"ອົງກອນຂອງທ່ານຕິດຕັ້ງອຳນາດໃບຮັບຮອງໄວ້ໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
+    <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"ມີອຳນາດໃບຮັບຮອງຕິດຕັ້ງຢູ່ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
+    <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"ຜູ້ເບິ່ງແຍງຂອງທ່ານໄດ້ເປີດໃຊ້ການບັນທຶກເຄືອຂ່າຍໄວ້, ເຊິ່ງຈະຕິດຕາມທຣາບຟິກໃນອຸປະກອນຂອງທ່ານ."</string>
+    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊຕ່າງໆຂອງທ່ານໄດ້."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ແລະ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊຕ່າງໆຂອງທ່ານໄດ້."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານເຊື່ອມຕໍ່ຫາ <xliff:g id="VPN_APP">%1$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມເຖິງອີເມວ, ແອັບ ແລະ ເວັບໄຊ."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"ໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊຕ່າງໆຂອງທ່ານໄດ້."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"ອຸປະກອນຂອງທ່ານແມ່ນຈັດການໂດຍ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ໃຊ້ <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> ເພື່ອຈັດການອຸປະກອນຂອງທ່ານ."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານສາມາດຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ການເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານແລະ ຂໍ້ມູນສະຖານທີ່ຂອງອຸປະກອນທ່ານໄດ້."</string>
@@ -485,22 +454,17 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊຕ່າງໆໄດ້."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"ເປີດການຕັ້ງຄ່າ VPN"</string>
-    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
-    <skip />
-    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
-    <skip />
+    <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"ເປີດຂໍ້ມູນການຮັບຮອງທີ່ເຊື່ອຖືໄດ້"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information, contact your admin."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"ທ່ານໄດ້ອະນຸຍາດໃຫ້ແອັບຕັ້ງການເຊື່ອມຕໍ່ VPN.\n\nແອັບນີ້ສາມາດຕິດຕາມການເຄື່ອນໄຫວຂອງອຸປະກອນ ແລະເຄືອຂ່າຍຂອງທ່ານ ເຊິ່ງລວມທັງອີເມວ, ແອັບ ແລະເວັບໄຊທ໌."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nYour admin is capable of monitoring your network activity including emails, apps, and websites.\n\nFor more information, contact your admin.\n\nYou\'re also connected to a VPN, which can monitor your network activity."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="1828472472674709532">"ທ່ານເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊ."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ ລວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊທ໌."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ ຮວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊໄດ້."</string>
-    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="4612997849787922906">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານແມ່ນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກດັ່ງກ່າວເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊໄດ້.\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ຕິດຕໍ່ຫາຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ\n."</string>
+    <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານແມ່ນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກດັ່ງກ່າວເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊໄດ້.\n\nນອກຈາກນັ້ນ, ທ່ານຍັງເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານໄດ້."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ຮັບເອົາການ​ແຈ້ງເຕືອນ​ໄວຂຶ້ນ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ເບິ່ງພວກ​ມັນກ່ອນ​ທ່ານຈະ​ປົດລັອກ"</string>
@@ -583,17 +547,21 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ດ້ວຍການຄວບຄຸມການແຈ້ງເຕືອນ, ທ່ານສາມາດຕັ້ງລະດັບຄວາມສຳຄັນຈາກ 0 ຮອດ 5 ໃຫ້ກັບການແຈ້ງເຕືອນແອັບໃດໜຶ່ງໄດ້. \n\n"<b>"ລະດັບ 5"</b>" \n- ສະແດງຢູ່ເທິງສຸດຂອງລາຍການແຈ້ງເຕືອນ \n- ອະນຸຍາດໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 4"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 3"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n\n"<b>"ລະດັບ 2"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n\n"<b>"ລະດັບ 1"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n- ເຊື່ອງຈາກໜ້າຈໍລັອກ ແລະ ແຖບສະຖານະ \n- ສະແດງຢູ່ລຸ່ມສຸດຂອງລາຍການແຈ້ງເຕືອນ \n\n"<b>"ລະດັບ 0"</b>" \n- ປິດກັ້ນການແຈ້ງເຕືອນທັງໝົດຈາກແອັບ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ການແຈ້ງເຕືອນ"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ."</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> notification categories"</string>
-    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
-    <skip />
-    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
+    <string name="notification_default_channel_desc" msgid="2506053815870808359">"ແອັບນີ້ບໍ່ມີໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
+      <item quantity="other">1 ຈາກທັງໝົດ <xliff:g id="NUMBER_1">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນຈາກແອັບນີ້</item>
+      <item quantity="one">1 ຈາກທັງໝົດ <xliff:g id="NUMBER_0">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນຈາກແອັບນີ້</item>
+    </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, and <xliff:g id="NUMBER_5">%3$d</xliff:g> others</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>, and <xliff:g id="NUMBER_2">%3$d</xliff:g> other</item>
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> ແລະ ອີກ <xliff:g id="NUMBER_5">%3$d</xliff:g> ຊ່ອງອື່ນໆ</item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> ແລະ ອີກ <xliff:g id="NUMBER_2">%3$d</xliff:g> ຊ່ອງອື່ນໆ</item>
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"ທຸກໝວດໝູ່"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
+    <!-- no translation found for notification_app_settings (3743278649182392015) -->
+    <skip />
     <string name="notification_done" msgid="5279426047273930175">"ສຳເລັດແລ້ວ"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ການຄວບຄຸມການແຈ້ງເຕືອນ"</string>
@@ -743,8 +711,9 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"ຂະຫຍາຍ"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ຫຍໍ້"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ປິດ"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ລາກລົງເພື່ອປິດໄວ້"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"ເມນູຊ້ອນຮູບພາບ"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in picture-in-picture"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ແມ່ນເປັນການສະແດງຜົນຫຼາຍຢ່າງພ້ອມກັນ"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"ຫາກທ່ານບໍ່ຕ້ອງການ <xliff:g id="NAME">%s</xliff:g> ໃຫ້ໃຊ້ຄຸນສົມບັດນີ້, ໃຫ້ແຕະເພື່ອເປີດການຕັ້ງຄ່າ ແລ້ວປິດມັນໄວ້."</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ໂທລະສັບກຳລັງຮ້ອນຂຶ້ນ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ຄຸນສົມບັດບາງຢ່າງຖືກຈຳກັດໄວ້ເນື່ອງໃນເວລາຫຼຸດອຸນຫະພູມຂອງໂທລະສັບ"</string>
@@ -771,4 +740,13 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"ອິນສະແຕນແອັບບໍ່ຈຳເປັນຕ້ອງມີການຕິດຕັ້ງ."</string>
     <string name="app_info" msgid="6856026610594615344">"ຂໍ້ມູນແອັບ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ອິນເຕີເນັດມືຖື"</string>
+    <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ປິດຢູ່"</string>
+    <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth ປິດຢູ່"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"ຫ້າມລົບກວນ ປິດຢູ່"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ (<xliff:g id="ID_1">%s</xliff:g>). ເກັບການຕັ້ງຄ່າປັດຈຸບັນໄວ້ບໍ?"</string>
+    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍແອັບໜຶ່ງ (<xliff:g id="ID_1">%s</xliff:g>). ເກັບການຕັ້ງຄ່າປັດຈຸບັນໄວ້ບໍ?"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ ຫຼື ແອັບໃດໜຶ່ງ. ເກັບການຕັ້ງຄ່າປັດຈຸບັນໄວ້ບໍ?"</string>
+    <string name="qs_dnd_until" msgid="3469471136280079874">"ຈົນຮອດ <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="qs_dnd_keep" msgid="1825009164681928736">"ເກັບໄວ້"</string>
+    <string name="qs_dnd_replace" msgid="8019520786644276623">"ແທນທີ່"</string>
 </resources>
