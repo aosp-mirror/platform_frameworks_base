@@ -18,6 +18,7 @@ package android.app;
 
 import android.metrics.LogMaker;
 import android.graphics.Rect;
+import android.view.ViewRootImpl.ActivityConfigCallback;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillPopupWindow;
@@ -6778,12 +6779,12 @@ public class Activity extends ContextThemeWrapper
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config, String referrer, IVoiceInteractor voiceInteractor,
-            Window window) {
+            Window window, ActivityConfigCallback activityConfigCallback) {
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
 
-        mWindow = new PhoneWindow(this, window);
+        mWindow = new PhoneWindow(this, window, activityConfigCallback);
         mWindow.setWindowControllerCallback(this);
         mWindow.setCallback(this);
         mWindow.setOnWindowDismissedCallback(this);

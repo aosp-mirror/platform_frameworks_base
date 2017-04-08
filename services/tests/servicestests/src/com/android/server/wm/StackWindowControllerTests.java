@@ -103,7 +103,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
         final TaskStack stack2 = stack2Controller.mContainer;
 
         // Reparent
-        stack1Controller.reparent(dc.getDisplayId(), new Rect());
+        stack1Controller.reparent(dc.getDisplayId(), new Rect(), true /* onTop */);
         assertEquals(dc, stack1.getDisplayContent());
         final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);
         final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);

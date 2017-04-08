@@ -100,7 +100,7 @@ public class StackWindowController
         }
     }
 
-    public void reparent(int displayId, Rect outStackBounds) {
+    public void reparent(int displayId, Rect outStackBounds, boolean onTop) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("Trying to move unknown stackId=" + mStackId
@@ -113,7 +113,7 @@ public class StackWindowController
                         + " to unknown displayId=" + displayId);
             }
 
-            targetDc.moveStackToDisplay(mContainer);
+            targetDc.moveStackToDisplay(mContainer, onTop);
             getRawBounds(outStackBounds);
         }
     }
