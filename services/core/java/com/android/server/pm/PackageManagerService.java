@@ -4083,6 +4083,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         return updateFlagsForComponent(flags, userId, intent /*cookie*/);
     }
 
+    private ActivityInfo generateActivityInfo(ActivityInfo ai, int flags, PackageUserState state,
+            int userId) {
+        ActivityInfo ret = PackageParser.generateActivityInfo(ai, flags, state, userId);
+        if (ret != null) {
+            rebaseEnabledOverlays(ret.applicationInfo, userId);
+        }
+        return ret;
+    }
+
+    private ActivityInfo generateActivityInfo(PackageParser.Activity a, int flags,
+            PackageUserState state, int userId) {
+        ActivityInfo ai = PackageParser.generateActivityInfo(a, flags, state, userId);
+        if (ai != null) {
+            rebaseEnabledOverlays(ai.applicationInfo, userId);
+        }
+        return ai;
+    }
+
     @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
@@ -4096,12 +4114,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                return PackageParser.generateActivityInfo(a, flags, ps.readUserState(userId),
-                        userId);
+                return generateActivityInfo(a, flags, ps.readUserState(userId), userId);
             }
             if (mResolveComponentName.equals(component)) {
-                return PackageParser.generateActivityInfo(mResolveActivity, flags,
-                        new PackageUserState(), userId);
+                return generateActivityInfo(mResolveActivity, flags, new PackageUserState(),
+                        userId);
             }
         }
         return null;
@@ -4142,12 +4159,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                ActivityInfo ri = PackageParser.generateActivityInfo(a, flags,
-                        ps.readUserState(userId), userId);
-                if (ri != null) {
-                    rebaseEnabledOverlays(ri.applicationInfo, userId);
-                }
-                return ri;
+                return generateActivityInfo(a, flags, ps.readUserState(userId), userId);
             }
         }
         return null;
@@ -12307,8 +12319,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             final PackageUserState userState = ps.readUserState(userId);
-            ActivityInfo ai = PackageParser.generateActivityInfo(activity, mFlags,
-                    userState, userId);
+            ActivityInfo ai = generateActivityInfo(activity, mFlags, userState, userId);
             if (ai == null) {
                 return null;
             }
