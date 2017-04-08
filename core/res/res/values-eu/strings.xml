@@ -89,22 +89,14 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Deien identifikazio-zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenik gabe"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Zerbitzua ez da hornitu."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ezin duzu deien identifikazio-zerbitzuaren ezarpena aldatu."</string>
-    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
-    <skip />
-    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
-    <skip />
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Ez dago datu-zerbitzurik"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Ez dago larrialdi-zerbitzurik"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ez dago ahots-deien zerbitzurik"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ez dago ahots- edo larrialdi-deien zerbitzurik"</string>
+    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Operadoreak aldi baterako eten du datu-zerbitzua kokapen honetan"</string>
+    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Operadoreak aldi baterako eten ditu larrialdi-deiak kokapen honetan"</string>
+    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Operadoreak aldi baterako eten ditu ahots-deiak kokapen honetan"</string>
+    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operadoreak aldi baterako eten ditu ahots- eta larrialdi-deiak kokapen honetan"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ezin da konektatu sarera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Seinalea hobea izan dadin, aldatu hautatutako sare mota Sistema &gt; Sareak eta Internet &gt; Sare mugikorrak &gt; Sare mota hobetsia atalean."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
@@ -146,7 +138,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desaktibatuta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi sarea hobesten da"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Datu-konexioa hobesten da"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Datu mugikorrak hobesten dira"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi sarea soilik"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -184,21 +176,16 @@
       <item quantity="one">Ziurtagiri-emaile bat dago instalatuta</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Hirugarren alderdi ezezagun baten arabera"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Laneko profilen administratzaileak"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> da arduraduna"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Laneko profila ezabatu egin da"</string>
-    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
-    <skip />
-    <string name="network_logging_notification_title" msgid="6399790108123704477">"Kudeatuta dago gailua"</string>
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Laneko profila ezabatu egin da hura administratzeko aplikazioa falta delako"</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"Laneko profila administratzeko aplikazioa falta da edo hondatuta dago. Ondorioz, ezabatu egin dira laneko profila bera eta harekin erlazionatutako datuak. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Laneko profila ez dago erabilgarri gailu honetan"</string>
+    <string name="network_logging_notification_title" msgid="6399790108123704477">"Jabeak kudeatzen du gailua"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Gailuko datuak ezabatu egingo dira"</string>
-    <!-- no translation found for factory_reset_message (7972496262232832457) -->
-    <skip />
+    <string name="factory_reset_message" msgid="7972496262232832457">"Ezin da erabili administratzeko aplikazioa. Ezabatu egingo da gailuko eduki guztia.\n\nZalantzarik baduzu, jarri erakundeko administratzailearekin harremanetan."</string>
     <string name="me" msgid="6545696007631404292">"Ni"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tabletaren aukerak"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Telebistaren aukerak"</string>
@@ -419,8 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Gailuaren telefono-eginbideak atzitzeko baimena ematen die aplikazioei. Baimen horrek aplikazioari telefono-zenbakia eta gailu IDak zein diren, deirik aktibo dagoen eta deia zer zenbakirekin konektatuta dagoen zehazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"bideratu deiak sistemaren bidez"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Deiak sistemaren bidez bideratzea baimentzen dio aplikazioari, deien zerbitzua ahal bezain ona izan dadin."</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"irakurri telefono-zenbakia"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Gailuaren telefono-zenbakia atzitzea baimentzen dio aplikazioari."</string>
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"irakurri telefono-zenbakiak"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Gailuaren telefono-zenbakiak atzitzea baimentzen dio aplikazioari."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"eragotzi tableta inaktibo ezartzea"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"eragotzi telebista inaktibo geratzea"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"eragotzi telefonoa inaktibo ezartzea"</string>
@@ -560,8 +547,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\"Ez molestatu\" konfigurazioa irakurtzea eta bertan idaztea baimentzen die aplikazioei."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ezarri pasahitzen arauak"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolatu pantaila blokeoaren pasahitzen eta PINen luzera eta onartutako karaktereak."</string>
-    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
-    <skip />
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Gainbegiratu pantaila desblokeatzeko saiakerak"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu tableta edo ezabatu bere datuak pasahitza gehiegitan oker idazten bada."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu telebista edo ezabatu haren datuak pasahitza gehiegitan oker idazten bada."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Kontrolatu pantaila desblokeatzen saiatzean idatzitako pasahitz oker kopurua, eta blokeatu telefonoa edo ezabatu bere datuak pasahitza gehiegitan oker idazten bada."</string>
@@ -1113,7 +1099,7 @@
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> erabiltzen ari zinen, baina <xliff:g id="NEW_NETWORK">%2$s</xliff:g> erabiltzen ari zara orain"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="3979506840912951943">"datu-konexioa"</item>
+    <item msgid="3979506840912951943">"datu mugikorrak"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
     <item msgid="6862614801537202646">"Bluetooth"</item>
     <item msgid="5447331121797802871">"Ethernet"</item>
@@ -1189,8 +1175,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Akatsen txostena sortzen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Akatsen txostena partekatu nahi duzu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Akatsen txostena partekatzen…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administratzaileak akatsen txostena eskatu du gailuko arazoa konpontzeko. Baliteke aplikazioak eta datuak partekatzea."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"PARTEKATU"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"BAZTERTU"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Aldatu teklatua"</string>
@@ -1201,7 +1186,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> aplikazioen gainean agertzea"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"Beste aplikazioen gainean agertzen da <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"Besteen gainean agertzen da <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESAKTIBATU"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> prestatzen"</string>
@@ -1376,7 +1361,7 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Sakatu erabilera eta ezarpenak ikusteko."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2-3 GB-ko mugara iritsi zara"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4 GB-ko mugara iritsi zara"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Datuen mugara iritsi zara"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Datu mugikorren mugara iritsi zara"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi datuen mugara iritsi zara"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Datuen erab. etenda zikloa amaitu arte"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G datu-muga gainditu da"</string>
@@ -1393,7 +1378,7 @@
     <string name="org_name" msgid="6973561190762085236">"Erakundea:"</string>
     <string name="org_unit" msgid="7265981890422070383">"Antolakuntza-unitatea:"</string>
     <string name="issued_by" msgid="2647584988057481566">"Jaulkitzailea:"</string>
-    <string name="validity_period" msgid="8818886137545983110">"Baliozkotasuna:"</string>
+    <string name="validity_period" msgid="8818886137545983110">"Balio-aldia:"</string>
     <string name="issued_on" msgid="5895017404361397232">"Jaulkitze-data:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Iraungitze-data:"</string>
     <string name="serial_number" msgid="758814067660862493">"Serie-zenbakia:"</string>
@@ -1475,29 +1460,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Kendu"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Bolumena gomendatutako mailatik gora igo nahi duzu?\n\nMusika bolumen handian eta denbora luzez entzuteak entzumena kalte diezazuke."</string>
-    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
-    <skip />
-    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
-    <skip />
-    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
-    <skip />
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Erabilerraztasun-lasterbidea erabili nahi duzu?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Lasterbidea aktibatuta dagoenean, bi bolumen-botoiak hiru segundoz sakatuta abiaraziko da erabilerraztasun-eginbidea.\n\n Uneko erabilerraztasun-eginbidea:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Eginbidea aldatzeko, joan Ezarpenak &gt; Erabilerraztasuna atalera."</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Desaktibatu lasterbidea"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Erabili lasterbidea"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Erabilerraztasun-lasterbideak <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu du"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Erabilerraztasun-lasterbideak <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu du"</string>
-    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
-    <skip />
-    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Aukeratu zein eginbide erabili nahi duzun Erabilerraztasuna botoia sakatzean:"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Eginbideak aldatzeko, eduki sakatuta Erabilerraztasuna botoia."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Lupa"</string>
     <string name="user_switched" msgid="3768006783166984410">"Uneko erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
     <string name="owner_name" msgid="2716755460376028154">"jabea"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Errorea"</string>
-    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"Administratzaileak ez du eman aldaketa egiteko baimena"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Ez da ekintza gauza dezakeen aplikaziorik aurkitu"</string>
     <string name="revoke" msgid="5404479185228271586">"Baliogabetu"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0 (Europa)"</string>
@@ -1589,8 +1566,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Inprimatze-zerbitzua ez dago gaituta"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> zerbitzua instalatu da"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Sakatu gaitzeko"</string>
-    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
-    <skip />
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Idatzi administratzailearen PIN kodea"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Idatzi PINa"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Okerra"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Uneko PINa"</string>
@@ -1618,21 +1594,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Laneko <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Laneko 2. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Laneko 3. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"Pantailari aingura kentzeko, eduki sakatuta Atzera eta Ikuspegi orokorra botoiak"</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Ezin zaio kendu aingura aplikazio honi"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantaila ainguratu da"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Aingura kendu zaio pantailari"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Eskatu PIN kodea aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Eskatu desblokeatzeko eredua aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Eskatu pasahitza aingura kendu aurretik"</string>
-    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
-    <skip />
-    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"Administratzaileak instalatu du"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
@@ -1717,10 +1688,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Hizkuntza guztiak"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Lurralde guztiak"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Bilaketa"</string>
-    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="2615362773958585967">"Laneko modua aktibatu?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"Laneko profila aktibatuko da, aplikazioak, atzeko planoko sinkronizazioa eta erlazionatutako eginbideak barne"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktibatu"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Mezu berriak dituzu"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Mezuak ikusteko, ireki SMS mezuen aplikazioa"</string>
@@ -1764,6 +1733,8 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Aldatu testu modura ordua zehazteko."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Aldatu erloju modura ordua zehazteko."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Betetze automatikoaren aukerak"</string>
+    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> zerbitzuan gorde?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> zerbitzuan gorde nahi duzu <xliff:g id="TYPE">%1$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Gorde"</string>
@@ -1771,17 +1742,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"pasahitza"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"helbidea"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kreditu-txartela"</string>
+    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
+    <skip />
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Ez larritu eta bilatu babesleku bat inguruan."</string>
-    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ebakuatu kostaldeak eta ibaialdeak berehala eta joan toki seguru batera, adibidez, altuera handiko toki batera."</string>
+    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ebakuatu kostaldeak eta ibaialdeak berehala eta joan toki seguru batera, adibidez, toki garai batera."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ez larritu eta bilatu babesleku bat inguruan."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Larrialdi-mezuen proba"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Ez da onartzen SIM txartela"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Ez dago SIM txartelik"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Ez da onartzen SIM txartela"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Ez da onartzen telefonoa"</string>
 </resources>

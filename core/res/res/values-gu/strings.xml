@@ -89,22 +89,14 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"સેવાની જોગવાઈ કરી નથી."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"તમે કૉલર ID સેટિંગ બદલી શકતાં નથી."</string>
-    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
-    <skip />
-    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
-    <skip />
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"કોઈ ડેટા સેવા નથી"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"કોઈ કટોકટીની સેવા નથી"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"કોઈ વૉઇસ સેવા નથી"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"કોઈ વૉઇસ/કટોકટીની સેવા નથી"</string>
+    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"તમારા કૅરિઅરે આ સ્થાને ડેટાની સેવાઓ અસ્થાયી રૂપે સસ્પેન્ડ કરી છે"</string>
+    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"તમારા કૅરિઅરે આ સ્થાને કટોકટીના કૉલ અસ્થાયી રૂપે સસ્પેન્ડ કર્યા છે"</string>
+    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"તમારા કૅરિઅરે આ સ્થાને વૉઇસ કૉલ અસ્થાયી રૂપે સસ્પેન્ડ કર્યા છે"</string>
+    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"તમારા કૅરિઅરે આ સ્થાને વૉઇસ અને કટોકટીના કૉલ અસ્થાયી રૂપે સસ્પેન્ડ કર્યા છે"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"નેટવર્ક પર પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"રિસેપ્શનને બહેતર બનાવવા માટે, સિસ્ટમ &gt; નેટવર્ક અને ઇન્ટરનેટ &gt; મોબાઇલ નેટવર્ક &gt; પસંદગીનો નેટવર્ક પ્રકારમાં પસંદ કરેલો પ્રકાર બદલવાનો પ્રયાસ કરો."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"પીઅરે TTY મોડ પૂર્ણની વિનંતી કરી"</string>
@@ -184,21 +176,16 @@
       <item quantity="other">પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કર્યા</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"અજાણ તૃતીય પક્ષ દ્વારા"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"તમારી કાર્ય પ્રોફાઇલના વ્યવસ્થાપક દ્વારા"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> દ્વારા"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"કાર્ય પ્રોફાઇલ કાઢી નાખી"</string>
-    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
-    <skip />
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"ખૂટતી વ્યવસ્થાપક ઍપ્લિકેશનને કારણે કાર્ય પ્રોફાઇલ કાઢી નાખી"</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"કાર્ય પ્રોફાઇલ વ્યવસ્થાપક ઍપ્લિકેશન ખૂટે છે અથવા તો દૂષિત છે. પરિણામે, તમારી કાર્ય પ્રોફાઇલ અને સંબંધિત ડેટા કાઢી નાખવામાં આવ્યો છે. સહાયતા માટે તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"આ ઉપકરણ પર તમારી કાર્ય પ્રોફાઇલ હવે ઉપલબ્ધ નથી"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ઉપકરણ સંચાલિત છે"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
-    <!-- no translation found for factory_reset_message (7972496262232832457) -->
-    <skip />
+    <string name="factory_reset_message" msgid="7972496262232832457">"આ વ્યવસ્થાપક ઍપ્લિકેશનનો ઉપયોગ કરી શકાશે નહીં. તમારું ઉપકરણ હવે કાઢી નાખવામાં આવશે.\n\nજો તમને પ્રશ્નો હોય, તો તમારી સંસ્થાના વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="me" msgid="6545696007631404292">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ટેબ્લેટ વિકલ્પો"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV વિકલ્પો"</string>
@@ -419,8 +406,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"એપ્લિકેશનને ફોન સુવિધાઓને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ પરવાનગી એપ્લિકેશનને ફોન નંબર અને ઉપકરણ ID, કૉલ સક્રિય છે અને કોઈ કૉલ દ્વારા કનેક્ટ થયેલ રિમોટ નંબર નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"સિસ્ટમ મારફતે કૉલ બીજે વાળો"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"કૉલિંગ અનુભવ સુધારવા માટે ઍપ્લિકેશનને સિસ્ટમ મારફતે કૉલ બીજે વાળવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ફોન નંબર વાંચવા"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"ઍપ્લિકેશનને ઉપકરણના ફોન નંબરને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
+    <!-- no translation found for permlab_readPhoneNumbers (6108163940932852440) -->
+    <skip />
+    <!-- no translation found for permdesc_readPhoneNumbers (8559488833662272354) -->
+    <skip />
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ટેબ્લેટને નિષ્ક્રિય થતું અટકાવો"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ટીવીને નિષ્ક્રિય થતો અટકાવો"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ફોનને નિષ્ક્રિય થતો અટકાવો"</string>
@@ -560,8 +549,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"સ્ક્રીન લૉક પાસવર્ડ્સ અને PIN માં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
-    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
-    <skip />
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોનું નિયમન કરો"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડ્સની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ્સ લખ્યાં છે તો ટેબ્લેટને લૉક કરો અથવા ટેબ્લેટનો તમામ ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડ્સની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ્સ લખ્યાં છે તો ટીવીને લૉક કરો અથવા ટીવીનો તમામ ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડ્સની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ્સ લખ્યાં છે તો ફોનને લૉક કરો અથવા ફોનનો તમામ ડેટા કાઢી નાખો."</string>
@@ -1189,8 +1177,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"બગ રિપોર્ટ લઈ રહ્યાં છે…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"બગ રિપોર્ટ શેર કરીએ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"બગ રિપોર્ટ શેર કરી રહ્યાં છે…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"તમારા વ્યવસ્થાપકે આ ઉપકરણના સમસ્યા નિવારણમાં સહાય માટે બગ રિપોર્ટની વિનંતી કરી છે. ઍપ્લિકેશનો અને ડેટા શેર કરવામાં આવી શકે છે."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"શેર કરો"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"નકારો"</string>
     <string name="select_input_method" msgid="8547250819326693584">"કીબોર્ડ બદલો"</string>
@@ -1201,7 +1188,8 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનોની ઉપર પ્રદર્શિત થઈ રહ્યું છે"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનો પર દેખાઈ છે."</string>
+    <!-- no translation found for alert_windows_notification_title (3697657294867638947) -->
+    <skip />
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"બંધ કરો"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ને તૈયાર કરી રહ્યું છે"</string>
@@ -1475,29 +1463,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"દૂર કરો"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
-    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
-    <skip />
-    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
-    <skip />
-    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
-    <skip />
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે.\n\n વર્તમાન ઍક્સેસિબિલિટી સુવિધા:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n તમે સેટિંગ્સ &gt; ઍક્સેસિબિલિટીમાં જઈને આ સુવિધા બદલી શકો છો."</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"શૉર્ટકટ બંધ કરો"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"શૉર્ટકટનો ઉપયોગ કરો"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ઍક્સેસિબિલિટી શૉર્ટકટે <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ઍક્સેસિબિલિટી શૉર્ટકટે <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી"</string>
-    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
-    <skip />
-    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"જ્યારે તમે ઍક્સેસિબિલિટી બટન પર ટૅપ કરો, ત્યારે ઉપયોગ કરવાની સુવિધા પસંદ કરો:"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"સુવિધાઓ બદલવા માટે, ઍક્સેસિબિલિટી બટન દબાવી રાખો."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"વિસ્તૃતીકરણ"</string>
     <string name="user_switched" msgid="3768006783166984410">"વર્તમાન વપરાશકર્તા <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> પર સ્વિચ કરી રહ્યાં છે…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> લોગ આઉટ થઈ રહ્યાં છે…"</string>
     <string name="owner_name" msgid="2716755460376028154">"માલિક"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ભૂલ"</string>
-    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"તમારા વ્યવસ્થાપકે આ ફેરફારની મંજૂરી આપી નથી"</string>
     <string name="app_not_found" msgid="3429141853498927379">"આ ક્રિયાને હેન્ડલ કરવા માટે કોઈ ઍપ્લિકેશન મળી નહીં"</string>
     <string name="revoke" msgid="5404479185228271586">"રદબાતલ કરો"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1589,8 +1569,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"મુદ્રણ સેવા સક્ષમ નથી"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> સેવા ઇન્સ્ટોલ કરી"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"સક્ષમ કરવા માટે ટેપ કરો"</string>
-    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
-    <skip />
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"વ્યવસ્થાપક PIN દાખલ કરો"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"પિન દાખલ કરો"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"ખોટું"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"વર્તમાન PIN"</string>
@@ -1618,21 +1597,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"કાર્યાલય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"આ સ્ક્રીનને અનપિન કરવા માટે, પાછળ અને વિહંગાવલોકન બટનોને ટચ કરીને દબાવી રાખો"</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"આ ઍપ્લિકેશનને અનપિન કરી શકાશે નહીં"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"સ્ક્રીન પિન કરી"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"સ્ક્રીન અનપિન કરી"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"અનપિન કરતાં પહેલાં PIN માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"અનપિન કરતા પહેલાં અનલૉક પેટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
-    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
-    <skip />
-    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટૉલ કરવામાં આવેલ છે"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના પૃષ્ઠભૂમિ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય ઍપ્લિકેશનો જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ડેટા સેવર ચાલુ કરીએ?"</string>
@@ -1717,10 +1691,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"બધી ભાષાઓ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"તમામ પ્રદેશ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"શોધ"</string>
-    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="2615362773958585967">"કાર્ય મોડ ચાલુ કરીએ?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"આનાથી ઍપ્લિકેશનો, પૃષ્ઠભૂમિ સમન્વયન અને સંબંધિત સુવિધાઓ સહિતની તમારી કાર્ય પ્રોફાઇલ ચાલુ થઈ જશે"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ચાલુ કરો"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"તમારી પાસે નવા સંદેશા છે"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"જોવા માટે SMS ઍપ્લિકેશન ખોલો"</string>
@@ -1764,6 +1736,8 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"સમય દાખલ કરવા માટે ટેક્સ્ટ ઇનપુટ મોડમાં સ્વિચ કરો."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"સમય દાખલ કરવા માટે ઘડિયાળ મોડમાં સ્વિચ કરો."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"સ્વતઃભરણના વિકલ્પો"</string>
+    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> માં સાચવીએ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> ને <xliff:g id="LABEL">%2$s</xliff:g> માં સાચવીએ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"સાચવો"</string>
@@ -1771,17 +1745,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"પાસવર્ડ"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"સરનામું"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ક્રેડિટ કાર્ડ"</string>
+    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
+    <skip />
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"શાંત રહો અને નજીકમાં આશ્રય લો."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"દરિયાકિનારાના પ્રદેશો તથા નદીકાંઠાના વિસ્તારો ખાલી કરીને તાત્કાલિક સુરક્ષિત ઊંચા સ્થાન પર જાઓ."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"શાંત રહો અને નજીકમાં આશ્રય લો."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"કટોકટી સંદેશાઓનું પરીક્ષણ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM મંજૂર નથી"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIMની જોગવાઈ કરી નથી"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM મંજૂર નથી"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"ફોન મંજૂર નથી"</string>
 </resources>

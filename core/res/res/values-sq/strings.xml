@@ -89,22 +89,14 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e pakufizuar!"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Shërbimi nuk është përgatitur."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nuk mund ta ndryshosh cilësimin e ID-së së telefonuesit."</string>
-    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
-    <skip />
-    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
-    <skip />
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Nuk ka shërbim për të dhënat"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Nuk ka shërbim urgjence"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Nuk ka shërbim zanor"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nuk ka shërbim zanor/urgjence"</string>
+    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Operatori yt ka pezulluar përkohësisht shërbimin e të dhënave në këtë vendndodhje"</string>
+    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Operatori yt ka pezulluar përkohësisht telefonatat e urgjencës në këtë vendndodhje"</string>
+    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Operatori yt ka pezulluar përkohësisht telefonatat zanore në këtë vendndodhje"</string>
+    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operatori yt ka pezulluar përkohësisht telefonatat zanore dhe të urgjencës në këtë vendndodhje"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Rrjeti i paarritshëm"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Për të përmirësuar marrjen e sinjalit, provo të ndryshosh llojin e zgjedhur te Sistemi &gt; Rrjeti dhe interneti &gt; Lloji i preferuar i rrjetit."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Homologu yt kërkoi modalitet \"TTY\" të plotë"</string>
@@ -184,21 +176,16 @@
       <item quantity="one">Autoriteti i certifikatës është instaluar</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Nga një palë e tretë e panjohur"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Nga administratori i profilit tënd të punës"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Nga <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Profili i punës u fshi"</string>
-    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
-    <skip />
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Profili i punës u fshi për shkak të mungesës së aplikacionit të administratorit"</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto me administratorin për ndihmë."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Pajisja është e menaxhuar"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit. Trokit për detaje."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Pajisja do të spastrohet"</string>
-    <!-- no translation found for factory_reset_message (7972496262232832457) -->
-    <skip />
+    <string name="factory_reset_message" msgid="7972496262232832457">"Aplikacioni i administratorit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
     <string name="me" msgid="6545696007631404292">"Unë"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opsionet e tabletit"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Opsionet e televizorit"</string>
@@ -419,8 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lejon aplikacionin të hyjë në funksionet telefonike të pajisjes. Kjo leje i mundëson aplikacionit të përcaktojë numrin e telefonit dhe ID-të e pajisjes, nëse një telefonatë është aktive apo nëse numri në distancë është i lidhur me një telefonatë."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kalon telefonatat përmes sistemit"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lejon që aplikacioni të kalojë telefonatat përmes sistemit për të përmirësuar përvojën e telefonatës."</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"lexo numrin e telefonit"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Lejon që aplikacioni të ketë qasje te numri i telefonit i pajisjes."</string>
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lexo numrat e telefonit"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Lejon që aplikacioni të ketë qasje te numrat e telefonit të pajisjes."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"parandalo kalimin e tabletit në fjetje"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"parandalo kalimin e televizorit në fjetje"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"parandalo kalimin e telefonit në fjetje"</string>
@@ -560,8 +547,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
-    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
-    <skip />
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitoro tentativat e shkyçjes së ekranit"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç tabletin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyç televizorin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç telefonin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
@@ -1189,8 +1175,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Po ndan raportin e defekteve në kod..."</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administratori kërkoi një raport të defekteve në kod për të ndihmuar me zgjidhjen e problemeve. Aplikacioni dhe të dhënat mund të ndahen."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SHPËRNDA"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REFUZO"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Ndërro tastierë"</string>
@@ -1201,7 +1186,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> afishohet mbi aplikacionet e tjera"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> afishohet mbi aplikacionet e tjera."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> shfaqet mbi apl. e tjera"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Nëse nuk dëshiron që <xliff:g id="NAME">%s</xliff:g> ta përdorë këtë funksion, trokit për të hapur cilësimet dhe për ta çaktivizuar."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ÇAKTIVIZO"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Po përgatit <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1475,29 +1460,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Hiq"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Të ngrihet volumi mbi nivelin e rekomanduar?\n\nDëgjimi me volum të lartë për periudha të gjata mund të dëmtojë dëgjimin."</string>
-    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
-    <skip />
-    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
-    <skip />
-    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
-    <skip />
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Të përdoret shkurtorja e qasshmërisë?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Kur shkurtorja është e aktivizuar, shtypja e të dy butonave për 3 sekonda do të nisë një funksion qasshmërie.\n\n Funksioni aktual i qasshmërisë:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Mund ta ndryshosh funksionin te Cilësimet &gt; Qasshmëria."</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Çaktivizo shkurtoren"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Përdor shkurtoren"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Shkurtorja e qasshmërisë e aktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Shkurtorja e qasshmërisë e çaktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
-    <skip />
-    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Zgjidh një funksion për ta përdorur kur troket butonin e \"Qasshmërisë\":"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Për të ndryshuar funksionet, prek dhe mbaj butonin e \"Qasshmërisë\"."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zmadhimi"</string>
     <string name="user_switched" msgid="3768006783166984410">"Emri i përdoruesit aktual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Po kalon në <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> po del…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Zotëruesi"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Gabim"</string>
-    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"Ky ndryshim nuk lejohet nga administratori"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nuk u gjet asnjë aplikacion për të menaxhuar këtë veprim"</string>
     <string name="revoke" msgid="5404479185228271586">"Anulo"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1589,8 +1566,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Shërbimi i printimit nuk është aktivizuar"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Shërbimi <xliff:g id="NAME">%s</xliff:g> u instalua"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Prek për të aktivizuar"</string>
-    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
-    <skip />
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Fut kodin PIN të administratorit"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Fut PIN-in"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"I pasaktë"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN-i aktual"</string>
@@ -1618,21 +1594,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Puna <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> i dytë i punës"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> i tretë i punës"</string>
-    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"Për të hequr gozhdimin e ekranit, prek dhe mbaj butonat \"Prapa\" dhe \"Përmbledhja\"."</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Këtij aplikacioni nuk mund t\'i hiqet gozhdimi"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrani u hoq nga gozhdimi"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zhgozhdimi kërkon PIN-in"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Kërko model shkyçjeje para heqjes së gozhdimit"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Kërko fjalëkalim para heqjes nga gozhdimi."</string>
-    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
-    <skip />
-    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"Instaluar nga administratori"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"Përditësuar nga administratori"</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"Fshirë nga administratori"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
@@ -1717,10 +1688,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Të gjitha gjuhët"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Të gjitha rajonet"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Kërko"</string>
-    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="2615362773958585967">"Të aktivizohet modaliteti i punës?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"Kjo do të aktivizojë profilin tënd të punës, duke përfshirë aplikacionet, sinkronizimin në sfond dhe funksionet e lidhura"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivizo"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Hap aplikacionin SMS për ta parë"</string>
@@ -1764,6 +1733,8 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Kalo te modaliteti i hyrjes së tekstit për hyrjen e kohës."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Kalo te modaliteti i orës për hyrjen e kohës."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opsionet e plotësimit automatik"</string>
+    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
+    <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"Të ruhet te <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Të ruhet <xliff:g id="TYPE">%1$s</xliff:g> te <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Ruaj"</string>
@@ -1771,17 +1742,17 @@
     <string name="autofill_save_type_password" msgid="5288448918465971568">"fjalëkalimi"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adresa"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"karta e kreditit"</string>
+    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
+    <skip />
+    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
+    <skip />
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Qëndro i qetë dhe kërko strehim në afërsi."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evakuohu menjëherë nga rajonet bregdetare dhe zonat pranë lumenjve drejt një vendi më të sigurt, si për shembull në një terren të ngritur."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Qëndro i qetë dhe kërko strehim në afërsi."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Testim për mesazhet e urgjencës"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Karta SIM nuk lejohet"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Karta SIM nuk është dhënë"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Karta SIM nuk lejohet"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telefoni nuk lejohet"</string>
 </resources>
