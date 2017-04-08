@@ -30,14 +30,15 @@ import android.view.autofill.IAutoFillManagerClient;
  */
 interface IAutoFillManager {
     boolean addClient(in IAutoFillManagerClient client, int userId);
-    oneway void startSession(in IBinder activityToken, IBinder windowToken, in IBinder appCallback,
+    int startSession(IBinder activityToken, IBinder windowToken, in IBinder appCallback,
             in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
             boolean hasCallback, int flags, String packageName);
-    oneway void updateSession(in IBinder activityToken, in AutofillId id, in Rect bounds,
+    boolean restoreSession(int sessionId, in IBinder activityToken, in IBinder appCallback);
+    void setWindow(int sessionId, in IBinder windowToken);
+    oneway void updateSession(int sessionId, in AutofillId id, in Rect bounds,
             in AutofillValue value, int flags, int userId);
-    oneway void finishSession(in IBinder activityToken, int userId);
-    oneway void cancelSession(in IBinder activityToken, int userId);
-    oneway void setAuthenticationResult(in Bundle data,
-            in IBinder activityToken, int userId);
-    oneway void setHasCallback(in IBinder activityToken, int userId, boolean hasIt);
+    void finishSession(int sessionId, int userId);
+    void cancelSession(int sessionId, int userId);
+    void setAuthenticationResult(in Bundle data, int sessionId, int userId);
+    oneway void setHasCallback(int sessionId, int userId, boolean hasIt);
 }

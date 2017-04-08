@@ -82,8 +82,7 @@ public abstract class AutofillService extends Service {
 
     // Internal extras
     /** @hide */
-    public static final String EXTRA_ACTIVITY_TOKEN =
-            "android.service.autofill.extra.ACTIVITY_TOKEN";
+    public static final String EXTRA_SESSION_ID = "android.service.autofill.extra.SESSION_ID";
 
     // Handler messages.
     private static final int MSG_CONNECT = 1;

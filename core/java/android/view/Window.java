@@ -480,6 +480,13 @@ public abstract class Window {
         public void onWindowFocusChanged(boolean hasFocus);
 
         /**
+         * @hide
+         */
+        default void onBeforeAttachedToWindow() {
+            // empty
+        }
+
+        /**
          * Called when the window has been attached to the window manager.
          * See {@link View#onAttachedToWindow() View.onAttachedToWindow()}
          * for more information.
