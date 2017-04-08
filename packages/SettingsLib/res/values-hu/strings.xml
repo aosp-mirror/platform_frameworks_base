@@ -33,8 +33,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"Nincs internet-hozzáférés"</string>
     <string name="saved_network" msgid="4352716707126620811">"Mentette: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automatikusan csatlakozott a következőn keresztül: %1$s"</string>
-    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
-    <skip />
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatikusan csatlakozott a hálózatértékelés szolgáltatóján keresztül"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Csatlakozva a következőn keresztül: %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Elérhető a következőn keresztül: %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Csatlakozva, nincs internetelérés"</string>
@@ -140,8 +139,7 @@
     <item msgid="5194774745031751806">"Rendkívül gyors"</item>
     <item msgid="9085102246155045744">"Leggyorsabb"</item>
   </string-array>
-    <!-- no translation found for choose_profile (6921016979430278661) -->
-    <skip />
+    <string name="choose_profile" msgid="6921016979430278661">"Profil kiválasztása"</string>
     <string name="category_personal" msgid="1299663247844969448">"Személyes"</string>
     <string name="category_work" msgid="8699184680584175622">"Munkahelyi"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Fejlesztői beállítások"</string>
@@ -318,35 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Színkorrekció"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ez egy kísérleti funkció, és hatással lehet a teljesítményre."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Felülírva erre: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Kb. <xliff:g id="TIME">%1$s</xliff:g> van hátra"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Körülbelül <xliff:g id="TIME">%1$s</xliff:g> maradt hátra"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> a teljes töltöttségig"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> van hátra"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - körülbelül <xliff:g id="TIME">%2$s</xliff:g> van hátra"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> van hátra"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> a teljes feltöltésig"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> a hálózati áramról való feltöltésig"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> a teljes feltöltésig USB-n"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> a vezeték nélküli teljes feltöltésig"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Ismeretlen"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Töltés"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Hálózati töltés"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Töltés"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB-s töltés"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Töltés"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Nem vezetékes töltés"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Töltés"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"töltés"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nem tölt"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nem töltődik"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Feltöltve"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Rendszergazda által irányítva"</string>
-    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
-    <skip />
-    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
-    <skip />
+    <string name="enabled_by_admin" msgid="5302986023578399263">"A rendszergazda bekapcsolta"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"A rendszergazda kikapcsolta"</string>
     <string name="home" msgid="3256884684164448244">"Beállítások kezdőlapja"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -369,4 +355,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Jelszó szükséges"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Aktív beviteli módok"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Rendszernyelvek használata"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nem sikerült megnyitni a(z) <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> beállításait."</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Ez a beviteli módszer alkalmas lehet a beírt szövegek – köztük az olyan személyes adatok, mint a jelszavak és a hitelkártyaszámok - összegyűjtésére. A <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> alkalmazás kapcsolta be. Használja ezt a módszert?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Megjegyzés: Újraindítás után ez az alkalmazás csak a telefon feloldását követően indul el"</string>
 </resources>

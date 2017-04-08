@@ -33,8 +33,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"មិនមានអ៊ីនធឺណិតទេ"</string>
     <string name="saved_network" msgid="4352716707126620811">"បានរក្សាទុកដោយ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"បានភ្ជាប់ដោយស្វ័យប្រវត្តិតាមរយៈ %1$s"</string>
-    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
-    <skip />
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"បានភ្ជាប់​ដោយស្វ័យប្រវត្តិ​តាម​រយៈក្រុមហ៊ុនផ្តល់​ការ​វាយ​តម្លៃលើ​បណ្តាញ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"បានភ្ជាប់តាមរយៈ %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"មានតាមរយៈ %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"បានភ្ជាប់ ប៉ុន្តែគ្មានអ៊ីនធឺណិតទេ"</string>
@@ -140,8 +139,7 @@
     <item msgid="5194774745031751806">"រហ័សខ្លាំង"</item>
     <item msgid="9085102246155045744">"លឿនបំផុត"</item>
   </string-array>
-    <!-- no translation found for choose_profile (6921016979430278661) -->
-    <skip />
+    <string name="choose_profile" msgid="6921016979430278661">"ជ្រើសរើស​កម្រងព័ត៌មាន"</string>
     <string name="category_personal" msgid="1299663247844969448">"ផ្ទាល់ខ្លួន"</string>
     <string name="category_work" msgid="8699184680584175622">"កន្លែង​ធ្វើការ"</string>
     <string name="development_settings_title" msgid="215179176067683667">"ជម្រើស​អ្នក​អភិវឌ្ឍ"</string>
@@ -189,7 +187,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"កំពុង​ចាក់៖ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​វិញ្ញាបនបត្រ​បង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុវ៉ាយហ្វាយបង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើស​វ៉ាយហ្វាយ"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"នៅពេលដែលបើក នោះ Wi‑Fi នឹងធ្វើការប្រគល់ការតភ្ជាប់ទិន្នន័យយ៉ាងគំហុកទៅបណ្តាញទូរសព្ទចល័ត នៅពេលរលកសញ្ញា Wi‑Fi ចុះខ្សោយ។"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"នៅពេលដែលបើក នោះ Wi‑Fi នឹងផ្តល់ការតភ្ជាប់ទិន្នន័យយ៉ាងគំហុកទៅបណ្តាញទូរសព្ទចល័ត នៅពេលរលកសញ្ញា Wi‑Fi ចុះខ្សោយ។"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"អនុញ្ញាត/មិន​អនុញ្ញាត​ការ​វិភាគ​រ៉ូម​​វ៉ាយហ្វាយ​ផ្អែក​លើ​​​ចំនួន​ការ​បង្ហាញ​ចរាចរណ៍​ទិន្នន័យ​​នៅ​ចំណុច​ប្រទាក់"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ទំហំ buffer របស់ Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ជ្រើស​ទំហំ Logger per log buffer"</string>
@@ -318,35 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ការ​កែ​ពណ៌"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"លក្ខណៈ​នេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ការ​អនុវត្ត។"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"នៅសល់ប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"សល់​ប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"សល់ <xliff:g id="TIME">%1$s</xliff:g> ទើប​សាកថ្ម​ពេញ"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"នៅសល់ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - សល់ប្រហែល <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - នៅសល់ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូតដល់សាកពេញ"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូតដល់សាកពេញដោយប្រើឆ្នាំងសាក"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូតដល់សាកពេញដោយប្រើ USB"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូតដល់សាកពេញដោយឥតប្រើខ្សែ"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"កំពុងបញ្ចូល​ថ្ម"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"បញ្ចូលថ្មតាម AC"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"កំពុងសាកថ្ម"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"បញ្ចូលថ្មតាមយូអេសប៊ី"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"កំពុងសាកថ្ម"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"បញ្ចូលថ្មដោយ​​ឥតខ្សែ"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"កំពុងសាកថ្ម"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"កំពុង​សាក​ថ្ម"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"មិន​បញ្ចូលថ្ម"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ពេញ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
-    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
-    <skip />
-    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
-    <skip />
+    <string name="enabled_by_admin" msgid="5302986023578399263">"បើកដោយ​អ្នកគ្រប់គ្រង"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"បិទដោយអ្នកគ្រប់គ្រង"</string>
     <string name="home" msgid="3256884684164448244">"ទំព័រដើមនៃការកំណត់"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -369,4 +355,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"តម្រូវ​ឲ្យ​មានពាក្យ​សម្ងាត់"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"វិធីសាស្ត្រ​បញ្ចូល​សកម្ម"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"ប្រើភាសាប្រព័ន្ធ"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"បាន​បរាជ័យ​ក្នុង​ការ​បើក​ការ​កំណត់​សម្រាប់ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"វិធី​សាស្ត្រ​បញ្ចូល​នេះ​អាច​​ប្រមូល​អត្ថបទ​ដែល​អ្នក​វាយ​ទាំងអស់ រួម​មាន​ទិន្នន័យ​ផ្ទាល់ខ្លួន ដូច​ជ ពាក្យ​សម្ងាត់ និង​លេខ​កាត​ឥណទាន។ វា​បាន​មក​ពី​កម្មវិធី <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ។ ប្រើ​វិធី​សាស្ត្រ​បញ្ចូល​នេះ?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"ចំណាំ៖ បន្ទាប់ពីបិទបើកឡើងវិញហើយ កម្មវិធីនេះមិនអាចចាប់ផ្តើមបានទេ រហូតទាល់តែអ្នកដោះសោទូរស័ព្ទរបស់អ្នក"</string>
 </resources>

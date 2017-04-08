@@ -33,8 +33,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"कोई इंटरनेट एक्सेस नहीं"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> के द्वारा सहेजा गया"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s के ज़रिए ऑटोमैटिक रूप से कनेक्ट है"</string>
-    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
-    <skip />
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"नेटवर्क रेटिंग प्रदाता के ज़रिए अपने आप कनेक्ट है"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s के द्वारा उपलब्ध"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s के द्वारा उपलब्ध"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"कनेक्ट किया गया, इंटरनेट नहीं"</string>
@@ -140,8 +139,7 @@
     <item msgid="5194774745031751806">"अत्यधिक तीव्र"</item>
     <item msgid="9085102246155045744">"सबसे तेज़"</item>
   </string-array>
-    <!-- no translation found for choose_profile (6921016979430278661) -->
-    <skip />
+    <string name="choose_profile" msgid="6921016979430278661">"प्रोफ़ाइल चुनें"</string>
     <string name="category_personal" msgid="1299663247844969448">"व्यक्तिगत"</string>
     <string name="category_work" msgid="8699184680584175622">"कार्यालय"</string>
     <string name="development_settings_title" msgid="215179176067683667">"डेवलपर विकल्प"</string>
@@ -318,35 +316,23 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"रंग सुधार"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"यह सुविधा प्रायोगिक है और निष्पादन को प्रभावित कर सकती है."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> के द्वारा ओवरराइड किया गया"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"लगभग <xliff:g id="TIME">%1$s</xliff:g> शेष"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"लगभग <xliff:g id="TIME">%1$s</xliff:g> शेष"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"पूरी तरह से चार्ज होने में <xliff:g id="TIME">%1$s</xliff:g> शेष"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> शेष"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - लगभग <xliff:g id="TIME">%2$s</xliff:g> शेष"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> शेष"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> पूरी तरह से चार्ज होने तक"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> AC पर पूरी तरह से चार्ज होने तक"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> USB पर पूरी तरह से चार्ज होने तक"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> वायरलेस से पूरी तरह से चार्ज होने तक"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज हो रही है"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC से चार्ज हो रही"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"चार्ज हो रहा है"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB पर चार्ज हो रही"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"चार्ज हो रहा है"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"वायरलेस रूप से चार्ज हो रही"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"चार्ज हो रहा है"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"चार्ज किया जा रहा है"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"पूरी"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"व्यवस्थापक द्वारा नियंत्रित"</string>
-    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
-    <skip />
-    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
-    <skip />
+    <string name="enabled_by_admin" msgid="5302986023578399263">"व्यवस्थापक ने सक्षम किया है"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"व्यवस्थापक ने अक्षम किया है"</string>
     <string name="home" msgid="3256884684164448244">"सेटिंग होम"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -369,4 +355,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"पासवर्ड आवश्यक"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"टाइप करने की सक्रीय पद्धतियां"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम की भाषाओं का उपयोग करें"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> के लिए सेटिंग खोलने में विफल रहा"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"यह इनपुट विधि, पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा सहित आपके द्वारा लिखे जाने वाले सभी लेख को एकत्र कर सकती है. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्स से आती है. इस इनपुट विधि का उपयोग करें?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"नोट: पुनः बूट करने के बाद, यह ऐप्लिकेशन तब तक शुरू नहीं हो सकता है जब तक कि आप अपना फ़ोन अनलॉक ना कर लें"</string>
 </resources>
