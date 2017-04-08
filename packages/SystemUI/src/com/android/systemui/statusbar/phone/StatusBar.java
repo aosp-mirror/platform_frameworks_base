@@ -182,6 +182,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
@@ -1149,7 +1150,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             ExtensionFragmentListener.attachExtensonToFragment(container, QS.TAG, R.id.qs_frame,
                     Dependency.get(ExtensionController.class).newExtension(QS.class)
                             .withPlugin(QS.class)
-                            .withUiMode(UI_MODE_TYPE_CAR, () -> new QSFragment())
+                            .withUiMode(UI_MODE_TYPE_CAR, () -> new CarQSFragment())
                             .withDefault(() -> new QSFragment())
                             .build());
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,

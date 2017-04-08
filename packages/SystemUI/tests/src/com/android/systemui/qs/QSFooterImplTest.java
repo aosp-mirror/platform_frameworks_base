@@ -42,9 +42,9 @@ import org.junit.runner.RunWith;
 @RunWithLooper
 @SmallTest
 @Ignore("failing")
-public class QSFooterTest extends LeakCheckedTest {
+public class QSFooterImplTest extends LeakCheckedTest {
 
-    private QSFooter mFooter;
+    private QSFooterImpl mFooter;
     private ActivityStarter mActivityStarter;
     private DeviceProvisionedController mDeviceProvisionedController;
 
@@ -54,9 +54,9 @@ public class QSFooterTest extends LeakCheckedTest {
         mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
         mDeviceProvisionedController = mDependency.injectMockDependency(
                 DeviceProvisionedController.class);
-        TestableLooper.get(this).runWithLooper(() -> {
-            mFooter = (QSFooter) LayoutInflater.from(mContext).inflate(R.layout.qs_footer, null);
-        });
+        TestableLooper.get(this).runWithLooper(
+                () -> mFooter = (QSFooterImpl) LayoutInflater.from(mContext).inflate(
+                        R.layout.qs_footer_impl, null));
     }
 
     @Test

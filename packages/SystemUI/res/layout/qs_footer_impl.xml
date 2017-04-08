@@ -15,10 +15,10 @@
 ** limitations under the License.
 -->
 
-<!-- Extends RelativeLayout -->
-<com.android.systemui.qs.QSFooter
+<!-- Extends FrameLayout -->
+<com.android.systemui.qs.QSFooterImpl
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/header"
+    android:id="@+id/qs_footer"
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:baselineAligned="false"
@@ -114,4 +114,4 @@
             android:padding="14dp" />
     </LinearLayout>
 
-</com.android.systemui.qs.QSFooter>
+</com.android.systemui.qs.QSFooterImpl>
