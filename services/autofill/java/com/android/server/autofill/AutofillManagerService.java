@@ -333,23 +333,23 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
-        public void setAuthenticationResult(Bundle data, IBinder activityToken, int userId) {
+        public void setAuthenticationResult(Bundle data, int sessionId, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                service.setAuthenticationResultLocked(data, activityToken);
+                service.setAuthenticationResultLocked(data, sessionId, getCallingUid());
             }
         }
 
         @Override
-        public void setHasCallback(IBinder activityToken, int userId, boolean hasIt) {
+        public void setHasCallback(int sessionId, int userId, boolean hasIt) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                service.setHasCallback(activityToken, hasIt);
+                service.setHasCallback(sessionId, getCallingUid(), hasIt);
             }
         }
 
         @Override
-        public void startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
+        public int startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
                 AutofillId autofillId, Rect bounds, AutofillValue value, int userId,
                 boolean hasCallback, int flags, String packageName) {
             // TODO(b/33197203): make sure it's called by resumed / focused activity
@@ -369,41 +369,73 @@ public final class AutofillManagerService extends SystemService {
 
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                service.startSessionLocked(activityToken, windowToken, appCallback,
-                        autofillId, bounds, value, hasCallback, flags, packageName);
+                return service.startSessionLocked(activityToken, getCallingUid(), windowToken,
+                        appCallback, autofillId, bounds, value, hasCallback, flags, packageName);
             }
         }
 
         @Override
-        public void updateSession(IBinder activityToken, AutofillId id, Rect bounds,
+        public boolean restoreSession(int sessionId, IBinder activityToken, IBinder appCallback)
+                throws RemoteException {
+            activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
+            appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
+
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = mServicesCache.get(
+                        UserHandle.getCallingUserId());
+                if (service != null) {
+                    return service.restoreSession(sessionId, getCallingUid(), activityToken,
+                            appCallback);
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public void setWindow(int sessionId, IBinder windowToken) throws RemoteException {
+            windowToken = Preconditions.checkNotNull(windowToken, "windowToken");
+
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = mServicesCache.get(
+                        UserHandle.getCallingUserId());
+                if (service != null) {
+                    service.setWindow(sessionId, getCallingUid(), windowToken);
+                }
+            }
+        }
+
+        @Override
+        public void updateSession(int sessionId, AutofillId id, Rect bounds,
                 AutofillValue value, int flags, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());
                 if (service != null) {
-                    service.updateSessionLocked(activityToken, id, bounds, value, flags);
+                    service.updateSessionLocked(sessionId, getCallingUid(), id, bounds, value,
+                            flags);
                 }
             }
         }
 
         @Override
-        public void finishSession(IBinder activityToken, int userId) {
+        public void finishSession(int sessionId, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());
                 if (service != null) {
-                    service.finishSessionLocked(activityToken);
+                    service.finishSessionLocked(sessionId, getCallingUid());
                 }
             }
         }
 
         @Override
-        public void cancelSession(IBinder activityToken, int userId) {
+        public void cancelSession(int sessionId, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = mServicesCache.get(
                         UserHandle.getCallingUserId());
                 if (service != null) {
-                    service.cancelSessionLocked(activityToken);
+                    service.cancelSessionLocked(sessionId, getCallingUid());
                 }
             }
         }

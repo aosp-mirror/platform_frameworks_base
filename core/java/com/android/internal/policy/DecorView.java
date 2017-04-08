@@ -1474,6 +1474,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         final Window.Callback cb = mWindow.getCallback();
         if (cb != null && !mWindow.isDestroyed() && mFeatureId < 0) {
+            cb.onBeforeAttachedToWindow();
             cb.onAttachedToWindow();
         }
 
