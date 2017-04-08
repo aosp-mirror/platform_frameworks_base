@@ -64,6 +64,7 @@ LOCAL_SHARED_LIBRARIES += \
     libinput \
     libinputflinger \
     libinputservice \
+    libschedulerservicehidl \
     libsensorservice \
     libsensorservicehidl \
     libskia \
@@ -89,6 +90,7 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.tv.input@1.0 \
     android.hardware.vibrator@1.0 \
     android.hardware.vr@1.0 \
+    android.frameworks.schedulerservice@1.0 \
     android.frameworks.sensorservice@1.0 \
 
 LOCAL_STATIC_LIBRARIES += libscrypt_static
