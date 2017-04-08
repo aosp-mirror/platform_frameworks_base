@@ -16,10 +16,11 @@
 
 package com.android.server.autofill;
 
-import static android.service.autofill.AutofillService.EXTRA_ACTIVITY_TOKEN;
+import static android.service.autofill.AutofillService.EXTRA_SESSION_ID;
 import static android.service.voice.VoiceInteractionSession.KEY_RECEIVER_EXTRAS;
 import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
 import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
+import static android.view.autofill.AutofillManager.NO_SESSION;
 
 import static com.android.server.autofill.Helper.DEBUG;
 import static com.android.server.autofill.Helper.VERBOSE;
@@ -48,11 +49,11 @@ import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
@@ -65,6 +66,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
@@ -74,6 +76,7 @@ import java.util.ArrayList;
 final class AutofillManagerServiceImpl {
 
     private static final String TAG = "AutofillManagerServiceImpl";
+    private static final int MAX_SESSION_ID_CREATE_TRIES = 2048;
 
     static final int MSG_SERVICE_SAVE = 1;
 
@@ -85,6 +88,8 @@ final class AutofillManagerServiceImpl {
     private RemoteCallbackList<IAutoFillManagerClient> mClients;
     private AutofillServiceInfo mInfo;
 
+    private static final Random sRandom = new Random();
+
     private final LocalLog mRequestsHistory;
     /**
      * Whether service was disabled for user due to {@link UserManager} restrictions.
@@ -94,7 +99,7 @@ final class AutofillManagerServiceImpl {
     private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
         switch (msg.what) {
             case MSG_SERVICE_SAVE:
-                handleSessionSave((IBinder) msg.obj);
+                handleSessionSave(msg.arg1);
                 break;
             default:
                 Slog.w(TAG, "invalid msg on handler: " + msg);
@@ -113,7 +118,7 @@ final class AutofillManagerServiceImpl {
     // TODO(b/33197203): need to make sure service is bound while callback is pending and/or
     // use WeakReference
     @GuardedBy("mLock")
-    private final ArrayMap<IBinder, Session> mSessions = new ArrayMap<>();
+    private final SparseArray<Session> mSessions = new SparseArray<>();
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -137,12 +142,12 @@ final class AutofillManagerServiceImpl {
                 return;
             }
 
-            final IBinder activityToken = receiverExtras.getBinder(EXTRA_ACTIVITY_TOKEN);
+            final int sessionId = receiverExtras.getInt(EXTRA_SESSION_ID);
             final Session session;
             synchronized (mLock) {
-                session = mSessions.get(activityToken);
+                session = mSessions.get(sessionId);
                 if (session == null) {
-                    Slog.w(TAG, "no server session for activityToken " + activityToken);
+                    Slog.w(TAG, "no server session for " + sessionId);
                     return;
                 }
                 // TODO(b/33197203): since service is fetching the data (to use for save later),
@@ -244,13 +249,17 @@ final class AutofillManagerServiceImpl {
         if (!isEnabled()) {
             return;
         }
-        final Session session = mSessions.get(activityToken);
-        if (session == null) {
-            Slog.w(TAG, "requestSaveForUserLocked(): no session for " + activityToken);
-            return;
+
+        final int numSessions = mSessions.size();
+        for (int i = 0; i < numSessions; i++) {
+            final Session session = mSessions.valueAt(i);
+            if (session.getActivityTokenLocked().equals(activityToken)) {
+                session.callSaveLocked();
+                return;
+            }
         }
 
-        session.callSaveLocked();
+        Slog.w(TAG, "requestSaveForUserLocked(): no session for " + activityToken);
     }
 
     boolean addClientLocked(IAutoFillManagerClient client) {
@@ -261,61 +270,59 @@ final class AutofillManagerServiceImpl {
         return isEnabled();
     }
 
-    void setAuthenticationResultLocked(Bundle data, IBinder activityToken) {
+    void setAuthenticationResultLocked(Bundle data, int sessionId, int uid) {
         if (!isEnabled()) {
             return;
         }
-        final Session session = mSessions.get(activityToken);
-        if (session != null) {
+        final Session session = mSessions.get(sessionId);
+        if (session != null && uid == session.uid) {
             session.setAuthenticationResultLocked(data);
         }
     }
 
-    void setHasCallback(IBinder activityToken, boolean hasIt) {
+    void setHasCallback(int sessionId, int uid, boolean hasIt) {
         if (!isEnabled()) {
             return;
         }
-        final Session session = mSessions.get(activityToken);
-        if (session != null) {
+        final Session session = mSessions.get(sessionId);
+        if (session != null && uid == session.uid) {
             session.setHasCallback(hasIt);
         }
     }
 
-    void startSessionLocked(@NonNull IBinder activityToken, @Nullable IBinder windowToken,
+    int startSessionLocked(@NonNull IBinder activityToken, int uid, @Nullable IBinder windowToken,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
             int flags, @NonNull String packageName) {
         if (!isEnabled()) {
-            return;
+            return 0;
         }
 
-        final String historyItem = "s=" + mInfo.getServiceInfo().packageName
-                + " u=" + mUserId + " a=" + activityToken
-                + " i=" + autofillId + " b=" + virtualBounds + " hc=" + hasCallback
-                + " f=" + flags;
+        final Session newSession = createSessionByTokenLocked(activityToken, uid, windowToken,
+                appCallbackToken, hasCallback, flags, packageName);
+        if (newSession == null) {
+            return NO_SESSION;
+        }
+
+        final String historyItem =
+                "id=" + newSession.id + " uid=" + uid + " s=" + mInfo.getServiceInfo().packageName
+                        + " u=" + mUserId + " i=" + autofillId + " b=" + virtualBounds + " hc=" +
+                        hasCallback + " f=" + flags;
         mRequestsHistory.log(historyItem);
 
-        // TODO(b/33197203): Handle scenario when user forced autofill after app was already
-        // autofilled.
-        final Session session = mSessions.get(activityToken);
-        if (session != null) {
-            // Already started...
-            return;
-        }
-
-        final Session newSession = createSessionByTokenLocked(activityToken,
-                windowToken, appCallbackToken, hasCallback, flags, packageName);
         newSession.updateLocked(autofillId, virtualBounds, value, FLAG_START_SESSION);
+
+        return newSession.id;
     }
 
-    void finishSessionLocked(IBinder activityToken) {
+    void finishSessionLocked(int sessionId, int uid) {
         if (!isEnabled()) {
             return;
         }
 
-        final Session session = mSessions.get(activityToken);
-        if (session == null) {
-            Slog.w(TAG, "finishSessionLocked(): no session for " + activityToken);
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.w(TAG, "finishSessionLocked(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
 
@@ -328,26 +335,39 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    void cancelSessionLocked(IBinder activityToken) {
+    void cancelSessionLocked(int sessionId, int uid) {
         if (!isEnabled()) {
             return;
         }
 
-        final Session session = mSessions.get(activityToken);
-        if (session == null) {
-            Slog.w(TAG, "cancelSessionLocked(): no session for " + activityToken);
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.w(TAG, "cancelSessionLocked(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
         session.removeSelfLocked();
     }
 
-    private Session createSessionByTokenLocked(@NonNull IBinder activityToken,
+    private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @Nullable IBinder windowToken, @NonNull IBinder appCallbackToken, boolean hasCallback,
             int flags, @NonNull String packageName) {
+        // use random ids so that one app cannot know that another app creates sessions
+        int sessionId;
+        int tries = 0;
+        do {
+            tries++;
+            if (tries > MAX_SESSION_ID_CREATE_TRIES) {
+                Log.w(TAG, "Cannot create session in " + MAX_SESSION_ID_CREATE_TRIES + " tries");
+                return null;
+            }
+
+            sessionId = sRandom.nextInt();
+        } while (sessionId == NO_SESSION || mSessions.indexOfKey(sessionId) >= 0);
+
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
-                activityToken, windowToken, appCallbackToken, hasCallback, flags,
+                sessionId, uid, activityToken, windowToken, appCallbackToken, hasCallback, flags,
                 mInfo.getServiceInfo().getComponentName(), packageName);
-        mSessions.put(activityToken, newSession);
+        mSessions.put(newSession.id, newSession);
 
         /*
          * TODO(b/33197203): apply security checks below:
@@ -358,7 +378,7 @@ final class AutofillManagerServiceImpl {
          */
         try {
             final Bundle receiverExtras = new Bundle();
-            receiverExtras.putBinder(EXTRA_ACTIVITY_TOKEN, activityToken);
+            receiverExtras.putInt(EXTRA_SESSION_ID, sessionId);
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (!ActivityManager.getService().requestAutofillData(mAssistReceiver,
@@ -374,12 +394,51 @@ final class AutofillManagerServiceImpl {
         return newSession;
     }
 
-    void updateSessionLocked(IBinder activityToken, AutofillId autofillId, Rect virtualBounds,
+    /**
+     * Restores a session after an activity was temporarily destroyed.
+     *
+     * @param sessionId The id of the session to restore
+     * @param uid UID of the process that tries to restore the session
+     * @param activityToken The new instance of the activity
+     * @param appCallback The callbacks to the activity
+     */
+    boolean restoreSession(int sessionId, int uid, @NonNull IBinder activityToken,
+            @NonNull IBinder appCallback) {
+        final Session session = mSessions.get(sessionId);
+
+        if (session == null || uid != session.uid) {
+            return false;
+        } else {
+            session.switchActivity(activityToken, appCallback);
+            return true;
+        }
+    }
+
+    /**
+     * Set the window the UI should get attached to
+     *
+     * @param sessionId The id of the session to restore
+     * @param uid UID of the process that tries to restore the session
+     * @param windowToken The window the activity is now in
+     */
+    boolean setWindow(int sessionId, int uid, @NonNull IBinder windowToken) {
+        final Session session = mSessions.get(sessionId);
+
+        if (session == null || uid != session.uid) {
+            return false;
+        } else {
+            session.switchWindow(windowToken);
+            return true;
+        }
+    }
+
+    void updateSessionLocked(int sessionId, int uid, AutofillId autofillId, Rect virtualBounds,
             AutofillValue value, int flags) {
-        final Session session = mSessions.get(activityToken);
-        if (session == null) {
+        final Session session = mSessions.get(sessionId);
+        if (session == null || session.uid != uid) {
             if (VERBOSE) {
-                Slog.v(TAG, "updateSessionLocked(): session gone for " + activityToken);
+                Slog.v(TAG, "updateSessionLocked(): session gone for " + sessionId + "(" + uid
+                        + ")");
             }
             return;
         }
@@ -387,15 +446,15 @@ final class AutofillManagerServiceImpl {
         session.updateLocked(autofillId, virtualBounds, value, flags);
     }
 
-    void removeSessionLocked(IBinder activityToken) {
-        mSessions.remove(activityToken);
+    void removeSessionLocked(int sessionId) {
+        mSessions.remove(sessionId);
     }
 
-    private void handleSessionSave(IBinder activityToken) {
+    private void handleSessionSave(int sessionId) {
         synchronized (mLock) {
-            final Session session = mSessions.get(activityToken);
+            final Session session = mSessions.get(sessionId);
             if (session == null) {
-                Slog.w(TAG, "handleSessionSave(): already gone: " + activityToken);
+                Slog.w(TAG, "handleSessionSave(): already gone: " + sessionId);
 
                 return;
             }
@@ -408,8 +467,9 @@ final class AutofillManagerServiceImpl {
             Slog.v(TAG, "destroyLocked()");
         }
 
-        for (Session session : mSessions.values()) {
-            session.destroyLocked();
+        final int numSessions = mSessions.size();
+        for (int i = 0; i < numSessions; i++) {
+            mSessions.valueAt(i).destroyLocked();
         }
         mSessions.clear();
     }
@@ -463,15 +523,16 @@ final class AutofillManagerServiceImpl {
     }
 
     void destroySessionsLocked() {
-        for (Session session : mSessions.values()) {
-            session.removeSelf();
+        while (mSessions.size() > 0) {
+            mSessions.valueAt(0).removeSelf();
         }
     }
 
     void listSessionsLocked(ArrayList<String> output) {
-        for (IBinder activityToken : mSessions.keySet()) {
+        final int numSessions = mSessions.size();
+        for (int i = 0; i < numSessions; i++) {
             output.add((mInfo != null ? mInfo.getServiceInfo().getComponentName()
-                    : null) + ":" + activityToken);
+                    : null) + ":" + mSessions.keyAt(i));
         }
     }
 

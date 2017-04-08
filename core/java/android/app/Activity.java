@@ -724,8 +724,9 @@ public class Activity extends ContextThemeWrapper
     public static final int FINISH_TASK_WITH_ACTIVITY = 2;
 
     static final String FRAGMENTS_TAG = "android:fragments";
-    static final String AUTOFILL_RESET_NEEDED_TAG = "android:autofillResetNeeded";
+    private static final String LAST_ACCESSIBILITY_ID = "android:lastAccessibilityId";
 
+    private static final String AUTOFILL_RESET_NEEDED = "@android:autofillResetNeeded";
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
@@ -772,6 +773,9 @@ public class Activity extends ContextThemeWrapper
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
+
+    /** The autofill manager. Always access via {@link #getAutofillManager()}. */
+    @Nullable private AutofillManager mAutofillManager;
 
     static final class NonConfigurationInstances {
         Object activity;
@@ -853,6 +857,9 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mAutoFillResetNeeded;
 
+    /** The last accessibility id that was returned from {@link #getNextAccessibilityId()} */
+    private int mLastAccessibilityId = View.LAST_APP_ACCESSIBILITY_ID;
+
     private AutofillPopupWindow mAutofillPopupWindow;
 
     private static native String getDlWarning();
@@ -930,6 +937,19 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * (Create and) return the autofill manager
+     *
+     * @return The autofill manager
+     */
+    @NonNull private AutofillManager getAutofillManager() {
+        if (mAutofillManager == null) {
+            mAutofillManager = getSystemService(AutofillManager.class);
+        }
+
+        return mAutofillManager;
+    }
+
+    /**
      * Called when the activity is starting.  This is where most initialization
      * should go: calling {@link #setContentView(int)} to inflate the
      * activity's UI, using {@link #findViewById} to programmatically interact
@@ -970,6 +990,13 @@ public class Activity extends ContextThemeWrapper
             }
         }
         if (savedInstanceState != null) {
+            mAutoFillResetNeeded = savedInstanceState.getBoolean(AUTOFILL_RESET_NEEDED, false);
+            mLastAccessibilityId = savedInstanceState.getInt(LAST_ACCESSIBILITY_ID, View.NO_ID);
+
+            if (mAutoFillResetNeeded) {
+                getAutofillManager().onCreate(savedInstanceState);
+            }
+
             Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);
             mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
                     ? mLastNonConfigurationInstances.fragments : null);
@@ -1058,12 +1085,6 @@ public class Activity extends ContextThemeWrapper
      * @see #onSaveInstanceState
      */
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        mAutoFillResetNeeded = savedInstanceState.getBoolean(AUTOFILL_RESET_NEEDED_TAG, false);
-
-        if (mAutoFillResetNeeded) {
-            getSystemService(AutofillManager.class).onRestoreInstanceState(savedInstanceState);
-        }
-
         if (mWindow != null) {
             Bundle windowState = savedInstanceState.getBundle(WINDOW_HIERARCHY_TAG);
             if (windowState != null) {
@@ -1312,6 +1333,27 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Gets the next accessibility ID.
+     *
+     * <p>All IDs will be bigger than {@link View#LAST_APP_ACCESSIBILITY_ID}. All IDs returned
+     * will be unique.
+     *
+     * @return A ID that is unique in the activity
+     *
+     * {@hide}
+     */
+    @Override
+    public int getNextAccessibilityId() {
+        if (mLastAccessibilityId == Integer.MAX_VALUE - 1) {
+            mLastAccessibilityId = View.LAST_APP_ACCESSIBILITY_ID;
+        }
+
+        mLastAccessibilityId++;
+
+        return mLastAccessibilityId;
+    }
+
+    /**
      * Check whether this activity is running as part of a voice interaction with the user.
      * If true, it should perform its interaction with the user through the
      * {@link VoiceInteractor} returned by {@link #getVoiceInteractor}.
@@ -1505,13 +1547,15 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBundle(WINDOW_HIERARCHY_TAG, mWindow.saveHierarchyState());
+
+        outState.putInt(LAST_ACCESSIBILITY_ID, mLastAccessibilityId);
         Parcelable p = mFragments.saveAllState();
         if (p != null) {
             outState.putParcelable(FRAGMENTS_TAG, p);
         }
         if (mAutoFillResetNeeded) {
-            outState.putBoolean(AUTOFILL_RESET_NEEDED_TAG, mAutoFillResetNeeded);
-            getSystemService(AutofillManager.class).onSaveInstanceState(outState);
+            outState.putBoolean(AUTOFILL_RESET_NEEDED, true);
+            getAutofillManager().onSaveInstanceState(outState);
         }
         getApplication().dispatchActivitySaveInstanceState(this, outState);
     }
@@ -1802,7 +1846,7 @@ public class Activity extends ContextThemeWrapper
         mTranslucentCallback = null;
         mCalled = true;
         if (isFinishing() && mAutoFillResetNeeded) {
-            getSystemService(AutofillManager.class).commit();
+            getAutofillManager().commit();
         }
     }
 
@@ -3054,6 +3098,19 @@ public class Activity extends ContextThemeWrapper
      * @see View#onWindowFocusChanged(boolean)
      */
     public void onWindowFocusChanged(boolean hasFocus) {
+    }
+
+    /**
+     * Called before {@link #onAttachedToWindow}.
+     *
+     * @hide
+     */
+    @CallSuper
+    public void onBeforeAttachedToWindow() {
+        if (mAutoFillResetNeeded) {
+            getAutofillManager().onAttachedToWindow(
+                    getWindow().getDecorView().getRootView().getWindowToken());
+        }
     }
 
     /**
@@ -7125,7 +7182,7 @@ public class Activity extends ContextThemeWrapper
             }
         } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
             Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
-            getSystemService(AutofillManager.class).onAuthenticationResult(resultData);
+            getAutofillManager().onAuthenticationResult(resultData);
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {

@@ -797,6 +797,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int NO_ID = -1;
 
     /**
+     * Last ID that is given to Views that are no part of activities.
+     *
+     * {@hide}
+     */
+    public static final int LAST_APP_ACCESSIBILITY_ID = Integer.MAX_VALUE / 2;
+
+    /**
      * Signals that compatibility booleans have been initialized according to
      * target SDK versions.
      */
@@ -1967,11 +1974,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private SparseArray<Object> mKeyedTags;
 
     /**
-     * The next available accessibility id.
-     */
-    private static int sNextAccessibilityViewId;
-
-    /**
      * The animation currently associated with this view.
      * @hide
      */
@@ -2013,10 +2015,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(resolveId = true)
     int mID = NO_ID;
 
-    /**
-     * The stable ID of this view for accessibility purposes.
+    /** The ID of this view for accessibility and autofill purposes.
+     * <ul>
+     *     <li>== {@link #NO_ID}: ID has not been assigned yet
+     *     <li>&le; {@link #LAST_APP_ACCESSIBILITY_ID}: View is not part of a activity. The ID is
+     *                                                  unique in the process. This might change
+     *                                                  over activity lifecycle events.
+     *     <li>&gt; {@link #LAST_APP_ACCESSIBILITY_ID}: View is part of a activity. The ID is
+     *                                                  unique in the activity. This stays the same
+     *                                                  over activity lifecycle events.
      */
-    int mAccessibilityViewId = NO_ID;
+    private int mAccessibilityViewId = NO_ID;
 
     private int mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
 
@@ -8144,7 +8153,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public int getAccessibilityViewId() {
         if (mAccessibilityViewId == NO_ID) {
-            mAccessibilityViewId = sNextAccessibilityViewId++;
+            mAccessibilityViewId = mContext.getNextAccessibilityId();
         }
         return mAccessibilityViewId;
     }
@@ -17159,7 +17168,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected Parcelable onSaveInstanceState() {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
-        if (mStartActivityRequestWho != null || isAutofilled()) {
+        if (mStartActivityRequestWho != null || isAutofilled()
+                || mAccessibilityViewId > LAST_APP_ACCESSIBILITY_ID) {
             BaseSavedState state = new BaseSavedState(AbsSavedState.EMPTY_STATE);
 
             if (mStartActivityRequestWho != null) {
@@ -17170,8 +17180,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 state.mSavedData |= BaseSavedState.IS_AUTOFILLED;
             }
 
+            if (mAccessibilityViewId > LAST_APP_ACCESSIBILITY_ID) {
+                state.mSavedData |= BaseSavedState.ACCESSIBILITY_ID;
+            }
+
             state.mStartActivityRequestWhoSaved = mStartActivityRequestWho;
             state.mIsAutofilled = isAutofilled();
+            state.mAccessibilityViewId = mAccessibilityViewId;
             return state;
         }
         return BaseSavedState.EMPTY_STATE;
@@ -17248,6 +17263,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             if ((baseState.mSavedData & BaseSavedState.IS_AUTOFILLED) != 0) {
                 setAutofilled(baseState.mIsAutofilled);
+            }
+            if ((baseState.mSavedData & BaseSavedState.ACCESSIBILITY_ID) != 0) {
+                mAccessibilityViewId = baseState.mAccessibilityViewId;
             }
         }
     }
@@ -24408,11 +24426,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static class BaseSavedState extends AbsSavedState {
         static final int START_ACTIVITY_REQUESTED_WHO_SAVED = 0b1;
         static final int IS_AUTOFILLED = 0b10;
+        static final int ACCESSIBILITY_ID = 0b100;
 
         // Flags that describe what data in this state is valid
         int mSavedData;
         String mStartActivityRequestWhoSaved;
         boolean mIsAutofilled;
+        int mAccessibilityViewId;
 
         /**
          * Constructor used when reading from a parcel. Reads the state of the superclass.
@@ -24435,6 +24455,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mSavedData = source.readInt();
             mStartActivityRequestWhoSaved = source.readString();
             mIsAutofilled = source.readBoolean();
+            mAccessibilityViewId = source.readInt();
         }
 
         /**
@@ -24453,6 +24474,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             out.writeInt(mSavedData);
             out.writeString(mStartActivityRequestWhoSaved);
             out.writeBoolean(mIsAutofilled);
+            out.writeInt(mAccessibilityViewId);
         }
 
         public static final Parcelable.Creator<BaseSavedState> CREATOR
