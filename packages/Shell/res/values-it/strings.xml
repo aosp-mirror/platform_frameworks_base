@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Aggiunta di dettagli alla segnalazione di bug"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Attendi..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"La segnalazione di bug comparirà a breve sul telefono"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Seleziona per condividere la segnalazione di bug"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tocca per condividere la segnalazione di bug"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Seleziona per inviare la segnalazione di bug senza screenshot o attendi che lo screenshot sia completo"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tocca per inviare la segnalazione del bug senza screenshot o attendi che lo screenshot sia completo"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tocca per inviare la segnalazione del bug senza screenshot o attendi che lo screenshot sia completo"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Le segnalazioni di bug contengono dati recuperati da vari file di log del sistema e potrebbero includere dati considerati riservati (ad esempio dati relativi alla posizione e all\'utilizzo delle app). Condividi le segnalazioni di bug solo con persone e app attendibili."</string>

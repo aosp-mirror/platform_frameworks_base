@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"बग रिपोर्ट में विवरण जोड़े जा रहे हैं"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा करें…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"बग रिपोर्ट थोड़ी ही देर में फ़ोन पर दिखाई देगी"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"अपनी बग रिपोर्ट साझा करना चुनें"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"अपनी बग रिपोर्ट साझा करने के लिए टैप करें"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"किसी स्क्रीनशॉट के बिना अपनी बग रिपोर्ट साझा करना चुनें या स्क्रीनशॉट पूरा होने तक इंतज़ार करें"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"अपनी बग रिपोर्ट को बिना स्क्रीनशॉट साझा करने हेतु टैप करें या स्क्रीनशॉट पूरा होने की प्रतीक्षा करें"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"अपनी बग रिपोर्ट को बिना स्क्रीनशॉट साझा करने हेतु टैप करें या स्क्रीनशॉट पूरा होने की प्रतीक्षा करें"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"बग रिपोर्ट में सिस्टम की विभिन्न लॉग फ़ाइलों का डेटा शामिल होता है, जिसमें ऐसा डेटा शामिल हो सकता है जिसे आप संवेदनशील मानते हैं (जैसे कि ऐप्लिकेशन का उपयोग और स्थान डेटा). बग रिपोर्ट केवल अपने विश्वसनीय लोगों और ऐप्लिकेशन से साझा करें."</string>

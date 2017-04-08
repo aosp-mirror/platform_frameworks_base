@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"正在向错误报告添加详细信息"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"请稍候…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"错误报告将很快显示在手机上"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"选择即可分享您的错误报告"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"点按即可分享您的错误报告"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"您可以选择分享不含屏幕截图的错误报告，也可以等待屏幕截图完成"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"点按即可分享不含屏幕截图的错误报告；您也可以等待屏幕截图完成"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"点按即可分享不含屏幕截图的错误报告；您也可以等待屏幕截图完成"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"错误报告包含的数据来自于系统的各种日志文件，其中可能包含您认为敏感的数据（例如应用使用情况信息和位置数据）。请务必只与您信任的人和应用分享错误报告。"</string>

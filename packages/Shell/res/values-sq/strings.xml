@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Po shtohen detajet te raporti i defekteve në kod"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Qëndro në pritje..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Raporti i defektit nëkod do të shfaqet së shpejti në telefon"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Përzgjidh për të ndarë raportin e defekteve në kod"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Trokit për të ndarë raportin e defekteve në kod"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Përzgjidh për të ndarë raportin e defekteve në kod pa një pamje çasti ose prit që pamja e çastit të përfundojë"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Trokit për të ndarë raportin e defekteve në kod pa një pamje çasti ose prit që pamja e çastit të përfundojë"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Trokit për të ndarë raportin e defekteve në kod pa një pamje çasti ose prit që pamja e çastit të përfundojë"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Raportet e gabimeve përmbajnë të dhëna nga skedarë të ndryshëm ditarësh sistemi, që mund të përfshijnë të dhëna që ti i konsideron delikate (të tilla si përdorimi i aplikacioneve dhe të dhënat e vendndodhjes). Ndaji raportet e gabimeve vetëm me aplikacionet dhe personat te të cilët ke besim."</string>
