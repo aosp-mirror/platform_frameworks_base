@@ -7,6 +7,7 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Mobildata er blevet deaktiveret"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Tryk for at besøge websitet for %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontakt din tjenesteudbyder %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Status for mobildata"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Log ind på mobilnetværk"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Der er sikkerhedsproblemer på det netværk, du forsøger at logge ind på."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Det er f.eks. ikke sikkert, at loginsiden tilhører den anførte organisation."</string>

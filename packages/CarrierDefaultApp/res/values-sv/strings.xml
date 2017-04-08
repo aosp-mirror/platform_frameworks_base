@@ -7,6 +7,7 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Din mobildata har inaktiverats"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Tryck här för att besöka webbplatsen %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontakta operatören %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Status för mobildata"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Logga in på mobilnätverk"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Nätverket du försöker ansluta till har säkerhetsproblem."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Det kan t.ex. hända att inloggningssidan inte tillhör den organisation som visas."</string>
