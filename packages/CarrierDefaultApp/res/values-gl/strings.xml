@@ -7,6 +7,7 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Desactiváronse os datos móbiles"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Toca para acceder ao sitio web de %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Ponte en contacto co teu fornecedor de servizo %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Estado dos datos móbiles"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Iniciar sesión na rede de telefonía móbil"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"A rede á que tentas unirte ten problemas de seguranza."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Por exemplo, é posible que a páxina de inicio de sesión non pertenza á organización que se mostra."</string>

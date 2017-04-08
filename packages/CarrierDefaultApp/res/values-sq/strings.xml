@@ -7,6 +7,7 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Të dhënat celulare janë çaktivizuar"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Trokit për të vizituar sajtin e uebit të %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontakto me ofruesin e shërbimit %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Statusi i të dhënave celulare"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Identifikohu në rrjetin celular"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Rrjeti në të cilin po përpiqesh të bashkohesh ka probleme sigurie."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"për shembull, faqja e identifikimit mund të mos i përkasë organizatës së shfaqur."</string>

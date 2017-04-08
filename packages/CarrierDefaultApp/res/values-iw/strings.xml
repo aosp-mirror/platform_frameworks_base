@@ -7,6 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"חבילת הגלישה שלך הושבתה"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"‏הקש כדי לעבור לאתר של %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"‏פנה לספק השירות %s"</string>
+    <!-- no translation found for mobile_data_status_notification_channel_name (833999690121305708) -->
+    <skip />
     <string name="action_bar_label" msgid="4290345990334377177">"היכנס לרשת סלולרית"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"יש בעיות אבטחה ברשת שאליה אתה מנסה להתחבר."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"לדוגמה, ייתכן שדף ההתחברות אינו שייך לארגון המוצג."</string>
