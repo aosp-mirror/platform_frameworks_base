@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"දෝෂ වාර්තාව වෙත විස්තර එක් කිරීම"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"කරුණාකර රැඳී සිටින්න..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"දෝෂ වාර්තාව ඉක්මනින් දුරකථනය මත දිස් වනු ඇත"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තෝරාගන්න"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තට්ටු කරන්න"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"තිර රුවක් රහිතව ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තෝරාගන්න නැතහොත් තිර රුව ගැනීම අවසන් වන තෙක් රැඳෙන්න"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"තිර රුවක් රහිතව ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තට්ටු කරන්න නැතහොත් තිර රුව ගැනීම අවසන් වන තෙක් රැඳෙන්න"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"තිර රුවක් රහිතව ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට තට්ටු කරන්න නැතහොත් තිර රුව ගැනීම අවසන් වන තෙක් රැඳෙන්න"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"දෝෂ වාර්තාවල පද්ධතියේ විවිධ ලොග ගොනු වෙතින් වන දත්ත අඩංගු අතර, ඒවායෙහි ඔබ සංවේදී ලෙස සලකන දත්ත (යෙදුම් භාවිතය සහ ස්ථාන දත්ත වැනි) අඩංගු විය හැකිය. ඔබ විශ්වාස කරන පුද්ගලයන් සහ යෙදුම් සමග පමණක් දෝෂ වාර්තා බෙදා ගන්න."</string>
