@@ -114,8 +114,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Veuillez dessiner le schéma lorsque vous changez de profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Veuillez saisir le code lorsque vous changez de profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Veuillez saisir le mot de passe lorsque vous changez de profil"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Appareil verrouillé par l\'administrateur"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Appareil verrouillé manuellement"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le schéma.</item>

@@ -75,8 +75,7 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"Kon nie skermkiekie neem nie."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Kon nie skermkiekie stoor nie."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Kan weens beperkte bergingspasie nie skermkiekie stoor nie."</string>
-    <!-- no translation found for screenshot_failed_to_capture_text (173674476457581486) -->
-    <skip />
+    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Die program of jou organisasie laat nie toe dat skermkiekies geneem word nie"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-lêeroordrag-opsies"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Heg as \'n mediaspeler (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Heg as \'n kamera (PTP)"</string>
@@ -91,8 +90,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Foon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Stembystand"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Ontsluit"</string>
-    <!-- no translation found for accessibility_waiting_for_fingerprint (4808860050517462885) -->
-    <skip />
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Wat tans vir vingerafdruk"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ontsluit sonder om jou vingerafdruk te gebruik"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ontsluit"</string>
     <string name="phone_label" msgid="2320074140205331708">"maak foon oop"</string>
@@ -278,8 +276,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Helderheid"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Outo-draai"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Outodraai skerm"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation_value (8187398200140760213) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g>-modus"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotasie is gesluit"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portret"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Landskap"</string>
@@ -415,68 +412,40 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profiel kan gemonitor word"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Netwerk kan dalk gemonitor word"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Netwerk kan dalk gemonitor word"</string>
-    <!-- no translation found for quick_settings_disclosure_management_monitoring (6645176135063957394) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (370622174777570853) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (1085137869053332307) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (6290456493852584017) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management (3294967280853150271) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management (1059403025094542908) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_management_vpns (3698767349925266482) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (7777821385318891527) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_monitoring (5125463987558278215) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_managed_profile_monitoring (8973606847896650284) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_monitoring (679658227269205728) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_vpns (8170318392053156330) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (3494535754792751741) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (4467456202486569906) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (6943724064780847080) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"Jou organisasie bestuur hierdie toestel en kan netwerkverkeer monitor"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bestuur hierdie toestel en kan netwerkverkeer monitor"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"Toestel word deur jou organisasie bestuur en is aan <xliff:g id="VPN_APP">%1$s</xliff:g> gekoppel"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"Toestel word deur <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bestuur en is aan <xliff:g id="VPN_APP">%2$s</xliff:g> gekoppel"</string>
+    <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"Toestel word deur jou organisasie bestuur"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"Toestel word deur <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bestuur"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"Toestel word deur jou organisasie bestuur en is aan VPN\'e gekoppel"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"Toestel word deur <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bestuur en is aan VPN\'e gekoppel"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"Jou organisasie kan netwerkverkeer in jou werkprofiel monitor"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kan netwerkverkeer in jou werkprofiel monitor"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Netwerk kan gemonitor word"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"Toestel is aan VPN\'e gekoppel"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Werkprofiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Persoonlike profiel is aan <xliff:g id="VPN_APP">%1$s</xliff:g> gekoppel"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Toestel is aan <xliff:g id="VPN_APP">%1$s</xliff:g> gekoppel"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Toestelmonitering"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profielmonitering"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Netwerkmonitering"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <!-- no translation found for monitoring_subtitle_network_logging (3341264304793193386) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_ca_certificate (3874151893894355988) -->
-    <skip />
+    <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"Netwerkloginskrywing"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"CA-sertifikate"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiveer VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Ontkoppel VPN"</string>
-    <!-- no translation found for monitoring_button_view_policies (100913612638514424) -->
-    <skip />
-    <!-- no translation found for monitoring_description_named_management (4872859182820011954) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (3115563193381106341) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management_ca_certificate (5202023784131001751) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_ca_certificate (4683248196789897964) -->
-    <skip />
-    <!-- no translation found for monitoring_description_ca_certificate (7886985418413598352) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management_network_logging (7184005419733060736) -->
-    <skip />
-    <!-- no translation found for monitoring_description_named_vpn (639013857356724268) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4479748971871539316) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_named_vpn (1427905889862420559) -->
-    <skip />
-    <!-- no translation found for monitoring_description_personal_profile_named_vpn (3133980926929069283) -->
-    <skip />
+    <string name="monitoring_button_view_policies" msgid="100913612638514424">"Bekyk beleide"</string>
+    <string name="monitoring_description_named_management" msgid="4872859182820011954">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bestuur jou toestel.\n\nJou administrateur kan instellings, korporatiewe toegang, programme, data wat met jou toestel geassosieer word, en jou toestel se ligginginligting monitor en bestuur.\n\nKontak jou administrateur vir meer inligting.\""</string>
+    <string name="monitoring_description_management" msgid="3115563193381106341">"Jou organisasie bestuur jou toestel.\n\nJou administrateur kan instellings, korporatiewe toegang, programme, data wat met jou toestel geassosieer word, en jou toestel se ligginginligting monitor en bestuur.\n\nKontak jou administrateur vir meer inligting.\""</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Jou organisasie het \'n sertifikaatoutoriteit op hierdie toestel geïnstalleer. Jou veilige netwerkverkeer kan gemonitor of gewysig word."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Jou organisasie het \'n sertifikaatoutoriteit in jou werkprofiel geïnstalleer. Jou veilige netwerkverkeer kan gemonitor of gewysig word."</string>
+    <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"\'n Sertifikaatoutoriteit is op hierdie toestel geïnstalleer. Jou veilige netwerkverkeer kan gemonitor of gewysig word."</string>
+    <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Jou administrateur het netwerkloginskrywing aangeskakel, wat verkeer op jou toestel monitor."</string>
+    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"Jy is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"Jy is gekoppel aan <xliff:g id="VPN_APP_0">%1$s</xliff:g> en <xliff:g id="VPN_APP_1">%2$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Jou werkprofiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Jy persoonlike profiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Jou toestel word bestuur deur <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> gebruik <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> om jou toestel te bestuur."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Jou admin kan instellings, korporatiewe toegang, programme, data wat met jou toestel geassosieer word en jou toestel se ligginginligting monitor en bestuur."</string>
@@ -485,22 +454,17 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Jy is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Maak VPN-instellings oop"</string>
-    <!-- no translation found for monitoring_description_ca_cert_settings_separator (4987350385906393626) -->
-    <skip />
-    <!-- no translation found for monitoring_description_ca_cert_settings (5489969458872997092) -->
-    <skip />
+    <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Maak vertroude eiebewyse oop"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Jou administrateur het netwerkloglêers aangeskakel wat verkeer op jou toestel monitor.\n\nKontak jou administrateur vir meer inligting."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Jy het \'n program toestemming gegee om \'n VPN-verbinding op te stel.\n\nHierdie program kan jou toestel- en netwerkaktiwiteit monitor, insluitend e-posse, programme en webwerwe."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Jou werkprofiel word deur <xliff:g id="ORGANIZATION">%1$s</xliff:g> bestuur.\n\nJou administrateur kan jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, bestuur.\n\nKontak jou administrateur vir meer inligting.\n\nJy is ook aan \'n VPN gekoppel, wat jou netwerkaktiwiteit kan monitor."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <!-- no translation found for monitoring_description_app (1828472472674709532) -->
-    <skip />
+    <string name="monitoring_description_app" msgid="1828472472674709532">"Jy is gekoppel aan <xliff:g id="APPLICATION">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Jy is gekoppel aan <xliff:g id="APPLICATION">%1$s</xliff:g>, wat jou persoonlike netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Jy is gekoppel aan <xliff:g id="APPLICATION">%1$s</xliff:g>, wat jou persoonlike netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
-    <!-- no translation found for monitoring_description_app_work (4612997849787922906) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (5664165460056859391) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> bestuur jou werkprofiel. Die profiel is gekoppel aan <xliff:g id="APPLICATION">%2$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor.\n\nKontak jou administrateur vir meer inligting."</string>
+    <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> bestuur jou werkprofiel. Die profiel is gekoppel aan <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor.\n\nJy is ook gekoppel aan <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, wat jou persoonlike netwerkaktiwiteit kan monitor."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Toestel sal gesluit bly totdat jy dit handmatig ontsluit"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Kry kennisgewings vinniger"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Sien hulle voordat jy ontsluit"</string>
@@ -584,9 +548,11 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Kennisgewings"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Jy sal nie meer hierdie kennisgewings kry nie."</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> kennisgewingkategorieë"</string>
-    <!-- no translation found for notification_default_channel_desc (2506053815870808359) -->
-    <skip />
-    <!-- no translation found for notification_num_channels_desc (5492793452274077663) -->
+    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Hierdie program het nie kennisgewingkategorieë nie"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
+      <item quantity="other">1 uit <xliff:g id="NUMBER_1">%d</xliff:g> kennisgewingkategorieë van hierdie program</item>
+      <item quantity="one">1 uit <xliff:g id="NUMBER_0">%d</xliff:g> kennisgewingkategorie van hierdie program</item>
+    </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> en <xliff:g id="NUMBER_5">%3$d</xliff:g> ander kanale</item>
@@ -594,6 +560,8 @@
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"Alle kategorieë"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Meer instellings"</string>
+    <!-- no translation found for notification_app_settings (3743278649182392015) -->
+    <skip />
     <string name="notification_done" msgid="5279426047273930175">"Klaar"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"kennisgewingkontroles"</string>
@@ -743,6 +711,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Vou uit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimeer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Maak toe"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep af om toe te maak"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Prent op prent-kieslys"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in beeld-in-beeld"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"As jy nie wil hê dat <xliff:g id="NAME">%s</xliff:g> hierdie kenmerk gebruik nie, tik om instellings oop te maak en skakel dit af."</string>
@@ -771,4 +740,13 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Kitsprogramme hoef nie geïnstalleer te word nie."</string>
     <string name="app_info" msgid="6856026610594615344">"Programinligting"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobiele data"</string>
+    <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi is af"</string>
+    <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth is af"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"Moenie steur nie is af"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"\'n Outomatiese reël (<xliff:g id="ID_1">%s</xliff:g>) het Moenie steur nie aangeskakel. Hou huidige instellings?"</string>
+    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"\'n Program (<xliff:g id="ID_1">%s</xliff:g>) het Moenie steur nie aangeskakel. Hou huidige instellings?"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"\'n Outomatiese reël of \'n program het Moenie steur nie aangeskakel. Hou huidige instellings?"</string>
+    <string name="qs_dnd_until" msgid="3469471136280079874">"Tot <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="qs_dnd_keep" msgid="1825009164681928736">"Hou"</string>
+    <string name="qs_dnd_replace" msgid="8019520786644276623">"Vervang"</string>
 </resources>
