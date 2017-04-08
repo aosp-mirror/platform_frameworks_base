@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Қате туралы есепке мәліметтер қосылуда"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Күте тұрыңыз…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Көп ұзамай қате туралы есеп телефон экранына шығады"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Қате туралы есепті бөлісу үшін таңдаңыз"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Қате туралы есепті бөлісу үшін түртіңіз"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Қате туралы есепті скриншотсыз бөлісу үшін таңдаңыз немесе скриншот түсіріліп болғанша күтіңіз"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Қате туралы есепті скриншотсыз бөлісу үшін түртіңіз немесе скриншот сақталып болғанша күтіңіз"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Қате туралы есепті скриншотсыз бөлісу үшін түртіңіз немесе скриншот сақталып болғанша күтіңіз"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Қате туралы есептерде жүйенің әр түрлі журнал файлдарының деректері беріледі. Олар маңызды деректерді қамтуы мүмкін (мысалы, қолданбаны пайдалану және орналасқан жер деректері). Қате туралы есептерді тек сенімді адамдармен және қолданбалармен бөлісіңіз."</string>

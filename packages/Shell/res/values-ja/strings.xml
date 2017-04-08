@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"バグレポートに詳細情報を追加しています"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"お待ちください…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"バグレポートはまもなくスマートフォンに表示されます"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"選択するとバグレポートが共有されます"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"バグレポートを共有するにはタップします"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"選択してバグレポートをスクリーンショットなしで共有するか、スクリーンショット完成までお待ちください"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"タップしてバグレポートをスクリーンショットなしで共有するか、スクリーンショット完成までお待ちください"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"タップしてバグレポートをスクリーンショットなしで共有するか、スクリーンショット完成までお待ちください"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"バグレポートには、システムのさまざまなログファイルのデータが含まれており、他人に知られたくないデータ（アプリの使用状況、位置情報など）が含まれている場合もあります。バグレポートの共有は、信頼できる人やアプリとのみ行ってください。"</string>

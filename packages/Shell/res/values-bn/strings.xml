@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ত্রুটির প্রতিবেদনে বিশদ বিবরণ যোগ করা হচ্ছে"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"অনুগ্রহ করে অপেক্ষা করুন..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ফোনে শীঘ্রই ত্রুটির প্রতিবেদন দেখা যাবে"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"ত্রুটির প্রতিবেদনটি শেয়ার করতে এটি বেছে নিন"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"আপনার ত্রুটির প্রতিবেদন শেয়ার করতে আলতো চাপ দিন"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"কোনো স্ক্রিনশট ছাড়াই ত্রুটির প্রতিবেদনটি শেয়ার করতে এটি বেছে নিন, বা স্ক্রিনশটের জন্য অপেক্ষা করুন"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"কোনো স্ক্রীনশট ছাড়াই ত্রুটির প্রতিবেদন শেয়ার করতে আলতো চাপ দিন বা সম্পন্ন করতে স্ক্রীনশটের জন্য অপেক্ষা করুন"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"কোনো স্ক্রীনশট ছাড়াই ত্রুটির প্রতিবেদন শেয়ার করতে আলতো চাপ দিন বা সম্পন্ন করতে স্ক্রীনশটের জন্য অপেক্ষা করুন"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"ত্রুটির প্রতিবেদনগুলিতে থাকা ডেটা, সিস্টেমের বিভিন্ন লগ ফাইলগুলি থেকে আসে, যাতে আপনার বিবেচনা অনুযায়ী সংবেদনশীল ডেটা (যেমন, অ্যাপ্লিকেশানের ব্যবহার এবং অবস্থান ডেটা) থাকতে পারে৷ আপনি বিশ্বাস করেন শুধুমাত্র এমন অ্যাপ্লিকেশান এবং ব্যক্তিদের সাথেই ত্রুটির প্রতিবেদনগুলিকে শেয়ার করুন৷"</string>

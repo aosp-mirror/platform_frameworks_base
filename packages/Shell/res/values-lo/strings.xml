@@ -23,11 +23,9 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ກຳລັງເພີ່ມລາຍລະອຽດໃສ່ລາຍງານຂໍ້ຜິດພາດ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"ກະລຸນາລໍຖ້າ..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ລາຍງານຂໍ້ຜິດພາດຈະປາກົດໃນໂທລະສັບໃນໄວໆນີ້"</string>
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"ເລືອກເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານ"</string>
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"ເລືອກເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"ລາຍງານຂໍ້ຜິດພາດມີຂໍ້ມູນຈາກໄຟລ໌ບັນທຶກຕ່າງໆຂອງລະບົບ ເຊິ່ງອາດຮວມມີຂໍ້ມູນທີ່ທ່ານຖືວ່າເປັນຂໍ້ມູນລະອຽດອ່ອນນຳ (ເຊັ່ນ: ການນຳໃຊ້ແອັບ ແລະ ຂໍ້ມູນສະຖານທີ່). ທ່ານຄວນແບ່ງປັນລາຍງານນີ້ໃຫ້ກັບຄົນ ແລະ ແອັບທີ່ທ່ານເຊື່ອໃຈເທົ່ານັ້ນ."</string>
