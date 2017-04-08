@@ -48,7 +48,7 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         // Once we've verified that the caller uid is permitted, we can trust the pid but
         // we can't trust the tid.  No need to explicitly check for pid == 0 || tid == 0,
         // since if not the case then the getThreadGroupLeader() test will also fail.
-        if (!isPermittedCallingUid() || prio < PRIORITY_MIN ||
+        if (!isPermitted() || prio < PRIORITY_MIN ||
                 prio > PRIORITY_MAX || Process.getThreadGroupLeader(tid) != pid) {
             return PackageManager.PERMISSION_DENIED;
         }
@@ -65,9 +65,13 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         return PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean isPermittedCallingUid() {
-        final int callingUid = Binder.getCallingUid();
-        switch (callingUid) {
+    private boolean isPermitted() {
+        // schedulerservice hidl
+        if (Binder.getCallingPid() == Process.myPid()) {
+            return true;
+        }
+
+        switch (Binder.getCallingUid()) {
         case Process.AUDIOSERVER_UID: // fastcapture, fastmixer
         case Process.CAMERASERVER_UID: // camera high frame rate recording
             return true;
