@@ -33,8 +33,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"අන්තර්ජාල ප්‍රවේශය නැත"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> විසින් සුරකින ලදී"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s හරහා ස්වයංක්‍රියව සම්බන්ධ විය"</string>
-    <!-- no translation found for connected_via_network_scorer_default (7867260222020343104) -->
-    <skip />
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ජාල ශ්‍රේණිගත සපයන්නා හරහා ස්වයංක්‍රියව සම්බන්ධ විය"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s හරහා සම්බන්ධ විය"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s හරහා ලබා ගැනීමට හැකිය"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"සම්බන්ධයි, අන්තර්ජාලය නැත"</string>
@@ -140,8 +139,7 @@
     <item msgid="5194774745031751806">"ඉතා ශීඝ්‍ර"</item>
     <item msgid="9085102246155045744">"ඉතාම වේගවත්"</item>
   </string-array>
-    <!-- no translation found for choose_profile (6921016979430278661) -->
-    <skip />
+    <string name="choose_profile" msgid="6921016979430278661">"පැතිකඩ තෝරන්න"</string>
     <string name="category_personal" msgid="1299663247844969448">"පෞද්ගලික"</string>
     <string name="category_work" msgid="8699184680584175622">"කාර්යාලය"</string>
     <string name="development_settings_title" msgid="215179176067683667">"වර්ධක විකල්ප"</string>
@@ -318,35 +316,26 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"වර්ණ නිවැරදි කිරීම"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"මෙම විශේෂාංගය පරීක්ෂණාත්මක සහ ඇතැම් විට ක්‍රියාකාරිත්වයට බලපෑ හැක."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> මගින් ඉක්මවන ලදී"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"දළ වශයෙන් <xliff:g id="TIME">%1$s</xliff:g>ක් ඉතිරිය"</string>
+    <!-- no translation found for power_remaining_duration_only (845431008899029842) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only (1421102457410268886) -->
+    <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"ඉතිරි <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>ක් පමණ ඇත"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - ඉතිරි <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> සම්පූර්ණයෙන් ආරෝපණය වන තෙක්"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="7341243578143555689">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> AC මත සම්පූර්ණයෙන් ආරෝපණය වන තෙක්"</string>
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="3720632890882121805">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> USB හරහා සම්පූර්ණයෙන් ආරෝපණය වන තෙක්"</string>
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="5768338238751562058">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> රැහැන් රහිතව සම්පූර්ණයෙන් ආරෝපණය වන තෙක්"</string>
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ආරෝපණය වෙමින්"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC හි ආරෝපණය වෙමින්"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"ආරෝපණය වෙමින්"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB හරහා ආරෝපණය වෙමින්"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"ආරෝපණය වෙමින්"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"රැහැන් රහිතව ආරෝපණය වෙමින්"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"ආරෝපණය වෙමින්"</string>
+    <!-- no translation found for battery_info_status_charging_lower (8689770213898117994) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ආරෝපණය නොවෙමින්"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"පූර්ණ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
-    <!-- no translation found for enabled_by_admin (5302986023578399263) -->
-    <skip />
-    <!-- no translation found for disabled_by_admin (8505398946020816620) -->
-    <skip />
+    <string name="enabled_by_admin" msgid="5302986023578399263">"පරිපාලක විසින් සබල කර ඇත"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"ඔබගේ පරිපාලක විසින් අබල කර ඇත"</string>
     <string name="home" msgid="3256884684164448244">"සැකසීම් මුල් පිටුව"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -369,4 +358,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"මුරපදය අවශ්‍යයි"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"සක්‍රීය ආදායක මාර්ග"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"පද්ධති භාෂා භාවිත කරන්න"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> සඳහා සැකසීම් විවෘත කිරීම අසාර්ථක විය"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"මෙම ආදාන ක්‍රමය මුරපද සහ ණයපත් අංක වැනි පෞද්ගලික දත්ත ඇතුළුව ඔබ ටයිප් කරන පෙළ එකතු කිරීමට හැකිය, එය <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> යෙදුමන් ලැබේ. මෙම ආදාන ක්‍රමය භාවිතා කරන්නද?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"සටහන: නැවත පණ ගැන්වීමකට පසුව, ඔබ ඔබේ දුරකථනය අගුලු හරින තෙක් මෙම යෙදුම ආරම්භ කළ නොහැකිය"</string>
 </resources>

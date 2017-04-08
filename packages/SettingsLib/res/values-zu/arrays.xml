@@ -68,10 +68,26 @@
     <item msgid="1913619118958233129">"I-avrcp15"</item>
     <item msgid="7142710449249088270">"I-avrcp16"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:6 (723675059572222462) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:7 (3304843301758635896) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:6 (2209680154067241740) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:7 (741805482892725657) -->
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Sebenzisa ukukhetha kwesistimu (Okuzenzakalelayo)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"I-AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"I-LDAC"</item>
+    <item msgid="723675059572222462">"Nika amandla amakhodekhi akhethekayo"</item>
+    <item msgid="3304843301758635896">"Khubaza amakhodekhi akhethekayo"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Sebenzisa ukukhetha kwesistimu (Okuzenzakalelayo)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"I-AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"I-LDAC"</item>
+    <item msgid="2209680154067241740">"Nika amandla amakhodekhi akhethekayo"</item>
+    <item msgid="741805482892725657">"Khubaza amakhodekhi akhethekayo"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Sebenzisa ukukhetha kwesistimu (Okuzenzakalelayo)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
@@ -108,8 +124,18 @@
     <item msgid="8900559293912978337">"Okukodwa"</item>
     <item msgid="8883739882299884241">"I-Stereo"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"Kuthuthukiselwe ikhwalithi yomsindo (990kbps/909kbps)"</item>
+    <item msgid="2921767058740704969">"Umsindo obhalansile nekhwalithi yoxhumo (660kbps/606kbps)"</item>
+    <item msgid="8860982705384396512">"Kuthuthukiselwe ikhwalithi yoxhumo (330kbps/303kbps)"</item>
+    <item msgid="4414060457677684127">"Amandla amahle (Adaptive Bit Rate)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"Kuthuthukiselwe ikhwalithi yomsebenzisi"</item>
+    <item msgid="4327143584633311908">"Umsindo obhalansile nekhwalithi yoxhumo"</item>
+    <item msgid="4681409244565426925">"Kuthuthukiselwe ikhwalithi yoxhumo"</item>
+    <item msgid="364670732877872677">"Amandla amahle (Adaptive Bit Rate)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Valiwe"</item>
     <item msgid="1593289376502312923">"64K"</item>
