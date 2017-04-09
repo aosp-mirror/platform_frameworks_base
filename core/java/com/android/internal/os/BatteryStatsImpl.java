@@ -1798,9 +1798,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
         /**
          * The total time at which the timer was acquired, to determine if it
-         * was actually held for an interesting duration.
+         * was actually held for an interesting duration. If time base was not running when timer
+         * was acquired, will be -1.
          */
-        long mAcquireTime;
+        long mAcquireTime = -1;
 
         long mTimeout;
 
@@ -1864,9 +1865,13 @@ public class BatteryStatsImpl extends BatteryStats {
                     // Add this timer to the active pool
                     mTimerPool.add(this);
                 }
-                // Increment the count
-                mCount++;
-                mAcquireTime = mTotalTime;
+                if (mTimeBase.isRunning()) {
+                    // Increment the count
+                    mCount++;
+                    mAcquireTime = mTotalTime;
+                } else {
+                    mAcquireTime = -1;
+                }
                 if (DEBUG && mType < 0) {
                     Log.v(TAG, "start #" + mType + ": mUpdateTime=" + mUpdateTime
                             + " mTotalTime=" + mTotalTime + " mCount=" + mCount
@@ -1904,7 +1909,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             + " mAcquireTime=" + mAcquireTime);
                 }
 
-                if (mTotalTime == mAcquireTime) {
+                if (mAcquireTime >= 0 && mTotalTime == mAcquireTime) {
                     // If there was no change in the time, then discard this
                     // count.  A somewhat cheezy strategy, but hey.
                     mCount--;
@@ -1963,7 +1968,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mNesting > 0) {
                 mUpdateTime = mTimeBase.getRealtime(mClocks.elapsedRealtime() * 1000);
             }
-            mAcquireTime = mTotalTime;
+            mAcquireTime = -1; // to ensure mCount isn't decreased to -1 if timer is stopped later.
             return canDetach;
         }
 
