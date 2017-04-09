@@ -137,7 +137,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         long bgTime = bi.getUidStats().get(UID).getWifiScanBackgroundTime(curr);
         assertEquals((305 - 202) * 1000, time);
         assertEquals(1, count);
-        assertEquals(1, bgCount);
+        assertEquals(0, bgCount);
         assertEquals((305 - 202) * 1000, actualTime);
         assertEquals((305 - 254) * 1000, bgTime);
     }
@@ -184,7 +184,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         long bgTime = bgTimer.getTotalDurationMsLocked(clocks.realtime) * 1000;
         assertEquals((305 - 202) * 1000, time);
         assertEquals(1, count);
-        assertEquals(1, bgCount);
+        assertEquals(0, bgCount);
         assertEquals((305 - 202) * 1000, actualTime);
         assertEquals((305 - 254) * 1000, bgTime);
     }
@@ -210,13 +210,13 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         curr = 1000 * (clocks.realtime = clocks.uptime = 161);
         bi.noteJobFinishLocked(jobName, UID);
 
-        // Start timer
-        curr = 1000 * (clocks.realtime = clocks.uptime = 202);
-        bi.noteJobStartLocked(jobName, UID);
-
         // Move to background
-        curr = 1000 * (clocks.realtime = clocks.uptime = 254);
+        curr = 1000 * (clocks.realtime = clocks.uptime = 202);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        // Start timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 254);
+        bi.noteJobStartLocked(jobName, UID);
 
         // Off battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
@@ -237,7 +237,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         int count = timer.getCountLocked(STATS_SINCE_CHARGED);
         int bgCount = bgTimer.getCountLocked(STATS_SINCE_CHARGED);
         long bgTime = bgTimer.getTotalTimeLocked(curr, STATS_SINCE_CHARGED);
-        assertEquals((161 - 151 + 305 - 202) * 1000, time);
+        assertEquals((161 - 151 + 305 - 254) * 1000, time);
         assertEquals(2, count);
         assertEquals(1, bgCount);
         assertEquals((305 - 254) * 1000, bgTime);

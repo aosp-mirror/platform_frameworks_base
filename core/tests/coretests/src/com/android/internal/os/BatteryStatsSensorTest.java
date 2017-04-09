@@ -29,9 +29,6 @@ public class BatteryStatsSensorTest extends TestCase {
     private static final int UID = 10500;
     private static final int SENSOR_ID = -10000;
 
-    // TODO: fix the bug in StopwatchTimer to prevent this bug from manifesting here.
-    boolean revealCntBug = false;
-
     @SmallTest
     public void testSensorStartStop() throws Exception {
         final MockClocks clocks = new MockClocks();
@@ -90,11 +87,7 @@ public class BatteryStatsSensorTest extends TestCase {
                 .get(SENSOR_ID).getSensorTime();
         assertEquals(0,
                 sensorTimer.getTotalTimeLocked(curr, BatteryStats.STATS_SINCE_CHARGED));
-        if(revealCntBug) {
-            assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        } else {
-            assertEquals(1, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        }
+        assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
         // Stop sensor (battery=off, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 550);
@@ -175,11 +168,7 @@ public class BatteryStatsSensorTest extends TestCase {
         curr = 1000 * (clocks.realtime = clocks.uptime = 657);
         BatteryStats.Timer sensorTimer = bi.getUidStats().get(UID).getSensorStats()
                 .get(SENSOR_ID).getSensorTime();
-        if(revealCntBug) {
-            assertEquals(1, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        } else {
-            assertEquals(2, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        }
+        assertEquals(1, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
         assertEquals((305-202)*1000,
                 sensorTimer.getTotalTimeLocked(curr, BatteryStats.STATS_SINCE_CHARGED));
 
@@ -216,11 +205,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertEquals(0,
                 sensorTimer.getTotalTimeLocked(curr, BatteryStats.STATS_SINCE_CHARGED));
         // Acquired off battery, so count=0.
-        if(revealCntBug) {
-            assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        } else {
-            assertEquals(1, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        }
+        assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
         // Unplug (battery=on, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
@@ -233,11 +218,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertEquals((410-305)*1000,
                 sensorTimer.getTotalTimeLocked(curr, BatteryStats.STATS_SINCE_CHARGED));
         // Only ever acquired off battery, so count=0.
-        if(revealCntBug) {
-            assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        } else {
-            assertEquals(1, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        }
+        assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
         // Stop sensor (battery=on, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 550);
@@ -250,11 +231,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertEquals((550-305)*1000,
                 sensorTimer.getTotalTimeLocked(curr, BatteryStats.STATS_SINCE_CHARGED));
         // Only ever acquired off battery, so count=0.
-        if(revealCntBug) {
-            assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        } else {
-            assertEquals(1, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        }
+        assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
     }
 
     @SmallTest
@@ -375,11 +352,7 @@ public class BatteryStatsSensorTest extends TestCase {
         // Test: UID - count
         assertEquals(2, timer1.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
         // Test: UID - background count
-        if(revealCntBug) {
-            assertEquals(1, bgTimer1.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        } else {
-            assertEquals(2, bgTimer1.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
-        }
+        assertEquals(1, bgTimer1.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
         // Test: UID_2 - blamed time
         assertEquals(expBlamedTime2 * 1000,
