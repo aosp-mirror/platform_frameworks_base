@@ -287,6 +287,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/euicc/IEuiccService.aidl \
 	core/java/android/service/euicc/IGetDownloadableSubscriptionMetadataCallback.aidl \
 	core/java/android/service/euicc/IGetEidCallback.aidl \
+	core/java/android/service/euicc/IGetEuiccProfileInfoListCallback.aidl \
 	core/java/android/service/gatekeeper/IGateKeeperService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
@@ -754,6 +755,7 @@ aidl_files := \
 	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
 	frameworks/base/core/java/android/service/euicc/DownloadResult.aidl \
 	frameworks/base/core/java/android/service/euicc/GetDownloadableSubscriptionMetadataResult.aidl \
+	frameworks/base/core/java/android/service/euicc/GetEuiccProfileInfoListResult.aidl \
 	frameworks/base/core/java/android/service/notification/Adjustment.aidl \
 	frameworks/base/core/java/android/service/notification/Condition.aidl \
 	frameworks/base/core/java/android/service/notification/SnoozeCriterion.aidl \

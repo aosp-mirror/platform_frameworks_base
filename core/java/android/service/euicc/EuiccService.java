@@ -165,6 +165,17 @@ public abstract class EuiccService extends Service {
             boolean forceDeactivateSim);
 
     /**
+     * Return a list of all @link EuiccProfileInfo}s.
+     *
+     * @param slotId ID of the SIM slot to use when starting the download. This is currently not
+     *     populated but is here to future-proof the APIs.
+     * @return The result of the operation.
+     * @see android.telephony.SubscriptionManager#getAvailableSubscriptionInfoList
+     * @see android.telephony.SubscriptionManager#getAccessibleSubscriptionInfoList
+     */
+    public abstract GetEuiccProfileInfoListResult onGetEuiccProfileInfoList(int slotId);
+
+    /**
      * Wrapper around IEuiccService that forwards calls to implementations of {@link EuiccService}.
      */
     private class IEuiccServiceWrapper extends IEuiccService.Stub {
@@ -199,6 +210,17 @@ public abstract class EuiccService extends Service {
             GetDownloadableSubscriptionMetadataResult result =
                     EuiccService.this.getDownloadableSubscriptionMetadata(
                             slotId, subscription, forceDeactivateSim);
+            try {
+                callback.onComplete(result);
+            } catch (RemoteException e) {
+                // Can't communicate with the phone process; ignore.
+            }
+        }
+
+        @Override
+        public void getEuiccProfileInfoList(int slotId, IGetEuiccProfileInfoListCallback callback) {
+            GetEuiccProfileInfoListResult result =
+                    EuiccService.this.onGetEuiccProfileInfoList(slotId);
             try {
                 callback.onComplete(result);
             } catch (RemoteException e) {

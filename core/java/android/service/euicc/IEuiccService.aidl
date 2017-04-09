@@ -19,6 +19,7 @@ package android.service.euicc;
 import android.service.euicc.IDownloadSubscriptionCallback;
 import android.service.euicc.IGetDownloadableSubscriptionMetadataCallback;
 import android.service.euicc.IGetEidCallback;
+import android.service.euicc.IGetEuiccProfileInfoListCallback;
 import android.telephony.euicc.DownloadableSubscription;
 
 /** @hide */
@@ -29,4 +30,5 @@ oneway interface IEuiccService {
     void getDownloadableSubscriptionMetadata(int slotId, in DownloadableSubscription subscription,
             boolean forceDeactivateSim, in IGetDownloadableSubscriptionMetadataCallback callback);
     void getEid(int slotId, in IGetEidCallback callback);
+    void getEuiccProfileInfoList(int slotId, in IGetEuiccProfileInfoListCallback callback);
 }
