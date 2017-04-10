@@ -77,20 +77,20 @@ static std::vector<StringPiece> extract_pieces(const std::vector<ScopedUtfChars>
   return pieces;
 }
 
-JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeCompile(
+JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeCompile(
     JNIEnv *env, jclass aapt_obj, jobject arguments_obj) {
   std::vector<ScopedUtfChars> compile_args_jni =
       list_to_utfchars(env, arguments_obj);
   std::vector<StringPiece> compile_args = extract_pieces(compile_args_jni);
-  aapt::Compile(compile_args);
+  return aapt::Compile(compile_args);
 }
 
-JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink(
+JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink(
     JNIEnv *env, jclass aapt_obj, jobject arguments_obj) {
   std::vector<ScopedUtfChars> link_args_jni =
       list_to_utfchars(env, arguments_obj);
   std::vector<StringPiece> link_args = extract_pieces(link_args_jni);
-  aapt::Link(link_args);
+  return aapt::Link(link_args);
 }
 
 JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_ping(
