@@ -2748,7 +2748,7 @@ public final class ActivityThread {
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
-                        r.referrer, r.voiceInteractor, window);
+                        r.referrer, r.voiceInteractor, window, r.configCallback);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;
@@ -3782,12 +3782,6 @@ public final class ActivityThread {
                 mNumVisibleActivities++;
                 if (r.activity.mVisibleFromClient) {
                     r.activity.makeVisible();
-                }
-                final ViewRootImpl viewRoot = r.activity.mDecor.getViewRootImpl();
-                if (viewRoot != null) {
-                    // TODO: Figure out the best place to set the callback.
-                    // This looks like a place where decor view is already initialized.
-                    viewRoot.setActivityConfigCallback(r.configCallback);
                 }
             }
 
@@ -5156,13 +5150,8 @@ public final class ActivityThread {
             if (DEBUG_CONFIGURATION) Slog.w(TAG, "Not found target activity to report to: " + r);
             return;
         }
-        final boolean movedToDifferentDisplay = displayId != INVALID_DISPLAY;
-        if (movedToDifferentDisplay) {
-            if (r.activity.getDisplay().getDisplayId() == displayId) {
-                throw new IllegalArgumentException("Activity is already on the target display: "
-                        + displayId);
-            }
-        }
+        final boolean movedToDifferentDisplay = displayId != INVALID_DISPLAY
+                && displayId != r.activity.getDisplay().getDisplayId();
 
         // Perform updates.
         r.overrideConfig = data.overrideConfig;

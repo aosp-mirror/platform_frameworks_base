@@ -1662,7 +1662,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return stack;
     }
 
-    void moveStackToDisplay(TaskStack stack) {
+    void moveStackToDisplay(TaskStack stack, boolean onTop) {
         final DisplayContent prevDc = stack.getDisplayContent();
         if (prevDc == null) {
             throw new IllegalStateException("Trying to move stackId=" + stack.mStackId
@@ -1674,7 +1674,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         prevDc.mTaskStackContainers.removeStackFromDisplay(stack);
-        mTaskStackContainers.addStackToDisplay(stack, true /* onTop */);
+        mTaskStackContainers.addStackToDisplay(stack, onTop);
     }
 
     @Override
