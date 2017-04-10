@@ -16,7 +16,8 @@
 
 package com.android.server.am;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import android.content.ComponentName;
 import android.platform.test.annotations.Presubmit;
@@ -36,50 +37,61 @@ import org.junit.Test;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityRecordTests extends ActivityTestsBase {
+    private static final int TEST_STACK_ID = 100;
+
     private final ComponentName testActivityComponent =
             ComponentName.unflattenFromString("com.foo/.BarActivity");
     @Test
     public void testStackCleanupOnClearingTask() throws Exception {
         final ActivityManagerService service = createActivityManagerService();
-        final TestActivityStack testStack = new ActivityStackBuilder(service).build();
-        final TaskRecord task = createTask(service, testActivityComponent, testStack);
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
         final ActivityRecord record = createActivity(service, testActivityComponent, task);
 
         record.setTask(null);
-        assertTrue(testStack.onActivityRemovedFromStackInvocationCount() == 1);
+        assertEquals(getActivityRemovedFromStackCount(service, TEST_STACK_ID), 1);
     }
 
     @Test
     public void testStackCleanupOnActivityRemoval() throws Exception {
         final ActivityManagerService service = createActivityManagerService();
-        final TestActivityStack testStack = new ActivityStackBuilder(service).build();
-        final TaskRecord task = createTask(service, testActivityComponent, testStack);
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
         final ActivityRecord record = createActivity(service, testActivityComponent, task);
 
         task.removeActivity(record);
-        assertTrue(testStack.onActivityRemovedFromStackInvocationCount() == 1);
+        assertEquals(getActivityRemovedFromStackCount(service, TEST_STACK_ID),  1);
     }
 
     @Test
     public void testStackCleanupOnTaskRemoval() throws Exception {
         final ActivityManagerService service = createActivityManagerService();
-        final TestActivityStack testStack = new ActivityStackBuilder(service).build();
-        final TaskRecord task = createTask(service, testActivityComponent, testStack);
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
         final ActivityRecord record = createActivity(service, testActivityComponent, task);
 
-        testStack.removeTask(task, null /*reason*/, ActivityStack.REMOVE_TASK_MODE_MOVING);
-        assertTrue(testStack.onActivityRemovedFromStackInvocationCount() == 1);
+        service.mStackSupervisor.getStack(TEST_STACK_ID)
+                .removeTask(task, null /*reason*/, ActivityStack.REMOVE_TASK_MODE_MOVING);
+
+        // Stack should be gone on task removal.
+        assertNull(service.mStackSupervisor.getStack(TEST_STACK_ID));
     }
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() throws Exception {
         final ActivityManagerService service = createActivityManagerService();
-        final TestActivityStack testStack = new ActivityStackBuilder(service).build();
-        final TaskRecord oldTask = createTask(service, testActivityComponent, testStack);
+        final TaskRecord oldTask = createTask(service, testActivityComponent, TEST_STACK_ID);
         final ActivityRecord record = createActivity(service, testActivityComponent, oldTask);
-        final TaskRecord newTask = createTask(service, testActivityComponent, testStack);
+        final TaskRecord newTask = createTask(service, testActivityComponent, TEST_STACK_ID);
 
         record.reparent(newTask, 0, null /*reason*/);
-        assertTrue(testStack.onActivityRemovedFromStackInvocationCount() == 0);
+        assertEquals(getActivityRemovedFromStackCount(service, TEST_STACK_ID), 0);
+    }
+
+    private static int getActivityRemovedFromStackCount(ActivityManagerService service,
+            int stackId) {
+        final ActivityStack stack = service.mStackSupervisor.getStack(stackId);
+        if (stack instanceof ActivityStackReporter) {
+            return ((ActivityStackReporter) stack).onActivityRemovedFromStackInvocationCount();
+        }
+
+        return -1;
     }
 }

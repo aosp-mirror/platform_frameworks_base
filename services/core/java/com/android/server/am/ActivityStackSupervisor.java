@@ -2878,6 +2878,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         mWindowManager.deferSurfaceLayout();
 
+        // This will clear the pinned stack by moving an existing task to the full screen stack,
+        // ensuring only one task is present.
+        moveTasksToFullscreenStackLocked(PINNED_STACK_ID, !ON_TOP);
+
         // Need to make sure the pinned stack exist so we can resize it below...
         final PinnedActivityStack stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
 
