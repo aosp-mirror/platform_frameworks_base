@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "android-base/macros.h"
 #include "androidfw/StringPiece.h"
 
 #include "ConfigDescription.h"
@@ -148,7 +149,8 @@ class StringPool {
   static bool FlattenUtf16(BigBuffer* out, const StringPool& pool);
 
   StringPool() = default;
-  StringPool(const StringPool&) = delete;
+  StringPool(StringPool&&) = default;
+  StringPool& operator=(StringPool&&) = default;
 
   /**
    * Adds a string to the pool, unless it already exists. Returns
@@ -208,6 +210,8 @@ class StringPool {
   void Prune();
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(StringPool);
+
   friend const_iterator begin(const StringPool& pool);
   friend const_iterator end(const StringPool& pool);
 

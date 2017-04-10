@@ -25,6 +25,7 @@
 
 #include "android-base/logging.h"
 
+#include "ResourceUtils.h"
 #include "XmlPullParser.h"
 #include "util/Util.h"
 
@@ -193,16 +194,14 @@ static void XMLCALL CommentDataHandler(void* user_data, const char* comment) {
   stack->pending_comment += comment;
 }
 
-std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag,
-                                     const Source& source) {
+std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag, const Source& source) {
   Stack stack;
 
   XML_Parser parser = XML_ParserCreateNS(nullptr, kXmlNamespaceSep);
   XML_SetUserData(parser, &stack);
   XML_UseParserAsHandlerArg(parser);
   XML_SetElementHandler(parser, StartElementHandler, EndElementHandler);
-  XML_SetNamespaceDeclHandler(parser, StartNamespaceHandler,
-                              EndNamespaceHandler);
+  XML_SetNamespaceDeclHandler(parser, StartNamespaceHandler, EndNamespaceHandler);
   XML_SetCharacterDataHandler(parser, CharacterDataHandler);
   XML_SetCommentHandler(parser, CommentDataHandler);
 
@@ -215,8 +214,7 @@ std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag,
       break;
     }
 
-    if (XML_Parse(parser, buffer, in->gcount(), in->eof()) ==
-        XML_STATUS_ERROR) {
+    if (XML_Parse(parser, buffer, in->gcount(), in->eof()) == XML_STATUS_ERROR) {
       stack.root = {};
       diag->Error(DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser)))
                   << XML_ErrorString(XML_GetErrorCode(parser)));
@@ -226,13 +224,12 @@ std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag,
 
   XML_ParserFree(parser);
   if (stack.root) {
-    return util::make_unique<XmlResource>(ResourceFile{{}, {}, source},
-                                          std::move(stack.root));
+    return util::make_unique<XmlResource>(ResourceFile{{}, {}, source}, std::move(stack.root));
   }
   return {};
 }
 
-static void CopyAttributes(Element* el, android::ResXMLParser* parser) {
+static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPool* out_pool) {
   const size_t attr_count = parser->getAttributeCount();
   if (attr_count > 0) {
     el->attributes.reserve(attr_count);
@@ -253,18 +250,26 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser) {
       if (str16) {
         attr.value = util::Utf16ToUtf8(StringPiece16(str16, len));
       }
+
+      android::Res_value res_value;
+      if (parser->getAttributeValue(i, &res_value) > 0) {
+        attr.compiled_value = ResourceUtils::ParseBinaryResValue(
+            ResourceType::kAnim, {}, parser->getStrings(), res_value, out_pool);
+      }
+
       el->attributes.push_back(std::move(attr));
     }
   }
 }
 
-std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len,
-                                     IDiagnostics* diag, const Source& source) {
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
+                                     const Source& source) {
   // We import the android namespace because on Windows NO_ERROR is a macro, not
   // an enum, which
   // causes errors when qualifying it with android::
   using namespace android;
 
+  StringPool string_pool;
   std::unique_ptr<Node> root;
   std::stack<Node*> node_stack;
 
@@ -307,7 +312,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len,
           node->name = util::Utf16ToUtf8(StringPiece16(str16, len));
         }
 
-        CopyAttributes(node.get(), &tree);
+        CopyAttributes(node.get(), &tree, &string_pool);
 
         new_node = std::move(node);
         break;
@@ -352,7 +357,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len,
       }
     }
   }
-  return util::make_unique<XmlResource>(ResourceFile{}, std::move(root));
+  return util::make_unique<XmlResource>(ResourceFile{}, std::move(root), std::move(string_pool));
 }
 
 std::unique_ptr<Node> Namespace::Clone() {

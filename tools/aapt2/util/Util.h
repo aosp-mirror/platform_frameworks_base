@@ -99,8 +99,7 @@ Maybe<std::string> GetFullyQualifiedClassName(const android::StringPiece& packag
                                               const android::StringPiece& class_name);
 
 /**
- * Makes a std::unique_ptr<> with the template parameter inferred by the
- * compiler.
+ * Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
  * This will be present in C++14 and can be removed then.
  */
 template <typename T, class... Args>

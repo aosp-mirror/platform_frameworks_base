@@ -29,7 +29,7 @@ struct AppInfo {
   std::string package;
 
   // The app's minimum SDK version, if it is defined.
-  Maybe<std::string> min_sdk_version;
+  Maybe<int> min_sdk_version;
 
   // The app's version code, if it is defined.
   Maybe<uint32_t> version_code;
