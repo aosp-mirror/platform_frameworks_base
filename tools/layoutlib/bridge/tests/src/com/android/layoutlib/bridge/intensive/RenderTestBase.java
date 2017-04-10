@@ -51,6 +51,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -483,8 +484,9 @@ public class RenderTestBase {
     }
 
     @NonNull
-    protected LayoutPullParser createLayoutPullParser(String layoutPath) {
-        return new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutPath);
+    protected LayoutPullParser createParserFromPath(String layoutPath)
+            throws FileNotFoundException {
+        return LayoutPullParser.createFromPath(APP_TEST_RES + "/layout/" + layoutPath);
     }
 
     /**
@@ -493,7 +495,7 @@ public class RenderTestBase {
      */
     @Nullable
     protected RenderResult renderAndVerify(String layoutFileName, String goldenFileName)
-            throws ClassNotFoundException {
+            throws ClassNotFoundException, FileNotFoundException {
         return renderAndVerify(layoutFileName, goldenFileName, ConfigGenerator.NEXUS_5);
     }
 
@@ -503,15 +505,15 @@ public class RenderTestBase {
      */
     @Nullable
     protected RenderResult renderAndVerify(String layoutFileName, String goldenFileName,
-            ConfigGenerator deviceConfig) throws ClassNotFoundException {
+            ConfigGenerator deviceConfig) throws ClassNotFoundException, FileNotFoundException {
         SessionParams params = createSessionParams(layoutFileName, deviceConfig);
         return renderAndVerify(params, goldenFileName);
     }
 
     protected SessionParams createSessionParams(String layoutFileName, ConfigGenerator deviceConfig)
-            throws ClassNotFoundException {
+            throws ClassNotFoundException, FileNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = createLayoutPullParser(layoutFileName);
+        LayoutPullParser parser = createParserFromPath(layoutFileName);
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback =
                 new LayoutLibTestCallback(getLogger(), mDefaultClassLoader);

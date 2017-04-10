@@ -26,6 +26,8 @@ import org.junit.runner.RunWith;
 
 import android.annotation.NonNull;
 
+import java.io.FileNotFoundException;
+
 /**
  * Set of render tests
  */
@@ -38,18 +40,19 @@ public class PerformanceTests extends RenderTestBase {
     }
 
 
-    private void render(@NonNull String layoutFileName) throws ClassNotFoundException {
+    private void render(@NonNull String layoutFileName)
+            throws ClassNotFoundException, FileNotFoundException {
         SessionParams params = createSessionParams(layoutFileName, ConfigGenerator.NEXUS_5);
         render(params, 250);
     }
 
     @Test
-    public void testActivity() throws ClassNotFoundException {
+    public void testActivity() throws ClassNotFoundException, FileNotFoundException {
         render("activity.xml");
     }
 
     @Test
-    public void testAllWidgets() throws ClassNotFoundException {
+    public void testAllWidgets() throws ClassNotFoundException, FileNotFoundException {
         render("allwidgets.xml");
     }
 }

@@ -39,6 +39,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -147,7 +148,11 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
 
     @Override
     public ILayoutPullParser getParser(ResourceValue layoutResource) {
-        return new LayoutPullParser(new File(layoutResource.getValue()));
+        try {
+            return LayoutPullParser.createFromFile(new File(layoutResource.getValue()));
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 
     @Override
