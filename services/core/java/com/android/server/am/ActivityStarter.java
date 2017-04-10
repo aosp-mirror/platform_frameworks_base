@@ -1038,7 +1038,7 @@ class ActivityStarter {
             sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
             reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
-            if (outActivity.length > 0) {
+            if (outActivity != null && outActivity.length > 0) {
                 outActivity[0] = reusedActivity;
             }
 
