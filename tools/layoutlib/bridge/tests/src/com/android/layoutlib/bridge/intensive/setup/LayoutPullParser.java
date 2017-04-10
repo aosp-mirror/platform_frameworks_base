@@ -21,11 +21,15 @@ import com.android.ide.common.rendering.api.ILayoutPullParser;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOError;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,35 +41,38 @@ import static com.android.SdkConstants.SPINNER;
 import static com.android.SdkConstants.TOOLS_URI;
 
 public class LayoutPullParser extends KXmlParser implements ILayoutPullParser{
+    @NonNull
+    public static LayoutPullParser createFromFile(@NonNull File layoutFile)
+            throws FileNotFoundException {
+        return new LayoutPullParser(new FileInputStream(layoutFile));
+    }
 
     /**
      * @param layoutPath Must start with '/' and be relative to test resources.
      */
-    public LayoutPullParser(String layoutPath) {
+    @NonNull
+    public static LayoutPullParser createFromPath(@NonNull String layoutPath) {
         if (layoutPath.startsWith("/")) {
             layoutPath = layoutPath.substring(1);
         }
+
+        return new LayoutPullParser(LayoutPullParser.class.getClassLoader().getResourceAsStream
+                (layoutPath));
+    }
+
+    @NonNull
+    public static LayoutPullParser createFromString(@NonNull String contents) {
+        return new LayoutPullParser(new ByteArrayInputStream(
+                contents.getBytes(Charset.forName("UTF-8"))));
+    }
+
+    private LayoutPullParser(@NonNull InputStream inputStream) {
         try {
-            init(getClass().getClassLoader().getResourceAsStream(layoutPath));
+            setFeature(FEATURE_PROCESS_NAMESPACES, true);
+            setInput(inputStream, null);
         } catch (XmlPullParserException e) {
             throw new IOError(e);
         }
-    }
-
-    /**
-     * @param layoutFile Path of the layout xml file on disk.
-     */
-    public LayoutPullParser(File layoutFile) {
-        try {
-            init(new FileInputStream(layoutFile));
-        } catch (XmlPullParserException | FileNotFoundException e) {
-            throw new IOError(e);
-        }
-    }
-
-    private void init(InputStream stream) throws XmlPullParserException {
-        setFeature(FEATURE_PROCESS_NAMESPACES, true);
-        setInput(stream, null);
     }
 
     @Override
