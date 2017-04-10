@@ -248,7 +248,8 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static Bitmap nativeCreate(int[] colors, int offset, int stride, int width,
-            int height, int nativeConfig, boolean isMutable) {
+            int height, int nativeConfig, boolean isMutable, @Nullable float[] xyzD50,
+            @Nullable ColorSpace.Rgb.TransferParameters p) {
         int imageType = getBufferedImageType();
 
         // create the image
@@ -662,6 +663,12 @@ public final class Bitmap_Delegate {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
                 "Color spaces are not supported", null /*data*/);
         return false;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nativeCopyColorSpace(long srcBitmap, long dstBitmap) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Color spaces are not supported", null /*data*/);
     }
 
     // ---- Private delegate/helper methods ----
