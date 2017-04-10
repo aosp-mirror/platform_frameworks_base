@@ -808,33 +808,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mDefaultFocus != null || super.hasDefaultFocus();
     }
 
-    void setFocusInCluster(View child) {
-        // Stop at the root of the cluster
-        if (child.isKeyboardNavigationCluster()) {
-            return;
-        }
-
+    void setFocusedInCluster(View child) {
         mFocusedInCluster = child;
-
-        if (mParent instanceof ViewGroup) {
-            ((ViewGroup) mParent).setFocusInCluster(this);
-        }
     }
 
-    void clearFocusInCluster(View child) {
+    /**
+     * Removes {@code child} (and associated focusedInCluster chain) from the cluster containing
+     * it.
+     * <br>
+     * This is intended to be run on {@code child}'s immediate parent. This is necessary because
+     * the chain is sometimes cleared after {@code child} has been detached.
+     */
+    void clearFocusedInCluster(View child) {
         if (mFocusedInCluster != child) {
             return;
         }
-
-        if (child.isKeyboardNavigationCluster()) {
-            return;
-        }
-
-        mFocusedInCluster = null;
-
-        if (mParent instanceof ViewGroup) {
-            ((ViewGroup) mParent).clearFocusInCluster(this);
-        }
+        View top = findKeyboardNavigationCluster();
+        ViewParent parent = this;
+        do {
+            ((ViewGroup) parent).mFocusedInCluster = null;
+            parent = parent.getParent();
+        } while (parent != top && parent instanceof ViewGroup);
     }
 
     @Override
@@ -1282,7 +1276,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void setTouchscreenBlocksFocus(boolean touchscreenBlocksFocus) {
         if (touchscreenBlocksFocus) {
             mGroupFlags |= FLAG_TOUCHSCREEN_BLOCKS_FOCUS;
-            if (hasFocus()) {
+            if (hasFocus() && !isKeyboardNavigationCluster()) {
                 final View focusedChild = getDeepestFocusedChild();
                 if (!focusedChild.isFocusableInTouchMode()) {
                     final View newFocus = focusSearch(FOCUS_FORWARD);
@@ -1317,7 +1311,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // cluster, focus is free to move around within it.
         return getTouchscreenBlocksFocus() &&
                 mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
-                && (!hasFocus() || !isKeyboardNavigationCluster());
+                && !(isKeyboardNavigationCluster()
+                        && (hasFocus() || (findKeyboardNavigationCluster() != this)));
     }
 
     @Override
@@ -3218,8 +3213,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private boolean restoreFocusInClusterInternal(@FocusRealDirection int direction) {
-        if (mFocusedInCluster != null && !mFocusedInCluster.isKeyboardNavigationCluster()
-                && getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS
+        if (mFocusedInCluster != null && getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS
                 && (mFocusedInCluster.mViewFlags & VISIBILITY_MASK) == VISIBLE
                 && mFocusedInCluster.restoreFocusInCluster(direction)) {
             return true;
@@ -5183,7 +5177,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             clearChildFocus = true;
         }
         if (view == mFocusedInCluster) {
-            clearFocusInCluster(view);
+            clearFocusedInCluster(view);
         }
 
         view.clearAccessibilityFocus();
@@ -5303,7 +5297,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 clearDefaultFocus = view;
             }
             if (view == mFocusedInCluster) {
-                clearFocusInCluster(view);
+                clearFocusedInCluster(view);
             }
 
             view.clearAccessibilityFocus();
@@ -5459,7 +5453,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             clearDefaultFocus(child);
         }
         if (child == mFocusedInCluster) {
-            clearFocusInCluster(child);
+            clearFocusedInCluster(child);
         }
 
         child.clearAccessibilityFocus();
