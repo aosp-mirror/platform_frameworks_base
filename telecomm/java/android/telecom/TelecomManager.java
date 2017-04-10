@@ -755,6 +755,32 @@ public class TelecomManager {
     }
 
     /**
+     * Returns a list of {@link PhoneAccountHandle}s for self-managed {@link ConnectionService}s.
+     * <p>
+     * Self-Managed {@link ConnectionService}s have a {@link PhoneAccount} with
+     * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
+     * <p>
+     * Requires permission {@link android.Manifest.permission#READ_PHONE_STATE}, or that the caller
+     * is the default dialer app.
+     * <p>
+     * A {@link SecurityException} will be thrown if a called is not the default dialer, or lacks
+     * the {@link android.Manifest.permission#READ_PHONE_STATE} permission.
+     *
+     * @return A list of {@code PhoneAccountHandle} objects.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getSelfManagedPhoneAccounts(mContext.getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#getSelfManagedPhoneAccounts()", e);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
      * Returns a list of {@link PhoneAccountHandle}s including those which have not been enabled
      * by the user.
      *
