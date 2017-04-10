@@ -60,7 +60,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     @Override
-    public void addCallback(@NonNull Callback callback) {
+    public synchronized void addCallback(@NonNull Callback callback) {
         Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
         mCallbacks.add(callback);
         if (mCallbacks.size() != 0 && !mListening) {
@@ -70,7 +70,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     @Override
-    public void removeCallback(@NonNull Callback callback) {
+    public synchronized void removeCallback(@NonNull Callback callback) {
         Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
         if (mCallbacks.remove(callback) && mCallbacks.size() == 0 && mListening) {
             mListening = false;
@@ -110,7 +110,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         return mKeyguardUpdateMonitor.isDeviceInteractive();
     }
 
-    private void notifyKeyguardChanged() {
+    private synchronized void notifyKeyguardChanged() {
         // Copy the list to allow removal during callback.
         new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
     }
