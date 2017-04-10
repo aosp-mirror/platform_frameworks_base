@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-final class PbapClientProfile implements LocalBluetoothProfile {
+public final class PbapClientProfile implements LocalBluetoothProfile {
     private static final String TAG = "PbapClientProfile";
     private static boolean V = false;
 
