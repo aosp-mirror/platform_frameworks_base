@@ -34,7 +34,7 @@ import android.os.Parcelable;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about communicating with USB hardware, read the
- * <a href="{@docRoot}guide/topics/usb/index.html">USB</a> developer guide.</p>
+ * <a href="{@docRoot}guide/topics/connectivity/usb/index.html">USB</a> developer guide.</p>
  * </div>
  */
 public class UsbDevice implements Parcelable {
