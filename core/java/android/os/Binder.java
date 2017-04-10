@@ -16,9 +16,15 @@
 
 package android.os;
 
+import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
+
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FunctionalUtils;
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
+
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
@@ -26,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
-import java.util.function.Supplier;
 
 /**
  * Base class for a remotable object, the core part of a lightweight
@@ -251,14 +256,23 @@ public class Binder implements IBinder {
      * Convenience method for running the provided action enclosed in
      * {@link #clearCallingIdentity}/{@link #restoreCallingIdentity}
      *
+     * Any exception thrown by the given action will be caught and rethrown after the call to
+     * {@link #restoreCallingIdentity}
+     *
      * @hide
      */
-    public static final void withCleanCallingIdentity(Runnable action) {
+    public static final void withCleanCallingIdentity(ThrowingRunnable action) {
         long callingIdentity = clearCallingIdentity();
+        Throwable throwableToPropagate = null;
         try {
             action.run();
+        } catch (Throwable throwable) {
+            throwableToPropagate = throwable;
         } finally {
             restoreCallingIdentity(callingIdentity);
+            if (throwableToPropagate != null) {
+                throw ExceptionUtils.propagate(throwableToPropagate);
+            }
         }
     }
 
@@ -266,14 +280,24 @@ public class Binder implements IBinder {
      * Convenience method for running the provided action enclosed in
      * {@link #clearCallingIdentity}/{@link #restoreCallingIdentity} returning the result
      *
+     * Any exception thrown by the given action will be caught and rethrown after the call to
+     * {@link #restoreCallingIdentity}
+     *
      * @hide
      */
-    public static final <T> T withCleanCallingIdentity(Supplier<T> action) {
+    public static final <T> T withCleanCallingIdentity(ThrowingSupplier<T> action) {
         long callingIdentity = clearCallingIdentity();
+        Throwable throwableToPropagate = null;
         try {
             return action.get();
+        } catch (Throwable throwable) {
+            throwableToPropagate = throwable;
+            return null; // overridden by throwing in finally block
         } finally {
             restoreCallingIdentity(callingIdentity);
+            if (throwableToPropagate != null) {
+                throw ExceptionUtils.propagate(throwableToPropagate);
+            }
         }
     }
 

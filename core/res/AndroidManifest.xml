@@ -3556,6 +3556,11 @@
                 android:process=":ui">
         </activity>
 
+        <activity android:name="com.android.settings.notification.NotificationAccessConfirmationActivity"
+                  android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.Alert"
+                  android:excludeFromRecents="true">
+        </activity>
+
         <receiver android:name="com.android.server.BootReceiver"
                 android:systemUserOnly="true">
             <intent-filter android:priority="1000">

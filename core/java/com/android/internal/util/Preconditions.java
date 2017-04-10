@@ -49,6 +49,23 @@ public class Preconditions {
     }
 
     /**
+     * Ensures that an expression checking an argument is true.
+     *
+     * @param expression the expression to check
+     * @param messageTemplate a printf-style message template to use if the check fails; will
+     *     be converted to a string using {@link String#format(String, Object...)}
+     * @param messageArgs arguments for {@code messageTemplate}
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(boolean expression,
+            final String messageTemplate,
+            final Object... messageArgs) {
+        if (!expression) {
+            throw new IllegalArgumentException(String.format(messageTemplate, messageArgs));
+        }
+    }
+
+    /**
      * Ensures that an string reference passed as a parameter to the calling
      * method is not empty.
      *

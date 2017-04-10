@@ -22,11 +22,13 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
 import java.util.Collections;
@@ -195,22 +197,47 @@ public final class CompanionDeviceManager {
         }
     }
 
-    /** @hide */
-    public void requestNotificationAccess() {
+    /**
+     * Request notification access for the given component.
+     *
+     * The given component must follow the protocol specified in {@link NotificationListenerService}
+     *
+     * Only components from the same {@link ComponentName#getPackageName package} as the calling app
+     * are allowed.
+     *
+     * Your app must have an association with a device before calling this API
+     */
+    public void requestNotificationAccess(ComponentName component) {
         if (!checkFeaturePresent()) {
             return;
         }
-        //TODO implement
-        throw new UnsupportedOperationException("Not yet implemented");
+        try {
+            mService.requestNotificationAccess(component).send();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (PendingIntent.CanceledException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    /** @hide */
-    public boolean haveNotificationAccess() {
+    /**
+     * Check whether the given component can access the notifications via a
+     * {@link NotificationListenerService}
+     *
+     * Your app must have an association with a device before calling this API
+     *
+     * @param component the name of the component
+     * @return whether the given component has the notification listener permission
+     */
+    public boolean hasNotificationAccess(ComponentName component) {
         if (!checkFeaturePresent()) {
             return false;
         }
-        //TODO implement
-        throw new UnsupportedOperationException("Not yet implemented");
+        try {
+            return mService.hasNotificationAccess(component);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private boolean checkFeaturePresent() {

@@ -67,10 +67,15 @@ public abstract class AlertActivity extends Activity implements DialogInterface 
 
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        event.setClassName(Dialog.class.getName());
-        event.setPackageName(getPackageName());
+        return dispatchPopulateAccessibilityEvent(this, event);
+    }
 
-        ViewGroup.LayoutParams params = getWindow().getAttributes();
+    public static boolean dispatchPopulateAccessibilityEvent(Activity act,
+            AccessibilityEvent event) {
+        event.setClassName(Dialog.class.getName());
+        event.setPackageName(act.getPackageName());
+
+        ViewGroup.LayoutParams params = act.getWindow().getAttributes();
         boolean isFullScreen = (params.width == ViewGroup.LayoutParams.MATCH_PARENT) &&
                 (params.height == ViewGroup.LayoutParams.MATCH_PARENT);
         event.setFullScreen(isFullScreen);
@@ -86,8 +91,7 @@ public abstract class AlertActivity extends Activity implements DialogInterface 
      * @see #mAlertParams
      */
     protected void setupAlert() {
-        mAlertParams.apply(mAlert);
-        mAlert.installContent();
+        mAlert.installContent(mAlertParams);
     }
 
     @Override

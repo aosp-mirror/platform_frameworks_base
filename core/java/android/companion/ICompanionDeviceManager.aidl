@@ -16,8 +16,10 @@
 
 package android.companion;
 
+import android.app.PendingIntent;
 import android.companion.IFindDeviceCallback;
 import android.companion.AssociationRequest;
+import android.content.ComponentName;
 
 /**
  * Interface for communication with the core companion device manager service.
@@ -32,7 +34,6 @@ interface ICompanionDeviceManager {
     List<String> getAssociations(String callingPackage, int userId);
     void disassociate(String deviceMacAddress, String callingPackage);
 
-    //TODO add these
-//    boolean haveNotificationAccess(String packageName);
-//    oneway void requestNotificationAccess(String packageName);
+    boolean hasNotificationAccess(in ComponentName component);
+    PendingIntent requestNotificationAccess(in ComponentName component);
 }
