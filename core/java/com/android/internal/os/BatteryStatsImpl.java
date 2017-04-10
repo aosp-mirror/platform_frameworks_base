@@ -2071,15 +2071,16 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public boolean reset(boolean detachIfReset) {
             boolean active = false;
+            // Do not detach the subTimer explicitly since that'll be done by DualTimer.detach().
+            active |= !mSubTimer.reset(false);
             active |= !super.reset(detachIfReset);
-            active |= !mSubTimer.reset(detachIfReset);
             return !active;
         }
 
         @Override
         public void detach() {
-            super.detach();
             mSubTimer.detach();
+            super.detach();
         }
 
         @Override
