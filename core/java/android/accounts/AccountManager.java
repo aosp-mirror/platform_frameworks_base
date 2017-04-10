@@ -364,11 +364,19 @@ public class AccountManager {
             "android.accounts.key_legacy_visible";
 
     /**
-     * Key to set visibility for applications targeting API level below
-     * {@link android.os.Build.VERSION_CODES#O} with
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission, or applications with any
-     * targeting API level with the same signature as authenticator. See
-     * {@link #getAccountVisibility}. If the value was not set by authenticator
+     * Key to set visibility for applications which satisfy one of the following conditions:
+     * <ul>
+     * <li>Target API level below {@link android.os.Build.VERSION_CODES#O} and have
+     * deprecated {@link android.Manifest.permission#GET_ACCOUNTS} permission.
+     * </li>
+     * <li> Have {@link android.Manifest.permission#GET_ACCOUNTS_PRIVILEGED} permission. </li>
+     * <li> Have the same signature as authenticator. </li>
+     * <li> Have {@link android.Manifest.permission#READ_CONTACTS} permission and
+     * account type may be associated with contacts data - (verified by
+     * {@link android.Manifest.permission#WRITE_CONTACTS} permission check for the authenticator).
+     * </li>
+     * </ul>
+     * See {@link #getAccountVisibility}. If the value was not set by authenticator
      * {@link #VISIBILITY_USER_MANAGED_VISIBLE} is used.
      */
     public static final String PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE =

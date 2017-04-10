@@ -652,20 +652,20 @@ public class AccountManagerService
             return visibility;
         }
 
-        boolean isPrivileged = isPermittedForPackage(packageName, accounts.userId,
+        boolean isPrivileged = isPermittedForPackage(packageName, uid, accounts.userId,
                 Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
 
         // Device/Profile owner gets visibility by default.
         if (isProfileOwner(uid)) {
             return AccountManager.VISIBILITY_VISIBLE;
         }
-        // Apps with READ_CONTACTS permission get visibility by default even post O.
-        boolean canReadContacts = checkReadContactsPermission(packageName, accounts.userId);
 
         boolean preO = isPreOApplication(packageName);
         if ((signatureCheckResult != SIGNATURE_CHECK_MISMATCH)
-                || (preO && checkGetAccountsPermission(packageName, accounts.userId))
-                || canReadContacts || isPrivileged) {
+                || (preO && checkGetAccountsPermission(packageName, uid, accounts.userId))
+                || (checkReadContactsPermission(packageName, uid, accounts.userId)
+                    && accountTypeManagesContacts(account.type, accounts.userId))
+                || isPrivileged) {
             // Use legacy for preO apps with GET_ACCOUNTS permission or pre/postO with signature
             // match.
             visibility = getAccountVisibilityFromCache(account,
@@ -5022,14 +5022,20 @@ public class AccountManagerService
         }
     }
 
-    private boolean isPermittedForPackage(String packageName, int userId, String... permissions) {
+    private boolean isPermittedForPackage(String packageName, int uid, int userId,
+            String... permissions) {
         final long identity = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = ActivityThread.getPackageManager();
             for (String perm : permissions) {
                 if (pm.checkPermission(perm, packageName, userId)
                         == PackageManager.PERMISSION_GRANTED) {
-                    return true;
+                    // Checks runtime permission revocation.
+                    final int opCode = AppOpsManager.permissionToOpCode(perm);
+                    if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOp(
+                            opCode, uid, packageName) == AppOpsManager.MODE_ALLOWED) {
+                        return true;
+                    }
                 }
             }
         } catch (RemoteException e) {
@@ -5145,13 +5151,37 @@ public class AccountManagerService
     // Method checks visibility for applications targeing API level below {@link
     // android.os.Build.VERSION_CODES#O},
     // returns true if the the app has GET_ACCOUNTS or GET_ACCOUNTS_PRIVILEGED permission.
-    private boolean checkGetAccountsPermission(String packageName, int userId) {
-        return isPermittedForPackage(packageName, userId, Manifest.permission.GET_ACCOUNTS,
+    private boolean checkGetAccountsPermission(String packageName, int uid, int userId) {
+        return isPermittedForPackage(packageName, uid, userId, Manifest.permission.GET_ACCOUNTS,
                 Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
     }
 
-    private boolean checkReadContactsPermission(String packageName, int userId) {
-        return isPermittedForPackage(packageName, userId, Manifest.permission.READ_CONTACTS);
+    private boolean checkReadContactsPermission(String packageName, int uid, int userId) {
+        return isPermittedForPackage(packageName, uid, userId, Manifest.permission.READ_CONTACTS);
+    }
+
+    // Heuristic to check that account type may be associated with some contacts data and
+    // therefore READ_CONTACTS permission grants the access to account by default.
+    private boolean accountTypeManagesContacts(String accountType, int userId) {
+        if (accountType == null) {
+            return false;
+        }
+        long identityToken = Binder.clearCallingIdentity();
+        Collection<RegisteredServicesCache.ServiceInfo<AuthenticatorDescription>> serviceInfos;
+        try {
+            serviceInfos = mAuthenticatorCache.getAllServices(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
+        // Check contacts related permissions for authenticator.
+        for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo
+                : serviceInfos) {
+            if (accountType.equals(serviceInfo.type.type)) {
+                return isPermittedForPackage(serviceInfo.type.packageName, serviceInfo.uid, userId,
+                    Manifest.permission.WRITE_CONTACTS);
+            }
+        }
+        return false;
     }
 
     /**
