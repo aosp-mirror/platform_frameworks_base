@@ -62,6 +62,15 @@ public class FontsContract {
     public static final class Columns implements BaseColumns {
         /**
          * Constant used to request data from a font provider. The cursor returned from the query
+         * may populate this column with a long for the font file ID. The client will request a file
+         * descriptor to "file/FILE_ID" with this ID immediately under the top-level content URI. If
+         * not present, the client will request a file descriptor to the top-level URI with the
+         * given base font ID. Note that several results may return the same file ID, e.g. for TTC
+         * files with different indices.
+         */
+        public static final String FILE_ID = "file_id";
+        /**
+         * Constant used to request data from a font provider. The cursor returned from the query
          * should have this column populated with an int for the ttc index for the resulting font.
          */
         public static final String TTC_INDEX = "font_ttc_index";
@@ -282,12 +291,16 @@ public class FontsContract {
     public void getFontFromProvider(FontRequest request, ResultReceiver receiver,
             String authority) {
         ArrayList<FontResult> result = null;
-        Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+        final Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority)
                 .build();
+        final Uri fileBaseUri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority)
+                .appendPath("file")
+                .build();
         try (Cursor cursor = mContext.getContentResolver().query(uri, new String[] { Columns._ID,
-                        Columns.TTC_INDEX, Columns.VARIATION_SETTINGS, Columns.STYLE,
-                        Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
+                        Columns.FILE_ID, Columns.TTC_INDEX, Columns.VARIATION_SETTINGS,
+                        Columns.STYLE, Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
                 "query = ?", new String[] { request.getQuery() }, null);) {
             // TODO: Should we restrict the amount of fonts that can be returned?
             // TODO: Write documentation explaining that all results should be from the same family.
@@ -296,6 +309,7 @@ public class FontsContract {
                 int resultCode = -1;
                 result = new ArrayList<>();
                 final int idColumnIndex = cursor.getColumnIndexOrThrow(Columns._ID);
+                final int fileIdColumnIndex = cursor.getColumnIndex(Columns.FILE_ID);
                 final int ttcIndexColumnIndex = cursor.getColumnIndex(Columns.TTC_INDEX);
                 final int vsColumnIndex = cursor.getColumnIndex(Columns.VARIATION_SETTINGS);
                 final int weightColumnIndex = cursor.getColumnIndex(Columns.WEIGHT);
@@ -319,8 +333,14 @@ public class FontsContract {
                         receiver.send(resultCode, null);
                         return;
                     }
-                    long id = cursor.getLong(idColumnIndex);
-                    Uri fileUri = ContentUris.withAppendedId(uri, id);
+                    Uri fileUri;
+                    if (fileIdColumnIndex == -1) {
+                        long id = cursor.getLong(idColumnIndex);
+                        fileUri = ContentUris.withAppendedId(uri, id);
+                    } else {
+                        long id = cursor.getLong(fileIdColumnIndex);
+                        fileUri = ContentUris.withAppendedId(fileBaseUri, id);
+                    }
                     try {
                         ParcelFileDescriptor pfd =
                                 mContext.getContentResolver().openFileDescriptor(fileUri, "r");
