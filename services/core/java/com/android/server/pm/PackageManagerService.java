@@ -13391,6 +13391,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageRemovedInfo info = new PackageRemovedInfo();
         info.removedPackage = packageName;
         info.removedUsers = new int[] {userId};
+        info.broadcastUsers = new int[] {userId};
         info.uid = UserHandle.getUid(userId, pkgSetting.appId);
         info.sendPackageRemovedBroadcasts(true /*killApp*/);
     }
@@ -18432,6 +18433,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             outInfo.isStaticSharedLib = pkg != null && pkg.staticSharedLibName != null;
             outInfo.removedAppId = ps.appId;
             outInfo.removedUsers = userIds;
+            outInfo.broadcastUsers = userIds;
         }
 
         return true;
