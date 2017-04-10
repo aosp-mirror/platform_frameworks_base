@@ -165,6 +165,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private boolean mGroupExpansionChanging;
 
+    /**
+     * Whether or not a notification that is not part of a group of notifications can be manually
+     * expanded by the user.
+     */
+    private boolean mEnableNonGroupedNotificationExpand;
+
+    /**
+     * Whether or not to update the background of the header of the notification when its expanded.
+     * If {@code true}, the header background will disappear when expanded.
+     */
+    private boolean mShowGroupBackgroundWhenExpanded;
+
     private OnClickListener mExpandClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -177,7 +189,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
                         nowExpanded);
                 onExpansionChanged(true /* userAction */, wasExpanded);
-            } else {
+            } else if (mEnableNonGroupedNotificationExpand) {
                 if (v.isAccessibilityFocused()) {
                     mPrivateLayout.setFocusOnVisibilityChange();
                 }
@@ -1141,7 +1153,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public interface ExpansionLogger {
-        public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
+        void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
@@ -1164,11 +1176,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
         mMaxHeadsUpHeightIncreased = getFontScaledHeight(
                 R.dimen.notification_max_heads_up_height_increased);
+
         Resources res = getResources();
         mIncreasedPaddingBetweenElements = res.getDimensionPixelSize(
                 R.dimen.notification_divider_height_increased);
         mIconTransformContentShiftNoIcon = res.getDimensionPixelSize(
                 R.dimen.notification_icon_transform_content_shift);
+        mEnableNonGroupedNotificationExpand =
+                res.getBoolean(R.bool.config_enableNonGroupedNotificationExpand);
+        mShowGroupBackgroundWhenExpanded =
+                res.getBoolean(R.bool.config_showGroupNotificationBgWhenExpanded);
     }
 
     /**
@@ -1384,7 +1401,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mIsSummaryWithChildren && !mShowingPublic) {
             return !mChildrenExpanded;
         }
-        return mExpandable;
+        return mEnableNonGroupedNotificationExpand && mExpandable;
     }
 
     public void setExpandable(boolean expandable) {
@@ -1974,7 +1991,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void updateBackgroundForGroupState() {
         if (mIsSummaryWithChildren) {
             // Only when the group has finished expanding do we hide its background.
-            mShowNoBackground = isGroupExpanded() && !isGroupExpansionChanging() && !isUserLocked();
+            mShowNoBackground = !mShowGroupBackgroundWhenExpanded && isGroupExpanded()
+                    && !isGroupExpansionChanging() && !isUserLocked();
             mChildrenContainer.updateHeaderForExpansion(mShowNoBackground);
             List<ExpandableNotificationRow> children = mChildrenContainer.getNotificationChildren();
             for (int i = 0; i < children.size(); i++) {
@@ -1983,10 +2001,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else if (isChildInGroup()) {
             final int childColor = getShowingLayout().getBackgroundColorForExpansionState();
             // Only show a background if the group is expanded OR if it is expanding / collapsing
-            // and has a custom background color
+            // and has a custom background color.
             final boolean showBackground = isGroupExpanded()
                     || ((mNotificationParent.isGroupExpansionChanging()
-                            || mNotificationParent.isUserLocked()) && childColor != 0);
+                    || mNotificationParent.isUserLocked()) && childColor != 0);
             mShowNoBackground = !showBackground;
         } else {
             // Only children or parents ever need no background.

@@ -369,4 +369,30 @@
          has rounded corners, then the contents will be clipped to those corners. -->
     <bool name="config_clipNotificationsToOutline">false</bool>
 
+    <!-- Whether or not notifications that can be expanded will always be in their expanded state.
+         This value only affects notifications that are not a group of notifications from the same
+         applications. If this value is false, then only the first notification will be expanded;
+         the other notifications need to be manually expanded by the user. -->
+    <bool name="config_alwaysExpandNonGroupedNotifications">false</bool>
+
+    <!-- Whether or not an expandable notification can be manually expanded or collapsed by the
+         user. Grouped notifications are still expandable even if this value is false. -->
+    <bool name="config_enableNonGroupedNotificationExpand">true</bool>
+
+    <!-- Whether or not there should be dividing lines between child notifications when the
+         group has been expanded. -->
+    <bool name="config_showDividersWhenGroupNotificationExpanded">false</bool>
+
+    <!-- Whether or not the dividing lines should be shown when the container is expanding and
+         collapsing. If this value is true, then the lines will only show when the container has
+         been completely expanded. -->
+    <bool name="config_hideDividersDuringExpand">false</bool>
+
+    <!-- Whether or not child notifications that are part of a group will have shadows. -->
+    <bool name="config_enableShadowOnChildNotifications">true</bool>
+
+    <!-- Whether or not a view containing child notifications will have a custom background when
+         it has been expanded to reveal its children. -->
+    <bool name="config_showGroupNotificationBgWhenExpanded">false</bool>
+
 </resources>

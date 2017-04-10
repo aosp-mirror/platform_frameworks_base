@@ -427,6 +427,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     View mExpandedContents;
     TextView mNotificationPanelDebugText;
 
+    /**
+     * {@code true} if notifications not part of a group should by default be rendered in their
+     * expanded state. If {@code false}, then only the first notification will be expanded if
+     * possible.
+     */
+    private boolean mAlwaysExpandNonGroupedNotification;
+
     // settings
     private QSPanel mQSPanel;
 
@@ -767,6 +774,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         Resources res = mContext.getResources();
         mScrimSrcModeEnabled = res.getBoolean(R.bool.config_status_bar_scrim_behind_use_src);
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
+        mAlwaysExpandNonGroupedNotification =
+                res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
 
         DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
         putComponent(StatusBar.class, this);
@@ -851,7 +860,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Set up the initial icon state
         int N = iconSlots.size();
-        int viewIndex = 0;
         for (int i=0; i < N; i++) {
             mCommandQueue.setIcon(iconSlots.get(i), icons.get(i));
         }
@@ -6682,13 +6690,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         while(!stack.isEmpty()) {
             ExpandableNotificationRow row = stack.pop();
             NotificationData.Entry entry = row.getEntry();
-            boolean childNotification = mGroupManager.isChildInGroupWithSummary(entry.notification);
-            if (onKeyguard) {
-                row.setOnKeyguard(true);
-            } else {
-                row.setOnKeyguard(false);
-                row.setSystemExpanded(visibleNotifications == 0 && !childNotification);
+            boolean isChildNotification =
+                    mGroupManager.isChildInGroupWithSummary(entry.notification);
+
+            row.setOnKeyguard(onKeyguard);
+
+            if (!onKeyguard) {
+                // If mAlwaysExpandNonGroupedNotification is false, then only expand the
+                // very first notification and if it's not a child of grouped notifications.
+                row.setSystemExpanded(mAlwaysExpandNonGroupedNotification
+                        || (visibleNotifications == 0 && !isChildNotification));
             }
+
             entry.row.setShowAmbient(isDozing());
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
@@ -6703,7 +6716,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (wasGone) {
                     entry.row.setVisibility(View.VISIBLE);
                 }
-                if (!childNotification && !entry.row.isRemoved()) {
+                if (!isChildNotification && !entry.row.isRemoved()) {
                     if (wasGone) {
                         // notify the scroller of a child addition
                         mStackScroller.generateAddAnimation(entry.row,
