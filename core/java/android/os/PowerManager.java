@@ -16,10 +16,13 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.util.Log;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class gives you control of the power state of the device.
@@ -431,6 +434,49 @@ public final class PowerManager {
      * @hide
      */
     public static final String SHUTDOWN_USER_REQUESTED = "userrequested";
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            SHUTDOWN_REASON_UNKNOWN,
+            SHUTDOWN_REASON_SHUTDOWN,
+            SHUTDOWN_REASON_REBOOT,
+            SHUTDOWN_REASON_USER_REQUESTED,
+            SHUTDOWN_REASON_THERMAL_SHUTDOWN
+    })
+    public @interface ShutdownReason {}
+
+    /**
+     * constant for shutdown reason being unknown.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_UNKNOWN = 0;
+
+    /**
+     * constant for shutdown reason being normal shutdown.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_SHUTDOWN = 1;
+
+    /**
+     * constant for shutdown reason being reboot.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_REBOOT = 2;
+
+    /**
+     * constant for shutdown reason being user requested.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_USER_REQUESTED = 3;
+
+    /**
+     * constant for shutdown reason being overheating.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_THERMAL_SHUTDOWN = 4;
 
     final Context mContext;
     final IPowerManager mService;
@@ -1082,6 +1128,22 @@ public final class PowerManager {
     public boolean isSustainedPerformanceModeSupported() {
         return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sustainedPerformanceModeSupported);
+    }
+
+    /**
+     * Returns the reason the phone was last shutdown. Calling app must have the
+     * {@link android.Manifest.permission#DEVICE_POWER} permission to request this information.
+     * @return Reason for shutdown as an int, {@link #SHUTDOWN_REASON_UNKNOWN} if the file could
+     * not be accessed.
+     * @hide
+     */
+    @ShutdownReason
+    public int getLastShutdownReason() {
+        try {
+            return mService.getLastShutdownReason();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
