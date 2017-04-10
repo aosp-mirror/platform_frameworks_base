@@ -3582,7 +3582,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             finishActivityResultsLocked(r, resultCode, resultData);
 
-            final boolean endTask = index <= 0;
+            final boolean endTask = index <= 0 && !task.isClearingToReuseTask();
             final int transit = endTask ? TRANSIT_TASK_CLOSE : TRANSIT_ACTIVITY_CLOSE;
             if (mResumedActivity == r) {
                 if (DEBUG_VISIBILITY || DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
