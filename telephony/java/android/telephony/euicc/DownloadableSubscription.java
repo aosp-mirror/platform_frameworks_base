@@ -18,6 +18,7 @@ package android.telephony.euicc;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.UiccAccessRule;
 
 import com.android.internal.util.Preconditions;
 
@@ -57,6 +58,8 @@ public final class DownloadableSubscription implements Parcelable {
     private String carrierName;
     // see isConsentGranted and setConsentGranted
     private boolean consentGranted;
+    // see getAccessRules and setAccessRules
+    private UiccAccessRule[] accessRules;
 
     /** @hide */
     private DownloadableSubscription(String encodedActivationCode) {
@@ -67,6 +70,7 @@ public final class DownloadableSubscription implements Parcelable {
         encodedActivationCode = in.readString();
         carrierName = in.readString();
         consentGranted = in.readInt() == 1;
+        accessRules = in.createTypedArray(UiccAccessRule.CREATOR);
     }
 
     /**
@@ -103,7 +107,7 @@ public final class DownloadableSubscription implements Parcelable {
      */
     @Nullable
     public String getCarrierName() {
-        return this.carrierName;
+        return carrierName;
     }
 
 
@@ -112,7 +116,7 @@ public final class DownloadableSubscription implements Parcelable {
      * @hide
      */
     public void setConsentGranted() {
-        this.consentGranted = true;
+        consentGranted = true;
     }
 
     /**
@@ -125,7 +129,31 @@ public final class DownloadableSubscription implements Parcelable {
      * TODO(b/35851809): Make this a SystemApi.
      */
     public boolean isConsentGranted() {
-        return this.consentGranted;
+        return consentGranted;
+    }
+
+    /**
+     * Returns the {@link UiccAccessRule}s dictating access to this subscription.
+     *
+     * <p>Only present for downloadable subscriptions that were queried from a server (as opposed to
+     * those created with {@link #forActivationCode}). May be populated with
+     * {@link EuiccManager#getDownloadableSubscriptionMetadata}.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    public UiccAccessRule[] getAccessRules() {
+        return accessRules;
+    }
+
+    /**
+     * Set the {@link UiccAccessRule}s dictating access to this subscription.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    public void setAccessRules(UiccAccessRule[] accessRules) {
+        this.accessRules = accessRules;
     }
 
     /**
@@ -144,6 +172,7 @@ public final class DownloadableSubscription implements Parcelable {
         dest.writeString(encodedActivationCode);
         dest.writeString(carrierName);
         dest.writeInt(consentGranted ? 1 : 0);
+        dest.writeTypedArray(accessRules, flags);
     }
 
     @Override
