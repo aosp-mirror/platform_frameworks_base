@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -29,10 +30,14 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.R;
 
 import static android.provider.Settings.Global.NETWORK_AVOID_BAD_WIFI;
+import static android.provider.Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE;
 
 /**
  * A class to encapsulate management of the "Smart Networking" capability of
@@ -57,12 +62,13 @@ public class MultinetworkPolicyTracker {
     private final Context mContext;
     private final Handler mHandler;
     private final Runnable mReevaluateRunnable;
-    private final Uri mAvoidBadWifiUri;
+    private final List<Uri> mSettingsUris;
     private final ContentResolver mResolver;
     private final SettingObserver mSettingObserver;
     private final BroadcastReceiver mBroadcastReceiver;
 
     private volatile boolean mAvoidBadWifi = true;
+    private volatile int mMeteredMultipathPreference;
 
     public MultinetworkPolicyTracker(Context ctx, Handler handler) {
         this(ctx, handler, null);
@@ -72,9 +78,14 @@ public class MultinetworkPolicyTracker {
         mContext = ctx;
         mHandler = handler;
         mReevaluateRunnable = () -> {
-            if (updateAvoidBadWifi() && avoidBadWifiCallback != null) avoidBadWifiCallback.run();
+            if (updateAvoidBadWifi() && avoidBadWifiCallback != null) {
+                avoidBadWifiCallback.run();
+            }
+            updateMeteredMultipathPreference();
         };
-        mAvoidBadWifiUri = Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI);
+        mSettingsUris = Arrays.asList(
+            Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI),
+            Settings.Global.getUriFor(NETWORK_METERED_MULTIPATH_PREFERENCE));
         mResolver = mContext.getContentResolver();
         mSettingObserver = new SettingObserver();
         mBroadcastReceiver = new BroadcastReceiver() {
@@ -85,10 +96,13 @@ public class MultinetworkPolicyTracker {
         };
 
         updateAvoidBadWifi();
+        updateMeteredMultipathPreference();
     }
 
     public void start() {
-        mResolver.registerContentObserver(mAvoidBadWifiUri, false, mSettingObserver);
+        for (Uri uri : mSettingsUris) {
+            mResolver.registerContentObserver(uri, false, mSettingObserver);
+        }
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -106,6 +120,10 @@ public class MultinetworkPolicyTracker {
 
     public boolean getAvoidBadWifi() {
         return mAvoidBadWifi;
+    }
+
+    public int getMeteredMultipathPreference() {
+        return mMeteredMultipathPreference;
     }
 
     /**
@@ -138,6 +156,23 @@ public class MultinetworkPolicyTracker {
         return mAvoidBadWifi != prev;
     }
 
+    /**
+     * The default (device and carrier-dependent) value for metered multipath preference.
+     */
+    public int configMeteredMultipathPreference() {
+        return mContext.getResources().getInteger(
+                R.integer.config_networkMeteredMultipathPreference);
+    }
+
+    public void updateMeteredMultipathPreference() {
+        String setting = Settings.Global.getString(mResolver, NETWORK_METERED_MULTIPATH_PREFERENCE);
+        try {
+            mMeteredMultipathPreference = Integer.parseInt(setting);
+        } catch (NumberFormatException e) {
+            mMeteredMultipathPreference = configMeteredMultipathPreference();
+        }
+    }
+
     private class SettingObserver extends ContentObserver {
         public SettingObserver() {
             super(null);
@@ -150,7 +185,9 @@ public class MultinetworkPolicyTracker {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (!mAvoidBadWifiUri.equals(uri)) return;
+            if (!mSettingsUris.contains(uri)) {
+                Slog.wtf(TAG, "Unexpected settings observation: " + uri);
+            }
             reevaluate();
         }
     }

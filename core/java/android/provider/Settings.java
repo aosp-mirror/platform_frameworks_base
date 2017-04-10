@@ -7582,6 +7582,16 @@ public final class Settings {
        public static final String NETWORK_AVOID_BAD_WIFI = "network_avoid_bad_wifi";
 
        /**
+        * User setting for ConnectivityManager.getMeteredMultipathPreference(). This value may be
+        * overridden by the system based on device or application state. If null, the value
+        * specified by config_networkMeteredMultipathPreference is used.
+        *
+        * @hide
+        */
+       public static final String NETWORK_METERED_MULTIPATH_PREFERENCE =
+               "network_metered_multipath_preference";
+
+       /**
         * Whether Wifi display is enabled/disabled
         * 0=disabled. 1=enabled.
         * @hide
