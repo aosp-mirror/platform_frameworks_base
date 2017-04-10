@@ -1313,7 +1313,7 @@ public class Vpn {
         try {
             final NotificationManager notificationManager = NotificationManager.from(mContext);
             if (!visible) {
-                notificationManager.cancelAsUser(TAG, 0, user);
+                notificationManager.cancelAsUser(TAG, SystemMessage.NOTE_VPN_DISCONNECTED, user);
                 return;
             }
             final Intent intent = new Intent(Settings.ACTION_VPN_SETTINGS);
