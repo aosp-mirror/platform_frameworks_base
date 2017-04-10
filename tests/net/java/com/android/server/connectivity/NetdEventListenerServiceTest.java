@@ -212,8 +212,6 @@ public class NetdEventListenerServiceTest extends TestCase {
 
         IpConnectivityEvent got = events.get(0);
         String want = joinLines(
-                "time_ms: 0",
-                "transport: 0",
                 "connect_statistics <",
                 "  connect_count: 12",
                 "  errnos_counters <",
@@ -247,7 +245,10 @@ public class NetdEventListenerServiceTest extends TestCase {
                 "  latencies_ms: 67",
                 "  latencies_ms: 110",
                 "  latencies_ms: 214",
-                "  latencies_ms: 523");
+                "  latencies_ms: 523",
+                ">",
+                "time_ms: 0",
+                "transport: 0");
         verifyConnectEvent(want, got);
     }
 
