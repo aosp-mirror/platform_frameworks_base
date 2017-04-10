@@ -628,8 +628,14 @@ public class TelephonyManager {
      * @see #EXTRA_DATA_IFACE
      * @see #EXTRA_DATA_FAILURE_CAUSE
      * @hide
+     *
+     * @deprecated If the app is running in the background, it won't be able to receive this
+     * broadcast. Apps should use ConnectivityManager {@link #registerNetworkCallback(
+     * android.net.NetworkRequest, ConnectivityManager.NetworkCallback)} to listen for network
+     * changes.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED =
             "android.intent.action.PRECISE_DATA_CONNECTION_STATE_CHANGED";
 
