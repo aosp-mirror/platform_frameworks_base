@@ -2857,12 +2857,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        moveActivityToPinnedStackLocked(r, null /* sourceBounds */, destBounds,
+        moveActivityToPinnedStackLocked(r, null /* sourceBounds */, 0f /* aspectRatio */,
                 true /* moveHomeStackToFront */, "moveTopActivityToPinnedStack");
         return true;
     }
 
-    void moveActivityToPinnedStackLocked(ActivityRecord r, Rect sourceBounds, Rect destBounds,
+    void moveActivityToPinnedStackLocked(ActivityRecord r, Rect sourceBounds, float aspectRatio,
             boolean moveHomeStackToFront, String reason) {
 
         mWindowManager.deferSurfaceLayout();
@@ -2931,6 +2931,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // with the visibility of the stack / windows.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
+
+        // Calculate the default bounds (don't use existing stack bounds as we may have just created
+        // the stack
+        final Rect destBounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
+                aspectRatio, false /* useExistingStackBounds */);
 
         // TODO(b/36099777): Schedule the PiP mode change here immediately until we can defer all
         // callbacks until after the bounds animation

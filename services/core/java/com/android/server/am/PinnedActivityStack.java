@@ -21,6 +21,7 @@ import android.graphics.Rect;
 
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.PinnedStackWindowController;
+import com.android.server.wm.PinnedStackWindowListener;
 import com.android.server.wm.StackWindowController;
 
 import java.util.ArrayList;
@@ -29,7 +30,8 @@ import java.util.List;
 /**
  * State and management of the pinned stack of activities.
  */
-class PinnedActivityStack extends ActivityStack<PinnedStackWindowController> {
+class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
+        implements PinnedStackWindowListener {
 
     PinnedActivityStack(ActivityContainer activityContainer,
             RecentTasks recentTasks, boolean onTop) {

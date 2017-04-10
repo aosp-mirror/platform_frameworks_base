@@ -7834,9 +7834,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                     final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                     final Rect sourceBounds = r.pictureInPictureArgs.getSourceRectHint();
-                    final Rect destBounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
-                            aspectRatio);
-                    mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, destBounds,
+                    mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, aspectRatio,
                             true /* moveHomeStackToFront */, "enterPictureInPictureMode");
                     final PinnedActivityStack stack = mStackSupervisor.getStack(PINNED_STACK_ID);
                     stack.setPictureInPictureAspectRatio(aspectRatio);

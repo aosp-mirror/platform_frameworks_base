@@ -32,8 +32,8 @@ public class PinnedStackWindowController extends StackWindowController {
 
     private Rect mTmpBoundsRect = new Rect();
 
-    public PinnedStackWindowController(int stackId, StackWindowListener listener, int displayId,
-            boolean onTop, Rect outBounds) {
+    public PinnedStackWindowController(int stackId, PinnedStackWindowListener listener,
+            int displayId, boolean onTop, Rect outBounds) {
         super(stackId, listener, displayId, onTop, outBounds, WindowManagerService.getInstance());
     }
 
@@ -84,7 +84,8 @@ public class PinnedStackWindowController extends StackWindowController {
             }
 
             final int displayId = mContainer.getDisplayContent().getDisplayId();
-            final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio);
+            final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio,
+                    true /* useExistingStackBounds */);
             final Rect targetBounds = new Rect();
             mContainer.getAnimatingBounds(targetBounds);
             final PinnedStackController pinnedStackController =
@@ -131,5 +132,17 @@ public class PinnedStackWindowController extends StackWindowController {
             bounds = new Rect(mTmpBoundsRect);
         }
         return bounds;
+    }
+
+    /**
+     * The following calls are made from WM to AM.
+     */
+
+    /** Calls directly into activity manager so window manager lock shouldn't held. */
+    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
+        if (mListener != null) {
+            PinnedStackWindowListener listener = (PinnedStackWindowListener) mListener;
+            listener.updatePictureInPictureModeForPinnedStackAnimation(targetStackBounds);
+        }
     }
 }

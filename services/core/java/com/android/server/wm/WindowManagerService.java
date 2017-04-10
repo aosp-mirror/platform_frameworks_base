@@ -2758,7 +2758,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mDockedStackCreateBounds = bounds;
     }
 
-    public Rect getPictureInPictureBounds(int displayId, float aspectRatio) {
+    /**
+     * @param useExistingStackBounds Apply {@param aspectRatio} to the existing target stack bounds
+     *                               if possible
+     */
+    public Rect getPictureInPictureBounds(int displayId, float aspectRatio,
+            boolean useExistingStackBounds) {
         synchronized (mWindowMap) {
             if (!mSupportsPictureInPicture) {
                 return null;
@@ -2773,7 +2778,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final PinnedStackController pinnedStackController =
                     displayContent.getPinnedStackController();
             final TaskStack stack = displayContent.getStackById(PINNED_STACK_ID);
-            if (stack != null) {
+            if (stack != null && useExistingStackBounds) {
                 // If the stack exists, then use its final bounds to calculate the new aspect ratio
                 // bounds.
                 stackBounds = new Rect();

@@ -1484,7 +1484,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     @Override  // AnimatesBounds
     public void updatePictureInPictureMode(Rect targetStackBounds) {
-        final StackWindowController controller = getController();
+        final PinnedStackWindowController controller =
+                (PinnedStackWindowController) getController();
         if (controller != null) {
             controller.updatePictureInPictureModeForPinnedStackAnimation(targetStackBounds);
         }
