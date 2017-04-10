@@ -167,7 +167,7 @@ public final class CompanionDeviceManager {
             return Collections.emptyList();
         }
         try {
-            return mService.getAssociations(mContext.getPackageName());
+            return mService.getAssociations(mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
