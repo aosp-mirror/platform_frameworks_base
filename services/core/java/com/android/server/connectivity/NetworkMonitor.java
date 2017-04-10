@@ -259,6 +259,12 @@ public class NetworkMonitor extends StateMachine {
     // This variable is set before transitioning to the mCaptivePortalState.
     private CaptivePortalProbeResult mLastPortalProbeResult = CaptivePortalProbeResult.FAILED;
 
+    // Configuration values for captive portal detection probes.
+    private final String mCaptivePortalUserAgent;
+    private final URL mCaptivePortalHttpsUrl;
+    private final URL mCaptivePortalHttpUrl;
+    private final URL mCaptivePortalFallbackUrl;
+
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
         this(context, handler, networkAgentInfo, defaultRequest, new IpConnectivityLog());
@@ -292,6 +298,11 @@ public class NetworkMonitor extends StateMachine {
                 != Settings.Global.CAPTIVE_PORTAL_MODE_IGNORE;
         mUseHttps = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
+
+        mCaptivePortalUserAgent = getCaptivePortalUserAgent(context);
+        mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl(context));
+        mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(context));
+        mCaptivePortalFallbackUrl = makeURL(getCaptivePortalFallbackUrl(context));
 
         start();
     }
@@ -676,7 +687,10 @@ public class NetworkMonitor extends StateMachine {
             return new CaptivePortalProbeResult(204);
         }
 
-        URL pacUrl = null, httpsUrl = null, httpUrl = null, fallbackUrl = null;
+        URL pacUrl = null;
+        URL httpsUrl = mCaptivePortalHttpsUrl;
+        URL httpUrl = mCaptivePortalHttpUrl;
+        URL fallbackUrl = mCaptivePortalFallbackUrl;
 
         // On networks with a PAC instead of fetching a URL that should result in a 204
         // response, we instead simply fetch the PAC script.  This is done for a few reasons:
@@ -703,13 +717,8 @@ public class NetworkMonitor extends StateMachine {
             }
         }
 
-        if (pacUrl == null) {
-            httpsUrl = makeURL(getCaptivePortalServerHttpsUrl(mContext));
-            httpUrl = makeURL(getCaptivePortalServerHttpUrl(mContext));
-            fallbackUrl = makeURL(getCaptivePortalFallbackUrl(mContext));
-            if (httpUrl == null || httpsUrl == null) {
-                return CaptivePortalProbeResult.FAILED;
-            }
+        if ((pacUrl == null) && (httpUrl == null || httpsUrl == null)) {
+            return CaptivePortalProbeResult.FAILED;
         }
 
         long startTime = SystemClock.elapsedRealtime();
@@ -789,9 +798,8 @@ public class NetworkMonitor extends StateMachine {
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setUseCaches(false);
-            final String userAgent = getCaptivePortalUserAgent(mContext);
-            if (userAgent != null) {
-                urlConnection.setRequestProperty("User-Agent", userAgent);
+            if (mCaptivePortalUserAgent != null) {
+                urlConnection.setRequestProperty("User-Agent", mCaptivePortalUserAgent);
             }
             // cannot read request header after connection
             String requestHeader = urlConnection.getRequestProperties().toString();
