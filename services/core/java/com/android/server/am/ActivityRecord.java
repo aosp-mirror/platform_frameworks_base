@@ -61,6 +61,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
+import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -2222,15 +2224,19 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     @Override
-    void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
-        super.onOverrideConfigurationChanged(overrideConfiguration);
-        if (mWindowContainerController != null) {
-            mWindowContainerController.onOverrideConfigurationChanged(
-                    overrideConfiguration, mBounds);
-            // TODO(b/36505427): Can we consolidate the call points of onOverrideConfigurationSent()
-            // to just use this method instead?
-            onOverrideConfigurationSent();
+    void onOverrideConfigurationChanged(Configuration newConfig) {
+        final Configuration currentConfig = getOverrideConfiguration();
+        if (currentConfig.equals(newConfig)) {
+            return;
         }
+        super.onOverrideConfigurationChanged(newConfig);
+        if (mWindowContainerController == null) {
+            return;
+        }
+        mWindowContainerController.onOverrideConfigurationChanged(newConfig, mBounds);
+        // TODO(b/36505427): Can we consolidate the call points of onOverrideConfigurationSent()
+        // to just use this method instead?
+        onOverrideConfigurationSent();
     }
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
@@ -2238,6 +2244,26 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         mTmpConfig.unset();
         computeBounds(mTmpBounds);
         if (mTmpBounds.equals(mBounds)) {
+            final ActivityStack stack = getStack();
+            if (!mBounds.isEmpty() || task == null || stack == null || !task.mFullscreen) {
+                // We don't want to influence the override configuration here if our task is in
+                // multi-window mode or there is a bounds specified to calculate the override
+                // config. In both of this cases the app should be compatible with whatever the
+                // current configuration is or will be.
+                return;
+            }
+
+            // Currently limited to the top activity for now to avoid situations where non-top
+            // visible activity and top might have conflicting requests putting the non-top activity
+            // windows in an odd state.
+            final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
+            final Configuration parentConfig = getParent().getConfiguration();
+            if (top != this || isConfigurationCompatible(parentConfig)) {
+                onOverrideConfigurationChanged(mTmpConfig);
+            } else if (isConfigurationCompatible(
+                    mLastReportedConfiguration.getMergedConfiguration())) {
+                onOverrideConfigurationChanged(mLastReportedConfiguration.getMergedConfiguration());
+            }
             return;
         }
 
@@ -2248,6 +2274,21 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     false /* overrideWidth */, false /* overrideHeight */);
         }
         onOverrideConfigurationChanged(mTmpConfig);
+    }
+
+    /** Returns true if the configuration is compatible with this activity. */
+    private boolean isConfigurationCompatible(Configuration config) {
+        final int orientation = mWindowContainerController != null
+                ? mWindowContainerController.getOrientation() : info.screenOrientation;
+        if (isFixedOrientationPortrait(orientation)
+                && config.orientation != ORIENTATION_PORTRAIT) {
+            return false;
+        }
+        if (isFixedOrientationLandscape(orientation)
+                && config.orientation != ORIENTATION_LANDSCAPE) {
+            return false;
+        }
+        return true;
     }
 
     /**

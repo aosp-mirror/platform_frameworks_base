@@ -985,10 +985,18 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     boolean isFixedOrientationLandscape() {
-        return screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_USER_LANDSCAPE;
+        return isFixedOrientationLandscape(screenOrientation);
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to landscape.
+     * @hide
+     */
+    public static boolean isFixedOrientationLandscape(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_USER_LANDSCAPE;
     }
 
     /**
@@ -996,10 +1004,18 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     boolean isFixedOrientationPortrait() {
-        return screenOrientation == SCREEN_ORIENTATION_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT;
+        return isFixedOrientationPortrait(screenOrientation);
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to portrait.
+     * @hide
+     */
+    public static boolean isFixedOrientationPortrait(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_USER_PORTRAIT;
     }
 
     /**
