@@ -423,7 +423,7 @@
     <string name="wifi_display_certification">Wireless display certification</string>
     <!-- Setting Checkbox title whether to enable WiFi Verbose Logging. [CHAR LIMIT=40] -->
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
-    <!-- Setting Checkbox title whether to enable WiFi Aggressive Handover. [CHAR LIMIT=40] -->
+    <!-- Setting Checkbox title whether to enable WiFi Aggressive Handover (more actively switch from wifi to mobile data). [CHAR LIMIT=40] -->
     <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to mobile handover</string>
     <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
     <string name="wifi_allow_scan_with_traffic">Always allow Wi\u2011Fi Roam Scans</string>
