@@ -1010,6 +1010,18 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
+     * check if in-band ringing is supported for this platform.
+     *
+     * @return true if in-band ringing is supported
+     *         false if in-band ringing is not supported
+     * @hide
+     */
+    public static boolean isInbandRingingSupported(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_bluetooth_hfp_inband_ringing_support);
+    }
+
+    /**
      * Send Headset the BIND response from AG to report change in the status of the
      * HF indicators to the headset
      *
