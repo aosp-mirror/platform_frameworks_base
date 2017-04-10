@@ -804,7 +804,7 @@
          <p>Protection level: dangerous-->
     <permission android:name="android.permission.READ_PHONE_NUMBERS"
         android:permissionGroup="android.permission-group.PHONE"
-        android:label="@string/permlab_readPhoneNumber"
+        android:label="@string/permlab_readPhoneNumbers"
         android:description="@string/permdesc_readPhoneNumbers"
         android:protectionLevel="dangerous|ephemeral" />
 
