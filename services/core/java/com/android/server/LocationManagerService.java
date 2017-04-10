@@ -146,6 +146,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     // The maximum interval a location request can have and still be considered "high power".
     private static final long HIGH_POWER_INTERVAL_MS = 5 * 60 * 1000;
 
+    private static final int FOREGROUND_IMPORTANCE_CUTOFF
+        = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
+
     // default background throttling interval if not overriden in settings
     private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 30 * 60 * 1000;
 
@@ -376,7 +379,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             };
             mActivityManager.addOnUidImportanceListener(uidImportanceListener,
-                    ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE);
+                    FOREGROUND_IMPORTANCE_CUTOFF);
 
             mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             updateUserProfiles(mCurrentUserId);
@@ -453,7 +456,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private static boolean isImportanceForeground(int importance) {
-        return importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
+        return importance <= FOREGROUND_IMPORTANCE_CUTOFF;
     }
 
     /**
