@@ -2775,9 +2775,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             throw new IllegalArgumentException("moveStackToDisplayLocked: Unknown stackId="
                     + stackId);
         }
-
-        ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
-                !PRESERVE_WINDOWS);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
