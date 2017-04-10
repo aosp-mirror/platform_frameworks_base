@@ -4125,6 +4125,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             INSTANT_APP_SETTINGS.add(TIME_12_24);
             INSTANT_APP_SETTINGS.add(SOUND_EFFECTS_ENABLED);
+            INSTANT_APP_SETTINGS.add(ACCELEROMETER_ROTATION);
         }
 
         /**
@@ -7093,6 +7094,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(ANDROID_ID);
 
             INSTANT_APP_SETTINGS.add(PACKAGE_VERIFIER_USER_CONSENT);
+            INSTANT_APP_SETTINGS.add(ALLOW_MOCK_LOCATION);
         }
 
         /**
@@ -10330,6 +10332,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(TRANSITION_ANIMATION_SCALE);
             INSTANT_APP_SETTINGS.add(ANIMATOR_DURATION_SCALE);
             INSTANT_APP_SETTINGS.add(DEBUG_VIEW_ATTRIBUTES);
+            INSTANT_APP_SETTINGS.add(WTF_IS_FATAL);
         }
 
         /**
