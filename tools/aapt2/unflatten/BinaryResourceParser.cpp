@@ -73,15 +73,16 @@ class ReferenceIdToNameVisitor : public ValueVisitor {
 
 }  // namespace
 
-BinaryResourceParser::BinaryResourceParser(IAaptContext* context,
-                                           ResourceTable* table,
-                                           const Source& source,
-                                           const void* data, size_t len)
+BinaryResourceParser::BinaryResourceParser(IAaptContext* context, ResourceTable* table,
+                                           const Source& source, const void* data, size_t len,
+                                           io::IFileCollection* files)
     : context_(context),
       table_(table),
       source_(source),
       data_(data),
-      data_len_(len) {}
+      data_len_(len),
+      files_(files) {
+}
 
 bool BinaryResourceParser::Parse() {
   ResChunkPullParser parser(data_, data_len_);
@@ -359,16 +360,14 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
 
     std::unique_ptr<Value> resource_value;
     if (entry->flags & ResTable_entry::FLAG_COMPLEX) {
-      const ResTable_map_entry* mapEntry =
-          static_cast<const ResTable_map_entry*>(entry);
+      const ResTable_map_entry* mapEntry = static_cast<const ResTable_map_entry*>(entry);
 
       // TODO(adamlesinski): Check that the entry count is valid.
       resource_value = ParseMapEntry(name, config, mapEntry);
     } else {
       const Res_value* value =
-          (const Res_value*)((const uint8_t*)entry +
-                             util::DeviceToHost32(entry->size));
-      resource_value = ParseValue(name, config, value, entry->flags);
+          (const Res_value*)((const uint8_t*)entry + util::DeviceToHost32(entry->size));
+      resource_value = ParseValue(name, config, *value);
     }
 
     if (!resource_value) {
@@ -388,8 +387,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       Symbol symbol;
       symbol.state = SymbolState::kPublic;
       symbol.source = source_.WithLine(0);
-      if (!table_->SetSymbolStateAllowMangled(name, res_id, symbol,
-                                              context_->GetDiagnostics())) {
+      if (!table_->SetSymbolStateAllowMangled(name, res_id, symbol, context_->GetDiagnostics())) {
         return false;
       }
     }
@@ -419,70 +417,25 @@ bool BinaryResourceParser::ParseLibrary(const ResChunk_header* chunk) {
   return true;
 }
 
-std::unique_ptr<Item> BinaryResourceParser::ParseValue(
-    const ResourceNameRef& name, const ConfigDescription& config,
-    const Res_value* value, uint16_t flags) {
-  if (name.type == ResourceType::kId) {
-    return util::make_unique<Id>();
-  }
-
-  const uint32_t data = util::DeviceToHost32(value->data);
-
-  if (value->dataType == Res_value::TYPE_STRING) {
-    const std::string str = util::GetString(value_pool_, data);
-
-    const ResStringPool_span* spans = value_pool_.styleAt(data);
-
-    // Check if the string has a valid style associated with it.
-    if (spans != nullptr && spans->name.index != ResStringPool_span::END) {
-      StyleString style_str = {str};
-      while (spans->name.index != ResStringPool_span::END) {
-        style_str.spans.push_back(
-            Span{util::GetString(value_pool_, spans->name.index),
-                 spans->firstChar, spans->lastChar});
-        spans++;
+std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& name,
+                                                       const ConfigDescription& config,
+                                                       const android::Res_value& value) {
+  std::unique_ptr<Item> item = ResourceUtils::ParseBinaryResValue(name.type, config, value_pool_,
+                                                                  value, &table_->string_pool);
+  if (files_ != nullptr && item != nullptr) {
+    FileReference* file_ref = ValueCast<FileReference>(item.get());
+    if (file_ref != nullptr) {
+      file_ref->file = files_->FindFile(*file_ref->path);
+      if (file_ref->file == nullptr) {
+        context_->GetDiagnostics()->Error(DiagMessage() << "resource " << name << " for config '"
+                                                        << config << "' is a file reference to '"
+                                                        << *file_ref->path
+                                                        << "' but no such path exists");
+        return {};
       }
-      return util::make_unique<StyledString>(table_->string_pool.MakeRef(
-          style_str,
-          StringPool::Context(StringPool::Context::kStylePriority, config)));
-    } else {
-      if (name.type != ResourceType::kString && util::StartsWith(str, "res/")) {
-        // This must be a FileReference.
-        return util::make_unique<FileReference>(table_->string_pool.MakeRef(
-            str,
-            StringPool::Context(StringPool::Context::kHighPriority, config)));
-      }
-
-      // There are no styles associated with this string, so treat it as
-      // a simple string.
-      return util::make_unique<String>(
-          table_->string_pool.MakeRef(str, StringPool::Context(config)));
     }
   }
-
-  if (value->dataType == Res_value::TYPE_REFERENCE ||
-      value->dataType == Res_value::TYPE_ATTRIBUTE ||
-      value->dataType == Res_value::TYPE_DYNAMIC_REFERENCE ||
-      value->dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
-    Reference::Type type = Reference::Type::kResource;
-    if (value->dataType == Res_value::TYPE_ATTRIBUTE ||
-        value->dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
-      type = Reference::Type::kAttribute;
-    }
-
-    if (data == 0) {
-      // A reference of 0, must be the magic @null reference.
-      Res_value null_type = {};
-      null_type.dataType = Res_value::TYPE_REFERENCE;
-      return util::make_unique<BinaryPrimitive>(null_type);
-    }
-
-    // This is a normal reference.
-    return util::make_unique<Reference>(data, type);
-  }
-
-  // Treat this as a raw binary primitive.
-  return util::make_unique<BinaryPrimitive>(*value);
+  return item;
 }
 
 std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(
@@ -528,7 +481,7 @@ std::unique_ptr<Style> BinaryResourceParser::ParseStyle(
 
     Style::Entry style_entry;
     style_entry.key = Reference(util::DeviceToHost32(map_entry.name.ident));
-    style_entry.value = ParseValue(name, config, &map_entry.value, 0);
+    style_entry.value = ParseValue(name, config, map_entry.value);
     if (!style_entry.value) {
       return {};
     }
@@ -586,7 +539,7 @@ std::unique_ptr<Array> BinaryResourceParser::ParseArray(
     const ResTable_map_entry* map) {
   std::unique_ptr<Array> array = util::make_unique<Array>();
   for (const ResTable_map& map_entry : map) {
-    array->items.push_back(ParseValue(name, config, &map_entry.value, 0));
+    array->items.push_back(ParseValue(name, config, map_entry.value));
   }
   return array;
 }
@@ -596,7 +549,7 @@ std::unique_ptr<Plural> BinaryResourceParser::ParsePlural(
     const ResTable_map_entry* map) {
   std::unique_ptr<Plural> plural = util::make_unique<Plural>();
   for (const ResTable_map& map_entry : map) {
-    std::unique_ptr<Item> item = ParseValue(name, config, &map_entry.value, 0);
+    std::unique_ptr<Item> item = ParseValue(name, config, map_entry.value);
     if (!item) {
       return {};
     }

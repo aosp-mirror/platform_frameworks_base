@@ -45,8 +45,8 @@ class BinaryResourceParser {
    * Creates a parser, which will read `len` bytes from `data`, and
    * add any resources parsed to `table`. `source` is for logging purposes.
    */
-  BinaryResourceParser(IAaptContext* context, ResourceTable* table,
-                       const Source& source, const void* data, size_t data_len);
+  BinaryResourceParser(IAaptContext* context, ResourceTable* table, const Source& source,
+                       const void* data, size_t data_len, io::IFileCollection* files = nullptr);
 
   /*
    * Parses the binary resource table and returns true if successful.
@@ -63,10 +63,8 @@ class BinaryResourceParser {
                  const android::ResChunk_header* chunk);
   bool ParseLibrary(const android::ResChunk_header* chunk);
 
-  std::unique_ptr<Item> ParseValue(const ResourceNameRef& name,
-                                   const ConfigDescription& config,
-                                   const android::Res_value* value,
-                                   uint16_t flags);
+  std::unique_ptr<Item> ParseValue(const ResourceNameRef& name, const ConfigDescription& config,
+                                   const android::Res_value& value);
 
   std::unique_ptr<Value> ParseMapEntry(const ResourceNameRef& name,
                                        const ConfigDescription& config,
@@ -103,6 +101,9 @@ class BinaryResourceParser {
 
   const void* data_;
   const size_t data_len_;
+
+  // Optional file collection from which to create io::IFile objects.
+  io::IFileCollection* files_;
 
   // The standard value string pool for resource values.
   android::ResStringPool value_pool_;

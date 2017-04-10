@@ -129,21 +129,21 @@ class XmlResource {
  public:
   ResourceFile file;
   std::unique_ptr<xml::Node> root;
+  StringPool string_pool;
 };
 
 /**
  * Inflates an XML DOM from a text stream, logging errors to the logger.
  * Returns the root node on success, or nullptr on failure.
  */
-std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag,
-                                     const Source& source);
+std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag, const Source& source);
 
 /**
  * Inflates an XML DOM from a binary ResXMLTree, logging errors to the logger.
  * Returns the root node on success, or nullptr on failure.
  */
-std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len,
-                                     IDiagnostics* diag, const Source& source);
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
+                                     const Source& source);
 
 Element* FindRootElement(XmlResource* doc);
 Element* FindRootElement(Node* node);

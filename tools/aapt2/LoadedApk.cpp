@@ -21,6 +21,7 @@
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
 #include "io/BigBufferInputStream.h"
+#include "io/Util.h"
 
 namespace aapt {
 
@@ -47,11 +48,10 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
   }
 
   std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-  BinaryResourceParser parser(context, table.get(), source, data->data(), data->size());
+  BinaryResourceParser parser(context, table.get(), source, data->data(), data->size(), apk.get());
   if (!parser.Parse()) {
     return {};
   }
-
   return util::make_unique<LoadedApk>(source, std::move(apk), std::move(table));
 }
 
@@ -100,20 +100,16 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOption
       }
 
       io::BigBufferInputStream input_stream(&buffer);
-      if (!writer->WriteFile(path, ArchiveEntry::kAlign, &input_stream)) {
-        context->GetDiagnostics()->Error(DiagMessage()
-                                         << "Error when writing file '" << path << "' in APK.");
+      if (!io::CopyInputStreamToArchive(context, &input_stream, path, ArchiveEntry::kAlign,
+                                        writer)) {
         return false;
       }
-      continue;
-    }
 
-    std::unique_ptr<io::IData> data = file->OpenAsData();
-    uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
-    if (!writer->WriteFile(path, compression_flags, data.get())) {
-      context->GetDiagnostics()->Error(DiagMessage()
-                                       << "Error when writing file '" << path << "' in APK.");
-      return false;
+    } else {
+      uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
+      if (!io::CopyFileToArchive(context, file, path, compression_flags, writer)) {
+        return false;
+      }
     }
   }
   return true;
