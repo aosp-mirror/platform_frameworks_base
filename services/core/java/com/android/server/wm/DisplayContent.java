@@ -125,6 +125,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.view.IInputMethodClient;
 
@@ -1394,6 +1395,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
         return null;
+    }
+
+    @VisibleForTesting
+    int getStackCount() {
+        return mTaskStackContainers.size();
+    }
+
+    @VisibleForTesting
+    int getStaskPosById(int stackId) {
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
+            if (stack.mStackId == stackId) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -3263,8 +3280,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     : requestedPosition >= topChildPosition;
             int targetPosition = requestedPosition;
 
-            if (toTop && isStackVisible(PINNED_STACK_ID) && stack.mStackId != PINNED_STACK_ID) {
-                // The pinned stack is always the top most stack (always-on-top) when it is visible.
+            if (toTop && stack.mStackId != PINNED_STACK_ID
+                    && getStackById(PINNED_STACK_ID) != null) {
+                // The pinned stack is always the top most stack (always-on-top) when it is present.
                 TaskStack topStack = mChildren.get(topChildPosition);
                 if (topStack.mStackId != PINNED_STACK_ID) {
                     throw new IllegalStateException("Pinned stack isn't top stack??? " + mChildren);
