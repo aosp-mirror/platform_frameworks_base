@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <memory>
 #include <vector>
+#include <cmath>
 
 #include <utils/Log.h>
 #include <utils/Errors.h>
@@ -1372,6 +1373,23 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         uint16_t iso = static_cast<uint16_t>(tempIso);
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_ISOSPEEDRATINGS, 1, &iso,
                 TIFF_IFD_0), env, TAG_ISOSPEEDRATINGS, writer);
+    }
+
+    {
+        // Baseline exposure
+        camera_metadata_entry entry =
+                results.find(ANDROID_CONTROL_POST_RAW_SENSITIVITY_BOOST);
+        BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_BASELINEEXPOSURE, writer);
+
+        // post RAW gain should be boostValue / 100
+        double postRAWGain = static_cast<double> (entry.data.i32[0]) / 100.f;
+        // Baseline exposure should be in EV units so log2(gain) =
+        // log10(gain)/log10(2)
+        double baselineExposure = std::log(postRAWGain) / std::log(2.0f);
+        int32_t baseExposureSRat[] = { static_cast<int32_t> (baselineExposure * 100),
+                100 };
+        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BASELINEEXPOSURE, 1,
+                baseExposureSRat, TIFF_IFD_0), env, TAG_BASELINEEXPOSURE, writer);
     }
 
     {
