@@ -478,7 +478,11 @@ public class NetworkMonitor extends StateMachine {
      */
     @VisibleForTesting
     public static final class CaptivePortalProbeResult {
-        static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(599);
+        static final int SUCCESS_CODE = 204;
+        static final int FAILED_CODE = 599;
+
+        static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(FAILED_CODE);
+        static final CaptivePortalProbeResult SUCCESS = new CaptivePortalProbeResult(SUCCESS_CODE);
 
         private final int mHttpResponseCode;  // HTTP response code returned from Internet probe.
         final String redirectUrl;             // Redirect destination returned from Internet probe.
@@ -496,9 +500,16 @@ public class NetworkMonitor extends StateMachine {
             this(httpResponseCode, null, null);
         }
 
-        boolean isSuccessful() { return mHttpResponseCode == 204; }
+        boolean isSuccessful() {
+            return mHttpResponseCode == SUCCESS_CODE;
+        }
+
         boolean isPortal() {
-            return !isSuccessful() && mHttpResponseCode >= 200 && mHttpResponseCode <= 399;
+            return !isSuccessful() && (mHttpResponseCode >= 200) && (mHttpResponseCode <= 399);
+        }
+
+        boolean isFailed() {
+            return !isSuccessful() && !isPortal();
         }
     }
 
@@ -712,7 +723,7 @@ public class NetworkMonitor extends StateMachine {
     protected CaptivePortalProbeResult isCaptivePortal() {
         if (!mIsCaptivePortalCheckEnabled) {
             validationLog("Validation disabled.");
-            return new CaptivePortalProbeResult(204);
+            return CaptivePortalProbeResult.SUCCESS;
         }
 
         URL pacUrl = null;
@@ -816,7 +827,7 @@ public class NetworkMonitor extends StateMachine {
     @VisibleForTesting
     protected CaptivePortalProbeResult sendHttpProbe(URL url, int probeType) {
         HttpURLConnection urlConnection = null;
-        int httpResponseCode = 599;
+        int httpResponseCode = CaptivePortalProbeResult.FAILED_CODE;
         String redirectUrl = null;
         final Stopwatch probeTimer = new Stopwatch().start();
         try {
@@ -854,7 +865,7 @@ public class NetworkMonitor extends StateMachine {
                 if (probeType == ValidationProbeEvent.PROBE_PAC) {
                     validationLog(
                             probeType, url, "PAC fetch 200 response interpreted as 204 response.");
-                    httpResponseCode = 204;
+                    httpResponseCode = CaptivePortalProbeResult.SUCCESS_CODE;
                 } else if (urlConnection.getContentLengthLong() == 0) {
                     // Consider 200 response with "Content-length=0" to not be a captive portal.
                     // There's no point in considering this a captive portal as the user cannot
@@ -862,20 +873,20 @@ public class NetworkMonitor extends StateMachine {
                     // See http://b/9972012.
                     validationLog(probeType, url,
                         "200 response with Content-length=0 interpreted as 204 response.");
-                    httpResponseCode = 204;
+                    httpResponseCode = CaptivePortalProbeResult.SUCCESS_CODE;
                 } else if (urlConnection.getContentLengthLong() == -1) {
                     // When no Content-length (default value == -1), attempt to read a byte from the
                     // response. Do not use available() as it is unreliable. See http://b/33498325.
                     if (urlConnection.getInputStream().read() == -1) {
                         validationLog(
                                 probeType, url, "Empty 200 response interpreted as 204 response.");
-                        httpResponseCode = 204;
+                        httpResponseCode = CaptivePortalProbeResult.SUCCESS_CODE;
                     }
                 }
             }
         } catch (IOException e) {
-            validationLog(probeType, url, "Probably not a portal: exception " + e);
-            if (httpResponseCode == 599) {
+            validationLog(probeType, url, "Probe failed with exception " + e);
+            if (httpResponseCode == CaptivePortalProbeResult.FAILED_CODE) {
                 // TODO: Ping gateway and DNS server and log results.
             }
         } finally {
