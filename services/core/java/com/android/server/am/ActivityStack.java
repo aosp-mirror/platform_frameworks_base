@@ -489,10 +489,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     void reparent(ActivityStackSupervisor.ActivityDisplay activityDisplay, boolean onTop) {
         removeFromDisplay();
         mTmpRect2.setEmpty();
-        mWindowContainerController.reparent(activityDisplay.mDisplayId, mTmpRect2);
         postAddToDisplay(activityDisplay, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
         adjustFocusToNextFocusableStackLocked("reparent", true /* allowFocusSelf */);
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
+        // Update visibility of activities before notifying WM. This way it won't try to resize
+        // windows that are no longer visible.
+        mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                !PRESERVE_WINDOWS);
+        mWindowContainerController.reparent(activityDisplay.mDisplayId, mTmpRect2, onTop);
     }
 
     /**

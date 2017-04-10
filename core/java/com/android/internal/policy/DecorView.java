@@ -1499,6 +1499,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             // renderer about it.
             mBackdropFrameRenderer.onConfigurationChange();
         }
+        mWindow.onViewRootImplSet(getViewRootImpl());
     }
 
     @Override

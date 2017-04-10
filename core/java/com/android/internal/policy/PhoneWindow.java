@@ -47,6 +47,7 @@ import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
+import android.view.ViewRootImpl.ActivityConfigCallback;
 import android.view.Window;
 import android.view.WindowManager;
 import com.android.internal.R;
@@ -287,6 +288,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private boolean mUseDecorContext = false;
 
+    /** @see ViewRootImpl#mActivityConfigCallback */
+    private ActivityConfigCallback mActivityConfigCallback;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -302,7 +306,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /**
      * Constructor for main window of an activity.
      */
-    public PhoneWindow(Context context, Window preservedWindow) {
+    public PhoneWindow(Context context, Window preservedWindow,
+            ActivityConfigCallback activityConfigCallback) {
         this(context);
         // Only main activity windows use decor context, all the other windows depend on whatever
         // context that was given to them.
@@ -323,6 +328,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
         mSupportsPictureInPicture = forceResizable || context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_PICTURE_IN_PICTURE);
+        mActivityConfigCallback = activityConfigCallback;
     }
 
     @Override
@@ -2058,6 +2064,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public final View peekDecorView() {
         return mDecor;
+    }
+
+    /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
+    void onViewRootImplSet(ViewRootImpl viewRoot) {
+        viewRoot.setActivityConfigCallback(mActivityConfigCallback);
     }
 
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";

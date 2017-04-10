@@ -181,7 +181,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, token.getDisplayContent());
 
         // Move stack to first display.
-        sDisplayContent.moveStackToDisplay(stack);
+        sDisplayContent.moveStackToDisplay(stack, true /* onTop */);
         assertEquals(sDisplayContent.getDisplayId(), stack.getDisplayContent().getDisplayId());
         assertEquals(sDisplayContent, stack.getParent().getParent());
         assertEquals(sDisplayContent, stack.getDisplayContent());
