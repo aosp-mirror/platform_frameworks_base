@@ -640,8 +640,11 @@ public class UsbDeviceManager {
                 // Set the new USB configuration.
                 setUsbConfig(oemFunctions);
 
-                // Start up dependent services.
-                updateUsbStateBroadcastIfNeeded(true);
+                if (UsbManager.containsFunction(functions, UsbManager.USB_FUNCTION_MTP)
+                        || UsbManager.containsFunction(functions, UsbManager.USB_FUNCTION_PTP)) {
+                    // Start up dependent services.
+                    updateUsbStateBroadcastIfNeeded(true);
+                }
 
                 if (!waitForState(oemFunctions)) {
                     Slog.e(TAG, "Failed to switch USB config to " + functions);
