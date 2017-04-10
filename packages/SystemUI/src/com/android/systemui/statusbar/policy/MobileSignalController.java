@@ -36,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SignalDrawable;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
@@ -231,6 +232,29 @@ public class MobileSignalController extends SignalController<
             }
         }
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyIcons.WFC);
+    }
+
+    private int getNumLevels() {
+        return SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
+    }
+
+    @Override
+    public int getCurrentIconId() {
+        if (mCurrentState.iconGroup == TelephonyIcons.CARRIER_NETWORK_CHANGE) {
+            return SignalDrawable.getCarrierChangeState(getNumLevels());
+        } else if (mCurrentState.connected) {
+            return SignalDrawable.getState(mCurrentState.level, getNumLevels(),
+                    mCurrentState.inetCondition == 0);
+        } else if (mCurrentState.enabled) {
+            return SignalDrawable.getEmptyState(getNumLevels());
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public int getQsCurrentIconId() {
+        return getCurrentIconId();
     }
 
     @Override
