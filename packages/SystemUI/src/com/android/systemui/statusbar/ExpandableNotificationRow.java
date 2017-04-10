@@ -848,6 +848,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void onDensityOrFontScaleChanged() {
         super.onDensityOrFontScaleChanged();
         initDimens();
+        initBackground();
         // Let's update our childrencontainer. This is intentionally not guarded with
         // mIsSummaryWithChildren since we might have had children but not anymore.
         if (mChildrenContainer != null) {
