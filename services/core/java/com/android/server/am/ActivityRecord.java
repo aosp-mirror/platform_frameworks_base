@@ -97,6 +97,7 @@ import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStack.LAUNCH_TICK;
 import static com.android.server.am.ActivityStack.LAUNCH_TICK_MSG;
 import static com.android.server.am.ActivityStack.PAUSE_TIMEOUT_MSG;
+import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.am.EventLogTags.AM_ACTIVITY_FULLY_DRAWN_TIME;
 import static com.android.server.am.EventLogTags.AM_ACTIVITY_LAUNCH_TIME;
@@ -2266,6 +2267,20 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration doesn't matter in finishing " + this);
             stopFreezingScreenLocked(false);
+            return true;
+        }
+
+        // Skip updating configuration for activity that are stopping or stopped.
+        if (state == STOPPING || state == STOPPED) {
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                    "Skipping config check stopped or stopping: " + this);
+            return true;
+        }
+
+        // Skip updating configuration for activity is a stack that shouldn't be visible.
+        if (stack.shouldBeVisible(null /* starting */) == STACK_INVISIBLE) {
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                    "Skipping config check invisible stack: " + this);
             return true;
         }
 
