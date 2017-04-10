@@ -1385,6 +1385,36 @@ public abstract class WebSettings {
      */
     public abstract boolean getOffscreenPreRaster();
 
+
+    /**
+     * Sets whether Safe Browsing is enabled. Safe browsing allows WebView to
+     * protect against malware and phishing attacks by verifying the links.
+     *
+     * Safe browsing is disabled by default. The recommended way to enable
+     * Safe browsing is using a manifest tag to change the default value to
+     * enabled for all WebViews.
+     * <p>
+     * <pre>
+     * &lt;meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
+     *            android:value="true" /&gt;
+     * </pre>
+     * </p>
+     *
+     * This API overrides the manifest tag value for this WebView.
+     *
+     * @param enabled Whether Safe browsing is enabled.
+     */
+    public abstract void setSafeBrowsingEnabled(boolean enabled);
+
+    /**
+     * Gets whether Safe browsing is enabled.
+     * See {@link #setSafeBrowsingEnabled}.
+     *
+     * @return true if Safe browsing is enabled and false otherwise.
+     */
+    public abstract boolean getSafeBrowsingEnabled();
+
+
     /**
      * @hide
      */
