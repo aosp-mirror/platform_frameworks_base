@@ -2150,31 +2150,26 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                           (int)((onDuration / (1000 * 60)) % 60),
                                           (int)((onDuration / 1000) % 60),
                                           (int)(onDuration % 1000));
-                writer.println("  time since enabled: " + onDurationString + "\n");
+                writer.println("  time since enabled: " + onDurationString);
             }
 
             if (mActiveLogs.size() == 0) {
-                writer.println("Bluetooth never enabled!");
+                writer.println("\nBluetooth never enabled!");
             } else {
-                writer.println("Enable log:");
+                writer.println("\nEnable log:");
                 for (ActiveLog log : mActiveLogs) {
                     writer.println("  " + log);
                 }
             }
 
-            writer.println("Bluetooth crashed " + mCrashes + " time" + (mCrashes == 1 ? "" : "s"));
+            writer.println("\nBluetooth crashed " + mCrashes + " time" + (mCrashes == 1 ? "" : "s"));
             if (mCrashes == CRASH_LOG_MAX_SIZE) writer.println("(last " + CRASH_LOG_MAX_SIZE + ")");
             for (Long time : mCrashTimestamps) {
               writer.println("  " + timeToLog(time.longValue()));
             }
 
-            String bleAppString = "No BLE Apps registered.";
-            if (mBleApps.size() == 1) {
-                bleAppString = "1 BLE App registered:";
-            } else if (mBleApps.size() > 1) {
-                bleAppString = mBleApps.size() + " BLE Apps registered:";
-            }
-            writer.println("\n" + bleAppString);
+            writer.println("\n" + mBleApps.size() + " BLE app" +
+                            (mBleApps.size() == 1 ? "" : "s") + "registered");
             for (ClientDeathRecipient app : mBleApps.values()) {
                 writer.println("  " + app.getPackageName());
             }
