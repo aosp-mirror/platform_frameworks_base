@@ -92,6 +92,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -213,7 +214,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 return null;
             }
         }).when(mContext.userManager).setApplicationRestrictions(
-                anyString(), any(Bundle.class), any(UserHandle.class));
+                anyString(), nullable(Bundle.class), any(UserHandle.class));
 
         // UM.getApplicationRestrictions() will read from appRestrictions.
         doAnswer(new Answer<Bundle>() {
