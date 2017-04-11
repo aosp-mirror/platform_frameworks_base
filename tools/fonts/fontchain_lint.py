@@ -126,7 +126,10 @@ def get_emoji_map(font):
     # Add GSUB rules
     ttfont = open_font(font)
     for lookup in ttfont['GSUB'].table.LookupList.Lookup:
-        assert lookup.LookupType == 4, 'We only understand type 4 lookups'
+        if lookup.LookupType != 4:
+            # Other lookups are used in the emoji font for fallback.
+            # We ignore them for now.
+            continue
         for subtable in lookup.SubTable:
             ligatures = subtable.ligatures
             for first_glyph in ligatures:
@@ -385,7 +388,7 @@ def parse_unicode_datafile(file_path, reverse=False):
     return output_dict
 
 
-def parse_standardized_variants(file_path):
+def parse_emoji_variants(file_path):
     emoji_set = set()
     text_set = set()
     with open(file_path) as datafile:
@@ -420,8 +423,8 @@ def parse_ucd(ucd_path):
 
     _chars_by_age = parse_unicode_datafile(
         path.join(ucd_path, 'DerivedAge.txt'), reverse=True)
-    sequences = parse_standardized_variants(
-        path.join(ucd_path, 'StandardizedVariants.txt'))
+    sequences = parse_emoji_variants(
+        path.join(ucd_path, 'emoji-variation-sequences.txt'))
     _text_variation_sequences, _emoji_variation_sequences = sequences
     _emoji_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-sequences.txt'))
@@ -442,8 +445,7 @@ UNSUPPORTED_FLAGS = frozenset({
     flag_sequence('GF'), flag_sequence('GP'), flag_sequence('GS'),
     flag_sequence('MF'), flag_sequence('MQ'), flag_sequence('NC'),
     flag_sequence('PM'), flag_sequence('RE'), flag_sequence('TF'),
-    flag_sequence('UN'), flag_sequence('WF'), flag_sequence('XK'),
-    flag_sequence('YT'),
+    flag_sequence('WF'), flag_sequence('XK'), flag_sequence('YT'),
 })
 
 EQUIVALENT_FLAGS = {
@@ -489,6 +491,55 @@ ZWJ_IDENTICALS = {
     (0x1F468, 0x200D, 0x1F469, 0x200D, 0x1F466): 0x1F46A,
 }
 
+ZWJ = 0x200D
+FEMALE_SIGN = 0x2640
+MALE_SIGN = 0x2642
+
+GENDER_DEFAULTS = [
+    (0x26F9, MALE_SIGN), # PERSON WITH BALL
+    (0x1F3C3, MALE_SIGN), # RUNNER
+    (0x1F3C4, MALE_SIGN), # SURFER
+    (0x1F3CA, MALE_SIGN), # SWIMMER
+    (0x1F3CB, MALE_SIGN), # WEIGHT LIFTER
+    (0x1F3CC, MALE_SIGN), # GOLFER
+    (0x1F46E, MALE_SIGN), # POLICE OFFICER
+    (0x1F46F, FEMALE_SIGN), # WOMAN WITH BUNNY EARS
+    (0x1F471, MALE_SIGN), # PERSON WITH BLOND HAIR
+    (0x1F473, MALE_SIGN), # MAN WITH TURBAN
+    (0x1F477, MALE_SIGN), # CONSTRUCTION WORKER
+    (0x1F481, FEMALE_SIGN), # INFORMATION DESK PERSON
+    (0x1F482, MALE_SIGN), # GUARDSMAN
+    (0x1F486, FEMALE_SIGN), # FACE MASSAGE
+    (0x1F487, FEMALE_SIGN), # HAIRCUT
+    (0x1F575, MALE_SIGN), # SLEUTH OR SPY
+    (0x1F645, FEMALE_SIGN), # FACE WITH NO GOOD GESTURE
+    (0x1F646, FEMALE_SIGN), # FACE WITH OK GESTURE
+    (0x1F647, MALE_SIGN), # PERSON BOWING DEEPLY
+    (0x1F64B, FEMALE_SIGN), # HAPPY PERSON RAISING ONE HAND
+    (0x1F64D, FEMALE_SIGN), # PERSON FROWNING
+    (0x1F64E, FEMALE_SIGN), # PERSON WITH POUTING FACE
+    (0x1F6A3, MALE_SIGN), # ROWBOAT
+    (0x1F6B4, MALE_SIGN), # BICYCLIST
+    (0x1F6B5, MALE_SIGN), # MOUNTAIN BICYCLIST
+    (0x1F6B6, MALE_SIGN), # PEDESTRIAN
+    (0x1F926, FEMALE_SIGN), # FACE PALM
+    (0x1F937, FEMALE_SIGN), # SHRUG
+    (0x1F938, MALE_SIGN), # PERSON DOING CARTWHEEL
+    (0x1F939, MALE_SIGN), # JUGGLING
+    (0x1F93C, MALE_SIGN), # WRESTLERS
+    (0x1F93D, MALE_SIGN), # WATER POLO
+    (0x1F93E, MALE_SIGN), # HANDBALL
+    (0x1F9D6, FEMALE_SIGN), # PERSON IN STEAMY ROOM
+    (0x1F9D7, FEMALE_SIGN), # PERSON CLIMBING
+    (0x1F9D8, FEMALE_SIGN), # PERSON IN LOTUS POSITION
+    (0x1F9D9, FEMALE_SIGN), # MAGE
+    (0x1F9DA, FEMALE_SIGN), # FAIRY
+    (0x1F9DB, FEMALE_SIGN), # VAMPIRE
+    (0x1F9DC, FEMALE_SIGN), # MERPERSON
+    (0x1F9DD, FEMALE_SIGN), # ELF
+    (0x1F9DE, FEMALE_SIGN), # GENIE
+    (0x1F9DF, FEMALE_SIGN), # ZOMBIE
+]
 
 def is_fitzpatrick_modifier(cp):
     return 0x1F3FB <= cp <= 0x1F3FF
@@ -514,10 +565,20 @@ def compute_expected_emoji():
     adjusted_emoji_zwj_sequences = dict(_emoji_zwj_sequences)
     adjusted_emoji_zwj_sequences.update(_emoji_zwj_sequences)
 
+    # Add empty flag tag sequence that is supported as fallback
+    _emoji_sequences[(0x1F3F4, 0xE007F)] = 'Emoji_Tag_Sequence'
+
     for sequence in _emoji_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
+        if _emoji_sequences.get(sequence, None) == 'Emoji_Tag_Sequence':
+            # Add reverse of all emoji ZWJ sequences, which are added to the fonts
+            # as a workaround to get the sequences work in RTL text.
+            # TODO: test if these are actually needed by Minikin/HarfBuzz.
+            reversed_seq = reverse_emoji(sequence)
+            all_sequences.add(reversed_seq)
+            equivalent_emoji[reversed_seq] = sequence
 
     for sequence in adjusted_emoji_zwj_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
@@ -529,13 +590,12 @@ def compute_expected_emoji():
         all_sequences.add(reversed_seq)
         equivalent_emoji[reversed_seq] = sequence
 
-    # Add all two-letter flag sequences, as even the unsupported ones should
-    # resolve to a flag tofu.
-    all_letters = [chr(code) for code in range(ord('A'), ord('Z')+1)]
-    all_two_letter_codes = itertools.product(all_letters, repeat=2)
-    all_flags = {flag_sequence(code) for code in all_two_letter_codes}
-    all_sequences.update(all_flags)
-    tofu_flags = UNSUPPORTED_FLAGS | (all_flags - set(_emoji_sequences.keys()))
+    # Remove unsupported flags
+    all_sequences.difference_update(UNSUPPORTED_FLAGS)
+
+    # Add all tag characters used in flags
+    sequence_pieces.update(range(0xE0030, 0xE0039 + 1))
+    sequence_pieces.update(range(0xE0061, 0xE007A + 1))
 
     all_emoji = (
         _emoji_properties['Emoji'] |
@@ -547,13 +607,17 @@ def compute_expected_emoji():
         all_sequences |
         set(LEGACY_ANDROID_EMOJI.keys()))
 
-    first_tofu_flag = sorted(tofu_flags)[0]
-    for flag in tofu_flags:
-        if flag != first_tofu_flag:
-            equivalent_emoji[flag] = first_tofu_flag
     equivalent_emoji.update(EQUIVALENT_FLAGS)
     equivalent_emoji.update(LEGACY_ANDROID_EMOJI)
     equivalent_emoji.update(ZWJ_IDENTICALS)
+
+    for ch, gender in GENDER_DEFAULTS:
+        equivalent_emoji[(ch, ZWJ, gender)] = ch
+        for skin_tone in range(0x1F3FB, 0x1F3FF+1):
+            skin_toned = (ch, skin_tone, ZWJ, gender)
+            if skin_toned in all_emoji:
+                equivalent_emoji[skin_toned] = (ch, skin_tone)
+
     for seq in _emoji_variation_sequences:
         equivalent_emoji[seq] = seq[0]
 
