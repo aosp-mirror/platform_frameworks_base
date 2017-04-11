@@ -164,7 +164,8 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"બૅટરી ચાર્જ થઈ રહી છે, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ટકા."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"સિસ્ટમ સેટિંગ્સ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"સૂચનાઓ."</string>
-    <string name="notification_shelf_content_description" msgid="5511922384591583913">"સૂચના ઓવરફ્લો કંટેનર"</string>
+    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
+    <skip />
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"સૂચના સાફ કરો."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS સક્ષમ."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS મેળવી રહ્યું છે."</string>
@@ -560,8 +561,7 @@
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"બધી કૅટેગરી"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"વધુ સેટિંગ્સ"</string>
-    <!-- no translation found for notification_app_settings (3743278649182392015) -->
-    <skip />
+    <string name="notification_app_settings" msgid="3743278649182392015">"કસ્ટમાઇઝ કરો: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
     <string name="notification_done" msgid="5279426047273930175">"થઈ ગયું"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"સૂચના નિયંત્રણો"</string>
@@ -740,22 +740,13 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"ઝટપટ ઍપ્લિકેશનો માટે ઇન્સ્ટૉલેશનની જરૂર નથી."</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
     <string name="mobile_data" msgid="7094582042819250762">"મોબાઇલ ડેટા"</string>
-    <!-- no translation found for wifi_is_off (1838559392210456893) -->
-    <skip />
-    <!-- no translation found for bt_is_off (2640685272289706392) -->
-    <skip />
-    <!-- no translation found for dnd_is_off (6167780215212497572) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule (1570808639425342) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (1131614608680529190) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (3685659782196144067) -->
-    <skip />
-    <!-- no translation found for qs_dnd_until (3469471136280079874) -->
-    <skip />
-    <!-- no translation found for qs_dnd_keep (1825009164681928736) -->
-    <skip />
-    <!-- no translation found for qs_dnd_replace (8019520786644276623) -->
-    <skip />
+    <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi બંધ છે"</string>
+    <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth બંધ છે"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"ખલેલ પાડશો નહીં બંધ છે"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>). વર્તમાન સેટિંગ્સ રાખીએ?"</string>
+    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"ખલેલ પાડશો નહીં એક ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું. (<xliff:g id="ID_1">%s</xliff:g>). વર્તમાન સેટિંગ્સ રાખીએ?"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ અથવા ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું. વર્તમાન સેટિંગ્સ રાખીએ?"</string>
+    <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> સુધી"</string>
+    <string name="qs_dnd_keep" msgid="1825009164681928736">"રાખો"</string>
+    <string name="qs_dnd_replace" msgid="8019520786644276623">"બદલો"</string>
 </resources>

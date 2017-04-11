@@ -164,7 +164,8 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Battery charging, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> percent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"System settings"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notifications."</string>
-    <string name="notification_shelf_content_description" msgid="5511922384591583913">"Notification overflow container"</string>
+    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
+    <skip />
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Clear notification."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS enabled."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS acquiring."</string>
@@ -560,8 +561,7 @@
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"All Categories"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"More settings"</string>
-    <!-- no translation found for notification_app_settings (3743278649182392015) -->
-    <skip />
+    <string name="notification_app_settings" msgid="3743278649182392015">"Customise: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
     <string name="notification_done" msgid="5279426047273930175">"Done"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"notification controls"</string>
