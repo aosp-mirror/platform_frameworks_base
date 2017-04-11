@@ -94,9 +94,9 @@ public abstract class AutofillService extends Service {
 
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
-        public void onInit(IAutoFillServiceConnection connection) {
-            if (connection != null) {
-                mHandlerCaller.obtainMessageO(MSG_CONNECT, connection).sendToTarget();
+        public void onConnectedStateChanged(boolean connected) {
+            if (connected) {
+                mHandlerCaller.obtainMessage(MSG_CONNECT).sendToTarget();
             } else {
                 mHandlerCaller.obtainMessage(MSG_DISCONNECT).sendToTarget();
             }
@@ -127,7 +127,6 @@ public abstract class AutofillService extends Service {
     private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
         switch (msg.what) {
             case MSG_CONNECT: {
-                mConnection = (IAutoFillServiceConnection) msg.obj;
                 onConnected();
                 break;
             } case MSG_ON_FILL_REQUEST: {
@@ -152,7 +151,6 @@ public abstract class AutofillService extends Service {
                 break;
             } case MSG_DISCONNECT: {
                 onDisconnected();
-                mConnection = null;
                 break;
             } default: {
                 Log.w(TAG, "MyCallbacks received invalid message type: " + msg);
@@ -161,8 +159,6 @@ public abstract class AutofillService extends Service {
     };
 
     private HandlerCaller mHandlerCaller;
-
-    private IAutoFillServiceConnection mConnection;
 
     /**
      * {@inheritDoc}
@@ -246,21 +242,9 @@ public abstract class AutofillService extends Service {
     public void onDisconnected() {
     }
 
-    /**
-     * Disables the service. After calling this method, the service will
-     * be disabled and settings will show that it is turned off.
-     *
-     * <p>You should call this method only after a call to {@link #onConnected()}
-     * and before the corresponding call to {@link #onDisconnected()}. In other words
-     * you can disable your service only while the system is connected to it.</p>
-     */
+    /** @hide */
     public final void disableSelf() {
-        if (mConnection != null) {
-            try {
-                mConnection.disableSelf();
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-        }
+        // TODO(b/33197203): Remove when GCore has migrated off this API
+        getSystemService(AutofillManager.class).disableOwnedAutofillServices();
     }
 }
