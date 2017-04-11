@@ -629,6 +629,7 @@ public class PackageParser {
         pi.restrictedAccountType = p.mRestrictedAccountType;
         pi.requiredAccountType = p.mRequiredAccountType;
         pi.overlayTarget = p.mOverlayTarget;
+        pi.overlayPriority = p.mOverlayPriority;
         pi.isStaticOverlay = p.mIsStaticOverlay;
         pi.firstInstallTime = firstInstallTime;
         pi.lastUpdateTime = lastUpdateTime;
@@ -2104,6 +2105,9 @@ public class PackageParser {
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay);
                 pkg.mOverlayTarget = sa.getString(
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay_targetPackage);
+                pkg.mOverlayPriority = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestResourceOverlay_priority,
+                        0);
                 pkg.mIsStaticOverlay = sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay_isStatic,
                         false);
@@ -2112,6 +2116,12 @@ public class PackageParser {
                 if (pkg.mOverlayTarget == null) {
                     outError[0] = "<overlay> does not specify a target package";
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return null;
+                }
+                if (pkg.mOverlayPriority < 0 || pkg.mOverlayPriority > 9999) {
+                    outError[0] = "<overlay> priority must be between 0 and 9999";
+                    mParseError =
+                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return null;
                 }
                 if (pkg.mIsStaticOverlay) {
@@ -5681,6 +5691,7 @@ public class PackageParser {
         public String mRequiredAccountType;
 
         public String mOverlayTarget;
+        public int mOverlayPriority;
         public boolean mIsStaticOverlay;
         public boolean mTrustedOverlay;
 
@@ -6163,6 +6174,7 @@ public class PackageParser {
             mRestrictedAccountType = dest.readString();
             mRequiredAccountType = dest.readString();
             mOverlayTarget = dest.readString();
+            mOverlayPriority = dest.readInt();
             mIsStaticOverlay = (dest.readInt() == 1);
             mTrustedOverlay = (dest.readInt() == 1);
             mSigningKeys = (ArraySet<PublicKey>) dest.readArraySet(boot);
@@ -6280,6 +6292,7 @@ public class PackageParser {
             dest.writeString(mRestrictedAccountType);
             dest.writeString(mRequiredAccountType);
             dest.writeString(mOverlayTarget);
+            dest.writeInt(mOverlayPriority);
             dest.writeInt(mIsStaticOverlay ? 1 : 0);
             dest.writeInt(mTrustedOverlay ? 1 : 0);
             dest.writeArraySet(mSigningKeys);
