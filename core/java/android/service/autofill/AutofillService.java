@@ -242,7 +242,7 @@ public abstract class AutofillService extends Service {
     public void onDisconnected() {
     }
 
-    /** @hide */
+    @Deprecated
     public final void disableSelf() {
         // TODO(b/33197203): Remove when GCore has migrated off this API
         getSystemService(AutofillManager.class).disableOwnedAutofillServices();
