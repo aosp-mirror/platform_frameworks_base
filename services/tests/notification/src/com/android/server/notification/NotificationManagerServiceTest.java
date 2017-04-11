@@ -47,6 +47,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.InstrumentationRegistry;
+import android.testing.TestableLooper;
 
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
@@ -64,20 +65,29 @@ public class NotificationManagerServiceTest {
     private final int uid = Binder.getCallingUid();
     private NotificationManagerService mNotificationManagerService;
     private INotificationManager mBinderService;
+    private NotificationManagerInternal mInternalService;
     private IPackageManager mPackageManager = mock(IPackageManager.class);
     private final PackageManager mPackageManagerClient = mock(PackageManager.class);
     private Context mContext = InstrumentationRegistry.getTargetContext();
     private final String PKG = mContext.getPackageName();
-    private HandlerThread mThread;
+    private TestableLooper mTestableLooper;
     private final RankingHelper mRankingHelper = mock(RankingHelper.class);
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
+
+    // Use a Testable subclass so we can simulate calls from the system without failing.
+    private static class TestableNotificationManagerService extends NotificationManagerService {
+        public TestableNotificationManagerService(Context context) { super(context); }
+
+        @Override
+        protected void checkCallerIsSystem() {}
+    }
 
     @Before
     @Test
     @UiThreadTest
     public void setUp() throws Exception {
-        mNotificationManagerService = new NotificationManagerService(mContext);
+        mNotificationManagerService = new TestableNotificationManagerService(mContext);
 
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         final ApplicationInfo applicationInfo = new ApplicationInfo();
@@ -88,9 +98,8 @@ public class NotificationManagerServiceTest {
                 .thenReturn(applicationInfo);
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
-        // Use a separate thread for service looper.
-        mThread = new HandlerThread("TestThread");
-        mThread.start();
+        // Use this testable looper.
+        mTestableLooper = new TestableLooper(false);
         // Mock NotificationListeners to bypass security checks.
         final NotificationManagerService.NotificationListeners mockNotificationListeners =
                 mock(NotificationManagerService.NotificationListeners.class);
@@ -98,32 +107,19 @@ public class NotificationManagerServiceTest {
                 mockNotificationListeners.new ManagedServiceInfo(null,
                         new ComponentName(PKG, "test_class"), uid, true, null, 0));
 
-        mNotificationManagerService.init(mThread.getLooper(), mPackageManager,
+        mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
                 mPackageManagerClient, mockLightsManager, mockNotificationListeners);
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
+        mInternalService = mNotificationManagerService.getInternalService();
 
         mBinderService.createNotificationChannels(
                 PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
     }
 
     public void waitForIdle() throws Exception {
-        MessageQueue queue = mThread.getLooper().getQueue();
-        if (queue.isIdle()) {
-            return;
-        }
-        CountDownLatch latch = new CountDownLatch(1);
-        queue.addIdleHandler(new MessageQueue.IdleHandler() {
-                @Override public boolean queueIdle() {
-                    latch.countDown();
-                    return false;
-                }
-        });
-        // Timeout is valid in the cases where the queue goes idle before the IdleHandler
-        // is added.
-        latch.await(WAIT_FOR_IDLE_TIMEOUT, TimeUnit.SECONDS);
-        waitForIdle();
+        mTestableLooper.processAllMessages();
     }
 
     private NotificationRecord generateNotificationRecord(NotificationChannel channel) {
@@ -260,7 +256,6 @@ public class NotificationManagerServiceTest {
 
     @Test
     @UiThreadTest
-    @Ignore("Flaky")
     public void testEnqueueNotificationWithTag_PopulatesGetActiveNotifications() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), new int[1], 0);
@@ -376,6 +371,21 @@ public class NotificationManagerServiceTest {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
+    }
+
+    @Test
+    @UiThreadTest
+    public void testRemoveForegroundServiceFlag_ImmediatelyAfterEnqueue() throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
+                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
+        mInternalService.removeForegroundServiceFlagFromNotification(PKG, sbn.getId(),
+                sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(0, notifs[0].getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE);
     }
 
     @Test
