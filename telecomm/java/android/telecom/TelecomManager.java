@@ -338,6 +338,28 @@ public class TelecomManager {
             "android.telecom.extra.NEW_OUTGOING_CALL_CANCEL_TIMEOUT";
 
     /**
+     * Boolean extra specified when calling {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)}
+     * to indicate to Telecom that the purpose of adding a new incoming call is to handover an
+     * existing call from the user's device to a different {@link PhoneAccount}.
+     * <p>
+     * The caller must also include {@link #EXTRA_HANDOVER_TOKEN} to specify which existing call is
+     * to be handed over.
+     * @hide
+     */
+    public static final String EXTRA_IS_HANDOVER = "android.telecom.extra.IS_HANDOVER";
+
+    /**
+     * String extra which identifies the existing call on the current device which will be handed
+     * over.  This is a Telecom-specific opaque token; the caller should not make any assumptions
+     * about its meaning or content.
+     * <p>
+     * Used alongside {@link #EXTRA_IS_HANDOVER} when calling
+     * {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)}.
+     * @hide
+     */
+    public static final String EXTRA_HANDOVER_TOKEN = "android.telecom.extra.HANDOVER_TOKEN";
+
+    /**
      * A boolean extra, which when set on the {@link Intent#ACTION_CALL} intent or on the bundle
      * passed into {@link #placeCall(Uri, Bundle)}, indicates that the call should be initiated with
      * an RTT session open. See {@link android.telecom.Call.RttCall} for more information on RTT.
