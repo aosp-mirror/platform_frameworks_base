@@ -120,7 +120,7 @@ private:
     virtual ~Bitmap();
     void* getStorage() const;
 
-    PixelStorageType mPixelStorageType;
+    const PixelStorageType mPixelStorageType;
 
     size_t mRowBytes = 0;
     sk_sp<SkColorTable> mColorTable;
