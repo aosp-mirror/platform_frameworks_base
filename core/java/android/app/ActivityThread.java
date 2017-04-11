@@ -2199,7 +2199,7 @@ public final class ActivityThread {
     public ContextImpl getSystemUiContext() {
         synchronized (this) {
             if (mSystemUiContext == null) {
-                mSystemUiContext = ContextImpl.createSystemUiContext(this);
+                mSystemUiContext = ContextImpl.createSystemUiContext(getSystemContext());
             }
             return mSystemUiContext;
         }
