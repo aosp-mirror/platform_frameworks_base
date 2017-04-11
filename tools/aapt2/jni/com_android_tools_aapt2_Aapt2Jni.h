@@ -18,17 +18,17 @@ JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_ping
 /*
  * Class:     com_android_tools_aapt2_Aapt2Jni
  * Method:    nativeCompile
- * Signature: (Ljava/util/List;)V
+ * Signature: (Ljava/util/List;)I
  */
-JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeCompile
+JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeCompile
   (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     com_android_tools_aapt2_Aapt2Jni
  * Method:    nativeLink
- * Signature: (Ljava/util/List;)V
+ * Signature: (Ljava/util/List;)I
  */
-JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink
+JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink
   (JNIEnv *, jclass, jobject);
 
 #ifdef __cplusplus
