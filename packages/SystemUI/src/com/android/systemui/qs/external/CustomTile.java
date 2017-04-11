@@ -305,7 +305,8 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         state.label = mTile.getLabel();
         if (tileState == Tile.STATE_UNAVAILABLE) {
             state.label = new SpannableStringBuilder().append(state.label,
-                    new ForegroundColorSpan(color),
+                    new ForegroundColorSpan(
+                            mContext.getColor(R.color.qs_tile_label_tint_unavailable)),
                     SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
         }
         if (mTile.getContentDescription() != null) {

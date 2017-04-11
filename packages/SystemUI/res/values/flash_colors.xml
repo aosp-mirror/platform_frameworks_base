@@ -68,4 +68,7 @@
     <color name="card_pressed">#7e3c3c3c</color>
     <color name="screenshot_flash_color">#4D3367d6</color>
     <color name="screenshot_background_color">#ff000000</color>
+
+    <!-- Separate QS text label tint from icon tint -->
+    <color name="qs_tile_label_tint_unavailable">@color/qs_tile_tint_unavailable</color>
 </resources>
