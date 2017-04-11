@@ -1421,6 +1421,11 @@ public class NotificationManagerService extends SystemService {
         return INotificationManager.Stub.asInterface(mService);
     }
 
+    @VisibleForTesting
+    NotificationManagerInternal getInternalService() {
+        return mInternalService;
+    }
+
     private final IBinder mService = new INotificationManager.Stub() {
         // Toasts
         // ============================================================================
@@ -2984,25 +2989,27 @@ public class NotificationManagerService extends SystemService {
                 int userId) {
             checkCallerIsSystem();
             synchronized (mNotificationLock) {
-                NotificationRecord r = findNotificationByListLocked(mNotificationList, pkg, null,
-                        notificationId, userId);
-                if (r == null) {
-                    Log.d(TAG, "stripForegroundServiceFlag: Could not find notification with "
-                            + "pkg=" + pkg + " / id=" + notificationId + " / userId=" + userId);
-                    return;
-                }
-                StatusBarNotification sbn = r.sbn;
-                // NoMan adds flags FLAG_NO_CLEAR and FLAG_ONGOING_EVENT when it sees
-                // FLAG_FOREGROUND_SERVICE. Hence it's not enough to remove FLAG_FOREGROUND_SERVICE,
-                // we have to revert to the flags we received initially *and* force remove
-                // FLAG_FOREGROUND_SERVICE.
-                sbn.getNotification().flags =
-                        (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
-                mRankingHelper.sort(mNotificationList);
-                mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        NotificationRecord r =
+                                findNotificationLocked(pkg, null, notificationId, userId);
+                        if (r == null) {
+                            Log.d(TAG,
+                                    "stripForegroundServiceFlag: Could not find notification with "
+                                    + "pkg=" + pkg + " / id=" + notificationId
+                                    + " / userId=" + userId);
+                            return;
+                        }
+                        StatusBarNotification sbn = r.sbn;
+                        // NoMan adds flags FLAG_NO_CLEAR and FLAG_ONGOING_EVENT when it sees
+                        // FLAG_FOREGROUND_SERVICE. Hence it's not enough to remove
+                        // FLAG_FOREGROUND_SERVICE, we have to revert to the flags we received
+                        // initially *and* force remove FLAG_FOREGROUND_SERVICE.
+                        sbn.getNotification().flags =
+                                (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
+                        mRankingHelper.sort(mNotificationList);
+                        mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
                         mGroupHelper.onNotificationPosted(sbn);
                     }
                 });
@@ -4425,16 +4432,16 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    protected static boolean isUidSystem(int uid) {
+    protected boolean isUidSystem(int uid) {
         final int appid = UserHandle.getAppId(uid);
         return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
     }
 
-    private static boolean isCallerSystem() {
+    private boolean isCallerSystem() {
         return isUidSystem(Binder.getCallingUid());
     }
 
-    private static void checkCallerIsSystem() {
+    protected void checkCallerIsSystem() {
         if (isCallerSystem()) {
             return;
         }
