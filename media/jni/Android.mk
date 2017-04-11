@@ -51,6 +51,7 @@ LOCAL_SHARED_LIBRARIES := \
     libandroidfw
 
 LOCAL_STATIC_LIBRARIES := \
+    libgrallocusage \
 
 LOCAL_C_INCLUDES += \
     external/libexif/ \
