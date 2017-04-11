@@ -32,6 +32,7 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
 import com.android.internal.os.TransferPipe;
@@ -49,9 +50,11 @@ import java.util.concurrent.TimeoutException;
  * @hide
  */
 final class EphemeralResolverConnection implements DeathRecipient {
+    private static final String TAG = "PackageManager";
     // This is running in a critical section and the timeout must be sufficiently low
     private static final long BIND_SERVICE_TIMEOUT_MS =
             ("eng".equals(Build.TYPE)) ? 300 : 200;
+    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
 
     private final Object mLock = new Object();
     private final GetEphemeralResolveInfoCaller mGetEphemeralResolveInfoCaller =
@@ -143,6 +146,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
         if (!mBindRequested) {
             mBindRequested = true;
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Binding to resolver service");
+            }
             mContext.bindServiceAsUser(mIntent, mServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, UserHandle.SYSTEM);
         }
@@ -175,6 +181,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
     @Override
     public void binderDied() {
+        if (DEBUG_EPHEMERAL) {
+            Slog.d(TAG, "Binder died");
+        }
         if (mRemoteInstance != null) {
             mRemoteInstance.asBinder().unlinkToDeath(this, 0 /*flags*/);
         }
@@ -193,6 +202,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
     private final class MyServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Service connected");
+            }
             synchronized (mLock) {
                 try {
                     service.linkToDeath(EphemeralResolverConnection.this, 0 /*flags*/);
@@ -205,6 +217,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Service disconnected");
+            }
             synchronized (mLock) {
                 mRemoteInstance = null;
             }
