@@ -109,6 +109,10 @@ final class OverlayManagerServiceImpl {
                     if (overlayPackage.isStaticOverlay ||
                             mDefaultOverlays.contains(overlayPackage.packageName)) {
                         // Enable this overlay by default.
+                        if (DEBUG) {
+                            Slog.d(TAG, "Enabling overlay " + overlayPackage.packageName
+                                    + " for user " + newUserId + " by default");
+                        }
                         mSettings.setEnabled(overlayPackage.packageName, newUserId, true);
                     }
                 } else {
