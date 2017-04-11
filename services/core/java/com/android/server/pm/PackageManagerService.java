@@ -221,6 +221,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
+import android.util.BootTimingsTraceLog;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -2725,15 +2726,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
                     true /* onlyCoreApps */);
             mPrepareAppDataFuture = SystemServerInitThreadPool.get().submit(() -> {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "fixup");
+                BootTimingsTraceLog traceLog = new BootTimingsTraceLog("SystemServerTimingAsync",
+                        Trace.TRACE_TAG_PACKAGE_MANAGER);
+                traceLog.traceBegin("AppDataFixup");
                 try {
                     mInstaller.fixupAppData(StorageManager.UUID_PRIVATE_INTERNAL,
                             StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Trouble fixing GIDs", e);
                 }
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                traceLog.traceEnd();
 
+                traceLog.traceBegin("AppDataPrepare");
                 if (deferPackages == null || deferPackages.isEmpty()) {
                     return;
                 }
@@ -2754,6 +2758,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         count++;
                     }
                 }
+                traceLog.traceEnd();
                 Slog.i(TAG, "Deferred reconcileAppsData finished " + count + " packages");
             }, "prepareAppData");
 
