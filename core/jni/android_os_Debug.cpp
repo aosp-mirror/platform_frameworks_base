@@ -327,7 +327,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                             subHeap = HEAP_DALVIK_ZYGOTE;
                         } else if (strstr(name, "/dev/ashmem/dalvik-indirect ref") == name) {
                             subHeap = HEAP_DALVIK_INDIRECT_REFERENCE_TABLE;
-                        } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
+                        } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name ||
+                                   strstr(name, "/dev/ashmem/dalvik-data-code-cache") == name ||
+                                   strstr(name, "/dev/ashmem/dalvik-CompilerMetadata") == name) {
                             subHeap = HEAP_DALVIK_CODE_CACHE;
                         } else {
                             subHeap = HEAP_DALVIK_ACCOUNTING;  // Default to accounting.
