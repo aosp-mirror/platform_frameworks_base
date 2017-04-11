@@ -31,6 +31,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -46,6 +47,11 @@ import com.android.systemui.R;
 import java.util.ArrayList;
 
 public class ScreenPinningRequest implements View.OnClickListener {
+
+    private static final int ROTATION_NONE = 0;
+    private static final int ROTATION_LANDSCAPE = 1;
+    private static final int ROTATION_SEASCAPE = 2;
+
     private final Context mContext;
 
     private final AccessibilityManager mAccessibilityService;
@@ -124,11 +130,12 @@ public class ScreenPinningRequest implements View.OnClickListener {
         clearPrompt();
     }
 
-    public FrameLayout.LayoutParams getRequestLayoutParams(boolean isLandscape) {
+    public FrameLayout.LayoutParams getRequestLayoutParams(int rotation) {
         return new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                isLandscape ? (Gravity.CENTER_VERTICAL | Gravity.RIGHT)
+                rotation == ROTATION_SEASCAPE ? (Gravity.CENTER_VERTICAL | Gravity.LEFT) :
+                rotation == ROTATION_LANDSCAPE ? (Gravity.CENTER_VERTICAL | Gravity.RIGHT)
                             : (Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM));
     }
 
@@ -153,14 +160,16 @@ public class ScreenPinningRequest implements View.OnClickListener {
             DisplayMetrics metrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getMetrics(metrics);
             float density = metrics.density;
-            boolean isLandscape = isLandscapePhone(mContext);
+            int rotation = getRotation(mContext);
 
-            inflateView(isLandscape);
+            inflateView(rotation);
             int bgColor = mContext.getColor(
                     R.color.screen_pinning_request_window_bg);
             if (ActivityManager.isHighEndGfx()) {
                 mLayout.setAlpha(0f);
-                if (isLandscape) {
+                if (rotation == ROTATION_SEASCAPE) {
+                    mLayout.setTranslationX(-OFFSET_DP * density);
+                } else if (rotation == ROTATION_LANDSCAPE) {
                     mLayout.setTranslationX(OFFSET_DP * density);
                 } else {
                     mLayout.setTranslationY(OFFSET_DP * density);
@@ -193,18 +202,27 @@ public class ScreenPinningRequest implements View.OnClickListener {
             mContext.registerReceiver(mReceiver, filter);
         }
 
-        private boolean isLandscapePhone(Context context) {
+        private int getRotation(Context context) {
             Configuration config = mContext.getResources().getConfiguration();
-            return config.orientation == Configuration.ORIENTATION_LANDSCAPE
-                    && config.smallestScreenWidthDp < 600;
+            int rot = context.getDisplay().getRotation();
+            if (config.smallestScreenWidthDp < 600) {
+                if (rot == Surface.ROTATION_90) {
+                    return ROTATION_LANDSCAPE;
+                } else if (rot == Surface.ROTATION_270) {
+                    return ROTATION_SEASCAPE;
+                }
+            }
+            return ROTATION_NONE;
         }
 
-        private void inflateView(boolean isLandscape) {
+        private void inflateView(int rotation) {
             // We only want this landscape orientation on <600dp, so rather than handle
             // resource overlay for -land and -sw600dp-land, just inflate this
             // other view for this single case.
-            mLayout = (ViewGroup) View.inflate(getContext(), isLandscape
-                    ? R.layout.screen_pinning_request_land_phone : R.layout.screen_pinning_request,
+            mLayout = (ViewGroup) View.inflate(getContext(),
+                    rotation == ROTATION_SEASCAPE ? R.layout.screen_pinning_request_sea_phone :
+                    rotation == ROTATION_LANDSCAPE ? R.layout.screen_pinning_request_land_phone
+                            : R.layout.screen_pinning_request,
                     null);
             // Catch touches so they don't trigger cancel/activate, like outside does.
             mLayout.setClickable(true);
@@ -240,7 +258,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
             mLayout.findViewById(R.id.screen_pinning_back_bg).setVisibility(backBgVisibility);
             mLayout.findViewById(R.id.screen_pinning_back_bg_light).setVisibility(backBgVisibility);
 
-            addView(mLayout, getRequestLayoutParams(isLandscape));
+            addView(mLayout, getRequestLayoutParams(rotation));
         }
 
         private void swapChildrenIfRtlAndVertical(View group) {
@@ -269,14 +287,14 @@ public class ScreenPinningRequest implements View.OnClickListener {
 
         protected void onConfigurationChanged() {
             removeAllViews();
-            inflateView(isLandscapePhone(mContext));
+            inflateView(getRotation(mContext));
         }
 
         private final Runnable mUpdateLayoutRunnable = new Runnable() {
             @Override
             public void run() {
                 if (mLayout != null && mLayout.getParent() != null) {
-                    mLayout.setLayoutParams(getRequestLayoutParams(isLandscapePhone(mContext)));
+                    mLayout.setLayoutParams(getRequestLayoutParams(getRotation(mContext)));
                 }
             }
         };
