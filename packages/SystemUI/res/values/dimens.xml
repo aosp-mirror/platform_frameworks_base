@@ -563,6 +563,10 @@
     <dimen name="screen_pinning_request_button_width">84dp</dimen>
     <!-- Screen pinning request padding on top of inner circle -->
     <dimen name="screen_pinning_request_inner_padding">14dp</dimen>
+    <!-- Screen pinning request seascape negative padding -->
+    <dimen name="screen_pinning_request_seascape_padding_negative">-18dp</dimen>
+    <!-- Screen pinning request seascape button offset -->
+    <dimen name="screen_pinning_request_seascape_button_offset">-4dp</dimen>
     <!-- Screen pinning request padding on top of icons -->
     <dimen name="screen_pinning_request_nav_icon_padding">18dp</dimen>
     <!-- Screen pinning request padding on side of icons
