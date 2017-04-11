@@ -59,6 +59,11 @@ interface ITelecomService {
             boolean includeDisabledAccounts, String callingPackage);
 
     /**
+     * @see TelecomServiceImpl#getSelfManagedPhoneAccounts
+     */
+    List<PhoneAccountHandle> getSelfManagedPhoneAccounts(String callingPackage);
+
+    /**
      * @see TelecomManager#getPhoneAccountsSupportingScheme
      */
     List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme,
