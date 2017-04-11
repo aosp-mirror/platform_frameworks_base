@@ -592,9 +592,10 @@ interface ITelephony {
      *
      * @param subId The subscription to use.
      * @param AID Application id. See ETSI 102.221 and 101.220.
+     * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
