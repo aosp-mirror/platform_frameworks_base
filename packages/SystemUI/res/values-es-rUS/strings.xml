@@ -166,7 +166,8 @@
     <skip />
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuración del sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificaciones"</string>
-    <string name="notification_shelf_content_description" msgid="5511922384591583913">"Contenedor del flujo de notificaciones"</string>
+    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
+    <skip />
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Eliminar notificación"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS habilitado"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Adquisición de GPS"</string>
@@ -562,8 +563,7 @@
     </plurals>
     <string name="notification_all_categories" msgid="5407190218055113282">"Todas las categorías"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Más opciones de configuración"</string>
-    <!-- no translation found for notification_app_settings (3743278649182392015) -->
-    <skip />
+    <string name="notification_app_settings" msgid="3743278649182392015">"Personalizar: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"controles de notificación"</string>
@@ -744,11 +744,11 @@
     <string name="mobile_data" msgid="7094582042819250762">"Datos móviles"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi desactivado"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth desactivado"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"No molestar desactivado"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"Una regla automática activó No molestar (<xliff:g id="ID_1">%s</xliff:g>). ¿Deseas mantener la configuración actual?"</string>
-    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"Una app (<xliff:g id="ID_1">%s</xliff:g>) activó No molestar. ¿Deseas mantener la configuración actual?"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"Una app o regla automática activó No molestar. ¿Deseas mantener la configuración actual?"</string>
-    <string name="qs_dnd_until" msgid="3469471136280079874">"Hasta las <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"No interrumpir desactivado"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"Una regla automática activó No interrumpir (<xliff:g id="ID_1">%s</xliff:g>). ¿Deseas mantener la configuración actual?"</string>
+    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"Una app (<xliff:g id="ID_1">%s</xliff:g>) activó No interrumpir. ¿Deseas mantener la configuración actual?"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"Una app o regla automática activó No interrumpir. ¿Deseas mantener la configuración actual?"</string>
+    <string name="qs_dnd_until" msgid="3469471136280079874">"Hasta la(s) <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Mantener"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Reemplazar"</string>
 </resources>
