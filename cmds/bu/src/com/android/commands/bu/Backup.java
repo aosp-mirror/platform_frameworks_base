@@ -57,7 +57,7 @@ public final class Backup {
         } else if (arg.equals("restore")) {
             doRestore(OsConstants.STDIN_FILENO);
         } else {
-            Log.e(TAG, "Invalid operation '" + arg + "'");
+            showUsage();
         }
     }
 
@@ -156,6 +156,21 @@ public final class Backup {
                 } catch (IOException e) {}
             }
         }
+    }
+
+    private static void showUsage() {
+        System.err.println(" backup [-f FILE] [-apk|-noapk] [-obb|-noobb] [-shared|-noshared] [-all]");
+        System.err.println("        [-system|-nosystem] [-keyvalue|-nokeyvalue] [PACKAGE...]");
+        System.err.println("     write an archive of the device's data to FILE [default=backup.adb]");
+        System.err.println("     package list optional if -all/-shared are supplied");
+        System.err.println("     -apk/-noapk: do/don't back up .apk files (default -noapk)");
+        System.err.println("     -obb/-noobb: do/don't back up .obb files (default -noobb)");
+        System.err.println("     -shared|-noshared: do/don't back up shared storage (default -noshared)");
+        System.err.println("     -all: back up all installed applications");
+        System.err.println("     -system|-nosystem: include system apps in -all (default -system)");
+        System.err.println("     -keyvalue|-nokeyvalue: include apps that perform key/value backups.");
+        System.err.println("         (default -nokeyvalue)");
+        System.err.println(" restore FILE             restore device contents from FILE");
     }
 
     private String nextArg() {
