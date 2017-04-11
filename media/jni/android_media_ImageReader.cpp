@@ -31,6 +31,8 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
+#include <grallocusage/GrallocUsageConversion.h>
 
 #include <jni.h>
 #include <JNIHelp.h>
@@ -42,6 +44,7 @@
 #define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mNativeBuffer"
 #define ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID       "mTimestamp"
 
+#define CONSUMER_BUFFER_USAGE_UNKNOWN              0;
 // ----------------------------------------------------------------------------
 
 using namespace android;
@@ -327,8 +330,8 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
             "Can not find SurfacePlane constructor");
 }
 
-static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
-                             jint width, jint height, jint format, jint maxImages)
+static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint width, jint height,
+                             jint format, jint maxImages, jlong ndkUsage)
 {
     status_t res;
     int nativeFormat;
@@ -358,17 +361,29 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
             width, height, format, maxImages, getpid(),
             createProcessUniqueId());
     uint32_t consumerUsage = GRALLOC_USAGE_SW_READ_OFTEN;
+    bool needUsageOverride = ndkUsage != CONSUMER_BUFFER_USAGE_UNKNOWN;
+    uint64_t outProducerUsage = 0;
+    uint64_t outConsumerUsage = 0;
+    android_hardware_HardwareBuffer_convertToGrallocUsageBits(&outProducerUsage, &outConsumerUsage,
+            ndkUsage, 0);
 
     if (isFormatOpaque(nativeFormat)) {
         // Use the SW_READ_NEVER usage to tell producer that this format is not for preview or video
         // encoding. The only possibility will be ZSL output.
         consumerUsage = GRALLOC_USAGE_SW_READ_NEVER;
+        if (needUsageOverride) {
+            consumerUsage = android_convertGralloc1To0Usage(0, outConsumerUsage);
+        }
+    } else if (needUsageOverride) {
+        ALOGW("Consumer usage override for non-opaque format is not implemented yet, "
+                "ignore the provided usage from the application");
     }
     bufferConsumer = new BufferItemConsumer(gbConsumer, consumerUsage, maxImages,
             /*controlledByApp*/true);
     if (bufferConsumer == nullptr) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
-                "Failed to allocate native buffer consumer for format 0x%x", nativeFormat);
+                "Failed to allocate native buffer consumer for format 0x%x and usage 0x%x",
+                nativeFormat, consumerUsage);
         return;
     }
     ctx->setBufferConsumer(bufferConsumer);
@@ -788,7 +803,7 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
 
 static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeClassInit",        "()V",                        (void*)ImageReader_classInit },
-    {"nativeInit",             "(Ljava/lang/Object;IIII)V",  (void*)ImageReader_init },
+    {"nativeInit",             "(Ljava/lang/Object;IIIIJ)V",  (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
     {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
