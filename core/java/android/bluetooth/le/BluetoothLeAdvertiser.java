@@ -386,7 +386,7 @@ public final class BluetoothLeAdvertiser {
             }
 
             boolean supportPeriodic = mBluetoothAdapter.isLePeriodicAdvertisingSupported();
-            if (periodicParameters != null && periodicParameters.getEnable() && !supportPeriodic) {
+            if (periodicParameters != null && !supportPeriodic) {
                 throw new IllegalArgumentException(
                     "Controller does not support LE Periodic Advertising");
             }
