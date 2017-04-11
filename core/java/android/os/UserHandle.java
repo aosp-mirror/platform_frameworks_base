@@ -344,6 +344,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public @UserIdInt int getIdentifier() {
         return mHandle;
     }
