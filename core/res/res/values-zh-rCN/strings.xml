@@ -1732,19 +1732,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"切换到文字输入模式来输入时间。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"切换到时钟模式来输入时间。"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自动填充选项"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"无法自动填充内容"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"要保存到<xliff:g id="LABEL">%1$s</xliff:g>吗？"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"要将<xliff:g id="TYPE">%1$s</xliff:g>保存到<xliff:g id="LABEL">%2$s</xliff:g>吗？"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"保存"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"不用了"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"密码"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"地址"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"信用卡"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"用户名"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"电子邮件地址"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"请保持冷静，并寻找附近的避难地点。"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"请立即从沿海和河滨区域撤离到高地等较安全的地方。"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"请保持冷静，并寻找附近的避难地点。"</string>

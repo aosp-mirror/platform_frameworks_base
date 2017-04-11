@@ -1734,19 +1734,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ប្តូរ​ទៅ​មុខងារ​បញ្ចូល​អក្សរ​សម្រាប់​ការ​បញ្ចូល​ម៉ោង។"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ប្តូរ​ទៅ​មុខងារ​នាឡិកា​សម្រាប់​ការ​បញ្ចូល​ម៉ោង។"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ជម្រើសបំពេញដោយស្វ័យប្រវត្តិ"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"មិនអាច​បំពេញ​មាតិកា​ដោយស្វ័យប្រវត្តិ​បានទេ"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"រក្សា​ទុក​ទៅ​ក្នុង <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"រក្សាទុក <xliff:g id="TYPE">%1$s</xliff:g> ​ទៅ​ក្នុង <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"រក្សាទុក"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"ទេ អរគុណ"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"ពាក្យ​សម្ងាត់"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"អាសយដ្ឋាន"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"បណ្ណ​ឥណទាន"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"ឈ្មោះ​អ្នក​ប្រើប្រាស់"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"អាសយដ្ឋាន​អ៊ីមែល"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"សូមរក្សាភាពស្ងប់ស្ងាត់ ហើយស្វែងរកជម្រកសុវត្ថិភាពដែលនៅជិត។"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ភៀសខ្លួនជាបន្ទាន់ពីតំបន់ឆ្នេរ និងតំបន់តាមមាត់ទន្លេទៅកាន់កន្លែងដែលមានសុវត្ថិភាពជាងនេះ ដូចជាទីទួលណាមួយ។"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"សូមរក្សាភាពស្ងប់ស្ងាត់ ហើយស្វែងរកជម្រកសុវត្ថិភាពដែលនៅជិត។"</string>

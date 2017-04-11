@@ -1732,19 +1732,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"برای وارد کردن زمان، به حالت وارد کردن نوشتار تغییر وضعیت دهید."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"برای وارد کردن زمان، به حالت ساعت تغییر وضعیت دهید."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"گزینه‌های تکمیل خودکار"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"تکمیل خودکار محتوا ممکن نیست"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"در <xliff:g id="LABEL">%1$s</xliff:g> ذخیره شود؟"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> در <xliff:g id="LABEL">%2$s</xliff:g> ذخیره شود؟"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"ذخیره"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"نه سپاسگزارم"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"گذرواژه"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"نشانی"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"کارت‌ اعتباری"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"نام کاربری"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"نشانی رایانامه"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"آرام باشید و پناهگاهی در این اطراف پیدا کنید."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"فوراً مناطق ساحلی و محدوده رودخانه را ترک کنید و به جایی امن، مثل ارتفاعات بروید."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"آرام باشید و پناهگاهی در این اطراف پیدا کنید."</string>

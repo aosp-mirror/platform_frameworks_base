@@ -1794,19 +1794,18 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Перейти в текстовий режим, щоб ввести час."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Перейти в режим годинника, щоб ввести час."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Параметри автозаповнення"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Вміст не можна заповнити автоматично"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"Зберегти в службі <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Зберегти дані (<xliff:g id="TYPE">%1$s</xliff:g>) у службі <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у службі <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>) у службі <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зберегти"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ні, дякую"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"пароль"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредитна картка"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"ім’я користувача"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"електронна адреса"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Не хвилюйтеся та знайдіть прихисток поблизу."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Негайно евакуюйтеся з прибережних районів і територій поблизу річок у безпечніше місце, як-от на територію на підвищенні."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Не хвилюйтеся та знайдіть прихисток поблизу."</string>
