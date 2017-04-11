@@ -29,26 +29,18 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
     private static final int INTERVAL_MAX = 80;
     private static final int INTERVAL_MIN = 65519;
 
-    private final boolean enable;
     private final boolean includeTxPower;
     private final int interval;
 
-    private PeriodicAdvertisingParameters(boolean enable, boolean includeTxPower, int interval) {
-        this.enable = enable;
+    private PeriodicAdvertisingParameters(boolean includeTxPower, int interval) {
         this.includeTxPower = includeTxPower;
         this.interval = interval;
     }
 
     private PeriodicAdvertisingParameters(Parcel in) {
-        enable = in.readInt() != 0 ? true : false;
         includeTxPower = in.readInt() != 0 ? true : false;
         interval = in.readInt();
     }
-
-    /**
-     * Returns whether the periodic advertising shall be enabled.
-     */
-    public boolean getEnable() { return enable; }
 
     /**
      * Returns whether the TX Power will be included.
@@ -68,7 +60,6 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(enable ? 1 : 0);
         dest.writeInt(includeTxPower ? 1 : 0);
         dest.writeInt(interval);
     }
@@ -89,16 +80,7 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
 
     public static final class Builder {
         private boolean includeTxPower = false;
-        private boolean enable = false;
         private int interval = INTERVAL_MAX;
-
-        /**
-         * Set whether the Periodic Advertising should be enabled for this set.
-         */
-        public Builder setEnable(boolean enable) {
-            this.enable = enable;
-            return this;
-        }
 
         /**
          * Whether the transmission power level should be included in the periodic
@@ -128,7 +110,7 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
          * Build the {@link AdvertisingSetParameters} object.
          */
         public PeriodicAdvertisingParameters build() {
-            return new PeriodicAdvertisingParameters(enable, includeTxPower, interval);
+            return new PeriodicAdvertisingParameters(includeTxPower, interval);
         }
     }
 }
