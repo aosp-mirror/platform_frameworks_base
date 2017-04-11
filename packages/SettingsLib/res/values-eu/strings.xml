@@ -113,7 +113,7 @@
     <string name="tts_play_example_title" msgid="7094780383253097230">"Entzun adibide bat"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Erreproduzitu hizketa-sintesiaren demostrazio laburra"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Instalatu ahotsaren datuak"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalatu hizketaren sintesirako behar diren ahots-datuak"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalatu hizketaren sintesirako behar diren ahotsaren datuak"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Hizketaren sintesi-motorrak idazten duzun testu guztia bil dezake, pasahitzak eta kreditu-txarteleko zenbakiak bezalako datu pertsonalak barne. <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> motorrak egin du eskaera. Hizketaren sintesi-motor hori erabili nahi duzu?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Testua ahots bihurtzeko eginbidea erabiltzeko, hizkuntza honek sareko konexioa behar du."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Hizketa-sintesiaren adibide bat da hau"</string>
