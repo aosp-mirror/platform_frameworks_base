@@ -66,6 +66,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -4379,6 +4380,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @Nullable
     private RoundScrollbarRenderer mRoundScrollbarRenderer;
+
+    /** Used to delay visibility updates sent to the autofill manager */
+    private Handler mVisibilityChangeForAutofillHandler;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -11695,6 +11699,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Drawable fg = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
         if (fg != null && isVisible != fg.isVisible()) {
             fg.setVisible(isVisible, false);
+        }
+
+        if (isAutofillable()) {
+            AutofillManager afm = getAutofillManager();
+
+            if (afm != null && getAccessibilityViewId() > LAST_APP_ACCESSIBILITY_ID) {
+                if (mVisibilityChangeForAutofillHandler != null) {
+                    mVisibilityChangeForAutofillHandler.removeMessages(0);
+                }
+
+                // If the view is in the background but still part of the hierarchy this is called
+                // with isVisible=false. Hence visibility==false requires further checks
+                if (isVisible) {
+                    afm.notifyViewVisibilityChange(this, true);
+                } else {
+                    if (mVisibilityChangeForAutofillHandler == null) {
+                        mVisibilityChangeForAutofillHandler =
+                                new VisibilityChangeForAutofillHandler(afm, this);
+                    }
+                    // Let current operation (e.g. removal of the view from the hierarchy)
+                    // finish before checking state
+                    mVisibilityChangeForAutofillHandler.obtainMessage(0, this).sendToTarget();
+                }
+            }
         }
     }
 
@@ -24488,6 +24516,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @Override
         public void run() {
             setPressed(false);
+        }
+    }
+
+    /**
+     * When a view becomes invisible checks if autofill considers the view invisible too. This
+     * happens after the regular removal operation to make sure the operation is finished by the
+     * time this is called.
+     */
+    private static class VisibilityChangeForAutofillHandler extends Handler {
+        private final AutofillManager mAfm;
+        private final View mView;
+
+        private VisibilityChangeForAutofillHandler(@NonNull AutofillManager afm,
+                @NonNull View view) {
+            mAfm = afm;
+            mView = view;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            mAfm.notifyViewVisibilityChange(mView, mView.isShown());
         }
     }
 

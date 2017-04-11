@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -143,6 +144,10 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     @Nullable private ParcelableMap mLastAutofilledData;
 
+    /** If view tracking is enabled, contains the tracking state */
+    @GuardedBy("mLock")
+    @Nullable private TrackedViews mTrackedViews;
+
     /** @hide */
     public interface AutofillClient {
         /**
@@ -177,6 +182,20 @@ public final class AutofillManager {
          * @return Whether the UI was hidden.
          */
         boolean autofillCallbackRequestHideFillUi();
+
+        /**
+         * Checks if the view is currently attached and visible.
+         *
+         * @return {@code true} iff the view is attached or visible
+         */
+        boolean getViewVisibility(int viewId);
+
+        /**
+         * Checks is the client is currently visible as understood by autofill.
+         *
+         * @return {@code true} if the client is currently visible
+         */
+        boolean isVisibleForAutofill();
     }
 
     /**
@@ -255,6 +274,21 @@ public final class AutofillManager {
                 mService.setWindow(mSessionId, windowToken);
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not attach window to session " + mSessionId);
+            }
+        }
+    }
+
+    /**
+     * Called once the client becomes visible.
+     *
+     * @see AutofillClient#isVisibleForAutofill()
+     *
+     * {@hide}
+     */
+    public void onVisibleForAutofill() {
+        synchronized (mLock) {
+            if (mEnabled && mSessionId != NO_SESSION && mTrackedViews != null) {
+                mTrackedViews.onVisibleForAutofill();
             }
         }
     }
@@ -407,6 +441,22 @@ public final class AutofillManager {
 
                 // Update focus on existing session.
                 updateSessionLocked(id, null, null, FLAG_VIEW_EXITED);
+            }
+        }
+    }
+
+    /**
+     * Called when a {@link View view's} visibility changes.
+     *
+     * @param view {@link View} that was exited.
+     * @param isVisible visible if the view is visible in the view hierarchy.
+     *
+     * @hide
+     */
+    public void notifyViewVisibilityChange(@NonNull View view, boolean isVisible) {
+        synchronized (mLock) {
+            if (mEnabled && mSessionId != NO_SESSION && mTrackedViews != null) {
+                mTrackedViews.notifyViewVisibilityChange(view, isVisible);
             }
         }
     }
@@ -669,6 +719,7 @@ public final class AutofillManager {
             throw e.rethrowFromSystemServer();
         }
 
+        mTrackedViews = null;
         mSessionId = NO_SESSION;
     }
 
@@ -683,6 +734,7 @@ public final class AutofillManager {
             throw e.rethrowFromSystemServer();
         }
 
+        mTrackedViews = null;
         mSessionId = NO_SESSION;
     }
 
@@ -903,6 +955,25 @@ public final class AutofillManager {
         }
     }
 
+    /**
+     *  Set the tracked views.
+     *
+     * @param trackedIds The views to be tracked
+     * @param saveOnAllViewsInvisible Finish the session once all tracked views are invisible.
+     */
+    private void setTrackedViews(int sessionId, List<AutofillId> trackedIds,
+            boolean saveOnAllViewsInvisible) {
+        synchronized (mLock) {
+            if (mEnabled && mSessionId == sessionId) {
+                if (saveOnAllViewsInvisible) {
+                    mTrackedViews = new TrackedViews(trackedIds);
+                } else {
+                    mTrackedViews = null;
+                }
+            }
+        }
+    }
+
     private void requestHideFillUi(int sessionId, IBinder windowToken, AutofillId id) {
         final View anchor = findAchorView(windowToken, id);
 
@@ -966,6 +1037,195 @@ public final class AutofillManager {
 
     private boolean hasAutofillFeature() {
         return mService != null;
+    }
+
+    /**
+     * View tracking information. Once all tracked views become invisible the session is finished.
+     */
+    private class TrackedViews {
+        /** Visible tracked views */
+        @Nullable private ArraySet<AutofillId> mVisibleTrackedIds;
+
+        /** Invisible tracked views */
+        @Nullable private ArraySet<AutofillId> mInvisibleTrackedIds;
+
+        /**
+         * Check if set is null or value is in set.
+         *
+         * @param set   The set or null (== empty set)
+         * @param value The value that might be in the set
+         *
+         * @return {@code true} iff set is not empty and value is in set
+         */
+        private <T> boolean isInSet(@Nullable ArraySet<T> set, T value) {
+            return set != null && set.contains(value);
+        }
+
+        /**
+         * Add a value to a set. If set is null, create a new set.
+         *
+         * @param set        The set or null (== empty set)
+         * @param valueToAdd The value to add
+         *
+         * @return The set including the new value. If set was {@code null}, a set containing only
+         *         the new value.
+         */
+        @NonNull
+        private <T> ArraySet<T> addToSet(@Nullable ArraySet<T> set, T valueToAdd) {
+            if (set == null) {
+                set = new ArraySet<>(1);
+            }
+
+            set.add(valueToAdd);
+
+            return set;
+        }
+
+        /**
+         * Remove a value from a set.
+         *
+         * @param set           The set or null (== empty set)
+         * @param valueToRemove The value to remove
+         *
+         * @return The set without the removed value. {@code null} if set was null, or is empty
+         *         after removal.
+         */
+        @Nullable
+        private <T> ArraySet<T> removeFromSet(@Nullable ArraySet<T> set, T valueToRemove) {
+            if (set == null) {
+                return null;
+            }
+
+            set.remove(valueToRemove);
+
+            if (set.isEmpty()) {
+                return null;
+            }
+
+            return set;
+        }
+
+        /**
+         * Set the tracked views.
+         *
+         * @param trackedIds The views to be tracked
+         */
+        TrackedViews(@NonNull List<AutofillId> trackedIds) {
+            mVisibleTrackedIds = null;
+            mInvisibleTrackedIds = null;
+
+            AutofillClient client = getClientLocked();
+            if (trackedIds != null) {
+                int numIds = trackedIds.size();
+                for (int i = 0; i < numIds; i++) {
+                    AutofillId id = trackedIds.get(i);
+
+                    boolean isVisible = true;
+                    if (client != null && client.isVisibleForAutofill()) {
+                        isVisible = client.getViewVisibility(id.getViewId());
+                    }
+
+                    if (isVisible) {
+                        mVisibleTrackedIds = addToSet(mInvisibleTrackedIds, id);
+                    } else {
+                        mInvisibleTrackedIds = addToSet(mInvisibleTrackedIds, id);
+                    }
+                }
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "TrackedViews(trackedIds=" + trackedIds + "): "
+                        + " mVisibleTrackedIds=" + mVisibleTrackedIds
+                        + " mInvisibleTrackedIds=" + mInvisibleTrackedIds);
+            }
+
+            if (mVisibleTrackedIds == null) {
+                finishSessionLocked();
+            }
+        }
+
+        /**
+         * Called when a {@link View view's} visibility changes.
+         *
+         * @param view {@link View} that was exited.
+         * @param isVisible visible if the view is visible in the view hierarchy.
+         */
+        void notifyViewVisibilityChange(@NonNull View view, boolean isVisible) {
+            AutofillId id = getAutofillId(view);
+            AutofillClient client = getClientLocked();
+
+            if (DEBUG) {
+                Log.d(TAG, "notifyViewVisibilityChange(): id=" + id + " isVisible="
+                        + isVisible);
+            }
+
+            if (client != null && client.isVisibleForAutofill()) {
+                if (isVisible) {
+                    if (isInSet(mInvisibleTrackedIds, id)) {
+                        mInvisibleTrackedIds = removeFromSet(mInvisibleTrackedIds, id);
+                        mVisibleTrackedIds = addToSet(mVisibleTrackedIds, id);
+                    }
+                } else {
+                    if (isInSet(mVisibleTrackedIds, id)) {
+                        mVisibleTrackedIds = removeFromSet(mVisibleTrackedIds, id);
+                        mInvisibleTrackedIds = addToSet(mInvisibleTrackedIds, id);
+                    }
+                }
+            }
+
+            if (mVisibleTrackedIds == null) {
+                finishSessionLocked();
+            }
+        }
+
+        /**
+         * Called once the client becomes visible.
+         *
+         * @see AutofillClient#isVisibleForAutofill()
+         */
+        void onVisibleForAutofill() {
+            // The visibility of the views might have changed while the client was not started,
+            // hence update the visibility state for all views.
+            AutofillClient client = getClientLocked();
+            ArraySet<AutofillId> updatedVisibleTrackedIds = null;
+            ArraySet<AutofillId> updatedInvisibleTrackedIds = null;
+            if (client != null) {
+                if (mInvisibleTrackedIds != null) {
+                    for (AutofillId id : mInvisibleTrackedIds) {
+                        if (client.getViewVisibility(id.getViewId())) {
+                            updatedVisibleTrackedIds = addToSet(updatedVisibleTrackedIds, id);
+
+                            if (DEBUG) {
+                                Log.i(TAG, "onVisibleForAutofill() " + id + " became visible");
+                            }
+                        } else {
+                            updatedInvisibleTrackedIds = addToSet(updatedInvisibleTrackedIds, id);
+                        }
+                    }
+                }
+
+                if (mVisibleTrackedIds != null) {
+                    for (AutofillId id : mVisibleTrackedIds) {
+                        if (client.getViewVisibility(id.getViewId())) {
+                            updatedVisibleTrackedIds = addToSet(updatedVisibleTrackedIds, id);
+                        } else {
+                            updatedInvisibleTrackedIds = addToSet(updatedInvisibleTrackedIds, id);
+
+                            if (DEBUG) {
+                                Log.i(TAG, "onVisibleForAutofill() " + id + " became invisible");
+                            }
+                        }
+                    }
+                }
+
+                mInvisibleTrackedIds = updatedInvisibleTrackedIds;
+                mVisibleTrackedIds = updatedVisibleTrackedIds;
+            }
+
+            if (mVisibleTrackedIds == null) {
+                finishSessionLocked();
+            }
+        }
     }
 
     /**
@@ -1104,6 +1364,17 @@ public final class AutofillManager {
                         Log.e(TAG, "startIntentSender() failed for intent:" + intentSender, e);
                     }
                 });
+            }
+        }
+
+        @Override
+        public void setTrackedViews(int sessionId, List<AutofillId> ids,
+                boolean saveOnAllViewsInvisible) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.mContext.getMainThreadHandler().post(
+                        () -> afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible)
+                );
             }
         }
     }

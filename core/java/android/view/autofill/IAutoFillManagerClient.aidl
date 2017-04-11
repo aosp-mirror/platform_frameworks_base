@@ -49,6 +49,13 @@ oneway interface IAutoFillManagerClient {
     void authenticate(int sessionId, in IntentSender intent, in Intent fillInIntent);
 
     /**
+      * Sets the views to track. If saveOnAllViewsInvisible is set and all these view are invisible
+      * the session is finished automatically.
+      */
+    void setTrackedViews(int sessionId, in List<AutofillId> ids,
+            boolean saveOnAllViewsInvisible);
+
+    /**
      * Requests showing the fill UI.
      */
     void requestShowFillUi(int sessionId, in IBinder windowToken, in AutofillId id, int width,
