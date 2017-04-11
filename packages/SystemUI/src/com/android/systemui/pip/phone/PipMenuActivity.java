@@ -221,6 +221,13 @@ public class PipMenuActivity extends Activity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+
+        cancelDelayedFinish();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 

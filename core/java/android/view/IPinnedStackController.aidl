@@ -28,4 +28,9 @@ interface IPinnedStackController {
      * Notifies the controller that the PiP is currently minimized.
      */
     oneway void setIsMinimized(boolean isMinimized);
+
+    /**
+     * @return what WM considers to be the current device rotation.
+     */
+    int getDisplayRotation();
 }

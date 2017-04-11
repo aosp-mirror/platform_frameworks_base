@@ -89,6 +89,11 @@ public class PipTouchHandler implements TunerService.Tunable {
     private Rect mExpandedMovementBounds = new Rect();
     private int mExpandedShortestEdgeSize;
 
+    // Used to workaround an issue where the WM rotation happens before we are notified, allowing
+    // us to send stale bounds
+    private int mDeferResizeToNormalBoundsUntilRotation = -1;
+    private int mDisplayRotation;
+
     private Handler mHandler = new Handler();
     private Runnable mShowDismissAffordance = new Runnable() {
         @Override
@@ -250,7 +255,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect animatingBounds,
-            boolean fromImeAdjustement) {
+            boolean fromImeAdjustement, int displayRotation) {
         // Re-calculate the expanded bounds
         mNormalBounds = normalBounds;
         Rect normalMovementBounds = new Rect();
@@ -304,7 +309,17 @@ public class PipTouchHandler implements TunerService.Tunable {
         // above
         mNormalMovementBounds = normalMovementBounds;
         mExpandedMovementBounds = expandedMovementBounds;
+        mDisplayRotation = displayRotation;
         updateMovementBounds(mMenuState);
+
+        // If we have a deferred resize, apply it now
+        if (mDeferResizeToNormalBoundsUntilRotation == displayRotation) {
+            mMotionHelper.animateToUnexpandedState(normalBounds, mSavedSnapFraction,
+                    mNormalMovementBounds, mMovementBounds, mIsMinimized,
+                    true /* immediate */);
+            mSavedSnapFraction = -1f;
+            mDeferResizeToNormalBoundsUntilRotation = -1;
+        }
     }
 
     private void onRegistrationChanged(boolean isRegistered) {
@@ -474,11 +489,34 @@ public class PipTouchHandler implements TunerService.Tunable {
             // Try and restore the PiP to the closest edge, using the saved snap fraction
             // if possible
             if (resize) {
-                Rect normalBounds = new Rect(mNormalBounds);
-                mMotionHelper.animateToUnexpandedState(normalBounds, mSavedSnapFraction,
-                        mNormalMovementBounds, mMovementBounds, mIsMinimized);
+                // This is a very special case: when the menu is expanded and visible, navigating to
+                // another activity can trigger auto-enter PiP, and if the revealed activity has a
+                // forced rotation set, then the controller will get updated with the new rotation
+                // of the display. However, at the same time, SystemUI will try to hide the menu by
+                // creating an animation to the normal bounds which are now stale.  In such a case
+                // we defer the animation to the normal bounds until after the next
+                // onMovementBoundsChanged() call to get the bounds in the new orientation
+                if (mDeferResizeToNormalBoundsUntilRotation == -1) {
+                    try {
+                        int displayRotation = mPinnedStackController.getDisplayRotation();
+                        if (mDisplayRotation != displayRotation) {
+                            mDeferResizeToNormalBoundsUntilRotation = displayRotation;
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Could not get display rotation from controller");
+                    }
+                }
+
+                if (mDeferResizeToNormalBoundsUntilRotation == -1) {
+                    Rect normalBounds = new Rect(mNormalBounds);
+                    mMotionHelper.animateToUnexpandedState(normalBounds, mSavedSnapFraction,
+                            mNormalMovementBounds, mMovementBounds, mIsMinimized,
+                            false /* immediate */);
+                    mSavedSnapFraction = -1f;
+                }
+            } else {
+                mSavedSnapFraction = -1f;
             }
-            mSavedSnapFraction = -1f;
         }
         mMenuState = menuState;
         updateMovementBounds(menuState);
