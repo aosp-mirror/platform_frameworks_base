@@ -94,15 +94,15 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     public OtaDexoptService(Context context, PackageManagerService packageManagerService) {
         this.mContext = context;
         this.mPackageManagerService = packageManagerService;
-
-        // Now it's time to check whether we need to move any A/B artifacts.
-        moveAbArtifacts(packageManagerService.mInstaller);
     }
 
     public static OtaDexoptService main(Context context,
             PackageManagerService packageManagerService) {
         OtaDexoptService ota = new OtaDexoptService(context, packageManagerService);
         ServiceManager.addService("otadexopt", ota);
+
+        // Now it's time to check whether we need to move any A/B artifacts.
+        ota.moveAbArtifacts(packageManagerService.mInstaller);
 
         return ota;
     }
@@ -330,8 +330,15 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             throw new IllegalStateException("Should not be ota-dexopting when trying to move.");
         }
 
+        if (!mPackageManagerService.isUpgrade()) {
+            Slog.d(TAG, "No upgrade, skipping A/B artifacts check.");
+            return;
+        }
+
         // Look into all packages.
         Collection<PackageParser.Package> pkgs = mPackageManagerService.getPackages();
+        int packagePaths = 0;
+        int pathsSuccessful = 0;
         for (PackageParser.Package pkg : pkgs) {
             if (pkg == null) {
                 continue;
@@ -362,13 +369,16 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
                     // TODO: Check first whether there is an artifact, to save the roundtrip time.
 
+                    packagePaths++;
                     try {
                         installer.moveAb(path, dexCodeInstructionSet, oatDir);
+                        pathsSuccessful++;
                     } catch (InstallerException e) {
                     }
                 }
             }
         }
+        Slog.i(TAG, "Moved " + pathsSuccessful + "/" + packagePaths);
     }
 
     /**
