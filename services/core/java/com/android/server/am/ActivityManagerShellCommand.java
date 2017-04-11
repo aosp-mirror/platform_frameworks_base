@@ -2498,6 +2498,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
             pw.println("          specified then run as the current user.");
+            pw.println("  start-foreground-service [--user <USER_ID> | current] <INTENT>");
+            pw.println("      Start a foreground Service.  Options are:");
+            pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
+            pw.println("          specified then run as the current user.");
             pw.println("  stop-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Stop a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
