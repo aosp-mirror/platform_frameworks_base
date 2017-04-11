@@ -32,15 +32,10 @@ import java.util.Map.Entry;
  */
 class TaskSnapshotCache {
 
-    // TODO: Make this more dynamic to accomodate for different clients.
-    private static final int RETRIEVAL_CACHE_SIZE = 4;
-
     private final WindowManagerService mService;
     private final TaskSnapshotLoader mLoader;
     private final ArrayMap<AppWindowToken, Integer> mAppTaskMap = new ArrayMap<>();
     private final ArrayMap<Integer, CacheEntry> mRunningCache = new ArrayMap<>();
-    private final LruCache<Integer, TaskSnapshot> mRetrievalCache =
-            new LruCache<>(RETRIEVAL_CACHE_SIZE);
 
     TaskSnapshotCache(WindowManagerService service, TaskSnapshotLoader loader) {
         mService = service;
@@ -55,7 +50,6 @@ class TaskSnapshotCache {
         final AppWindowToken top = task.getTopChild();
         mAppTaskMap.put(top, task.mTaskId);
         mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, task.getTopChild()));
-        mRetrievalCache.put(task.mTaskId, snapshot);
     }
 
     /**
@@ -69,12 +63,6 @@ class TaskSnapshotCache {
             final CacheEntry entry = mRunningCache.get(taskId);
             if (entry != null) {
                 return entry.snapshot;
-            }
-
-            // Try the retrieval cache.
-            final TaskSnapshot snapshot = mRetrievalCache.get(taskId);
-            if (snapshot != null) {
-                return snapshot;
             }
         }
 
@@ -93,13 +81,6 @@ class TaskSnapshotCache {
         if (snapshot == null) {
             return null;
         }
-
-        // Only cache non-reduced snapshots.
-        if (!reducedResolution) {
-            synchronized (mService.mWindowMap) {
-                mRetrievalCache.put(taskId, snapshot);
-            }
-        }
         return snapshot;
     }
 
@@ -110,9 +91,6 @@ class TaskSnapshotCache {
         final Integer taskId = mAppTaskMap.get(wtoken);
         if (taskId != null) {
             removeRunningEntry(taskId);
-        }
-        if (wtoken.getTask() != null) {
-            mRetrievalCache.remove(wtoken.getTask().mTaskId);
         }
     }
 
@@ -128,7 +106,6 @@ class TaskSnapshotCache {
 
     void onTaskRemoved(int taskId) {
         removeRunningEntry(taskId);
-        mRetrievalCache.remove(taskId);
     }
 
     private void removeRunningEntry(int taskId) {
@@ -142,20 +119,12 @@ class TaskSnapshotCache {
     void dump(PrintWriter pw, String prefix) {
         final String doublePrefix = prefix + "  ";
         final String triplePrefix = doublePrefix + "  ";
-        final String quadruplePrefix = triplePrefix + "  ";
         pw.println(prefix + "SnapshotCache");
-        pw.println(doublePrefix + "RunningCache");
         for (int i = mRunningCache.size() - 1; i >= 0; i--) {
             final CacheEntry entry = mRunningCache.valueAt(i);
-            pw.println(triplePrefix + "Entry taskId=" + mRunningCache.keyAt(i));
-            pw.println(quadruplePrefix + "topApp=" + entry.topApp);
-            pw.println(quadruplePrefix + "snapshot=" + entry.snapshot);
-        }
-        pw.println(doublePrefix + "RetrievalCache");
-        final Map<Integer, TaskSnapshot> retrievalSnapshot = mRetrievalCache.snapshot();
-        for (Entry<Integer, TaskSnapshot> entry : retrievalSnapshot.entrySet()) {
-            pw.println(triplePrefix + "Entry taskId=" + entry.getKey());
-            pw.println(quadruplePrefix + "snapshot=" + entry.getValue());
+            pw.println(doublePrefix + "Entry taskId=" + mRunningCache.keyAt(i));
+            pw.println(triplePrefix + "topApp=" + entry.topApp);
+            pw.println(triplePrefix + "snapshot=" + entry.snapshot);
         }
     }
 

@@ -64,7 +64,7 @@ public class RecentsTaskLoadPlan {
     public static class Options {
         public int runningTaskId = -1;
         public boolean loadIcons = true;
-        public boolean loadThumbnails = true;
+        public boolean loadThumbnails = false;
         public boolean onlyLoadForCache = false;
         public boolean onlyLoadPausedActivities = false;
         public int numVisibleTasks = 0;
@@ -189,7 +189,7 @@ public class RecentsTaskLoadPlan {
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
             ThumbnailData thumbnail = loader.getAndUpdateThumbnail(taskKey,
-                    false /* loadIfNotCached */);
+                    false /* loadIfNotCached */, false /* storeInCache */);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
             int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
             boolean isSystemApp = (info != null) &&
@@ -223,9 +223,7 @@ public class RecentsTaskLoadPlan {
     /**
      * Called to apply the actual loading based on the specified conditions.
      */
-    public synchronized void executePlan(Options opts, RecentsTaskLoader loader,
-            TaskResourceLoadQueue loadQueue) {
-        RecentsConfiguration config = Recents.getConfiguration();
+    public synchronized void executePlan(Options opts, RecentsTaskLoader loader) {
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.
@@ -250,15 +248,9 @@ public class RecentsTaskLoadPlan {
                             true);
                 }
             }
-            if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
-                if (task.thumbnail == null || isRunningTask) {
-                    if (config.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey,
-                                true /* loadIfNotCached */);
-                    } else if (config.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
-                        loadQueue.addTask(task);
-                    }
-                }
+            if (opts.loadThumbnails && isVisibleThumbnail) {
+                task.thumbnail = loader.getAndUpdateThumbnail(taskKey,
+                        true /* loadIfNotCached */, true /* storeInCache */);
             }
         }
     }
