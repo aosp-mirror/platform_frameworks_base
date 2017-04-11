@@ -123,39 +123,11 @@ import java.util.function.DoubleUnaryOperator;
  * and {@link #connect(ColorSpace, ColorSpace)}, are also guaranteed to be
  * thread-safe.</p>
  *
- * <h3>Visualization and debugging</h3>
- *
- * <p>To visualize and debug color spaces, you can call {@link #createRenderer()}.
- * The {@link Renderer} created by calling this method can be used to compare
- * color spaces and locate specific colors on a CIE 1931 or CIE 1976 UCS
- * chromaticity diagram.</p>
- *
- * <p>The following code snippet shows how to render a bitmap that compares
- * the color gamuts and white points of {@link Named#DCI_P3} and
- * {@link Named#PRO_PHOTO_RGB}:</p>
- *
- * <pre class="prettyprint">
- * Bitmap bitmap = ColorSpace.createRenderer()
- *     .size(768)
- *     .clip(true)
- *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
- *     .add(ColorSpace.get(ColorSpace.Named.PRO_PHOTO_RGB), 0xff097ae9)
- *     .render();
- * </pre>
- * <p>
- *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_renderer.png" />
- *     <figcaption style="text-align: center;">DCI-P3 vs ProPhoto RGB</figcaption>
- * </p>
- *
- * <p>Please refer to the documentation of the {@link Renderer} class for more
- * information about its options and capabilities.</p>
- *
  * @see #get(Named)
  * @see Named
  * @see Model
  * @see Connector
  * @see Adaptation
- * @see Renderer
  */
 @AnyThread
 @SuppressWarnings("StaticInitializerReferencesSubClass")
@@ -1417,6 +1389,8 @@ public abstract class ColorSpace {
      * @return A new non-null {@link Renderer} instance
      *
      * @see Renderer
+     *
+     * @hide
      */
     @NonNull
     public static Renderer createRenderer() {
@@ -3712,6 +3686,8 @@ public abstract class ColorSpace {
      * See {@link #add(ColorSpace, float, float, float, int)} for more information.</p>
      *
      * @see ColorSpace#createRenderer()
+     *
+     * @hide
      */
     public static class Renderer {
         private static final int NATIVE_SIZE = 1440;
@@ -4054,7 +4030,7 @@ public abstract class ColorSpace {
          */
         @NonNull
         @Size(6)
-        private static float[] getPrimaries(@NonNull Rgb rgb,
+        private static void getPrimaries(@NonNull Rgb rgb,
                 @NonNull @Size(6) float[] primaries, boolean asUcs) {
             // TODO: We should find a better way to handle these cases
             if (rgb.equals(ColorSpace.get(Named.EXTENDED_SRGB)) ||
@@ -4069,7 +4045,6 @@ public abstract class ColorSpace {
                 rgb.getPrimaries(primaries);
             }
             if (asUcs) xyYToUv(primaries);
-            return primaries;
         }
 
         /**
