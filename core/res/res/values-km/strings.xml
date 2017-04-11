@@ -89,22 +89,14 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"មិន​បាន​ផ្ដល់​សេវាកម្ម។"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"អ្នក​មិន​អាច​ប្ដូរ​ការ​កំណត់​លេខ​សម្គាល់​អ្នក​ហៅ​បានទេ។"</string>
-    <!-- no translation found for RestrictedOnDataTitle (1322504692764166532) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyTitle (1236071219598685236) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalTitle (3179574012752700984) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceTitle (158800171499150681) -->
-    <skip />
-    <!-- no translation found for RestrictedOnDataContent (8997474569390996587) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergencyContent (4573217945494650061) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormalContent (1579434198284512182) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAllVoiceContent (5243580774142557047) -->
-    <skip />
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"គ្មាន​សេវាកម្ម​ទិន្នន័យ​ទេ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"គ្មាន​សេវាកម្ម​សង្រ្គោះបន្ទាន់​ទេ"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"គ្មាន​សេវាកម្ម​ជា​សំឡេង​ទេ"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"គ្មាន​សេវាកម្ម​សំឡេង/សង្រ្គោះបន្ទាន់​ទេ"</string>
+    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"ក្រុមហ៊ុន​បម្រើ​សេវាទូរសព្ទ​របស់​អ្នក​បានផ្អាក​សេវាកម្ម​ទិន្នន័យ​ជាបណ្តោះអាសន្ន​នៅ​ទីតាំង​នេះ"</string>
+    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"ក្រុមហ៊ុន​បម្រើ​សេវាទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​បន្ទាន់​ជាបណ្តោះអាសន្ន​នៅទី​តាំង​នេះ"</string>
+    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"ក្រុមហ៊ុន​បម្រើសេវា​ទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​ដោយ​សំឡេង​ជាបណ្តោះអាសន្ន​នៅទី​តាំងនេះ"</string>
+    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ក្រុមហ៊ុន​បម្រើ​សេវា​ទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​ដោយ​សំឡេង និង​ការហៅ​បន្ទាន់​ជា​បណ្តោះអាសន្ន​នៅទី​តាំង​នេះ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ដើម្បីកែលម្អការទទួលយក សាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ប្រព័ន្ធ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode FULL"</string>
@@ -184,21 +176,16 @@
       <item quantity="one">បានដំឡើងអាជ្ញាធរវិញ្ញាបនបត្រ</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ដោយ​ភាគី​ទីបី​ដែល​មិន​ស្គាល់"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (3541729986326153557) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"ដោយអ្នក​គ្រប់គ្រង​កម្រងព័ត៌មាន​ការងារ​របស់​អ្នក"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"ដោយ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"ប្រវត្តិរូបការងារត្រូវបានលុប"</string>
-    <!-- no translation found for work_profile_deleted_description (1100529432509639864) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (6307630639269092360) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (8823792115612348820) -->
-    <skip />
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"កម្រងព័ត៌មាន​ការងារ​ត្រូវបាន​លុប​ដោយសារ​បាត់​កម្មវិធី​អ្នកគ្រប់គ្រង"</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"កម្មវិធី​អ្នកគ្រប់គ្រង​កម្រងព័ត៌មាន​ការងារនេះ​អាច​បាត់ ឬ​មាន​បញ្ហា។ ដូច្នេះហើយ​ទើប​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក និង​ទិន្នន័យ​ដែល​ពាក់ព័ន្ធត្រូវ​បានលុប។ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​របស់អ្នក ដើម្បី​ទទួល​បាន​ជំនួយ។"</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លែងមាន​នៅលើ​ឧបករណ៍​នេះទៀត​ហើយ"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ឧបករណ៍ស្ថិតក្រោមការគ្រប់គ្រង"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ស្ថាប័នរបស់អ្នកគ្រប់គ្រងឧបករណ៍នេះ ហើយអាចនឹងតាមដានចរាចរណ៍បណ្តាញ។ ចុចដើម្បីទទួលបានព័ត៌មានលម្អិត។"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
-    <!-- no translation found for factory_reset_message (7972496262232832457) -->
-    <skip />
+    <string name="factory_reset_message" msgid="7972496262232832457">"​មិនអាច​ប្រើ​កម្មវិធី​អ្នកគ្រប់គ្រង​បានទេ។ ឧបករណ៍​របស់អ្នក​នឹងត្រូវ​បានលុប​ឥឡូវនេះ។\n\nប្រសិនបើ​អ្នកមាន​សំណួរ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​ស្ថាប័ន​របស់​អ្នក។"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"ជម្រើសទូរទស្សន៍"</string>
@@ -419,8 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ សិទ្ធិ​នេះ​​ឲ្យ​កម្មវិធី​កំណត់​លេខ​ទូរស័ព្ទ និង​លេខ​សម្គាល់​ឧបករណ៍ ថា​តើ​ការ​ហៅ​សកម្ម និង​លេខ​ពី​ចម្ងាយ​បាន​ភ្ជាប់​ដោយ​ការ​ហៅ។"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​តាមរយៈ​ប្រព័ន្ធ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​នេះ​បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​របស់វា​តាមរយៈ​ប្រព័ន្ធ ​ដើម្បី​ធ្វើ​ឲ្យ​ការ​ហៅ​ទូរសព្ទ​ប្រសើរ​ជាង​មុន។"</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"អានលេខទូរសព្ទ"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"អនុញ្ញាតឲ្យកម្មវិធីនេះចូលប្រើលេខទូរសព្ទរបស់ឧបករណ៍នេះ។"</string>
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"អាន​លេខ​ទូរសព្ទ"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"អនុញ្ញាត​ឲ្យ​កម្មវិធីនេះ​ចូលប្រើប្រាស់​លេខទូរសព្ទ​របស់​ឧបករណ៍​នេះ។"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ការពារ​​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"បង្ការទូរទស្សន៍ពីការបិទពន្លឺ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ការ​ពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក"</string>
@@ -560,8 +547,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"អនុញ្ញាតឲ្យកម្មវិធីអាន និងសរសេរការកំណត់រចនាសម្ព័ន្ធមុខងារ កុំរំខាន។"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
-    <!-- no translation found for policylab_watchLogin (5091404125971980158) -->
-    <skip />
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"តាមដាន​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ពិនិត្យ​ចំនួន​​បញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។ ពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរស័ព្ទ ឬ​លុប​ទិន្នន័យ​ទូរស័ព្ទ​ទាំងអស់​ ប្រសិន​បើ​មាន​ពាក្យ​សម្ងាត់​បញ្ចូល​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ត្រួតពិនិត្យចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះសោអេក្រង់ និងចាក់សោទូរទស្សន៍ ឬលុបទិន្នន័យទូរទស្សន៍ទាំង ប្រសិនបើមានការវាយបញ្ចូលពាក្យសម្ងាត់ខុសច្រើនដងពេក។"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ពិនិត្យ​ចំនួន​​បញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។ ពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរស័ព្ទ ឬ​លុប​ទិន្នន័យ​ទូរស័ព្ទ​ទាំងអស់​ ប្រសិន​បើ​មាន​ពាក្យ​សម្ងាត់​បញ្ចូល​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
@@ -1190,8 +1176,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"កំពុងទទួលយករបាយការណ៍កំហុស…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ចែករំលែករបាយការណ៍កំហុសឬ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"កំពុងចែករំលែករបាយកំហុស…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (6029609949340992866) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"អ្នកគ្រប់គ្រង​របស់អ្នក​បាន​ស្នើសុំ​របាយការណ៍​អំពី​បញ្ហា ដើម្បី​ជួយដោះស្រាយ​បញ្ហា​នៅលើឧបករណ៍​នេះ។ កម្មវិធី និង​ទិន្នន័យអាច​ត្រូវ​បានចែក​រំលែក។"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ចែករំលែក"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"បដិសេធ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ប្ដូរ​ក្ដារចុច"</string>
@@ -1202,7 +1187,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> កំពុង​បង្ហាញពីលើ​កម្មវិធី​ផ្សេង​ទៀត"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g> កំពុងបង្ហាញ​ពីលើ​កម្មវិធី​ផ្សេង​ទៀត។"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> កំពុង​បង្ហាញ​ពីលើ​កម្មវិធី​ផ្សេង​ទៀត"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ទេ សូមចុច​ដើម្បី​បើក​ការកំណត់ រួច​បិទ​វា។"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"បិទ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"កំពុងរៀបចំ <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1476,29 +1461,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"លុប​ចេញ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
-    <!-- no translation found for accessibility_shortcut_warning_dialog_title (8404780875025725199) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_toogle_warning (7256507885737444807) -->
-    <skip />
-    <!-- no translation found for disable_accessibility_shortcut (627625354248453445) -->
-    <skip />
-    <!-- no translation found for leave_accessibility_shortcut_on (7653111894438512680) -->
-    <skip />
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"នៅពេល​ផ្លូវកាត់​នេះបើក ការ​ចុច​ប៊ូតុង​កម្រិត​សំឡេង​ទាំង​ពីរ​ឲ្យ​ជាប់​រយៈពេល​ 3 វិនាទីនឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយស្រួល។\n\n មុខងារ​ភាពងាយស្រួល​បច្ចុប្បន្ន៖\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n អ្នក​អាច​ផ្លាស់​ប្តូរ​មុខងារ​នេះ​បាន​នៅក្នុង​ការ កំណត់ &gt; ភាព​ងាយស្រួល។"</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"បិទ​ផ្លូវកាត់"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ផ្លូវកាត់​ភាព​ងាយ​ស្រួល​បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ផ្លូវកាត់​ភាព​ងាយ​ស្រួល​បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (4234556536456854251) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6942300463612999993) -->
-    <skip />
-    <!-- no translation found for accessibility_magnification_chooser_text (1227146738764986237) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ជ្រើសរើស​មុខងារ​ដែលត្រូវ​ប្រើ នៅពេល​ដែល​អ្នកចុច​ប៊ូតុង​ភាពងាយស្រួល៖"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ដើម្បី​ផ្លាស់ប្តូរ​មុខងារ សូម​ចុច​ប៊ូតុង​ភាព​ងាយស្រួល​ឲ្យ​ជាប់។"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ការ​ពង្រីក"</string>
     <string name="user_switched" msgid="3768006783166984410">"អ្នក​ប្រើ​បច្ចុប្បន្ន <xliff:g id="NAME">%1$s</xliff:g> ។"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"កំពុង​ប្ដូរ​ទៅ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"កំពុងចេញ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ម្ចាស់"</string>
     <string name="error_message_title" msgid="4510373083082500195">"កំហុស"</string>
-    <!-- no translation found for error_message_change_not_allowed (1238035947357923497) -->
-    <skip />
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"ការ​ផ្លាស់ប្ដូរ​នេះ​មិន​ត្រូវ​បាន​អនុញ្ញាត​ដោយ​អ្នក​គ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="app_not_found" msgid="3429141853498927379">"រក​មិន​ឃើញ​កម្មវិធី​ ដើម្បី​គ្រប់គ្រង​សកម្មភាព​នេះ"</string>
     <string name="revoke" msgid="5404479185228271586">"ដកហូត"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1590,8 +1567,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"មិន​បា​ន​បើក​សេវាកម្ម​បោះពុម្ព"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"បាន​ដំឡើង​សេវាកម្ម <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ប៉ះ ដើម្បី​បើក"</string>
-    <!-- no translation found for restr_pin_enter_admin_pin (8641662909467236832) -->
-    <skip />
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"បញ្ចូលកូដ PIN របស់​អ្នក​គ្រប់គ្រង"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"បញ្ចូល​​កូដ PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"មិន​ត្រឹមត្រូវ"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"កូដ PIN បច្ចុប្បន្ន"</string>
@@ -1619,21 +1595,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
-    <!-- no translation found for lock_to_app_toast (6820571533009838261) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (7849470948648628704) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"ដើម្បី​ដក​ការ​ខ្ទាស់​អេក្រង់​នេះ សូម​ចុច​ប៉ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាព​ឲ្យ​ជាប់"</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"មិនអាច​ដក​ការ​ខ្ទាស់​កម្មវិធីនេះ​បានទេ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"មិន​បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
-    <!-- no translation found for package_installed_device_owner (6875717669960212648) -->
-    <skip />
-    <!-- no translation found for package_updated_device_owner (1847154566357862089) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (2307122077550236438) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"​ដំឡើង​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ដើម្បីជួយឲ្យថាមពលថ្មប្រសើរឡើង កម្មវិធីសន្សំសំចៃថាមពលថ្មកាត់បន្ថយប្រតិបត្តិការឧបករណ៍របស់អ្នក និងកម្រិតភាពញ័រ សេវាកម្មទីតាំង និងទិន្នន័យផ្ទៃខាងក្រោយស្ទើរតែទាំងអស់។ ការផ្ញើសារអ៊ីម៉ែល និងកម្មវិធីផ្សេងទៀតដែលពឹងផ្អែកលើការធ្វើសមកាលកម្មអាចនឹងមិនធ្វើបច្ចុប្បន្នភាពទេ លុះត្រាតែអ្នកបើកពួកវា។\n\nកម្មវិធីសន្សំសំចៃបិទដោយស្វ័យប្រវត្តិ នៅពេលដែលឧបករណ៍របស់អ្នកកំពុងសាកថ្ម។"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
@@ -1718,10 +1689,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ភាសាទាំងអស់"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ស្វែងរក"</string>
-    <!-- no translation found for work_mode_off_title (2615362773958585967) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (2961559609199223594) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="2615362773958585967">"បើក​មុខងារ​ការងារ?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"វានឹង​បើកកម្រង​ព័ត៌មាន​ការងារ​របស់អ្នក រួមទាំង​កម្មវិធី សមកាលកម្ម​ផ្ទៃ​ខាងក្រោយ និង​មុខងារ​ដែលពាក់ព័ន្ធ​ផងដែរ"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"បើក"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"អ្នកមានសារថ្មី"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"បើកកម្មវិធីសារ SMS ដើម្បីមើល"</string>
@@ -1765,24 +1734,27 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ប្តូរ​ទៅ​មុខងារ​បញ្ចូល​អក្សរ​សម្រាប់​ការ​បញ្ចូល​ម៉ោង។"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ប្តូរ​ទៅ​មុខងារ​នាឡិកា​សម្រាប់​ការ​បញ្ចូល​ម៉ោង។"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ជម្រើសបំពេញដោយស្វ័យប្រវត្តិ"</string>
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"មិនអាច​បំពេញ​មាតិកា​ដោយស្វ័យប្រវត្តិ​បានទេ"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"រក្សា​ទុក​ទៅ​ក្នុង <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"រក្សាទុក <xliff:g id="TYPE">%1$s</xliff:g> ​ទៅ​ក្នុង <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"រក្សាទុក"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"ទេ អរគុណ"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"ពាក្យ​សម្ងាត់"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"អាសយដ្ឋាន"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"បណ្ណ​ឥណទាន"</string>
+    <string name="autofill_save_type_username" msgid="239040540379769562">"ឈ្មោះ​អ្នក​ប្រើប្រាស់"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"អាសយដ្ឋាន​អ៊ីមែល"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"សូមរក្សាភាពស្ងប់ស្ងាត់ ហើយស្វែងរកជម្រកសុវត្ថិភាពដែលនៅជិត។"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ភៀសខ្លួនជាបន្ទាន់ពីតំបន់ឆ្នេរ និងតំបន់តាមមាត់ទន្លេទៅកាន់កន្លែងដែលមានសុវត្ថិភាពជាងនេះ ដូចជាទីទួលណាមួយ។"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"សូមរក្សាភាពស្ងប់ស្ងាត់ ហើយស្វែងរកជម្រកសុវត្ថិភាពដែលនៅជិត។"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"សារសាកល្បងពេលមានអាសន្ន"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (7729819349669603406) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (6321202257374418726) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (2769452751852211112) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (4438696681169345015) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"មិន​អនុញ្ញាត​សីុមកាត​ទេ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"សីុម​មិន​ត្រូវបាន​ផ្តល់ជូន​ទេ"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"មិន​អនុញ្ញាត​ចំពោះសីុម​ទេ"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"មិន​អនុញ្ញាត​ចំពោះទូរសព្ទ​ទេ"</string>
 </resources>
