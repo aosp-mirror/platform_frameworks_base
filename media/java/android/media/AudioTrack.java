@@ -2523,8 +2523,11 @@ public class AudioTrack extends PlayerBase
             mAvSyncHeader = ByteBuffer.allocate(16);
             mAvSyncHeader.order(ByteOrder.BIG_ENDIAN);
             mAvSyncHeader.putInt(0x55550001);
-            mAvSyncHeader.putInt(sizeInBytes);
-            mAvSyncHeader.putLong(timestamp);
+        }
+
+        if (mAvSyncBytesRemaining == 0) {
+            mAvSyncHeader.putInt(4, sizeInBytes);
+            mAvSyncHeader.putLong(8, timestamp);
             mAvSyncHeader.position(0);
             mAvSyncBytesRemaining = sizeInBytes;
         }
@@ -2556,9 +2559,6 @@ public class AudioTrack extends PlayerBase
         }
 
         mAvSyncBytesRemaining -= ret;
-        if (mAvSyncBytesRemaining == 0) {
-            mAvSyncHeader = null;
-        }
 
         return ret;
     }
