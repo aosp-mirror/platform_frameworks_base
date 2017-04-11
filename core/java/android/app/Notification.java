@@ -6724,8 +6724,8 @@ public class Notification implements Parcelable
                 // Need to clone customContent before adding, because otherwise it can no longer be
                 // parceled independently of remoteViews.
                 customContent = customContent.clone();
-                remoteViews.removeAllViews(R.id.notification_main_column);
-                remoteViews.addView(R.id.notification_main_column, customContent);
+                remoteViews.removeAllViewsExceptId(R.id.notification_main_column, R.id.progress);
+                remoteViews.addView(R.id.notification_main_column, customContent, 0 /* index */);
             }
             // also update the end margin if there is an image
             int endMargin = R.dimen.notification_content_margin_end;
