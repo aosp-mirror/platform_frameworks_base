@@ -3628,7 +3628,7 @@
     <string name="data_usage_3g_limit_title">2G-3G data limit reached</string>
     <!-- Notification title when 4G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_4g_limit_title">4G data limit reached</string>
-    <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
+    <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=50] -->
     <string name="data_usage_mobile_limit_title">Mobile data limit reached</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_wifi_limit_title">Wi-Fi data limit reached</string>
