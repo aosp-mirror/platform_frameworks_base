@@ -683,8 +683,7 @@ public class SurfaceView extends View {
                     mTranslator.translateRectInAppWindowToScreen(mScreenRect);
                 }
 
-                if (mSurfaceControl != null
-                        && (!isHardwareAccelerated() || !mRtHandlingPositionUpdates)) {
+                if (!isHardwareAccelerated() || !mRtHandlingPositionUpdates) {
                     try {
                         if (DEBUG) Log.d(TAG, String.format("%d updateSurfacePosition UI, " +
                                 "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
