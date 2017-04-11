@@ -122,6 +122,10 @@ public class PinnedStackWindowController extends StackWindowController {
         return mContainer.isBoundsAnimatingToFullscreen();
     }
 
+    public boolean pinnedStackResizeAllowed() {
+        return mContainer.pinnedStackResizeAllowed();
+    }
+
     /**
      * Checks the {@param bounds} and retirms non-null fullscreen bounds for the pinned stack
      * animation if necessary.

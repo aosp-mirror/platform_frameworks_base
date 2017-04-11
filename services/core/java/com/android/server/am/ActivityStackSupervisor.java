@@ -174,6 +174,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -2492,11 +2493,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void resizePinnedStackLocked(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
-        final ActivityStack stack = getStack(PINNED_STACK_ID);
+        final PinnedActivityStack stack = getStack(PINNED_STACK_ID);
         if (stack == null) {
             Slog.w(TAG, "resizePinnedStackLocked: pinned stack not found");
             return;
         }
+
+        // It is possible for the bounds animation from the WM to call this but be delayed by
+        // another AM call that is holding the AMS lock. In such a case, the pinnedBounds may be
+        // incorrect if AMS.resizeStackWithBoundsFromWindowManager() is already called while waiting
+        // for the AMS lock to be freed. So check and make sure these bounds are still good.
+        final PinnedStackWindowController stackController = stack.getWindowContainerController();
+        if (stackController.pinnedStackResizeAllowed()) {
+            return;
+        }
+
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizePinnedStack");
         mWindowManager.deferSurfaceLayout();
         try {

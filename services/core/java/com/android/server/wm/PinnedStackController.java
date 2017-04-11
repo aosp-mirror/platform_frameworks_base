@@ -244,10 +244,18 @@ class PinnedStackController {
      * Updates the display info, calculating and returning the new stack and movement bounds in the
      * new orientation of the device if necessary.
      */
-    void onTaskStackBoundsChanged(Rect targetBounds, Rect outBounds) {
+    boolean onTaskStackBoundsChanged(Rect targetBounds, Rect outBounds) {
         final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
         if (mDisplayInfo.equals(displayInfo)) {
-            return;
+            // We are already in the right orientation, ignore
+            outBounds.setEmpty();
+            return false;
+        } else if (targetBounds.isEmpty()) {
+            // The stack is null, we are just initializing the stack, so just store the display info
+            // and ignore
+            mDisplayInfo.copyFrom(displayInfo);
+            outBounds.setEmpty();
+            return false;
         }
 
         mTmpRect.set(targetBounds);
@@ -272,6 +280,7 @@ class PinnedStackController {
         notifyMovementBoundsChanged(false /* fromImeAdjustment */);
 
         outBounds.set(postChangeStackBounds);
+        return true;
     }
 
     /**
