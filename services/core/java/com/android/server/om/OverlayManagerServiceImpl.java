@@ -101,7 +101,8 @@ final class OverlayManagerServiceImpl {
                 // Update the overlay if it didn't exist or had the wrong target package.
                 mSettings.init(overlayPackage.packageName, newUserId,
                         overlayPackage.overlayTarget,
-                        overlayPackage.applicationInfo.getBaseCodePath());
+                        overlayPackage.applicationInfo.getBaseCodePath(),
+                        overlayPackage.isStaticOverlay, overlayPackage.overlayPriority);
 
                 if (oi == null) {
                     // This overlay does not exist in our settings.
@@ -243,7 +244,8 @@ final class OverlayManagerServiceImpl {
                 mPackageManager.getPackageInfo(overlayPackage.overlayTarget, userId);
 
         mSettings.init(packageName, userId, overlayPackage.overlayTarget,
-                overlayPackage.applicationInfo.getBaseCodePath());
+                overlayPackage.applicationInfo.getBaseCodePath(), overlayPackage.isStaticOverlay,
+                overlayPackage.overlayPriority);
         try {
             if (updateState(targetPackage, overlayPackage, userId)) {
                 mListener.onOverlaysChanged(overlayPackage.overlayTarget, userId);
