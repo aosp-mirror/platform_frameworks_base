@@ -43,6 +43,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
@@ -348,6 +349,25 @@ final class AutofillManagerServiceImpl {
         session.removeSelfLocked();
     }
 
+    void disableOwnedAutofillServicesLocked(int uid) {
+        if (mInfo == null || mInfo.getServiceInfo().applicationInfo.uid
+                != UserHandle.getAppId(uid)) {
+            return;
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final String autoFillService = getComponentNameFromSettings();
+            if (mInfo.getServiceInfo().getComponentName().equals(
+                    ComponentName.unflattenFromString(autoFillService))) {
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        Settings.Secure.AUTOFILL_SERVICE, null, mUserId);
+                destroySessionsLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @Nullable IBinder windowToken, @NonNull IBinder appCallbackToken, boolean hasCallback,
             int flags, @NonNull String packageName) {
@@ -472,20 +492,6 @@ final class AutofillManagerServiceImpl {
             mSessions.valueAt(i).destroyLocked();
         }
         mSessions.clear();
-    }
-
-    void disableSelf() {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final String autoFillService = getComponentNameFromSettings();
-            if (mInfo.getServiceInfo().getComponentName().equals(
-                    ComponentName.unflattenFromString(autoFillService))) {
-                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.AUTOFILL_SERVICE, null, mUserId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     CharSequence getServiceLabel() {

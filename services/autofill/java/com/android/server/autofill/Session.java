@@ -311,15 +311,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void onDisableSelf() {
-        mService.disableSelf();
-        synchronized (mLock) {
-            removeSelfLocked();
-        }
-    }
-
-    // FillServiceCallbacks
-    @Override
     public void onServiceDied(RemoteFillService service) {
         // TODO(b/33197203): implement
     }

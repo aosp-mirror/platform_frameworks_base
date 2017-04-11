@@ -35,7 +35,6 @@ import android.os.UserHandle;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
-import android.service.autofill.IAutoFillServiceConnection;
 import android.service.autofill.IFillCallback;
 import android.service.autofill.ISaveCallback;
 import android.text.format.DateUtils;
@@ -96,7 +95,6 @@ final class RemoteFillService implements DeathRecipient {
         void onSaveRequestFailure(@Nullable CharSequence message,
                 @NonNull String servicePackageName);
         void onServiceDied(RemoteFillService service);
-        void onDisableSelf();
     }
 
     public RemoteFillService(Context context, ComponentName componentName,
@@ -203,10 +201,6 @@ final class RemoteFillService implements DeathRecipient {
         }
     }
 
-    private void handleDisableSelf() {
-        mCallbacks.onDisableSelf();
-    }
-
     private boolean isBound() {
         return mAutoFillService != null;
     }
@@ -246,7 +240,7 @@ final class RemoteFillService implements DeathRecipient {
         mBinding = false;
         if (isBound()) {
             try {
-                mAutoFillService.onInit(null);
+                mAutoFillService.onConnectedStateChanged(false);
             } catch (Exception e) {
                 Slog.w(LOG_TAG, "Exception calling onDisconnected(): " + e);
             }
@@ -322,12 +316,7 @@ final class RemoteFillService implements DeathRecipient {
                 return;
             }
             try {
-                mAutoFillService.onInit(new IAutoFillServiceConnection.Stub() {
-                    @Override
-                    public void disableSelf() {
-                        mHandler.obtainMessage(MyHandler.MSG_ON_DISABLE_SELF).sendToTarget();
-                    }
-                });
+                mAutoFillService.onConnectedStateChanged(true);
             } catch (RemoteException e) {
                 Slog.w(LOG_TAG, "Exception calling onConnected(): " + e);
             }
@@ -353,7 +342,6 @@ final class RemoteFillService implements DeathRecipient {
         public static final int MSG_BINDER_DIED = 2;
         public static final int MSG_UNBIND = 3;
         public static final int MSG_ON_PENDING_REQUEST = 4;
-        public static final int MSG_ON_DISABLE_SELF = 5;
 
         public MyHandler(Context context) {
             // Cannot use lambda - doesn't compile
@@ -380,10 +368,6 @@ final class RemoteFillService implements DeathRecipient {
 
                         case MSG_ON_PENDING_REQUEST: {
                             handlePendingRequest((PendingRequest) message.obj);
-                        } break;
-
-                        case MSG_ON_DISABLE_SELF: {
-                            handleDisableSelf();
                         } break;
                     }
                 }

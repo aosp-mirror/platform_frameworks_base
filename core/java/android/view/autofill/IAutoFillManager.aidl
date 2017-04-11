@@ -35,10 +35,11 @@ interface IAutoFillManager {
             boolean hasCallback, int flags, String packageName);
     boolean restoreSession(int sessionId, in IBinder activityToken, in IBinder appCallback);
     void setWindow(int sessionId, in IBinder windowToken);
-    oneway void updateSession(int sessionId, in AutofillId id, in Rect bounds,
+    void updateSession(int sessionId, in AutofillId id, in Rect bounds,
             in AutofillValue value, int flags, int userId);
     void finishSession(int sessionId, int userId);
     void cancelSession(int sessionId, int userId);
     void setAuthenticationResult(in Bundle data, int sessionId, int userId);
-    oneway void setHasCallback(int sessionId, int userId, boolean hasIt);
+    void setHasCallback(int sessionId, int userId, boolean hasIt);
+    void disableOwnedAutofillServices(int userId);
 }
