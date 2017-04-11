@@ -2220,11 +2220,12 @@ class ContextImpl extends Context {
 
     /**
      * System Context to be used for UI. This Context has resources that can be themed.
+     * Make sure that the created system UI context shares the same LoadedApk as the system context.
      */
-    static ContextImpl createSystemUiContext(ActivityThread mainThread) {
-        LoadedApk packageInfo = new LoadedApk(mainThread);
-        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,
-                null);
+    static ContextImpl createSystemUiContext(ContextImpl systemContext) {
+        final LoadedApk packageInfo = systemContext.mPackageInfo;
+        ContextImpl context = new ContextImpl(null, systemContext.mMainThread, packageInfo, null,
+                null, null, 0, null);
         context.setResources(createResources(null, packageInfo, null, Display.DEFAULT_DISPLAY, null,
                 packageInfo.getCompatibilityInfo()));
         return context;
