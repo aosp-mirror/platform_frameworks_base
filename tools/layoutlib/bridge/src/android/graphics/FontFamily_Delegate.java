@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import static android.graphics.Typeface.Builder.RESOLVE_BY_FONT_TABLE;
+import static android.graphics.Typeface.RESOLVE_BY_FONT_TABLE;
 import static android.graphics.Typeface_Delegate.SYSTEM_FONTS;
 
 /**
