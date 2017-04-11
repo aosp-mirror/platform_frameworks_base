@@ -212,7 +212,9 @@ public final class Log {
      * @param tag The tag to check.
      * @param level The level to check.
      * @return Whether or not that this is allowed to be logged.
-     * @throws IllegalArgumentException is thrown if the tag.length() > 23.
+     * @throws IllegalArgumentException is thrown if the tag.length() > 23
+     *         for Nougat (7.0) releases (API <= 23) and prior, there is no
+     *         tag limit of concern after this API level.
      */
     public static native boolean isLoggable(String tag, int level);
 
