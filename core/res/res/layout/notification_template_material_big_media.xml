@@ -56,15 +56,9 @@
         </LinearLayout>
         <LinearLayout
             android:id="@+id/media_actions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-21dp"
-            android:paddingStart="8dp"
-            android:paddingBottom="12dp"
-            android:gravity="top"
             android:orientation="horizontal"
             android:layoutDirection="ltr"
-            >
+            style="@style/NotificationMediaActionContainer" >
             <!-- media buttons will be added here -->
         </LinearLayout>
     </LinearLayout>
