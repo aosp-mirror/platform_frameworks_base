@@ -272,6 +272,9 @@ public class PackageInfo implements Parcelable {
     public String overlayTarget;
 
     /** @hide */
+    public int overlayPriority;
+
+    /** @hide */
     public boolean isStaticOverlay;
 
     public PackageInfo() {
@@ -327,6 +330,7 @@ public class PackageInfo implements Parcelable {
         dest.writeString(requiredAccountType);
         dest.writeString(overlayTarget);
         dest.writeInt(isStaticOverlay ? 1 : 0);
+        dest.writeInt(overlayPriority);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -377,6 +381,7 @@ public class PackageInfo implements Parcelable {
         requiredAccountType = source.readString();
         overlayTarget = source.readString();
         isStaticOverlay = source.readInt() != 0;
+        overlayPriority = source.readInt();
 
         // The component lists were flattened with the redundant ApplicationInfo
         // instances omitted.  Distribute the canonical one here as appropriate.
