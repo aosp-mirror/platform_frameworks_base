@@ -844,7 +844,6 @@ fwbase_dirs_to_document := \
 include libcore/Docs.mk
 
 non_base_dirs := \
-	../opt/telephony/src/java/android/provider \
 	../opt/telephony/src/java/android/telephony \
 	../opt/telephony/src/java/android/telephony/gsm \
 	../opt/net/voip/src/java/android/net/rtp \
