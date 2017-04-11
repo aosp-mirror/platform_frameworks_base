@@ -537,6 +537,18 @@ public final class AutofillManager {
         }
     }
 
+    /**
+     * If the app calling this API has enabled autofill services they
+     * will be disabled.
+     */
+    public void disableOwnedAutofillServices() {
+        try {
+            mService.disableOwnedAutofillServices(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private AutofillClient getClientLocked() {
         if (mContext instanceof AutofillClient) {
             return (AutofillClient) mContext;
