@@ -3074,9 +3074,17 @@ public class NotificationManagerService extends SystemService {
                     + ", incomingUserId=" + incomingUserId
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
-            // STOPSHIP TODO: should throw instead of logging.
+            // STOPSHIP TODO: should throw instead of logging or toasting.
             // throw new IllegalArgumentException(noChannelStr);
             Log.e(TAG, noChannelStr);
+
+            final String noChannelToastStr =
+                    "Developer warning for package \"" + pkg + "\"\n" +
+                    "Failed to post notification on channel \"" + channelId + "\"\n" +
+                    "See log for more details";
+            Toast noChannelToast =
+                    Toast.makeText(getContext(), noChannelToastStr, Toast.LENGTH_LONG);
+            noChannelToast.show();
             return;
         }
         final StatusBarNotification n = new StatusBarNotification(
