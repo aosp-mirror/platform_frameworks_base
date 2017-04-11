@@ -274,6 +274,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 selectedImportance - mStartingUserImportance);
         mSingleNotificationChannel.setImportance(selectedImportance);
+        mSingleNotificationChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
         try {
             mINotificationManager.updateNotificationChannelForPackage(
                     mPkg, mAppUid, mSingleNotificationChannel);

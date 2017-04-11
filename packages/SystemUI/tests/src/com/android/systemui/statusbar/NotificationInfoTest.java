@@ -61,6 +61,7 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -585,11 +586,16 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mNotificationChannel.getImportance(), mSbn, null, null, null,
                 null, Collections.singleton(TEST_PACKAGE_NAME));
 
-        Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
+        Switch enabledSwitch = mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         enabledSwitch.setChecked(false);
         mNotificationInfo.handleCloseControls(true);
+
+        ArgumentCaptor<NotificationChannel> updated =
+                ArgumentCaptor.forClass(NotificationChannel.class);
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
-                eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
+                anyString(), anyInt(), updated.capture());
+        assertTrue((updated.getValue().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_IMPORTANCE) != 0);
     }
 
     @Test
