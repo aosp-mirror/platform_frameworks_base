@@ -289,6 +289,14 @@ static void nativeSetLayer(JNIEnv* env, jclass clazz, jlong nativeObject, jint z
     }
 }
 
+static void nativeSetRelativeLayer(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jobject relativeTo, jint zorder) {
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    sp<IBinder> handle = ibinderForJavaObject(env, relativeTo);
+
+    ctrl->setRelativeLayer(handle, zorder);
+}
+
 static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat x, jfloat y) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setPosition(x, y);
@@ -774,6 +782,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetAnimationTransaction },
     {"nativeSetLayer", "(JI)V",
             (void*)nativeSetLayer },
+    {"nativeSetRelativeLayer", "(JLandroid/os/IBinder;I)V",
+            (void*)nativeSetRelativeLayer },
     {"nativeSetPosition", "(JFF)V",
             (void*)nativeSetPosition },
     {"nativeSetGeometryAppliesWithResize", "(J)V",

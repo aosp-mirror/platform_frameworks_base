@@ -50,6 +50,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPL
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -4409,6 +4410,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             numVisible = 0;
             numDrawn = 0;
             nowGone = true;
+        }
+    }
+
+    boolean usesRelativeZOrdering() {
+        if (!isChildWindow()) {
+            return false;
+        } else if (mAttrs.type == TYPE_APPLICATION_MEDIA_OVERLAY) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
