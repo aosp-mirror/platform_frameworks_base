@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -246,8 +247,8 @@ public class NsdService extends INsdManager.Stub {
             }
 
             private void removeRequestMap(int clientId, int globalId, ClientInfo clientInfo) {
-                clientInfo.mClientIds.remove(clientId);
-                clientInfo.mClientRequests.remove(clientId);
+                clientInfo.mClientIds.delete(clientId);
+                clientInfo.mClientRequests.delete(clientId);
                 mIdToClientInfoMap.remove(globalId);
             }
 
@@ -300,7 +301,7 @@ public class NsdService extends INsdManager.Stub {
                         clientInfo = mClients.get(msg.replyTo);
 
                         try {
-                            id = clientInfo.mClientIds.get(msg.arg2).intValue();
+                            id = clientInfo.mClientIds.get(msg.arg2);
                         } catch (NullPointerException e) {
                             replyToMessage(msg, NsdManager.STOP_DISCOVERY_FAILED,
                                     NsdManager.FAILURE_INTERNAL_ERROR);
@@ -338,7 +339,7 @@ public class NsdService extends INsdManager.Stub {
                         if (DBG) Slog.d(TAG, "unregister service");
                         clientInfo = mClients.get(msg.replyTo);
                         try {
-                            id = clientInfo.mClientIds.get(msg.arg2).intValue();
+                            id = clientInfo.mClientIds.get(msg.arg2);
                         } catch (NullPointerException e) {
                             replyToMessage(msg, NsdManager.UNREGISTER_SERVICE_FAILED,
                                     NsdManager.FAILURE_INTERNAL_ERROR);
@@ -828,10 +829,10 @@ public class NsdService extends INsdManager.Stub {
         private NsdServiceInfo mResolvedService;
 
         /* A map from client id to unique id sent to mDns */
-        private final SparseArray<Integer> mClientIds = new SparseArray<>();
+        private final SparseIntArray mClientIds = new SparseIntArray();
 
         /* A map from client id to the type of the request we had received */
-        private final SparseArray<Integer> mClientRequests = new SparseArray<>();
+        private final SparseIntArray mClientRequests = new SparseIntArray();
 
         private ClientInfo(AsyncChannel c, Messenger m) {
             mChannel = c;
@@ -858,6 +859,7 @@ public class NsdService extends INsdManager.Stub {
         // and send cancellations to the daemon.
         private void expungeAllRequests() {
             int globalId, clientId, i;
+            // TODO: to keep handler responsive, do not clean all requests for that client at once.
             for (i = 0; i < mClientIds.size(); i++) {
                 clientId = mClientIds.keyAt(i);
                 globalId = mClientIds.valueAt(i);
@@ -885,15 +887,11 @@ public class NsdService extends INsdManager.Stub {
         // mClientIds is a sparse array of listener id -> mDnsClient id.  For a given mDnsClient id,
         // return the corresponding listener id.  mDnsClient id is also called a global id.
         private int getClientId(final int globalId) {
-            // This doesn't use mClientIds.indexOfValue because indexOfValue uses == (not .equals)
-            // while also coercing the int primitives to Integer objects.
-            for (int i = 0, nSize = mClientIds.size(); i < nSize; i++) {
-                int mDnsId = mClientIds.valueAt(i);
-                if (globalId == mDnsId) {
-                    return mClientIds.keyAt(i);
-                }
+            int idx = mClientIds.indexOfValue(globalId);
+            if (idx < 0) {
+                return idx;
             }
-            return -1;
+            return mClientIds.keyAt(idx);
         }
     }
 
