@@ -36,6 +36,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -948,6 +949,16 @@ class AlarmManagerService extends SystemService {
         // We have to set current TimeZone info to kernel
         // because kernel doesn't keep this after reboot
         setTimeZoneImpl(SystemProperties.get(TIMEZONE_PROPERTY));
+
+        // Also sure that we're booting with a halfway sensible current time
+        if (mNativeData != 0) {
+            final long systemBuildTime = Environment.getRootDirectory().lastModified();
+            if (System.currentTimeMillis() < systemBuildTime) {
+                Slog.i(TAG, "Current time only " + System.currentTimeMillis()
+                        + ", advancing to build time " + systemBuildTime);
+                setKernelTime(mNativeData, systemBuildTime);
+            }
+        }
 
         PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*alarm*");
