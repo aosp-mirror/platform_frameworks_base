@@ -277,8 +277,8 @@ interface IActivityManager {
     int checkGrantUriPermission(int callingUid, in String targetPkg, in Uri uri,
             int modeFlags, int userId);
     // Cause the specified process to dump the specified heap.
-    boolean dumpHeap(in String process, int userId, boolean managed, boolean runGc, in String path,
-            in ParcelFileDescriptor fd);
+    boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
+            boolean runGc, in String path, in ParcelFileDescriptor fd);
     int startActivities(in IApplicationThread caller, in String callingPackage,
             in Intent[] intents, in String[] resolvedTypes, in IBinder resultTo,
             in Bundle options, int userId);
