@@ -24,6 +24,8 @@ import static com.android.server.autofill.Helper.VERBOSE;
 import static com.android.server.autofill.Helper.bundleToString;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -35,6 +37,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -194,13 +197,27 @@ public final class AutofillManagerService extends SystemService {
      */
     @NonNull
     AutofillManagerServiceImpl getServiceForUserLocked(int userId) {
-        AutofillManagerServiceImpl service = mServicesCache.get(userId);
+        final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, false, null, null);
+        AutofillManagerServiceImpl service = mServicesCache.get(resolvedUserId);
         if (service == null) {
-            service = new AutofillManagerServiceImpl(mContext, mLock,
-                    mRequestsHistory, userId, mUi, mDisabledUsers.get(userId));
+            service = new AutofillManagerServiceImpl(mContext, mLock, mRequestsHistory,
+                    resolvedUserId, mUi, mDisabledUsers.get(resolvedUserId));
             mServicesCache.put(userId, service);
         }
         return service;
+    }
+
+    /**
+     * Peeks the service instance for a user.
+     *
+     * @return service instance or null if not already present
+     */
+    @Nullable
+    AutofillManagerServiceImpl peekServiceForUserLocked(int userId) {
+        final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, false, null, null);
+        return mServicesCache.get(resolvedUserId);
     }
 
     // Called by Shell command.
@@ -210,7 +227,7 @@ public final class AutofillManagerService extends SystemService {
         final IBinder activityToken = getTopActivityForUser();
         if (activityToken != null) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = mServicesCache.get(userId);
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service == null) {
                     Log.w(TAG, "handleSaveForUser(): no cached service for userId " + userId);
                     return;
@@ -228,7 +245,10 @@ public final class AutofillManagerService extends SystemService {
 
         synchronized (mLock) {
             if (userId != UserHandle.USER_ALL) {
-                mServicesCache.get(userId).destroySessionsLocked();
+                AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.destroySessionsLocked();
+                }
             } else {
                 final int size = mServicesCache.size();
                 for (int i = 0; i < size; i++) {
@@ -253,7 +273,10 @@ public final class AutofillManagerService extends SystemService {
 
         synchronized (mLock) {
             if (userId != UserHandle.USER_ALL) {
-                mServicesCache.get(userId).listSessionsLocked(sessions);
+                AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.listSessionsLocked(sessions);
+                }
             } else {
                 final int size = mServicesCache.size();
                 for (int i = 0; i < size; i++) {
@@ -287,7 +310,7 @@ public final class AutofillManagerService extends SystemService {
      * Removes a cached service for a given user.
      */
     private void removeCachedServiceLocked(int userId) {
-        final AutofillManagerServiceImpl service = mServicesCache.get(userId);
+        final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
         if (service != null) {
             mServicesCache.delete(userId);
             service.destroyLocked();
@@ -305,7 +328,7 @@ public final class AutofillManagerService extends SystemService {
      * Updates a cached service for a given user.
      */
     private void updateCachedServiceLocked(int userId, boolean disabled) {
-        AutofillManagerServiceImpl service = mServicesCache.get(userId);
+        AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
         if (service != null) {
             service.updateLocked(disabled);
         }
@@ -409,8 +432,7 @@ public final class AutofillManagerService extends SystemService {
         public void updateSession(int sessionId, AutofillId id, Rect bounds,
                 AutofillValue value, int flags, int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = mServicesCache.get(
-                        UserHandle.getCallingUserId());
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.updateSessionLocked(sessionId, getCallingUid(), id, bounds, value,
                             flags);
@@ -421,8 +443,7 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void finishSession(int sessionId, int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = mServicesCache.get(
-                        UserHandle.getCallingUserId());
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.finishSessionLocked(sessionId, getCallingUid());
                 }
@@ -432,10 +453,19 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void cancelSession(int sessionId, int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = mServicesCache.get(
-                        UserHandle.getCallingUserId());
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.cancelSessionLocked(sessionId, getCallingUid());
+                }
+            }
+        }
+
+        @Override
+        public void disableOwnedAutofillServices(int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.disableOwnedAutofillServicesLocked(Binder.getCallingUid());
                 }
             }
         }
