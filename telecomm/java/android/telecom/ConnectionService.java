@@ -99,24 +99,16 @@ public abstract class ConnectionService extends Service {
      * be specified in the {@link ConnectionRequest#getExtras()} passed by Telecom when
      * {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)} is called.
      * <p>
-     * Telecom will also specify {@link #EXTRA_HANDOVER_TOKEN} to provide a Telecom-specific opaque
-     * token representing the ongoing call which is to be handed over.
-     * <p>
-     * When your {@link ConnectionService} receives this extra, it should communicate the
-     * {@link #EXTRA_HANDOVER_TOKEN} to the other device's matching {@link ConnectionService}.  That
+     * When your {@link ConnectionService} receives this extra, it should communicate the fact that
+     * this is a handover to the other device's matching {@link ConnectionService}.  That
      * {@link ConnectionService} will continue the handover using
      * {@link TelecomManager#addNewIncomingCall(PhoneAccountHandle, Bundle)}, specifying
-     * {@link TelecomManager#EXTRA_IS_HANDOVER} and {@link TelecomManager#EXTRA_HANDOVER_TOKEN}.
+     * {@link TelecomManager#EXTRA_IS_HANDOVER}.  Telecom will match the phone numbers of the
+     * handover call on the other device with ongoing calls for {@link ConnectionService}s which
+     * support {@link PhoneAccount#EXTRA_SUPPORTS_HANDOVER_FROM}.
      * @hide
      */
     public static final String EXTRA_IS_HANDOVER = TelecomManager.EXTRA_IS_HANDOVER;
-
-    /**
-     * String extra used by Telecom when {@link #EXTRA_IS_HANDOVER} is true to provide an identifier
-     * for the call to be handed over.
-     * @hide
-     */
-    public static final String EXTRA_HANDOVER_TOKEN = TelecomManager.EXTRA_HANDOVER_TOKEN;
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
