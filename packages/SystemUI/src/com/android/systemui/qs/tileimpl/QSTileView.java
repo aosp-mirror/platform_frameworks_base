@@ -42,6 +42,7 @@ public class QSTileView extends QSTileBaseView {
     private int mState;
     private ViewGroup mLabelContainer;
     private View mExpandIndicator;
+    private View mExpandSpace;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -84,6 +85,7 @@ public class QSTileView extends QSTileBaseView {
         mPadLock = mLabelContainer.findViewById(R.id.restricted_padlock);
         mDivider = mLabelContainer.findViewById(R.id.underline);
         mExpandIndicator = mLabelContainer.findViewById(R.id.expand_indicator);
+        mExpandSpace = mLabelContainer.findViewById(R.id.expand_space);
 
         addView(mLabelContainer);
     }
@@ -101,8 +103,8 @@ public class QSTileView extends QSTileBaseView {
             mState = state.state;
             mLabel.setText(state.label);
         }
-        mDivider.setVisibility(state.dualTarget ? View.VISIBLE : View.INVISIBLE);
         mExpandIndicator.setVisibility(state.dualTarget ? View.VISIBLE : View.GONE);
+        mExpandSpace.setVisibility(state.dualTarget ? View.VISIBLE : View.GONE);
         mLabelContainer.setContentDescription(state.dualTarget ? state.dualLabelContentDescription
                 : null);
         if (state.dualTarget != mLabelContainer.isClickable()) {
