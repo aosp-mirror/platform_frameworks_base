@@ -472,9 +472,9 @@ public class ChangeBounds extends Transition {
         private int mTop;
         private int mRight;
         private int mBottom;
-        private boolean mIsTopLeftSet;
-        private boolean mIsBottomRightSet;
         private View mView;
+        private int mTopLeftCalls;
+        private int mBottomRightCalls;
 
         public ViewBounds(View view) {
             mView = view;
@@ -483,8 +483,8 @@ public class ChangeBounds extends Transition {
         public void setTopLeft(PointF topLeft) {
             mLeft = Math.round(topLeft.x);
             mTop = Math.round(topLeft.y);
-            mIsTopLeftSet = true;
-            if (mIsBottomRightSet) {
+            mTopLeftCalls++;
+            if (mTopLeftCalls == mBottomRightCalls) {
                 setLeftTopRightBottom();
             }
         }
@@ -492,16 +492,16 @@ public class ChangeBounds extends Transition {
         public void setBottomRight(PointF bottomRight) {
             mRight = Math.round(bottomRight.x);
             mBottom = Math.round(bottomRight.y);
-            mIsBottomRightSet = true;
-            if (mIsTopLeftSet) {
+            mBottomRightCalls++;
+            if (mTopLeftCalls == mBottomRightCalls) {
                 setLeftTopRightBottom();
             }
         }
 
         private void setLeftTopRightBottom() {
             mView.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
-            mIsTopLeftSet = false;
-            mIsBottomRightSet = false;
+            mTopLeftCalls = 0;
+            mBottomRightCalls = 0;
         }
     }
 }
