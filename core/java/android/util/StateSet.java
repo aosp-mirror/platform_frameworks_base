@@ -228,6 +228,29 @@ public class StateSet {
         return true;
     }
 
+    /**
+     * Check whether a list of state specs has an attribute specified.
+     * @param stateSpecs a list of state specs we're checking.
+     * @param attr an attribute we're looking for.
+     * @return {@code true} if the attribute is contained in the state specs.
+     * @hide
+     */
+    public static boolean containsAttribute(int[][] stateSpecs, int attr) {
+        if (stateSpecs != null) {
+            for (int[] spec : stateSpecs) {
+                if (spec == null) {
+                    break;
+                }
+                for (int specAttr : spec) {
+                    if (specAttr == attr || -specAttr == attr) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public static int[] trimStateSet(int[] states, int newSize) {
         if (states.length == newSize) {
             return states;

@@ -352,6 +352,12 @@ public class ShapeDrawable extends Drawable {
         return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mShapeState.mTint != null && mShapeState.mTint.hasFocusStateSpecified();
+    }
+
     /**
      * Subclasses override this to parse custom subelements. If you handle it,
      * return true, else return <em>super.inflateTag(...)</em>.

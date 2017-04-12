@@ -413,6 +413,12 @@ public class VectorDrawable extends Drawable {
         return super.isStateful() || (mVectorState != null && mVectorState.isStateful());
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mVectorState != null && mVectorState.hasFocusStateSpecified();
+    }
+
     @Override
     protected boolean onStateChange(int[] stateSet) {
         boolean changed = false;
@@ -976,6 +982,11 @@ public class VectorDrawable extends Drawable {
                     || (mRootGroup != null && mRootGroup.isStateful());
         }
 
+        public boolean hasFocusStateSpecified() {
+            return mTint != null && mTint.hasFocusStateSpecified()
+                    || (mRootGroup != null && mRootGroup.hasFocusStateSpecified());
+        }
+
         void setViewportSize(float viewportWidth, float viewportHeight) {
             mViewportWidth = viewportWidth;
             mViewportHeight = viewportHeight;
@@ -1326,6 +1337,21 @@ public class VectorDrawable extends Drawable {
         }
 
         @Override
+        public boolean hasFocusStateSpecified() {
+            boolean result = false;
+
+            final ArrayList<VObject> children = mChildren;
+            for (int i = 0, count = children.size(); i < count; i++) {
+                final VObject child = children.get(i);
+                if (child.isStateful()) {
+                    result |= child.hasFocusStateSpecified();
+                }
+            }
+
+            return result;
+        }
+
+        @Override
         int getNativeSize() {
             // Return the native allocation needed for the subtree.
             int size = NATIVE_ALLOCATION_SIZE;
@@ -1565,6 +1591,11 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public boolean isStateful() {
+            return false;
+        }
+
+        @Override
+        public boolean hasFocusStateSpecified() {
             return false;
         }
 
@@ -1816,6 +1847,14 @@ public class VectorDrawable extends Drawable {
         @Override
         public boolean isStateful() {
             return mStrokeColors != null || mFillColors != null;
+        }
+
+        @Override
+        public boolean hasFocusStateSpecified() {
+            return (mStrokeColors != null && mStrokeColors instanceof ColorStateList &&
+                    ((ColorStateList) mStrokeColors).hasFocusStateSpecified()) &&
+                    (mFillColors != null && mFillColors instanceof ColorStateList &&
+                    ((ColorStateList) mFillColors).hasFocusStateSpecified());
         }
 
         @Override
@@ -2116,6 +2155,7 @@ public class VectorDrawable extends Drawable {
         abstract void applyTheme(Theme t);
         abstract boolean onStateChange(int[] state);
         abstract boolean isStateful();
+        abstract boolean hasFocusStateSpecified();
         abstract int getNativeSize();
         abstract Property getProperty(String propertyName);
     }
