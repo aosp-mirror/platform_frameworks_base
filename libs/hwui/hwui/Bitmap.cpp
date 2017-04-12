@@ -323,18 +323,12 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
 }
 
 void Bitmap::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
-    // TODO: See todo in reconfigure() below
-    SkImageInfo* myInfo = const_cast<SkImageInfo*>(&this->info());
-    *myInfo = info().makeColorSpace(std::move(colorSpace));
+    reconfigure(info().makeColorSpace(std::move(colorSpace)), rowBytes(), colorTable());
 }
 
 void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
     if (kIndex_8_SkColorType != newInfo.colorType()) {
         ctable = nullptr;
-    }
-    mRowBytes = rowBytes;
-    if (mColorTable.get() != ctable) {
-        mColorTable.reset(SkSafeRef(ctable));
     }
 
     // Need to validate the alpha type to filter against the color type
@@ -349,50 +343,48 @@ void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTab
     // really hard to work with. Skia really, really wants immutable objects,
     // but with the nested-ref-count hackery going on that's just not
     // feasible without going insane trying to figure it out
-    SkImageInfo* myInfo = const_cast<SkImageInfo*>(&this->info());
-    *myInfo = newInfo;
-    changeAlphaType(alphaType);
-
-    // Docs say to only call this in the ctor, but we're going to call
-    // it anyway even if this isn't always the ctor.
-    // TODO: Fix this too as part of the above TODO
-    setPreLocked(getStorage(), mRowBytes, mColorTable.get());
+    this->android_only_reset(newInfo.makeAlphaType(alphaType), rowBytes, sk_ref_sp(ctable));
 }
 
+static sk_sp<SkColorTable> sanitize(const SkImageInfo& info, SkColorTable* ctable) {
+    if (info.colorType() == kIndex_8_SkColorType) {
+        SkASSERT(ctable);
+        return sk_ref_sp(ctable);
+    }
+    return nullptr; // drop the ctable if we're not indexed
+}
 Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-            : SkPixelRef(info)
+            : SkPixelRef(info, address, rowBytes, sanitize(info, ctable))
             , mPixelStorageType(PixelStorageType::Heap) {
     mPixelStorage.heap.address = address;
     mPixelStorage.heap.size = size;
-    reconfigure(info, rowBytes, ctable);
 }
 
 Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
                 const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-            : SkPixelRef(info)
+            : SkPixelRef(info, address, rowBytes, sanitize(info, ctable))
             , mPixelStorageType(PixelStorageType::External) {
     mPixelStorage.external.address = address;
     mPixelStorage.external.context = context;
     mPixelStorage.external.freeFunc = freeFunc;
-    reconfigure(info, rowBytes, ctable);
 }
 
 Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
                 const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-            : SkPixelRef(info)
+            : SkPixelRef(info, address, rowBytes, sanitize(info, ctable))
             , mPixelStorageType(PixelStorageType::Ashmem) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
     mPixelStorage.ashmem.size = mappedSize;
-    reconfigure(info, rowBytes, ctable);
 }
 
 Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
-        : SkPixelRef(info)
+        : SkPixelRef(info, nullptr,
+                     bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride(),
+                     nullptr)
         , mPixelStorageType(PixelStorageType::Hardware) {
     mPixelStorage.hardware.buffer = buffer;
     buffer->incStrong(buffer);
-    mRowBytes = bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride();
 }
 
 Bitmap::~Bitmap() {
@@ -442,15 +434,8 @@ void* Bitmap::getStorage() const {
     }
 }
 
-bool Bitmap::onNewLockPixels(LockRec* rec) {
-    rec->fPixels = getStorage();
-    rec->fRowBytes = mRowBytes;
-    rec->fColorTable = mColorTable.get();
-    return true;
-}
-
 size_t Bitmap::getAllocatedSizeInBytes() const {
-    return info().getSafeSize(mRowBytes);
+    return info().getSafeSize(this->rowBytes());
 }
 
 int Bitmap::getAshmemFd() const {
