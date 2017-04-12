@@ -16,6 +16,10 @@
 
 package com.android.systemui.pip.phone;
 
+import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
+import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
+import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -106,7 +110,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private boolean mEnableMinimize = false;
 
     // Behaviour states
-    private boolean mIsMenuVisible;
+    private int mMenuState;
     private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
@@ -129,8 +133,8 @@ public class PipTouchHandler implements TunerService.Tunable {
      */
     private class PipMenuListener implements PipMenuActivityController.Listener {
         @Override
-        public void onPipMenuVisibilityChanged(boolean menuVisible, boolean resize) {
-            setMenuVisibilityState(menuVisible, resize);
+        public void onPipMenuStateChanged(int menuState, boolean resize) {
+            setMenuState(menuState, resize);
         }
 
         @Override
@@ -151,6 +155,12 @@ public class PipTouchHandler implements TunerService.Tunable {
             mMotionHelper.dismissPip();
             MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                     METRIC_VALUE_DISMISSED_BY_TAP);
+        }
+
+        @Override
+        public void onPipShowMenu() {
+            mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                    mMovementBounds, true /* allowMenuTimeout */);
         }
     }
 
@@ -193,20 +203,21 @@ public class PipTouchHandler implements TunerService.Tunable {
     public void showPictureInPictureMenu() {
         // Only show the menu if the user isn't currently interacting with the PiP
         if (!mTouchState.isUserInteracting()) {
-            mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
-                    false /* allowMenuTimeout */);
+            mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                    mMovementBounds, false /* allowMenuTimeout */);
         }
     }
 
     public void onActivityPinned() {
         // Reset some states once we are pinned
-        if (mIsMenuVisible) {
-            mIsMenuVisible = false;
-        }
+        mMenuState = MENU_STATE_NONE;
+
         if (mIsMinimized) {
             setMinimizedStateInternal(false);
         }
         mDismissViewController.destroyDismissTarget();
+        mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),
+                mMovementBounds, true /* allowMenuTimeout */);
     }
 
     public void onPinnedStackAnimationEnded() {
@@ -266,7 +277,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 // touching the screen
             } else {
                 final Rect bounds = new Rect(animatingBounds);
-                final Rect toMovementBounds = mIsMenuVisible
+                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
                         ? expandedMovementBounds
                         : normalMovementBounds;
                 if (mIsImeShowing) {
@@ -293,7 +304,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         // above
         mNormalMovementBounds = normalMovementBounds;
         mExpandedMovementBounds = expandedMovementBounds;
-        updateMovementBounds(mIsMenuVisible);
+        updateMovementBounds(mMenuState);
     }
 
     private void onRegistrationChanged(boolean isRegistered) {
@@ -303,8 +314,8 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     private void onAccessibilityShowMenu() {
-        mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
-                false /* allowMenuTimeout */);
+        mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                mMovementBounds, false /* allowMenuTimeout */);
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -336,7 +347,7 @@ public class PipTouchHandler implements TunerService.Tunable {
             case MotionEvent.ACTION_UP: {
                 // Update the movement bounds again if the state has changed since the user started
                 // dragging (ie. when the IME shows)
-                updateMovementBounds(mIsMenuVisible);
+                updateMovementBounds(mMenuState);
 
                 for (PipTouchGesture gesture : mGestures) {
                     if (gesture.onUp(mTouchState)) {
@@ -378,7 +389,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 break;
             }
         }
-        return !mIsMenuVisible;
+        return mMenuState == MENU_STATE_NONE;
     }
 
     /**
@@ -393,7 +404,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 final float distance = bounds.bottom - target;
                 fraction = Math.min(distance / bounds.height(), 1f);
             }
-            if (Float.compare(fraction, 0f) != 0 || mMenuController.isMenuVisible()) {
+            if (Float.compare(fraction, 0f) != 0 || mMenuState != MENU_STATE_NONE) {
                 // Update if the fraction > 0, or if fraction == 0 and the menu was already visible
                 mMenuController.setDismissFraction(fraction);
             }
@@ -449,8 +460,8 @@ public class PipTouchHandler implements TunerService.Tunable {
     /**
      * Sets the menu visibility.
      */
-    void setMenuVisibilityState(boolean menuVisible, boolean resize) {
-        if (menuVisible) {
+    void setMenuState(int menuState, boolean resize) {
+        if (menuState == MENU_STATE_FULL) {
             // Save the current snap fraction and if we do not drag or move the PiP, then
             // we store back to this snap fraction.  Otherwise, we'll reset the snap
             // fraction and snap to the closest edge
@@ -459,7 +470,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
                         mMovementBounds, mExpandedMovementBounds);
             }
-        } else {
+        } else if (menuState == MENU_STATE_NONE) {
             // Try and restore the PiP to the closest edge, using the saved snap fraction
             // if possible
             if (resize) {
@@ -469,10 +480,12 @@ public class PipTouchHandler implements TunerService.Tunable {
             }
             mSavedSnapFraction = -1f;
         }
-        mIsMenuVisible = menuVisible;
-        updateMovementBounds(menuVisible);
-        MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
-                menuVisible);
+        mMenuState = menuState;
+        updateMovementBounds(menuState);
+        if (menuState != MENU_STATE_CLOSE) {
+            MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
+                    menuState == MENU_STATE_FULL);
+        }
     }
 
     /**
@@ -501,7 +514,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
             // If the menu is still visible, and we aren't minimized, then just poke the menu
             // so that it will timeout after the user stops touching it
-            if (mMenuController.isMenuVisible() && !mIsMinimized) {
+            if (mMenuState != MENU_STATE_NONE && !mIsMinimized) {
                 mMenuController.pokeMenu();
             }
 
@@ -599,7 +612,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                         !mIsMinimized && (mMotionHelper.shouldMinimizePip() || isFlingToEdge)) {
                     // Pip should be minimized
                     setMinimizedStateInternal(true);
-                    if (mMenuController.isMenuVisible()) {
+                    if (mMenuState == MENU_STATE_FULL) {
                         // If the user dragged the expanded PiP to the edge, then hiding the menu
                         // will trigger the PiP to be scaled back to the normal size with the
                         // minimize offset adjusted
@@ -617,11 +630,11 @@ public class PipTouchHandler implements TunerService.Tunable {
                 }
 
                 AnimatorListenerAdapter postAnimationCallback = null;
-                if (mMenuController.isMenuVisible()) {
+                if (mMenuState != MENU_STATE_NONE) {
                     // If the menu is still visible, and we aren't minimized, then just poke the
                     // menu so that it will timeout after the user stops touching it
-                    mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
-                            true /* allowMenuTimeout */);
+                    mMenuController.showMenu(mMenuState, mMotionHelper.getBounds(),
+                            mMovementBounds, true /* allowMenuTimeout */);
                 } else {
                     // If the menu is not visible, then we can still be showing the activity for the
                     // dismiss overlay, so just finish it after the animation completes
@@ -645,9 +658,9 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mMotionHelper.animateToClosestSnapTarget(mMovementBounds, null /* updateListener */,
                         null /* animatorListener */);
                 setMinimizedStateInternal(false);
-            } else if (!mIsMenuVisible) {
-                mMenuController.showMenu(mMotionHelper.getBounds(), mMovementBounds,
-                        true /* allowMenuTimeout */);
+            } else if (mMenuState != MENU_STATE_FULL) {
+                mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                        mMovementBounds, true /* allowMenuTimeout */);
             } else {
                 mMotionHelper.expandPip();
             }
@@ -658,8 +671,8 @@ public class PipTouchHandler implements TunerService.Tunable {
     /**
      * Updates the current movement bounds based on whether the menu is currently visible.
      */
-    private void updateMovementBounds(boolean isExpanded) {
-        mMovementBounds = isExpanded
+    private void updateMovementBounds(int menuState) {
+        mMovementBounds = menuState == MENU_STATE_FULL
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
     }
@@ -672,7 +685,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         pw.println(innerPrefix + "mNormalMovementBounds=" + mNormalMovementBounds);
         pw.println(innerPrefix + "mExpandedBounds=" + mExpandedBounds);
         pw.println(innerPrefix + "mExpandedMovementBounds=" + mExpandedMovementBounds);
-        pw.println(innerPrefix + "mIsMenuVisible=" + mIsMenuVisible);
+        pw.println(innerPrefix + "mMenuState=" + mMenuState);
         pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
