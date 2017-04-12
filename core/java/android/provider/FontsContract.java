@@ -124,8 +124,9 @@ public class FontsContract {
          * should have this column populated to indicate the result status of the
          * query. This will be checked before any other data in the cursor. Possible values are
          * {@link #RESULT_CODE_OK}, {@link #RESULT_CODE_FONT_NOT_FOUND},
-         * {@link #RESULT_CODE_MALFORMED_QUERY} and {@link #RESULT_CODE_FONT_UNAVAILABLE}. If not
-         * present, {@link #RESULT_CODE_OK} will be assumed.
+         * {@link #RESULT_CODE_MALFORMED_QUERY} and {@link #RESULT_CODE_FONT_UNAVAILABLE} for system
+         * defined values. You may also define your own values in the 0x000010000..0xFFFF0000 range.
+         * If not present, {@link #RESULT_CODE_OK} will be assumed.
          */
         public static final String RESULT_CODE = "result_code";
 
@@ -452,7 +453,10 @@ public class FontsContract {
          *               {@link #FAIL_REASON_FONT_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_LOAD_ERROR},
          *               {@link #FAIL_REASON_FONT_UNAVAILABLE} or
-         *               {@link #FAIL_REASON_MALFORMED_QUERY}.
+         *               {@link #FAIL_REASON_MALFORMED_QUERY} if returned by the system. May also be
+         *               a positive value greater than 0 defined by the font provider as an
+         *               additional error code. Refer to the provider's documentation for more
+         *               information on possible returned error codes.
          */
         public void onTypefaceRequestFailed(@FontRequestFailReason int reason) {}
     }
