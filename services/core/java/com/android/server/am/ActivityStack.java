@@ -2531,26 +2531,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     }
                 }
 
-                boolean allowSavedSurface = true;
                 if (next.newIntents != null) {
-                    // Restrict saved surface to launcher start, or there is no intent at all
-                    // (eg. task being brought to front). If the intent is something else,
-                    // likely the app is going to show some specific page or view, instead of
-                    // what's left last time.
-                    for (int i = next.newIntents.size() - 1; i >= 0; i--) {
-                        final Intent intent = next.newIntents.get(i);
-                        if (intent != null && !ActivityRecord.isMainIntent(intent)) {
-                            allowSavedSurface = false;
-                            break;
-                        }
-                    }
                     next.app.thread.scheduleNewIntent(
                             next.newIntents, next.appToken, false /* andPause */);
                 }
 
                 // Well the app will no longer be stopped.
                 // Clear app token stopped state in window manager if needed.
-                next.notifyAppResumed(next.stopped, allowSavedSurface);
+                next.notifyAppResumed(next.stopped);
 
                 EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
                         System.identityHashCode(next), next.getTask().taskId,

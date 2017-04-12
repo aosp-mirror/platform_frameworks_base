@@ -97,7 +97,7 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         final WindowTestUtils.TestAppWindowContainerController controller =
                 createAppWindowController();
         controller.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
-                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false);
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true);
         waitUntilHandlersIdle();
         final AppWindowToken atoken = controller.getAppWindowToken();
         assertHasStartingWindow(atoken);
@@ -113,11 +113,11 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         final WindowTestUtils.TestAppWindowContainerController controller2 =
                 createAppWindowController();
         controller1.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
-                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false);
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true);
         waitUntilHandlersIdle();
         controller2.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, controller1.mToken.asBinder(),
-                true, true, false);
+                true, true, false, true);
         waitUntilHandlersIdle();
         assertNoStartingWindow(controller1.getAppWindowToken());
         assertHasStartingWindow(controller2.getAppWindowToken());
@@ -134,10 +134,10 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
             // Surprise, ...! Transfer window in the middle of the creation flow.
             controller2.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, controller1.mToken.asBinder(),
-                    true, true, false);
+                    true, true, false, true);
         });
         controller1.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
-                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false);
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true);
         waitUntilHandlersIdle();
         assertNoStartingWindow(controller1.getAppWindowToken());
         assertHasStartingWindow(controller2.getAppWindowToken());
