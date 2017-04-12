@@ -5721,9 +5721,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck) {
         final int callingUser = UserHandle.getCallingUserId();
-        if (callingUser != UserHandle.USER_SYSTEM) {
-            return false;
-        }
         if (mInstantAppResolverConnection == null) {
             return false;
         }
@@ -6334,19 +6331,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                 }
                 final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-                ephemeralInstaller.activityInfo = new ActivityInfo(mInstantAppInstallerActivity);
-                ephemeralInstaller.activityInfo.launchToken = auxiliaryResponse.token;
-                ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
-                // make sure this resolver is the default
-                ephemeralInstaller.isDefault = true;
-                ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                        | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
-                // add a non-generic filter
-                ephemeralInstaller.filter = new IntentFilter(intent.getAction());
-                ephemeralInstaller.filter.addDataPath(
-                        intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
-                ephemeralInstaller.instantAppAvailable = true;
-                result.add(ephemeralInstaller);
+                final PackageSetting ps =
+                        mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);
+                if (ps != null) {
+                    ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
+                            mInstantAppInstallerActivity, 0, ps.readUserState(userId), userId);
+                    ephemeralInstaller.activityInfo.launchToken = auxiliaryResponse.token;
+                    ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
+                    // make sure this resolver is the default
+                    ephemeralInstaller.isDefault = true;
+                    ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+                    // add a non-generic filter
+                    ephemeralInstaller.filter = new IntentFilter(intent.getAction());
+                    ephemeralInstaller.filter.addDataPath(
+                            intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
+                    ephemeralInstaller.instantAppAvailable = true;
+                    result.add(ephemeralInstaller);
+                }
             }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
