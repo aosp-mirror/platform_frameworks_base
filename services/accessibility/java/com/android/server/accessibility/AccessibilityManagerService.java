@@ -2036,10 +2036,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
         if (!shortcutServiceIsInstalled) {
             userState.mServiceToEnableWithShortcut = null;
-            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null, userState.mUserId);
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 0, userState.mUserId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null, userState.mUserId);
+
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 0, userState.mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
