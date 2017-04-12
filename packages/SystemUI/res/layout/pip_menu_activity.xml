@@ -26,16 +26,6 @@
       android:layout_height="match_parent"
       android:forceHasOverlappingRendering="false">
 
-      <ImageView
-          android:id="@+id/dismiss"
-          android:layout_width="@dimen/pip_action_size"
-          android:layout_height="@dimen/pip_action_size"
-          android:layout_gravity="top|end"
-          android:padding="@dimen/pip_action_padding"
-          android:contentDescription="@string/pip_phone_close"
-          android:src="@drawable/ic_close_white"
-          android:background="?android:selectableItemBackgroundBorderless" />
-
       <!-- The margins for this container is calculated in the code depending on whether the
            actions_container is visible. -->
       <FrameLayout
@@ -67,4 +57,15 @@
               android:showDividers="middle" />
       </FrameLayout>
   </FrameLayout>
+
+  <ImageView
+      android:id="@+id/dismiss"
+      android:layout_width="@dimen/pip_action_size"
+      android:layout_height="@dimen/pip_action_size"
+      android:layout_gravity="top|end"
+      android:padding="@dimen/pip_action_padding"
+      android:contentDescription="@string/pip_phone_close"
+      android:src="@drawable/ic_close_white"
+      android:background="?android:selectableItemBackgroundBorderless" />
+
 </FrameLayout>

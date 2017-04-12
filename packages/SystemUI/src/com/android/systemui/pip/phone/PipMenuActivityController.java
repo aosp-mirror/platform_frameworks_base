@@ -57,16 +57,21 @@ public class PipMenuActivityController {
     public static final String EXTRA_STACK_BOUNDS = "stack_bounds";
     public static final String EXTRA_MOVEMENT_BOUNDS = "movement_bounds";
     public static final String EXTRA_ALLOW_TIMEOUT = "allow_timeout";
-    public static final String EXTRA_SHOW_MENU = "show_menu";
     public static final String EXTRA_DISMISS_FRACTION = "dismiss_fraction";
+    public static final String EXTRA_MENU_STATE = "menu_state";
 
-    public static final int MESSAGE_MENU_VISIBILITY_CHANGED = 100;
+    public static final int MESSAGE_MENU_STATE_CHANGED = 100;
     public static final int MESSAGE_EXPAND_PIP = 101;
     public static final int MESSAGE_MINIMIZE_PIP = 102;
     public static final int MESSAGE_DISMISS_PIP = 103;
     public static final int MESSAGE_UPDATE_ACTIVITY_CALLBACK = 104;
     public static final int MESSAGE_REGISTER_INPUT_CONSUMER = 105;
     public static final int MESSAGE_UNREGISTER_INPUT_CONSUMER = 106;
+    public static final int MESSAGE_SHOW_MENU = 107;
+
+    public static final int MENU_STATE_NONE = 0;
+    public static final int MENU_STATE_CLOSE = 1;
+    public static final int MENU_STATE_FULL = 2;
 
     /**
      * A listener interface to receive notification on changes in PIP.
@@ -75,10 +80,10 @@ public class PipMenuActivityController {
         /**
          * Called when the PIP menu visibility changes.
          *
-         * @param menuVisible whether or not the menu is visible
-         * @param resize whether or not to resize the PiP with the visibility change
+         * @param menuState the current state of the menu
+         * @param resize whether or not to resize the PiP with the state change
          */
-        void onPipMenuVisibilityChanged(boolean menuVisible, boolean resize);
+        void onPipMenuStateChanged(int menuState, boolean resize);
 
         /**
          * Called when the PIP requested to be expanded.
@@ -94,6 +99,11 @@ public class PipMenuActivityController {
          * Called when the PIP requested to be dismissed.
          */
         void onPipDismiss();
+
+        /**
+         * Called when the PIP requested to show the menu.
+         */
+        void onPipShowMenu();
     }
 
     private Context mContext;
@@ -104,7 +114,7 @@ public class PipMenuActivityController {
     private ArrayList<Listener> mListeners = new ArrayList<>();
     private ParceledListSlice mAppActions;
     private ParceledListSlice mMediaActions;
-    private boolean mMenuVisible;
+    private int mMenuState;
 
     // The dismiss fraction update is sent frequently, so use a temporary bundle for the message
     private Bundle mTmpDismissFractionData = new Bundle();
@@ -115,16 +125,16 @@ public class PipMenuActivityController {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MESSAGE_MENU_VISIBILITY_CHANGED: {
-                    boolean visible = msg.arg1 > 0;
-                    onMenuVisibilityChanged(visible, true /* resize */);
+                case MESSAGE_MENU_STATE_CHANGED: {
+                    int menuState = msg.arg1;
+                    onMenuStateChanged(menuState, true /* resize */);
                     break;
                 }
                 case MESSAGE_EXPAND_PIP: {
                     mListeners.forEach(l -> l.onPipExpand());
                     // Preemptively mark the menu as invisible once we expand the PiP, but don't
                     // resize as we will be animating the stack
-                    onMenuVisibilityChanged(false, false /* resize */);
+                    onMenuStateChanged(MENU_STATE_NONE, false /* resize */);
                     break;
                 }
                 case MESSAGE_MINIMIZE_PIP: {
@@ -135,7 +145,11 @@ public class PipMenuActivityController {
                     mListeners.forEach(l -> l.onPipDismiss());
                     // Preemptively mark the menu as invisible once we dismiss the PiP, but don't
                     // resize as we'll be removing the stack in place
-                    onMenuVisibilityChanged(false, false /* resize */);
+                    onMenuStateChanged(MENU_STATE_NONE, false /* resize */);
+                    break;
+                }
+                case MESSAGE_SHOW_MENU: {
+                    mListeners.forEach(l -> l.onPipShowMenu());
                     break;
                 }
                 case MESSAGE_REGISTER_INPUT_CONSUMER: {
@@ -151,7 +165,7 @@ public class PipMenuActivityController {
                     mStartActivityRequested = false;
                     // Mark the menu as invisible once the activity finishes as well
                     if (mToActivityMessenger == null) {
-                        onMenuVisibilityChanged(false, true /* resize */);
+                        onMenuStateChanged(MENU_STATE_NONE, true /* resize */);
                     }
                     break;
                 }
@@ -176,7 +190,7 @@ public class PipMenuActivityController {
     }
 
     public void onActivityPinned() {
-        if (!mMenuVisible) {
+        if (mMenuState == MENU_STATE_NONE) {
             // If the menu is not visible, then re-register the input consumer if it is not already
             // registered
             mInputConsumerController.registerInputConsumer();
@@ -209,23 +223,25 @@ public class PipMenuActivityController {
             try {
                 mToActivityMessenger.send(m);
             } catch (RemoteException e) {
-                Log.e(TAG, "Could not notify menu to show", e);
+                Log.e(TAG, "Could not notify menu to update dismiss fraction", e);
             }
         } else if (!mStartActivityRequested) {
-            startMenuActivity(null /* stackBounds */, null /* movementBounds */,
-                    false /* showMenu */, false /* allowMenuTimeout */);
+            startMenuActivity(MENU_STATE_NONE, null /* stackBounds */,
+                    null /* movementBounds */, false /* allowMenuTimeout */);
         }
     }
 
     /**
      * Shows the menu activity.
      */
-    public void showMenu(Rect stackBounds, Rect movementBounds, boolean allowMenuTimeout) {
+    public void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
+            boolean allowMenuTimeout) {
         if (DEBUG) {
             Log.d(TAG, "showMenu() hasActivity=" + (mToActivityMessenger != null));
         }
         if (mToActivityMessenger != null) {
             Bundle data = new Bundle();
+            data.putInt(EXTRA_MENU_STATE, menuState);
             data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
             data.putParcelable(EXTRA_MOVEMENT_BOUNDS, movementBounds);
             data.putBoolean(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
@@ -238,7 +254,7 @@ public class PipMenuActivityController {
                 Log.e(TAG, "Could not notify menu to show", e);
             }
         } else if (!mStartActivityRequested) {
-            startMenuActivity(stackBounds, movementBounds, true /* showMenu */, allowMenuTimeout);
+            startMenuActivity(menuState, stackBounds, movementBounds, allowMenuTimeout);
         }
     }
 
@@ -279,10 +295,10 @@ public class PipMenuActivityController {
     }
 
     /**
-     * @return whether the menu is currently visible.
+     * @return the current menu state.
      */
-    public boolean isMenuVisible() {
-        return mMenuVisible;
+    public int getMenuState() {
+        return mMenuState;
     }
 
     /**
@@ -306,7 +322,7 @@ public class PipMenuActivityController {
     /**
      * Starts the menu activity on the top task of the pinned stack.
      */
-    private void startMenuActivity(Rect stackBounds, Rect movementBounds, boolean showMenu,
+    private void startMenuActivity(int menuState, Rect stackBounds, Rect movementBounds,
             boolean allowMenuTimeout) {
         try {
             StackInfo pinnedStackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
@@ -321,7 +337,7 @@ public class PipMenuActivityController {
                 if (movementBounds != null) {
                     intent.putExtra(EXTRA_MOVEMENT_BOUNDS, movementBounds);
                 }
-                intent.putExtra(EXTRA_SHOW_MENU, showMenu);
+                intent.putExtra(EXTRA_MENU_STATE, menuState);
                 intent.putExtra(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
                 ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
                 options.setLaunchTaskId(
@@ -378,19 +394,19 @@ public class PipMenuActivityController {
     /**
      * Handles changes in menu visibility.
      */
-    private void onMenuVisibilityChanged(boolean visible, boolean resize) {
+    private void onMenuStateChanged(int menuState, boolean resize) {
         if (DEBUG) {
-            Log.d(TAG, "onMenuVisibilityChanged() mMenuVisible=" + mMenuVisible
-                    + " menuVisible=" + visible + " resize=" + resize);
+            Log.d(TAG, "onMenuStateChanged() mMenuState=" + mMenuState
+                    + " menuState=" + menuState + " resize=" + resize);
         }
-        if (visible) {
-            mInputConsumerController.unregisterInputConsumer();
-        } else {
+        if (menuState == MENU_STATE_NONE) {
             mInputConsumerController.registerInputConsumer();
+        } else {
+            mInputConsumerController.unregisterInputConsumer();
         }
-        if (visible != mMenuVisible) {
-            mListeners.forEach(l -> l.onPipMenuVisibilityChanged(visible, resize));
-            if (visible) {
+        if (menuState != mMenuState) {
+            mListeners.forEach(l -> l.onPipMenuStateChanged(menuState, resize));
+            if (menuState == MENU_STATE_FULL) {
                 // Once visible, start listening for media action changes. This call will trigger
                 // the menu actions to be updated again.
                 mMediaController.addListener(mMediaActionListener);
@@ -400,13 +416,13 @@ public class PipMenuActivityController {
                 mMediaController.removeListener(mMediaActionListener);
             }
         }
-        mMenuVisible = visible;
+        mMenuState = menuState;
     }
 
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mMenuVisible=" + mMenuVisible);
+        pw.println(innerPrefix + "mMenuState=" + mMenuState);
         pw.println(innerPrefix + "mToActivityMessenger=" + mToActivityMessenger);
         pw.println(innerPrefix + "mListeners=" + mListeners.size());
     }
