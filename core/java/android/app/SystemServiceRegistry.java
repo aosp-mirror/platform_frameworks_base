@@ -784,7 +784,7 @@ final class SystemServiceRegistry {
         registerService(Context.RADIO_SERVICE, RadioManager.class,
                 new CachedServiceFetcher<RadioManager>() {
             @Override
-            public RadioManager createService(ContextImpl ctx) {
+            public RadioManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new RadioManager(ctx);
             }});
 

@@ -17,12 +17,19 @@
 package android.hardware.radio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.Log;
+
 import java.util.List;
 import java.util.Arrays;
 
@@ -35,6 +42,7 @@ import java.util.Arrays;
  */
 @SystemApi
 public class RadioManager {
+    private static final String TAG = "RadioManager";
 
     /** Method return status: successful operation */
     public static final int STATUS_OK = 0;
@@ -1434,23 +1442,40 @@ public class RadioManager {
     public RadioTuner openTuner(int moduleId, BandConfig config, boolean withAudio,
             RadioTuner.Callback callback, Handler handler) {
         if (callback == null) {
-            return null;
+            throw new IllegalArgumentException("callback must not be empty");
         }
-        RadioModule module = new RadioModule(moduleId, config, withAudio, callback, handler);
-        if (module != null) {
-            if (!module.initCheck()) {
-                module = null;
+
+        if (mService != null) {
+            ITuner tuner;
+            try {
+                tuner = mService.openTuner();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
+            return new TunerAdapter(tuner);
         }
+
+        RadioModule module = new RadioModule(moduleId, config, withAudio, callback, handler);
+        if (!module.initCheck()) {
+            Log.e(TAG, "Failed to open tuner");
+            module = null;
+        }
+
         return (RadioTuner)module;
     }
 
-    private final Context mContext;
+    @NonNull private final Context mContext;
+    // TODO(b/36863239): NonNull when transitioned from native service
+    @Nullable private final IRadioService mService;
 
     /**
      * @hide
      */
-    public RadioManager(Context context) {
+    public RadioManager(@NonNull Context context) throws ServiceNotFoundException {
         mContext = context;
+
+        boolean isServiceJava = SystemProperties.getBoolean("config.enable_java_radio", false);
+        mService = isServiceJava ? IRadioService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.RADIO_SERVICE)) : null;
     }
 }
