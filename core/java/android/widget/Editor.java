@@ -1915,11 +1915,10 @@ public class Editor {
         }
 
         boolean clamped = layout.shouldClampCursor(line);
-        updateCursorPosition(0, top, middle, layout.getPrimaryHorizontal(offset, clamped, true));
+        updateCursorPosition(0, top, middle, layout.getPrimaryHorizontal(offset, clamped));
 
         if (mCursorCount == 2) {
-            updateCursorPosition(1, middle, bottom,
-                    layout.getSecondaryHorizontal(offset, clamped, true));
+            updateCursorPosition(1, middle, bottom, layout.getSecondaryHorizontal(offset, clamped));
         }
     }
 
@@ -4340,7 +4339,7 @@ public class Editor {
                     updateSelection(offset);
                     addPositionToTouchUpFilter(offset);
                 }
-                final int line = getLineForOffset(layout, offset);
+                final int line = layout.getLineForOffset(offset);
                 mPrevLine = line;
 
                 mPositionX = getCursorHorizontalPosition(layout, offset) - mHotspotX
@@ -4365,15 +4364,6 @@ public class Editor {
          */
         int getCursorHorizontalPosition(Layout layout, int offset) {
             return (int) (getHorizontal(layout, offset) - 0.5f);
-        }
-
-        /**
-         * @param layout Text layout.
-         * @param offset Character offset for the cursor.
-         * @return The line the cursor should be at.
-         */
-        int getLineForOffset(Layout layout, int offset) {
-            return layout.getLineForOffset(offset);
         }
 
         @Override
@@ -4804,7 +4794,7 @@ public class Editor {
                     || !isStartHandle() && initialOffset <= anotherHandleOffset) {
                 // Handles have crossed, bound it to the first selected line and
                 // adjust by word / char as normal.
-                currLine = getLineForOffset(layout, anotherHandleOffset, !isStartHandle());
+                currLine = layout.getLineForOffset(anotherHandleOffset);
                 initialOffset = getOffsetAtCoordinate(layout, currLine, x);
             }
 
@@ -4876,18 +4866,14 @@ public class Editor {
             if (isExpanding) {
                 // User is increasing the selection.
                 int wordBoundary = isStartHandle() ? wordStart : wordEnd;
-                final boolean atLineBoundary = layout.getLineStart(currLine) == offset
-                        || layout.getLineEnd(currLine) == offset;
-                final boolean atWordBoundary = getWordIteratorWithText().isBoundary(offset);
-                final boolean snapToWord = !(atLineBoundary && atWordBoundary)
-                        && (!mInWord
-                                || (isStartHandle() ? currLine < mPrevLine : currLine > mPrevLine))
-                                        && atRtl == isAtRtlRun(layout, wordBoundary);
+                final boolean snapToWord = (!mInWord
+                        || (isStartHandle() ? currLine < mPrevLine : currLine > mPrevLine))
+                                && atRtl == isAtRtlRun(layout, wordBoundary);
                 if (snapToWord) {
                     // Sometimes words can be broken across lines (Chinese, hyphenation).
                     // We still snap to the word boundary but we only use the letters on the
                     // current line to determine if the user is far enough into the word to snap.
-                    if (getLineForOffset(layout, wordBoundary) != currLine) {
+                    if (layout.getLineForOffset(wordBoundary) != currLine) {
                         wordBoundary = isStartHandle()
                                 ? layout.getLineStart(currLine) : layout.getLineEnd(currLine);
                     }
@@ -5035,29 +5021,12 @@ public class Editor {
         }
 
         private float getHorizontal(@NonNull Layout layout, int offset, boolean startHandle) {
-            final int line = getLineForOffset(layout, offset);
+            final int line = layout.getLineForOffset(offset);
             final int offsetToCheck = startHandle ? offset : Math.max(offset - 1, 0);
             final boolean isRtlChar = layout.isRtlCharAt(offsetToCheck);
             final boolean isRtlParagraph = layout.getParagraphDirection(line) == -1;
             return (isRtlChar == isRtlParagraph)
-                    ? layout.getPrimaryHorizontal(offset, false, startHandle)
-                            : layout.getSecondaryHorizontal(offset, false, startHandle);
-        }
-
-        @Override
-        public int getLineForOffset(@NonNull Layout layout, int offset) {
-            return getLineForOffset(layout, offset, isStartHandle());
-        }
-
-        private int getLineForOffset(@NonNull Layout layout, int offset, boolean startHandle) {
-            final int line = layout.getLineForOffset(offset);
-            if (!startHandle && line > 0 && layout.getLineStart(line) == offset
-                    && mTextView.getText().charAt(offset - 1) != '\n') {
-                // If end handle is at a line break in a paragraph, the handle should be at the
-                // previous line.
-                return line - 1;
-            }
-            return line;
+                    ? layout.getPrimaryHorizontal(offset) : layout.getSecondaryHorizontal(offset);
         }
 
         @Override

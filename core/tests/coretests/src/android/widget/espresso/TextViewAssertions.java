@@ -28,13 +28,10 @@ import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.ViewAssertion;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Editor;
 import android.widget.TextView;
 
 import junit.framework.AssertionFailedError;
 import org.hamcrest.Matcher;
-
-import com.android.ex.editstyledtext.EditStyledText.EditModeActions.TextViewAction;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -140,14 +137,6 @@ public final class TextViewAssertions {
     }
 
     /**
-     * Returns a {@link ViewAssertion} that asserts that the TextView selection handle is on the
-     * specified line.
-     */
-    public static ViewAssertion handleIsOnLine(TextView tv, int line) {
-        return new SelectionHandlePositionAssertion(tv, line);
-    }
-
-    /**
      * A {@link ViewAssertion} to check the selected text in a {@link TextView}.
      */
     private static final class TextSelectionAssertion implements ViewAssertion {
@@ -225,33 +214,6 @@ public final class TextViewAssertions {
 
             assertThat("Cursor should be on the " + positionStr, Double.valueOf(diff),
                     closeTo(0f, 1f));
-        }
-    }
-    /**
-     * {@link ViewAssertion} to check that TextView selection handle is on a given line.
-     */
-    static class SelectionHandlePositionAssertion implements ViewAssertion {
-        private TextView mTextView;
-        private int mLine;
-        private SelectionHandlePositionAssertion(TextView tv, int line) {
-            mTextView = tv;
-            mLine = line;
-        }
-
-        @Override
-        public void check(View view, NoMatchingViewException exception) {
-            if (!(view instanceof Editor.HandleView)) {
-                throw new AssertionFailedError("View should be an instance of Editor.HandleView");
-            }
-            final Editor.HandleView handleView = (Editor.HandleView) view;
-            final Rect bounds = new Rect();
-            handleView.getBoundsOnScreen(bounds);
-            final float bottom = mTextView.getLayout().getLineBottom(mLine);
-            final float[] pos =
-                    TextViewActions.convertToScreenCoordinates(mTextView, 0, bottom);
-
-            assertThat("Cursor should be on the line " + mLine, Double.valueOf(bounds.top),
-                    closeTo(pos[1], 1f));
         }
     }
 }
