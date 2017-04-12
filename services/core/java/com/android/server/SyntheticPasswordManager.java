@@ -48,6 +48,20 @@ import java.util.Set;
  *   The SP has an associated password handle, which binds to the SID for that user. The password
  *   handle is persisted by SyntheticPasswordManager internally.
  *   If the user credential is null, it's treated as if the credential is DEFAULT_PASSWORD
+ *
+ * Information persisted on disk:
+ *   for each user (stored under DEFAULT_HANDLE):
+ *     SP_HANDLE_NAME: GateKeeper password handle of synthetic password. Only available if user
+ *                     credential exists, cleared when user clears their credential.
+ *     SP_E0_NAME, SP_P1_NAME: Secret to derive synthetic password when combined with escrow
+ *                     tokens. Destroyed when escrow support is turned off for the given user.
+ *
+ *     for each SP blob under the user (stored under the corresponding handle):
+ *       SP_BLOB_NAME: The encrypted synthetic password. Always exists.
+ *       PASSWORD_DATA_NAME: Metadata about user credential. Only exists for password based SP.
+ *       SECDISCARDABLE_NAME: Part of the necessary ingredient to decrypt SP_BLOB_NAME for the
+ *                            purpose of secure deletion.
+ *
  */
 public class SyntheticPasswordManager {
     private static final String SP_BLOB_NAME = "spblob";
@@ -221,7 +235,7 @@ public class SyntheticPasswordManager {
      * If the existing credential hash is non-null, the existing SID mill be migrated so
      * the synthetic password in the authentication token will produce the same SID
      * (the corresponding synthetic password handle is persisted by SyntheticPasswordManager
-     * in a per-user data storage.
+     * in a per-user data storage.)
      *
      * If the existing credential hash is null, it means the given user should have no SID so
      * SyntheticPasswordManager will nuke any SP handle previously persisted. In this case,
@@ -578,8 +592,6 @@ public class SyntheticPasswordManager {
 
     private void destroySyntheticPassword(long handle, int userId) {
         destroyState(SP_BLOB_NAME, true, handle, userId);
-        destroyState(SP_E0_NAME, true, handle, userId);
-        destroyState(SP_P1_NAME, true, handle, userId);
         destroySPBlobKey(getHandleName(handle));
     }
 
