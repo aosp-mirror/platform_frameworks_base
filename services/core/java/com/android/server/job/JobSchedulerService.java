@@ -37,6 +37,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.app.job.IJobScheduler;
+import android.app.job.JobWorkItem;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -582,20 +583,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
     }
 
-    /**
-     * Entry point from client to schedule the provided job.
-     * This cancels the job if it's already been scheduled, and replaces it with the one provided.
-     * @param job JobInfo object containing execution parameters
-     * @param uId The package identifier of the application this job is for.
-     * @return Result of this operation. See <code>JobScheduler#RESULT_*</code> return codes.
-     */
-    public int schedule(JobInfo job, int uId) {
-        return scheduleAsPackage(job, uId, null, -1, null);
-    }
-
-    public int scheduleAsPackage(JobInfo job, int uId, String packageName, int userId,
-            String tag) {
-        JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
+    public int scheduleAsPackage(JobInfo job, JobWorkItem work, int uId, String packageName,
+            int userId, String tag) {
         try {
             if (ActivityManager.getService().isAppStartModeDisabled(uId,
                     job.getService().getPackageName())) {
@@ -605,9 +594,20 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         } catch (RemoteException e) {
         }
-        if (DEBUG) Slog.d(TAG, "SCHEDULE: " + jobStatus.toShortString());
-        JobStatus toCancel;
         synchronized (mLock) {
+            final JobStatus toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
+
+            if (work != null && toCancel != null) {
+                // Fast path: we are adding work to an existing job, and the JobInfo is not
+                // changing.  We can just directly enqueue this work in to the job.
+                if (toCancel.getJob().equals(job)) {
+                    toCancel.enqueueWorkLocked(work);
+                    return JobScheduler.RESULT_SUCCESS;
+                }
+            }
+
+            JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
+            if (DEBUG) Slog.d(TAG, "SCHEDULE: " + jobStatus.toShortString());
             // Jobs on behalf of others don't apply to the per-app job cap
             if (ENFORCE_MAX_JOBS && packageName == null) {
                 if (mJobs.countJobsForUid(uId) > MAX_JOBS_PER_APP) {
@@ -618,15 +618,18 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
 
             // This may throw a SecurityException.
-            jobStatus.prepare(ActivityManager.getService());
+            jobStatus.prepareLocked(ActivityManager.getService());
 
-            toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
             if (toCancel != null) {
                 cancelJobImpl(toCancel, jobStatus);
             }
-            startTrackingJob(jobStatus, toCancel);
+            if (work != null) {
+                // If work has been supplied, enqueue it into the new job.
+                jobStatus.enqueueWorkLocked(work);
+            }
+            startTrackingJobLocked(jobStatus, toCancel);
+            mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
         }
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
         return JobScheduler.RESULT_SUCCESS;
     }
 
@@ -715,17 +718,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
     }
 
     private void cancelJobImpl(JobStatus cancelled, JobStatus incomingJob) {
-        if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
-        cancelled.unprepare(ActivityManager.getService());
-        stopTrackingJob(cancelled, incomingJob, true /* writeBack */);
         synchronized (mLock) {
+            if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
+            cancelled.unprepareLocked(ActivityManager.getService());
+            stopTrackingJobLocked(cancelled, incomingJob, true /* writeBack */);
             // Remove from pending queue.
             if (mPendingJobs.remove(cancelled)) {
                 mJobPackageTracker.noteNonpending(cancelled);
             }
             // Cancel if running.
             stopJobOnServiceContextLocked(cancelled, JobParameters.REASON_CANCELED);
-            reportActive();
+            reportActiveLocked();
         }
     }
 
@@ -773,7 +776,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    void reportActive() {
+    void reportActiveLocked() {
         // active is true if pending queue contains jobs OR some job is running.
         boolean active = mPendingJobs.size() > 0;
         if (mPendingJobs.size() <= 0) {
@@ -895,20 +898,18 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * {@link com.android.server.job.JobStore}, and make sure all the relevant controllers know
      * about.
      */
-    private void startTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
-        synchronized (mLock) {
-            if (!jobStatus.isPrepared()) {
-                Slog.wtf(TAG, "Not yet prepared when started tracking: " + jobStatus);
-            }
-            final boolean update = mJobs.add(jobStatus);
-            if (mReadyToRock) {
-                for (int i = 0; i < mControllers.size(); i++) {
-                    StateController controller = mControllers.get(i);
-                    if (update) {
-                        controller.maybeStopTrackingJobLocked(jobStatus, null, true);
-                    }
-                    controller.maybeStartTrackingJobLocked(jobStatus, lastJob);
+    private void startTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
+        if (!jobStatus.isPreparedLocked()) {
+            Slog.wtf(TAG, "Not yet prepared when started tracking: " + jobStatus);
+        }
+        final boolean update = mJobs.add(jobStatus);
+        if (mReadyToRock) {
+            for (int i = 0; i < mControllers.size(); i++) {
+                StateController controller = mControllers.get(i);
+                if (update) {
+                    controller.maybeStopTrackingJobLocked(jobStatus, null, true);
                 }
+                controller.maybeStartTrackingJobLocked(jobStatus, lastJob);
             }
         }
     }
@@ -917,19 +918,20 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * Called when we want to remove a JobStatus object that we've finished executing. Returns the
      * object removed.
      */
-    private boolean stopTrackingJob(JobStatus jobStatus, JobStatus incomingJob,
+    private boolean stopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean writeBack) {
-        synchronized (mLock) {
-            // Remove from store as well as controllers.
-            final boolean removed = mJobs.remove(jobStatus, writeBack);
-            if (removed && mReadyToRock) {
-                for (int i=0; i<mControllers.size(); i++) {
-                    StateController controller = mControllers.get(i);
-                    controller.maybeStopTrackingJobLocked(jobStatus, incomingJob, false);
-                }
+        // Deal with any remaining work items in the old job.
+        jobStatus.stopTrackingJobLocked(incomingJob);
+
+        // Remove from store as well as controllers.
+        final boolean removed = mJobs.remove(jobStatus, writeBack);
+        if (removed && mReadyToRock) {
+            for (int i=0; i<mControllers.size(); i++) {
+                StateController controller = mControllers.get(i);
+                controller.maybeStopTrackingJobLocked(jobStatus, incomingJob, false);
             }
-            return removed;
         }
+        return removed;
     }
 
     private boolean stopJobOnServiceContextLocked(JobStatus job, int reason) {
@@ -990,7 +992,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      *
      * @see JobHandler#maybeQueueReadyJobsForExecutionLockedH
      */
-    private JobStatus getRescheduleJobForFailure(JobStatus failureToReschedule) {
+    private JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule) {
         final long elapsedNowMillis = SystemClock.elapsedRealtime();
         final JobInfo job = failureToReschedule.getJob();
 
@@ -1017,7 +1019,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 JobStatus.NO_LATEST_RUNTIME, backoffAttempts);
         for (int ic=0; ic<mControllers.size(); ic++) {
             StateController controller = mControllers.get(ic);
-            controller.rescheduleForFailure(newJob, failureToReschedule);
+            controller.rescheduleForFailureLocked(newJob, failureToReschedule);
         }
         return newJob;
     }
@@ -1065,13 +1067,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * @param needsReschedule Whether the implementing class should reschedule this job.
      */
     @Override
-    public void onJobCompleted(JobStatus jobStatus, boolean needsReschedule) {
+    public void onJobCompletedLocked(JobStatus jobStatus, boolean needsReschedule) {
         if (DEBUG) {
             Slog.d(TAG, "Completed " + jobStatus + ", reschedule=" + needsReschedule);
         }
         // Do not write back immediately if this is a periodic job. The job may get lost if system
         // shuts down before it is added back.
-        if (!stopTrackingJob(jobStatus, null, !jobStatus.getJob().isPeriodic())) {
+        if (!stopTrackingJobLocked(jobStatus, null, !jobStatus.getJob().isPeriodic())) {
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
@@ -1085,24 +1087,24 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // the old job after scheduling the new one, but since we have no lock held here
         // that may cause ordering problems if the app removes jobStatus while in here.
         if (needsReschedule) {
-            JobStatus rescheduled = getRescheduleJobForFailure(jobStatus);
+            JobStatus rescheduled = getRescheduleJobForFailureLocked(jobStatus);
             try {
-                rescheduled.prepare(ActivityManager.getService());
+                rescheduled.prepareLocked(ActivityManager.getService());
             } catch (SecurityException e) {
                 Slog.w(TAG, "Unable to regrant job permissions for " + rescheduled);
             }
-            startTrackingJob(rescheduled, jobStatus);
+            startTrackingJobLocked(rescheduled, jobStatus);
         } else if (jobStatus.getJob().isPeriodic()) {
             JobStatus rescheduledPeriodic = getRescheduleJobForPeriodic(jobStatus);
             try {
-                rescheduledPeriodic.prepare(ActivityManager.getService());
+                rescheduledPeriodic.prepareLocked(ActivityManager.getService());
             } catch (SecurityException e) {
                 Slog.w(TAG, "Unable to regrant job permissions for " + rescheduledPeriodic);
             }
-            startTrackingJob(rescheduledPeriodic, jobStatus);
+            startTrackingJobLocked(rescheduledPeriodic, jobStatus);
         }
-        jobStatus.unprepare(ActivityManager.getService());
-        reportActive();
+        jobStatus.unprepareLocked(ActivityManager.getService());
+        reportActiveLocked();
         mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
     }
 
@@ -1410,7 +1412,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
                 }
                 assignJobsToContextsLocked();
-                reportActive();
+                reportActiveLocked();
             }
         }
     }
@@ -1698,7 +1700,37 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.schedule(job, uid);
+                return JobSchedulerService.this.scheduleAsPackage(job, null, uid, null, -1, null);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        // IJobScheduler implementation
+        @Override
+        public int enqueue(JobInfo job, JobWorkItem work) throws RemoteException {
+            if (DEBUG) {
+                Slog.d(TAG, "Enqueueing job: " + job.toString() + " work: " + work);
+            }
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+
+            enforceValidJobRequest(uid, job);
+            if (job.isPersisted()) {
+                throw new IllegalArgumentException("Can't enqueue work for persisted jobs");
+            }
+            if (work == null) {
+                throw new NullPointerException("work is null");
+            }
+
+            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
+            }
+
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return JobSchedulerService.this.scheduleAsPackage(job, work, uid, null, -1, null);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1731,7 +1763,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.scheduleAsPackage(job, callerUid,
+                return JobSchedulerService.this.scheduleAsPackage(job, null, callerUid,
                         packageName, userId, tag);
             } finally {
                 Binder.restoreCallingIdentity(ident);
