@@ -6377,17 +6377,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                                             .getIdentifier();
                                     if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
                                             && mKeyguardManager.isDeviceLocked(userId)) {
-                                        boolean canBypass = false;
-                                        try {
-                                            canBypass = ActivityManager.getService()
-                                                    .canBypassWorkChallenge(intent);
-                                        } catch (RemoteException e) {
-                                        }
-                                        // For direct-boot aware activities, they can be shown when
-                                        // the device is still locked without triggering the work
-                                        // challenge.
-                                        if ((!canBypass) && startWorkChallengeIfNecessary(userId,
-                                                    intent.getIntentSender(), notificationKey)) {
+                                        // TODO(b/28935539): should allow certain activities to
+                                        // bypass work challenge
+                                        if (startWorkChallengeIfNecessary(userId,
+                                                intent.getIntentSender(), notificationKey)) {
                                             // Show work challenge, do not run PendingIntent and
                                             // remove notification
                                             return;
