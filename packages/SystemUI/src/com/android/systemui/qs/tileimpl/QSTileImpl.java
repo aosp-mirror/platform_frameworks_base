@@ -22,6 +22,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
+import android.R.attr;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -342,9 +343,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
                         Utils.getColorAttr(context, android.R.attr.textColorTertiary));
             case Tile.STATE_INACTIVE:
                 return Utils.getDisabled(context,
-                        Utils.getColorAttr(context, android.R.attr.colorForeground));
+                        Utils.getColorAttr(context, android.R.attr.textColorSecondary));
             case Tile.STATE_ACTIVE:
-                return Utils.getColorAttr(context, android.R.attr.colorForeground);
+                return Utils.getColorAttr(context, attr.textColorSecondary);
             default:
                 Log.e("QSTile", "Invalid state " + state);
                 return 0;

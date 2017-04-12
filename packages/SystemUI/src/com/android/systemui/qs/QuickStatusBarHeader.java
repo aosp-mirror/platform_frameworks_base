@@ -21,15 +21,19 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextClock;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.R.id;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.SignalClusterView;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
 
 public class QuickStatusBarHeader extends RelativeLayout {
@@ -63,17 +67,25 @@ public class QuickStatusBarHeader extends RelativeLayout {
         updateResources();
 
         // Set the light/dark theming on the header status UI to match the current theme.
-        SignalClusterView cluster = findViewById(R.id.signal_cluster);
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
         float intensity = colorForeground == Color.WHITE ? 0 : 1;
-        cluster.onDarkChanged(new Rect(0, 0, 0, 0), intensity, colorForeground);
+        Rect tintArea = new Rect(0, 0, 0, 0);
+
+        applyDarkness(R.id.signal_cluster, tintArea, intensity, colorForeground);
+        applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
+        applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
 
         BatteryMeterView battery = findViewById(R.id.battery);
         battery.setForceShowPercent(true);
-        int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
-        battery.setRawColors(colorForeground, colorSecondary);
 
         mActivityStarter = Dependency.get(ActivityStarter.class);
+    }
+
+    private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
+        View v = findViewById(id);
+        if (v instanceof DarkReceiver) {
+            ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
+        }
     }
 
     @Override
