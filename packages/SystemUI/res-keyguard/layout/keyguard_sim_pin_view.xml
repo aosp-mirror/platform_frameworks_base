@@ -42,9 +42,15 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
+            android:gravity="center"
             android:layout_weight="1"
             android:layoutDirection="ltr"
             >
+        <include layout="@layout/keyguard_esim_area"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_marginTop="@dimen/eca_overlap" />
+
         <RelativeLayout
                 android:id="@+id/row0"
                 android:layout_width="match_parent"

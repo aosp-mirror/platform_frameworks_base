@@ -29,6 +29,7 @@ import android.os.ServiceManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.euicc.EuiccManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.WindowManager;
@@ -121,7 +122,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
             if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
                 int count = TelephonyManager.getDefault().getSimCount();
                 Resources rez = getResources();
-                final String msg;
+                String msg;
                 int color = Color.WHITE;
                 if (count < 2) {
                     msg = rez.getString(R.string.kg_puk_enter_puk_hint);
@@ -132,6 +133,11 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                     if (info != null) {
                         color = info.getIconTint();
                     }
+                }
+                EuiccManager euiccManager =
+                        (EuiccManager) mContext.getSystemService(Context.EUICC_SERVICE);
+                if (euiccManager.isEnabled()) {
+                    msg = msg + " " + rez.getString(R.string.kg_sim_lock_instructions_esim);
                 }
                 mSecurityMessageDisplay.setMessage(msg);
                 mSimImageView.setImageTintList(ColorStateList.valueOf(color));
