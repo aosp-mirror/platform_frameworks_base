@@ -580,6 +580,11 @@ public final class Bmgr {
             }
         }
 
+        /**
+         * Wait until either {@link #restoreFinished} or {@link #restoreStarting} is called.
+         * Once one is called, it clears the internal flag again, so that the same observer intance
+         * can be reused for a next operation.
+         */
         public void waitForCompletion() {
             // The restoreFinished() callback will throw the 'done' flag; we
             // just sit and wait on that notification.
@@ -590,6 +595,7 @@ public final class Bmgr {
                     } catch (InterruptedException ex) {
                     }
                 }
+                done = false;
             }
         }
     }
