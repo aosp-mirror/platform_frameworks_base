@@ -14,17 +14,9 @@
      limitations under the License.
 -->
 
-<FrameLayout  xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    style="@style/AutofillDatasetPicker">
-
-    <ListView
-        android:id="@+id/autofill_dataset_list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:divider="@null"
-        android:visibility="gone">
-    </ListView>
-
-</FrameLayout>
+<inset xmlns:android="http://schemas.android.com/apk/res/android">
+    <shape android:shape="rectangle">
+        <corners android:radius="2dp" />
+        <solid android:color="?attr/colorBackground" />
+    </shape>
+</inset>

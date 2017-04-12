@@ -1482,4 +1482,10 @@ please see styles_device_defaults.xml.
         <item name="successColor">@color/lock_pattern_view_success_color</item>
     </style>
 
+    <!-- @hide -->
+    <style name="AutofillDatasetPicker">
+        <item name="elevation">4dp</item>
+        <item name="background">@drawable/autofill_dataset_picker_background</item>
+    </style>
+
 </resources>
