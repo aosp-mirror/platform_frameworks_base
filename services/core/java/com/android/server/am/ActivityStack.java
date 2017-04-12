@@ -3973,6 +3973,19 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     task.isOverHomeStack()) {
                 mStackSupervisor.moveHomeStackTaskToTop(reason);
             }
+
+            if (onlyHasTaskOverlays) {
+                // When destroying a task, tell the supervisor to remove it so that any activity it
+                // has can be cleaned up correctly. This is currently the only place where we remove
+                // a task with the DESTROYING mode, so instead of passing the onlyHasTaskOverlays
+                // state into removeTask(), we just clear the task here before the other residual
+                // work.
+                // TODO: If the callers to removeTask() changes such that we have multiple places
+                //       where we are destroying the task, move this back into removeTask()
+                mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
+                        !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
+                task.removeWindowContainer();
+            }
             removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
         }
         cleanUpActivityServicesLocked(r);
@@ -5032,14 +5045,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      *             {@link #REMOVE_TASK_MODE_MOVING}, {@link #REMOVE_TASK_MODE_MOVING_TO_TOP}.
      */
     void removeTask(TaskRecord task, String reason, int mode) {
-        if (mode == REMOVE_TASK_MODE_DESTROYING) {
-            // When destroying a task, tell the supervisor to remove it so that any activity it has
-            // can be cleaned up correctly
-            mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
-                    !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
-            task.removeWindowContainer();
-        }
-
         for (ActivityRecord record : task.mActivities) {
             onActivityRemovedFromStack(record);
         }
