@@ -6293,4 +6293,12 @@ public abstract class PackageManager {
      */
     @SystemApi
     public abstract ComponentName getInstantAppInstallerComponent();
+
+    /**
+     * Return the Android Id for a given Instant App.
+     *
+     * @see {@link android.provider.Settings.Secure#ANDROID_ID}
+     * @hide
+     */
+    public abstract String getInstantAppAndroidId(String packageName, @NonNull UserHandle user);
 }

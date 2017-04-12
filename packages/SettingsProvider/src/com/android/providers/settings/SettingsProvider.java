@@ -1109,6 +1109,33 @@ public class SettingsProvider extends ContentProvider {
         // Retrieve the ssaid from the table if present.
         final Setting ssaid = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID, owningUserId,
                 name);
+        // If the app is an Instant App use its stored SSAID instead of our own.
+        final String instantSsaid;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            instantSsaid = mPackageManager.getInstantAppAndroidId(callingPkg.packageName,
+                    owningUserId);
+        } catch (RemoteException e) {
+            Slog.e(LOG_TAG, "Failed to get Instant App Android ID", e);
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        if (instantSsaid != null) {
+            // Use the stored value if it is still valid.
+            if (ssaid != null && instantSsaid.equals(ssaid.getValue())) {
+                return ssaid;
+            }
+            // The value has changed, update the stored value.
+            final SettingsState ssaidSettings = mSettingsRegistry.getSettingsLocked(
+                    SETTINGS_TYPE_SSAID, owningUserId);
+            final boolean success = ssaidSettings.insertSettingLocked(name, instantSsaid, null,
+                    true, callingPkg.packageName);
+            if (!success) {
+                throw new IllegalStateException("Failed to update instant app android id");
+            }
+            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID, owningUserId, name);
+        }
 
         // Lazy initialize ssaid if not yet present in ssaid table.
         if (ssaid == null || ssaid.isNull() || ssaid.getValue() == null) {
