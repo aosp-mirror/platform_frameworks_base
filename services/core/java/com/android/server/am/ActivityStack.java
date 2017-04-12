@@ -2001,10 +2001,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // keeping the screen frozen.
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r + " " + r.state);
         try {
-            r.setVisible(false);
             switch (r.state) {
                 case STOPPING:
                 case STOPPED:
+                    r.setVisible(false);
                     if (r.app != null && r.app.thread != null) {
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                 "Scheduling invisibility: " + r);
@@ -2023,6 +2023,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // This case created for transitioning activities from
                     // translucent to opaque {@link Activity#convertToOpaque}.
                     if (visibleBehind == r) {
+                        r.setVisible(false);
                         releaseBackgroundResources(r);
                     } else {
                         // If this activity is in a state where it can currently enter
@@ -2030,7 +2031,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         // the activity tries to enterPictureInPictureMode() later. Otherwise,
                         // we will try and stop the activity next time idle is processed.
                         final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
-                                "makeInvisible", true /* noThrow */);
+                                "makeInvisible", true /* noThrow */, true /* beforeStopping */);
+
+                        if (canEnterPictureInPicture) {
+                            // We set r.visible=false so that Stop will later
+                            // call setVisible for us. In this case
+                            // we don't want to call setVisible(false) to avoid
+                            // notifying the client of this intermittent invisible
+                            // state.
+                            r.visible = false;
+                        } else {
+                            r.setVisible(false);
+                        }
                         addToStopping(r, true /* scheduleIdle */,
                                 canEnterPictureInPicture /* idleDelayed */);
                     }
