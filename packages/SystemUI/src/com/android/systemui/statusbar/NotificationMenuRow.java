@@ -30,11 +30,13 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
+import android.service.notification.StatusBarNotification;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,12 +50,12 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private static final long SHOW_MENU_DELAY = 60;
     private static final long SWIPE_MENU_TIMING = 200;
 
-    private static final int NOTIFICATION_INFO_INDEX = 1;
-
     private ExpandableNotificationRow mParent;
 
     private Context mContext;
     private FrameLayout mMenuContainer;
+    private MenuItem mSnoozeItem;
+    private MenuItem mInfoItem;
     private ArrayList<MenuItem> mMenuItems;
     private OnMenuEventListener mMenuListener;
 
@@ -94,7 +96,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
         mHandler = new Handler();
-        mMenuItems = getDefaultMenuItems(context);
+        mMenuItems = new ArrayList<>();
+        mSnoozeItem = createSnoozeItem(context);
+        mInfoItem = createInfoItem(context);
+        mMenuItems.add(mSnoozeItem);
+        mMenuItems.add(mInfoItem);
     }
 
     @Override
@@ -104,7 +110,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     @Override
     public MenuItem getLongpressMenuItem(Context context) {
-        return mMenuItems.get(NOTIFICATION_INFO_INDEX);
+        return mInfoItem;
     }
 
     @Override
@@ -120,14 +126,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public void createMenu(ViewGroup parent) {
         mParent = (ExpandableNotificationRow) parent;
-        if (mMenuContainer != null) {
-            mMenuContainer.removeAllViews();
-        }
-        mMenuContainer = new FrameLayout(mContext);
-        for (int i = 0; i < mMenuItems.size(); i++) {
-            addMenuView(mMenuItems.get(i), mMenuContainer);
-        }
-        resetState(false);
+        createMenuViews();
     }
 
     @Override
@@ -143,6 +142,40 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public void resetMenu() {
         resetState(true);
+    }
+
+    @Override
+    public void onNotificationUpdated() {
+        if (mMenuContainer == null) {
+            // Menu hasn't been created yet, no need to do anything.
+            return;
+        }
+        createMenuViews();
+    }
+
+    private void createMenuViews() {
+        // Filter the menu items based on the notification
+        if (mParent != null && mParent.getStatusBarNotification() != null) {
+            int flags = mParent.getStatusBarNotification().getNotification().flags;
+            boolean isForeground = (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+            if (isForeground) {
+                // Don't show snooze for foreground services
+                mMenuItems.remove(mSnoozeItem);
+            } else if (!mMenuItems.contains(mSnoozeItem)) {
+                // Was a foreground service but is no longer, add snooze back
+                mMenuItems.add(mSnoozeItem);
+            }
+        }
+        // Recreate the menu
+        if (mMenuContainer != null) {
+            mMenuContainer.removeAllViews();
+        } else {
+            mMenuContainer = new FrameLayout(mContext);
+        }
+        for (int i = 0; i < mMenuItems.size(); i++) {
+            addMenuView(mMenuItems.get(i), mMenuContainer);
+        }
+        resetState(false /* notify */);
     }
 
     private void resetState(boolean notify) {
@@ -495,24 +528,24 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         // TODO -- handle / allow custom menu items!
     }
 
-    public static ArrayList<MenuItem> getDefaultMenuItems(Context context) {
-        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+    public static MenuItem createSnoozeItem(Context context) {
         Resources res = context.getResources();
-
         NotificationSnooze content = (NotificationSnooze) LayoutInflater.from(context)
                 .inflate(R.layout.notification_snooze, null, false);
         String snoozeDescription = res.getString(R.string.notification_menu_snooze_description);
         MenuItem snooze = new NotificationMenuItem(context, snoozeDescription, content,
                 R.drawable.ic_snooze);
-        items.add(snooze);
+        return snooze;
+    }
 
-        String settingsDescription = res.getString(R.string.notification_menu_gear_description);
-        NotificationInfo settingsContent = (NotificationInfo) LayoutInflater.from(context).inflate(
+    public static MenuItem createInfoItem(Context context) {
+        Resources res = context.getResources();
+        String infoDescription = res.getString(R.string.notification_menu_gear_description);
+        NotificationInfo infoContent = (NotificationInfo) LayoutInflater.from(context).inflate(
                 R.layout.notification_info, null, false);
-        MenuItem settings = new NotificationMenuItem(context, settingsDescription, settingsContent,
+        MenuItem info = new NotificationMenuItem(context, infoDescription, infoContent,
                 R.drawable.ic_settings);
-        items.add(settings);
-        return items;
+        return info;
     }
 
     private void addMenuView(MenuItem item, ViewGroup parent) {

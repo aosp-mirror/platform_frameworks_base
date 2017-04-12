@@ -37,7 +37,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem
 public interface NotificationMenuRowPlugin extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW";
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     @ProvidesInterface(version = OnMenuEventListener.VERSION)
     public interface OnMenuEventListener {
@@ -88,6 +88,8 @@ public interface NotificationMenuRowPlugin extends Plugin {
     public void onTranslationUpdate(float translation);
 
     public void onHeightUpdate();
+
+    public void onNotificationUpdated();
 
     public boolean onTouchEvent(View view, MotionEvent ev, float velocity);
 

@@ -328,6 +328,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mIsColorized = mStatusBarNotification.getNotification().isColorized();
         mShowingPublicInitialized = false;
         updateNotificationColor();
+        if (mMenuRow != null) {
+            mMenuRow.onNotificationUpdated();
+        }
         if (mIsSummaryWithChildren) {
             mChildrenContainer.recreateNotificationHeader(mExpandClickListener);
             mChildrenContainer.onNotificationUpdated();
@@ -760,7 +763,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mMenuRow = plugin;
         if (mMenuRow.useDefaultMenuItems()) {
-            mMenuRow.setMenuItems(NotificationMenuRow.getDefaultMenuItems(mContext));
+            ArrayList<MenuItem> items = new ArrayList<>();
+            items.add(NotificationMenuRow.createInfoItem(mContext));
+            items.add(NotificationMenuRow.createSnoozeItem(mContext));
+            mMenuRow.setMenuItems(items);
         }
         if (existed) {
             createMenu();
@@ -786,7 +792,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         return mMenuRow;
     }
-
 
     public NotificationMenuRowPlugin getProvider() {
         return mMenuRow;
