@@ -449,7 +449,8 @@ public class AppWindowContainerController
 
     public boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
-            IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning) {
+            IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
+            boolean allowTaskSnapshot) {
         synchronized(mWindowMap) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "setAppStartingWindow: token=" + mToken
                     + " pkg=" + pkg + " transferFrom=" + transferFrom);
@@ -469,7 +470,8 @@ public class AppWindowContainerController
                 return false;
             }
 
-            final int type = getStartingWindowType(newTask, taskSwitch, processRunning);
+            final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
+                    allowTaskSnapshot);
 
             if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
                 return createSnapshot();
@@ -539,10 +541,11 @@ public class AppWindowContainerController
         return true;
     }
 
-    private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning) {
+    private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
+            boolean allowTaskSnapshot) {
         if (newTask || !processRunning) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-        } else if (taskSwitch) {
+        } else if (taskSwitch && allowTaskSnapshot) {
             return STARTING_WINDOW_TYPE_SNAPSHOT;
         } else {
             return STARTING_WINDOW_TYPE_NONE;
@@ -612,13 +615,13 @@ public class AppWindowContainerController
         }
     }
 
-    public void notifyAppResumed(boolean wasStopped, boolean allowSavedSurface) {
+    public void notifyAppResumed(boolean wasStopped) {
         synchronized(mWindowMap) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: " + mToken);
                 return;
             }
-            mContainer.notifyAppResumed(wasStopped, allowSavedSurface);
+            mContainer.notifyAppResumed(wasStopped);
         }
     }
 
