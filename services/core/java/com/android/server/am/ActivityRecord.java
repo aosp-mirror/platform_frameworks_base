@@ -1561,8 +1561,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
     }
 
-    void notifyAppResumed(boolean wasStopped, boolean allowSavedSurface) {
-        mWindowContainerController.notifyAppResumed(wasStopped, allowSavedSurface);
+    void notifyAppResumed(boolean wasStopped) {
+        mWindowContainerController.notifyAppResumed(wasStopped);
     }
 
     void notifyUnknownVisibilityLaunched() {
@@ -2112,7 +2112,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 service.compatibilityInfoForPackageLocked(info.applicationInfo);
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning());
+                prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
+                allowTaskSnapshot());
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
@@ -2552,12 +2553,32 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         preserveWindowOnDeferredRelaunch = false;
     }
 
-    boolean isProcessRunning() {
+    private boolean isProcessRunning() {
         ProcessRecord proc = app;
         if (proc == null) {
             proc = service.mProcessNames.get(processName, info.applicationInfo.uid);
         }
         return proc != null && proc.thread != null;
+    }
+
+    /**
+     * @return Whether a task snapshot starting window may be shown.
+     */
+    private boolean allowTaskSnapshot() {
+        if (newIntents == null) {
+            return true;
+        }
+
+        // Restrict task snapshot starting window to launcher start, or there is no intent at all
+        // (eg. task being brought to front). If the intent is something else, likely the app is
+        // going to show some specific page or view, instead of what's left last time.
+        for (int i = newIntents.size() - 1; i >= 0; i--) {
+            final Intent intent = newIntents.get(i);
+            if (intent != null && !ActivityRecord.isMainIntent(intent)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
