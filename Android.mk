@@ -283,11 +283,17 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/carrier/ICarrierService.aidl \
 	core/java/android/service/carrier/ICarrierMessagingCallback.aidl \
 	core/java/android/service/carrier/ICarrierMessagingService.aidl \
+	core/java/android/service/euicc/IDeleteSubscriptionCallback.aidl \
 	core/java/android/service/euicc/IDownloadSubscriptionCallback.aidl \
+	core/java/android/service/euicc/IEraseSubscriptionsCallback.aidl \
 	core/java/android/service/euicc/IEuiccService.aidl \
+	core/java/android/service/euicc/IGetDefaultDownloadableSubscriptionListCallback.aidl \
 	core/java/android/service/euicc/IGetDownloadableSubscriptionMetadataCallback.aidl \
 	core/java/android/service/euicc/IGetEidCallback.aidl \
+	core/java/android/service/euicc/IGetEuiccInfoCallback.aidl \
 	core/java/android/service/euicc/IGetEuiccProfileInfoListCallback.aidl \
+	core/java/android/service/euicc/ISwitchToSubscriptionCallback.aidl \
+	core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl \
 	core/java/android/service/gatekeeper/IGateKeeperService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
@@ -640,6 +646,7 @@ aidl_files := \
 	frameworks/base/telephony/java/android/telephony/ModemActivityInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/UiccAccessRule.aidl \
 	frameworks/base/telephony/java/android/telephony/euicc/DownloadableSubscription.aidl \
+	frameworks/base/telephony/java/android/telephony/euicc/EuiccInfo.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/location/java/android/location/Address.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \
@@ -753,9 +760,14 @@ aidl_files := \
 	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
 	frameworks/base/core/java/android/service/carrier/CarrierIdentifier.aidl \
 	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
+	frameworks/base/core/java/android/service/euicc/DeleteResult.aidl \
 	frameworks/base/core/java/android/service/euicc/DownloadResult.aidl \
+	frameworks/base/core/java/android/service/euicc/EraseResult.aidl \
+	frameworks/base/core/java/android/service/euicc/GetDefaultDownloadableSubscriptionListResult.aidl \
 	frameworks/base/core/java/android/service/euicc/GetDownloadableSubscriptionMetadataResult.aidl \
 	frameworks/base/core/java/android/service/euicc/GetEuiccProfileInfoListResult.aidl \
+	frameworks/base/core/java/android/service/euicc/SwitchResult.aidl \
+	frameworks/base/core/java/android/service/euicc/UpdateNicknameResult.aidl \
 	frameworks/base/core/java/android/service/notification/Adjustment.aidl \
 	frameworks/base/core/java/android/service/notification/Condition.aidl \
 	frameworks/base/core/java/android/service/notification/SnoozeCriterion.aidl \

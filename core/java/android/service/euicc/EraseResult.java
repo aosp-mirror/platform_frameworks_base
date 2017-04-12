@@ -23,22 +23,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Result of a {@link EuiccService#onDownloadSubscription} operation.
+ * Result of a {@link EuiccService#onEraseSubscriptions} operation.
  * @hide
  *
  * TODO(b/35851809): Make this a SystemApi.
  */
-public final class DownloadResult implements Parcelable {
+public final class EraseResult implements Parcelable {
 
-    public static final Creator<DownloadResult> CREATOR = new Creator<DownloadResult>() {
+    public static final Creator<EraseResult> CREATOR = new Creator<EraseResult>() {
         @Override
-        public DownloadResult createFromParcel(Parcel in) {
-            return new DownloadResult(in);
+        public EraseResult createFromParcel(Parcel in) {
+            return new EraseResult(in);
         }
 
         @Override
-        public DownloadResult[] newArray(int size) {
-            return new DownloadResult[size];
+        public EraseResult[] newArray(int size) {
+            return new EraseResult[size];
         }
     };
 
@@ -46,14 +46,12 @@ public final class DownloadResult implements Parcelable {
     @IntDef({
             RESULT_OK,
             RESULT_GENERIC_ERROR,
-            RESULT_MUST_DEACTIVATE_SIM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
 
     public static final int RESULT_OK = 0;
     public static final int RESULT_GENERIC_ERROR = 1;
-    public static final int RESULT_MUST_DEACTIVATE_SIM = 2;
 
     /** Result of the operation - one of the RESULT_* constants. */
     public final @ResultCode int result;
@@ -61,12 +59,12 @@ public final class DownloadResult implements Parcelable {
     /** Implementation-defined detailed error code in case of a failure not covered here. */
     public final int detailedCode;
 
-    private DownloadResult(int result, int detailedCode) {
+    private EraseResult(int result, int detailedCode) {
         this.result = result;
         this.detailedCode = detailedCode;
     }
 
-    private DownloadResult(Parcel in) {
+    private EraseResult(Parcel in) {
         this.result = in.readInt();
         this.detailedCode = in.readInt();
     }
@@ -77,16 +75,9 @@ public final class DownloadResult implements Parcelable {
         dest.writeInt(detailedCode);
     }
 
-    /** Return a result indicating that the download was successful. */
-    public static DownloadResult success() {
-        return new DownloadResult(RESULT_OK, 0);
-    }
-
-    /**
-     * Return a result indicating that an active SIM must be deactivated to perform the operation.
-     */
-    public static DownloadResult mustDeactivateSim() {
-        return new DownloadResult(RESULT_MUST_DEACTIVATE_SIM, 0);
+    /** Return a result indicating that the erase was successful. */
+    public static EraseResult success() {
+        return new EraseResult(RESULT_OK, 0);
     }
 
     /**
@@ -95,8 +86,8 @@ public final class DownloadResult implements Parcelable {
      *
      * @param detailedCode an implemenation-defined detailed error code for debugging purposes.
      */
-    public static DownloadResult genericError(int detailedCode) {
-        return new DownloadResult(RESULT_GENERIC_ERROR, detailedCode);
+    public static EraseResult genericError(int detailedCode) {
+        return new EraseResult(RESULT_GENERIC_ERROR, detailedCode);
     }
 
     @Override

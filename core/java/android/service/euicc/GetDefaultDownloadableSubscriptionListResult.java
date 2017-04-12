@@ -25,23 +25,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Result of a {@link EuiccService#onGetDownloadableSubscriptionMetadata} operation.
+ * Result of a {@link EuiccService#onGetDefaultDownloadableSubscriptionList} operation.
  * @hide
  *
  * TODO(b/35851809): Make this a SystemApi.
  */
-public final class GetDownloadableSubscriptionMetadataResult implements Parcelable {
+public final class GetDefaultDownloadableSubscriptionListResult implements Parcelable {
 
-    public static final Creator<GetDownloadableSubscriptionMetadataResult> CREATOR =
-            new Creator<GetDownloadableSubscriptionMetadataResult>() {
+    public static final Creator<GetDefaultDownloadableSubscriptionListResult> CREATOR =
+            new Creator<GetDefaultDownloadableSubscriptionListResult>() {
         @Override
-        public GetDownloadableSubscriptionMetadataResult createFromParcel(Parcel in) {
-            return new GetDownloadableSubscriptionMetadataResult(in);
+        public GetDefaultDownloadableSubscriptionListResult createFromParcel(Parcel in) {
+            return new GetDefaultDownloadableSubscriptionListResult(in);
         }
 
         @Override
-        public GetDownloadableSubscriptionMetadataResult[] newArray(int size) {
-            return new GetDownloadableSubscriptionMetadataResult[size];
+        public GetDefaultDownloadableSubscriptionListResult[] newArray(int size) {
+            return new GetDefaultDownloadableSubscriptionListResult[size];
         }
     };
 
@@ -62,48 +62,48 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
     public final @ResultCode int result;
 
     /**
-     * The {@link DownloadableSubscription} with filled-in metadata.
+     * The available {@link DownloadableSubscription}s (with filled-in metadata).
      *
      * <p>Only non-null if {@link #result} is {@link #RESULT_OK}.
      */
     @Nullable
-    public final DownloadableSubscription subscription;
+    public final DownloadableSubscription[] subscriptions;
 
     /** Implementation-defined detailed error code in case of a failure not covered here. */
     public final int detailedCode;
 
-    private GetDownloadableSubscriptionMetadataResult(int result,
-            @Nullable DownloadableSubscription subscription, int detailedCode) {
+    private GetDefaultDownloadableSubscriptionListResult(int result,
+            @Nullable DownloadableSubscription[] subscriptions, int detailedCode) {
         this.result = result;
-        this.subscription = subscription;
+        this.subscriptions = subscriptions;
         this.detailedCode = detailedCode;
     }
 
-    private GetDownloadableSubscriptionMetadataResult(Parcel in) {
+    private GetDefaultDownloadableSubscriptionListResult(Parcel in) {
         this.result = in.readInt();
-        this.subscription = in.readTypedObject(DownloadableSubscription.CREATOR);
+        this.subscriptions = in.createTypedArray(DownloadableSubscription.CREATOR);
         this.detailedCode = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
-        dest.writeTypedObject(this.subscription, flags);
+        dest.writeTypedArray(subscriptions, flags);
         dest.writeInt(detailedCode);
     }
 
-    /** Return a result indicating that the lookup was successful. */
-    public static GetDownloadableSubscriptionMetadataResult success(
-            DownloadableSubscription subscription) {
-        return new GetDownloadableSubscriptionMetadataResult(RESULT_OK, subscription,
+    /** Return a result indicating that the list operation was successful. */
+    public static GetDefaultDownloadableSubscriptionListResult success(
+            DownloadableSubscription[] subscriptions) {
+        return new GetDefaultDownloadableSubscriptionListResult(RESULT_OK, subscriptions,
                 0 /* detailedCode */);
     }
 
     /**
      * Return a result indicating that an active SIM must be deactivated to perform the operation.
      */
-    public static GetDownloadableSubscriptionMetadataResult mustDeactivateSim() {
-        return new GetDownloadableSubscriptionMetadataResult(RESULT_MUST_DEACTIVATE_SIM,
+    public static GetDefaultDownloadableSubscriptionListResult mustDeactivateSim() {
+        return new GetDefaultDownloadableSubscriptionListResult(RESULT_MUST_DEACTIVATE_SIM,
                 null /* subscription */, 0 /* detailedCode */);
     }
 
@@ -113,8 +113,8 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
      *
      * @param detailedCode an implementation-defined detailed error code for debugging purposes.
      */
-    public static GetDownloadableSubscriptionMetadataResult genericError(int detailedCode) {
-        return new GetDownloadableSubscriptionMetadataResult(RESULT_GENERIC_ERROR,
+    public static GetDefaultDownloadableSubscriptionListResult genericError(int detailedCode) {
+        return new GetDefaultDownloadableSubscriptionListResult(RESULT_GENERIC_ERROR,
                 null /* subscription */, detailedCode);
     }
 
