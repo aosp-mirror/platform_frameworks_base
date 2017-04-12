@@ -65,14 +65,14 @@ import java.util.Set;
  *   for each user (stored under DEFAULT_HANDLE):
  *     SP_HANDLE_NAME: GateKeeper password handle of synthetic password. Only available if user
  *                     credential exists, cleared when user clears their credential.
- *     SP_E0_NAME, SP_P1_NAME: Secret to derive synthetic password when combining with escrow
+ *     SP_E0_NAME, SP_P1_NAME: Secret to derive synthetic password when combined with escrow
  *                     tokens. Destroyed when escrow support is turned off for the given user.
  *
  *     for each SP blob under the user (stored under the corresponding handle):
  *       SP_BLOB_NAME: The encrypted synthetic password. Always exists.
  *       PASSWORD_DATA_NAME: Metadata about user credential. Only exists for password based SP.
- *       SECDISCARDABLE_NAME: Part of the necessary ingredient to decrypt SP_BLOB_NAME in order
- *                            to facilitate secure deletion. Exists if this is a non-weaver SP
+ *       SECDISCARDABLE_NAME: Part of the necessary ingredient to decrypt SP_BLOB_NAME for the
+ *                            purpose of secure deletion. Exists if this is a non-weaver SP
  *                            (both password and token based), or it's a token-based SP under weaver.
  *       WEAVER_SLOT: Metadata about the weaver slot used. Only exists if this is a SP under weaver.
  *
