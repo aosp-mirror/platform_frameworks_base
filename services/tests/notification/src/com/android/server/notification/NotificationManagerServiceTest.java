@@ -59,10 +59,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
@@ -74,20 +75,21 @@ public class NotificationManagerServiceTest {
     private NotificationManagerService mNotificationManagerService;
     private INotificationManager mBinderService;
     private NotificationManagerInternal mInternalService;
-    private IPackageManager mPackageManager = mock(IPackageManager.class);
-    private final PackageManager mPackageManagerClient = mock(PackageManager.class);
+    @Mock
+    private IPackageManager mPackageManager;
+    @Mock
+    private PackageManager mPackageManagerClient;
     private Context mContext = InstrumentationRegistry.getTargetContext();
     private final String PKG = mContext.getPackageName();
     private TestableLooper mTestableLooper;
-    private final RankingHelper mRankingHelper = mock(RankingHelper.class);
+    @Mock
+    private RankingHelper mRankingHelper;
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
-    private NotificationManagerService.NotificationListeners mNotificationListeners =
-            mock(NotificationManagerService.NotificationListeners.class);
-    private ManagedServices.ManagedServiceInfo mListener =
-            mNotificationListeners.new ManagedServiceInfo(
-                    null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
-    private ICompanionDeviceManager mCompanionMgr = mock(ICompanionDeviceManager.class);
+    @Mock
+    private NotificationManagerService.NotificationListeners mNotificationListeners;
+    private ManagedServices.ManagedServiceInfo mListener;
+    @Mock private ICompanionDeviceManager mCompanionMgr;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -102,6 +104,7 @@ public class NotificationManagerServiceTest {
     @Before
     @UiThreadTest
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mNotificationManagerService = new TestableNotificationManagerService(mContext);
 
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
@@ -116,6 +119,8 @@ public class NotificationManagerServiceTest {
         // Use this testable looper.
         mTestableLooper = new TestableLooper(false);
 
+        mListener = mNotificationListeners.new ManagedServiceInfo(
+                null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
         when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
         mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
                 mPackageManagerClient, mockLightsManager, mNotificationListeners, mCompanionMgr);
@@ -630,5 +635,13 @@ public class NotificationManagerServiceTest {
         }
 
         verify(mRankingHelper, never()).getNotificationChannelGroups(anyString(), anyInt());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testHasCompanionDevice_failure() throws Exception {
+        when(mCompanionMgr.getAssociations(anyString(), anyInt())).thenThrow(
+                new IllegalArgumentException());
+        mNotificationManagerService.hasCompanionDevice(mListener);
     }
 }
