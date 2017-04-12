@@ -21,7 +21,7 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:minHeight="48dp"
-    android:paddingTop="8dp">
+    android:paddingTop="12dp">
     <LinearLayout
         android:id="@+id/label_group"
         android:layout_width="wrap_content"
@@ -31,6 +31,10 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="horizontal">
+        <Space
+            android:id="@+id/expand_space"
+            android:layout_width="22dp"
+            android:layout_height="0dp" />
 
         <TextView
             android:id="@+id/tile_label"
@@ -44,14 +48,6 @@
             android:textAppearance="@style/TextAppearance.QS.TileLabel"
             android:textColor="?android:attr/textColorPrimary"/>
 
-        <ImageView
-            android:id="@+id/expand_indicator"
-            android:layout_marginStart="4dp"
-            android:layout_width="12dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/qs_dual_tile_caret"
-            android:tint="?android:attr/textColorPrimary" />
-
         <ImageView android:id="@+id/restricted_padlock"
             android:layout_width="@dimen/qs_tile_text_size"
             android:layout_height="match_parent"
@@ -60,6 +56,14 @@
             android:layout_marginLeft="@dimen/restricted_padlock_pading"
             android:scaleType="centerInside"
             android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/expand_indicator"
+            android:layout_marginStart="4dp"
+            android:layout_width="18dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/qs_dual_tile_caret"
+            android:tint="?android:attr/textColorPrimary" />
     </LinearLayout>
 
     <TextView
@@ -85,6 +89,7 @@
         android:layout_alignStart="@id/label_group"
         android:layout_alignEnd="@id/label_group"
         android:layout_below="@id/label_group"
+        android:visibility="gone"
         android:alpha="?android:attr/disabledAlpha"
         android:background="?android:attr/colorForeground"/>
 
