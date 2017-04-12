@@ -3878,7 +3878,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // the per-user SELinux context must be set
             if (TextUtils.isEmpty(app.info.seInfoUser)) {
                 Slog.wtf(TAG, "SELinux tag not defined",
-                        new IllegalStateException("SELinux tag not defined"));
+                        new IllegalStateException("SELinux tag not defined for "
+                        + app.info.packageName + " (uid " + app.uid + ")"));
             }
             final String seInfo = app.info.seInfo
                     + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser);
