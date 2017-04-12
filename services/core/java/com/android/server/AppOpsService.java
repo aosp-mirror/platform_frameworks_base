@@ -416,6 +416,29 @@ public class AppOpsService extends IAppOpsService.Stub {
         return resOps;
     }
 
+    private ArrayList<AppOpsManager.OpEntry> collectOps(SparseIntArray uidOps, int[] ops) {
+        ArrayList<AppOpsManager.OpEntry> resOps = null;
+        if (ops == null) {
+            resOps = new ArrayList<>();
+            for (int j=0; j<uidOps.size(); j++) {
+                resOps.add(new AppOpsManager.OpEntry(uidOps.keyAt(j), uidOps.valueAt(j),
+                        0, 0, 0, -1, null));
+            }
+        } else {
+            for (int j=0; j<ops.length; j++) {
+                int index = uidOps.indexOfKey(ops[j]);
+                if (index >= 0) {
+                    if (resOps == null) {
+                        resOps = new ArrayList<>();
+                    }
+                    resOps.add(new AppOpsManager.OpEntry(uidOps.keyAt(index), uidOps.valueAt(index),
+                            0, 0, 0, -1, null));
+                }
+            }
+        }
+        return resOps;
+    }
+
     @Override
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
@@ -468,6 +491,27 @@ public class AppOpsService extends IAppOpsService.Stub {
             ArrayList<AppOpsManager.PackageOps> res = new ArrayList<AppOpsManager.PackageOps>();
             AppOpsManager.PackageOps resPackage = new AppOpsManager.PackageOps(
                     pkgOps.packageName, pkgOps.uidState.uid, resOps);
+            res.add(resPackage);
+            return res;
+        }
+    }
+
+    @Override
+    public List<AppOpsManager.PackageOps> getUidOps(int uid, int[] ops) {
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
+        synchronized (this) {
+            UidState uidState = getUidStateLocked(uid, false);
+            if (uidState == null) {
+                return null;
+            }
+            ArrayList<AppOpsManager.OpEntry> resOps = collectOps(uidState.opModes, ops);
+            if (resOps == null) {
+                return null;
+            }
+            ArrayList<AppOpsManager.PackageOps> res = new ArrayList<AppOpsManager.PackageOps>();
+            AppOpsManager.PackageOps resPackage = new AppOpsManager.PackageOps(
+                    null, uidState.uid, resOps);
             res.add(resPackage);
             return res;
         }
@@ -1669,6 +1713,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int op;
         int mode;
         int packageUid;
+        int nonpackageUid;
 
         Shell(IAppOpsService iface, AppOpsService internal) {
             mInterface = iface;
@@ -1790,15 +1835,59 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (userId == UserHandle.USER_CURRENT) {
                 userId = ActivityManager.getCurrentUser();
             }
-            if ("root".equals(packageName)) {
-                packageUid = 0;
-            } else {
-                packageUid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            nonpackageUid = -1;
+            try {
+                nonpackageUid = Integer.parseInt(packageName);
+            } catch (NumberFormatException e) {
             }
-            if (packageUid < 0) {
-                err.println("Error: No UID for " + packageName + " in user " + userId);
-                return -1;
+            if (nonpackageUid == -1 && packageName.length() > 1 && packageName.charAt(0) == 'u'
+                    && packageName.indexOf('.') < 0) {
+                int i = 1;
+                while (i < packageName.length() && packageName.charAt(i) >= '0'
+                        && packageName.charAt(i) <= '9') {
+                    i++;
+                }
+                if (i > 1 && i < packageName.length()) {
+                    String userStr = packageName.substring(1, i);
+                    try {
+                        int user = Integer.parseInt(userStr);
+                        char type = packageName.charAt(i);
+                        i++;
+                        int startTypeVal = i;
+                        while (i < packageName.length() && packageName.charAt(i) >= '0'
+                                && packageName.charAt(i) <= '9') {
+                            i++;
+                        }
+                        if (i > startTypeVal) {
+                            String typeValStr = packageName.substring(startTypeVal, i);
+                            try {
+                                int typeVal = Integer.parseInt(typeValStr);
+                                if (type == 'a') {
+                                    nonpackageUid = UserHandle.getUid(user,
+                                            typeVal + Process.FIRST_APPLICATION_UID);
+                                } else if (type == 's') {
+                                    nonpackageUid = UserHandle.getUid(user, typeVal);
+                                }
+                            } catch (NumberFormatException e) {
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
+            if (nonpackageUid != -1) {
+                packageName = null;
+            } else {
+                if ("root".equals(packageName)) {
+                    packageUid = 0;
+                } else {
+                    packageUid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+                }
+                if (packageUid < 0) {
+                    err.println("Error: No UID for " + packageName + " in user " + userId);
+                    return -1;
+                }
             }
             return 0;
         }
@@ -1814,9 +1903,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("AppOps service (appops) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  set [--user <USER_ID>] <PACKAGE> <OP> <MODE>");
+        pw.println("  set [--user <USER_ID>] <PACKAGE | UID> <OP> <MODE>");
         pw.println("    Set the mode for a particular application and operation.");
-        pw.println("  get [--user <USER_ID>] <PACKAGE> [<OP>]");
+        pw.println("  get [--user <USER_ID>] <PACKAGE | UID> [<OP>]");
         pw.println("    Return the mode for a particular application and optional operation.");
         pw.println("  query-op [--user <USER_ID>] <OP> [<MODE>]");
         pw.println("    Print all packages that currently have the given op in the given mode.");
@@ -1858,7 +1947,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return -1;
                     }
 
-                    shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName, mode);
+                    if (shell.packageName != null) {
+                        shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName,
+                                mode);
+                    } else {
+                        shell.mInterface.setUidMode(shell.op, shell.nonpackageUid, mode);
+                    }
                     return 0;
                 }
                 case "get": {
@@ -1867,9 +1961,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return res;
                     }
 
-                    List<AppOpsManager.PackageOps> ops = shell.mInterface.getOpsForPackage(
-                            shell.packageUid, shell.packageName,
-                            shell.op != AppOpsManager.OP_NONE ? new int[] {shell.op} : null);
+                    List<AppOpsManager.PackageOps> ops;
+                    if (shell.packageName != null) {
+                        ops = shell.mInterface.getOpsForPackage(
+                                shell.packageUid, shell.packageName,
+                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
+                    } else {
+                        ops = shell.mInterface.getUidOps(
+                                shell.nonpackageUid,
+                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
+                    }
                     if (ops == null || ops.size() <= 0) {
                         pw.println("No operations.");
                         return 0;
