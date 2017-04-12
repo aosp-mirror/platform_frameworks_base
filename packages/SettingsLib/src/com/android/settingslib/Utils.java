@@ -186,6 +186,11 @@ public class Utils {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
         float alpha = ta.getFloat(0, 0);
         ta.recycle();
+        return applyAlpha(alpha, inputColor);
+    }
+
+    @ColorInt
+    public static int applyAlpha(float alpha, int inputColor) {
         alpha *= Color.alpha(inputColor);
         return Color.argb((int) (alpha), Color.red(inputColor), Color.green(inputColor),
                 Color.blue(inputColor));
