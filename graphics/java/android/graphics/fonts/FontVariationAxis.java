@@ -18,8 +18,6 @@ package android.graphics.fonts;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ import java.util.regex.Pattern;
 /**
  * Class that holds information about single font variation axis.
  */
-public final class FontVariationAxis implements Parcelable {
+public final class FontVariationAxis {
     private final int mTag;
     private final String mTagString;
     private final float mStyleValue;
@@ -72,39 +70,6 @@ public final class FontVariationAxis implements Parcelable {
     public float getStyleValue() {
         return mStyleValue;
     }
-
-    /**
-     * @hide
-     */
-    public FontVariationAxis(Parcel in) {
-        mTag = in.readInt();
-        mTagString = in.readString();
-        mStyleValue = in.readFloat();
-    }
-
-    @Override
-    public void writeToParcel(Parcel out, int flag) {
-        out.writeInt(mTag);
-        out.writeString(mTagString);
-        out.writeFloat(mStyleValue);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<FontVariationAxis> CREATOR = new Creator<FontVariationAxis>() {
-        @Override
-        public FontVariationAxis createFromParcel(Parcel in) {
-            return new FontVariationAxis(in);
-        }
-
-        @Override
-        public FontVariationAxis[] newArray(int size) {
-            return new FontVariationAxis[size];
-        }
-    };
 
     /**
      * Returns a valid font variation setting string for this object.
