@@ -3355,9 +3355,10 @@ final class ActivityStack {
         }
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
-        int taskNdx = mTaskHistory.indexOf(r.task);
         int activityNdx = r.task.mActivities.indexOf(r);
         finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
+        // taskNdx may change after finishActivityLocked call
+        int taskNdx = mTaskHistory.indexOf(r.task);
         finishedTask = r.task;
         // Also terminate any activities below it that aren't yet
         // stopped, to avoid a situation where one will get
