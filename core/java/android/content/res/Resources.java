@@ -1450,7 +1450,8 @@ public class Resources {
          * <p>Be sure to call {@link TypedArray#recycle() TypedArray.recycle()} when you are done
          * with the array.
          * 
-         * @param attrs The desired attributes.
+         * @param attrs The desired attributes. These attribute IDs must be sorted in ascending
+         *              order.
          *
          * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
          * 
@@ -1474,7 +1475,8 @@ public class Resources {
          * with the array.
          * 
          * @param resId The desired style resource.
-         * @param attrs The desired attributes in the style.
+         * @param attrs The desired attributes in the style. These attribute IDs must be sorted in
+         *              ascending order.
          * 
          * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
          * 
@@ -1521,7 +1523,8 @@ public class Resources {
          * the styles.
          * 
          * @param set The base set of attribute values.  May be null.
-         * @param attrs The desired attributes to be retrieved.
+         * @param attrs The desired attributes to be retrieved. These attribute IDs must be sorted
+         *              in ascending order.
          * @param defStyleAttr An attribute in the current theme that contains a
          *                     reference to a style resource that supplies
          *                     defaults values for the TypedArray.  Can be
@@ -1552,7 +1555,8 @@ public class Resources {
          * @param values The base set of attribute values, must be equal in
          *               length to {@code attrs}. All values must be of type
          *               {@link TypedValue#TYPE_ATTRIBUTE}.
-         * @param attrs The desired attributes to be retrieved.
+         * @param attrs The desired attributes to be retrieved. These attribute IDs must be sorted
+         *              in ascending order.
          * @return Returns a TypedArray holding an array of the attribute
          *         values. Be sure to call {@link TypedArray#recycle()}
          *         when done with it.
@@ -1791,14 +1795,15 @@ public class Resources {
      * performing styling of them using a theme and/or style resources.
      *
      * @param set The current attribute values to retrieve.
-     * @param attrs The specific attributes to be retrieved.
+     * @param attrs The specific attributes to be retrieved. These attribute IDs must be sorted in
+     *              ascending order.
      * @return Returns a TypedArray holding an array of the attribute values.
      * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
      * when done with it.
      * 
      * @see Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
-    public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
+    public TypedArray obtainAttributes(AttributeSet set, @StyleableRes int[] attrs) {
         int len = attrs.length;
         TypedArray array = TypedArray.obtain(this, len);
 
