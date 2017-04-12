@@ -35,7 +35,7 @@ import java.io.OutputStream;
  * TODO: We should create unified backup/restore engines that can be used for both transport and
  * adb backup/restore, and for fullbackup and key-value backup.
  */
-class KeyValueAdbBackupEngine {
+public class KeyValueAdbBackupEngine {
     private static final String TAG = "KeyValueAdbBackupEngine";
     private static final boolean DEBUG = false;
 
@@ -58,8 +58,8 @@ class KeyValueAdbBackupEngine {
     private ParcelFileDescriptor mBackupData;
     private ParcelFileDescriptor mNewState;
 
-    KeyValueAdbBackupEngine(OutputStream output, PackageInfo packageInfo,
-        BackupManagerServiceInterface backupManagerService, PackageManager packageManager,
+    public KeyValueAdbBackupEngine(OutputStream output, PackageInfo packageInfo,
+            BackupManagerServiceInterface backupManagerService, PackageManager packageManager,
             File baseStateDir, File dataDir) {
         mOutput = output;
         mCurrentPackage = packageInfo;
@@ -81,7 +81,7 @@ class KeyValueAdbBackupEngine {
         mManifestFile = new File(mDataDir, BackupManagerService.BACKUP_MANIFEST_FILENAME);
     }
 
-    void backupOnePackage() throws IOException {
+    public void backupOnePackage() throws IOException {
         ApplicationInfo targetApp = mCurrentPackage.applicationInfo;
 
         try {

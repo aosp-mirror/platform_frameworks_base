@@ -14,19 +14,26 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.fullbackup;
 
-/**
- * Interface and methods used by the asynchronous-with-timeout backup/restore operations.
- */
-public interface BackupRestoreTask {
+public class FullBackupEntry implements Comparable<FullBackupEntry> {
 
-    // Execute one tick of whatever state machine the task implements
-    void execute();
+    public String packageName;
+    public long lastBackup;
 
-    // An operation that wanted a callback has completed
-    void operationComplete(long result);
+    public FullBackupEntry(String pkg, long when) {
+        packageName = pkg;
+        lastBackup = when;
+    }
 
-    // An operation that wanted a callback has timed out
-    void handleCancel(boolean cancelAll);
+    @Override
+    public int compareTo(FullBackupEntry other) {
+        if (lastBackup < other.lastBackup) {
+            return -1;
+        } else if (lastBackup > other.lastBackup) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 }

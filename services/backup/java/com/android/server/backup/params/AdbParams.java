@@ -14,19 +14,24 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.params;
+
+import android.app.backup.IFullBackupRestoreObserver;
+import android.os.ParcelFileDescriptor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Interface and methods used by the asynchronous-with-timeout backup/restore operations.
+ * Parameters used by adbBackup() and adbRestore().
  */
-public interface BackupRestoreTask {
+public class AdbParams {
 
-    // Execute one tick of whatever state machine the task implements
-    void execute();
+    public ParcelFileDescriptor fd;
+    public final AtomicBoolean latch;
+    public IFullBackupRestoreObserver observer;
+    public String curPassword;     // filled in by the confirmation step
+    public String encryptPassword;
 
-    // An operation that wanted a callback has completed
-    void operationComplete(long result);
-
-    // An operation that wanted a callback has timed out
-    void handleCancel(boolean cancelAll);
+    AdbParams() {
+        latch = new AtomicBoolean(false);
+    }
 }

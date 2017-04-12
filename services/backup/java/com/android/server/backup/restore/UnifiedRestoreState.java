@@ -14,19 +14,16 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.restore;
 
 /**
- * Interface and methods used by the asynchronous-with-timeout backup/restore operations.
+ * States of the unified-restore state machine.
  */
-public interface BackupRestoreTask {
-
-    // Execute one tick of whatever state machine the task implements
-    void execute();
-
-    // An operation that wanted a callback has completed
-    void operationComplete(long result);
-
-    // An operation that wanted a callback has timed out
-    void handleCancel(boolean cancelAll);
+public enum UnifiedRestoreState {
+    INITIAL,
+    RUNNING_QUEUE,
+    RESTORE_KEYVALUE,
+    RESTORE_FULL,
+    RESTORE_FINISHED,
+    FINAL
 }

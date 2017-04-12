@@ -14,19 +14,15 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.params;
 
-/**
- * Interface and methods used by the asynchronous-with-timeout backup/restore operations.
- */
-public interface BackupRestoreTask {
+public class ClearRetryParams {
 
-    // Execute one tick of whatever state machine the task implements
-    void execute();
+    public String transportName;
+    public String packageName;
 
-    // An operation that wanted a callback has completed
-    void operationComplete(long result);
-
-    // An operation that wanted a callback has timed out
-    void handleCancel(boolean cancelAll);
+    public ClearRetryParams(String transport, String pkg) {
+        transportName = transport;
+        packageName = pkg;
+    }
 }
