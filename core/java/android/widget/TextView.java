@@ -8470,7 +8470,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // right where it is most likely to be annoying.
         final boolean clamped = grav > 0;
         // FIXME: Is it okay to truncate this, or should we round?
-        final int x = (int) layout.getPrimaryHorizontal(offset, clamped, true);
+        final int x = (int) layout.getPrimaryHorizontal(offset, clamped);
         final int top = layout.getLineTop(line);
         final int bottom = layout.getLineTop(line + 1);
 
