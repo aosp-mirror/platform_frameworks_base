@@ -79,18 +79,6 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* reducedResolution */));
         mCache.onAppDied(window.mAppToken);
-
-        // Should still be in the retrieval cache.
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
-                false /* restoreFromDisk */, false /* reducedResolution */));
-
-        // Trash retrieval cache.
-        for (int i = 0; i < 20; i++) {
-            mCache.putSnapshot(createWindow(null, FIRST_APPLICATION_WINDOW, "window").getTask(),
-                    createSnapshot());
-        }
-
-        // Should not be in cache anymore
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* reducedResolution */));
     }
@@ -134,9 +122,5 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         // Load it from disk
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId,
                 true /* restoreFromDisk */, false /* reducedResolution */));
-
-        // Make sure it's in the cache now.
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId,
-                false /* restoreFromDisk */, false /* reducedResolution */));
     }
 }
