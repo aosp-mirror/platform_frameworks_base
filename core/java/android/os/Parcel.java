@@ -315,6 +315,7 @@ public final class Parcel {
     private static native byte[] nativeMarshall(long nativePtr);
     private static native long nativeUnmarshall(
             long nativePtr, byte[] data, int offset, int length);
+    private static native int nativeCompareData(long thisNativePtr, long otherNativePtr);
     private static native long nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
     @FastNative
@@ -485,6 +486,11 @@ public final class Parcel {
 
     public final void appendFrom(Parcel parcel, int offset, int length) {
         updateNativeSize(nativeAppendFrom(mNativePtr, parcel.mNativePtr, offset, length));
+    }
+
+    /** @hide */
+    public final int compareData(Parcel other) {
+        return nativeCompareData(mNativePtr, other.mNativePtr);
     }
 
     /**
