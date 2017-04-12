@@ -81,8 +81,8 @@ public class QSDetailItems extends FrameLayout {
         mItemList.setAdapter(mAdapter);
         mEmpty = findViewById(android.R.id.empty);
         mEmpty.setVisibility(GONE);
-        mEmptyText = (TextView) mEmpty.findViewById(android.R.id.title);
-        mEmptyIcon = (ImageView) mEmpty.findViewById(android.R.id.icon);
+        mEmptyText = mEmpty.findViewById(android.R.id.title);
+        mEmptyIcon = mEmpty.findViewById(android.R.id.icon);
     }
 
     @Override
@@ -104,8 +104,10 @@ public class QSDetailItems extends FrameLayout {
     }
 
     public void setEmptyState(int icon, int text) {
-        mEmptyIcon.setImageResource(icon);
-        mEmptyText.setText(text);
+        mEmptyIcon.post(() -> {
+            mEmptyIcon.setImageResource(icon);
+            mEmptyText.setText(text);
+        });
     }
 
     @Override
