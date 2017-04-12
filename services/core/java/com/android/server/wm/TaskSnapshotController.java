@@ -162,12 +162,15 @@ class TaskSnapshotController {
         if (top == null) {
             return null;
         }
+        final WindowState mainWindow = top.findMainWindow();
+        if (mainWindow == null) {
+            return null;
+        }
         final GraphicBuffer buffer = top.mDisplayContent.screenshotApplicationsToBuffer(top.token,
                 -1, -1, false, 1.0f, false, true);
         if (buffer == null) {
             return null;
         }
-        final WindowState mainWindow = top.findMainWindow();
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
                 minRect(mainWindow.mContentInsets, mainWindow.mStableInsets), false /* reduced */,
                 1f /* scale */);
