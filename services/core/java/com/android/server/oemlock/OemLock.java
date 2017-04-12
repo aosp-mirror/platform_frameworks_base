@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package android.service.oemlock;
+package com.android.server.oemlock;
 
-/**
- * Interface for communication with the OemLockService.
- *
- * @hide
- */
-interface IOemLockService {
-    void setOemUnlockAllowedByCarrier(boolean allowed, in byte[] signature);
-    boolean isOemUnlockAllowedByCarrier();
+import android.annotation.Nullable;
 
-    void setOemUnlockAllowedByUser(boolean allowed);
-    boolean isOemUnlockAllowedByUser();
+abstract class OemLock {
+    abstract void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature);
+    abstract boolean isOemUnlockAllowedByCarrier();
 
-    boolean canUserAllowOemUnlock();
-    boolean isOemUnlockAllowed();
-    boolean isDeviceOemUnlocked();
+    abstract void setOemUnlockAllowedByDevice(boolean allowedByDevice);
+    abstract boolean isOemUnlockAllowedByDevice();
 }

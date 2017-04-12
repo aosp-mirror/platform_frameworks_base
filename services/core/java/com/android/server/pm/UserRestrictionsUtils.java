@@ -31,7 +31,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
-import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -518,22 +517,6 @@ public class UserRestrictionsUtils {
                             context.getContentResolver(),
                             android.provider.Settings.Global.SAFE_BOOT_DISALLOWED,
                             newValue ? 1 : 0);
-                    break;
-                case UserManager.DISALLOW_FACTORY_RESET:
-                case UserManager.DISALLOW_OEM_UNLOCK:
-                    if (newValue) {
-                        PersistentDataBlockManager manager = (PersistentDataBlockManager) context
-                                .getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
-                        if (manager != null
-                                && manager.getOemUnlockEnabled()
-                                && manager.getFlashLockState()
-                                        != PersistentDataBlockManager.FLASH_LOCK_UNLOCKED) {
-                            // Only disable OEM unlock if the bootloader is locked. If it's already
-                            // unlocked, setting the OEM unlock enabled flag to false has no effect
-                            // (the bootloader would remain unlocked).
-                            manager.setOemUnlockEnabled(false);
-                        }
-                    }
                     break;
             }
         } finally {

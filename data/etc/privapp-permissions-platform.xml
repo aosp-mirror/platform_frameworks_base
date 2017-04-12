@@ -229,6 +229,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_FINGERPRINT"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.MANAGE_USER_OEM_UNLOCK_STATE" />
         <permission name="android.permission.MASTER_CLEAR"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
