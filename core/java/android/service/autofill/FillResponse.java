@@ -309,7 +309,6 @@ public final class FillResponse implements Parcelable {
             return this;
         }
 
-
         /**
          * Builds a new {@link FillResponse} instance. You must provide at least
          * one dataset or some savable ids or an authentication with a presentation

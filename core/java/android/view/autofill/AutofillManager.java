@@ -192,6 +192,9 @@ public final class AutofillManager {
      * {@hide}
      */
     public void onCreate(Bundle savedInstanceState) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             mLastAutofilledData = savedInstanceState.getParcelable(LAST_AUTOFILLED_DATA_TAG);
 
@@ -237,6 +240,9 @@ public final class AutofillManager {
      * {@hide}
      */
     public void onAttachedToWindow(@NonNull IBinder windowToken) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (mSessionId == NO_SESSION) {
                 return;
@@ -258,6 +264,9 @@ public final class AutofillManager {
      * {@hide}
      */
     public void onSaveInstanceState(Bundle outState) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (mSessionId != NO_SESSION) {
                 outState.putInt(SESSION_ID_TAG, mSessionId);
@@ -278,6 +287,9 @@ public final class AutofillManager {
      * @return whether autofill is enabled for the current user.
      */
     public boolean isEnabled() {
+        if (!hasAutofillFeature()) {
+            return false;
+        }
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
             return mEnabled;
@@ -294,6 +306,9 @@ public final class AutofillManager {
      * @param view view requesting the new autofill context.
      */
     public void requestAutofill(@NonNull View view) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
 
@@ -320,6 +335,9 @@ public final class AutofillManager {
      * @param bounds child boundaries, relative to the top window.
      */
     public void requestAutofill(@NonNull View view, int childId, @NonNull Rect bounds) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
 
@@ -339,6 +357,9 @@ public final class AutofillManager {
      * @param view {@link View} that was entered.
      */
     public void notifyViewEntered(@NonNull View view) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         AutofillCallback callback = null;
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
@@ -372,6 +393,9 @@ public final class AutofillManager {
      * @param view {@link View} that was exited.
      */
     public void notifyViewExited(@NonNull View view) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
 
@@ -392,6 +416,9 @@ public final class AutofillManager {
      * @param bounds child boundaries, relative to the top window.
      */
     public void notifyViewEntered(@NonNull View view, int childId, @NonNull Rect bounds) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         AutofillCallback callback = null;
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
@@ -426,6 +453,9 @@ public final class AutofillManager {
      * @param childId id identifying the virtual child inside the view.
      */
     public void notifyViewExited(@NonNull View view, int childId) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
 
@@ -444,6 +474,9 @@ public final class AutofillManager {
      * @param view view whose value changed.
      */
     public void notifyValueChanged(View view) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         AutofillId id = null;
         boolean valueWasRead = false;
         AutofillValue value = null;
@@ -486,7 +519,6 @@ public final class AutofillManager {
         }
     }
 
-
     /**
      * Called to indicate the value of an autofillable virtual {@link View} changed.
      *
@@ -495,6 +527,9 @@ public final class AutofillManager {
      * @param value new value of the child.
      */
     public void notifyValueChanged(View view, int childId, AutofillValue value) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (!mEnabled || mSessionId == NO_SESSION) {
                 return;
@@ -512,6 +547,9 @@ public final class AutofillManager {
      * call this method after the form is submitted and another page is rendered.
      */
     public void commit() {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (!mEnabled && mSessionId == NO_SESSION) {
                 return;
@@ -528,6 +566,9 @@ public final class AutofillManager {
      * call this method if the user does not post the form but moves to another form in this page.
      */
     public void cancel() {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (!mEnabled && mSessionId == NO_SESSION) {
                 return;
@@ -542,6 +583,9 @@ public final class AutofillManager {
      * will be disabled.
      */
     public void disableOwnedAutofillServices() {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         try {
             mService.disableOwnedAutofillServices(mContext.getUserId());
         } catch (RemoteException e) {
@@ -558,6 +602,9 @@ public final class AutofillManager {
 
     /** @hide */
     public void onAuthenticationResult(Intent data) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         // TODO(b/33197203): the result code is being ignored, so this method is not reliably
         // handling the cases where it's not RESULT_OK: it works fine if the service does not
         // set the EXTRA_AUTHENTICATION_RESULT extra, but it could cause weird results if the
@@ -672,6 +719,9 @@ public final class AutofillManager {
      * @param callback callback to receive events.
      */
     public void registerCallback(@Nullable AutofillCallback callback) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (callback == null) return;
 
@@ -694,6 +744,9 @@ public final class AutofillManager {
      * @param callback callback to stop receiving events.
      */
     public void unregisterCallback(@Nullable AutofillCallback callback) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (callback == null || mCallback == null || callback != mCallback) return;
 
@@ -869,6 +922,10 @@ public final class AutofillManager {
             return null;
         }
         return view;
+    }
+
+    private boolean hasAutofillFeature() {
+        return mService != null;
     }
 
     /**
