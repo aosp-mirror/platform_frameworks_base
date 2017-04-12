@@ -65,6 +65,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
@@ -1166,6 +1167,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
+                // TODO(b/37244415): This just wrong. We should also be moving PAUSED activities to
+                // the stopped state when we are sleeping.
                 if (r.state == ActivityState.STOPPING || r.state == ActivityState.STOPPED
                         || r.state == ActivityState.PAUSED || r.state == ActivityState.PAUSING) {
                     r.setSleeping(true);
@@ -1799,6 +1802,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             // If this activity is already visible, then there is nothing to do here.
                             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                     "Skipping: already visible at " + r);
+
+                            if (r.state == STOPPED) {
+                                // In this case the activity is visible, but in the stopped state.
+                                // This sometimes happens if the activity is behind the lockscreen.
+                                // Restart the activity to the paused or resumed state since we want
+                                // it to be in the visible state now.
+                                makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
+                                        resumeNextActivity, r);
+                            }
 
                             if (r.handleAlreadyVisible()) {
                                 resumeNextActivity = false;
