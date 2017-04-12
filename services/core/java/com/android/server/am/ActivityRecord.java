@@ -1156,10 +1156,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     /**
+     * @param beforeStopping Whether this check is for an auto-enter-pip operation, that is to say
+     *         the activity has requested to enter PiP when it would otherwise be stopped.
+     *
      * @return whether this activity is currently allowed to enter PIP, throwing an exception if
      *         the activity is not currently visible and {@param noThrow} is not set.
      */
-    boolean checkEnterPictureInPictureState(String caller, boolean noThrow) {
+    boolean checkEnterPictureInPictureState(String caller, boolean noThrow, boolean beforeStopping) {
         // Check app-ops and see if PiP is supported for this package
         if (!checkEnterPictureInPictureAppOpsState()) {
             return false;
@@ -1170,17 +1173,24 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return false;
         }
 
-        boolean isCurrentAppLocked = mStackSupervisor.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         boolean isKeyguardLocked = service.isKeyguardLocked();
+        boolean isCurrentAppLocked = mStackSupervisor.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
         boolean isNotLockedOrOnKeyguard = !isKeyguardLocked && !isCurrentAppLocked;
+
+        // We don't allow auto-PiP when something else is already pipped.
+        if (beforeStopping && hasPinnedStack) {
+            return false;
+        }
+
         switch (state) {
             case RESUMED:
                 // When visible, allow entering PiP if the app is not locked.  If it is over the
                 // keyguard, then we will prompt to unlock in the caller before entering PiP.
-                return !isCurrentAppLocked;
+                return !isCurrentAppLocked &&
+                        (supportsPictureInPictureWhilePausing || !beforeStopping);
             case PAUSING:
             case PAUSED:
                 // When pausing, then only allow enter PiP as in the resume state, and in addition,

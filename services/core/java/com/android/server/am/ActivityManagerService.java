@@ -7803,7 +7803,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Activity supports picture-in-picture, now check that we can enter PiP at this
                 // point, if it is
                 if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode",
-                        false /* noThrow */)) {
+                        false /* noThrow */, false /* beforeStopping */)) {
                     return false;
                 }
 
