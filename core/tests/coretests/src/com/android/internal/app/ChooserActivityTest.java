@@ -154,22 +154,6 @@ public class ChooserActivityTest {
     }
 
     @Test
-    public void reportChooserSelection() throws InterruptedException {
-        Intent sendIntent = createSendImageIntent();
-        final ChooserWrapperActivity activity = mActivityRule
-                .launchActivity(Intent.createChooser(sendIntent, null));
-        waitForIdle();
-        UsageStatsManager usm = activity.getUsageStatsManager();
-        String packageName = "test_package";
-        String action = "test_action";
-        String annotation = "test_annotation";
-        long beforeReport = getCount(usm, packageName, action, annotation);
-        usm.reportChooserSelection(packageName, activity.getUserId(), annotation, null, action);
-        long afterReport = getCount(usm, packageName, action, annotation);
-        assertThat(afterReport, is(beforeReport + 1l));
-    }
-
-    @Test
     public void noResultsFromPackageManager() {
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
@@ -355,20 +339,5 @@ public class ChooserActivityTest {
 
     private void waitForIdle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-    }
-
-    private Integer getCount(
-            UsageStatsManager usm, String packageName, String action, String annotation) {
-        if (usm == null) {
-            return 0;
-        }
-        Map<String, UsageStats> stats =
-                usm.queryAndAggregateUsageStats(Long.MIN_VALUE, Long.MAX_VALUE);
-        UsageStats packageStats = stats.get(packageName);
-        if (packageStats == null || packageStats.mChooserCounts == null
-                || packageStats.mChooserCounts.get(action) == null) {
-            return 0;
-        }
-        return packageStats.mChooserCounts.get(action).getOrDefault(annotation, 0);
     }
 }
