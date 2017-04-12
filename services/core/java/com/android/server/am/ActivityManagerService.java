@@ -13025,6 +13025,19 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public int getUidProcessState(int uid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "getUidProcessState");
+        }
+
+        synchronized (this) {
+            UidRecord uidRec = mActiveUids.get(uid);
+            return uidRec != null ? uidRec.curProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
+        }
+    }
+
+    @Override
     public void registerUidObserver(IUidObserver observer, int which, int cutpoint,
             String callingPackage) {
         if (!hasUsageStatsPermission(callingPackage)) {

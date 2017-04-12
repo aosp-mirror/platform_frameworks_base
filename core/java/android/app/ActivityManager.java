@@ -3387,6 +3387,26 @@ public class ActivityManager {
     }
 
     /**
+     * Return the importance of a given uid, based on the processes that are
+     * currently running.  The return value is one of the importance constants defined
+     * in {@link RunningAppProcessInfo}, giving you the highest importance of all the
+     * processes that this uid has running.  If there are no processes
+     * running its code, {@link RunningAppProcessInfo#IMPORTANCE_GONE} is returned.
+     * @hide
+     */
+    @SystemApi @TestApi
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public int getUidImportance(int uid) {
+        try {
+            int procState = getService().getUidProcessState(uid,
+                    mContext.getOpPackageName());
+            return RunningAppProcessInfo.procStateToImportance(procState);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Callback to get reports about changes to the importance of a uid.  Use with
      * {@link #addOnUidImportanceListener}.
      * @hide
