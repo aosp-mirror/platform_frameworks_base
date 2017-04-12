@@ -463,6 +463,7 @@ interface IActivityManager {
      *              etc.
      */
     void keyguardGoingAway(int flags);
+    int getUidProcessState(int uid, in String callingPackage);
     void registerUidObserver(in IUidObserver observer, int which, int cutpoint,
             String callingPackage);
     void unregisterUidObserver(in IUidObserver observer);
