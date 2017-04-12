@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar;
 
+import static junit.framework.Assert.assertTrue;
+
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -49,6 +51,8 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     public void testRecreateMenu() {
         NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
         row.createMenu(null);
+        assertTrue(row.getMenuView() != null);
         row.createMenu(null);
+        assertTrue(row.getMenuView() != null);
     }
 }
