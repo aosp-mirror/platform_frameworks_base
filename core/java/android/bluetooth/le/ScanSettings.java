@@ -17,6 +17,7 @@
 package android.bluetooth.le;
 
 import android.annotation.SystemApi;
+import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -121,16 +122,6 @@ public final class ScanSettings implements Parcelable {
      */
     @SystemApi
     public static final int SCAN_RESULT_TYPE_ABBREVIATED = 1;
-
-    /**
-     * Use the Bluetooth LE 1Mbit PHY for scanning.
-     */
-    public static final int PHY_LE_1M = 1;
-
-    /**
-     * Use Bluetooth LE Coded PHY for scanning.
-     */
-    public static final int PHY_LE_CODED = 3;
 
     /**
      * Use all supported PHYs for scanning.
@@ -412,8 +403,8 @@ public final class ScanSettings implements Parcelable {
          * Selecting an unsupported phy will result in failure to start scan.
          *
          * @param phy Can be one of
-         *   {@link ScanSettings#PHY_LE_1M},
-         *   {@link ScanSettings#PHY_LE_CODED} or
+         *   {@link BluetoothDevice#PHY_LE_1M},
+         *   {@link BluetoothDevice#PHY_LE_CODED} or
          *   {@link ScanSettings#PHY_LE_ALL_SUPPORTED}
          */
         public Builder setPhy(int phy) {
