@@ -23761,24 +23761,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean canBypassWorkChallenge(PendingIntent intent) throws RemoteException {
-        final int userId = intent.getCreatorUserHandle().getIdentifier();
-        if (!mUserController.isUserRunningLocked(userId, ActivityManager.FLAG_AND_LOCKED)) {
-            return false;
-        }
-        IIntentSender target = intent.getTarget();
-        if (!(target instanceof PendingIntentRecord)) {
-            return false;
-        }
-        final PendingIntentRecord record = (PendingIntentRecord) target;
-        final ResolveInfo rInfo = mStackSupervisor.resolveIntent(record.key.requestIntent,
-                record.key.requestResolvedType, userId, PackageManager.MATCH_DIRECT_BOOT_AWARE);
-        // For direct boot aware activities, they can be shown without triggering a work challenge
-        // before the profile user is unlocked.
-        return rInfo != null && rInfo.activityInfo != null;
-    }
-
-    @Override
     public void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback)
             throws RemoteException {
         final long callingId = Binder.clearCallingIdentity();
