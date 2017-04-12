@@ -173,7 +173,8 @@ public class Typeface {
         if (sFallbackFonts != null) {
             synchronized (sDynamicTypefaceCache) {
                 final String key = Builder.createAssetUid(
-                        mgr, path, 0 /* ttcIndex */, null /* axes */);
+                        mgr, path, 0 /* ttcIndex */, null /* axes */,
+                        RESOLVE_BY_FONT_TABLE /* weight */, RESOLVE_BY_FONT_TABLE /* italic */);
                 Typeface typeface = sDynamicTypefaceCache.get(key);
                 if (typeface != null) return typeface;
 
@@ -186,7 +187,8 @@ public class Typeface {
                         return null;
                     }
                     FontFamily[] families = {fontFamily};
-                    typeface = createFromFamiliesWithDefault(families);
+                    typeface = createFromFamiliesWithDefault(families,
+                            RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
                     sDynamicTypefaceCache.put(key, typeface);
                     return typeface;
                 }
@@ -251,10 +253,12 @@ public class Typeface {
             fontFamily.allowUnsupportedFont();
             fontFamily.freeze();
             FontFamily[] familyChain = { fontFamily };
-            typeface = createFromFamiliesWithDefault(familyChain);
+            typeface = createFromFamiliesWithDefault(familyChain,
+                    RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
             synchronized (sDynamicTypefaceCache) {
                 final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */,
-                        null /* axes */);
+                        null /* axes */, RESOLVE_BY_FONT_TABLE /* weight */,
+                        RESOLVE_BY_FONT_TABLE /* italic */);
                 sDynamicTypefaceCache.put(key, typeface);
             }
             return typeface;
@@ -268,7 +272,8 @@ public class Typeface {
      */
     public static Typeface findFromCache(AssetManager mgr, String path) {
         synchronized (sDynamicTypefaceCache) {
-            final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */, null /* axes */);
+            final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */, null /* axes */,
+                    RESOLVE_BY_FONT_TABLE /* weight */, RESOLVE_BY_FONT_TABLE /* italic */);
             Typeface typeface = sDynamicTypefaceCache.get(key);
             if (typeface != null) {
                 return typeface;
@@ -406,7 +411,9 @@ public class Typeface {
                     FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
             return;
         }
-        Typeface typeface = Typeface.createFromFamiliesWithDefault(new FontFamily[] { fontFamily });
+        Typeface typeface = Typeface.createFromFamiliesWithDefault(
+                new FontFamily[] { fontFamily },
+                RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
         synchronized (sDynamicTypefaceCache) {
             String key = createProviderUid(request.getProviderAuthority(), request.getQuery());
             sDynamicTypefaceCache.put(key, typeface);
@@ -715,7 +722,7 @@ public class Typeface {
          * @return Unique id for a given AssetManager and asset path.
          */
         private static String createAssetUid(final AssetManager mgr, String path, int ttcIndex,
-                @Nullable FontVariationAxis[] axes) {
+                @Nullable FontVariationAxis[] axes, int weight, int italic) {
             final SparseArray<String> pkgs = mgr.getAssignedPackageIdentifiers();
             final StringBuilder builder = new StringBuilder();
             final int size = pkgs.size();
@@ -726,6 +733,10 @@ public class Typeface {
             builder.append(path);
             builder.append("-");
             builder.append(Integer.toString(ttcIndex));
+            builder.append("-");
+            builder.append(Integer.toString(weight));
+            builder.append("-");
+            builder.append(Integer.toString(italic));
             builder.append("-");
             if (axes != null) {
                 for (FontVariationAxis axis : axes) {
@@ -791,7 +802,7 @@ public class Typeface {
          * @return Newly created Typeface. May return null if some parameters are invalid.
          */
         public Typeface build() {
-            if (mFd != null) {  // set source by setSourceFromFile(FileDescriptor)
+            if (mFd != null) {  // Builder is created with file descriptor.
                 try (FileInputStream fis = new FileInputStream(mFd)) {
                     FileChannel channel = fis.getChannel();
                     long size = channel.size();
@@ -806,12 +817,13 @@ public class Typeface {
                         return resolveFallbackTypeface();
                     }
                     FontFamily[] families = { fontFamily };
-                    return createFromFamiliesWithDefault(families);
+                    return createFromFamiliesWithDefault(families, mWeight, mItalic);
                 } catch (IOException e) {
                     return resolveFallbackTypeface();
                 }
-            } else if (mAssetManager != null) {  // set source by setSourceFromAsset()
-                final String key = createAssetUid(mAssetManager, mPath, mTtcIndex, mAxes);
+            } else if (mAssetManager != null) {  // Builder is created with asset manager.
+                final String key = createAssetUid(
+                        mAssetManager, mPath, mTtcIndex, mAxes, mWeight, mItalic);
                 synchronized (sLock) {
                     Typeface typeface = sDynamicTypefaceCache.get(key);
                     if (typeface != null) return typeface;
@@ -825,11 +837,11 @@ public class Typeface {
                         return resolveFallbackTypeface();
                     }
                     FontFamily[] families = { fontFamily };
-                    typeface = createFromFamiliesWithDefault(families);
+                    typeface = createFromFamiliesWithDefault(families, mWeight, mItalic);
                     sDynamicTypefaceCache.put(key, typeface);
                     return typeface;
                 }
-            } else if (mPath != null) {  // set source by setSourceFromFile(File)
+            } else if (mPath != null) {  // Builder is created with file path.
                 final FontFamily fontFamily = new FontFamily();
                 if (!fontFamily.addFont(mPath, mTtcIndex, mAxes, mWeight, mItalic)) {
                     fontFamily.abortCreation();
@@ -839,7 +851,7 @@ public class Typeface {
                     return resolveFallbackTypeface();
                 }
                 FontFamily[] families = { fontFamily };
-                return createFromFamiliesWithDefault(families);
+                return createFromFamiliesWithDefault(families, mWeight, mItalic);
             } else if (mFonts != null) {
                 final FontFamily fontFamily = new FontFamily();
                 boolean atLeastOneFont = false;
@@ -865,7 +877,7 @@ public class Typeface {
                 }
                 fontFamily.freeze();
                 FontFamily[] families = { fontFamily };
-                return createFromFamiliesWithDefault(families);
+                return createFromFamiliesWithDefault(families, mWeight, mItalic);
             }
 
             // Must not reach here.
@@ -969,7 +981,7 @@ public class Typeface {
                 if (typeface != null) return typeface;
 
                 final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */,
-                        null /* axes */);
+                        null /* axes */, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
                 typeface = sDynamicTypefaceCache.get(key);
                 if (typeface != null) return typeface;
 
@@ -984,7 +996,8 @@ public class Typeface {
                     fontFamily.allowUnsupportedFont();
                     fontFamily.freeze();
                     final FontFamily[] families = { fontFamily };
-                    typeface = createFromFamiliesWithDefault(families);
+                    typeface = createFromFamiliesWithDefault(families, RESOLVE_BY_FONT_TABLE,
+                            RESOLVE_BY_FONT_TABLE);
                     sDynamicTypefaceCache.put(key, typeface);
                     return typeface;
                 } else {
@@ -1037,7 +1050,8 @@ public class Typeface {
                 fontFamily.allowUnsupportedFont();
                 fontFamily.freeze();
                 FontFamily[] families = { fontFamily };
-                return createFromFamiliesWithDefault(families);
+                return createFromFamiliesWithDefault(families, RESOLVE_BY_FONT_TABLE,
+                        RESOLVE_BY_FONT_TABLE);
             } else {
                 fontFamily.abortCreation();
             }
@@ -1055,16 +1069,25 @@ public class Typeface {
         for (int i = 0; i < families.length; i++) {
             ptrArray[i] = families[i].mNativePtr;
         }
-        return new Typeface(nativeCreateFromArray(ptrArray));
+        return new Typeface(nativeCreateFromArray(
+                ptrArray, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
     }
 
     /**
      * Create a new typeface from an array of font families, including
      * also the font families in the fallback list.
-     *
+     * @param weight the weight for this family. {@link RESOLVE_BY_FONT_TABLE} can be used. In that
+     *               case, the table information in the first family's font is used. If the first
+     *               family has multiple fonts, the closest to the regular weight and upright font
+     *               is used.
+     * @param italic the italic information for this family. {@link RESOLVE_BY_FONT_TABLE} can be
+     *               used. In that case, the table information in the first family's font is used.
+     *               If the first family has multiple fonts, the closest to the regular weight and
+     *               upright font is used.
      * @param families array of font families
      */
-    private static Typeface createFromFamiliesWithDefault(FontFamily[] families) {
+    private static Typeface createFromFamiliesWithDefault(FontFamily[] families,
+                int weight, int italic) {
         long[] ptrArray = new long[families.length + sFallbackFonts.length];
         for (int i = 0; i < families.length; i++) {
             ptrArray[i] = families[i].mNativePtr;
@@ -1072,7 +1095,7 @@ public class Typeface {
         for (int i = 0; i < sFallbackFonts.length; i++) {
             ptrArray[i + families.length] = sFallbackFonts[i].mNativePtr;
         }
-        return new Typeface(nativeCreateFromArray(ptrArray));
+        return new Typeface(nativeCreateFromArray(ptrArray, weight, italic));
     }
 
     // don't allow clients to call this directly
@@ -1155,7 +1178,8 @@ public class Typeface {
                     } else {
                         FontFamily fontFamily = makeFamilyFromParsed(f, bufferForPath);
                         FontFamily[] families = { fontFamily };
-                        typeface = Typeface.createFromFamiliesWithDefault(families);
+                        typeface = Typeface.createFromFamiliesWithDefault(families,
+                                RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
                     }
                     systemFonts.put(f.getName(), typeface);
                 }
@@ -1262,7 +1286,7 @@ public class Typeface {
     private static native void nativeUnref(long native_instance);
     private static native int  nativeGetStyle(long native_instance);
     private static native int  nativeGetBaseWeight(long native_instance);
-    private static native long nativeCreateFromArray(long[] familyArray);
+    private static native long nativeCreateFromArray(long[] familyArray, int weight, int italic);
     private static native void nativeSetDefault(long native_instance);
     private static native int[] nativeGetSupportedAxes(long native_instance);
 }
