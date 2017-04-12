@@ -593,24 +593,34 @@ public final class BluetoothDevice implements Parcelable {
     public static final int TRANSPORT_LE = 2;
 
     /**
-     * 1M initiating PHY.
+     * Bluetooth LE 1M PHY.
      */
     public static final int PHY_LE_1M = 1;
 
     /**
-     * 2M initiating PHY.
+     * Bluetooth LE 2M PHY.
      */
     public static final int PHY_LE_2M = 2;
 
     /**
-     * LE Coded initiating PHY.
+     * Bluetooth LE Coded PHY.
      */
-    public static final int PHY_LE_CODED = 4;
+    public static final int PHY_LE_CODED = 3;
 
     /**
-     * Any LE PHY.
+     * Bluetooth LE 1M PHY mask.
      */
-    public static final int PHY_LE_ANY = PHY_LE_1M | PHY_LE_2M | PHY_LE_CODED;
+    public static final int PHY_LE_1M_MASK = 1;
+
+    /**
+     * Bluetooth LE 2M PHY mask.
+     */
+    public static final int PHY_LE_2M_MASK = 2;
+
+    /**
+     * Bluetooth LE Coded PHY mask.
+     */
+    public static final int PHY_LE_CODED_MASK = 4;
 
     /**
      * No preferred coding when transmitting on the LE Coded PHY.
@@ -1651,7 +1661,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     public BluetoothGatt connectGatt(Context context, boolean autoConnect,
                                      BluetoothGattCallback callback, int transport) {
-        return (connectGatt(context, autoConnect,callback, TRANSPORT_AUTO, PHY_LE_1M));
+        return (connectGatt(context, autoConnect,callback, TRANSPORT_AUTO, PHY_LE_1M_MASK));
     }
 
     /**
@@ -1668,8 +1678,8 @@ public final class BluetoothDevice implements Parcelable {
      *             {@link BluetoothDevice#TRANSPORT_AUTO} or
      *             {@link BluetoothDevice#TRANSPORT_BREDR} or {@link BluetoothDevice#TRANSPORT_LE}
      * @param phy preferred PHY for connections to remote LE device. Bitwise OR of any of
-     *             {@link BluetoothDevice#PHY_LE_1M}, {@link BluetoothDevice#PHY_LE_2M},
-     *             and {@link BluetoothDevice#PHY_LE_CODED}. This option does not take effect if
+     *             {@link BluetoothDevice#PHY_LE_1M_MASK}, {@link BluetoothDevice#PHY_LE_2M_MASK},
+     *             and {@link BluetoothDevice#PHY_LE_CODED_MASK}. This option does not take effect if
      *             {@code autoConnect} is set to true.
      * @throws IllegalArgumentException if callback is null
      */

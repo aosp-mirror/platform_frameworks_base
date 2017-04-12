@@ -47,21 +47,6 @@ public final class ScanResult implements Parcelable {
     public static final int PHY_UNUSED = 0x00;
 
     /**
-     * Bluetooth LE 1Mbit advertiser PHY.
-     */
-    public static final int PHY_LE_1M = 0x01;
-
-    /**
-     * Bluetooth LE 2Mbit advertiser PHY.
-     */
-    public static final int PHY_LE_2M = 0x02;
-
-    /**
-     * Bluetooth LE Coded advertiser PHY.
-     */
-    public static final int PHY_LE_CODED = 0x03;
-
-    /**
      * Advertising Set ID is not present in the packet.
      */
     public static final int SID_NOT_PRESENT = 0xFF;
@@ -112,7 +97,7 @@ public final class ScanResult implements Parcelable {
         mRssi = rssi;
         mTimestampNanos = timestampNanos;
         mEventType = (DATA_COMPLETE << 5) | ET_LEGACY_MASK | ET_CONNECTABLE_MASK;
-        mPrimaryPhy = PHY_LE_1M;
+        mPrimaryPhy = BluetoothDevice.PHY_LE_1M;
         mSecondaryPhy = PHY_UNUSED;
         mAdvertisingSid = SID_NOT_PRESENT;
         mTxPower = 127;
@@ -256,16 +241,16 @@ public final class ScanResult implements Parcelable {
     /**
      * Returns the primary Physical Layer
      * on which this advertisment was received.
-     * Can be one of {@link ScanResult#PHY_LE_1M} or
-     * {@link ScanResult#PHY_LE_CODED}.
+     * Can be one of {@link BluetoothDevice#PHY_LE_1M} or
+     * {@link BluetoothDevice#PHY_LE_CODED}.
      */
     public int getPrimaryPhy() { return mPrimaryPhy; }
 
     /**
      * Returns the secondary Physical Layer
      * on which this advertisment was received.
-     * Can be one of {@link ScanResult#PHY_LE_1M},
-     * {@link ScanResult#PHY_LE_2M}, {@link ScanResult#PHY_LE_CODED}
+     * Can be one of {@link BluetoothDevice#PHY_LE_1M},
+     * {@link BluetoothDevice#PHY_LE_2M}, {@link BluetoothDevice#PHY_LE_CODED}
      * or {@link ScanResult#PHY_UNUSED} - if the advertisement
      * was not received on a secondary physical channel.
      */
