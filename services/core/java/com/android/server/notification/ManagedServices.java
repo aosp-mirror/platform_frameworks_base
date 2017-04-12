@@ -154,6 +154,13 @@ abstract public class ManagedServices {
 
     abstract protected void onServiceAdded(ManagedServiceInfo info);
 
+    protected List<ManagedServiceInfo> getServices() {
+        synchronized (mMutex) {
+            List<ManagedServiceInfo> services = new ArrayList<>(mServices);
+            return services;
+        }
+    }
+
     protected void onServiceRemovedLocked(ManagedServiceInfo removed) { }
 
     private ManagedServiceInfo newServiceInfo(IInterface service,

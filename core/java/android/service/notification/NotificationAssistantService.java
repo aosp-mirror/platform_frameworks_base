@@ -138,7 +138,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         }
     }
 
-
     private class NotificationAssistantServiceWrapper extends NotificationListenerWrapper {
         @Override
         public void onNotificationEnqueued(IStatusBarNotificationHolder sbnHolder) {

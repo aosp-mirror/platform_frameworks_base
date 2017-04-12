@@ -16,6 +16,8 @@
 
 package android.service.notification;
 
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.NotificationRankingUpdate;
@@ -32,6 +34,10 @@ oneway interface INotificationListener
     void onNotificationRankingUpdate(in NotificationRankingUpdate update);
     void onListenerHintsChanged(int hints);
     void onInterruptionFilterChanged(int interruptionFilter);
+
+    // companion device managers only
+    void onNotificationChannelModification(String pkgName, in NotificationChannel channel, int modificationType);
+    void onNotificationChannelGroupModification(String pkgName, in NotificationChannelGroup group, int modificationType);
 
     // rankers only
     void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder);

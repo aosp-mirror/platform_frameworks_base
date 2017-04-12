@@ -16,8 +16,13 @@
 
 package android.service.notification;
 
+import android.Manifest;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
+import android.companion.CompanionDeviceManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -51,6 +56,8 @@ import android.widget.RemoteViews;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +66,7 @@ import java.util.List;
  * A service that receives calls from the system when new notifications are
  * posted or removed, or their ranking changed.
  * <p>To extend this class, you must declare the service in your manifest file with
- * the {@link android.Manifest.permission#BIND_NOTIFICATION_LISTENER_SERVICE} permission
+ * the {@link Manifest.permission#BIND_NOTIFICATION_LISTENER_SERVICE} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
  * <pre>
  * &lt;service android:name=".NotificationListener"
@@ -214,6 +221,37 @@ public abstract class NotificationListenerService extends Service {
      */
     @SystemApi
     public static final int TRIM_LIGHT = 1;
+
+
+    /** @hide */
+    @IntDef({NOTIFICATION_CHANNEL_OR_GROUP_ADDED, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED,
+            NOTIFICATION_CHANNEL_OR_GROUP_DELETED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ChannelOrGroupModificationTypes {}
+
+    /**
+     * Channel or group modification reason provided to
+     * {@link #onNotificationChannelModified(String, NotificationChannel, int)} or
+     * {@link #onNotificationChannelGroupModified(String, NotificationChannelGroup, int)}- the
+     * provided object was created.
+     */
+    public static final int NOTIFICATION_CHANNEL_OR_GROUP_ADDED = 1;
+
+    /**
+     * Channel or group modification reason provided to
+     * {@link #onNotificationChannelModified(String, NotificationChannel, int)} or
+     * {@link #onNotificationChannelGroupModified(String, NotificationChannelGroup, int)}- the
+     * provided object was updated.
+     */
+    public static final int NOTIFICATION_CHANNEL_OR_GROUP_UPDATED = 2;
+
+    /**
+     * Channel or group modification reason provided to
+     * {@link #onNotificationChannelModified(String, NotificationChannel, int)} or
+     * {@link #onNotificationChannelGroupModified(String, NotificationChannelGroup, int)}- the
+     * provided object was deleted.
+     */
+    public static final int NOTIFICATION_CHANNEL_OR_GROUP_DELETED = 3;
 
     private final Object mLock = new Object();
 
@@ -384,6 +422,40 @@ public abstract class NotificationListenerService extends Service {
      * @param hints The current {@link #getCurrentListenerHints() listener hints}.
      */
     public void onListenerHintsChanged(int hints) {
+        // optional
+    }
+
+    /**
+     * Implement this method to learn about notification channel modifications.
+     *
+     * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
+     * device} in order to receive this callback.
+     *
+     * @param pkg The package the channel belongs to.
+     * @param channel The channel that has changed.
+     * @param modificationType One of {@link #NOTIFICATION_CHANNEL_OR_GROUP_ADDED},
+     *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_UPDATED},
+     *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_DELETED}.
+     */
+    public void onNotificationChannelModified(String pkg, NotificationChannel channel,
+            @ChannelOrGroupModificationTypes int modificationType) {
+        // optional
+    }
+
+    /**
+     * Implement this method to learn about notification channel group modifications.
+     *
+     * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
+     * device} in order to receive this callback.
+     *
+     * @param pkg The package the group belongs to.
+     * @param group The group that has changed.
+     * @param modificationType One of {@link #NOTIFICATION_CHANNEL_OR_GROUP_ADDED},
+     *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_UPDATED},
+     *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_DELETED}.
+     */
+    public void onNotificationChannelGroupModified(String pkg, NotificationChannelGroup group,
+            @ChannelOrGroupModificationTypes int modificationType) {
         // optional
     }
 
@@ -584,6 +656,69 @@ public abstract class NotificationListenerService extends Service {
             getNotificationInterface().setNotificationsShownFromListener(mWrapper, keys);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+
+    /**
+     * Updates a notification channel for a given package. This should only be used to reflect
+     * changes a user has made to the channel via the listener's user interface.
+     *
+     * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
+     * device} in order to use this method.
+     *
+     * @param pkg The package the channel belongs to.
+     * @param channel the channel to update.
+     */
+    public final void updateNotificationChannel(@NonNull String pkg,
+            @NonNull NotificationChannel channel) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().updateNotificationChannelFromPrivilegedListener(
+                    mWrapper, pkg, channel);
+        } catch (RemoteException e) {
+            Log.v(TAG, "Unable to contact notification manager", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all notification channels belonging to the given package.
+     *
+     * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
+     * device} in order to use this method.
+     *
+     * @param pkg The package to retrieve channels for.
+     */
+    public final List<NotificationChannel> getNotificationChannels(@NonNull String pkg) {
+        if (!isBound()) return null;
+        try {
+
+            return getNotificationInterface().getNotificationChannelsFromPrivilegedListener(
+                    mWrapper, pkg).getList();
+        } catch (RemoteException e) {
+            Log.v(TAG, "Unable to contact notification manager", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all notification channel groups belonging to the given package.
+     *
+     * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
+     * device} in order to use this method.
+     *
+     * @param pkg The package to retrieve channel groups for.
+     */
+    public final List<NotificationChannelGroup> getNotificationChannelGroups(@NonNull String pkg) {
+        if (!isBound()) return null;
+        try {
+
+            return getNotificationInterface().getNotificationChannelGroupsFromPrivilegedListener(
+                    mWrapper, pkg).getList();
+        } catch (RemoteException e) {
+            Log.v(TAG, "Unable to contact notification manager", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1116,6 +1251,28 @@ public abstract class NotificationListenerService extends Service {
             // no-op in the listener
         }
 
+        @Override
+        public void onNotificationChannelModification(String pkgName, NotificationChannel channel,
+                @ChannelOrGroupModificationTypes int modificationType) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = pkgName;
+            args.arg2 = channel;
+            args.arg3 = modificationType;
+            mHandler.obtainMessage(
+                    MyHandler.MSG_ON_NOTIFICATION_CHANNEL_MODIFIED, args).sendToTarget();
+        }
+
+        @Override
+        public void onNotificationChannelGroupModification(String pkgName,
+                NotificationChannelGroup group,
+                @ChannelOrGroupModificationTypes int modificationType) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = pkgName;
+            args.arg2 = group;
+            args.arg3 = modificationType;
+            mHandler.obtainMessage(
+                    MyHandler.MSG_ON_NOTIFICATION_CHANNEL_GROUP_MODIFIED, args).sendToTarget();
+        }
     }
 
     /**
@@ -1632,6 +1789,8 @@ public abstract class NotificationListenerService extends Service {
         public static final int MSG_ON_NOTIFICATION_RANKING_UPDATE = 4;
         public static final int MSG_ON_LISTENER_HINTS_CHANGED = 5;
         public static final int MSG_ON_INTERRUPTION_FILTER_CHANGED = 6;
+        public static final int MSG_ON_NOTIFICATION_CHANNEL_MODIFIED = 7;
+        public static final int MSG_ON_NOTIFICATION_CHANNEL_GROUP_MODIFIED = 8;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -1677,6 +1836,22 @@ public abstract class NotificationListenerService extends Service {
                 case MSG_ON_INTERRUPTION_FILTER_CHANGED: {
                     final int interruptionFilter = msg.arg1;
                     onInterruptionFilterChanged(interruptionFilter);
+                } break;
+
+                case MSG_ON_NOTIFICATION_CHANNEL_MODIFIED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String pkgName = (String) args.arg1;
+                    NotificationChannel channel = (NotificationChannel) args.arg2;
+                    int modificationType = (int) args.arg3;
+                    onNotificationChannelModified(pkgName, channel, modificationType);
+                } break;
+
+                case MSG_ON_NOTIFICATION_CHANNEL_GROUP_MODIFIED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String pkgName = (String) args.arg1;
+                    NotificationChannelGroup group = (NotificationChannelGroup) args.arg2;
+                    int modificationType = (int) args.arg3;
+                    onNotificationChannelGroupModified(pkgName, group, modificationType);
                 } break;
             }
         }
