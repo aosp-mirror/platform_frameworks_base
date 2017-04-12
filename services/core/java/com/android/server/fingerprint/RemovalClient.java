@@ -59,12 +59,23 @@ public abstract class RemovalClient extends ClientMonitor {
 
     @Override
     public int stop(boolean initiatedByClient) {
-        // We don't actually stop remove, but inform the client that the cancel operation succeeded
-        // so we can start the next operation.
-        if (initiatedByClient) {
-            onError(FingerprintManager.FINGERPRINT_ERROR_CANCELED, 0 /* vendorCode */);
+        IBiometricsFingerprint daemon = getFingerprintDaemon();
+        if (daemon == null) {
+            Slog.w(TAG, "stopRemoval: no fingerprint HAL!");
+            return ERROR_ESRCH;
         }
-        return 0;
+        try {
+            final int result = daemon.cancel();
+            if (result != 0) {
+                Slog.w(TAG, "stopRemoval failed, result=" + result);
+                return result;
+            }
+            if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is no longer removing");
+        } catch (RemoteException e) {
+            Slog.e(TAG, "stopRemoval failed", e);
+            return ERROR_ESRCH;
+        }
+        return 0; // success
     }
 
     /*
