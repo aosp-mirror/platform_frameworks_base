@@ -406,10 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"उपकरणको फोन विशेषताहरूको पहुँच गर्न अनुप्रयोगलाई अनुमति दिन्छ। यस अनुमतिले फोन नम्बर र उपकरणको IDs, कल सक्षम छ कि छैन र कलद्वारा जोडिएको टाढाको नम्बर निर्धारण गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणाली मार्फत कल गर्न दिनुहोस्‌"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कल गर्दाको अनुभवलाई सुधार्न यस अनुप्रयोगलाई प्रणाली मार्फत कलहरू गर्न अनुमति दिन्छ।"</string>
-    <!-- no translation found for permlab_readPhoneNumbers (6108163940932852440) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneNumbers (8559488833662272354) -->
-    <skip />
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"फोन नम्बरहरू पढ्ने"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"उक्त अनुप्रयोगलाई यस यन्त्रको फोन नम्बरहरूमाथि पहुँच राख्न दिनुहोस्।"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ट्याब्लेटलाई निन्द्रामा जानबाट रोक्नुहोस्"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"TV निभ्नबाट जोगाउनुहोस्"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"फोनलाई निदाउनबाट रोक्नुहोस्"</string>
@@ -1193,8 +1191,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
-    <!-- no translation found for alert_windows_notification_title (3697657294867638947) -->
-    <skip />
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले यो विशेषता प्रयोग नगरेको चाहनुहुन्न भने सेटिङहरू खोली यसलाई निष्क्रिय पार्न ट्याप गर्नुहोस्।"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"निष्क्रिय पार्नुहोस्"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"तयारी गर्दै <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1741,19 +1738,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"समय इनपुट गर्न पाठ इनपुट मोडमा स्विच गर्नुहोस्।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"समय इनपुट गर्न घडी मोडमा स्विच गर्नुहोस्।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"स्वतः भरणका विकल्पहरू"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"सामग्रीहरूलाई स्वत: भरण गर्न मिल्दैन"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> मा सुरक्षित गर्ने हो?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> लाई <xliff:g id="LABEL">%2$s</xliff:g> मा सुरक्षित गर्ने हो?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"सुरक्षित गर्नुहोस्"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"पर्दैन, धन्यवाद"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"ठेगाना"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"प्रयोगकर्ताको नाम"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"इमेल ठेगाना"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"तटीय क्षेत्र र नदीछेउका ठाउँहरू छाडी उच्च सतहमा अवस्थित कुनै अझ सुरक्षित ठाउँमा जानुहोस्।"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>

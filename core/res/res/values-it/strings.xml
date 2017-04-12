@@ -1185,7 +1185,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"App <xliff:g id="NAME">%s</xliff:g> visualizzata sopra altre app"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"App <xliff:g id="NAME">%s</xliff:g> visualiz. sopra altre app"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"App <xliff:g id="NAME">%s</xliff:g> mostrata sopra altre app"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se non desideri che l\'app <xliff:g id="NAME">%s</xliff:g> utilizzi questa funzione, tocca per aprire le impostazioni e disattivarla."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DISATTIVA"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparazione della <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1732,19 +1732,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Passa alla modalità di immissione testo per inserire l\'ora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Passa alla modalità orologio per inserire l\'ora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opzioni di compilazione automatica"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Impossibile compilare automaticamente i contenuti"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"Salvare in <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Salvare <xliff:g id="TYPE">%1$s</xliff:g> in <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"Salva"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, grazie"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"password"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"indirizzo"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"carta di credito"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"nome utente"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"indirizzo email"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantieni la calma e cerca riparo nelle vicinanze."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evacuare immediatamente le zone costiere e in riva ai fiumi e recarsi in un luogo più sicuro, ad esempio un\'altura."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantieni la calma e cerca riparo nelle vicinanze."</string>

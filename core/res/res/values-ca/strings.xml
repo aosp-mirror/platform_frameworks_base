@@ -1185,7 +1185,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"S\'està superposant <xliff:g id="NAME">%s</xliff:g> a altres aplicacions"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"Superposant <xliff:g id="NAME">%s</xliff:g> a altres apps"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> s\'està superposant a altres apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESACTIVA"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"S\'està preparant <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1732,19 +1732,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Canvia al mode d\'introducció de text per introduir l\'hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Canvia al mode de rellotge per introduir l\'hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcions d\'emplenament automàtic"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"El contingut no es pot emplenar automàticament"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"Vols desar-ho a <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Vols desar la informació del camp <xliff:g id="TYPE">%1$s</xliff:g> a <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"Desa"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, gràcies"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"contrasenya"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adreça"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"targeta de crèdit"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"nom d\'usuari"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"adreça electrònica"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantén la calma i busca refugi a prop."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Abandona immediatament les regions costaneres i riberenques, i cerca un lloc més segur, com ara un terreny elevat."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantén la calma i busca refugi a prop."</string>
@@ -1753,5 +1754,5 @@
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM no compatible"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM no proporcionada"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM no compatible"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telèfonno no compatible"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telèfon no no compatible"</string>
 </resources>

@@ -1186,7 +1186,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> колдонмосун башка терезелердин үстүнөн көрсөтүү"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> колд. башк-дын үст. көрсөт-дө"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>: башка колдонмолордун үстүнөн"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ӨЧҮРҮҮ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> даярдалууда"</string>
@@ -1733,19 +1733,18 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Убакытты текст киргизүү режиминде киргизиңиз."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Убакытты дубал саатынын режиминде киргизиңиз."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Автотолтуруу опциялары"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Мазмундарды автотолтуруу мүмкүн эмес"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> кызматында сакталсынбы?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> кызматында сакталсынбы?"</string>
+    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g> менен <xliff:g id="TYPE_1">%2$s</xliff:g> <xliff:g id="LABEL">%3$s</xliff:g> кызматында сакталсынбы?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> жана <xliff:g id="TYPE_2">%3$s</xliff:g> <xliff:g id="LABEL">%4$s</xliff:g> кызматында сакталсынбы?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Сактоо"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Жок, рахмат"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"сырсөз"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"дарек"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"насыя картасы"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"колдонуучунун аты"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"электрондук почта дареги"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Эс алып, жакын жерден калканч издеңиз."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Деңиз жана дарыя жээгинде жайгашкан аймактардан бийик тоо сыяктуу коопсуз жерге тезинен чыгып кетиңиз."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Эс алып, жакын жерден калканч издеңиз."</string>

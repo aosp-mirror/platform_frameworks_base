@@ -1732,19 +1732,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Zamanı daxil etmək üçün mətnlə daxiletmə rejiminə keçin"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Zamanı daxil etmək üçün saat rejiminə keçin"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Avtodoldurma seçimləri"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Kontentlər avtomatik olaraq doldurula bilməz"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> etiketində yadda saxlanılsın?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> etiketində yadda saxlanılsın?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"Yadda saxlayın"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Xeyr, çox sağ olun"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"ünvan"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredit kartı"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"istifadəçi adı"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"e-poçt ünvanı"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Sakit qalın və yaxınlıqda sığınacaq axtarın."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Dərhal sahil bölgələrindən və çay kənarı ərazilərdən daha təhlükəsiz yüksək yerlərə evakuasiya edin."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Sakit qalın və yaxınlıqda sığınacaq axtarın."</string>

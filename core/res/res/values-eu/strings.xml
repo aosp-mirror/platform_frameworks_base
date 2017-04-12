@@ -307,7 +307,7 @@
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"birbideratu irteerako deiak"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Irteerako deian markatutako zenbakia ikustea baimentzen die aplikazioei, deia beste zenbaki batera birbideratzeko edo deia bertan behera uzteko aukerarekin."</string>
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"erantzun telefono-deiak"</string>
-    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Sarrerako deiak hartzea baimentzen dio aplikazioari."</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"Sarrerako deiak hartzea baimentzen die aplikazioei."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"jaso testu-mezuak (SMSak)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS mezuak jasotzeko eta prozesatzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailura bidalitako mezuak kontrola eta ezaba ditzake zuri erakutsi gabe."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"jaso testu-mezuak (MMSak)"</string>
@@ -405,9 +405,9 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"irakurri telefonoaren egoera eta identitatea"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Gailuaren telefono-eginbideak atzitzeko baimena ematen die aplikazioei. Baimen horrek aplikazioari telefono-zenbakia eta gailu IDak zein diren, deirik aktibo dagoen eta deia zer zenbakirekin konektatuta dagoen zehazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"bideratu deiak sistemaren bidez"</string>
-    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Deiak sistemaren bidez bideratzea baimentzen dio aplikazioari, deien zerbitzua ahal bezain ona izan dadin."</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Deiak sistemaren bidez bideratzea baimentzen die aplikazioei, deien zerbitzua ahal bezain ona izan dadin."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"irakurri telefono-zenbakiak"</string>
-    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Gailuaren telefono-zenbakiak atzitzea baimentzen dio aplikazioari."</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Gailuaren telefono-zenbakiak atzitzea baimentzen die aplikazioei."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"eragotzi tableta inaktibo ezartzea"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"eragotzi telebista inaktibo geratzea"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"eragotzi telefonoa inaktibo ezartzea"</string>
@@ -1733,19 +1733,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Aldatu testu modura ordua zehazteko."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Aldatu erloju modura ordua zehazteko."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Betetze automatikoaren aukerak"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Ezin dira bete automatikoki eremuak"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> zerbitzuan gorde?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> zerbitzuan gorde nahi duzu <xliff:g id="TYPE">%1$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"Gorde"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ez, eskerrik asko"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"pasahitza"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"helbidea"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kreditu-txartela"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"erabiltzaile-izena"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"helbide elektronikoa"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Ez larritu eta bilatu babesleku bat inguruan."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ebakuatu kostaldeak eta ibaialdeak berehala eta joan toki seguru batera, adibidez, toki garai batera."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ez larritu eta bilatu babesleku bat inguruan."</string>

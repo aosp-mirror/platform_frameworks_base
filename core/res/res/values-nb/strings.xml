@@ -406,10 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"send anrop gjennom systemet"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lar appen sende anrop gjennom systemet for å forbedre anropsopplevelsen."</string>
-    <!-- no translation found for permlab_readPhoneNumbers (6108163940932852440) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneNumbers (8559488833662272354) -->
-    <skip />
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"les telefonnumre"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Gir appen tilgang til telefonnumrene til enheten."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"hindre nettbrettet fra å gå over til sovemodus"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"hindre TV-en i å gå i hvilemodus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"forhindre telefonen fra å sove"</string>
@@ -1187,8 +1185,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> vises over andre apper"</string>
-    <!-- no translation found for alert_windows_notification_title (3697657294867638947) -->
-    <skip />
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> vises over andre apper"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"SLÅ AV"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Forbereder <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1735,19 +1732,20 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Bytt til tekstinndatamodus for tidsinndata."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Bytt til klokkemodus for tidsinndata."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Alternativer for autofyll"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Innhold kan ikke fylles ut automatisk"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"Vil du lagre i <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Vil du lagre <xliff:g id="TYPE">%1$s</xliff:g> i <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"Lagre"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nei takk"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"passord"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adresse"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredittkort"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"brukernavn"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"e-postadresse"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Hold deg rolig og søk ly i nærheten."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evakuer umiddelbart fra kyst- og elveområder til et tryggere sted, for eksempel høyt terreng."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Hold deg rolig og søk ly i nærheten."</string>

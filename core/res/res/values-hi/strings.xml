@@ -1732,19 +1732,18 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"समय इनपुट के लिए लेख इनपुट मोड पर जाएं."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"समय इनपुट के लिए घड़ी मोड पर जाएं."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ऑटोमैटिक भरने के विकल्प"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"सामग्रियां ऑटोमैटिक रूप से भरी जा सकती हैं"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> में सहेजें?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> को <xliff:g id="LABEL">%2$s</xliff:g> में सहेजें?"</string>
+    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> को <xliff:g id="LABEL">%3$s</xliff:g> में सहेजें?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> को <xliff:g id="LABEL">%4$s</xliff:g> में सहेजें?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"सहेजें"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"नहीं, धन्यवाद"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"पता"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"उपयोगकर्ता नाम"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"ईमेल पता"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"शांत रहें और आस-पास शरण स्थल खोजें."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"तटीय क्षेत्रों और नदी के किनारे वाले क्षेत्रों को जल्द से जल्द खाली करके किसी सुरक्षित ऊंची जगह पर चले जाएं."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"शांत रहें और आस-पास आश्रय खोजें."</string>

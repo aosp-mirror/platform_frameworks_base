@@ -282,7 +282,7 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få åtkomst till sensordata om dina vitalparametrar"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hämta fönsterinnehåll"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Granska innehållet i ett fönster som du interagerar med."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by Touch"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by touch"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Objekt som användaren trycker på läses upp högt och skärmen kan utforskas med hjälp av rörelser."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktivera förbättrad webbtillgänglighet"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skript kan installeras för att göra appens innehåll tillgängligare."</string>
@@ -853,9 +853,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Ta bort frågan"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Skicka fråga"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Röstsökning"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Aktivera Explore by Touch?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by Touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med surfplattan."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by Touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med telefonen."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Aktivera Explore by touch?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med surfplattan."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med telefonen."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"för 1 månad sedan"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"För mer än en månad sedan"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1732,19 +1732,18 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Byt till textinmatningsläget och ange tid."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Byt till klockläget och ange tid."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Alternativ för autofyll"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Det gick inte att fylla i innehållet automatiskt"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"Vill du spara detta i <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Vill du spara <xliff:g id="TYPE">%1$s</xliff:g> i <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Spara <xliff:g id="TYPE_0">%1$s</xliff:g> och <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Spara <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> och <xliff:g id="TYPE_2">%3$s</xliff:g> i <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Spara"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nej tack"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"lösenordet"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adressen"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kreditkortet"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"användarnamn"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"e-postadress"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Håll dig lugn och sök skydd i närheten."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Utrym kust- och flodområden omedelbart och förflytta er till en säkrare plats, till exempel ett högt beläget område."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Håll dig lugn och sök skydd i närheten."</string>

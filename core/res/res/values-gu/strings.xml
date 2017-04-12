@@ -406,10 +406,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"એપ્લિકેશનને ફોન સુવિધાઓને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ પરવાનગી એપ્લિકેશનને ફોન નંબર અને ઉપકરણ ID, કૉલ સક્રિય છે અને કોઈ કૉલ દ્વારા કનેક્ટ થયેલ રિમોટ નંબર નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"સિસ્ટમ મારફતે કૉલ બીજે વાળો"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"કૉલિંગ અનુભવ સુધારવા માટે ઍપ્લિકેશનને સિસ્ટમ મારફતે કૉલ બીજે વાળવાની મંજૂરી આપે છે."</string>
-    <!-- no translation found for permlab_readPhoneNumbers (6108163940932852440) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneNumbers (8559488833662272354) -->
-    <skip />
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ફોન નંબર વાંચો"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ઍપ્લિકેશનને ઉપકરણનાં ફોન નંબરને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ટેબ્લેટને નિષ્ક્રિય થતું અટકાવો"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ટીવીને નિષ્ક્રિય થતો અટકાવો"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ફોનને નિષ્ક્રિય થતો અટકાવો"</string>
@@ -1188,8 +1186,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનોની ઉપર પ્રદર્શિત થઈ રહ્યું છે"</string>
-    <!-- no translation found for alert_windows_notification_title (3697657294867638947) -->
-    <skip />
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનો પર દેખાઈ છે"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"બંધ કરો"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ને તૈયાર કરી રહ્યું છે"</string>
@@ -1740,15 +1737,17 @@
     <skip />
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> માં સાચવીએ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> ને <xliff:g id="LABEL">%2$s</xliff:g> માં સાચવીએ?"</string>
+    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"સાચવો"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"નહીં આભાર"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"પાસવર્ડ"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"સરનામું"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ક્રેડિટ કાર્ડ"</string>
-    <!-- no translation found for autofill_save_type_username (239040540379769562) -->
-    <skip />
-    <!-- no translation found for autofill_save_type_email_address (5752949432129262174) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"વપરાશકર્તાનામ"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"ઇમેઇલ સરનામું"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"શાંત રહો અને નજીકમાં આશ્રય લો."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"દરિયાકિનારાના પ્રદેશો તથા નદીકાંઠાના વિસ્તારો ખાલી કરીને તાત્કાલિક સુરક્ષિત ઊંચા સ્થાન પર જાઓ."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"શાંત રહો અને નજીકમાં આશ્રય લો."</string>
