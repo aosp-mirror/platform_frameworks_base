@@ -81,6 +81,14 @@ public final class ConfigUpdate {
     @SystemApi
     public static final String ACTION_UPDATE_LANG_ID = "android.intent.action.UPDATE_LANG_ID";
 
+    /**
+     * Update smart selection model file.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_UPDATE_SMART_SELECTION
+            = "android.intent.action.UPDATE_SMART_SELECTION";
+
     private ConfigUpdate() {
     }
 }

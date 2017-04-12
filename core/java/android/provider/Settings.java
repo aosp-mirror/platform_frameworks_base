@@ -9529,6 +9529,20 @@ public final class Settings {
         public static final String LANG_ID_UPDATE_METADATA_URL = "lang_id_metadata_url";
 
         /**
+         * URL for smart selection model updates
+         * @hide
+         */
+        public static final String SMART_SELECTION_UPDATE_CONTENT_URL =
+                "smart_selection_content_url";
+
+        /**
+         * URL for smart selection model update metadata
+         * @hide
+         */
+        public static final String SMART_SELECTION_UPDATE_METADATA_URL =
+                "smart_selection_metadata_url";
+
+        /**
          * SELinux enforcement status. If 0, permissive; if 1, enforcing.
          * @hide
          */
