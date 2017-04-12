@@ -55,7 +55,7 @@
     <shortcode country="be" premium="\\d{4}" free="8\\d{3}|116\\d{3}" />
 
     <!-- Bulgaria: 4-5 digits, plus EU -->
-    <shortcode country="bg" pattern="\\d{4,5}" premium="18(?:16|423)|19(?:1[56]|35)" free="116\\d{3}" />
+    <shortcode country="bg" pattern="\\d{4,5}" premium="18(?:16|423)|19(?:1[56]|35)" free="116\\d{3}|1988|1490" />
 
     <!-- Bahrain: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="bh" pattern="\\d{1,5}" free="81181" />
@@ -95,7 +95,7 @@
 
     <!-- Spain: 5-6 digits: 25xxx, 27xxx, 280xx, 35xxx, 37xxx, 795xxx, 797xxx, 995xxx, 997xxx, plus EU.
          http://www.legallink.es/?q=en/content/which-current-regulatory-status-premium-rate-services-spain -->
-    <shortcode country="es" premium="[23][57]\\d{3}|280\\d{2}|[79]9[57]\\d{3}" free="116\\d{3}|22791|222145" />
+    <shortcode country="es" premium="[23][57]\\d{3}|280\\d{2}|[79]9[57]\\d{3}" free="116\\d{3}|22791|222145|22189" />
 
     <!-- Finland: 5-6 digits, premium 0600, 0700: http://en.wikipedia.org/wiki/Telephone_numbers_in_Finland -->
     <shortcode country="fi" pattern="\\d{5,6}" premium="0600.*|0700.*|171(?:59|63)" free="116\\d{3}|14789" />
@@ -103,12 +103,12 @@
     <!-- France: 5 digits, free: 3xxxx, premium [4-8]xxxx, plus EU:
          http://clients.txtnation.com/entries/161972-france-premium-sms-short-code-requirements,
          visual voicemail code for Orange: 21101 -->
-    <shortcode country="fr" premium="[4-8]\\d{4}" free="3\\d{4}|116\\d{3}|21101" />
+    <shortcode country="fr" premium="[4-8]\\d{4}" free="3\\d{4}|116\\d{3}|21101|20366" />
 
     <!-- United Kingdom (Great Britain): 4-6 digits, common codes [5-8]xxxx, plus EU:
          http://www.short-codes.com/media/Co-regulatoryCodeofPracticeforcommonshortcodes170206.pdf,
          visual voicemail code for EE: 887 -->
-    <shortcode country="gb" pattern="\\d{4,6}" premium="[5-8]\\d{4}" free="116\\d{3}|2020|35890|61002|61202|887|83669|34664|40406" />
+    <shortcode country="gb" pattern="\\d{4,6}" premium="[5-8]\\d{4}" free="116\\d{3}|2020|35890|61002|61202|887|83669|34664|40406|60174" />
 
     <!-- Georgia: 4 digits, known premium codes listed -->
     <shortcode country="ge" pattern="\\d{4}" premium="801[234]|888[239]" />
@@ -116,12 +116,15 @@
     <!-- Greece: 5 digits (54xxx, 19yxx, x=0-9, y=0-5): http://www.cmtelecom.com/premium-sms/greece -->
     <shortcode country="gr" pattern="\\d{5}" premium="54\\d{3}|19[0-5]\\d{2}" free="116\\d{3}|12115" />
 
+    <!-- Croatia -->
+    <shortcode country="hr" free="13062" />
+
     <!-- Hungary: 4 or 10 digits starting with 1 or 0, plus EU:
          http://clients.txtnation.com/entries/209633-hungary-premium-sms-short-code-regulations -->
     <shortcode country="hu" pattern="[01](?:\\d{3}|\\d{9})" premium="0691227910|1784" free="116\\d{3}" />
 
     <!-- India: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="in" pattern="\\d{1,5}" free="59336" />
+    <shortcode country="in" pattern="\\d{1,5}" free="59336|53969" />
 
     <!-- Indonesia: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="id" pattern="\\d{1,5}" free="99477|6006|46645" />
@@ -153,45 +156,48 @@
     <shortcode country="kw" pattern="\\d{1,5}" free="1378|50420|94006" />
 
     <!-- Lithuania: 3-5 digits, known premium codes listed, plus EU -->
-    <shortcode country="lt" pattern="\\d{3,5}" premium="13[89]1|1394|16[34]5" free="116\\d{3}" />
+    <shortcode country="lt" pattern="\\d{3,5}" premium="13[89]1|1394|16[34]5" free="116\\d{3}|1399" />
 
     <!-- Luxembourg: 5 digits, 6xxxx, plus EU:
          http://www.luxgsm.lu/assets/files/filepage/file_1253803400.pdf -->
-    <shortcode country="lu" premium="6\\d{4}" free="116\\d{3}" />
+    <shortcode country="lu" premium="6\\d{4}" free="116\\d{3}|60231" />
 
     <!-- Latvia: 4 digits, known premium codes listed, plus EU -->
-    <shortcode country="lv" pattern="\\d{4}" premium="18(?:19|63|7[1-4])" free="116\\d{3}" />
+    <shortcode country="lv" pattern="\\d{4}" premium="18(?:19|63|7[1-4])" free="116\\d{3}|1399" />
 
     <!-- Mexico: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="46645|5050|26259|50025|50052" />
 
     <!-- Malaysia: 5 digits: http://www.skmm.gov.my/attachment/Consumer_Regulation/Mobile_Content_Services_FAQs.pdf -->
-    <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099" />
+    <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288" />
 
     <!-- The Netherlands, 4 digits, known premium codes listed, plus EU -->
-    <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225" />
+    <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225|2223" />
 
     <!-- Norway: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="no" pattern="\\d{4,5}" premium="2201|222[67]" />
 
     <!-- New Zealand: 3-4 digits, known premium codes listed -->
-    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" />
+    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="3067|3068|4053" />
 
     <!-- Philippines -->
     <shortcode country="ph" free="2147|5495|5496" />
+
+    <!-- Pakistan -->
+    <shortcode country="pk" free="2057" />
 
     <!-- Poland: 4-5 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="pl" pattern="\\d{4,5}" premium="74240|79(?:10|866)|92525" free="116\\d{3}|8012|80921" />
 
     <!-- Portugal: 5 digits, plus EU:
          http://clients.txtnation.com/entries/158326-portugal-premium-sms-short-code-regulations -->
-    <shortcode country="pt" premium="6[1289]\\d{3}" free="116\\d{3}" />
+    <shortcode country="pt" premium="6[1289]\\d{3}" free="116\\d{3}|1262" />
 
     <!-- Qatar: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="qa" pattern="\\d{1,5}" free="92451" />
 
     <!-- Romania: 4 digits, plus EU: http://www.simplus.ro/en/resources/glossary-of-terms/ -->
-    <shortcode country="ro" pattern="\\d{4}" premium="12(?:63|66|88)|13(?:14|80)" free="116\\d{3}|3654" />
+    <shortcode country="ro" pattern="\\d{4}" premium="12(?:63|66|88)|13(?:14|80)" free="116\\d{3}|3654|8360" />
 
     <!-- Russia: 4 digits, known premium codes listed: http://smscoin.net/info/pricing-russia/ -->
     <shortcode country="ru" pattern="\\d{4}" premium="1(?:1[56]1|899)|2(?:09[57]|322|47[46]|880|990)|3[589]33|4161|44(?:4[3-9]|81)|77(?:33|81)|8424" />
@@ -207,7 +213,7 @@
     <shortcode country="sg" pattern="7\\d{4}" premium="73800" standard="74688|70134" />
 
     <!-- Slovenia: 4 digits (premium=3xxx, 6xxx, 8xxx), plus EU: http://www.cmtelecom.com/premium-sms/slovenia -->
-    <shortcode country="si" pattern="\\d{4}" premium="[368]\\d{3}" free="116\\d{3}" />
+    <shortcode country="si" pattern="\\d{4}" premium="[368]\\d{3}" free="116\\d{3}|3133" />
 
     <!-- Slovakia: 4 digits (premium), plus EU: http://www.cmtelecom.com/premium-sms/slovakia -->
     <shortcode country="sk" premium="\\d{4}" free="116\\d{3}|8000" />
@@ -219,7 +225,7 @@
     <shortcode country="tj" pattern="\\d{4}" premium="11[3-7]1|4161|4333|444[689]" />
 
     <!-- Turkey -->
-    <shortcode country="tr" free="7529|5528" />
+    <shortcode country="tr" free="7529|5528|6493" />
 
     <!-- Ukraine: 4 digits, known premium codes listed -->
     <shortcode country="ua" pattern="\\d{4}" premium="444[3-9]|70[579]4|7540" />
