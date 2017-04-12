@@ -21,11 +21,11 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
+import android.app.job.JobWorkItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -195,7 +195,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
             mVerb = VERB_BINDING;
-            scheduleOpTimeOut();
+            scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = mContext.bindServiceAsUser(intent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
@@ -208,7 +208,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 mParams = null;
                 mExecutionStartTimeElapsed = 0L;
                 mVerb = VERB_FINISHED;
-                removeOpTimeOut();
+                removeOpTimeOutLocked();
                 return false;
             }
             try {
@@ -297,6 +297,38 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         mCallbackHandler.obtainMessage(MSG_CALLBACK, jobId, ongoing ? 1 : 0).sendToTarget();
     }
 
+    @Override
+    public JobWorkItem dequeueWork(int jobId) {
+        if (!verifyCallingUid()) {
+            throw new SecurityException("Bad calling uid: " + Binder.getCallingUid());
+        }
+        JobWorkItem work = null;
+        boolean stillWorking = false;
+        synchronized (mLock) {
+            if (mRunningJob != null) {
+                work = mRunningJob.dequeueWorkLocked();
+                stillWorking = mRunningJob.hasExecutingWorkLocked();
+            }
+        }
+        if (work == null && !stillWorking) {
+            jobFinished(jobId, false);
+        }
+        return work;
+    }
+
+    @Override
+    public boolean completeWork(int jobId, int workId) {
+        if (!verifyCallingUid()) {
+            throw new SecurityException("Bad calling uid: " + Binder.getCallingUid());
+        }
+        synchronized (mLock) {
+            if (mRunningJob != null) {
+                return mRunningJob.completeWorkLocked(workId);
+            }
+            return false;
+        }
+    }
+
     /**
      * We acquire/release a wakelock on onServiceConnected/unbindService. This mirrors the work
      * we intend to send to the client - we stop sending work when the service is unbound so until
@@ -378,46 +410,18 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_SERVICE_BOUND:
-                    removeOpTimeOut();
-                    handleServiceBoundH();
+                    doServiceBound();
                     break;
                 case MSG_CALLBACK:
-                    if (DEBUG) {
-                        Slog.d(TAG, "MSG_CALLBACK of : " + mRunningJob
-                                + " v:" + VERB_STRINGS[mVerb]);
-                    }
-                    removeOpTimeOut();
-
-                    if (mVerb == VERB_STARTING) {
-                        final boolean workOngoing = message.arg2 == 1;
-                        handleStartedH(workOngoing);
-                    } else if (mVerb == VERB_EXECUTING ||
-                            mVerb == VERB_STOPPING) {
-                        final boolean reschedule = message.arg2 == 1;
-                        handleFinishedH(reschedule);
-                    } else {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Unrecognised callback: " + mRunningJob);
-                        }
-                    }
+                    doCallback(message.arg2);
                     break;
                 case MSG_CANCEL:
-                    if (mVerb == VERB_FINISHED) {
-                        if (DEBUG) {
-                            Slog.d(TAG,
-                                   "Trying to process cancel for torn-down context, ignoring.");
-                        }
-                        return;
-                    }
-                    mParams.setStopReason(message.arg1);
-                    if (message.arg1 == JobParameters.REASON_PREEMPT) {
-                        mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
-                                NO_PREFERRED_UID;
-                    }
-                    handleCancelH();
+                    doCancel(message.arg1);
                     break;
                 case MSG_TIMEOUT:
-                    handleOpTimeoutH();
+                    synchronized (mLock) {
+                        handleOpTimeoutH();
+                    }
                     break;
                 case MSG_SHUTDOWN_EXECUTION:
                     closeAndCleanupJobH(true /* needsReschedule */);
@@ -425,6 +429,55 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 default:
                     Slog.e(TAG, "Unrecognised message: " + message);
             }
+        }
+
+        void doServiceBound() {
+            synchronized (mLock) {
+                removeOpTimeOutLocked();
+                handleServiceBoundH();
+            }
+        }
+
+        void doCallback(int arg2) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "MSG_CALLBACK of : " + mRunningJob
+                            + " v:" + VERB_STRINGS[mVerb]);
+                }
+                removeOpTimeOutLocked();
+
+                if (mVerb == VERB_STARTING) {
+                    final boolean workOngoing = arg2 == 1;
+                    handleStartedH(workOngoing);
+                } else if (mVerb == VERB_EXECUTING ||
+                        mVerb == VERB_STOPPING) {
+                    final boolean reschedule = arg2 == 1;
+                    handleFinishedH(reschedule);
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Unrecognised callback: " + mRunningJob);
+                    }
+                }
+            }
+        }
+
+        void doCancel(int arg1) {
+            synchronized (mLock) {
+                if (mVerb == VERB_FINISHED) {
+                    if (DEBUG) {
+                        Slog.d(TAG,
+                                "Trying to process cancel for torn-down context, ignoring.");
+                    }
+                    return;
+                }
+                mParams.setStopReason(arg1);
+                if (arg1 == JobParameters.REASON_PREEMPT) {
+                    mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
+                            NO_PREFERRED_UID;
+                }
+                handleCancelH();
+            }
+
         }
 
         /** Start the job on the service. */
@@ -448,7 +501,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             }
             try {
                 mVerb = VERB_STARTING;
-                scheduleOpTimeOut();
+                scheduleOpTimeOutLocked();
                 service.startJob(mParams);
             } catch (Exception e) {
                 // We catch 'Exception' because client-app malice or bugs might induce a wide
@@ -483,7 +536,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                         handleCancelH();
                         return;
                     }
-                    scheduleOpTimeOut();
+                    scheduleOpTimeOutLocked();
                     break;
                 default:
                     Slog.e(TAG, "Handling started job but job wasn't starting! Was "
@@ -587,7 +640,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
          * VERB_STOPPING.
          */
         private void sendStopMessageH() {
-            removeOpTimeOut();
+            removeOpTimeOutLocked();
             if (mVerb != VERB_EXECUTING) {
                 Slog.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
                 closeAndCleanupJobH(false /* reschedule */);
@@ -595,7 +648,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             }
             try {
                 mVerb = VERB_STOPPING;
-                scheduleOpTimeOut();
+                scheduleOpTimeOutLocked();
                 service.stopJob(mParams);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error sending onStopJob to client.", e);
@@ -635,13 +688,13 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 mCancelled.set(false);
                 service = null;
                 mAvailable = true;
+                removeOpTimeOutLocked();
+                removeMessages(MSG_CALLBACK);
+                removeMessages(MSG_SERVICE_BOUND);
+                removeMessages(MSG_CANCEL);
+                removeMessages(MSG_SHUTDOWN_EXECUTION);
+                mCompletedListener.onJobCompletedLocked(completedJob, reschedule);
             }
-            removeOpTimeOut();
-            removeMessages(MSG_CALLBACK);
-            removeMessages(MSG_SERVICE_BOUND);
-            removeMessages(MSG_CANCEL);
-            removeMessages(MSG_SHUTDOWN_EXECUTION);
-            mCompletedListener.onJobCompleted(completedJob, reschedule);
         }
     }
 
@@ -650,8 +703,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      * we haven't received a response in a certain amount of time, we want to give up and carry
      * on with life.
      */
-    private void scheduleOpTimeOut() {
-        removeOpTimeOut();
+    private void scheduleOpTimeOutLocked() {
+        removeOpTimeOutLocked();
 
         final long timeoutMillis;
         switch (mVerb) {
@@ -678,7 +731,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     }
 
 
-    private void removeOpTimeOut() {
+    private void removeOpTimeOutLocked() {
         mCallbackHandler.removeMessages(MSG_TIMEOUT);
     }
 }

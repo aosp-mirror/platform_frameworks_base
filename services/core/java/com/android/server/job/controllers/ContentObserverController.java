@@ -164,7 +164,7 @@ public class ContentObserverController extends StateController {
                             && taskStatus.contentObserverJobInstance.mChangedAuthorities != null) {
                         // We are stopping this job, but it is going to be replaced by this given
                         // incoming job.  We want to propagate our state over to it, so we don't
-                        // lose any content changes that had happend since the last one started.
+                        // lose any content changes that had happened since the last one started.
                         // If there is a previous job associated with the new job, propagate over
                         // any pending content URI trigger reports.
                         if (incomingJob.contentObserverJobInstance == null) {
@@ -195,16 +195,14 @@ public class ContentObserverController extends StateController {
     }
 
     @Override
-    public void rescheduleForFailure(JobStatus newJob, JobStatus failureToReschedule) {
+    public void rescheduleForFailureLocked(JobStatus newJob, JobStatus failureToReschedule) {
         if (failureToReschedule.hasContentTriggerConstraint()
                 && newJob.hasContentTriggerConstraint()) {
-            synchronized (mLock) {
-                // Our job has failed, and we are scheduling a new job for it.
-                // Copy the last reported content changes in to the new job, so when
-                // we schedule the new one we will pick them up and report them again.
-                newJob.changedAuthorities = failureToReschedule.changedAuthorities;
-                newJob.changedUris = failureToReschedule.changedUris;
-            }
+            // Our job has failed, and we are scheduling a new job for it.
+            // Copy the last reported content changes in to the new job, so when
+            // we schedule the new one we will pick them up and report them again.
+            newJob.changedAuthorities = failureToReschedule.changedAuthorities;
+            newJob.changedUris = failureToReschedule.changedUris;
         }
     }
 

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -440,6 +441,130 @@ public class JobInfo implements Parcelable {
      */
     public boolean hasLateConstraint() {
         return hasLateConstraint;
+    }
+
+    private static boolean kindofEqualsBundle(BaseBundle a, BaseBundle b) {
+        return (a == b) || (a != null && a.kindofEquals(b));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof JobInfo)) {
+            return false;
+        }
+        JobInfo j = (JobInfo) o;
+        if (jobId != j.jobId) {
+            return false;
+        }
+        // XXX won't be correct if one is parcelled and the other not.
+        if (!kindofEqualsBundle(extras, j.extras)) {
+            return false;
+        }
+        // XXX won't be correct if one is parcelled and the other not.
+        if (!kindofEqualsBundle(transientExtras, j.transientExtras)) {
+            return false;
+        }
+        // XXX for now we consider two different clip data objects to be different,
+        // regardless of whether their contents are the same.
+        if (clipData != j.clipData) {
+            return false;
+        }
+        if (clipGrantFlags != j.clipGrantFlags) {
+            return false;
+        }
+        if (!Objects.equals(service, j.service)) {
+            return false;
+        }
+        if (constraintFlags != j.constraintFlags) {
+            return false;
+        }
+        if (!Objects.deepEquals(triggerContentUris, j.triggerContentUris)) {
+            return false;
+        }
+        if (triggerContentUpdateDelay != j.triggerContentUpdateDelay) {
+            return false;
+        }
+        if (triggerContentMaxDelay != j.triggerContentMaxDelay) {
+            return false;
+        }
+        if (hasEarlyConstraint != j.hasEarlyConstraint) {
+            return false;
+        }
+        if (hasLateConstraint != j.hasLateConstraint) {
+            return false;
+        }
+        if (networkType != j.networkType) {
+            return false;
+        }
+        if (minLatencyMillis != j.minLatencyMillis) {
+            return false;
+        }
+        if (maxExecutionDelayMillis != j.maxExecutionDelayMillis) {
+            return false;
+        }
+        if (isPeriodic != j.isPeriodic) {
+            return false;
+        }
+        if (isPersisted != j.isPersisted) {
+            return false;
+        }
+        if (intervalMillis != j.intervalMillis) {
+            return false;
+        }
+        if (flexMillis != j.flexMillis) {
+            return false;
+        }
+        if (initialBackoffMillis != j.initialBackoffMillis) {
+            return false;
+        }
+        if (backoffPolicy != j.backoffPolicy) {
+            return false;
+        }
+        if (priority != j.priority) {
+            return false;
+        }
+        if (flags != j.flags) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = jobId;
+        if (extras != null) {
+            hashCode = 31*hashCode + extras.hashCode();
+        }
+        if (transientExtras != null) {
+            hashCode = 31*hashCode + transientExtras.hashCode();
+        }
+        if (clipData != null) {
+            hashCode = 31*hashCode + clipData.hashCode();
+        }
+        hashCode = 31*hashCode + clipGrantFlags;
+        if (service != null) {
+            hashCode = 31*hashCode + service.hashCode();
+        }
+        hashCode = 31*hashCode + constraintFlags;
+        if (triggerContentUris != null) {
+            hashCode = 31*hashCode + triggerContentUris.hashCode();
+        }
+        hashCode = 31*hashCode + Long.hashCode(triggerContentUpdateDelay);
+        hashCode = 31*hashCode + Long.hashCode(triggerContentMaxDelay);
+        hashCode = 31*hashCode + Boolean.hashCode(hasEarlyConstraint);
+        hashCode = 31*hashCode + Boolean.hashCode(hasLateConstraint);
+        hashCode = 31*hashCode + networkType;
+        hashCode = 31*hashCode + Long.hashCode(minLatencyMillis);
+        hashCode = 31*hashCode + Long.hashCode(maxExecutionDelayMillis);
+        hashCode = 31*hashCode + Boolean.hashCode(isPeriodic);
+        hashCode = 31*hashCode + Boolean.hashCode(isPersisted);
+        hashCode = 31*hashCode + Long.hashCode(intervalMillis);
+        hashCode = 31*hashCode + Long.hashCode(flexMillis);
+        hashCode = 31*hashCode + Long.hashCode(initialBackoffMillis);
+        hashCode = 31*hashCode + backoffPolicy;
+        hashCode = 31*hashCode + priority;
+        hashCode = 31*hashCode + flags;
+        return hashCode;
     }
 
     private JobInfo(Parcel in) {
