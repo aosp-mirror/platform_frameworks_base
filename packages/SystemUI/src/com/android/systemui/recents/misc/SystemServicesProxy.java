@@ -65,7 +65,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArraySet;
-import android.util.LauncherIcons;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.Display;
@@ -121,6 +121,7 @@ public class SystemServicesProxy {
     ActivityManager mAm;
     IActivityManager mIam;
     PackageManager mPm;
+    IconDrawableFactory mDrawableFactory;
     IPackageManager mIpm;
     AssistUtils mAssistUtils;
     WindowManager mWm;
@@ -139,7 +140,6 @@ public class SystemServicesProxy {
     int mDummyThumbnailHeight;
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
-    LauncherIcons mLauncherIcons;
 
     private final Handler mHandler = new H();
 
@@ -258,6 +258,7 @@ public class SystemServicesProxy {
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManager.getService();
         mPm = context.getPackageManager();
+        mDrawableFactory = IconDrawableFactory.newInstance(context);
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -296,8 +297,6 @@ public class SystemServicesProxy {
 
         Collections.addAll(sRecentsBlacklist,
                 res.getStringArray(R.array.recents_blacklist_array));
-
-        mLauncherIcons = new LauncherIcons(context);
     }
 
     /**
@@ -834,8 +833,7 @@ public class SystemServicesProxy {
             return new ColorDrawable(0xFF666666);
         }
 
-        Drawable icon = mLauncherIcons.wrapIconDrawableWithShadow(info.loadIcon(mPm));
-        return getBadgedIcon(icon, userId);
+        return mDrawableFactory.getBadgedIcon(info, info.applicationInfo, userId);
     }
 
     /**
@@ -850,8 +848,7 @@ public class SystemServicesProxy {
             return new ColorDrawable(0xFF666666);
         }
 
-        Drawable icon = mLauncherIcons.wrapIconDrawableWithShadow(appInfo.loadIcon(mPm));
-        return getBadgedIcon(icon, userId);
+        return mDrawableFactory.getBadgedIcon(appInfo, userId);
     }
 
     /**

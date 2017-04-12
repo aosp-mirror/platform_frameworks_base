@@ -46,6 +46,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.Formatter;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -95,6 +96,7 @@ public class ApplicationsState {
 
     final Context mContext;
     final PackageManager mPm;
+    final IconDrawableFactory mDrawableFactory;
     final IPackageManager mIpm;
     final UserManager mUm;
     final StorageStatsManager mStats;
@@ -132,6 +134,7 @@ public class ApplicationsState {
     private ApplicationsState(Application app) {
         mContext = app;
         mPm = mContext.getPackageManager();
+        mDrawableFactory = IconDrawableFactory.newInstance(mContext);
         mIpm = AppGlobals.getPackageManager();
         mUm = mContext.getSystemService(UserManager.class);
         mStats = mContext.getSystemService(StorageStatsManager.class);
@@ -327,7 +330,7 @@ public class ApplicationsState {
             return;
         }
         synchronized (entry) {
-            entry.ensureIconLocked(mContext, mPm);
+            entry.ensureIconLocked(mContext, mDrawableFactory);
         }
     }
 
@@ -943,7 +946,7 @@ public class ApplicationsState {
                             AppEntry entry = mAppEntries.get(i);
                             if (entry.icon == null || !entry.mounted) {
                                 synchronized (entry) {
-                                    if (entry.ensureIconLocked(mContext, mPm)) {
+                                    if (entry.ensureIconLocked(mContext, mDrawableFactory)) {
                                         if (!mRunning) {
                                             mRunning = true;
                                             Message m = mMainHandler.obtainMessage(
@@ -1266,10 +1269,10 @@ public class ApplicationsState {
             }
         }
 
-        boolean ensureIconLocked(Context context, PackageManager pm) {
+        boolean ensureIconLocked(Context context, IconDrawableFactory drawableFactory) {
             if (this.icon == null) {
                 if (this.apkFile.exists()) {
-                    this.icon = getBadgedIcon(pm);
+                    this.icon = drawableFactory.getBadgedIcon(info);
                     return true;
                 } else {
                     this.mounted = false;
@@ -1281,17 +1284,11 @@ public class ApplicationsState {
                 // its icon.
                 if (this.apkFile.exists()) {
                     this.mounted = true;
-                    this.icon = getBadgedIcon(pm);
+                    this.icon = drawableFactory.getBadgedIcon(info);
                     return true;
                 }
             }
             return false;
-        }
-
-        private Drawable getBadgedIcon(PackageManager pm) {
-            // Do badging ourself so that it comes from the user of the app not the current user.
-            return pm.getUserBadgedIcon(pm.loadUnbadgedItemIcon(info, info),
-                    new UserHandle(UserHandle.getUserId(info.uid)));
         }
 
         public String getVersion(Context context) {

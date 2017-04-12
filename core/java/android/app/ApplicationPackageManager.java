@@ -79,6 +79,8 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.IconDrawableFactory;
+import android.util.LauncherIcons;
 import android.util.Log;
 import android.view.Display;
 
@@ -1245,16 +1247,9 @@ public class ApplicationPackageManager extends PackageManager {
         if (!isManagedProfile(user.getIdentifier())) {
             return icon;
         }
-        Drawable badgeShadow = getDrawable("system",
-                com.android.internal.R.drawable.ic_corp_icon_badge_shadow, null);
-        Drawable badgeColor = getDrawable("system",
-                com.android.internal.R.drawable.ic_corp_icon_badge_color, null);
-        badgeColor.setTint(getUserBadgeColor(user));
-        Drawable badgeForeground = getDrawable("system",
-                com.android.internal.R.drawable.ic_corp_icon_badge_case, null);
-
-        Drawable badge = new LayerDrawable(
-                new Drawable[] {badgeShadow, badgeColor, badgeForeground });
+        Drawable badge = new LauncherIcons(mContext).getBadgeDrawable(
+                com.android.internal.R.drawable.ic_corp_icon_badge_case,
+                getUserBadgeColor(user));
         return getBadgedDrawable(icon, badge, null, true);
     }
 
@@ -1268,14 +1263,6 @@ public class ApplicationPackageManager extends PackageManager {
         return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
     }
 
-    // Should have enough colors to cope with UserManagerService.getMaxManagedProfiles()
-    @VisibleForTesting
-    public static final int[] CORP_BADGE_COLORS = new int[] {
-        com.android.internal.R.color.profile_badge_1,
-        com.android.internal.R.color.profile_badge_2,
-        com.android.internal.R.color.profile_badge_3
-    };
-
     @VisibleForTesting
     public static final int[] CORP_BADGE_LABEL_RES_ID = new int[] {
         com.android.internal.R.string.managed_profile_label_badge,
@@ -1284,12 +1271,7 @@ public class ApplicationPackageManager extends PackageManager {
     };
 
     private int getUserBadgeColor(UserHandle user) {
-        int badge = getUserManager().getManagedProfileBadge(user.getIdentifier());
-        if (badge < 0) {
-            badge = 0;
-        }
-        int resourceId = CORP_BADGE_COLORS[badge % CORP_BADGE_COLORS.length];
-        return Resources.getSystem().getColor(resourceId, null);
+        return IconDrawableFactory.getUserBadgeColor(getUserManager(), user.getIdentifier());
     }
 
     @Override
