@@ -72,6 +72,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
+import com.android.systemui.recents.views.TaskStackLayoutAlgorithm.VisibilityReport;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewScroller;
 import com.android.systemui.recents.views.TaskViewHeader;
@@ -126,11 +127,22 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 if (runningTaskInfo != null) {
                     launchOpts.runningTaskId = runningTaskInfo.id;
                 }
-                launchOpts.numVisibleTasks = 2;
-                launchOpts.numVisibleTaskThumbnails = 2;
+                mDummyStackView.setTasks(plan.getTaskStack(), false /* allowNotify */);
+                updateDummyStackViewLayout(plan.getTaskStack(),
+                        getWindowRect(null /* windowRectOverride */));
+
+                // Launched from app is always the worst case (in terms of how many thumbnails/tasks
+                // visible)
+                RecentsActivityLaunchState launchState = new RecentsActivityLaunchState();
+                launchState.launchedFromApp = true;
+                mDummyStackView.updateLayoutAlgorithm(true /* boundScroll */, launchState);
+
+                VisibilityReport visibilityReport = mDummyStackView.computeStackVisibilityReport();
+                launchOpts.numVisibleTasks = visibilityReport.numVisibleTasks;
+                launchOpts.numVisibleTaskThumbnails = visibilityReport.numVisibleThumbnails;
                 launchOpts.onlyLoadForCache = true;
                 launchOpts.onlyLoadPausedActivities = true;
-                launchOpts.loadThumbnails = !ActivityManager.ENABLE_TASK_SNAPSHOTS;
+                launchOpts.loadThumbnails = true;
                 loader.loadTasks(mContext, plan, launchOpts);
             }
         }
@@ -605,23 +617,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mHeaderBar.setLayoutDirection(res.getConfiguration().getLayoutDirection());
     }
 
-    /**
-     * Prepares the header bar layout for the next transition, if the task view bounds has changed
-     * since the last call, it will attempt to re-measure and layout the header bar to the new size.
-     *
-     * @param stack the stack to initialize the stack layout with
-     * @param windowRectOverride the rectangle to use when calculating the stack state which can
-     *                           be different from the current window rect if recents is resizing
-     *                           while being launched
-     */
-    private void updateHeaderBarLayout(TaskStack stack, Rect windowRectOverride) {
+    private void updateDummyStackViewLayout(TaskStack stack, Rect windowRect) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect displayRect = ssp.getDisplayRect();
         Rect systemInsets = new Rect();
         ssp.getStableInsets(systemInsets);
-        Rect windowRect = windowRectOverride != null
-                ? new Rect(windowRectOverride)
-                : ssp.getWindowRect();
+
         // When docked, the nav bar insets are consumed and the activity is measured without insets.
         // However, the window bounds include the insets, so we need to subtract them here to make
         // them identical.
@@ -642,6 +643,29 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             stackLayout.reset();
             stackLayout.initialize(displayRect, windowRect, mTaskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
+        }
+    }
+
+    private Rect getWindowRect(Rect windowRectOverride) {
+       return windowRectOverride != null
+                ? new Rect(windowRectOverride)
+                : Recents.getSystemServices().getWindowRect();
+    }
+
+    /**
+     * Prepares the header bar layout for the next transition, if the task view bounds has changed
+     * since the last call, it will attempt to re-measure and layout the header bar to the new size.
+     *
+     * @param stack the stack to initialize the stack layout with
+     * @param windowRectOverride the rectangle to use when calculating the stack state which can
+     *                           be different from the current window rect if recents is resizing
+     *                           while being launched
+     */
+    private void updateHeaderBarLayout(TaskStack stack, Rect windowRectOverride) {
+        Rect windowRect = getWindowRect(windowRectOverride);
+        updateDummyStackViewLayout(stack, windowRect);
+        if (stack != null) {
+            TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
             mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
             // Get the width of a task view so that we know how wide to draw the header bar.
             int taskViewWidth = 0;

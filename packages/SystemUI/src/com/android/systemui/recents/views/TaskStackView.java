@@ -868,12 +868,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTaskViewsClipDirty = false;
     }
 
+    public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax) {
+        updateLayoutAlgorithm(boundScrollToNewMinMax, Recents.getConfiguration().getLaunchState());
+    }
+
     /**
      * Updates the layout algorithm min and max virtual scroll bounds.
      */
-   public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax) {
+   public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
+           RecentsActivityLaunchState launchState) {
         // Compute the min and max scroll values
-        mLayoutAlgorithm.update(mStack, mIgnoreTasks);
+        mLayoutAlgorithm.update(mStack, mIgnoreTasks, launchState);
 
         // Update the freeform workspace background
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -1550,6 +1555,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onStackTasksUpdated(TaskStack stack) {
+        if (mAwaitingFirstLayout) {
+            return;
+        }
+
         // Update the layout and immediately layout
         updateLayoutAlgorithm(false /* boundScroll */);
         relayoutTaskViews(AnimationProps.IMMEDIATE);

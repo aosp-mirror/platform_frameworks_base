@@ -16,12 +16,9 @@
 
 package com.android.systemui.recents.model;
 
-import android.util.Log;
 import android.util.LruCache;
-import android.util.SparseArray;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * A mapping of {@link Task.TaskKey} to value, with additional LRU functionality where the least
@@ -31,15 +28,12 @@ import java.util.ArrayList;
  * In addition, this also allows the caller to invalidate cached values for keys that have since
  * changed.
  */
-public class TaskKeyLruCache<V> {
+public class TaskKeyLruCache<V> extends TaskKeyCache<V> {
 
     public interface EvictionCallback {
         public void onEntryEvicted(Task.TaskKey key);
     }
 
-    private static final String TAG = "TaskKeyLruCache";
-
-    private final SparseArray<Task.TaskKey> mKeys = new SparseArray<>();
     private final LruCache<Integer, V> mCache;
     private final EvictionCallback mEvictionCallback;
 
@@ -61,57 +55,6 @@ public class TaskKeyLruCache<V> {
         };
     }
 
-    /**
-     * Gets a specific entry in the cache with the specified key, regardless of whether the cached
-     * value is valid or not.
-     */
-    final V get(Task.TaskKey key) {
-        return mCache.get(key.id);
-    }
-
-    /**
-     * Returns the value only if the key is valid (has not been updated since the last time it was
-     * in the cache)
-     */
-    final V getAndInvalidateIfModified(Task.TaskKey key) {
-        Task.TaskKey lastKey = mKeys.get(key.id);
-        if (lastKey != null) {
-            if ((lastKey.stackId != key.stackId) ||
-                    (lastKey.lastActiveTime != key.lastActiveTime)) {
-                // The task has updated (been made active since the last time it was put into the
-                // LRU cache) or the stack id for the task has changed, invalidate that cache item
-                remove(key);
-                return null;
-            }
-        }
-        // Either the task does not exist in the cache, or the last active time is the same as
-        // the key specified, so return what is in the cache
-        return mCache.get(key.id);
-    }
-
-    /** Puts an entry in the cache for a specific key. */
-    final void put(Task.TaskKey key, V value) {
-        if (key == null || value == null) {
-            Log.e(TAG, "Unexpected null key or value: " + key + ", " + value);
-            return;
-        }
-        mKeys.put(key.id, key);
-        mCache.put(key.id, value);
-    }
-
-    /** Removes a cache entry for a specific key. */
-    final void remove(Task.TaskKey key) {
-        // Remove the key after the cache value because we need it to make the callback
-        mCache.remove(key.id);
-        mKeys.remove(key.id);
-    }
-
-    /** Removes all the entries in the cache. */
-    final void evictAll() {
-        mCache.evictAll();
-        mKeys.clear();
-    }
-
     /** Trims the cache to a specific size */
     final void trimToSize(int cacheSize) {
         mCache.trimToSize(cacheSize);
@@ -127,5 +70,25 @@ public class TaskKeyLruCache<V> {
         for (int i = 0; i < keyCount; i++) {
             writer.print(innerPrefix); writer.println(mKeys.get(mKeys.keyAt(i)));
         }
+    }
+
+    @Override
+    protected V getCacheEntry(int id) {
+        return mCache.get(id);
+    }
+
+    @Override
+    protected void putCacheEntry(int id, V value) {
+        mCache.put(id, value);
+    }
+
+    @Override
+    protected void removeCacheEntry(int id) {
+        mCache.remove(id);
+    }
+
+    @Override
+    protected void evictAllCache() {
+        mCache.evictAll();
     }
 }
