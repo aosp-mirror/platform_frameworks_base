@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -118,7 +119,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     protected void addDivider() {
         mDivider = LayoutInflater.from(mContext).inflate(R.layout.qs_divider, this, false);
-        mDivider.setBackgroundColor(getColorForState(mContext, Tile.STATE_INACTIVE));
+        mDivider.setBackgroundColor(Utils.applyAlpha(mDivider.getAlpha(),
+                getColorForState(mContext, Tile.STATE_ACTIVE)));
         addView(mDivider);
     }
 
