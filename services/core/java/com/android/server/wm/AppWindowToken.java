@@ -1553,6 +1553,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mPendingRelaunchCount != 0) {
             pw.print(prefix); pw.print("mPendingRelaunchCount="); pw.println(mPendingRelaunchCount);
         }
+        if (getController() != null) {
+            pw.print(prefix); pw.print("controller="); pw.println(getController());
+        }
     }
 
     @Override
