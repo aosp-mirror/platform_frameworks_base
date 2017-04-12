@@ -942,6 +942,50 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void sendTvInputNotifyIntent(Intent intent, int userId) {
+            if (mContext.checkCallingPermission(android.Manifest.permission.NOTIFY_TV_INPUTS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("The caller: " + getCallingPackageName()
+                        + " doesn't have permission: "
+                        + android.Manifest.permission.NOTIFY_TV_INPUTS);
+            }
+            if (TextUtils.isEmpty(intent.getPackage())) {
+                throw new IllegalArgumentException("Must specify package name to notify.");
+            }
+            switch (intent.getAction()) {
+                case TvContract.ACTION_PREVIEW_PROGRAM_BROWSABLE_DISABLED:
+                    if (intent.getLongExtra(TvContract.EXTRA_PREVIEW_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid preview program ID.");
+                    }
+                    break;
+                case TvContract.ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED:
+                    if (intent.getLongExtra(TvContract.EXTRA_WATCH_NEXT_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid watch next program ID.");
+                    }
+                    break;
+                case TvContract.ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT:
+                    if (intent.getLongExtra(TvContract.EXTRA_PREVIEW_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid preview program ID.");
+                    }
+                    if (intent.getLongExtra(TvContract.EXTRA_WATCH_NEXT_PROGRAM_ID, -1) < 0) {
+                        throw new IllegalArgumentException("Invalid watch next program ID.");
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid TV input notifying action: "
+                            + intent.getAction());
+            }
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "sendTvInputNotifyIntent");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                getContext().sendBroadcastAsUser(intent, new UserHandle(resolvedUserId));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void registerCallback(final ITvInputManagerCallback callback, int userId) {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, "registerCallback");

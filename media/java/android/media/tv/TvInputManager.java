@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
 import android.net.Uri;
@@ -1388,6 +1389,64 @@ public final class TvInputManager {
     public List<TvContentRatingSystemInfo> getTvContentRatingSystemList() {
         try {
             return mService.getTvContentRatingSystemList(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the TV input of the given preview program that the program's browsable state is
+     * disabled.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS)
+    public void notifyPreviewProgramBrowsableDisabled(String packageName, long programId) {
+        Intent intent = new Intent();
+        intent.setAction(TvContract.ACTION_PREVIEW_PROGRAM_BROWSABLE_DISABLED);
+        intent.putExtra(TvContract.EXTRA_PREVIEW_PROGRAM_ID, programId);
+        intent.setPackage(packageName);
+        try {
+            mService.sendTvInputNotifyIntent(intent, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the TV input of the given watch next program that the program's browsable state is
+     * disabled.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS)
+    public void notifyWatchNextProgramBrowsableDisabled(String packageName, long programId) {
+        Intent intent = new Intent();
+        intent.setAction(TvContract.ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED);
+        intent.putExtra(TvContract.EXTRA_WATCH_NEXT_PROGRAM_ID, programId);
+        intent.setPackage(packageName);
+        try {
+            mService.sendTvInputNotifyIntent(intent, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the TV input of the given preview program that the program is added to watch next.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NOTIFY_TV_INPUTS)
+    public void notifyPreviewProgramAddedToWatchNext(String packageName, long previewProgramId,
+            long watchNextProgramId) {
+        Intent intent = new Intent();
+        intent.setAction(TvContract.ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT);
+        intent.putExtra(TvContract.EXTRA_PREVIEW_PROGRAM_ID, previewProgramId);
+        intent.putExtra(TvContract.EXTRA_WATCH_NEXT_PROGRAM_ID, watchNextProgramId);
+        intent.setPackage(packageName);
+        try {
+            mService.sendTvInputNotifyIntent(intent, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

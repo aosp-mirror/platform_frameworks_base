@@ -1437,7 +1437,8 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)
+                    || mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
                 traceBeginAndSlog("StartTvInputManager");
                 mSystemServiceManager.startService(TvInputManagerService.class);
                 traceEnd();
