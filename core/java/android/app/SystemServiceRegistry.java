@@ -641,7 +641,8 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<PrintManager>() {
             @Override
             public PrintManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder iBinder = ServiceManager.getServiceOrThrow(Context.PRINT_SERVICE);
+                // Get the services without throwing as this is an optional feature
+                IBinder iBinder = ServiceManager.getService(Context.PRINT_SERVICE);
                 IPrintManager service = IPrintManager.Stub.asInterface(iBinder);
                 return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
                         UserHandle.getAppId(Process.myUid()));
@@ -652,8 +653,9 @@ final class SystemServiceRegistry {
                     @Override
                     public CompanionDeviceManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
+                        // Get the services without throwing as this is an optional feature
                         IBinder iBinder =
-                                ServiceManager.getServiceOrThrow(Context.COMPANION_DEVICE_SERVICE);
+                                ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE);
                         ICompanionDeviceManager service =
                                 ICompanionDeviceManager.Stub.asInterface(iBinder);
                         return new CompanionDeviceManager(service, ctx);
@@ -833,7 +835,8 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<AutofillManager>() {
             @Override
             public AutofillManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.AUTOFILL_MANAGER_SERVICE);
+                // Get the services without throwing as this is an optional feature
+                IBinder b = ServiceManager.getService(Context.AUTOFILL_MANAGER_SERVICE);
                 IAutoFillManager service = IAutoFillManager.Stub.asInterface(b);
                 return new AutofillManager(ctx.getOuterContext(), service);
             }});

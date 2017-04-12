@@ -2404,6 +2404,15 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports autofill of user credentials, addresses, credit cards, etc
+     * via integration with {@link android.service.autofill.AutofillService autofill
+     * providers}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_AUTOFILL = "android.software.autofill";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device implements headtracking suitable for a VR device.
      */
     @SdkConstant(SdkConstantType.FEATURE)
