@@ -16,6 +16,7 @@
 package com.android.server.vr;
 
 import android.annotation.NonNull;
+import android.app.CompatibilityDisplayProperties;
 import android.content.ComponentName;
 import android.service.vr.IPersistentVrStateCallbacks;
 
@@ -80,6 +81,18 @@ public abstract class VrManagerInternal {
      *       given in {@link android.service.vr.VrModeException} on failure.
      */
     public abstract int hasVrPackage(@NonNull ComponentName packageName, int userId);
+
+    /**
+     * Sets the resolution and DPI of the compatibility virtual display used to display
+     * 2D applications in VR mode.
+     *
+     * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
+     *
+     * @param compatDisplayProp Properties of the virtual display for 2D applications
+     * in VR mode.
+     */
+    public abstract void setCompatibilityDisplayProperties(
+            CompatibilityDisplayProperties compatDisplayProp);
 
     /**
      * Sets the persistent VR mode state of a device. When a device is in persistent VR mode it will
