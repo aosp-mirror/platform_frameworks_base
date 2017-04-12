@@ -23636,4 +23636,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     public ComponentName getInstantAppResolverSettingsComponent() {
         return mInstantAppResolverSettingsComponent;
     }
+
+    @Override
+    public ComponentName getInstantAppInstallerComponent() {
+        return mInstantAppInstallerActivity == null
+                ? null : mInstantAppInstallerActivity.getComponentName();
+    }
 }
