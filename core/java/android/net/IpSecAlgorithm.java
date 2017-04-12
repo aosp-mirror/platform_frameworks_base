@@ -32,7 +32,7 @@ public final class IpSecAlgorithm implements Parcelable {
      *
      * <p>Valid lengths for this key are {128, 192, 256}.
      */
-    public static final String ALGO_CRYPT_AES_CBC = "cbc(aes)";
+    public static final String CRYPT_AES_CBC = "cbc(aes)";
 
     /**
      * MD5 HMAC Authentication/Integrity Algorithm. This algorithm is not recommended for use in new
@@ -40,7 +40,7 @@ public final class IpSecAlgorithm implements Parcelable {
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 128.
      */
-    public static final String ALGO_AUTH_HMAC_MD5 = "hmac(md5)";
+    public static final String AUTH_HMAC_MD5 = "hmac(md5)";
 
     /**
      * SHA1 HMAC Authentication/Integrity Algorithm. This algorithm is not recommended for use in
@@ -48,35 +48,35 @@ public final class IpSecAlgorithm implements Parcelable {
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 160.
      */
-    public static final String ALGO_AUTH_HMAC_SHA1 = "hmac(sha1)";
+    public static final String AUTH_HMAC_SHA1 = "hmac(sha1)";
 
     /**
      * SHA256 HMAC Authentication/Integrity Algorithm.
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 256.
      */
-    public static final String ALGO_AUTH_HMAC_SHA256 = "hmac(sha256)";
+    public static final String AUTH_HMAC_SHA256 = "hmac(sha256)";
 
     /**
      * SHA384 HMAC Authentication/Integrity Algorithm.
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 192 to (default) 384.
      */
-    public static final String ALGO_AUTH_HMAC_SHA384 = "hmac(sha384)";
+    public static final String AUTH_HMAC_SHA384 = "hmac(sha384)";
     /**
      * SHA512 HMAC Authentication/Integrity Algorithm
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 256 to (default) 512.
      */
-    public static final String ALGO_AUTH_HMAC_SHA512 = "hmac(sha512)";
+    public static final String AUTH_HMAC_SHA512 = "hmac(sha512)";
 
     /** @hide */
     @StringDef({
-        ALGO_CRYPT_AES_CBC,
-        ALGO_AUTH_HMAC_MD5,
-        ALGO_AUTH_HMAC_SHA1,
-        ALGO_AUTH_HMAC_SHA256,
-        ALGO_AUTH_HMAC_SHA512
+        CRYPT_AES_CBC,
+        AUTH_HMAC_MD5,
+        AUTH_HMAC_SHA1,
+        AUTH_HMAC_SHA256,
+        AUTH_HMAC_SHA512
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AlgorithmName {}
@@ -164,17 +164,17 @@ public final class IpSecAlgorithm implements Parcelable {
 
     private static boolean isTruncationLengthValid(String algo, int truncLenBits) {
         switch (algo) {
-            case ALGO_CRYPT_AES_CBC:
+            case CRYPT_AES_CBC:
                 return (truncLenBits == 128 || truncLenBits == 192 || truncLenBits == 256);
-            case ALGO_AUTH_HMAC_MD5:
+            case AUTH_HMAC_MD5:
                 return (truncLenBits >= 96 && truncLenBits <= 128);
-            case ALGO_AUTH_HMAC_SHA1:
+            case AUTH_HMAC_SHA1:
                 return (truncLenBits >= 96 && truncLenBits <= 160);
-            case ALGO_AUTH_HMAC_SHA256:
+            case AUTH_HMAC_SHA256:
                 return (truncLenBits >= 96 && truncLenBits <= 256);
-            case ALGO_AUTH_HMAC_SHA384:
+            case AUTH_HMAC_SHA384:
                 return (truncLenBits >= 192 && truncLenBits <= 384);
-            case ALGO_AUTH_HMAC_SHA512:
+            case AUTH_HMAC_SHA512:
                 return (truncLenBits >= 256 && truncLenBits <= 512);
             default:
                 return false;
