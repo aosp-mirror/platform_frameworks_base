@@ -1435,8 +1435,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.DEMO_USER_SETUP_COMPLETE,
                 SecureSettingsProto.DEMO_USER_SETUP_COMPLETE);
         dumpSetting(s, p,
-                Settings.Secure.WEB_ACTION_ENABLED,
-                SecureSettingsProto.WEB_ACTION_ENABLED);
+                Settings.Secure.INSTANT_APPS_ENABLED,
+                SecureSettingsProto.INSTANT_APPS_ENABLED);
         dumpSetting(s, p,
                 Settings.Secure.DEVICE_PAIRED,
                 SecureSettingsProto.DEVICE_PAIRED);
