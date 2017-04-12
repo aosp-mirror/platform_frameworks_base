@@ -959,6 +959,12 @@ public class AccountManagerService
         mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId));
     }
 
+    private void sendAccountRemovedBroadcast(int userId) {
+        Intent intent = new Intent(AccountManager.ACTION_ACCOUNT_REMOVED);
+        intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        mContext.sendBroadcastAsUser(intent, new UserHandle(userId));
+    }
+
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
             throws RemoteException {
@@ -1111,6 +1117,7 @@ public class AccountManagerService
                                     notifyPackage(packageToVisibility.getKey(), accounts);
                                 }
                             }
+                            sendAccountRemovedBroadcast(accounts.userId);
                         } else {
                             ArrayList<String> accountNames = accountNamesByType.get(account.type);
                             if (accountNames == null) {
@@ -1971,6 +1978,7 @@ public class AccountManagerService
 
                 sendNotificationAccountUpdated(resultAccount, accounts);
                 sendAccountsChangedBroadcast(accounts.userId);
+                sendAccountRemovedBroadcast(accounts.userId);
             }
         }
         return resultAccount;
@@ -2206,6 +2214,7 @@ public class AccountManagerService
 
                     // Only broadcast LOGIN_ACCOUNTS_CHANGED if a change occurred.
                     sendAccountsChangedBroadcast(accounts.userId);
+                    sendAccountRemovedBroadcast(accounts.userId);
                     String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
                             : AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE_DE;
                     logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
