@@ -19,6 +19,8 @@ package com.android.internal.telephony;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Messenger;
 import android.os.ResultReceiver;
 import android.net.Uri;
 import android.service.carrier.CarrierIdentifier;
@@ -29,6 +31,7 @@ import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
+import android.telephony.NetworkScanRequest;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyHistogram;
@@ -789,6 +792,26 @@ interface ITelephony {
      * @return CellNetworkScanResult containing status of scan and networks.
      */
     CellNetworkScanResult getCellNetworkScanResults(int subId);
+
+    /**
+     * Perform a radio network scan and return the id of this scan.
+     *
+     * @param subId the id of the subscription.
+     * @param request Defines all the configs for network scan.
+     * @param messenger Callback messages will be sent using this messenger.
+     * @param binder the binder object instantiated in TelephonyManager.
+     * @return An id for this scan.
+     */
+    int requestNetworkScan(int subId, in NetworkScanRequest request, in Messenger messenger,
+            in IBinder binder);
+
+    /**
+     * Stop an existing radio network scan.
+     *
+     * @param subId the id of the subscription.
+     * @param scanId The id of the scan that is going to be stopped.
+     */
+    void stopNetworkScan(int subId, int scanId);
 
     /**
      * Ask the radio to connect to the input network and change selection mode to manual.
