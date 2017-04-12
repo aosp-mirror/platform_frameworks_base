@@ -18,8 +18,9 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
-import java.lang.IllegalArgumentException;
+import android.util.Log;
+
+import java.util.Objects;
 
 /**
  * This class represents the capabilities of a network.  This is used both to specify
@@ -33,6 +34,8 @@ import java.lang.IllegalArgumentException;
  * all cellular based connections are metered and all Wi-Fi based connections are not.
  */
 public final class NetworkCapabilities implements Parcelable {
+    private static final String TAG = "NetworkCapabilities";
+
     /**
      * @hide
      */
@@ -203,19 +206,6 @@ public final class NetworkCapabilities implements Parcelable {
             (1 << NET_CAPABILITY_VALIDATED) |
             (1 << NET_CAPABILITY_CAPTIVE_PORTAL) |
             (1 << NET_CAPABILITY_FOREGROUND);
-
-    /**
-     * Network specifier for factories which want to match any network specifier
-     * (NS) in a request. Behavior:
-     * <li>Empty NS in request matches any network factory NS</li>
-     * <li>Empty NS in the network factory NS only matches a request with an
-     * empty NS</li>
-     * <li>"*" (this constant) NS in the network factory matches requests with
-     * any NS</li>
-     *
-     * @hide
-     */
-    public static final String MATCH_ALL_REQUESTS_NETWORK_SPECIFIER = "*";
 
     /**
      * Network capabilities that are not allowed in NetworkRequests. This exists because the
@@ -581,63 +571,56 @@ public final class NetworkCapabilities implements Parcelable {
                 this.mLinkDownBandwidthKbps == nc.mLinkDownBandwidthKbps);
     }
 
-    private String mNetworkSpecifier;
+    private NetworkSpecifier mNetworkSpecifier = null;
+
     /**
      * Sets the optional bearer specific network specifier.
      * This has no meaning if a single transport is also not specified, so calling
      * this without a single transport set will generate an exception, as will
      * subsequently adding or removing transports after this is set.
      * </p>
-     * The interpretation of this {@code String} is bearer specific and bearers that use
-     * it should document their particulars.  For example, Bluetooth may use some sort of
-     * device id while WiFi could used SSID and/or BSSID.  Cellular may use carrier SPN (name)
-     * or Subscription ID.
      *
-     * @param networkSpecifier An {@code String} of opaque format used to specify the bearer
-     *                         specific network specifier where the bearer has a choice of
-     *                         networks.
+     * @param networkSpecifier A concrete, parcelable framework class that extends
+     *                         NetworkSpecifier.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public NetworkCapabilities setNetworkSpecifier(String networkSpecifier) {
-        if (TextUtils.isEmpty(networkSpecifier) == false && Long.bitCount(mTransportTypes) != 1) {
+    public NetworkCapabilities setNetworkSpecifier(NetworkSpecifier networkSpecifier) {
+        if (networkSpecifier != null && Long.bitCount(mTransportTypes) != 1) {
             throw new IllegalStateException("Must have a single transport specified to use " +
                     "setNetworkSpecifier");
         }
+
         mNetworkSpecifier = networkSpecifier;
+
         return this;
     }
 
     /**
      * Gets the optional bearer specific network specifier.
      *
-     * @return The optional {@code String} specifying the bearer specific network specifier.
-     *         See {@link #setNetworkSpecifier}.
+     * @return The optional {@link NetworkSpecifier} specifying the bearer specific network
+     *         specifier. See {@link #setNetworkSpecifier}.
      * @hide
      */
-    public String getNetworkSpecifier() {
+    public NetworkSpecifier getNetworkSpecifier() {
         return mNetworkSpecifier;
     }
 
     private void combineSpecifiers(NetworkCapabilities nc) {
-        String otherSpecifier = nc.getNetworkSpecifier();
-        if (TextUtils.isEmpty(otherSpecifier)) return;
-        if (TextUtils.isEmpty(mNetworkSpecifier) == false) {
+        if (mNetworkSpecifier != null && !mNetworkSpecifier.equals(nc.mNetworkSpecifier)) {
             throw new IllegalStateException("Can't combine two networkSpecifiers");
         }
-        setNetworkSpecifier(otherSpecifier);
+        setNetworkSpecifier(nc.mNetworkSpecifier);
     }
+
     private boolean satisfiedBySpecifier(NetworkCapabilities nc) {
-        return (TextUtils.isEmpty(mNetworkSpecifier) ||
-                mNetworkSpecifier.equals(nc.mNetworkSpecifier) ||
-                MATCH_ALL_REQUESTS_NETWORK_SPECIFIER.equals(nc.mNetworkSpecifier));
+        return mNetworkSpecifier == null || mNetworkSpecifier.satisfiedBy(nc.mNetworkSpecifier)
+                || nc.mNetworkSpecifier instanceof MatchAllNetworkSpecifier;
     }
+
     private boolean equalsSpecifier(NetworkCapabilities nc) {
-        if (TextUtils.isEmpty(mNetworkSpecifier)) {
-            return TextUtils.isEmpty(nc.mNetworkSpecifier);
-        } else {
-            return mNetworkSpecifier.equals(nc.mNetworkSpecifier);
-        }
+        return Objects.equals(mNetworkSpecifier, nc.mNetworkSpecifier);
     }
 
     /**
@@ -799,7 +782,7 @@ public final class NetworkCapabilities implements Parcelable {
                 ((int)(mTransportTypes >> 32) * 7) +
                 (mLinkUpBandwidthKbps * 11) +
                 (mLinkDownBandwidthKbps * 13) +
-                (TextUtils.isEmpty(mNetworkSpecifier) ? 0 : mNetworkSpecifier.hashCode() * 17) +
+                Objects.hashCode(mNetworkSpecifier) * 17 +
                 (mSignalStrength * 19));
     }
 
@@ -813,7 +796,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeLong(mTransportTypes);
         dest.writeInt(mLinkUpBandwidthKbps);
         dest.writeInt(mLinkDownBandwidthKbps);
-        dest.writeString(mNetworkSpecifier);
+        dest.writeParcelable((Parcelable) mNetworkSpecifier, flags);
         dest.writeInt(mSignalStrength);
     }
 
@@ -827,7 +810,7 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mTransportTypes = in.readLong();
                 netCap.mLinkUpBandwidthKbps = in.readInt();
                 netCap.mLinkDownBandwidthKbps = in.readInt();
-                netCap.mNetworkSpecifier = in.readString();
+                netCap.mNetworkSpecifier = in.readParcelable(null);
                 netCap.mSignalStrength = in.readInt();
                 return netCap;
             }
