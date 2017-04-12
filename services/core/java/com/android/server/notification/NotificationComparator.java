@@ -21,15 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.telecom.TelecomManager;
-import android.text.TextUtils;
-import android.util.ArrayMap;
 
 import com.android.internal.util.NotificationMessagingUtil;
 
@@ -56,8 +48,8 @@ public class NotificationComparator
     @Override
     public int compare(NotificationRecord left, NotificationRecord right) {
         // first all colorized notifications
-        boolean leftImportantColorized = isImportantColorized(left);
-        boolean rightImportantColorized = isImportantColorized(right);
+        boolean leftImportantColorized = isImportantOngoingColorized(left);
+        boolean rightImportantColorized = isImportantOngoingColorized(right);
 
         if (leftImportantColorized != rightImportantColorized) {
             return -1 * Boolean.compare(leftImportantColorized, rightImportantColorized);
@@ -118,7 +110,10 @@ public class NotificationComparator
         return -1 * Long.compare(left.getRankingTimeMs(), right.getRankingTimeMs());
     }
 
-    private boolean isImportantColorized(NotificationRecord record) {
+    private boolean isImportantOngoingColorized(NotificationRecord record) {
+        if (!isOngoing(record)) {
+            return false;
+        }
         if (record.getImportance() < NotificationManager.IMPORTANCE_LOW) {
             return false;
         }
@@ -133,7 +128,6 @@ public class NotificationComparator
         if (record.getImportance() < NotificationManager.IMPORTANCE_LOW) {
             return false;
         }
-        // TODO: add whitelist
 
         return isCall(record) || isMediaNotification(record);
     }
@@ -153,8 +147,7 @@ public class NotificationComparator
     }
 
     private boolean isOngoing(NotificationRecord record) {
-        final int ongoingFlags =
-                Notification.FLAG_FOREGROUND_SERVICE | Notification.FLAG_ONGOING_EVENT;
+        final int ongoingFlags = Notification.FLAG_FOREGROUND_SERVICE;
         return (record.getNotification().flags & ongoingFlags) != 0;
     }
 
