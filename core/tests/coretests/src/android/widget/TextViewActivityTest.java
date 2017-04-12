@@ -26,7 +26,6 @@ import static android.widget.espresso.TextViewActions.dragHandle;
 import static android.widget.espresso.TextViewActions.Handle;
 import static android.widget.espresso.TextViewActions.longPressAndDragOnText;
 import static android.widget.espresso.TextViewActions.longPressOnTextAtIndex;
-import static android.widget.espresso.TextViewAssertions.handleIsOnLine;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsDisplayed;
@@ -446,26 +445,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('r') + 1));
         onView(withId(R.id.textview)).check(hasSelection("abcd\nefg\nhijk\nlmn\nopqr"));
-    }
-
-    public void testSelectionHandles_multiLine_japanese() throws Exception {
-        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 100; ++i) {
-            builder.append("\u3042\u3044\u3046\u3048\u304A");
-            onView(withId(R.id.textview)).perform(replaceText(builder.toString()));
-            final int lineEnd = textView.getLayout().getLineEnd(0);
-            if (lineEnd < builder.length()) {
-                break;
-            }
-        }
-        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(3));
-
-        final int lineEnd = textView.getLayout().getLineEnd(0);
-        onHandleView(com.android.internal.R.id.selection_end_handle)
-                .perform(dragHandle(textView, Handle.SELECTION_END, lineEnd, true, false));
-        onHandleView(com.android.internal.R.id.selection_end_handle)
-                .check(handleIsOnLine(textView, 0));
     }
 
     public void testSelectionHandles_multiLine_rtl() throws Exception {
