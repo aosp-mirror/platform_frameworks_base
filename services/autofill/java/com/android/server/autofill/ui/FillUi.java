@@ -69,7 +69,6 @@ final class FillUi {
     private final @Nullable ArrayAdapter<ViewItem> mAdapter;
 
     private @Nullable String mFilterText;
-    private final String mAccessibilityTitle;
 
     private int mContentWidth;
     private int mContentHeight;
@@ -81,7 +80,9 @@ final class FillUi {
             @NonNull Callback callback) {
         mCallback = callback;
 
-        mAccessibilityTitle = context.getString(R.string.autofill_picker_accessibility_title);
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        final ViewGroup decor = (ViewGroup) inflater.inflate(
+                R.layout.autofill_dataset_picker, null);
 
         if (response.getAuthentication() != null) {
             mListView = null;
@@ -89,23 +90,23 @@ final class FillUi {
 
             final View content;
             try {
-                content = response.getPresentation().apply(context, null);
+                content = response.getPresentation().apply(context, decor);
+                decor.addView(content);
             } catch (RuntimeException e) {
                 callback.onCanceled();
                 Slog.e(TAG, "Error inflating remote views", e);
                 mWindow = null;
                 return;
             }
-            final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
-            final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+            final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             content.measure(widthMeasureSpec, heightMeasureSpec);
             content.setOnClickListener(v -> mCallback.onResponsePicked(response));
-            content.setElevation(context.getResources().getDimension(R.dimen.floating_window_z));
             // TODO(b/33197203 , b/36660292): temporary limiting maximum height and minimum width
             mContentWidth = Math.max(content.getMeasuredWidth(), 1000);
             mContentHeight = Math.min(content.getMeasuredHeight(), 500);
 
-            mWindow = new AnchoredWindow(content);
+            mWindow = new AnchoredWindow(decor);
             mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
         } else {
             final int datasetCount = response.getDatasets().size();
@@ -139,9 +140,9 @@ final class FillUi {
                 }
             };
 
-            final LayoutInflater inflater = LayoutInflater.from(context);
-            mListView = (ListView) inflater.inflate(R.layout.autofill_dataset_picker, null);
+            mListView = decor.findViewById(R.id.autofill_dataset_list);
             mListView.setAdapter(mAdapter);
+            mListView.setVisibility(View.VISIBLE);
             mListView.setOnItemClickListener((adapter, view, position, id) -> {
                 final ViewItem vi = mAdapter.getItem(position);
                 mCallback.onDatasetPicked(vi.getDataset());
@@ -154,11 +155,12 @@ final class FillUi {
             }
 
             applyNewFilterText();
-            mWindow = new AnchoredWindow(mListView);
+            mWindow = new AnchoredWindow(decor);
         }
     }
 
     private void applyNewFilterText() {
+        final int oldCount = mAdapter.getCount();
         mAdapter.getFilter().filter(mFilterText, (count) -> {
             if (mDestroyed) {
                 return;
@@ -174,6 +176,9 @@ final class FillUi {
                     mListView.onVisibilityAggregated(true);
                 } else {
                     mListView.setVerticalScrollBarEnabled(false);
+                }
+                if (mAdapter.getCount() != oldCount) {
+                    mListView.requestLayout();
                 }
             }
         });
@@ -312,7 +317,8 @@ final class FillUi {
         public void show(WindowManager.LayoutParams params) {
             try {
                 if (!mShowing) {
-                    params.accessibilityTitle = mAccessibilityTitle;
+                    params.accessibilityTitle = mContentView.getContext()
+                            .getString(R.string.autofill_picker_accessibility_title);
                     mWm.addView(mContentView, params);
                     mContentView.setOnTouchListener(this);
                     mShowing = true;
@@ -352,7 +358,6 @@ final class FillUi {
         pw.print(prefix); pw.print("mListView: "); pw.println(mListView);
         pw.print(prefix); pw.print("mAdapter: "); pw.println(mAdapter != null);
         pw.print(prefix); pw.print("mFilterText: "); pw.println(mFilterText);
-        pw.print(prefix); pw.print("mAccessibilityTitle: "); pw.println(mAccessibilityTitle);
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
