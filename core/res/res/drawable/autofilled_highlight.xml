@@ -15,12 +15,6 @@
   * limitations under the License.
   -->
 
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="4dp"
-    android:insetRight="4dp"
-    android:insetBottom="4dp"
-    android:insetTop="4dp">
-    <shape>
-        <solid android:color="@color/autofilled_highlight" />
-    </shape>
-</inset>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/autofilled_highlight" />
+</shape>
