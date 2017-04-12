@@ -302,8 +302,8 @@ public final class Settings {
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_EXTERNAL_SOURCES =
-            "android.settings.action.MANAGE_EXTERNAL_SOURCES";
+    public static final String ACTION_MANAGE_UNKNOWN_APP_SOURCES =
+            "android.settings.action.MANAGE_UNKNOWN_APP_SOURCES";
 
     /**
      * Activity Action: Show trusted credentials settings, opening to the user tab,
