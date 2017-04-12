@@ -20,15 +20,18 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.when;
 
 import android.app.job.JobService;
-import android.app.job.JobParameters;
+import android.app.usage.ExternalStorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.pm.PackageStats;
+import android.os.UserHandle;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import com.android.server.storage.DiskStatsLoggingService.LogRunnable;
 
@@ -52,8 +55,10 @@ import java.util.ArrayList;
 public class DiskStatsLoggingServiceTest extends AndroidTestCase {
     @Rule public TemporaryFolder mTemporaryFolder;
     @Rule public TemporaryFolder mDownloads;
-    @Rule public TemporaryFolder mRootDirectory;
     @Mock private AppCollector mCollector;
+    @Mock private JobService mJobService;
+    @Mock private StorageStatsManager mSsm;
+    private ExternalStorageStats mStorageStats;
     private File mInputFile;
 
 
@@ -66,8 +71,10 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         mInputFile = mTemporaryFolder.newFile();
         mDownloads = new TemporaryFolder();
         mDownloads.create();
-        mRootDirectory = new TemporaryFolder();
-        mRootDirectory.create();
+        mStorageStats = new ExternalStorageStats();
+        when(mSsm.queryExternalStatsForUser(isNull(String.class), any(UserHandle.class)))
+                .thenReturn(mStorageStats);
+        when(mJobService.getSystemService(anyString())).thenReturn(mSsm);
     }
 
     @Test
@@ -75,9 +82,9 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         LogRunnable task = new LogRunnable();
         task.setAppCollector(mCollector);
         task.setDownloadsDirectory(mDownloads.getRoot());
-        task.setRootDirectory(mRootDirectory.getRoot());
         task.setLogOutputFile(mInputFile);
         task.setSystemSize(0L);
+        task.setContext(mJobService);
         task.run();
 
         JSONObject json = getJsonOutput();
@@ -99,10 +106,10 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
     public void testPopulatedLogTask() throws Exception {
         // Write data to directories.
         writeDataToFile(mDownloads.newFile(), "lol");
-        writeDataToFile(mRootDirectory.newFile("test.jpg"), "1234");
-        writeDataToFile(mRootDirectory.newFile("test.mp4"), "12345");
-        writeDataToFile(mRootDirectory.newFile("test.mp3"), "123456");
-        writeDataToFile(mRootDirectory.newFile("test.whatever"), "1234567");
+        mStorageStats.audioBytes = 6L;
+        mStorageStats.imageBytes = 4L;
+        mStorageStats.videoBytes = 5L;
+        mStorageStats.totalBytes = 22L;
 
         // Write apps.
         ArrayList<PackageStats> apps = new ArrayList<>();
@@ -110,15 +117,16 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         testApp.dataSize = 5L;
         testApp.cacheSize = 55L;
         testApp.codeSize = 10L;
+        testApp.userHandle = UserHandle.USER_SYSTEM;
         apps.add(testApp);
-        when(mCollector.getPackageStats(anyInt())).thenReturn(apps);
+        when(mCollector.getPackageStats(anyLong())).thenReturn(apps);
 
         LogRunnable task = new LogRunnable();
         task.setAppCollector(mCollector);
         task.setDownloadsDirectory(mDownloads.getRoot());
-        task.setRootDirectory(mRootDirectory.getRoot());
         task.setLogOutputFile(mInputFile);
         task.setSystemSize(10L);
+        task.setContext(mJobService);
         task.run();
 
         JSONObject json = getJsonOutput();
@@ -143,9 +151,9 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         LogRunnable task = new LogRunnable();
         task.setAppCollector(mCollector);
         task.setDownloadsDirectory(mDownloads.getRoot());
-        task.setRootDirectory(mRootDirectory.getRoot());
         task.setLogOutputFile(mInputFile);
         task.setSystemSize(10L);
+        task.setContext(mJobService);
         task.run();
 
         // No exception should be thrown.
