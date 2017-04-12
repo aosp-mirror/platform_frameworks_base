@@ -73,6 +73,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
 
     private String mTileSpec;
     private EnforcedAdmin mEnforcedAdmin;
+    private boolean mShowingDetail;
 
     public abstract TState newTileState();
 
@@ -286,9 +287,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     private void handleShowDetail(boolean show) {
+        mShowingDetail = show;
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).onShowDetail(show);
         }
+    }
+
+    protected boolean isShowingDetail() {
+        return mShowingDetail;
     }
 
     private void handleToggleStateChanged(boolean state) {
