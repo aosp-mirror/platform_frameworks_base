@@ -278,6 +278,23 @@ public final class IpSecManager {
     }
 
     /**
+     * Apply an active Transport Mode IPsec Transform to a stream socket to perform IPsec
+     * encapsulation of the traffic flowing between the socket and the remote InetAddress of that
+     * transform. For security reasons, attempts to send traffic to any IP address other than the
+     * address associated with that transform will throw an IOException. In addition, if the
+     * IpSecTransform is later deactivated, the socket will throw an IOException on any calls to
+     * send() or receive() until the transform is removed from the socket by calling {@link
+     * #removeTransportModeTransform(Socket, IpSecTransform)};
+     *
+     * @param socket a socket file descriptor
+     * @param transform an {@link IpSecTransform}, which must be an active Transport Mode transform.
+     */
+    public void applyTransportModeTransform(FileDescriptor socket, IpSecTransform transform)
+            throws IOException {
+        applyTransportModeTransform(new ParcelFileDescriptor(socket), transform);
+    }
+
+    /**
      * Apply an active Tunnel Mode IPsec Transform to a network, which will tunnel all traffic to
      * and from that network's interface with IPsec (applies an outer IP header and IPsec Header to
      * all traffic, and expects an additional IP header and IPsec Header on all inbound traffic).
@@ -316,6 +333,20 @@ public final class IpSecManager {
      */
     public void removeTransportModeTransform(DatagramSocket socket, IpSecTransform transform) {
         removeTransportModeTransform(ParcelFileDescriptor.fromDatagramSocket(socket), transform);
+    }
+
+    /**
+     * Remove a transform from a given stream socket. Once removed, traffic on the socket will not
+     * be encypted. This allows sockets that have been used for IPsec to be reclaimed for
+     * communication in the clear in the event socket reuse is desired. This operation will succeed
+     * regardless of the underlying state of a transform. If a transform is removed, communication
+     * on all sockets to which that transform was applied will fail until this method is called.
+     *
+     * @param socket a socket file descriptor that previously had a transform applied to it.
+     * @param transform the IPsec Transform that was previously applied to the given socket
+     */
+    public void removeTransportModeTransform(FileDescriptor socket, IpSecTransform transform) {
+        removeTransportModeTransform(new ParcelFileDescriptor(socket), transform);
     }
 
     /* Call down to activate a transform */
