@@ -6170,5 +6170,33 @@ public class TelephonyManager {
 
         return null;
     }
+
+    /**
+     * Check if phone is in emergency callback mode
+     * @return true if phone is in emergency callback mode
+     * @hide
+     */
+    public boolean getEmergencyCallbackMode() {
+        return getEmergencyCallbackMode(getSubId());
+    }
+
+    /**
+     * Check if phone is in emergency callback mode
+     * @return true if phone is in emergency callback mode
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    public boolean getEmergencyCallbackMode(int subId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return false;
+            }
+            return telephony.getEmergencyCallbackMode(subId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getEmergencyCallbackMode", e);
+        }
+        return false;
+    }
 }
 
