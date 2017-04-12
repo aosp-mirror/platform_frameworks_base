@@ -36,6 +36,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public boolean hasWorkProfile() {
+        return false;
+    }
+
+    @Override
     public String getDeviceOwnerName() {
         return null;
     }
@@ -47,6 +52,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
 
     @Override
     public CharSequence getDeviceOwnerOrganizationName() {
+        return null;
+    }
+
+    @Override
+    public CharSequence getWorkProfileOrganizationName() {
         return null;
     }
 
@@ -76,8 +86,18 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
-    public String getProfileVpnName() {
+    public String getWorkProfileVpnName() {
         return null;
+    }
+
+    @Override
+    public boolean hasCACertInCurrentUser() {
+        return false;
+    }
+
+    @Override
+    public boolean hasCACertInWorkProfile() {
+        return false;
     }
 
     @Override

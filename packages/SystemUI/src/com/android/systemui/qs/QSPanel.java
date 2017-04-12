@@ -97,9 +97,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
         setupTileLayout();
 
-        mFooter = new QSSecurityFooter(this, context);
-        addView(mFooter.getView());
-
         mPageIndicator = LayoutInflater.from(context).inflate(
                 R.layout.qs_page_indicator, this, false);
         addView(mPageIndicator);
@@ -108,6 +105,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         }
 
         addDivider();
+
+        mFooter = new QSSecurityFooter(this, context);
+        addView(mFooter.getView());
 
         updateResources();
 
