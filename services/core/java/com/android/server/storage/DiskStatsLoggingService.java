@@ -73,7 +73,6 @@ public class DiskStatsLoggingService extends JobService {
         final int userId = UserHandle.myUserId();
         UserEnvironment environment = new UserEnvironment(userId);
         LogRunnable task = new LogRunnable();
-        task.setRootDirectory(environment.getExternalStorageDirectory());
         task.setDownloadsDirectory(
                 environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
         task.setSystemSize(FileCollector.getSystemSize(this));
@@ -127,13 +126,9 @@ public class DiskStatsLoggingService extends JobService {
         private JobParameters mParams;
         private AppCollector mCollector;
         private File mOutputFile;
-        private File mRootDirectory;
         private File mDownloadsDirectory;
+        private Context mContext;
         private long mSystemSize;
-
-        public void setRootDirectory(File file) {
-            mRootDirectory = file;
-        }
 
         public void setDownloadsDirectory(File file) {
             mDownloadsDirectory = file;
@@ -151,14 +146,25 @@ public class DiskStatsLoggingService extends JobService {
             mSystemSize = size;
         }
 
+        public void setContext(Context context) {
+            mContext = context;
+        }
+
         public void setJobService(JobService jobService, JobParameters params) {
             mJobService = jobService;
             mParams = params;
         }
 
         public void run() {
-            FileCollector.MeasurementResult mainCategories =
-                    FileCollector.getMeasurementResult(mRootDirectory);
+            FileCollector.MeasurementResult mainCategories;
+            try {
+                mainCategories = FileCollector.getMeasurementResult(mContext);
+            } catch (IllegalStateException e) {
+                // This can occur if installd has an issue.
+                Log.e(TAG, "Error while measuring storage", e);
+                finishJob(true);
+                return;
+            }
             FileCollector.MeasurementResult downloads =
                     FileCollector.getMeasurementResult(mDownloadsDirectory);
 
@@ -168,12 +174,10 @@ public class DiskStatsLoggingService extends JobService {
                 needsReschedule = false;
                 logToFile(mainCategories, downloads, stats, mSystemSize);
             } else {
-                Log.w("TAG", "Timed out while fetching package stats.");
+                Log.w(TAG, "Timed out while fetching package stats.");
             }
 
-            if (mJobService != null) {
-                mJobService.jobFinished(mParams, needsReschedule);
-            }
+            finishJob(needsReschedule);
         }
 
         private void logToFile(MeasurementResult mainCategories, MeasurementResult downloads,
@@ -185,6 +189,12 @@ public class DiskStatsLoggingService extends JobService {
                 logger.dumpToFile(mOutputFile);
             } catch (IOException e) {
                 Log.e(TAG, "Exception while writing opportunistic disk file cache.", e);
+            }
+        }
+
+        private void finishJob(boolean needsReschedule) {
+            if (mJobService != null) {
+                mJobService.jobFinished(mParams, needsReschedule);
             }
         }
     }
