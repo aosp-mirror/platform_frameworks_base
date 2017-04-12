@@ -101,6 +101,10 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
+    void updateNotificationChannelFromPrivilegedListener(in INotificationListener token, String pkg, in NotificationChannel channel);
+    ParceledListSlice getNotificationChannelsFromPrivilegedListener(in INotificationListener token, String pkg);
+    ParceledListSlice getNotificationChannelGroupsFromPrivilegedListener(in INotificationListener token, String pkg);
+
     void applyEnqueuedAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentsFromAssistant(in INotificationListener token, in List<Adjustment> adjustments);

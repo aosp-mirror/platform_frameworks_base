@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_LOW;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -26,6 +28,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,25 +37,29 @@ import static org.mockito.Mockito.when;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Color;
 import android.os.Binder;
-import android.os.HandlerThread;
-import android.os.MessageQueue;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.InstrumentationRegistry;
 import android.testing.TestableLooper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -74,17 +82,24 @@ public class NotificationManagerServiceTest {
     private final RankingHelper mRankingHelper = mock(RankingHelper.class);
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
+    private NotificationManagerService.NotificationListeners mNotificationListeners =
+            mock(NotificationManagerService.NotificationListeners.class);
+    private ManagedServices.ManagedServiceInfo mListener =
+            mNotificationListeners.new ManagedServiceInfo(
+                    null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
+    private ICompanionDeviceManager mCompanionMgr = mock(ICompanionDeviceManager.class);
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
         public TestableNotificationManagerService(Context context) { super(context); }
 
         @Override
-        protected void checkCallerIsSystem() {}
+        protected boolean isCallerSystem() {
+            return true;
+        }
     }
 
     @Before
-    @Test
     @UiThreadTest
     public void setUp() throws Exception {
         mNotificationManagerService = new TestableNotificationManagerService(mContext);
@@ -92,7 +107,7 @@ public class NotificationManagerServiceTest {
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = uid;
-        when(mPackageManager.getApplicationInfo(any(), anyInt(), anyInt()))
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
         when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
@@ -100,15 +115,10 @@ public class NotificationManagerServiceTest {
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
         // Use this testable looper.
         mTestableLooper = new TestableLooper(false);
-        // Mock NotificationListeners to bypass security checks.
-        final NotificationManagerService.NotificationListeners mockNotificationListeners =
-                mock(NotificationManagerService.NotificationListeners.class);
-        when(mockNotificationListeners.checkServiceTokenLocked(any())).thenReturn(
-                mockNotificationListeners.new ManagedServiceInfo(null,
-                        new ComponentName(PKG, "test_class"), uid, true, null, 0));
 
+        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
         mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
-                mPackageManagerClient, mockLightsManager, mockNotificationListeners);
+                mPackageManagerClient, mockLightsManager, mNotificationListeners, mCompanionMgr);
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
@@ -418,5 +428,207 @@ public class NotificationManagerServiceTest {
                 generateNotificationRecord(null, tv).getNotification(), new int[1], 0);
         verify(mRankingHelper, times(1)).getNotificationChannel(
                 anyString(), anyInt(), eq(mTestNotificationChannel.getId()), anyBoolean());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testCreateChannelNotifyListener() throws Exception {
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+        NotificationChannel channel2 = new NotificationChannel("a", "b", IMPORTANCE_LOW);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(channel2.getId()), anyBoolean()))
+                .thenReturn(channel2);
+
+        reset(mNotificationListeners);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(mTestNotificationChannel, channel2)));
+        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+                eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
+        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+                eq(channel2),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testCreateChannelGroupNotifyListener() throws Exception {
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        NotificationChannelGroup group1 = new NotificationChannelGroup("a", "b");
+        NotificationChannelGroup group2 = new NotificationChannelGroup("n", "m");
+
+        reset(mNotificationListeners);
+        mBinderService.createNotificationChannelGroups(PKG,
+                new ParceledListSlice(Arrays.asList(group1, group2)));
+        verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
+                eq(group1),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
+        verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
+                eq(group2),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testUpdateChannelNotifyListener() throws Exception {
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mTestNotificationChannel.setLightColor(Color.CYAN);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+
+        reset(mNotificationListeners);
+        mBinderService.updateNotificationChannelForPackage(PKG, 0, mTestNotificationChannel);
+        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+                eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testDeleteChannelNotifyListener() throws Exception {
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+        reset(mNotificationListeners);
+        mBinderService.deleteNotificationChannel(PKG, mTestNotificationChannel.getId());
+        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+                eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testDeleteChannelGroupNotifyListener() throws Exception {
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        NotificationChannelGroup ncg = new NotificationChannelGroup("a", "b/c");
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannelGroup(eq(ncg.getId()), eq(PKG), anyInt()))
+                .thenReturn(ncg);
+        reset(mNotificationListeners);
+        mBinderService.deleteNotificationChannelGroup(PKG, ncg.getId());
+        verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
+                eq(ncg),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testUpdateNotificationChannelFromPrivilegedListener_success() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+
+        mBinderService.updateNotificationChannelFromPrivilegedListener(
+                null, PKG, mTestNotificationChannel);
+
+        verify(mRankingHelper, times(1)).updateNotificationChannel(anyString(), anyInt(), any());
+
+        verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+                eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testUpdateNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+
+        try {
+            mBinderService.updateNotificationChannelFromPrivilegedListener(
+                    null, PKG, mTestNotificationChannel);
+            fail("listeners that don't have a companion device shouldn't be able to call this");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        verify(mRankingHelper, never()).updateNotificationChannel(anyString(), anyInt(), any());
+
+        verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+                eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testGetNotificationChannelFromPrivilegedListener_success() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+
+        mBinderService.getNotificationChannelsFromPrivilegedListener(null, PKG);
+
+        verify(mRankingHelper, times(1)).getNotificationChannels(
+                anyString(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testGetNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+
+        try {
+            mBinderService.getNotificationChannelsFromPrivilegedListener(null, PKG);
+            fail("listeners that don't have a companion device shouldn't be able to call this");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        verify(mRankingHelper, never()).getNotificationChannels(
+                anyString(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testGetNotificationChannelGroupsFromPrivilegedListener_success() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+
+        mBinderService.getNotificationChannelGroupsFromPrivilegedListener(null, PKG);
+
+        verify(mRankingHelper, times(1)).getNotificationChannelGroups(anyString(), anyInt());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testGetNotificationChannelGroupsFromPrivilegedListener_noAccess() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+
+        try {
+            mBinderService.getNotificationChannelGroupsFromPrivilegedListener(null, PKG);
+            fail("listeners that don't have a companion device shouldn't be able to call this");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        verify(mRankingHelper, never()).getNotificationChannelGroups(anyString(), anyInt());
     }
 }
