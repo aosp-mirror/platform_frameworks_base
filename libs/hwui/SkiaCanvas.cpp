@@ -80,37 +80,11 @@ void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
 // Canvas state operations: Replace Bitmap
 // ----------------------------------------------------------------------------
 
-class ClipCopier : public SkCanvas::ClipVisitor {
-public:
-    explicit ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
-
-    virtual void clipRect(const SkRect& rect, SkClipOp op, bool antialias) {
-        m_dstCanvas->clipRect(rect, op, antialias);
-    }
-    virtual void clipRRect(const SkRRect& rrect, SkClipOp op, bool antialias) {
-        m_dstCanvas->clipRRect(rrect, op, antialias);
-    }
-    virtual void clipPath(const SkPath& path, SkClipOp op, bool antialias) {
-        m_dstCanvas->clipPath(path, op, antialias);
-    }
-
-private:
-    SkCanvas* m_dstCanvas;
-};
-
 void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
     sk_sp<SkColorSpace> cs = bitmap.refColorSpace();
     std::unique_ptr<SkCanvas> newCanvas = std::unique_ptr<SkCanvas>(new SkCanvas(bitmap));
     std::unique_ptr<SkCanvas> newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(),
             cs == nullptr ? SkColorSpace::MakeSRGB() : std::move(cs));
-
-    if (!bitmap.isNull()) {
-        // Copy the canvas matrix & clip state.
-        newCanvasWrapper->setMatrix(mCanvas->getTotalMatrix());
-
-        ClipCopier copier(newCanvasWrapper.get());
-        mCanvas->replayClips(&copier);
-    }
 
     // deletes the previously owned canvas (if any)
     mCanvasOwned = std::move(newCanvas);
