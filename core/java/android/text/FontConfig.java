@@ -23,8 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 
@@ -33,7 +31,7 @@ import java.lang.annotation.Retention;
  * Font configuration descriptions for System fonts.
  * @hide
  */
-public final class FontConfig implements Parcelable {
+public final class FontConfig {
     private final @NonNull Family[] mFamilies;
     private final @NonNull Alias[] mAliases;
 
@@ -57,37 +55,9 @@ public final class FontConfig implements Parcelable {
     }
 
     /**
-     * @hide
-     */
-    public FontConfig(Parcel in) {
-        mFamilies = in.readTypedArray(Family.CREATOR);
-        mAliases = in.readTypedArray(Alias.CREATOR);
-    }
-
-    @Override
-    public void writeToParcel(Parcel out, int flag) {
-        out.writeTypedArray(mFamilies, flag);
-        out.writeTypedArray(mAliases, flag);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Parcelable.Creator<FontConfig> CREATOR = new Parcelable.Creator() {
-        public FontConfig createFromParcel(Parcel in) {
-            return new FontConfig(in);
-        }
-        public FontConfig[] newArray(int size) {
-            return new FontConfig[size];
-        }
-    };
-
-    /**
      * Class that holds information about a Font.
      */
-    public static final class Font implements Parcelable {
+    public static final class Font {
         private final @NonNull String mFontName;
         private final int mTtcIndex;
         private final @NonNull FontVariationAxis[] mAxes;
@@ -152,57 +122,15 @@ public final class FontConfig implements Parcelable {
             return mUri;
         }
 
-        /**
-         * @hide
-         */
         public void setUri(@NonNull Uri uri) {
             mUri = uri;
         }
-
-        /**
-         * @hide
-         */
-        public Font(Parcel in) {
-            mFontName = in.readString();
-            mTtcIndex = in.readInt();
-            mAxes = in.createTypedArray(FontVariationAxis.CREATOR);
-            mWeight = in.readInt();
-            mIsItalic = in.readInt() == 1;
-            mUri = in.readTypedObject(Uri.CREATOR);
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flag) {
-            out.writeString(mFontName);
-            out.writeInt(mTtcIndex);
-            out.writeTypedArray(mAxes, flag);
-            out.writeInt(mWeight);
-            out.writeInt(mIsItalic ? 1 : 0);
-            out.writeTypedObject(mUri, flag);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<Font> CREATOR = new Creator<Font>() {
-            @Override
-            public Font createFromParcel(Parcel in) {
-                return new Font(in);
-            }
-
-            @Override
-            public Font[] newArray(int size) {
-                return new Font[size];
-            }
-        };
     }
 
     /**
      * Class that holds information about a Font alias.
      */
-    public static final class Alias implements Parcelable {
+    public static final class Alias {
         private final @NonNull String mName;
         private final @NonNull String mToName;
         private final int mWeight;
@@ -233,45 +161,12 @@ public final class FontConfig implements Parcelable {
         public int getWeight() {
             return mWeight;
         }
-
-        /**
-         * @hide
-         */
-        public Alias(Parcel in) {
-            mName = in.readString();
-            mToName = in.readString();
-            mWeight = in.readInt();
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flag) {
-            out.writeString(mName);
-            out.writeString(mToName);
-            out.writeInt(mWeight);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<Alias> CREATOR = new Creator<Alias>() {
-            @Override
-            public Alias createFromParcel(Parcel in) {
-                return new Alias(in);
-            }
-
-            @Override
-            public Alias[] newArray(int size) {
-                return new Alias[size];
-            }
-        };
     }
 
     /**
      * Class that holds information about a Font family.
      */
-    public static final class Family implements Parcelable {
+    public static final class Family {
         private final @NonNull String mName;
         private final @NonNull Font[] mFonts;
         private final @NonNull String mLanguage;
@@ -343,40 +238,5 @@ public final class FontConfig implements Parcelable {
         public @Variant int getVariant() {
             return mVariant;
         }
-
-        /**
-         * @hide
-         */
-        public Family(Parcel in) {
-            mName = in.readString();
-            mFonts = in.readTypedArray(Font.CREATOR);
-            mLanguage = in.readString();
-            mVariant = in.readInt();
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flag) {
-            out.writeString(mName);
-            out.writeTypedArray(mFonts, flag);
-            out.writeString(mLanguage);
-            out.writeInt(mVariant);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<Family> CREATOR = new Creator<Family>() {
-            @Override
-            public Family createFromParcel(Parcel in) {
-                return new Family(in);
-            }
-
-            @Override
-            public Family[] newArray(int size) {
-                return new Family[size];
-            }
-        };
     }
 }
