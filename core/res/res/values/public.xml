@@ -2830,6 +2830,10 @@
         <public name="autofilled_highlight" />
     </public-group>
 
+    <public-group type="string" first-id="0x01040019">
+        <public name="paste_as_plain_text" />
+    </public-group>
+
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
