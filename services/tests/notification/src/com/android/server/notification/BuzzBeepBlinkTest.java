@@ -215,6 +215,8 @@ public class BuzzBeepBlinkTest {
                 builder.setSound(CUSTOM_SOUND);
                 channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
             }
+        } else {
+            channel.setSound(null, null);
         }
         if (buzzy) {
             if (defaultVibration) {

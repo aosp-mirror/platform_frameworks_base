@@ -26,6 +26,7 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
 
@@ -139,7 +140,7 @@ public final class NotificationChannel implements Parcelable {
     private int mImportance = DEFAULT_IMPORTANCE;
     private boolean mBypassDnd;
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
-    private Uri mSound;
+    private Uri mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
     private boolean mLights;
     private int mLightColor = DEFAULT_LIGHT_COLOR;
     private long[] mVibration;
@@ -330,7 +331,8 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets the sound that should be played for notifications posted to this channel and its
-     * audio attributes.
+     * audio attributes. Notification channels with an {@link #getImportance() importance} of at
+     * least {@link NotificationManager#IMPORTANCE_DEFAULT} should have a sound.
      *
      * Only modifiable before the channel is submitted to
      * {@link NotificationManager#notify(String, int, Notification)}.
@@ -445,7 +447,7 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Returns the user specified importance {e.g. @link NotificationManager#IMPORTANCE_LOW} for
+     * Returns the user specified importance e.g. {@link NotificationManager#IMPORTANCE_LOW} for
      * notifications posted to this channel.
      */
     public int getImportance() {
