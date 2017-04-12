@@ -193,15 +193,44 @@ public final class IpSecManager {
      *
      * @param direction {@link IpSecTransform#DIRECTION_IN} or {@link IpSecTransform#DIRECTION_OUT}
      * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress.
-     * @param requestedSpi the requested SPI, or '0' to allocate a random SPI.
      * @return the reserved SecurityParameterIndex
      * @throws ResourceUnavailableException indicating that too many SPIs are currently allocated
      *     for this user
      * @throws SpiUnavailableException indicating that a particular SPI cannot be reserved
      */
     public SecurityParameterIndex reserveSecurityParameterIndex(
+            int direction, InetAddress remoteAddress)
+            throws ResourceUnavailableException {
+        try {
+            return new SecurityParameterIndex(
+                    mService,
+                    direction,
+                    remoteAddress,
+                    IpSecManager.INVALID_SECURITY_PARAMETER_INDEX);
+        } catch (SpiUnavailableException unlikely) {
+            throw new ResourceUnavailableException("No SPIs available");
+        }
+    }
+
+    /**
+     * Reserve an SPI for traffic bound towards the specified remote address.
+     *
+     * <p>If successful, this SPI is guaranteed available until released by a call to {@link
+     * SecurityParameterIndex#close()}.
+     *
+     * @param direction {@link IpSecTransform#DIRECTION_IN} or {@link IpSecTransform#DIRECTION_OUT}
+     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress.
+     * @param requestedSpi the requested SPI, or '0' to allocate a random SPI.
+     * @return the reserved SecurityParameterIndex
+     * @throws ResourceUnavailableException indicating that too many SPIs are currently allocated
+     *     for this user
+     */
+    public SecurityParameterIndex reserveSecurityParameterIndex(
             int direction, InetAddress remoteAddress, int requestedSpi)
             throws SpiUnavailableException, ResourceUnavailableException {
+        if (requestedSpi == IpSecManager.INVALID_SECURITY_PARAMETER_INDEX) {
+            throw new IllegalArgumentException("Requested SPI must be a valid (non-zero) SPI");
+        }
         return new SecurityParameterIndex(mService, direction, remoteAddress, requestedSpi);
     }
 
