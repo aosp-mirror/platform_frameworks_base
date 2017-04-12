@@ -543,9 +543,8 @@ class UsbProfileGroupSettingsManager {
         }
 
         @Override
-        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+        public void onPackageUpdateFinished(String packageName, int uid) {
             handlePackageUpdate(packageName);
-            return false;
         }
 
         @Override
@@ -1207,8 +1206,11 @@ class UsbProfileGroupSettingsManager {
         boolean changed = false;
         for (DeviceFilter test : mDevicePreferenceMap.keySet()) {
             if (filter.matches(test)) {
-                mDevicePreferenceMap.remove(test);
-                changed = true;
+                UserPackage currentMatch = mDevicePreferenceMap.get(test);
+                if (!currentMatch.packageName.equals(packageName)) {
+                    mDevicePreferenceMap.remove(test);
+                    changed = true;
+                }
             }
         }
         return changed;
@@ -1218,8 +1220,11 @@ class UsbProfileGroupSettingsManager {
         boolean changed = false;
         for (AccessoryFilter test : mAccessoryPreferenceMap.keySet()) {
             if (filter.matches(test)) {
-                mAccessoryPreferenceMap.remove(test);
-                changed = true;
+                UserPackage currentMatch = mAccessoryPreferenceMap.get(test);
+                if (!currentMatch.packageName.equals(packageName)) {
+                    mAccessoryPreferenceMap.remove(test);
+                    changed = true;
+                }
             }
         }
         return changed;
