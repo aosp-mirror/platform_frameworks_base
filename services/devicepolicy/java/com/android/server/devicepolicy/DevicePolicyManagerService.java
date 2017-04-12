@@ -1917,7 +1917,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setDeviceOwnerSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
             migrateUserRestrictionsIfNecessaryLocked();
-            setDefaultEnabledUserRestrictionsIfNecessaryLocked();
+            maybeSetDefaultDeviceOwnerUserRestrictionsLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
 
@@ -1925,33 +1925,77 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void setDefaultEnabledUserRestrictionsIfNecessaryLocked() {
+    /** Apply default restrictions that haven't been applied to device owners yet. */
+    private void maybeSetDefaultDeviceOwnerUserRestrictionsLocked() {
         final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        if (deviceOwner != null
-                && !UserRestrictionsUtils.getDefaultEnabledForDeviceOwner().equals(
-                        deviceOwner.defaultEnabledRestrictionsAlreadySet)) {
-            Slog.i(LOG_TAG,"New user restrictions need to be set by default for the device owner");
+        if (deviceOwner != null) {
+            maybeSetDefaultRestrictionsForAdminLocked(mOwners.getDeviceOwnerUserId(),
+                    deviceOwner, UserRestrictionsUtils.getDefaultEnabledForDeviceOwner());
+        }
+    }
 
-            if (VERBOSE_LOG) {
-                Slog.d(LOG_TAG,"Default enabled restrictions for DO: "
-                        + UserRestrictionsUtils.getDefaultEnabledForDeviceOwner()
-                        + ". Restrictions already enabled: "
-                        + deviceOwner.defaultEnabledRestrictionsAlreadySet);
-            }
-
-            Set<String> restrictionsToSet = new ArraySet<>(
-                    UserRestrictionsUtils.getDefaultEnabledForDeviceOwner());
-            restrictionsToSet.removeAll(deviceOwner.defaultEnabledRestrictionsAlreadySet);
-            if (!restrictionsToSet.isEmpty()) {
-                for (String restriction : restrictionsToSet) {
-                    deviceOwner.ensureUserRestrictions().putBoolean(restriction, true);
+    /** Apply default restrictions that haven't been applied to profile owners yet. */
+    private void maybeSetDefaultProfileOwnerUserRestrictions() {
+        synchronized (this) {
+            for (final int userId : mOwners.getProfileOwnerKeys()) {
+                final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
+                // The following restrictions used to be applied to managed profiles by different
+                // means (via Settings or by disabling components). Now they are proper user
+                // restrictions so we apply them to managed profile owners. Non-managed secondary
+                // users didn't have those restrictions so we skip them to keep existing behavior.
+                if (profileOwner == null || !mUserManager.isManagedProfile(userId)) {
+                    continue;
                 }
-                deviceOwner.defaultEnabledRestrictionsAlreadySet.addAll(restrictionsToSet);
-                Slog.i(LOG_TAG,
-                        "Enabled the following restrictions by default: " + restrictionsToSet);
-
-                saveUserRestrictionsLocked(mOwners.getDeviceOwnerUserId());
+                maybeSetDefaultRestrictionsForAdminLocked(userId, profileOwner,
+                        UserRestrictionsUtils.getDefaultEnabledForManagedProfiles());
+                ensureUnknownSourcesRestrictionForProfileOwnerLocked(
+                        userId, profileOwner, false /* newOwner */);
             }
+        }
+    }
+
+    /**
+     * Checks whether {@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES} should be added to the
+     * set of restrictions for this profile owner.
+     */
+    private void ensureUnknownSourcesRestrictionForProfileOwnerLocked(int userId,
+            ActiveAdmin profileOwner, boolean newOwner) {
+        if (newOwner || mInjector.settingsSecureGetIntForUser(
+                Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId) != 0) {
+            profileOwner.ensureUserRestrictions().putBoolean(
+                    UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
+            saveUserRestrictionsLocked(userId);
+            mInjector.settingsSecurePutIntForUser(
+                    Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId);
+        }
+    }
+
+    /**
+     * Apply default restrictions that haven't been applied to a given admin yet.
+     */
+    private void maybeSetDefaultRestrictionsForAdminLocked(
+            int userId, ActiveAdmin admin, Set<String> defaultRestrictions) {
+        if (defaultRestrictions.equals(admin.defaultEnabledRestrictionsAlreadySet)) {
+            return; // The same set of default restrictions has been already applied.
+        }
+        Slog.i(LOG_TAG, "New user restrictions need to be set by default for user " + userId);
+
+        if (VERBOSE_LOG) {
+            Slog.d(LOG_TAG,"Default enabled restrictions: "
+                    + defaultRestrictions
+                    + ". Restrictions already enabled: "
+                    + admin.defaultEnabledRestrictionsAlreadySet);
+        }
+
+        final Set<String> restrictionsToSet = new ArraySet<>(defaultRestrictions);
+        restrictionsToSet.removeAll(admin.defaultEnabledRestrictionsAlreadySet);
+        if (!restrictionsToSet.isEmpty()) {
+            for (final String restriction : restrictionsToSet) {
+                admin.ensureUserRestrictions().putBoolean(restriction, true);
+            }
+            admin.defaultEnabledRestrictionsAlreadySet.addAll(restrictionsToSet);
+            Slog.i(LOG_TAG, "Enabled the following restrictions by default: " + restrictionsToSet);
+            saveUserRestrictionsLocked(userId);
         }
     }
 
@@ -2941,41 +2985,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void ensureUnknownSourcesRestrictionForProfileOwners() {
-        synchronized (this) {
-            for (int userId : mOwners.getProfileOwnerKeys()) {
-                if (!mUserManager.isManagedProfile(userId) ||
-                        mInjector.settingsSecureGetIntForUser(
-                        Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId) == 0) {
-                    continue;
-                }
-                setUserRestrictionOnBehalfOfProfileOwnerLocked(
-                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId);
-                mInjector.settingsSecurePutIntForUser(
-                        Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId);
-            }
-        }
-    }
-
-    private void setUserRestrictionOnBehalfOfProfileOwnerLocked(String userRestrictionKey,
-            int userId) {
-        if (UserRestrictionsUtils.isValidRestriction(userRestrictionKey) &&
-                UserRestrictionsUtils.canProfileOwnerChange(userRestrictionKey, userId)) {
-            ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
-            if (profileOwner == null) {
-                return;
-            }
-            Bundle restrictions = profileOwner.ensureUserRestrictions();
-            restrictions.putBoolean(userRestrictionKey, true);
-            saveUserRestrictionsLocked(userId);
-        }
-    }
-
     private void onLockSettingsReady() {
         getUserData(UserHandle.USER_SYSTEM);
         loadOwners();
         cleanUpOldUsers();
-        ensureUnknownSourcesRestrictionForProfileOwners();
+        maybeSetDefaultProfileOwnerUserRestrictions();
         handleStartUser(UserHandle.USER_SYSTEM);
 
         // Register an observer for watching for user setup complete and settings changes.
@@ -6727,8 +6741,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             enforceCanSetProfileOwnerLocked(who, userHandle, hasIncompatibleAccountsOrNonAdb);
 
-            if (getActiveAdminUncheckedLocked(who, userHandle) == null
-                    || getUserData(userHandle).mRemovingAdmins.contains(who)) {
+            final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (admin == null || getUserData(userHandle).mRemovingAdmins.contains(who)) {
                 throw new IllegalArgumentException("Not active admin: " + who);
             }
 
@@ -6744,10 +6758,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final long id = mInjector.binderClearCallingIdentity();
             try {
                 if (mUserManager.isManagedProfile(userHandle)) {
-                    setUserRestrictionOnBehalfOfProfileOwnerLocked(
-                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userHandle);
-                    mInjector.settingsSecurePutIntForUser(
-                            Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userHandle);
+                    maybeSetDefaultRestrictionsForAdminLocked(userHandle, admin,
+                            UserRestrictionsUtils.getDefaultEnabledForManagedProfiles());
+                    ensureUnknownSourcesRestrictionForProfileOwnerLocked(userHandle, admin,
+                            true /* newOwner */);
                 }
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
