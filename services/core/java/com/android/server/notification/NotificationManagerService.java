@@ -2695,7 +2695,9 @@ public class NotificationManagerService extends SystemService {
             Preconditions.checkNotNull(channel);
 
             ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-            checkHasCompanionDevice(info);
+            if (!hasCompanionDevice(info)) {
+                throw new SecurityException(info + " does not have access");
+            }
 
             int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
             updateNotificationChannelInt(pkg, uid, channel, true);
@@ -2705,7 +2707,9 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannel> getNotificationChannelsFromPrivilegedListener(
                 INotificationListener token, String pkg) throws RemoteException {
             ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-            checkHasCompanionDevice(info);
+            if (!hasCompanionDevice(info)) {
+                throw new SecurityException(info + " does not have access");
+            }
 
             int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
             return mRankingHelper.getNotificationChannels(pkg, uid, false /* includeDeleted */);
@@ -2716,7 +2720,9 @@ public class NotificationManagerService extends SystemService {
                 getNotificationChannelGroupsFromPrivilegedListener(
                 INotificationListener token, String pkg) throws RemoteException {
             ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-            checkHasCompanionDevice(info);
+            if (!hasCompanionDevice(info)) {
+                throw new SecurityException(info + " does not have access");
+            }
 
             List<NotificationChannelGroup> groups = new ArrayList<>();
             int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
@@ -4655,15 +4661,28 @@ public class NotificationManagerService extends SystemService {
                 channels, overridePeople, snoozeCriteria, showBadge);
     }
 
-    private void checkHasCompanionDevice(ManagedServiceInfo info) throws RemoteException {
+    boolean hasCompanionDevice(ManagedServiceInfo info) {
         if (mCompanionManager == null) {
             mCompanionManager = ICompanionDeviceManager.Stub.asInterface(
                     ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE));
         }
-        if (ArrayUtils.isEmpty(mCompanionManager.getAssociations(
-                info.component.getPackageName(), info.userid))) {
-            throw new SecurityException("Disallowed call from " + info.component);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            List<String> associations = mCompanionManager.getAssociations(
+                    info.component.getPackageName(), info.userid);
+            if (!ArrayUtils.isEmpty(associations)) {
+                return true;
+            }
+        } catch (SecurityException se) {
+            // Not a privileged listener
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Cannot reach companion device service", re);
+        } catch (Exception e) {
+            Slog.e(TAG, "Cannot verify listener " + info, e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
+        return false;
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
@@ -4996,23 +5015,19 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             for (final ManagedServiceInfo serviceInfo : getServices()) {
-                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                if (!serviceInfo.enabledAndUserMatches(UserHandle.getCallingUserId())) {
                     continue;
                 }
-                try {
-                    checkHasCompanionDevice(serviceInfo);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyNotificationChannelChanged(serviceInfo, pkg, channel,
-                                    modificationType);
-                        }
-                    });
-                } catch (SecurityException se) {
-                    // Not a privileged listener; do not notify
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Cannot reach companion device service", e);
+                if (!hasCompanionDevice(serviceInfo)) {
+                    continue;
                 }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyNotificationChannelChanged(serviceInfo, pkg, channel,
+                                modificationType);
+                    }
+                });
             }
         }
 
@@ -5022,23 +5037,19 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             for (final ManagedServiceInfo serviceInfo : getServices()) {
-                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                if (!serviceInfo.enabledAndUserMatches(UserHandle.getCallingUserId())) {
                     continue;
                 }
-                try {
-                    checkHasCompanionDevice(serviceInfo);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyNotificationChannelGroupChanged(serviceInfo, pkg, group,
-                                    modificationType);
-                        }
-                    });
-                } catch (SecurityException se) {
-                    // Not a privileged listener; do not notify
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Cannot reach companion device service", e);
+                if (!hasCompanionDevice(serviceInfo)) {
+                    continue;
                 }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyNotificationChannelGroupChanged(serviceInfo, pkg, group,
+                                modificationType);
+                    }
+                });
             }
         }
 
