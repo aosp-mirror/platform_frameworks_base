@@ -147,7 +147,6 @@ class PinnedStackController {
 
     void onConfigurationChanged() {
         reloadResources();
-        notifyMovementBoundsChanged(false /* fromImeAdjustment */);
     }
 
     /**
@@ -238,6 +237,16 @@ class PinnedStackController {
         Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
                 0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
         return defaultBounds;
+    }
+
+    /**
+     * In the case where the display rotation is changed but there is no stack, we can't depend on
+     * onTaskStackBoundsChanged() to be called.  But we still should update our known display info
+     * with the new state so that we can update SystemUI.
+     */
+    synchronized void onDisplayInfoChanged() {
+        mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
+        notifyMovementBoundsChanged(false /* fromImeAdjustment */);
     }
 
     /**
