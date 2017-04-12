@@ -474,7 +474,7 @@ public class SettingsBackupTest {
                  Settings.Secure.USER_SETUP_COMPLETE,
                  Settings.Secure.VOICE_INTERACTION_SERVICE,
                  Settings.Secure.VOICE_RECOGNITION_SERVICE,
-                 Settings.Secure.WEB_ACTION_ENABLED);
+                 Settings.Secure.INSTANT_APPS_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {
