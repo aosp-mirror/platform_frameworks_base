@@ -558,11 +558,11 @@ public final class BluetoothGattServer implements BluetoothProfile {
      *
      * @param device The remote device to send this response to
      * @param txPhy preferred transmitter PHY. Bitwise OR of any of
-     *             {@link BluetoothDevice#PHY_LE_1M}, {@link BluetoothDevice#PHY_LE_2M}, and
-     *             {@link BluetoothDevice#PHY_LE_CODED}.
+     *             {@link BluetoothDevice#PHY_LE_1M_MASK}, {@link BluetoothDevice#PHY_LE_2M_MASK},
+     *             and {@link BluetoothDevice#PHY_LE_CODED_MASK}.
      * @param rxPhy preferred receiver PHY. Bitwise OR of any of
-     *             {@link BluetoothDevice#PHY_LE_1M}, {@link BluetoothDevice#PHY_LE_2M}, and
-     *             {@link BluetoothDevice#PHY_LE_CODED}.
+     *             {@link BluetoothDevice#PHY_LE_1M_MASK}, {@link BluetoothDevice#PHY_LE_2M_MASK},
+     *             and {@link BluetoothDevice#PHY_LE_CODED_MASK}.
      * @param phyOptions preferred coding to use when transmitting on the LE Coded PHY. Can be one
      *             of {@link BluetoothDevice#PHY_OPTION_NO_PREFERRED},
      *             {@link BluetoothDevice#PHY_OPTION_S2} or {@link BluetoothDevice#PHY_OPTION_S8}

@@ -17,6 +17,7 @@
 package android.bluetooth.le;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothGatt;
@@ -363,12 +364,12 @@ public final class BluetoothLeAdvertiser {
             boolean support2MPhy = mBluetoothAdapter.isLe2MPhySupported();
             int pphy = parameters.getPrimaryPhy();
             int sphy = parameters.getSecondaryPhy();
-            if (pphy == AdvertisingSetParameters.PHY_LE_CODED && !supportCodedPhy) {
+            if (pphy == BluetoothDevice.PHY_LE_CODED && !supportCodedPhy) {
                 throw new IllegalArgumentException("Unsupported primary PHY selected");
             }
 
-            if ((sphy == AdvertisingSetParameters.PHY_LE_CODED && !supportCodedPhy)
-                || (sphy == AdvertisingSetParameters.PHY_LE_2M && !support2MPhy)) {
+            if ((sphy == BluetoothDevice.PHY_LE_CODED && !supportCodedPhy)
+                || (sphy == BluetoothDevice.PHY_LE_2M && !support2MPhy)) {
                 throw new IllegalArgumentException("Unsupported secondary PHY selected");
             }
 
