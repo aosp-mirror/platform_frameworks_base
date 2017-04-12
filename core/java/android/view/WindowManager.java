@@ -978,8 +978,9 @@ public interface WindowManager extends ViewManager {
          * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
          * also been set.
          * @deprecated Use {@link #FLAG_SHOW_WHEN_LOCKED} or {@link KeyguardManager#dismissKeyguard}
-         * instead. The Keyguard should never be dismissed automatically repeatedly as it also
-         * guards against unintentional touches.
+         * instead. Since keyguard was dismissed all the time as long as an activity with this flag
+         * on its window was focused, keyguard couldn't guard against unintentional touches on the
+         * screen, which isn't desired.
          */
         @Deprecated
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
