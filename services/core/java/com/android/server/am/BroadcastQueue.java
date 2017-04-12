@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import android.content.pm.IPackageManager;
+import android.content.pm.PermissionInfo;
 import android.os.Trace;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -795,6 +797,31 @@ public final class BroadcastQueue {
                 .sendToTarget();
     }
 
+    /**
+     * Return true if all given permissions are signature-only perms.
+     */
+    final boolean isSignaturePerm(String[] perms) {
+        if (perms == null) {
+            return false;
+        }
+        IPackageManager pm = AppGlobals.getPackageManager();
+        for (int i = perms.length-1; i >= 0; i--) {
+            try {
+                PermissionInfo pi = pm.getPermissionInfo(perms[i], 0);
+                if ((pi.protectionLevel & (PermissionInfo.PROTECTION_MASK_BASE
+                        | PermissionInfo.PROTECTION_FLAG_PRIVILEGED))
+                        != PermissionInfo.PROTECTION_SIGNATURE) {
+                    // If this a signature permission and NOT allowed for privileged apps, it
+                    // is okay...  otherwise, nope!
+                    return false;
+                }
+            } catch (RemoteException e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     final void processNextBroadcast(boolean fromMsg) {
         synchronized(mService) {
             BroadcastRecord r;
@@ -1246,7 +1273,8 @@ public final class BroadcastQueue {
                             || (r.intent.getComponent() == null
                                 && r.intent.getPackage() == null
                                 && ((r.intent.getFlags()
-                                        & Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND) == 0))) {
+                                        & Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND) == 0)
+                                && !isSignaturePerm(r.requiredPermissions))) {
                         mService.addBackgroundCheckViolationLocked(r.intent.getAction(),
                                 component.getPackageName());
                         Slog.w(TAG, "Background execution not allowed: receiving "
