@@ -2079,8 +2079,11 @@ public abstract class ColorSpace {
                     throw new IllegalArgumentException("Parameters cannot be NaN");
                 }
 
-                if (!(d >= 0.0 && d <= 1.0 + Math.ulp(1.0))) {
-                    throw new IllegalArgumentException("Parameter d must be in the range [0..1]");
+                // Next representable float after 1.0
+                // We use doubles here but the representation inside our native code is often floats
+                if (!(d >= 0.0 && d <= 1.0f + Math.ulp(1.0f))) {
+                    throw new IllegalArgumentException("Parameter d must be in the range [0..1], " +
+                            "was " + d);
                 }
 
                 if (d == 0.0 && (a == 0.0 || g == 0.0)) {
@@ -2495,7 +2498,7 @@ public abstract class ColorSpace {
                             x -> Math.pow(x < 0.0 ? 0.0 : x, gamma),
                     min, max, id);
             mTransferParameters = gamma == 1.0 ?
-                    new TransferParameters(0.0, 0.0, 1.0, 1.0 + Math.ulp(1.0), gamma) :
+                    new TransferParameters(0.0, 0.0, 1.0, 1.0 + Math.ulp(1.0f), gamma) :
                     new TransferParameters(1.0, 0.0, 0.0, 0.0, gamma);
         }
 
