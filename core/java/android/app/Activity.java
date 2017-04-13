@@ -7526,7 +7526,7 @@ public class Activity extends ContextThemeWrapper
 
         @Nullable
         @Override
-        public View onFindViewById(int id) {
+        public <T extends View> T onFindViewById(int id) {
             return Activity.this.findViewById(id);
         }
 
