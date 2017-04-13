@@ -594,11 +594,6 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getSystemCpuTimeUs(int which);
 
         /**
-         * Get the total cpu power consumed (in milli-ampere-microseconds).
-         */
-        public abstract long getCpuPowerMaUs(int which);
-
-        /**
          * Returns the approximate cpu time (in milliseconds) spent at a certain CPU speed for a
          * given CPU cluster.
          * @param cluster the index of the CPU cluster.
@@ -3467,10 +3462,9 @@ public abstract class BatteryStats implements Parcelable {
 
             final long userCpuTimeUs = u.getUserCpuTimeUs(which);
             final long systemCpuTimeUs = u.getSystemCpuTimeUs(which);
-            final long powerCpuMaUs = u.getCpuPowerMaUs(which);
-            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0 || powerCpuMaUs > 0) {
+            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0) {
                 dumpLine(pw, uid, category, CPU_DATA, userCpuTimeUs / 1000, systemCpuTimeUs / 1000,
-                        powerCpuMaUs / 1000);
+                        0 /* old cpu power, keep for compatibility */);
             }
 
             final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats
@@ -4758,17 +4752,13 @@ public abstract class BatteryStats implements Parcelable {
 
             final long userCpuTimeUs = u.getUserCpuTimeUs(which);
             final long systemCpuTimeUs = u.getSystemCpuTimeUs(which);
-            final long powerCpuMaUs = u.getCpuPowerMaUs(which);
-            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0 || powerCpuMaUs > 0) {
+            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0) {
                 sb.setLength(0);
                 sb.append(prefix);
                 sb.append("    Total cpu time: u=");
                 formatTimeMs(sb, userCpuTimeUs / 1000);
                 sb.append("s=");
                 formatTimeMs(sb, systemCpuTimeUs / 1000);
-                sb.append("p=");
-                printmAh(sb, powerCpuMaUs / (1000.0 * 1000.0 * 60.0 * 60.0));
-                sb.append("mAh");
                 pw.println(sb.toString());
             }
 
