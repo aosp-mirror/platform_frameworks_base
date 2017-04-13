@@ -17,7 +17,10 @@ package com.android.server.autofill.ui;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Rect;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
@@ -55,6 +58,7 @@ final class FillUi {
         void requestShowFillUi(int width, int height,
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
+        void startIntentSender(IntentSender intentSender);
     }
 
     private final @NonNull AutofillWindowPresenter mWindowPresenter =
@@ -84,13 +88,24 @@ final class FillUi {
         final ViewGroup decor = (ViewGroup) inflater.inflate(
                 R.layout.autofill_dataset_picker, null);
 
+        final RemoteViews.OnClickHandler interceptionHandler = new RemoteViews.OnClickHandler() {
+            @Override
+            public boolean onClickHandler(View view, PendingIntent pendingIntent,
+                    Intent fillInIntent) {
+                if (pendingIntent != null) {
+                    mCallback.startIntentSender(pendingIntent.getIntentSender());
+                }
+                return true;
+            }
+        };
+
         if (response.getAuthentication() != null) {
             mListView = null;
             mAdapter = null;
 
             final View content;
             try {
-                content = response.getPresentation().apply(context, decor);
+                content = response.getPresentation().apply(context, decor, interceptionHandler);
                 decor.addView(content);
             } catch (RuntimeException e) {
                 callback.onCanceled();
@@ -101,7 +116,7 @@ final class FillUi {
             final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             content.measure(widthMeasureSpec, heightMeasureSpec);
-            content.setOnClickListener(v -> mCallback.onResponsePicked(response));
+            decor.setOnClickListener(v -> mCallback.onResponsePicked(response));
             // TODO(b/33197203 , b/36660292): temporary limiting maximum height and minimum width
             mContentWidth = Math.max(content.getMeasuredWidth(), 1000);
             mContentHeight = Math.min(content.getMeasuredHeight(), 500);
@@ -118,7 +133,7 @@ final class FillUi {
                     final RemoteViews presentation = dataset.getFieldPresentation(index);
                     final View view;
                     try {
-                        view = presentation.apply(context, null);
+                        view = presentation.apply(context, null, interceptionHandler);
                     } catch (RuntimeException e) {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;

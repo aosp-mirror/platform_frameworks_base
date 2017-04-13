@@ -59,7 +59,12 @@ oneway interface IAutoFillManagerClient {
     void requestHideFillUi(in IBinder windowToken, in AutofillId id);
 
     /**
-     * Nitifies no fill UI will be shown.
+     * Notifies no fill UI will be shown.
      */
     void notifyNoFillUi(in IBinder windowToken, in AutofillId id);
+
+    /**
+     * Starts the provided intent sender
+     */
+    void startIntentSender(in IntentSender intentSender);
 }
