@@ -708,7 +708,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         Drawable dr = mLauncherApps.getShortcutIconDrawable(
             makeShortcutWithIcon("bmp64x64", bmp64x64_maskable), 0);
         assertTrue(dr instanceof AdaptiveIconDrawable);
-        float viewportPercentage = 1 / (1 + 2 * AdaptiveIconDrawable.getExtraInsetPercentage());
+        float viewportPercentage = 1 / (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction());
         assertEquals((int) (bmp64x64_maskable.getBitmap().getWidth() * viewportPercentage),
             dr.getIntrinsicWidth());
         assertEquals((int) (bmp64x64_maskable.getBitmap().getHeight() * viewportPercentage),
