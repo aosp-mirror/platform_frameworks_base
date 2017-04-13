@@ -302,9 +302,13 @@ public class VoiceInteractionManagerService extends SystemService {
                 ComponentName curInteractor = !TextUtils.isEmpty(curInteractorStr)
                         ? ComponentName.unflattenFromString(curInteractorStr) : null;
                 try {
-                    recognizerInfo = pm.getServiceInfo(curRecognizer, 0, userHandle);
+                    recognizerInfo = pm.getServiceInfo(curRecognizer,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
                     if (curInteractor != null) {
-                        interactorInfo = pm.getServiceInfo(curInteractor, 0, userHandle);
+                        interactorInfo = pm.getServiceInfo(curInteractor,
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
                     }
                 } catch (RemoteException e) {
                 }
@@ -492,7 +496,9 @@ public class VoiceInteractionManagerService extends SystemService {
         ComponentName findAvailRecognizer(String prefPackage, int userHandle) {
             List<ResolveInfo> available =
                     mContext.getPackageManager().queryIntentServicesAsUser(
-                            new Intent(RecognitionService.SERVICE_INTERFACE), 0, userHandle);
+                            new Intent(RecognitionService.SERVICE_INTERFACE),
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
             int numAvailable = available.size();
 
             if (numAvailable == 0) {
