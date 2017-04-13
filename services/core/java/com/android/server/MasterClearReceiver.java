@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.RecoverySystem;
 import android.os.storage.StorageManager;
+import android.telephony.euicc.EuiccManager;
 import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
@@ -33,6 +34,8 @@ import java.io.IOException;
 
 public class MasterClearReceiver extends BroadcastReceiver {
     private static final String TAG = "MasterClear";
+    private boolean mWipeExternalStorage;
+    private boolean mWipeEims;
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
@@ -53,8 +56,8 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
         final boolean shutdown = intent.getBooleanExtra("shutdown", false);
         final String reason = intent.getStringExtra(Intent.EXTRA_REASON);
-        final boolean wipeExternalStorage = intent.getBooleanExtra(
-                Intent.EXTRA_WIPE_EXTERNAL_STORAGE, false);
+        mWipeExternalStorage = intent.getBooleanExtra(Intent.EXTRA_WIPE_EXTERNAL_STORAGE, false);
+        mWipeEims = intent.getBooleanExtra(Intent.EXTRA_WIPE_ESIMS, false);
         final boolean forceWipe = intent.getBooleanExtra(Intent.EXTRA_FORCE_MASTER_CLEAR, false)
                 || intent.getBooleanExtra(Intent.EXTRA_FORCE_FACTORY_RESET, false);
 
@@ -74,20 +77,20 @@ public class MasterClearReceiver extends BroadcastReceiver {
             }
         };
 
-        if (wipeExternalStorage) {
+        if (mWipeExternalStorage || mWipeEims) {
             // thr will be started at the end of this task.
-            new WipeAdoptableDisksTask(context, thr).execute();
+            new WipeDataTask(context, thr).execute();
         } else {
             thr.start();
         }
     }
 
-    private class WipeAdoptableDisksTask extends AsyncTask<Void, Void, Void> {
+    private class WipeDataTask extends AsyncTask<Void, Void, Void> {
         private final Thread mChainedTask;
         private final Context mContext;
         private final ProgressDialog mProgressDialog;
 
-        public WipeAdoptableDisksTask(Context context, Thread chainedTask) {
+        public WipeDataTask(Context context, Thread chainedTask) {
             mContext = context;
             mChainedTask = chainedTask;
             mProgressDialog = new ProgressDialog(context);
@@ -104,9 +107,16 @@ public class MasterClearReceiver extends BroadcastReceiver {
         @Override
         protected Void doInBackground(Void... params) {
             Slog.w(TAG, "Wiping adoptable disks");
-            StorageManager sm = (StorageManager) mContext.getSystemService(
-                    Context.STORAGE_SERVICE);
-            sm.wipeAdoptableDisks();
+            if (mWipeExternalStorage) {
+                StorageManager sm = (StorageManager) mContext.getSystemService(
+                        Context.STORAGE_SERVICE);
+                sm.wipeAdoptableDisks();
+            }
+            if (mWipeEims) {
+                EuiccManager euiccManager = (EuiccManager) mContext.getSystemService(
+                        Context.EUICC_SERVICE);
+                // STOPSHIP: add EuiccManager API to factory reset eUICC
+            }
             return null;
         }
 
