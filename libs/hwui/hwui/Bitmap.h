@@ -70,15 +70,8 @@ public:
     int width() const { return info().width(); }
     int height() const { return info().height(); }
 
-    // Can't mark as override since SkPixelRef::rowBytes isn't virtual
-    // but that's OK since we just want Bitmap to be able to rely
-    // on calling rowBytes() on an unlocked pixelref, which it will be
-    // doing on a Bitmap type, not a SkPixelRef, so static
-    // dispatching will do what we want.
-    size_t rowBytes() const { return mRowBytes; }
-
     int rowBytesAsPixels() const {
-        return mRowBytes >> info().shiftPerPixel();
+        return rowBytes() >> info().shiftPerPixel();
     }
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
@@ -103,7 +96,7 @@ public:
     void getBounds(SkRect* bounds) const;
 
     bool readyToDraw() const {
-        return this->colorType() != kIndex_8_SkColorType || mColorTable;
+        return this->colorType() != kIndex_8_SkColorType || this->colorTable();
     }
 
     bool isHardware() const {
@@ -112,8 +105,6 @@ public:
 
     GraphicBuffer* graphicBuffer();
 protected:
-    virtual bool onNewLockPixels(LockRec* rec) override;
-    virtual void onUnlockPixels() override { };
     virtual size_t getAllocatedSizeInBytes() const override;
 private:
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
@@ -122,8 +113,6 @@ private:
 
     const PixelStorageType mPixelStorageType;
 
-    size_t mRowBytes = 0;
-    sk_sp<SkColorTable> mColorTable;
     bool mHasHardwareMipMap = false;
 
     union {
