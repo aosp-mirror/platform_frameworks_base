@@ -71,7 +71,6 @@ import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.os.Process.getFreeMemory;
-import static android.os.Process.getThreadPriority;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
@@ -1688,6 +1687,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 64;
     static final int NOTIFY_VR_SLEEPING_MSG = 65;
     static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
+    static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -1955,6 +1955,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case SERVICE_FOREGROUND_TIMEOUT_MSG: {
                 mServices.serviceForegroundTimeout((ServiceRecord)msg.obj);
+            } break;
+            case DISPATCH_PENDING_INTENT_CANCEL_MSG: {
+                RemoteCallbackList<IResultReceiver> callbacks
+                        = (RemoteCallbackList<IResultReceiver>)msg.obj;
+                int N = callbacks.beginBroadcast();
+                for (int i = 0; i < N; i++) {
+                    try {
+                        callbacks.getBroadcastItem(i).send(Activity.RESULT_CANCELED, null);
+                    } catch (RemoteException e) {
+                    }
+                }
+                callbacks.finishBroadcast();
             } break;
             case UPDATE_TIME_ZONE: {
                 synchronized (ActivityManagerService.this) {
@@ -6423,7 +6435,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     didSomething = true;
                     it.remove();
-                    pir.canceled = true;
+                    makeIntentSenderCanceledLocked(pir);
                     if (pir.key.activity != null && pir.key.activity.pendingResults != null) {
                         pir.key.activity.pendingResults.remove(pir.ref);
                     }
@@ -7433,7 +7445,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 return rec;
             }
-            rec.canceled = true;
+            makeIntentSenderCanceledLocked(rec);
             mIntentSenderRecords.remove(key);
         }
         if (noCreate) {
@@ -7537,7 +7549,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     String msg = "Permission Denial: cancelIntentSender() from pid="
                         + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid()
-                        + " is not allowed to cancel packges "
+                        + " is not allowed to cancel package "
                         + rec.key.packageName;
                     Slog.w(TAG, msg);
                     throw new SecurityException(msg);
@@ -7550,10 +7562,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void cancelIntentSenderLocked(PendingIntentRecord rec, boolean cleanActivity) {
-        rec.canceled = true;
+        makeIntentSenderCanceledLocked(rec);
         mIntentSenderRecords.remove(rec.key);
         if (cleanActivity && rec.key.activity != null) {
             rec.key.activity.pendingResults.remove(rec.ref);
+        }
+    }
+
+    void makeIntentSenderCanceledLocked(PendingIntentRecord rec) {
+        rec.canceled = true;
+        RemoteCallbackList<IResultReceiver> callbacks = rec.detachCancelListenersLocked();
+        if (callbacks != null) {
+            mHandler.obtainMessage(DISPATCH_PENDING_INTENT_CANCEL_MSG, callbacks).sendToTarget();
         }
     }
 
@@ -7568,6 +7588,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (ClassCastException e) {
         }
         return null;
+    }
+
+    @Override
+    public void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
+        if (!(sender instanceof PendingIntentRecord)) {
+            return;
+        }
+        synchronized(this) {
+            ((PendingIntentRecord)sender).registerCancelListenerLocked(receiver);
+        }
+    }
+
+    @Override
+    public void unregisterIntentSenderCancelListener(IIntentSender sender,
+            IResultReceiver receiver) {
+        if (!(sender instanceof PendingIntentRecord)) {
+            return;
+        }
+        synchronized(this) {
+            ((PendingIntentRecord)sender).unregisterCancelListenerLocked(receiver);
+        }
     }
 
     @Override
@@ -16212,23 +16253,45 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.println("ACTIVITY MANAGER PENDING INTENTS (dumpsys activity intents)");
 
         if (mIntentSenderRecords.size() > 0) {
-            Iterator<WeakReference<PendingIntentRecord>> it
+            // Organize these by package name, so they are easier to read.
+            final ArrayMap<String, ArrayList<PendingIntentRecord>> byPackage = new ArrayMap<>();
+            final ArrayList<WeakReference<PendingIntentRecord>> weakRefs = new ArrayList<>();
+            final Iterator<WeakReference<PendingIntentRecord>> it
                     = mIntentSenderRecords.values().iterator();
             while (it.hasNext()) {
                 WeakReference<PendingIntentRecord> ref = it.next();
-                PendingIntentRecord rec = ref != null ? ref.get(): null;
-                if (dumpPackage != null && (rec == null
-                        || !dumpPackage.equals(rec.key.packageName))) {
+                PendingIntentRecord rec = ref != null ? ref.get() : null;
+                if (rec == null) {
+                    weakRefs.add(ref);
                     continue;
                 }
+                if (dumpPackage != null && !dumpPackage.equals(rec.key.packageName)) {
+                    continue;
+                }
+                ArrayList<PendingIntentRecord> list = byPackage.get(rec.key.packageName);
+                if (list == null) {
+                    list = new ArrayList<>();
+                    byPackage.put(rec.key.packageName, list);
+                }
+                list.add(rec);
+            }
+            for (int i = 0; i < byPackage.size(); i++) {
+                ArrayList<PendingIntentRecord> intents = byPackage.valueAt(i);
                 printed = true;
-                if (rec != null) {
-                    pw.print("  * "); pw.println(rec);
+                pw.print("  * "); pw.print(byPackage.keyAt(i));
+                pw.print(": "); pw.print(intents.size()); pw.println(" items");
+                for (int j = 0; j < intents.size(); j++) {
+                    pw.print("    #"); pw.print(j); pw.print(": "); pw.println(intents.get(j));
                     if (dumpAll) {
-                        rec.dump(pw, "    ");
+                        intents.get(j).dump(pw, "      ");
                     }
-                } else {
-                    pw.print("  * "); pw.println(ref);
+                }
+            }
+            if (weakRefs.size() > 0) {
+                printed = true;
+                pw.println("  * WEAK REFS:");
+                for (int i = 0; i < weakRefs.size(); i++) {
+                    pw.print("    #"); pw.print(i); pw.print(": "); pw.println(weakRefs.get(i));
                 }
             }
         }
@@ -23357,7 +23420,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
                 return;
             }
-            ((PendingIntentRecord) target).setWhitelistDuration(duration);
+            ((PendingIntentRecord) target).setWhitelistDurationLocked(duration);
         }
 
         @Override
