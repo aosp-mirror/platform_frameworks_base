@@ -20,17 +20,17 @@ LOCAL_AIDL_INCLUDES += \
 
 LOCAL_JAVA_LIBRARIES := \
     services.net \
-    android.hardware.light@2.0-java \
-    android.hardware.power@1.0-java \
-    android.hardware.tv.cec@1.0-java \
-    android.hidl.manager@1.0-java
+    android.hardware.light-V2.0-java \
+    android.hardware.power-V1.0-java \
+    android.hardware.tv.cec-V1.0-java \
+    android.hidl.manager-V1.0-java
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     tzdata_shared2 \
     tzdata_update2 \
-    android.hidl.base@1.0-java-static \
-    android.hardware.biometrics.fingerprint@2.1-java-static \
-    android.hardware.vibrator@1.0-java-constants \
+    android.hidl.base-V1.0-java-static \
+    android.hardware.biometrics.fingerprint-V2.1-java-static \
+    android.hardware.vibrator-V1.0-java-constants \
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
