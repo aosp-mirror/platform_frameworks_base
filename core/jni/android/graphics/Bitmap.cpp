@@ -1086,7 +1086,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         return NULL;
     }
 
-    SkColorTable* ctable = NULL;
+    sk_sp<SkColorTable> ctable = NULL;
     if (colorType == kIndex_8_SkColorType) {
         int count = p->readInt32();
         if (count < 0 || count > 256) {
@@ -1100,7 +1100,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
             if (src == NULL) {
                 return NULL;
             }
-            ctable = new SkColorTable(src, count);
+            ctable = SkColorTable::Make(src, count);
         }
     }
 
@@ -1109,7 +1109,6 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     android::Parcel::ReadableBlob blob;
     android::status_t status = p->readBlob(size, &blob);
     if (status) {
-        SkSafeUnref(ctable);
         doThrowRE(env, "Could not read bitmap blob.");
         return NULL;
     }
@@ -1130,15 +1129,13 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         if (dupFd < 0) {
             ALOGE("Error allocating dup fd. Error:%d", errno);
             blob.release();
-            SkSafeUnref(ctable);
             doThrowRE(env, "Could not allocate dup blob fd.");
             return NULL;
         }
 
         // Map the pixels in place and take ownership of the ashmem region.
         nativeBitmap = sk_sp<Bitmap>(GraphicsJNI::mapAshmemBitmap(env, bitmap.get(),
-                ctable, dupFd, const_cast<void*>(blob.data()), size, !isMutable));
-        SkSafeUnref(ctable);
+                ctable.get(), dupFd, const_cast<void*>(blob.data()), size, !isMutable));
         if (!nativeBitmap) {
             close(dupFd);
             blob.release();
@@ -1164,7 +1161,6 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
         // Copy the pixels into a new buffer.
         nativeBitmap = Bitmap::allocateHeapBitmap(bitmap.get(), ctable);
-        SkSafeUnref(ctable);
         if (!nativeBitmap) {
             blob.release();
             doThrowRE(env, "Could not allocate java pixel ref.");

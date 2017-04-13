@@ -44,14 +44,14 @@ typedef void (*FreeFunc)(void* addr, void* context);
 
 class ANDROID_API Bitmap : public SkPixelRef {
 public:
-    static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable);
     static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
 
     static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
 
-    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable);
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
-        size_t rowBytes, SkColorTable* ctable);
+        size_t rowBytes, sk_sp<SkColorTable> ctable);
 
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
 
@@ -61,11 +61,11 @@ public:
             SkBitmap& bitmap);
 
     Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
-            SkColorTable* ctable);
+            sk_sp<SkColorTable> ctable);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
+            const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
-            size_t rowBytes, SkColorTable* ctable);
+            size_t rowBytes, sk_sp<SkColorTable> ctable);
 
     int width() const { return info().width(); }
     int height() const { return info().height(); }
@@ -74,7 +74,7 @@ public:
         return rowBytes() >> info().shiftPerPixel();
     }
 
-    void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
+    void reconfigure(const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable);
     void reconfigure(const SkImageInfo& info);
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     void setAlphaType(SkAlphaType alphaType);
