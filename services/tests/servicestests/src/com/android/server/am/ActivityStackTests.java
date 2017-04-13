@@ -1,0 +1,64 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
+package com.android.server.am;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import android.content.ComponentName;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.runner.RunWith;
+import org.junit.Test;
+
+/**
+ * Tests for the {@link ActivityStack} class.
+ *
+ * Build/Install/Run:
+ *  bit FrameworksServicesTests:com.android.server.am.ActivityStackTests
+ */
+@SmallTest
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class ActivityStackTests extends ActivityTestsBase {
+    private final ComponentName testActivityComponent =
+            ComponentName.unflattenFromString("com.foo/.BarActivity");
+
+    @Test
+    public void testEmptyTaskCleanupOnRemove() throws Exception {
+        final ActivityManagerService service = createActivityManagerService();
+        final TestActivityStack testStack = new ActivityStackBuilder(service).build();
+        final TaskRecord task = createTask(service, testActivityComponent, testStack);
+        assertNotNull(task.getWindowContainerController());
+        testStack.removeTask(task, "testEmptyTaskCleanupOnRemove",
+                ActivityStack.REMOVE_TASK_MODE_DESTROYING);
+        assertNull(task.getWindowContainerController());
+    }
+    @Test
+    public void testOccupiedTaskCleanupOnRemove() throws Exception {
+        final ActivityManagerService service = createActivityManagerService();
+        final TestActivityStack testStack = new ActivityStackBuilder(service).build();
+        final TaskRecord task = createTask(service, testActivityComponent, testStack);
+        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
+        assertNotNull(task.getWindowContainerController());
+        testStack.removeTask(task, "testOccupiedTaskCleanupOnRemove",
+                ActivityStack.REMOVE_TASK_MODE_DESTROYING);
+        assertNotNull(task.getWindowContainerController());
+    }
+}
