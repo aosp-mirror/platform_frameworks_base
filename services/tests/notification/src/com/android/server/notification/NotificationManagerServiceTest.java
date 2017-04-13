@@ -19,6 +19,7 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -98,6 +99,11 @@ public class NotificationManagerServiceTest {
         @Override
         protected boolean isCallerSystem() {
             return true;
+        }
+
+        @Override
+        protected ICompanionDeviceManager getCompanionManager() {
+            return null;
         }
     }
 
@@ -644,4 +650,13 @@ public class NotificationManagerServiceTest {
                 new IllegalArgumentException());
         mNotificationManagerService.hasCompanionDevice(mListener);
     }
+
+    @Test
+    @UiThreadTest
+    public void testHasCompanionDevice_noService() throws Exception {
+        mNotificationManagerService = new TestableNotificationManagerService(mContext);
+
+        assertFalse(mNotificationManagerService.hasCompanionDevice(mListener));
+    }
+
 }
