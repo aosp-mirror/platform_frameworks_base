@@ -203,6 +203,7 @@ public class WifiTracker {
         mFilter.addAction(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
         mFilter.addAction(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
         mFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        mFilter.addAction(WifiManager.RSSI_CHANGED_ACTION);
 
         mNetworkRequest = new NetworkRequest.Builder()
                 .clearCapabilities()
@@ -640,20 +641,24 @@ public class WifiTracker {
                     (System.currentTimeMillis() - before) + "ms.");
         }
 
-        boolean reorder = false;
+        boolean updated = false;
+        boolean reorder = false; // Only reorder if connected AP was changed
         for (int i = mInternalAccessPoints.size() - 1; i >= 0; --i) {
             AccessPoint ap = mInternalAccessPoints.get(i);
+            boolean previouslyConnected = ap.isActive();
             if (ap.update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
-                reorder = true;
+                updated = true;
+                if (previouslyConnected != ap.isActive()) reorder = true;
             }
             if (ap.update(mScoreCache, mNetworkScoringUiEnabled)) {
                 reorder = true;
+                updated = true;
             }
         }
-        if (reorder) {
-            Collections.sort(mInternalAccessPoints);
-            mMainHandler.scheduleAPCopyingAndCloseWriteLock();
-        }
+
+        if (reorder) Collections.sort(mInternalAccessPoints);
+
+        if (updated) mMainHandler.scheduleAPCopyingAndCloseWriteLock();
     }
 
     /**
@@ -718,6 +723,8 @@ public class WifiTracker {
                 mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO, info)
                         .sendToTarget();
                 mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
+            } else if (WifiManager.RSSI_CHANGED_ACTION.equals(action)) {
+                mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO);
             }
         }
     };
