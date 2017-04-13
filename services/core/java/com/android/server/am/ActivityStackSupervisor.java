@@ -1477,12 +1477,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             stack.minimalResumeActivityLocked(r);
         } else {
             // This activity is not starting in the resumed state... which should look like we asked
-            // it to resume+pause (but remain visible), and it has done so and reported back the
+            // it to pause+stop (but remain visible), and it has done so and reported back the
             // current icicle and other state.
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to PAUSED: " + r + " (starting in paused state)");
             r.state = PAUSED;
-            r.stopped = false;
         }
 
         // Launch the new version setup screen if needed.  We do this -after-
@@ -3090,7 +3089,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         mGoingToSleepActivities.clear();
-        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
     }
 
     void activitySleptLocked(ActivityRecord r) {
