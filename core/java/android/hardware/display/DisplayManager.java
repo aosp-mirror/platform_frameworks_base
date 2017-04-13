@@ -247,6 +247,7 @@ public final class DisplayManager {
      * </p>
      *
      * @see #createVirtualDisplay
+     * @hide
      */
     public static final int VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
