@@ -5243,10 +5243,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private final int getLRURecordIndexForAppLocked(IApplicationThread thread) {
-        IBinder threadBinder = thread.asBinder();
+        final IBinder threadBinder = thread.asBinder();
         // Find the application record.
         for (int i=mLruProcesses.size()-1; i>=0; i--) {
-            ProcessRecord rec = mLruProcesses.get(i);
+            final ProcessRecord rec = mLruProcesses.get(i);
             if (rec.thread != null && rec.thread.asBinder() == threadBinder) {
                 return i;
             }
@@ -5261,7 +5261,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         int appIndex = getLRURecordIndexForAppLocked(thread);
-        return appIndex >= 0 ? mLruProcesses.get(appIndex) : null;
+        if (appIndex >= 0) {
+            return mLruProcesses.get(appIndex);
+        }
+
+        // Validation: if it isn't in the LRU list, it shouldn't exist, but let's
+        // double-check that.
+        final IBinder threadBinder = thread.asBinder();
+        final ArrayMap<String, SparseArray<ProcessRecord>> pmap = mProcessNames.getMap();
+        for (int i = pmap.size()-1; i >= 0; i--) {
+            final SparseArray<ProcessRecord> procs = pmap.valueAt(i);
+            for (int j = procs.size()-1; j >= 0; j--) {
+                final ProcessRecord proc = procs.valueAt(j);
+                if (proc.thread != null && proc.thread.asBinder() == threadBinder) {
+                    Slog.wtf(TAG, "getRecordForApp: exists in name list but not in LRU list: "
+                            + proc);
+                    return proc;
+                }
+            }
+        }
+
+        return null;
     }
 
     final void doLowMemReportIfNeededLocked(ProcessRecord dyingProc) {
@@ -17874,10 +17894,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
             final long origId = Binder.clearCallingIdentity();
-            ComponentName res = mServices.startServiceLocked(caller, service,
-                    resolvedType, id, notification, callingPid, callingUid,
-                    requireForeground, callingPackage, userId);
-            Binder.restoreCallingIdentity(origId);
+            ComponentName res;
+            try {
+                res = mServices.startServiceLocked(caller, service,
+                        resolvedType, id, notification, callingPid, callingUid,
+                        requireForeground, callingPackage, userId);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
             return res;
         }
     }
@@ -17889,9 +17913,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                     "startServiceInPackage: " + service + " type=" + resolvedType);
             final long origId = Binder.clearCallingIdentity();
-            ComponentName res = mServices.startServiceLocked(null, service,
-                    resolvedType, 0, null, -1, uid, fgRequired, callingPackage, userId);
-            Binder.restoreCallingIdentity(origId);
+            ComponentName res;
+            try {
+                res = mServices.startServiceLocked(null, service,
+                        resolvedType, 0, null, -1, uid, fgRequired, callingPackage, userId);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
             return res;
         }
     }
