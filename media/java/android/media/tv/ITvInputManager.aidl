@@ -107,6 +107,7 @@ interface ITvInputManager {
     List<DvbDeviceInfo> getDvbDeviceList();
     ParcelFileDescriptor openDvbDevice(in DvbDeviceInfo info, int device);
 
-    // For preview programs
+    // For preview channels and programs
     void sendTvInputNotifyIntent(in Intent intent, int userId);
+    void requestChannelBrowsable(in Uri channelUri, int userId);
 }
