@@ -495,12 +495,12 @@ public class StackScrollAlgorithm {
         int childCount = algorithmState.visibleChildren.size();
         float childrenOnTop = 0.0f;
         for (int i = childCount - 1; i >= 0; i--) {
-            updateChildZValue(i, childrenOnTop,
+            childrenOnTop = updateChildZValue(i, childrenOnTop,
                     resultState, algorithmState, ambientState);
         }
     }
 
-    protected void updateChildZValue(int i, float childrenOnTop,
+    protected float updateChildZValue(int i, float childrenOnTop,
             StackScrollState resultState, StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
@@ -538,6 +538,7 @@ public class StackScrollAlgorithm {
         } else {
             childViewState.zTranslation = baseZ;
         }
+        return childrenOnTop;
     }
 
     public void setIsExpanded(boolean isExpanded) {
