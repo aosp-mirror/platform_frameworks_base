@@ -40,9 +40,15 @@ public class BatteryMeterDrawableBase extends Drawable {
     public static final String TAG = BatteryMeterDrawableBase.class.getSimpleName();
 
     protected final Context mContext;
+    protected final Paint mFramePaint;
+    protected final Paint mBatteryPaint;
+    protected final Paint mWarningTextPaint;
+    protected final Paint mTextPaint;
+    protected final Paint mBoltPaint;
+    protected final Paint mPlusPaint;
 
     private int mLevel = -1;
-    private boolean mPluggedIn;
+    private boolean mCharging;
     private boolean mPowerSaveEnabled;
     private boolean mShowPercent;
 
@@ -59,8 +65,6 @@ public class BatteryMeterDrawableBase extends Drawable {
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
-    private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint,
-            mPlusPaint;
     private float mTextHeight, mWarningTextHeight;
     private int mIconTint = Color.WHITE;
     private float mOldDarkIntensity = -1f;
@@ -180,14 +184,22 @@ public class BatteryMeterDrawableBase extends Drawable {
         postInvalidate();
     }
 
-    public void setPluggedIn(boolean val) {
-        mPluggedIn = val;
+    public void setCharging(boolean val) {
+        mCharging = val;
         postInvalidate();
+    }
+
+    public boolean getCharging() {
+        return mCharging;
     }
 
     public void setBatteryLevel(int val) {
         mLevel = val;
         postInvalidate();
+    }
+
+    public int getBatteryLevel() {
+        return mLevel;
     }
 
     public void setPowerSave(boolean val) {
@@ -314,7 +326,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         mFrame.bottom -= mSubpixelSmoothingRight;
 
         // set the battery charging color
-        mBatteryPaint.setColor(mPluggedIn ? mChargeColor : getColorForLevel(level));
+        mBatteryPaint.setColor(mCharging ? mChargeColor : getColorForLevel(level));
 
         if (level >= FULL) {
             drawFrac = 1f;
@@ -337,7 +349,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         mShapePath.lineTo(mButtonFrame.left, mFrame.top);
         mShapePath.lineTo(mButtonFrame.left, mButtonFrame.top);
 
-        if (mPluggedIn) {
+        if (mCharging) {
             // define the bolt shape
             final float bl = mFrame.left + mFrame.width() / 4f;
             final float bt = mFrame.top + mFrame.height() / 6f;
@@ -408,7 +420,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         boolean pctOpaque = false;
         float pctX = 0, pctY = 0;
         String pctText = null;
-        if (!mPluggedIn && !mPowerSaveEnabled && level > mCriticalLevel && mShowPercent) {
+        if (!mCharging && !mPowerSaveEnabled && level > mCriticalLevel && mShowPercent) {
             mTextPaint.setColor(getColorForLevel(level));
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
@@ -436,7 +448,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         mShapePath.op(mClipPath, Path.Op.INTERSECT);
         c.drawPath(mShapePath, mBatteryPaint);
 
-        if (!mPluggedIn && !mPowerSaveEnabled) {
+        if (!mCharging && !mPowerSaveEnabled) {
             if (level <= mCriticalLevel) {
                 // draw the warning text
                 final float x = mWidth * 0.5f;
@@ -466,5 +478,9 @@ public class BatteryMeterDrawableBase extends Drawable {
     @Override
     public int getOpacity() {
         return 0;
+    }
+
+    public int getCriticalLevel() {
+        return mCriticalLevel;
     }
 }
