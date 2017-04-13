@@ -52,12 +52,19 @@ public class FontFamily {
         mBuilderPtr = nInitBuilder(lang, variant);
     }
 
-    public void freeze() {
+    /**
+     * Finalize the FontFamily creation.
+     *
+     * @return boolean returns false if some error happens in native code, e.g. broken font file is
+     *                 passed, etc.
+     */
+    public boolean freeze() {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen");
         }
         mNativePtr = nCreateFamily(mBuilderPtr);
         mBuilderPtr = 0;
+        return mNativePtr != 0;
     }
 
     public void abortCreation() {
@@ -143,6 +150,25 @@ public class FontFamily {
                 isItalic);
     }
 
+    /**
+     * Allow creating unsupported FontFamily.
+     *
+     * For compatibility reasons, we still need to create a FontFamily object even if Minikin failed
+     * to find any usable 'cmap' table for some reasons, e.g. broken 'cmap' table, no 'cmap' table
+     * encoded with Unicode code points, etc. Without calling this method, the freeze() method will
+     * return null if Minikin fails to find any usable 'cmap' table. By calling this method, the
+     * freeze() won't fail and will create an empty FontFamily. This empty FontFamily is placed at
+     * the top of the fallback chain but is never used. if we don't create this empty FontFamily
+     * and put it at top, bad things (performance regressions, unexpected glyph selection) will
+     * happen.
+     */
+    public void allowUnsupportedFont() {
+        if (mBuilderPtr == 0) {
+            throw new IllegalStateException("Unable to allow unsupported font.");
+        }
+        nAllowUnsupportedFont(mBuilderPtr);
+    }
+
     // TODO: Remove once internal user stop using private API.
     private static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex) {
         return nAddFont(builderPtr, font, ttcIndex, -1, -1);
@@ -152,6 +178,9 @@ public class FontFamily {
 
     @CriticalNative
     private static native long nCreateFamily(long mBuilderPtr);
+
+    @CriticalNative
+    private static native void nAllowUnsupportedFont(long builderPtr);
 
     @CriticalNative
     private static native void nAbort(long mBuilderPtr);

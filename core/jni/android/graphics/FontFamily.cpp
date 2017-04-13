@@ -45,21 +45,24 @@ namespace android {
 constexpr jint RESOLVE_BY_FONT_TABLE = -1;
 
 struct NativeFamilyBuilder {
+    NativeFamilyBuilder(uint32_t langId, int variant)
+        : langId(langId), variant(variant), allowUnsupportedFont(false) {}
     uint32_t langId;
     int variant;
+    bool allowUnsupportedFont;
     std::vector<minikin::Font> fonts;
     std::vector<minikin::FontVariation> axes;
 };
 
 static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
-    NativeFamilyBuilder* builder = new NativeFamilyBuilder();
+    NativeFamilyBuilder* builder;
     if (lang != nullptr) {
         ScopedUtfChars str(env, lang);
-        builder->langId = minikin::FontStyle::registerLanguageList(str.c_str());
+        builder = new NativeFamilyBuilder(
+                minikin::FontStyle::registerLanguageList(str.c_str()), variant);
     } else {
-        builder->langId = minikin::FontStyle::registerLanguageList("");
+        builder = new NativeFamilyBuilder(minikin::FontStyle::registerLanguageList(""), variant);
     }
-    builder->variant = variant;
     return reinterpret_cast<jlong>(builder);
 }
 
@@ -67,12 +70,22 @@ static jlong FontFamily_create(jlong builderPtr) {
     if (builderPtr == 0) {
         return 0;
     }
+    std::unique_ptr<NativeFamilyBuilder> builder(
+            reinterpret_cast<NativeFamilyBuilder*>(builderPtr));
+    std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
+            builder->langId, builder->variant, std::move(builder->fonts));
+    if (family->getCoverage().length() == 0 && !builder->allowUnsupportedFont) {
+        return 0;
+    }
+    return reinterpret_cast<jlong>(new FontFamilyWrapper(std::move(family)));
+}
+
+static void FontFamily_allowUnsupportedFont(jlong builderPtr) {
+    if (builderPtr == 0) {
+        return;
+    }
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    FontFamilyWrapper* family = new FontFamilyWrapper(
-            std::make_shared<minikin::FontFamily>(
-                    builder->langId, builder->variant, std::move(builder->fonts)));
-    delete builder;
-    return reinterpret_cast<jlong>(family);
+    builder->allowUnsupportedFont = true;
 }
 
 static void FontFamily_abort(jlong builderPtr) {
@@ -258,6 +271,7 @@ static void FontFamily_addAxisValue(jlong builderPtr, jint tag, jfloat value) {
 static const JNINativeMethod gFontFamilyMethods[] = {
     { "nInitBuilder",          "(Ljava/lang/String;I)J", (void*)FontFamily_initBuilder },
     { "nCreateFamily",         "(J)J", (void*)FontFamily_create },
+    { "nAllowUnsupportedFont", "(J)V", (void*)FontFamily_allowUnsupportedFont },
     { "nAbort",                "(J)V", (void*)FontFamily_abort },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
     { "nAddFont",              "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont },

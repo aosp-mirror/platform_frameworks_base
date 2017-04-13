@@ -71,6 +71,18 @@ Typeface* Typeface::createFromTypeface(Typeface* src, SkTypeface::Style style) {
     return result;
 }
 
+Typeface* Typeface::createFromTypefaceWithStyle(Typeface* base, int weight, bool italic) {
+    Typeface* resolvedFace = Typeface::resolveDefault(base);
+    Typeface* result = new Typeface();
+    if (result != nullptr) {
+        result->fFontCollection = resolvedFace->fFontCollection;
+        result->fBaseWeight = weight;
+        result->fStyle = minikin::FontStyle(weight / 100, italic);
+        result->fSkiaStyle = resolvedFace->fSkiaStyle;
+    }
+    return result;
+}
+
 Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
         const std::vector<minikin::FontVariation>& variations) {
     Typeface* resolvedFace = Typeface::resolveDefault(src);
