@@ -173,6 +173,9 @@ message SystemMessage {
     // Package: android
     NOTE_ACCOUNT_CREDENTIAL_PERMISSION = 38;
 
+    // Inform the user their phone recently shut down due to high temperature
+    NOTE_THERMAL_SHUTDOWN = 39;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
