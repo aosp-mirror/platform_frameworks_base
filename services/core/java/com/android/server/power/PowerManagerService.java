@@ -46,6 +46,8 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -4027,6 +4029,14 @@ public final class PowerManagerService extends SystemService
     }
 
     private final class BinderService extends IPowerManager.Stub {
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            (new PowerManagerShellCommand(this)).exec(
+                    this, in, out, err, args, callback, resultReceiver);
+        }
+
         @Override // Binder call
         public void acquireWakeLockWithUid(IBinder lock, int flags, String tag,
                 String packageName, int uid) {
