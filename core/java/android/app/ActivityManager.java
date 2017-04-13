@@ -30,6 +30,8 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.BatteryStats;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
@@ -138,14 +140,17 @@ public class ActivityManager {
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
+        final Context mContext;
 
-        UidObserver(OnUidImportanceListener listener) {
+        UidObserver(OnUidImportanceListener listener, Context clientContext) {
             mListener = listener;
+            mContext = clientContext;
         }
 
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq) {
-            mListener.onUidImportance(uid, RunningAppProcessInfo.procStateToImportance(procState));
+            mListener.onUidImportance(uid, RunningAppProcessInfo.procStateToImportanceForClient(
+                    procState, mContext));
         }
 
         @Override
@@ -3081,10 +3086,32 @@ public class ActivityManager {
         public static final int IMPORTANCE_VISIBLE = 200;
 
         /**
-         * Constant for {@link #importance}: This process is not something the user
-         * is directly aware of, but is otherwise perceptable to them to some degree.
+         * Constant for {@link #importance}: {@link #IMPORTANCE_PERCEPTIBLE} had this wrong value
+         * before {@link Build.VERSION_CODES#O}.  Since the {@link Build.VERSION_CODES#O} SDK,
+         * the value of {@link #IMPORTANCE_PERCEPTIBLE} has been fixed.
+         *
+         * @deprecated Use {@link #IMPORTANCE_PERCEPTIBLE} instead.
          */
-        public static final int IMPORTANCE_PERCEPTIBLE = 130;
+        @Deprecated
+        public static final int IMPORTANCE_PERCEPTIBLE_DEPRECATED = 130;
+
+        /**
+         * Constant for {@link #importance}: This process is not something the user
+         * is directly aware of, but is otherwise perceptible to them to some degree.
+         */
+        public static final int IMPORTANCE_PERCEPTIBLE = 230;
+
+        /**
+         * Constant for {@link #importance}: {@link #IMPORTANCE_CANT_SAVE_STATE} had
+         * this wrong value
+         * before {@link Build.VERSION_CODES#O}.  Since the {@link Build.VERSION_CODES#O} SDK,
+         * the value of {@link #IMPORTANCE_CANT_SAVE_STATE} has been fixed.
+         *
+         * @deprecated Use {@link #IMPORTANCE_CANT_SAVE_STATE} instead.
+         * @hide
+         */
+        @Deprecated
+        public static final int IMPORTANCE_CANT_SAVE_STATE_DEPRECATED = 170;
 
         /**
          * Constant for {@link #importance}: This process is running an
@@ -3092,7 +3119,7 @@ public class ActivityManager {
          * while in the background.
          * @hide
          */
-        public static final int IMPORTANCE_CANT_SAVE_STATE = 170;
+        public static final int IMPORTANCE_CANT_SAVE_STATE= 270;
 
         /**
          * Constant for {@link #importance}: This process is contains services
@@ -3128,7 +3155,11 @@ public class ActivityManager {
          */
         public static final int IMPORTANCE_GONE = 1000;
 
-        /** @hide */
+        /**
+         * Convert a proc state to the correspondent IMPORTANCE_* constant.  If the return value
+         * will be passed to a client, use {@link #procStateToImportanceForClient}.
+         * @hide
+         */
         public static int procStateToImportance(int procState) {
             if (procState == PROCESS_STATE_NONEXISTENT) {
                 return IMPORTANCE_GONE;
@@ -3149,6 +3180,28 @@ public class ActivityManager {
             } else {
                 return IMPORTANCE_FOREGROUND;
             }
+        }
+
+        /**
+         * Convert a proc state to the correspondent IMPORTANCE_* constant for a client represented
+         * by a given {@link Context}, with converting {@link #IMPORTANCE_PERCEPTIBLE}
+         * and {@link #IMPORTANCE_CANT_SAVE_STATE} to the corresponding "wrong" value if the
+         * client's target SDK < {@link VERSION_CODES#O}.
+         * @hide
+         */
+        public static int procStateToImportanceForClient(int procState, Context clientContext) {
+            final int importance = procStateToImportance(procState);
+
+            // For pre O apps, convert to the old, wrong values.
+            if (clientContext.getApplicationInfo().targetSdkVersion < VERSION_CODES.O) {
+                switch (importance) {
+                    case IMPORTANCE_PERCEPTIBLE:
+                        return IMPORTANCE_PERCEPTIBLE_DEPRECATED;
+                    case IMPORTANCE_CANT_SAVE_STATE:
+                        return IMPORTANCE_CANT_SAVE_STATE_DEPRECATED;
+                }
+            }
+            return importance;
         }
 
         /** @hide */
@@ -3380,7 +3433,7 @@ public class ActivityManager {
         try {
             int procState = getService().getPackageProcessState(packageName,
                     mContext.getOpPackageName());
-            return RunningAppProcessInfo.procStateToImportance(procState);
+            return RunningAppProcessInfo.procStateToImportanceForClient(procState, mContext);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3400,7 +3453,7 @@ public class ActivityManager {
         try {
             int procState = getService().getUidProcessState(uid,
                     mContext.getOpPackageName());
-            return RunningAppProcessInfo.procStateToImportance(procState);
+            return RunningAppProcessInfo.procStateToImportanceForClient(procState, mContext);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3450,7 +3503,7 @@ public class ActivityManager {
                 throw new IllegalArgumentException("Listener already registered: " + listener);
             }
             // TODO: implement the cut point in the system process to avoid IPCs.
-            UidObserver observer = new UidObserver(listener);
+            UidObserver observer = new UidObserver(listener, mContext);
             try {
                 getService().registerUidObserver(observer,
                         UID_OBSERVER_PROCSTATE | UID_OBSERVER_GONE,
