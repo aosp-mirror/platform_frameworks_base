@@ -164,8 +164,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"La bateria s\'està carregant, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuració del sistema."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificacions."</string>
-    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
-    <skip />
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"Mostra totes les notificacions"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Esborra la notificació."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS activat."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"S\'està adquirint el GPS."</string>
@@ -467,7 +466,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. El perfil està connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. El perfil està connectat a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nTambé estàs connectat a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositiu continuarà bloquejat fins que no el desbloquegis manualment."</string>
-    <string name="hidden_notifications_title" msgid="7139628534207443290">"Obtén notificacions més ràpidament"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Rep notificacions més ràpidament"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Mostra-les abans de desbloquejar"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configura"</string>
@@ -743,9 +742,12 @@
     <string name="wifi_is_off" msgid="1838559392210456893">"La Wi-Fi està desactivada"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"El Bluetooth està desactivat"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"El mode No molestis està desactivat"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"Una regla automàtica (<xliff:g id="ID_1">%s</xliff:g>) ha activat el mode No molestis. Vols conservar la configuració actual?"</string>
-    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"Una aplicació (<xliff:g id="ID_1">%s</xliff:g>) ha activat el mode No molestis. Vols conservar la configuració actual?"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"Una regla automàtica o una aplicació han activat el mode No molestis. Vols conservar la configuració actual?"</string>
+    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
+    <skip />
     <string name="qs_dnd_until" msgid="3469471136280079874">"Fins a les <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Conserva"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Substitueix"</string>

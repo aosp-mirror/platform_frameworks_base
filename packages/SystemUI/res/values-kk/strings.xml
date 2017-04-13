@@ -164,8 +164,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батарея зарядталуда, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> пайыз."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Жүйе параметрлері."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Хабарлар."</string>
-    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
-    <skip />
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"Барлық хабарландыруды қарау"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Хабарларды өшіру."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS қосылған."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS қыземтін шығару."</string>
@@ -743,9 +742,12 @@
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi өшірулі"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth өшірулі"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\"Мазаламау\" режимі өшірулі"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"\"Мазаламау\" режимі (<xliff:g id="ID_1">%s</xliff:g>) автоматты ережесі арқылы қосылды. Ағымдағы параметрлер қалсын ба?"</string>
-    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"\"Мазаламау\" режимі (<xliff:g id="ID_1">%s</xliff:g>) қолданбасы арқылы қосылды. Ағымдағы параметрлер қалсын ба?"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"\"Мазаламау\" режимі автоматты ереже немесе қолданба арқылы қосылды. Ағымдағы параметрлер қалсын ба?"</string>
+    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
+    <skip />
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> дейін"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Қалсын"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ауыстыру"</string>

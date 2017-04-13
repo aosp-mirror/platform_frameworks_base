@@ -164,8 +164,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Battery laai tans, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> persent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Stelselinstellings"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Kennisgewings"</string>
-    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
-    <skip />
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"Sien alle kennisgewings"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Verwyder kennisgewing"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS geaktiveer."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS soek ligging."</string>
@@ -743,9 +742,12 @@
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi is af"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth is af"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Moenie steur nie is af"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"\'n Outomatiese reël (<xliff:g id="ID_1">%s</xliff:g>) het Moenie steur nie aangeskakel. Hou huidige instellings?"</string>
-    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"\'n Program (<xliff:g id="ID_1">%s</xliff:g>) het Moenie steur nie aangeskakel. Hou huidige instellings?"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"\'n Outomatiese reël of \'n program het Moenie steur nie aangeskakel. Hou huidige instellings?"</string>
+    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
+    <skip />
     <string name="qs_dnd_until" msgid="3469471136280079874">"Tot <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Hou"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Vervang"</string>
