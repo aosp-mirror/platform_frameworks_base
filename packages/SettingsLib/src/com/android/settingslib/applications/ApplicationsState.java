@@ -1502,7 +1502,8 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return (entry.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
+            return !AppUtils.isInstant(entry.info)
+                && (entry.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
         }
     };
 
