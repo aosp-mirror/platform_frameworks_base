@@ -54,11 +54,10 @@ static void setDescrambler(
 }
 
 static status_t getBufferAndSize(
-        JNIEnv *env, jobject byteBuf, jint offset, size_t length,
+        JNIEnv *env, jobject byteBuf, jint offset, jint limit, size_t length,
         void **outPtr, jbyteArray *outByteArray) {
     void *ptr = env->GetDirectBufferAddress(byteBuf);
 
-    size_t bufSize;
     jbyteArray byteArray = NULL;
 
     ScopedLocalRef<jclass> byteBufClass(env, env->FindClass("java/nio/ByteBuffer"));
@@ -78,13 +77,9 @@ static status_t getBufferAndSize(
 
         jboolean isCopy;
         ptr = env->GetByteArrayElements(byteArray, &isCopy);
-
-        bufSize = (size_t) env->GetArrayLength(byteArray);
-    } else {
-        bufSize = (size_t) env->GetDirectBufferCapacity(byteBuf);
     }
 
-    if (length + offset > bufSize) {
+    if ((jint)length + offset > limit) {
         if (byteArray != NULL) {
             env->ReleaseByteArrayElements(byteArray, (jbyte *)ptr, 0);
         }
@@ -294,7 +289,8 @@ static void throwServiceSpecificException(
 static jint android_media_MediaDescrambler_native_descramble(
         JNIEnv *env, jobject thiz, jbyte key, jint numSubSamples,
         jintArray numBytesOfClearDataObj, jintArray numBytesOfEncryptedDataObj,
-        jobject srcBuf, jint srcOffset, jobject dstBuf, jint dstOffset) {
+        jobject srcBuf, jint srcOffset, jint srcLimit,
+        jobject dstBuf, jint dstOffset, jint dstLimit) {
     sp<JDescrambler> descrambler = getDescrambler(env, thiz);
     if (descrambler == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -307,7 +303,7 @@ static jint android_media_MediaDescrambler_native_descramble(
             numBytesOfEncryptedDataObj, &subSamples);
     if (totalLength < 0) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                "Invalid sub sample info!");
+                "Invalid subsample info!");
         return -1;
     }
 
@@ -315,16 +311,23 @@ static jint android_media_MediaDescrambler_native_descramble(
     void *srcPtr = NULL, *dstPtr = NULL;
     jbyteArray srcArray = NULL, dstArray = NULL;
     status_t err = getBufferAndSize(
-            env, srcBuf, srcOffset, totalLength, &srcPtr, &srcArray);
+            env, srcBuf, srcOffset, srcLimit, totalLength, &srcPtr, &srcArray);
 
     if (err == OK) {
         if (dstBuf == NULL) {
             dstPtr = srcPtr;
         } else {
             err = getBufferAndSize(
-                    env, dstBuf, dstOffset, totalLength, &dstPtr, &dstArray);
+                    env, dstBuf, dstOffset, dstLimit, totalLength, &dstPtr, &dstArray);
         }
     }
+
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "Invalid buffer offset and/or size for subsamples!");
+        return -1;
+    }
+
     Status status;
     if (err == OK) {
         status = descrambler->descramble(
@@ -394,7 +397,7 @@ static const JNINativeMethod gMethods[] = {
             (void *)android_media_MediaDescrambler_native_init },
     { "native_setup", "(Landroid/os/IBinder;)V",
             (void *)android_media_MediaDescrambler_native_setup },
-    { "native_descramble", "(BI[I[ILjava/nio/ByteBuffer;ILjava/nio/ByteBuffer;I)I",
+    { "native_descramble", "(BI[I[ILjava/nio/ByteBuffer;IILjava/nio/ByteBuffer;II)I",
             (void *)android_media_MediaDescrambler_native_descramble },
 };
 
