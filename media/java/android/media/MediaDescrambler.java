@@ -38,7 +38,7 @@ import java.nio.ByteBuffer;
  * Scrambling schemes are identified by 16-bit unsigned integer as in CA_system_id.
  *
  */
-public final class MediaDescrambler {
+public final class MediaDescrambler implements AutoCloseable {
     private static final String TAG = "MediaDescrambler";
     private IDescrambler mIDescrambler;
 
@@ -141,17 +141,17 @@ public final class MediaDescrambler {
      * android.media.MediaCodec#queueSecureInputBuffer} by specifying even
      * or odd key in the {@link android.media.MediaCodec.CryptoInfo#key} field.
      *
-     * @param sessionId the MediaCas sessionId to associate with this
+     * @param session the MediaCas session to associate with this
      * MediaDescrambler instance.
      *
      * @throws IllegalStateException if the descrambler instance is not valid.
      * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    public final void setMediaCasSession(@NonNull byte[] sessionId) {
+    public final void setMediaCasSession(@NonNull MediaCas.Session session) {
         validateInternalStates();
 
         try {
-            mIDescrambler.setMediaCasSession(sessionId);
+            mIDescrambler.setMediaCasSession(session.mSessionId);
         } catch (ServiceSpecificException e) {
             MediaCasStateException.throwExceptions(e);
         } catch (RemoteException e) {
@@ -163,11 +163,10 @@ public final class MediaDescrambler {
      * Descramble a ByteBuffer of data described by a
      * {@link android.media.MediaCodec.CryptoInfo} structure.
      *
-     * @param srcBuf ByteBuffer containing the scrambled data.
-     * @param srcPos position within src where the scrambled data starts.
-     * @param dstBuf ByteBuffer to descramble into. If null, descrambling will happen
-     * in-place and src will be used as dst.
-     * @param dstPos position within dst to put the descrambled data.
+     * @param srcBuf ByteBuffer containing the scrambled data, which starts at
+     * srcBuf.position().
+     * @param dstBuf ByteBuffer to hold the descrambled data, which starts at
+     * dstBuf.position().
      * @param cryptoInfo a {@link android.media.MediaCodec.CryptoInfo} structure
      * describing the subsamples contained in src.
      *
@@ -178,7 +177,7 @@ public final class MediaDescrambler {
      * @throws MediaCasStateException for CAS-specific state exceptions.
      */
     public final int descramble(
-            @NonNull ByteBuffer srcBuf, int srcPos, ByteBuffer dstBuf, int dstPos,
+            @NonNull ByteBuffer srcBuf, @NonNull ByteBuffer dstBuf,
             @NonNull MediaCodec.CryptoInfo cryptoInfo) {
         validateInternalStates();
 
@@ -208,14 +207,16 @@ public final class MediaDescrambler {
                     cryptoInfo.numSubSamples,
                     cryptoInfo.numBytesOfClearData,
                     cryptoInfo.numBytesOfEncryptedData,
-                    srcBuf, srcPos, dstBuf, dstPos);
+                    srcBuf, srcBuf.position(), srcBuf.limit(),
+                    dstBuf, dstBuf.position(), dstBuf.limit());
         } catch (ServiceSpecificException e) {
             MediaCasStateException.throwExceptions(e);
         }
         return -1;
     }
 
-    public final void release() {
+    @Override
+    public void close() {
         if (mIDescrambler != null) {
             try {
                 mIDescrambler.release();
@@ -229,7 +230,7 @@ public final class MediaDescrambler {
 
     @Override
     protected void finalize() {
-        release();
+        close();
     }
 
     private static native final void native_init();
@@ -237,7 +238,8 @@ public final class MediaDescrambler {
     private native final void native_release();
     private native final int native_descramble(
             byte key, int numSubSamples, int[] numBytesOfClearData, int[] numBytesOfEncryptedData,
-            @NonNull ByteBuffer srcBuf, int srcOffset, ByteBuffer dstBuf, int dstOffset);
+            @NonNull ByteBuffer srcBuf, int srcOffset, int srcLimit,
+            ByteBuffer dstBuf, int dstOffset, int dstLimit);
 
     static {
         System.loadLibrary("media_jni");
