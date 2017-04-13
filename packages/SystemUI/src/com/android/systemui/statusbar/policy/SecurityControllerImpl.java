@@ -138,6 +138,13 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     }
 
     @Override
+    public CharSequence getWorkProfileOrganizationName() {
+        final int profileId = getWorkProfileUserId(mCurrentUserId);
+        if (profileId == UserHandle.USER_NULL) return null;
+        return mDevicePolicyManager.getOrganizationNameForUser(profileId);
+    }
+
+    @Override
     public String getPrimaryVpnName() {
         VpnConfig cfg = mCurrentVpns.get(mVpnUserId);
         if (cfg != null) {
@@ -147,16 +154,27 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         }
     }
 
+    private int getWorkProfileUserId(int userId) {
+        for (final UserInfo userInfo : mUserManager.getProfiles(userId)) {
+            if (userInfo.isManagedProfile()) {
+                return userInfo.id;
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
     @Override
-    public String getProfileVpnName() {
-        for (int profileId : mUserManager.getProfileIdsWithDisabled(mVpnUserId)) {
-            if (profileId == mVpnUserId) {
-                continue;
-            }
-            VpnConfig cfg = mCurrentVpns.get(profileId);
-            if (cfg != null) {
-                return getNameForVpnConfig(cfg, UserHandle.of(profileId));
-            }
+    public boolean hasWorkProfile() {
+        return getWorkProfileUserId(mCurrentUserId) != UserHandle.USER_NULL;
+    }
+
+    @Override
+    public String getWorkProfileVpnName() {
+        final int profileId = getWorkProfileUserId(mVpnUserId);
+        if (profileId == UserHandle.USER_NULL) return null;
+        VpnConfig cfg = mCurrentVpns.get(profileId);
+        if (cfg != null) {
+            return getNameForVpnConfig(cfg, UserHandle.of(profileId));
         }
         return null;
     }
@@ -196,6 +214,18 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         }
 
         return isVpnPackageBranded(packageName);
+    }
+
+    @Override
+    public boolean hasCACertInCurrentUser() {
+        //TODO: implement
+        return false;
+    }
+
+    @Override
+    public boolean hasCACertInWorkProfile() {
+        //TODO: implement
+        return false;
     }
 
     @Override
