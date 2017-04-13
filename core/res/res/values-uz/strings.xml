@@ -796,7 +796,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"Ishlab chiqarish sinovi amalga oshmadi"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"The FACTORY_TEST amali faqatgina /system/app ichiga o‘rnatilgan paketlar bilan ishlay oladi."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST amalini bajarish uchun birorta ham paket topilmadi."</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"O‘chirib-yoqish"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"O‘chirib yoqish"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\"<xliff:g id="TITLE">%s</xliff:g>\"dagi sahifa buni xabar qilmoqda:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Tasdiqlash"</string>
@@ -1146,7 +1146,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Tayyor"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karta qo‘shildi"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Uyali tarmoqqa ulanish uchun qurilmangizni o‘chirib-yoqing."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"O‘chirib-yoqish"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"O‘chirib yoqish"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Yangi SIM karta to‘g‘ri ishlashi uchun operator ilovasini o‘rnatib, ochish kerak bo‘ladi."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ILOVANI YUKLAB OLING"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"HOZIR EMAS"</string>
@@ -1736,10 +1736,8 @@
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Kontentlarni avtomatik to‘ldirib bo‘lmaydi"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> xizmatiga saqlansinmi?"</string>
-    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
-    <skip />
+    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ma’lumotlari <xliff:g id="LABEL">%3$s</xliff:g> yorlig‘iga saqlansinmi?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> ma’lumotlari <xliff:g id="LABEL">%4$s</xliff:g> yorlig‘iga saqlansinmi?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Saqlash"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Yo‘q, kerak emas"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>

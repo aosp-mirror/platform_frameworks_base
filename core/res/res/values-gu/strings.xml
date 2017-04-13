@@ -1733,8 +1733,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"સમય દાખલ કરવા માટે ટેક્સ્ટ ઇનપુટ મોડમાં સ્વિચ કરો."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"સમય દાખલ કરવા માટે ઘડિયાળ મોડમાં સ્વિચ કરો."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"સ્વતઃભરણના વિકલ્પો"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"કન્ટેન્ટ સ્વતઃ ભરી શકાતું નથી"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> માં સાચવીએ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> ને <xliff:g id="LABEL">%2$s</xliff:g> માં સાચવીએ?"</string>
     <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->

@@ -1733,8 +1733,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"সময় ইনপুট দেওয়ার জন্য পাঠ্য ইনপুট মোডে যান।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"সময় ইনপুট দেওয়ার জন্য ঘড়ি মোডে যান।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"আপনাআপনি পূরণ করার বিকল্পগুলি"</string>
-    <!-- no translation found for autofill_error_cannot_autofill (7402758580060110371) -->
-    <skip />
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"বিষয়বস্তুগুলি অটো-ফিল করা যাবে না"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> এ সংরক্ষণ করবেন?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> এ <xliff:g id="TYPE">%1$s</xliff:g> সংরক্ষণ করবেন?"</string>
     <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
