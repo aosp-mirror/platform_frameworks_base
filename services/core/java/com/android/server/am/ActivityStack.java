@@ -116,6 +116,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
@@ -230,9 +231,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // activities and there is a specific combination of stacks.
     private static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
 
+    @VisibleForTesting
     /* The various modes for the method {@link #removeTask}. */
     // Task is being completely removed from all stacks in the system.
-    private static final int REMOVE_TASK_MODE_DESTROYING = 0;
+    protected static final int REMOVE_TASK_MODE_DESTROYING = 0;
     // Task is being removed from this stack so we can add it to another stack. In the case we are
     // moving we don't want to perform some operations on the task like removing it from window
     // manager or recents.
@@ -3990,7 +3992,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 //       where we are destroying the task, move this back into removeTask()
                 mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
-                task.removeWindowContainer();
             }
             removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
         }
@@ -5082,6 +5083,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mRecentTasks.remove(task);
                 task.removedFromRecents();
             }
+
+            task.removeWindowContainer();
         }
 
         if (mTaskHistory.isEmpty()) {
