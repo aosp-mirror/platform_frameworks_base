@@ -24,7 +24,6 @@ import android.database.Cursor;
 import android.database.CursorToBulkCursorAdaptor;
 import android.database.DatabaseUtils;
 import android.database.IContentObserver;
-import android.database.PageViewCursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -104,7 +103,6 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     if (cursor != null) {
                         CursorToBulkCursorAdaptor adaptor = null;
 
-                        cursor = PageViewCursor.wrap(cursor, queryArgs);
                         try {
                             adaptor = new CursorToBulkCursorAdaptor(cursor, observer,
                                     getProviderName());
