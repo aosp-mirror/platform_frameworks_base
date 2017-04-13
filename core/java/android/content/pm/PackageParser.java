@@ -4273,7 +4273,7 @@ public class PackageParser {
                     a.intents.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -4306,7 +4306,7 @@ public class PackageParser {
                     owner.preferredActivityFilters.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -4634,7 +4634,7 @@ public class PackageParser {
                             + parser.getPositionDescription());
                 } else {
                     intent.setVisibleToInstantApp(
-                            visibleToEphemeral || isWebBrowsableIntent(intent));
+                            visibleToEphemeral || isImplicitlyExposedIntent(intent));
                     a.intents.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
@@ -4836,7 +4836,7 @@ public class PackageParser {
                 }
                 outInfo.intents.add(intent);
                 // adjust provider flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     outInfo.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -5141,7 +5141,7 @@ public class PackageParser {
                     return null;
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isWebBrowsableIntent(intent));
+                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
                 if (intent.isVisibleToInstantApp()) {
                     s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
@@ -5182,8 +5182,11 @@ public class PackageParser {
         return s;
     }
 
-    private boolean isWebBrowsableIntent(IntentInfo intent) {
-        return intent.hasCategory(Intent.CATEGORY_BROWSABLE);
+    private boolean isImplicitlyExposedIntent(IntentInfo intent) {
+        return intent.hasCategory(Intent.CATEGORY_BROWSABLE)
+                || intent.hasAction(Intent.ACTION_SEND)
+                || intent.hasAction(Intent.ACTION_SENDTO)
+                || intent.hasAction(Intent.ACTION_SEND_MULTIPLE);
     }
 
     private boolean parseAllMetaData(Resources res, XmlResourceParser parser, String tag,
