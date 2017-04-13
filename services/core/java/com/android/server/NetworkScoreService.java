@@ -84,6 +84,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -106,6 +107,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     private final Object mServiceConnectionLock = new Object();
     private final Handler mHandler;
     private final DispatchingContentObserver mContentObserver;
+    private final Function<NetworkScorerAppData, ScoringServiceConnection> mServiceConnProducer;
 
     @GuardedBy("mPackageMonitorLock")
     private NetworkScorerPackageMonitor mPackageMonitor;
@@ -238,11 +240,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     public NetworkScoreService(Context context) {
-      this(context, new NetworkScorerAppManager(context), Looper.myLooper());
+      this(context, new NetworkScorerAppManager(context),
+              ScoringServiceConnection::new, Looper.myLooper());
     }
 
     @VisibleForTesting
     NetworkScoreService(Context context, NetworkScorerAppManager networkScoreAppManager,
+            Function<NetworkScorerAppData, ScoringServiceConnection> serviceConnProducer,
             Looper looper) {
         mContext = context;
         mNetworkScorerAppManager = networkScoreAppManager;
@@ -257,6 +261,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         mRecommendationRequestTimeoutMs = TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS;
         mHandler = new ServiceHandler(looper);
         mContentObserver = new DispatchingContentObserver(context, mHandler);
+        mServiceConnProducer = serviceConnProducer;
     }
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
@@ -356,17 +361,17 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             synchronized (mServiceConnectionLock) {
                 // If we're connected to a different component then drop it.
                 if (mServiceConnection != null
-                        && !mServiceConnection.mAppData.equals(appData)) {
+                        && !mServiceConnection.getAppData().equals(appData)) {
                     unbindFromScoringServiceIfNeeded();
                 }
 
                 // If we're not connected at all then create a new connection.
                 if (mServiceConnection == null) {
-                    mServiceConnection = new ScoringServiceConnection(appData);
+                    mServiceConnection = mServiceConnProducer.apply(appData);
                 }
 
                 // Make sure the connection is connected (idempotent)
-                mServiceConnection.connect(mContext);
+                mServiceConnection.bind(mContext);
             }
         } else { // otherwise make sure it isn't bound.
             unbindFromScoringServiceIfNeeded();
@@ -377,9 +382,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         if (DBG) Log.d(TAG, "unbindFromScoringServiceIfNeeded");
         synchronized (mServiceConnectionLock) {
             if (mServiceConnection != null) {
-                mServiceConnection.disconnect(mContext);
+                mServiceConnection.unbind(mContext);
                 if (DBG) Log.d(TAG, "Disconnected from: "
-                        + mServiceConnection.mAppData.getRecommendationServiceComponent());
+                        + mServiceConnection.getAppData().getRecommendationServiceComponent());
             }
             mServiceConnection = null;
         }
@@ -687,7 +692,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public boolean isCallerActiveScorer(int callingUid) {
         synchronized (mServiceConnectionLock) {
             return mServiceConnection != null
-                    && mServiceConnection.mAppData.packageUid == callingUid;
+                    && mServiceConnection.getAppData().packageUid == callingUid;
         }
     }
 
@@ -720,7 +725,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         if (isCallerSystemProcess(getCallingUid()) || callerCanRequestScores()) {
             synchronized (mServiceConnectionLock) {
                 if (mServiceConnection != null) {
-                    return mServiceConnection.mAppData;
+                    return mServiceConnection.getAppData();
                 }
             }
         } else {
@@ -1020,7 +1025,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         mReqRecommendationCallerRef.set(new RequestRecommendationCaller(timeoutMs));
     }
 
-    private static class ScoringServiceConnection implements ServiceConnection {
+    // The class and methods need to be public for Mockito to work.
+    @VisibleForTesting
+    public static class ScoringServiceConnection implements ServiceConnection {
         private final NetworkScorerAppData mAppData;
         private volatile boolean mBound = false;
         private volatile boolean mConnected = false;
@@ -1030,7 +1037,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             mAppData = appData;
         }
 
-        void connect(Context context) {
+        @VisibleForTesting
+        public void bind(Context context) {
             if (!mBound) {
                 Intent service = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
                 service.setComponent(mAppData.getRecommendationServiceComponent());
@@ -1039,13 +1047,15 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                         UserHandle.SYSTEM);
                 if (!mBound) {
                     Log.w(TAG, "Bind call failed for " + service);
+                    context.unbindService(this);
                 } else {
                     if (DBG) Log.d(TAG, "ScoringServiceConnection bound.");
                 }
             }
         }
 
-        void disconnect(Context context) {
+        @VisibleForTesting
+        public void unbind(Context context) {
             try {
                 if (mBound) {
                     mBound = false;
@@ -1056,15 +1066,28 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 Log.e(TAG, "Unbind failed.", e);
             }
 
+            mConnected = false;
             mRecommendationProvider = null;
         }
 
-        INetworkRecommendationProvider getRecommendationProvider() {
+        @VisibleForTesting
+        public NetworkScorerAppData getAppData() {
+            return mAppData;
+        }
+
+        @VisibleForTesting
+        public INetworkRecommendationProvider getRecommendationProvider() {
             return mRecommendationProvider;
         }
 
-        String getPackageName() {
+        @VisibleForTesting
+        public String getPackageName() {
             return mAppData.getRecommendationServiceComponent().getPackageName();
+        }
+
+        @VisibleForTesting
+        public boolean isAlive() {
+            return mBound && mConnected;
         }
 
         @Override
