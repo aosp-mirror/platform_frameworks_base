@@ -616,7 +616,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         paint.setBlendMode(SkBlendMode::kSrc);
         paint.setFilterQuality(kLow_SkFilterQuality); // bilinear filtering
 
-        SkCanvas canvas(outputBitmap);
+        SkCanvas canvas(outputBitmap, SkCanvas::ColorBehavior::kLegacy);
         canvas.scale(sx, sy);
         canvas.drawBitmap(decodingBitmap, 0.0f, 0.0f, &paint);
     } else {
