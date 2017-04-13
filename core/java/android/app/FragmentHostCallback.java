@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -143,6 +144,20 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
                     "Starting activity with a requestCode requires a FragmentActivity host");
         }
         mContext.startActivity(intent);
+    }
+
+    /**
+     * @hide
+     * Starts a new {@link Activity} from the given fragment.
+     * See {@link Activity#startActivityForResult(Intent, int)}.
+     */
+    public void onStartActivityAsUserFromFragment(Fragment fragment, Intent intent, int requestCode,
+            Bundle options, UserHandle userHandle) {
+        if (requestCode != -1) {
+            throw new IllegalStateException(
+                    "Starting activity with a requestCode requires a FragmentActivity host");
+        }
+        mContext.startActivityAsUser(intent, userHandle);
     }
 
     /**
