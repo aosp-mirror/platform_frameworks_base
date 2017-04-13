@@ -2992,7 +2992,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // Skip if it had no restrictions to begin with
                 if ((oldRules & MASK_ALL_NETWORKS) == 0) continue;
             }
-            updateRulesForPowerRestrictionsUL(uid, oldRules, paroled);
+            final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldRules, paroled);
+            if (newUidRules == RULE_NONE) {
+                mUidRules.delete(uid);
+            } else {
+                mUidRules.put(uid, newUidRules);
+            }
         }
     }
 
