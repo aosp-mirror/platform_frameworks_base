@@ -27,6 +27,7 @@
 #include <SkCanvas.h>
 #include <SkMatrix.h>
 
+class SkCanvasState;
 class SkVertices;
 
 namespace minikin {
@@ -203,6 +204,9 @@ public:
     // filters
     virtual SkDrawFilter* getDrawFilter() = 0;
     virtual void setDrawFilter(SkDrawFilter* drawFilter) = 0;
+
+    // WebView only
+    virtual SkCanvasState* captureCanvasState() const { return nullptr; }
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations

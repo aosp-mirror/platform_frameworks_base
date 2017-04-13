@@ -102,6 +102,8 @@ public:
     virtual SkDrawFilter* getDrawFilter() override;
     virtual void setDrawFilter(SkDrawFilter* drawFilter) override;
 
+    virtual SkCanvasState* captureCanvasState() const override;
+
     virtual void drawColor(int color, SkBlendMode mode) override;
     virtual void drawPaint(const SkPaint& paint) override;
 
