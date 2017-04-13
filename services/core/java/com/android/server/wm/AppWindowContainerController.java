@@ -715,6 +715,10 @@ public class AppWindowContainerController
 
     @Override
     public String toString() {
-        return "{AppWindowContainerController token=" + mToken + "}";
+        return "AppWindowContainerController{"
+                + " token=" + mToken
+                + " mContainer=" + mContainer
+                + " mListener=" + mListener
+                + "}";
     }
 }
