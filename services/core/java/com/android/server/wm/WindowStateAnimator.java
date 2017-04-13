@@ -714,7 +714,16 @@ class WindowStateAnimator {
         }
 
         // Start a new transaction and apply position & offset.
-        mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, getLayerStack(), mAnimLayer);
+
+        mService.openSurfaceTransaction();
+        try {
+            mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, false);
+            mSurfaceController.setLayerStackInTransaction(getLayerStack());
+            mSurfaceController.setLayer(mAnimLayer);
+        } finally {
+            mService.closeSurfaceTransaction();
+        }
+
         mLastHidden = true;
 
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Created surface " + this);
@@ -1521,12 +1530,13 @@ class WindowStateAnimator {
                     + "," + mDsDy + "*" + w.mVScale + "]", false);
 
             boolean prepared =
-                mSurfaceController.prepareToShowInTransaction(mShownAlpha, mAnimLayer,
+                mSurfaceController.prepareToShowInTransaction(mShownAlpha,
                         mDsDx * w.mHScale * mExtraHScale,
                         mDtDx * w.mVScale * mExtraVScale,
                         mDtDy * w.mHScale * mExtraHScale,
                         mDsDy * w.mVScale * mExtraVScale,
                         recoveringMemory);
+            mSurfaceController.setLayer(mAnimLayer);
 
             if (prepared && mLastHidden && mDrawState == HAS_DRAWN) {
                 if (showSurfaceRobustlyLocked()) {
