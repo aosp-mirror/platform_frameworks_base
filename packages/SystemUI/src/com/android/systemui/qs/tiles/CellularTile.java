@@ -45,6 +45,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     private final NetworkController mController;
     private final DataUsageController mDataController;
     private final CellularDetailAdapter mDetailAdapter;
+    private final QSTile.SignalState mStateBeforeClick = newTileState();
 
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
 
@@ -82,6 +83,13 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     @Override
     public Intent getLongClickIntent() {
         return null;
+    }
+
+    @Override
+    protected void handleSecondaryClick() {
+        mState.copyTo(mStateBeforeClick);
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
+        mDataController.setMobileDataEnabled(!mState.value);
     }
 
     @Override
