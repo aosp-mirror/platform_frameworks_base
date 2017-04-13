@@ -255,6 +255,9 @@ public class StatusBarWindowView extends FrameLayout {
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
             mStackScrollLayout.closeControlsIfOutsideTouch(ev);
         }
+        if (mService.isDozing()) {
+            mService.mDozeScrimController.extendPulse();
+        }
 
         return super.dispatchTouchEvent(ev);
     }
