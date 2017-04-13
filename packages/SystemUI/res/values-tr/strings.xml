@@ -164,8 +164,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Pil şarj oluyor, yüzde <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem ayarları."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Bildirimler."</string>
-    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
-    <skip />
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"Tüm bildirimleri göster"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Bildirimi temizle."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS etkin."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS alınıyor."</string>
@@ -743,9 +742,12 @@
     <string name="wifi_is_off" msgid="1838559392210456893">"Kablosuz bağlantı kapalı"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth kapalı"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Rahatsız Etmeyin kapalı"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"Rahatsız Etmeyin ayarı bir otomatik kural (<xliff:g id="ID_1">%s</xliff:g>) tarafından açıldı. Geçerli ayarlar korunsun mu?"</string>
-    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"Rahatsız Etmeyin ayarı bir uygulama (<xliff:g id="ID_1">%s</xliff:g>) tarafından açıldı. Geçerli ayarlar korunsun mu?"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"Rahatsız Etmeyin ayarı bir otomatik kural veya uygulama tarafından açıldı. Geçerli ayarlar korunsun mu?"</string>
+    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
+    <skip />
     <string name="qs_dnd_until" msgid="3469471136280079874">"Bitiş: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Koru"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Değiştir"</string>

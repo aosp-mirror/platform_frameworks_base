@@ -164,8 +164,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Φόρτιση μπαταρίας, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> τοις εκατό."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Ρυθμίσεις συστήματος."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Ειδοποιήσεις."</string>
-    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
-    <skip />
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"Δείτε όλες τις ειδοποιήσεις"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Διαγραφή ειδοποίησης."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"Το GPS ενεργοποιήθηκε."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Προσδιορισμός GPS."</string>
@@ -743,9 +742,12 @@
     <string name="wifi_is_off" msgid="1838559392210456893">"Το Wi-Fi είναι ανενεργό"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Το Bluetooth είναι ανενεργό"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Η λειτουργία \"Μην ενοχλείτε\" είναι ανενεργή"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από έναν αυτόματο κανόνα (<xliff:g id="ID_1">%s</xliff:g>). Διατήρηση τρεχουσών ρυθμίσεων;"</string>
-    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από μια εφαρμογή (<xliff:g id="ID_1">%s</xliff:g>). Διατήρηση τρεχουσών ρυθμίσεων;"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από έναν αυτόματο κανόνα ή μια εφαρμογή. Διατήρηση τρεχουσών ρυθμίσεων;"</string>
+    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
+    <skip />
     <string name="qs_dnd_until" msgid="3469471136280079874">"Έως τις <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Διατήρηση"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Αντικατάσταση"</string>

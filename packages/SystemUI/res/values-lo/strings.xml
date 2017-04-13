@@ -164,8 +164,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ກຳລັງສາກແບັດເຕີຣີ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ເປີເຊັນ."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ການຕັ້ງຄ່າລະບົບ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ການແຈ້ງເຕືອນ."</string>
-    <!-- no translation found for accessibility_overflow_action (5681882033274783311) -->
-    <skip />
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"ເບິ່ງການແຈ້ງເຕືອນທັງໝົດ"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"ລຶບລ້າງການແຈ້ງເຕືອນ."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ເປີດແລ້ວ."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"ກຳລັງຊອກຫາ GPS."</string>
@@ -743,9 +742,12 @@
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ປິດຢູ່"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth ປິດຢູ່"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"ຫ້າມລົບກວນ ປິດຢູ່"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="1570808639425342">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ (<xliff:g id="ID_1">%s</xliff:g>). ເກັບການຕັ້ງຄ່າປັດຈຸບັນໄວ້ບໍ?"</string>
-    <string name="qs_dnd_prompt_app" msgid="1131614608680529190">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍແອັບໜຶ່ງ (<xliff:g id="ID_1">%s</xliff:g>). ເກັບການຕັ້ງຄ່າປັດຈຸບັນໄວ້ບໍ?"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="3685659782196144067">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ ຫຼື ແອັບໃດໜຶ່ງ. ເກັບການຕັ້ງຄ່າປັດຈຸບັນໄວ້ບໍ?"</string>
+    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
+    <skip />
+    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
+    <skip />
     <string name="qs_dnd_until" msgid="3469471136280079874">"ຈົນຮອດ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"ເກັບໄວ້"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ແທນທີ່"</string>
