@@ -1249,6 +1249,19 @@ public final class ViewRootImpl implements ViewParent,
         mIsAmbientMode = ambient;
     }
 
+    interface WindowStoppedCallback {
+        public void windowStopped(boolean stopped);
+    }
+    private final ArrayList<WindowStoppedCallback> mWindowStoppedCallbacks =  new ArrayList<>();
+
+    void addWindowStoppedCallback(WindowStoppedCallback c) {
+        mWindowStoppedCallbacks.add(c);
+    }
+
+    void removeWindowStoppedCallback(WindowStoppedCallback c) {
+        mWindowStoppedCallbacks.remove(c);
+    }
+
     void setWindowStopped(boolean stopped) {
         if (mStopped != stopped) {
             mStopped = stopped;
@@ -1263,6 +1276,10 @@ public final class ViewRootImpl implements ViewParent,
                 if (renderer != null) {
                     renderer.destroyHardwareResources(mView);
                 }
+            }
+
+            for (int i = 0; i < mWindowStoppedCallbacks.size(); i++) {
+                mWindowStoppedCallbacks.get(i).windowStopped(stopped);
             }
         }
     }
