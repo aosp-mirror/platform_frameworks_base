@@ -275,10 +275,6 @@ public class LauncherApps {
         @Deprecated
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
-        /** @deprecated punted, don't use. */
-        @Deprecated
-        public static final int FLAG_MATCH_CHOOSER = 1 << 4;
-
         /**
          * Does not retrieve CHOOSER only shortcuts.
          * TODO: Add another flag for MATCH_ALL_PINNED
@@ -372,12 +368,6 @@ public class LauncherApps {
          */
         public ShortcutQuery setActivity(@Nullable ComponentName activity) {
             mActivity = activity;
-            return this;
-        }
-
-        /** @deprecated punted, don't use. */
-        @Deprecated
-        public ShortcutQuery setIntent(@Nullable Intent intent) {
             return this;
         }
 
