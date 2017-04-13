@@ -182,7 +182,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 19:
      *   - Wakelock data (wl) gets current and max times.
      * New in version 20:
-     *   - Background timers and counters for: Sensor, BluetoothScan, WifiScan, Jobs.
+     *   - Background timers and counters for: Sensor, BluetoothScan, WifiScan, Jobs, Syncs.
      */
     static final String CHECKIN_VERSION = "20";
 
@@ -3392,9 +3392,13 @@ public abstract class BatteryStats implements Parcelable {
                 // Convert from microseconds to milliseconds with rounding
                 final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
                 final int count = timer.getCountLocked(which);
+                final Timer bgTimer = timer.getSubTimer();
+                final long bgTime = bgTimer != null ?
+                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 if (totalTime != 0) {
                     dumpLine(pw, uid, category, SYNC_DATA, "\"" + syncs.keyAt(isy) + "\"",
-                            totalTime, count);
+                            totalTime, count, bgTime, bgCount);
                 }
             }
 
@@ -4608,6 +4612,10 @@ public abstract class BatteryStats implements Parcelable {
                 // Convert from microseconds to milliseconds with rounding
                 final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
                 final int count = timer.getCountLocked(which);
+                final Timer bgTimer = timer.getSubTimer();
+                final long bgTime = bgTimer != null ?
+                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 sb.setLength(0);
                 sb.append(prefix);
                 sb.append("    Sync ");
@@ -4618,6 +4626,13 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append("realtime (");
                     sb.append(count);
                     sb.append(" times)");
+                    if (bgTime > 0) {
+                        sb.append(", ");
+                        formatTimeMs(sb, bgTime);
+                        sb.append("background (");
+                        sb.append(bgCount);
+                        sb.append(" times)");
+                    }
                 } else {
                     sb.append("(not used)");
                 }
