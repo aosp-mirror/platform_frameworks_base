@@ -302,7 +302,8 @@ int Optimize(const std::vector<StringPiece>& args) {
                             &configs)
           .OptionalFlagList("--split",
                             "Split resources matching a set of configs out to a "
-                            "Split APK.\nSyntax: path/to/output.apk:<config>[,<config>[...]].",
+                            "Split APK.\nSyntax: path/to/output.apk;<config>[,<config>[...]].\n"
+                            "On Windows, use a semicolon ';' separator instead.",
                             &split_args)
           .OptionalSwitch("--enable-sparse-encoding",
                           "Enables encoding sparse entries using a binary search tree.\n"

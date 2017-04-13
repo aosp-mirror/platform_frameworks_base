@@ -1785,9 +1785,9 @@ int Link(const std::vector<StringPiece>& args) {
           .OptionalSwitch("-z", "Require localization of strings marked 'suggested'.",
                           &require_localization)
           .OptionalFlagList("-c",
-                        "Comma separated list of configurations to include. The default\n"
-                        "is all configurations.",
-                        &configs)
+                            "Comma separated list of configurations to include. The default\n"
+                            "is all configurations.",
+                            &configs)
           .OptionalFlag("--preferred-density",
                         "Selects the closest matching density and strips out all others.",
                         &preferred_density)
@@ -1855,7 +1855,8 @@ int Link(const std::vector<StringPiece>& args) {
                             &options.extensions_to_not_compress)
           .OptionalFlagList("--split",
                             "Split resources matching a set of configs out to a Split APK.\n"
-                            "Syntax: path/to/output.apk:<config>[,<config>[...]].",
+                            "Syntax: path/to/output.apk:<config>[,<config>[...]].\n"
+                            "On Windows, use a semicolon ';' separator instead.",
                             &split_args)
           .OptionalSwitch("-v", "Enables verbose logging.", &verbose);
 
