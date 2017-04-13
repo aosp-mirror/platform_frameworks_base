@@ -20,6 +20,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The base class for implementing a network recommendation provider.
+ * <p>
+ * A network recommendation provider is any application which:
+ * <ul>
+ * <li>Is granted the {@link permission#SCORE_NETWORKS} permission.
+ * <li>Includes a Service for the {@link NetworkScoreManager#ACTION_RECOMMEND_NETWORKS} intent
+ *     which is protected by the {@link permission#BIND_NETWORK_RECOMMENDATION_SERVICE} permission.
+ * </ul>
+ * <p>
+ * Implementations are required to implement the abstract methods in this class and return the
+ * result of {@link #getBinder()} from the <code>onBind()</code> method in their Service.
+ * <p>
+ * The default network recommendation provider is controlled via the
+ * <code>config_defaultNetworkRecommendationProviderPackage</code> config key.
  * @hide
  */
 @SystemApi
