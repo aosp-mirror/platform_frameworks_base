@@ -16,11 +16,15 @@
 
 package com.android.server.om;
 
+import static com.android.server.om.OverlayManagerService.DEBUG;
+import static com.android.server.om.OverlayManagerService.TAG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -185,6 +189,10 @@ final class OverlayManagerSettings {
         for (int i = 0; i < mItems.size(); i++) {
             final SettingsItem item = mItems.get(i);
             if (item.getUserId() == userId) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Removing overlay " + item.mPackageName + " for user " + userId
+                            + " from settings because user was removed");
+                }
                 mItems.remove(i);
                 removed = true;
                 i--;
