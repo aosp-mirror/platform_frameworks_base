@@ -77,6 +77,7 @@ import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
 import com.android.server.connectivity.tethering.IPv6TetheringInterfaceServices;
 import com.android.server.connectivity.tethering.OffloadController;
+import com.android.server.connectivity.tethering.SimChangeListener;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.connectivity.tethering.TetheringConfiguration;
 import com.android.server.connectivity.tethering.UpstreamNetworkMonitor;
@@ -157,6 +158,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private final OffloadController mOffloadController;
     private final UpstreamNetworkMonitor mUpstreamNetworkMonitor;
     private final HashSet<TetherInterfaceStateMachine> mForwardedDownstreams;
+    private final SimChangeListener mSimChange;
 
     private volatile TetheringConfiguration mConfig;
     private String mCurrentUpstreamIface;
@@ -190,6 +192,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
                 mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new HashSet<>();
+        mSimChange = new SimChangeListener(
+                mContext, mTetherMasterSM.getHandler(), () -> reevaluateSimCardProvisioning());
 
         mStateReceiver = new StateReceiver();
         IntentFilter filter = new IntentFilter();
@@ -350,6 +354,20 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
         }
         return (provisionApp.length == 2);
+    }
+
+    // Used by the SIM card change observation code.
+    // TODO: De-duplicate above code.
+    private boolean hasMobileHotspotProvisionApp() {
+        try {
+            if (!mContext.getResources().getString(com.android.internal.R.string.
+                    config_mobile_hotspot_provision_app_no_ui).isEmpty()) {
+                Log.d(TAG, "re-evaluate provisioning");
+                return true;
+            }
+        } catch (Resources.NotFoundException e) {}
+        Log.d(TAG, "no prov-check needed for new SIM");
+        return false;
     }
 
     /**
@@ -524,6 +542,16 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 Binder.restoreCallingIdentity(ident);
             }
         }
+    }
+
+    // Used by the SIM card change observation code.
+    // TODO: De-duplicate with above code, where possible.
+    private void startProvisionIntent(int tetherType) {
+        final Intent startProvIntent = new Intent();
+        startProvIntent.putExtra(ConnectivityManager.EXTRA_ADD_TETHER_TYPE, tetherType);
+        startProvIntent.putExtra(ConnectivityManager.EXTRA_RUN_PROVISION, true);
+        startProvIntent.setComponent(TETHER_SERVICE);
+        mContext.startServiceAsUser(startProvIntent, UserHandle.CURRENT);
     }
 
     public int tether(String iface) {
@@ -995,6 +1023,29 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         return false;
     }
 
+    private void reevaluateSimCardProvisioning() {
+        if (!hasMobileHotspotProvisionApp()) return;
+
+        ArrayList<Integer> tethered = new ArrayList<>();
+        synchronized (mPublicSync) {
+            for (int i = 0; i < mTetherStates.size(); i++) {
+                TetherState tetherState = mTetherStates.valueAt(i);
+                if (tetherState.lastState != IControlsTethering.STATE_TETHERED) {
+                    continue;  // Skip interfaces that aren't tethered.
+                }
+                String iface = mTetherStates.keyAt(i);
+                int interfaceType = ifaceNameToType(iface);
+                if (interfaceType != ConnectivityManager.TETHERING_INVALID) {
+                    tethered.add(interfaceType);
+                }
+            }
+        }
+
+        for (int tetherType : tethered) {
+            startProvisionIntent(tetherType);
+        }
+    }
+
     class TetherMasterSM extends StateMachine {
         private static final int BASE_MASTER                    = Protocol.BASE_TETHERING;
         // an interface SM has requested Tethering/Local Hotspot
@@ -1268,127 +1319,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
         }
 
-        private class SimChangeListener {
-            private final Context mContext;
-            private final AtomicInteger mSimBcastGenerationNumber;
-            private BroadcastReceiver mBroadcastReceiver;
-
-            SimChangeListener(Context ctx) {
-                mContext = ctx;
-                mSimBcastGenerationNumber = new AtomicInteger(0);
-            }
-
-            public int generationNumber() {
-                return mSimBcastGenerationNumber.get();
-            }
-
-            public void startListening() {
-                if (DBG) Log.d(TAG, "startListening for SIM changes");
-
-                if (mBroadcastReceiver != null) return;
-
-                mBroadcastReceiver = new SimChangeBroadcastReceiver(
-                        mSimBcastGenerationNumber.incrementAndGet());
-                final IntentFilter filter = new IntentFilter();
-                filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-
-                mContext.registerReceiver(mBroadcastReceiver, filter, null,
-                        mTetherMasterSM.getHandler());
-            }
-
-            public void stopListening() {
-                if (DBG) Log.d(TAG, "stopListening for SIM changes");
-
-                if (mBroadcastReceiver == null) return;
-
-                mSimBcastGenerationNumber.incrementAndGet();
-                mContext.unregisterReceiver(mBroadcastReceiver);
-                mBroadcastReceiver = null;
-            }
-
-            public boolean hasMobileHotspotProvisionApp() {
-                try {
-                    if (!mContext.getResources().getString(com.android.internal.R.string.
-                            config_mobile_hotspot_provision_app_no_ui).isEmpty()) {
-                        Log.d(TAG, "re-evaluate provisioning");
-                        return true;
-                    }
-                } catch (Resources.NotFoundException e) {}
-                Log.d(TAG, "no prov-check needed for new SIM");
-                return false;
-            }
-
-            private boolean isSimCardLoaded(String state) {
-                return IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(state);
-            }
-
-            private void startProvisionIntent(int tetherType) {
-                final Intent startProvIntent = new Intent();
-                startProvIntent.putExtra(ConnectivityManager.EXTRA_ADD_TETHER_TYPE, tetherType);
-                startProvIntent.putExtra(ConnectivityManager.EXTRA_RUN_PROVISION, true);
-                startProvIntent.setComponent(TETHER_SERVICE);
-                mContext.startServiceAsUser(startProvIntent, UserHandle.CURRENT);
-            }
-
-            private class SimChangeBroadcastReceiver extends BroadcastReceiver {
-                // used to verify this receiver is still current
-                final private int mGenerationNumber;
-
-                // used to check the sim state transition from non-loaded to loaded
-                private boolean mSimNotLoadedSeen = false;
-
-                public SimChangeBroadcastReceiver(int generationNumber) {
-                    mGenerationNumber = generationNumber;
-                }
-
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    final int currentGenerationNumber = mSimBcastGenerationNumber.get();
-
-                    if (DBG) {
-                        Log.d(TAG, "simchange mGenerationNumber=" + mGenerationNumber +
-                                ", current generationNumber=" + currentGenerationNumber);
-                    }
-                    if (mGenerationNumber != currentGenerationNumber) return;
-
-                    final String state = intent.getStringExtra(
-                            IccCardConstants.INTENT_KEY_ICC_STATE);
-                    Log.d(TAG, "got Sim changed to state " + state + ", mSimNotLoadedSeen=" +
-                            mSimNotLoadedSeen);
-
-                    if (!isSimCardLoaded(state)) {
-                        if (!mSimNotLoadedSeen) mSimNotLoadedSeen = true;
-                        return;
-                    }
-
-                    if (isSimCardLoaded(state) && mSimNotLoadedSeen) {
-                        mSimNotLoadedSeen = false;
-
-                        if (!hasMobileHotspotProvisionApp()) return;
-
-                        ArrayList<Integer> tethered = new ArrayList<Integer>();
-                        synchronized (mPublicSync) {
-                            for (int i = 0; i < mTetherStates.size(); i++) {
-                                TetherState tetherState = mTetherStates.valueAt(i);
-                                if (tetherState.lastState != IControlsTethering.STATE_TETHERED) {
-                                    continue;  // Skip interfaces that aren't tethered.
-                                }
-                                String iface = mTetherStates.keyAt(i);
-                                int interfaceType = ifaceNameToType(iface);
-                                if (interfaceType != ConnectivityManager.TETHERING_INVALID) {
-                                    tethered.add(new Integer(interfaceType));
-                                }
-                            }
-                        }
-
-                        for (int tetherType : tethered) {
-                            startProvisionIntent(tetherType);
-                        }
-                    }
-                }
-            }
-        }
-
         private void handleInterfaceServingStateActive(int mode, TetherInterfaceStateMachine who) {
             if (mNotifyList.indexOf(who) < 0) {
                 mNotifyList.add(who);
@@ -1434,7 +1364,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
 
         class TetherModeAliveState extends TetherMasterUtilState {
-            final SimChangeListener simChange = new SimChangeListener(mContext);
             boolean mUpstreamWanted = false;
             boolean mTryCell = true;
 
@@ -1442,7 +1371,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             public void enter() {
                 // TODO: examine if we should check the return value.
                 turnOnMasterTetherSettings(); // may transition us out
-                simChange.startListening();
+                mSimChange.startListening();
                 mUpstreamNetworkMonitor.start();
                 mOffloadController.start();
 
@@ -1458,7 +1387,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 mOffloadController.stop();
                 unrequestUpstreamMobileConnection();
                 mUpstreamNetworkMonitor.stop();
-                simChange.stopListening();
+                mSimChange.stopListening();
                 notifyTetheredOfNewUpstreamIface(null);
                 handleNewUpstreamNetworkState(null);
             }
