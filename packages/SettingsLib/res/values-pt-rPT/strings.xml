@@ -168,7 +168,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Redes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificação de display sem fios"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Ativar o registo verboso de Wi-Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Transm. agressiva de Wi‑Fi p/ rede móvel"</string>
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Mudança brusca de Wi‑Fi para rede móvel"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permitir sempre a deteção de Wi-Fi em roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dados móveis sempre ativos"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desativar volume absoluto"</string>

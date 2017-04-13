@@ -207,7 +207,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"允許開發設定？"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"這些設定僅供開發之用，可能導致您的裝置及裝置中的應用程式毀損或運作異常。"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"透過 USB 驗證應用程式"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"透過 ADB/ADT 檢查安裝的應用程式是否出現有害的行為。"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"檢查透過 ADB/ADT 安裝的應用程式是否具有有害行為。"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"只要停用藍牙絕對音量功能，即可避免在連線到遠端裝置時，發生音量過大或無法控制音量等問題。"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
