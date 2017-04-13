@@ -645,9 +645,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     final ActivityRecord topRunningActivityLocked() {
+        return topRunningActivityLocked(false /* focusableOnly */);
+    }
+
+    final ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked();
-            if (r != null) {
+            if (r != null && (!focusableOnly || r.isFocusable())) {
                 return r;
             }
         }
@@ -1324,7 +1328,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         + (timeout ? " (due to timeout)" : " (pause complete)"));
                 mService.mWindowManager.deferSurfaceLayout();
                 try {
-                    completePauseLocked(true, null);
+                    completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
                 } finally {
                     mService.mWindowManager.continueSurfaceLayout();
                 }
@@ -2198,8 +2202,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return false;
         }
 
-        // Find the topmost activity in this stack that is not finishing.
-        final ActivityRecord next = topRunningActivityLocked();
+        // Find the next top-most activity to resume in this stack that is not finishing and is
+        // focusable. If it is not focusable, we will fall into the case below to resume the
+        // top activity in the next focusable task.
+        final ActivityRecord next = topRunningActivityLocked(true /* focusableOnly */);
 
         final boolean hasRunningActivity = next != null;
 
