@@ -71,6 +71,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -754,24 +755,22 @@ public final class OverlayManagerService extends SystemService {
                 // restarted before we received USER_REMOVED. Remove data for
                 // users that will not exist after the system is ready.
 
-                final List<UserInfo> deadUsers = getDeadUsers();
-                final int N = deadUsers.size();
-                for (int i = 0; i < N; i++) {
-                    final UserInfo deadUser = deadUsers.get(i);
-                    final int userId = deadUser.getUserHandle().getIdentifier();
-                    mSettings.removeUser(userId);
+                final List<UserInfo> liveUsers = mUserManager.getUsers(true /*excludeDying*/);
+                final int[] liveUserIds = new int[liveUsers.size()];
+                for (int i = 0; i < liveUsers.size(); i++) {
+                    liveUserIds[i] = liveUsers.get(i).getUserHandle().getIdentifier();
+                }
+                Arrays.sort(liveUserIds);
+
+                for (int userId : mSettings.getUsers()) {
+                    if (Arrays.binarySearch(liveUserIds, userId) < 0) {
+                        mSettings.removeUser(userId);
+                    }
                 }
             } catch (IOException | XmlPullParserException e) {
                 Slog.e(TAG, "failed to restore overlay state", e);
             }
         }
-    }
-
-    private List<UserInfo> getDeadUsers() {
-        final List<UserInfo> users = mUserManager.getUsers(false);
-        final List<UserInfo> onlyLiveUsers = mUserManager.getUsers(true);
-        users.removeAll(onlyLiveUsers);
-        return users;
     }
 
     private static final class PackageManagerHelper implements
