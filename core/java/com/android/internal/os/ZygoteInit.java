@@ -167,8 +167,8 @@ public class ZygoteInit {
 
     private static void preloadOpenGL() {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
-        if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false) ||
-                driverPackageName == null || driverPackageName.isEmpty()) {
+        if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false) &&
+                (driverPackageName == null || driverPackageName.isEmpty())) {
             EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
         }
     }
