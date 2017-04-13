@@ -17,12 +17,17 @@ package com.android.systemui.utils.leaks;
 import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
+import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
-public class FakeLocationController extends BaseLeakChecker<LocationSettingsChangeCallback>
+public class FakeLocationController extends BaseLeakChecker<LocationChangeCallback>
         implements LocationController {
     public FakeLocationController(LeakCheck test) {
         super(test, "location");
+    }
+
+    @Override
+    public boolean isLocationActive() {
+        return false;
     }
 
     @Override
