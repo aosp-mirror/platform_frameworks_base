@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,7 +88,7 @@ final class TextClassifierImpl implements TextClassifier {
     @Override
     public TextSelection suggestSelection(
             @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
-            LocaleList defaultLocales) {
+            @Nullable LocaleList defaultLocales) {
         validateInput(text, selectionStartIndex, selectionEndIndex);
         try {
             if (text.length() > 0) {
@@ -128,7 +127,8 @@ final class TextClassifierImpl implements TextClassifier {
 
     @Override
     public TextClassificationResult getTextClassificationResult(
-            @NonNull CharSequence text, int startIndex, int endIndex, LocaleList defaultLocales) {
+            @NonNull CharSequence text, int startIndex, int endIndex,
+            @Nullable LocaleList defaultLocales) {
         validateInput(text, startIndex, endIndex);
         try {
             if (text.length() > 0) {
@@ -156,7 +156,8 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     @Override
-    public LinksInfo getLinks(CharSequence text, int linkMask, LocaleList defaultLocales) {
+    public LinksInfo getLinks(
+            @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales) {
         Preconditions.checkArgument(text != null);
         try {
             return LinksInfoFactory.create(
@@ -199,12 +200,11 @@ final class TextClassifierImpl implements TextClassifier {
     @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
     @Nullable
     private Locale findBestSupportedLocaleLocked(LocaleList localeList) {
-        final List<Locale.LanguageRange> languageRangeList = Locale.LanguageRange.parse(
-                new StringJoiner(",")
-                        // Specified localeList takes priority over the system default
-                        .add(localeList.toLanguageTags())
-                        .add(LocaleList.getDefault().toLanguageTags())
-                        .toString());
+        // Specified localeList takes priority over the system default, so it is listed first.
+        final String languages = localeList.isEmpty()
+                ? LocaleList.getDefault().toLanguageTags()
+                : localeList.toLanguageTags() + "," + LocaleList.getDefault().toLanguageTags();
+        final List<Locale.LanguageRange> languageRangeList = Locale.LanguageRange.parse(languages);
         return Locale.lookup(languageRangeList, loadModelFilePathsLocked().keySet());
     }
 
