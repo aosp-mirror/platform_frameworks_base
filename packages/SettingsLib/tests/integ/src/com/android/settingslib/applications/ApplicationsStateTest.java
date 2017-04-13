@@ -174,6 +174,13 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testOtherAppsRejectsLegacyGame() {
+        mEntry.info.flags = ApplicationInfo.FLAG_IS_GAME;
+
+        assertThat(ApplicationsState.FILTER_OTHER_APPS.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
     public void testInstantFilterAcceptsInstantApp() {
         when(mEntry.info.isInstantApp()).thenReturn(true);
         assertThat(ApplicationsState.FILTER_INSTANT.filterApp(mEntry)).isTrue();
@@ -199,5 +206,19 @@ public class ApplicationsStateTest {
         assertThat(ApplicationsState.FILTER_DISABLED.filterApp(mEntry)).isTrue();
         when(mEntry.info.isInstantApp()).thenReturn(true);
         assertThat(ApplicationsState.FILTER_DISABLED.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testVideoFilterAcceptsCategorizedVideo() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_VIDEO;
+
+        assertThat(ApplicationsState.FILTER_MOVIES.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testVideosFilterRejectsNotVideo() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_GAME;
+
+        assertThat(ApplicationsState.FILTER_MOVIES.filterApp(mEntry)).isFalse();
     }
 }
