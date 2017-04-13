@@ -15,10 +15,18 @@
  */
 package android.provider;
 
+import static android.graphics.fonts.FontVariationAxis.InvalidFormatException;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.Signature;
@@ -26,8 +34,10 @@ import android.database.Cursor;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontResult;
+import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
@@ -37,14 +47,22 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Utility class to deal with Font ContentProviders.
@@ -140,7 +158,6 @@ public class FontsContract {
      * @hide
      */
     public static final String PARCEL_FONT_RESULTS = "font_results";
-
     // Error codes internal to the system, which can not come from a provider. To keep the number
     // space open for new provider codes, these should all be negative numbers.
     /** @hide */
@@ -165,11 +182,128 @@ public class FontsContract {
         mPackageManager = mContext.getPackageManager();
     }
 
-    /** @hide */
-    @VisibleForTesting
-    public FontsContract(Context context, PackageManager packageManager) {
-        mContext = context;
-        mPackageManager = packageManager;
+    /**
+     * Object represent a font entry in the family returned from {@link #fetchFonts}.
+     */
+    public static class FontInfo {
+        private final Uri mUri;
+        private final int mTtcIndex;
+        private final FontVariationAxis[] mAxes;
+        private final int mWeight;
+        private final boolean mItalic;
+        private final int mResultCode;
+
+        /**
+         * Creates a Font with all the information needed about a provided font.
+         * @param uri A URI associated to the font file.
+         * @param ttcIndex If providing a TTC_INDEX file, the index to point to. Otherwise, 0.
+         * @param axes If providing a variation font, the settings for it. May be null.
+         * @param weight An integer that indicates the font weight.
+         * @param italic A boolean that indicates the font is italic style or not.
+         * @param resultCode A boolean that indicates the font contents is ready.
+         */
+        /** @hide */
+        public FontInfo(@NonNull Uri uri, @IntRange(from = 0) int ttcIndex,
+                @Nullable FontVariationAxis[] axes, @IntRange(from = 1, to = 1000) int weight,
+                boolean italic, int resultCode) {
+            mUri = Preconditions.checkNotNull(uri);
+            mTtcIndex = ttcIndex;
+            mAxes = axes;
+            mWeight = weight;
+            mItalic = italic;
+            mResultCode = resultCode;
+        }
+
+        /**
+         * Returns a URI associated to this record.
+         */
+        public @NonNull Uri getUri() {
+            return mUri;
+        }
+
+        /**
+         * Returns the index to be used to access this font when accessing a TTC file.
+         */
+        public @IntRange(from = 0) int getTtcIndex() {
+            return mTtcIndex;
+        }
+
+        /**
+         * Returns the list of axes associated to this font.
+         */
+        public @Nullable FontVariationAxis[] getAxes() {
+            return mAxes;
+        }
+
+        /**
+         * Returns the weight value for this font.
+         */
+        public @IntRange(from = 1, to = 1000) int getWeight() {
+            return mWeight;
+        }
+
+        /**
+         * Returns whether this font is italic.
+         */
+        public boolean isItalic() {
+            return mItalic;
+        }
+
+        /**
+         * Returns result code.
+         *
+         * {@link FontsContract.Columns#RESULT_CODE}
+         */
+        public int getResultCode() {
+            return mResultCode;
+        }
+    }
+
+    /**
+     * Object returned from {@link #fetchFonts}.
+     */
+    public static class FontFamilyResult {
+        /**
+         * Constant represents that the font was successfully retrieved. Note that when this value
+         * is set and {@link #getFonts} returns an empty array, it means there were no fonts
+         * matching the given query.
+         */
+        public static final int STATUS_OK = 0;
+
+        /**
+         * Constant represents that the given certificate was not matched with the provider's
+         * signature. {@link #getFonts} returns null if this status was set.
+         */
+        public static final int STATUS_WRONG_CERTIFICATES = 1;
+
+        /**
+         * Constant represents that the provider returns unexpected data. {@link #getFonts} returns
+         * null if this status was set. For example, this value is set when the font provider
+         * gives invalid format of variation settings.
+         */
+        public static final int STATUS_UNEXPECTED_DATA_PROVIDED = 2;
+
+        /** @hide */
+        @IntDef({STATUS_OK, STATUS_WRONG_CERTIFICATES, STATUS_UNEXPECTED_DATA_PROVIDED})
+        @Retention(RetentionPolicy.SOURCE)
+        @interface FontResultStatus {}
+
+        private final @FontResultStatus int mStatusCode;
+        private final FontInfo[] mFonts;
+
+        /** @hide */
+        public FontFamilyResult(@FontResultStatus int statusCode, @Nullable FontInfo[] fonts) {
+            mStatusCode = statusCode;
+            mFonts = fonts;
+        }
+
+        public @FontResultStatus int getStatusCode() {
+            return mStatusCode;
+        }
+
+        public @NonNull FontInfo[] getFonts() {
+            return mFonts;
+        }
     }
 
     // We use a background thread to post the content resolving work for all requests on. This
@@ -196,33 +330,210 @@ public class FontsContract {
                 mHandler = new Handler(mThread.getLooper());
             }
             mHandler.post(() -> {
-                ProviderInfo providerInfo = getProvider(request, receiver);
-                if (providerInfo == null) {
+                ProviderInfo providerInfo;
+                try {
+                    providerInfo = getProvider(mPackageManager, request);
+                    if (providerInfo == null) {
+                        receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
+                        return;
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
                     return;
                 }
-                getFontFromProvider(request, receiver, providerInfo.authority);
+                FontInfo[] fonts;
+                try {
+                    fonts = getFontFromProvider(mContext, request, providerInfo.authority,
+                            null /* cancellation signal */);
+                } catch (InvalidFormatException e) {
+                    receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
+                    return;
+                }
+
+                ArrayList<FontResult> result = new ArrayList<>();
+                int resultCode = -1;
+                for (FontInfo font : fonts) {
+                    try {
+                        resultCode = font.getResultCode();
+                        if (resultCode != Columns.RESULT_CODE_OK) {
+                            if (resultCode < 0) {
+                                // Negative values are reserved for the internal errors.
+                                resultCode = Columns.RESULT_CODE_FONT_NOT_FOUND;
+                            }
+                            for (int i = 0; i < result.size(); ++i) {
+                                try {
+                                    result.get(i).getFileDescriptor().close();
+                                } catch (IOException e) {
+                                    // Ignore, as we are closing fds for cleanup.
+                                }
+                            }
+                            receiver.send(resultCode, null);
+                            return;
+                        }
+                        ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(
+                                font.getUri(), "r");
+                        result.add(new FontResult(pfd, font.getTtcIndex(),
+                                FontVariationAxis.toFontVariationSettings(font.getAxes()),
+                                font.getWeight(), font.isItalic()));
+                    } catch (FileNotFoundException e) {
+                        Log.e(TAG, "FileNotFoundException raised when interacting with content "
+                                + "provider " + providerInfo.authority, e);
+                    }
+                }
+                if (!result.isEmpty()) {
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelableArrayList(PARCEL_FONT_RESULTS, result);
+                    receiver.send(Columns.RESULT_CODE_OK, bundle);
+                    return;
+                }
+                receiver.send(Columns.RESULT_CODE_FONT_NOT_FOUND, null);
             });
             mHandler.removeCallbacks(mReplaceDispatcherThreadRunnable);
             mHandler.postDelayed(mReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
         }
     }
 
+    /**
+     * Fetch fonts given a font request.
+     *
+     * @param context A {@link Context} to be used for fetching fonts.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none. If
+     *                           the operation is canceled, then {@link
+     *                           android.os.OperationCanceledException} will be thrown when the
+     *                           query is executed.
+     * @param request A {@link FontRequest} object that identifies the provider and query for the
+     *                request.
+     *
+     * @return {@link FontFamilyResult}
+     *
+     * @throws NameNotFoundException If requested package or authority was not found in system.
+     */
+    public static @NonNull FontFamilyResult fetchFonts(
+            @NonNull Context context, @Nullable CancellationSignal cancellationSignal,
+            @NonNull FontRequest request) throws NameNotFoundException {
+        ProviderInfo providerInfo = getProvider(context.getPackageManager(), request);
+        if (providerInfo == null) {
+            return new FontFamilyResult(FontFamilyResult.STATUS_WRONG_CERTIFICATES, null);
+
+        }
+        try {
+            FontInfo[] fonts = getFontFromProvider(
+                    context, request, providerInfo.authority, cancellationSignal);
+            return new FontFamilyResult(FontFamilyResult.STATUS_OK, fonts);
+        } catch (InvalidFormatException e) {
+            return new FontFamilyResult(FontFamilyResult.STATUS_UNEXPECTED_DATA_PROVIDED, null);
+        }
+    }
+
+    /**
+     * Build a Typeface from an array of {@link FontInfo}. Results that are marked as not ready
+     * will be skipped.
+     *
+     * @param context A {@link Context} that will be used to fetch the font contents.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none. If
+     *                           the operation is canceled, then {@link
+     *                           android.os.OperationCanceledException} will be thrown.
+     * @param fonts An array of {@link FontInfo} to be used to create a Typeface.
+     * @param weight A weight value to be used for selecting a font from a font family.
+     * @param italic {@code true} if this font is of italic style. This will be used for font
+     *               selection from a font family.
+     * @param fallbackFontName A fallback font name used if this method fails to create the
+     *                         Typeface. By passing {@code null}, this method returns {@code null}
+     *                         if typeface creation fails.
+     * @return A Typeface object. May return {@code null} if that is the value passed to {@code
+     *         fallBackFontName}.
+     */
+    public static Typeface buildTypeface(@NonNull Context context,
+            @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fonts,
+            int weight, boolean italic, @Nullable String fallbackFontName) {
+        final Map<Uri, ByteBuffer> uriBuffer =
+                prepareFontData(context, fonts, cancellationSignal);
+        Typeface typeface = new Typeface.Builder(fonts, uriBuffer)
+            .setWeight(weight)
+            .setItalic(italic)
+            .build();
+        // TODO: Use Typeface fallback instead.
+        if (typeface == null) {
+            typeface = Typeface.create(fallbackFontName, Typeface.NORMAL);
+        }
+        return typeface;
+    }
+
+    /**
+     * Build a Typeface from an array of {@link FontInfo}
+     *
+     * Results that are marked as not ready will be skipped.
+     *
+     * @param context A {@link Context} that will be used to fetch the font contents.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none. If
+     *                           the operation is canceled, then {@link
+     *                           android.os.OperationCanceledException} will be thrown.
+     * @param fonts An array of {@link FontInfo} to be used to create a Typeface.
+     * @return A Typeface object. Returns null if typeface creation fails.
+     */
+    public static Typeface buildTypeface(@NonNull Context context,
+            @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fonts) {
+        final Map<Uri, ByteBuffer> uriBuffer =
+                prepareFontData(context, fonts, cancellationSignal);
+        return new Typeface.Builder(fonts, uriBuffer).build();
+    }
+
+    /**
+     * A helper function to create a mapping from {@link Uri} to {@link ByteBuffer}.
+     *
+     * Skip if the file contents is not ready to be read.
+     *
+     * @param context A {@link Context} to be used for resolving content URI in
+     *                {@link FontInfo}.
+     * @param fonts An array of {@link FontInfo}.
+     * @return A map from {@link Uri} to {@link ByteBuffer}.
+     */
+    private static Map<Uri, ByteBuffer> prepareFontData(Context context, FontInfo[] fonts,
+            CancellationSignal cancellationSignal) {
+        final HashMap<Uri, ByteBuffer> out = new HashMap<>();
+        final ContentResolver resolver = context.getContentResolver();
+
+        for (FontInfo font : fonts) {
+            if (font.getResultCode() != Columns.RESULT_CODE_OK) {
+                continue;
+            }
+
+            final Uri uri = font.getUri();
+            if (out.containsKey(uri)) {
+                continue;
+            }
+
+            ByteBuffer buffer = null;
+            try (final ParcelFileDescriptor pfd =
+                    resolver.openFileDescriptor(uri, "r", cancellationSignal);
+                    final FileInputStream fis = new FileInputStream(pfd.getFileDescriptor())) {
+                final FileChannel fileChannel = fis.getChannel();
+                final long size = fileChannel.size();
+                buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, size);
+            } catch (IOException e) {
+                // ignore
+            }
+
+            // TODO: try other approach?, e.g. read all contents instead of mmap.
+
+            out.put(uri, buffer);
+        }
+        return Collections.unmodifiableMap(out);
+    }
+
     /** @hide */
     @VisibleForTesting
-    public ProviderInfo getProvider(FontRequest request, ResultReceiver receiver) {
+    public static @Nullable ProviderInfo getProvider(
+            PackageManager packageManager, FontRequest request) throws NameNotFoundException {
         String providerAuthority = request.getProviderAuthority();
-        ProviderInfo info = mPackageManager.resolveContentProvider(providerAuthority, 0);
+        ProviderInfo info = packageManager.resolveContentProvider(providerAuthority, 0);
         if (info == null) {
-            Log.e(TAG, "Can't find content provider " + providerAuthority);
-            receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-            return null;
+            throw new NameNotFoundException("No package found for authority: " + providerAuthority);
         }
 
         if (!info.packageName.equals(request.getProviderPackage())) {
-            Log.e(TAG, "Found content provider " + providerAuthority + ", but package was not "
-                    + request.getProviderPackage());
-            receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-            return null;
+            throw new NameNotFoundException("Found content provider " + providerAuthority
+                    + ", but package was not " + request.getProviderPackage());
         }
         // Trust system apps without signature checks
         if (info.applicationInfo.isSystemApp()) {
@@ -230,16 +541,11 @@ public class FontsContract {
         }
 
         List<byte[]> signatures;
-        try {
-            PackageInfo packageInfo = mPackageManager.getPackageInfo(info.packageName,
-                    PackageManager.GET_SIGNATURES);
-            signatures = convertToByteArrayList(packageInfo.signatures);
-            Collections.sort(signatures, sByteArrayComparator);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Can't find content provider " + providerAuthority, e);
-            receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-            return null;
-        }
+        PackageInfo packageInfo = packageManager.getPackageInfo(info.packageName,
+                PackageManager.GET_SIGNATURES);
+        signatures = convertToByteArrayList(packageInfo.signatures);
+        Collections.sort(signatures, sByteArrayComparator);
+
         List<List<byte[]>> requestCertificatesList = request.getCertificates();
         for (int i = 0; i < requestCertificatesList.size(); ++i) {
             // Make a copy so we can sort it without modifying the incoming data.
@@ -249,8 +555,6 @@ public class FontsContract {
                 return info;
             }
         }
-        Log.e(TAG, "Certificates don't match for given provider " + providerAuthority);
-        receiver.send(RESULT_CODE_WRONG_CERTIFICATES, null);
         return null;
     }
 
@@ -266,7 +570,8 @@ public class FontsContract {
         return 0;
     };
 
-    private boolean equalsByteArrayList(List<byte[]> signatures, List<byte[]> requestSignatures) {
+    private static boolean equalsByteArrayList(
+            List<byte[]> signatures, List<byte[]> requestSignatures) {
         if (signatures.size() != requestSignatures.size()) {
             return false;
         }
@@ -278,7 +583,7 @@ public class FontsContract {
         return true;
     }
 
-    private List<byte[]> convertToByteArrayList(Signature[] signatures) {
+    private static List<byte[]> convertToByteArrayList(Signature[] signatures) {
         List<byte[]> shas = new ArrayList<>();
         for (int i = 0; i < signatures.length; ++i) {
             shas.add(signatures[i].toByteArray());
@@ -288,9 +593,10 @@ public class FontsContract {
 
     /** @hide */
     @VisibleForTesting
-    public void getFontFromProvider(FontRequest request, ResultReceiver receiver,
-            String authority) {
-        ArrayList<FontResult> result = null;
+    public static @NonNull FontInfo[] getFontFromProvider(
+            Context context, FontRequest request, String authority,
+            CancellationSignal cancellationSignal) throws InvalidFormatException {
+        ArrayList<FontInfo> result = new ArrayList<>();
         final Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority)
                 .build();
@@ -298,15 +604,14 @@ public class FontsContract {
                 .authority(authority)
                 .appendPath("file")
                 .build();
-        try (Cursor cursor = mContext.getContentResolver().query(uri, new String[] { Columns._ID,
+        try (Cursor cursor = context.getContentResolver().query(uri, new String[] { Columns._ID,
                         Columns.FILE_ID, Columns.TTC_INDEX, Columns.VARIATION_SETTINGS,
                         Columns.STYLE, Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
-                "query = ?", new String[] { request.getQuery() }, null);) {
+                "query = ?", new String[] { request.getQuery() }, null, cancellationSignal);) {
             // TODO: Should we restrict the amount of fonts that can be returned?
             // TODO: Write documentation explaining that all results should be from the same family.
             if (cursor != null && cursor.getCount() > 0) {
                 final int resultCodeColumnIndex = cursor.getColumnIndex(Columns.RESULT_CODE);
-                int resultCode = -1;
                 result = new ArrayList<>();
                 final int idColumnIndex = cursor.getColumnIndexOrThrow(Columns._ID);
                 final int fileIdColumnIndex = cursor.getColumnIndex(Columns.FILE_ID);
@@ -316,23 +621,13 @@ public class FontsContract {
                 final int italicColumnIndex = cursor.getColumnIndex(Columns.ITALIC);
                 final int styleColumnIndex = cursor.getColumnIndex(Columns.STYLE);
                 while (cursor.moveToNext()) {
-                    resultCode = resultCodeColumnIndex != -1
+                    int resultCode = resultCodeColumnIndex != -1
                             ? cursor.getInt(resultCodeColumnIndex) : Columns.RESULT_CODE_OK;
-                    if (resultCode != Columns.RESULT_CODE_OK) {
-                        if (resultCode < 0) {
-                            // Negative values are reserved for the internal errors.
-                            resultCode = Columns.RESULT_CODE_FONT_NOT_FOUND;
-                        }
-                        for (int i = 0; i < result.size(); ++i) {
-                            try {
-                                result.get(i).getFileDescriptor().close();
-                            } catch (IOException e) {
-                                // Ignore, as we are closing fds for cleanup.
-                            }
-                        }
-                        receiver.send(resultCode, null);
-                        return;
-                    }
+                    final int ttcIndex = ttcIndexColumnIndex != -1
+                            ? cursor.getInt(ttcIndexColumnIndex) : 0;
+                    final String variationSettings = vsColumnIndex != -1
+                            ? cursor.getString(vsColumnIndex) : null;
+
                     Uri fileUri;
                     if (fileIdColumnIndex == -1) {
                         long id = cursor.getLong(idColumnIndex);
@@ -341,42 +636,27 @@ public class FontsContract {
                         long id = cursor.getLong(fileIdColumnIndex);
                         fileUri = ContentUris.withAppendedId(fileBaseUri, id);
                     }
-                    try {
-                        ParcelFileDescriptor pfd =
-                                mContext.getContentResolver().openFileDescriptor(fileUri, "r");
-                        final int ttcIndex = ttcIndexColumnIndex != -1
-                                ? cursor.getInt(ttcIndexColumnIndex) : 0;
-                        final String variationSettings = vsColumnIndex != -1
-                                ? cursor.getString(vsColumnIndex) : null;
-                        // TODO: Stop using STYLE column and enforce WEIGHT/ITALIC column.
-                        int weight;
-                        boolean italic;
-                        if (weightColumnIndex != -1 && italicColumnIndex != -1) {
-                            weight = cursor.getInt(weightColumnIndex);
-                            italic = cursor.getInt(italicColumnIndex) == 1;
-                        } else if (styleColumnIndex != -1) {
-                            final int style = cursor.getInt(styleColumnIndex);
-                            weight = (style & Typeface.BOLD) != 0 ? 700 : 400;
-                            italic = (style & Typeface.ITALIC) != 0;
-                        } else {
-                            weight = 400;
-                            italic = false;
-                        }
-                        result.add(
-                                new FontResult(pfd, ttcIndex, variationSettings, weight, italic));
-                    } catch (FileNotFoundException e) {
-                        Log.e(TAG, "FileNotFoundException raised when interacting with content "
-                                + "provider " + authority, e);
+                    // TODO: Stop using STYLE column and enforce WEIGHT/ITALIC column.
+                    int weight;
+                    boolean italic;
+                    if (weightColumnIndex != -1 && italicColumnIndex != -1) {
+                        weight = cursor.getInt(weightColumnIndex);
+                        italic = cursor.getInt(italicColumnIndex) == 1;
+                    } else if (styleColumnIndex != -1) {
+                        final int style = cursor.getInt(styleColumnIndex);
+                        weight = (style & Typeface.BOLD) != 0 ?
+                                Typeface.Builder.BOLD_WEIGHT : Typeface.Builder.NORMAL_WEIGHT;
+                        italic = (style & Typeface.ITALIC) != 0;
+                    } else {
+                        weight = Typeface.Builder.NORMAL_WEIGHT;
+                        italic = false;
                     }
+                    FontVariationAxis[] axes =
+                            FontVariationAxis.fromFontVariationSettings(variationSettings);
+                    result.add(new FontInfo(fileUri, ttcIndex, axes, weight, italic, resultCode));
                 }
             }
         }
-        if (result != null && !result.isEmpty()) {
-            Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList(PARCEL_FONT_RESULTS, result);
-            receiver.send(Columns.RESULT_CODE_OK, bundle);
-            return;
-        }
-        receiver.send(Columns.RESULT_CODE_FONT_NOT_FOUND, null);
+        return result.toArray(new FontInfo[0]);
     }
 }
