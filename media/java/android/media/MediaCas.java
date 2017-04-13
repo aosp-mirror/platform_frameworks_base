@@ -506,34 +506,8 @@ public final class MediaCas implements AutoCloseable {
     }
 
     /**
-     * Open a session for the specified program.
-     *
-     * @param programNumber program_number of the program (as in ISO/IEC13818-1).
-     *
-     * @return session the newly opened session.
-     *
-     * @throws IllegalStateException if the MediaCas instance is not valid.
-     * @throws MediaCasException for CAS-specific errors.
-     * @throws MediaCasStateException for CAS-specific state exceptions.
-     */
-    public Session openSession(int programNumber) throws MediaCasException {
-        validateInternalStates();
-
-        try {
-            return createFromSessionId(mICas.openSession(programNumber));
-        } catch (ServiceSpecificException e) {
-            MediaCasException.throwExceptions(e);
-        } catch (RemoteException e) {
-            cleanupAndRethrowIllegalState();
-        }
-        return null;
-    }
-
-    /**
-     * Open a session for the specified stream.
-     *
-     * @param programNumber program_number of the stream (as in ISO/IEC13818-1).
-     * @param elementaryPID elementary_PID of the stream (as in ISO/IEC13818-1).
+     * Open a session to descramble one or more streams scrambled by the
+     * conditional access system.
      *
      * @return session the newly opened session.
      *
@@ -541,12 +515,11 @@ public final class MediaCas implements AutoCloseable {
      * @throws MediaCasException for CAS-specific errors.
      * @throws MediaCasStateException for CAS-specific state exceptions.
      */
-    public Session openSession(int programNumber, int elementaryPID)
-            throws MediaCasException {
+    public Session openSession() throws MediaCasException {
         validateInternalStates();
 
         try {
-            return createFromSessionId(mICas.openSessionForStream(programNumber, elementaryPID));
+            return createFromSessionId(mICas.openSession());
         } catch (ServiceSpecificException e) {
             MediaCasException.throwExceptions(e);
         } catch (RemoteException e) {
