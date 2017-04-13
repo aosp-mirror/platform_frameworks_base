@@ -30,7 +30,7 @@ import android.net.NetworkStats;
 import android.net.TrafficStats;
 import android.test.AndroidTestCase;
 
-import com.android.frameworks.coretests.R;
+import com.android.frameworks.tests.net.R;
 
 import java.io.File;
 import java.io.FileOutputStream;

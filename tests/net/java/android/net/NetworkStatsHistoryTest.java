@@ -38,7 +38,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
-import com.android.frameworks.coretests.R;
+import com.android.frameworks.tests.net.R;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
