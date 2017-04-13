@@ -75,6 +75,7 @@ public class NotificationComparatorTest {
     private NotificationRecord mRecordContact;
     private NotificationRecord mRecordUrgent;
     private NotificationRecord mRecordCheater;
+    private NotificationRecord mRecordCheaterColorized;
 
 
     @Before
@@ -174,6 +175,7 @@ public class NotificationComparatorTest {
                 pkg2, 1, "cheater", uid2, uid2, n9, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mRecordCheater.setUserImportance(NotificationManager.IMPORTANCE_LOW);
+        mRecordCheater.setPackagePriority(Notification.PRIORITY_MAX);
 
         Notification n10 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.InboxStyle().setSummaryText("message!")).build();
@@ -181,6 +183,15 @@ public class NotificationComparatorTest {
                 pkg2, 1, "email", uid2, uid2, n10, new UserHandle(userId),
                 "", 1599), getDefaultChannel());
         mRecordEmail.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+
+        Notification n11 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setColorized(true)
+                .build();
+        mRecordCheaterColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+                pkg2, 1, "cheater", uid2, uid2, n11, new UserHandle(userId),
+                "", 9258), getDefaultChannel());
+        mRecordCheaterColorized.setUserImportance(NotificationManager.IMPORTANCE_LOW);
     }
 
     @Test
@@ -195,6 +206,7 @@ public class NotificationComparatorTest {
         expected.add(mRecordEmail);
         expected.add(mRecordUrgent);
         expected.add(mRecordCheater);
+        expected.add(mRecordCheaterColorized);
         expected.add(mRecordMinCall);
 
         List<NotificationRecord> actual = new ArrayList<>();
