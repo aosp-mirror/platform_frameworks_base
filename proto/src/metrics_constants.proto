@@ -3923,6 +3923,21 @@ message MetricsEvent {
     // OS: O
     ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST = 937;
 
+    // OPEN: Settings > Security > Managed Device Info > Apps installed
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_INSTALLED_APPS = 938;
+
+    // OPEN: Settings > Security > Managed Device Info > nnn permissions
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_PERMISSIONS = 939;
+
+    // OPEN: Settings > Security > Managed Device Info > Default apps
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_DEFAULT_APPS = 940;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
