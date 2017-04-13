@@ -28,6 +28,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Surface;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -92,6 +93,7 @@ public class MediaRecorder
 
     private String mPath;
     private FileDescriptor mFd;
+    private File mFile;
     private EventHandler mEventHandler;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
@@ -804,7 +806,23 @@ public class MediaRecorder
     public void setOutputFile(FileDescriptor fd) throws IllegalStateException
     {
         mPath = null;
+        mFile = null;
         mFd = fd;
+    }
+
+    /**
+     * Pass in the file object to be written. Call this after setOutputFormat() but before prepare().
+     * File should be seekable. After setting the next output file, application should not use the
+     * file until {@link #stop}. Application is responsible for cleaning up unused files after
+     * {@link #stop} is called.
+     *
+     * @param file the file object to be written into.
+     */
+    public void setOutputFile(File file)
+    {
+        mPath = null;
+        mFd = null;
+        mFile = file;
     }
 
     /**
@@ -842,15 +860,16 @@ public class MediaRecorder
     public void setOutputFile(String path) throws IllegalStateException
     {
         mFd = null;
+        mFile = null;
         mPath = path;
     }
 
     /**
-     * Sets the next output file path to be used when the maximum filesize is reached
-     * on the prior output {@link #setOutputFile} or {@link #setNextOutputFile}). File should
-     * be seekable. After setting the next output file, application should not use the file
-     * referenced by this file descriptor until {@link #stop}. Application must call this
-     * after receiving on the {@link android.media.MediaRecorder.OnInfoListener} a "what" code of
+     * Sets the next output file to be used when the maximum filesize is reached on the prior
+     * output {@link #setOutputFile} or {@link #setNextOutputFile}). File should be seekable.
+     * After setting the next output file, application should not use the file until {@link #stop}.
+     * Application must call this after receiving on the
+     * {@link android.media.MediaRecorder.OnInfoListener} a "what" code of
      * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING} and before receiving a "what" code of
      * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}. The file is not used until switching to
      * that output. Application will receive {@link #MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED}
@@ -858,19 +877,17 @@ public class MediaRecorder
      * the previous one has not been used. Application is responsible for cleaning up unused files
      * after {@link #stop} is called.
      *
-     * @param  path The pathname to use.
+     * @param  file The file to use.
      * @throws IllegalStateException if it is called before prepare().
      * @throws IOException if setNextOutputFile fails otherwise.
      */
-    public void setNextOutputFile(String path) throws IllegalStateException, IOException
+    public void setNextOutputFile(File file) throws IllegalStateException, IOException
     {
-        if (path != null) {
-            RandomAccessFile file = new RandomAccessFile(path, "rws");
-            try {
-                _setNextOutputFile(file.getFD());
-            } finally {
-                file.close();
-            }
+        RandomAccessFile f = new RandomAccessFile(file, "rws");
+        try {
+            _setNextOutputFile(f.getFD());
+        } finally {
+            f.close();
         }
     }
 
@@ -899,6 +916,13 @@ public class MediaRecorder
             }
         } else if (mFd != null) {
             _setOutputFile(mFd);
+        } else if (mFile != null) {
+            RandomAccessFile file = new RandomAccessFile(mFile, "rws");
+            try {
+                _setOutputFile(file.getFD());
+            } finally {
+                file.close();
+            }
         } else {
             throw new IOException("No valid output file");
         }
