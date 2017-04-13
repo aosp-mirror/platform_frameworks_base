@@ -292,6 +292,7 @@ public class Typeface {
      *                request. May not be null.
      * @param callback A callback that will be triggered when results are obtained. May not be null.
      */
+    @Deprecated
     public static void create(@NonNull FontRequest request, @NonNull FontRequestCallback callback) {
         // Check the cache first
         // TODO: would the developer want to avoid a cache hit and always ask for the freshest
@@ -404,6 +405,7 @@ public class Typeface {
     /**
      * Interface used to receive asynchronously fetched typefaces.
      */
+    @Deprecated
     public interface FontRequestCallback {
         /**
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
