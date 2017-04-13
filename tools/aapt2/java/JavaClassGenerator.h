@@ -59,7 +59,7 @@ struct JavaClassGeneratorOptions {
   std::vector<std::string> javadoc_annotations;
 };
 
-// Generates the R.java file for a resource table.
+// Generates the R.java file for a resource table and optionally an R.txt file.
 class JavaClassGenerator {
  public:
   JavaClassGenerator(IAaptContext* context, ResourceTable* table,
@@ -69,10 +69,12 @@ class JavaClassGenerator {
   // All symbols technically belong to a single package, but linked libraries will
   // have their names mangled, denoting that they came from a different package.
   // We need to generate these symbols in a separate file. Returns true on success.
-  bool Generate(const android::StringPiece& package_name_to_generate, std::ostream* out);
+  bool Generate(const android::StringPiece& package_name_to_generate, std::ostream* out,
+                std::ostream* out_r_txt = nullptr);
 
   bool Generate(const android::StringPiece& package_name_to_generate,
-                const android::StringPiece& output_package_name, std::ostream* out);
+                const android::StringPiece& output_package_name, std::ostream* out,
+                std::ostream* out_r_txt = nullptr);
 
   const std::string& getError() const;
 
@@ -88,13 +90,14 @@ class JavaClassGenerator {
 
   bool ProcessType(const android::StringPiece& package_name_to_generate,
                    const ResourceTablePackage& package, const ResourceTableType& type,
-                   ClassDefinition* out_type_class_def, MethodDefinition* out_rewrite_method_def);
+                   ClassDefinition* out_type_class_def, MethodDefinition* out_rewrite_method_def,
+                   std::ostream* out_r_txt);
 
   // Writes a resource to the R.java file, optionally writing out a rewrite rule for its package
   // ID if `out_rewrite_method` is not nullptr.
   void ProcessResource(const ResourceNameRef& name, const ResourceId& id,
                        const ResourceEntry& entry, ClassDefinition* out_class_def,
-                       MethodDefinition* out_rewrite_method);
+                       MethodDefinition* out_rewrite_method, std::ostream* out_r_txt);
 
   // Writes a styleable resource to the R.java file, optionally writing out a rewrite rule for
   // its package ID if `out_rewrite_method` is not nullptr.
@@ -102,7 +105,8 @@ class JavaClassGenerator {
   void ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
                         const Styleable& styleable,
                         const android::StringPiece& package_name_to_generate,
-                        ClassDefinition* out_class_def, MethodDefinition* out_rewrite_method);
+                        ClassDefinition* out_class_def, MethodDefinition* out_rewrite_method,
+                        std::ostream* out_r_txt);
 
   IAaptContext* context_;
   ResourceTable* table_;
