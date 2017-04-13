@@ -21,12 +21,14 @@ import android.system.OsConstants;
 
 /**
  * Callback that handles file system requests from ProxyFileDescriptor.
+ *
+ * @see android.os.storage.StorageManager#openProxyFileDescriptor(int, ProxyFileDescriptorCallback)
  */
 public abstract class ProxyFileDescriptorCallback {
     /**
      * Returns size of bytes provided by the file descriptor.
-     * @return Size of bytes
-     * @throws ErrnoException
+     * @return Size of bytes.
+     * @throws ErrnoException ErrnoException containing E constants in OsConstants.
      */
     public long onGetSize() throws ErrnoException {
         throw new ErrnoException("onGetSize", OsConstants.EBADF);
@@ -35,11 +37,13 @@ public abstract class ProxyFileDescriptorCallback {
     /**
      * Provides bytes read from file descriptor.
      * It needs to return exact requested size of bytes unless it reaches file end.
-     * @param offset Where to read bytes from.
+     * @param offset Offset in bytes from the file head specifying where to read bytes. If a seek
+     *     operation is conducted on the file descriptor, then a read operation is requested, the
+     *     offset refrects the proper position of requested bytes.
      * @param size Size for read bytes.
      * @param data Byte array to store read bytes.
      * @return Size of bytes returned by the function.
-     * @throws ErrnoException
+     * @throws ErrnoException ErrnoException containing E constants in OsConstants.
      */
     public int onRead(long offset, int size, byte[] data) throws ErrnoException {
         throw new ErrnoException("onRead", OsConstants.EBADF);
@@ -47,19 +51,23 @@ public abstract class ProxyFileDescriptorCallback {
 
     /**
      * Handles bytes written to file descriptor.
-     * @param offset Where to write bytes to.
+     * @param offset Offset in bytes from the file head specifying where to write bytes. If a seek
+     *     operation is conducted on the file descriptor, then a write operation is requested, the
+     *     offset refrects the proper position of requested bytes.
      * @param size Size for write bytes.
      * @param data Byte array to be written to somewhere.
      * @return Size of bytes processed by the function.
-     * @throws ErrnoException
+     * @throws ErrnoException ErrnoException containing E constants in OsConstants.
      */
     public int onWrite(long offset, int size, byte[] data) throws ErrnoException {
         throw new ErrnoException("onWrite", OsConstants.EBADF);
     }
 
     /**
-     * Processes fsync request.
-     * @throws ErrnoException
+     * Ensures all the written data are stored in permanent storage device.
+     * For example, if it has data stored in on memory cache, it needs to flush data to storage
+     * device.
+     * @throws ErrnoException ErrnoException containing E constants in OsConstants.
      */
     public void onFsync() throws ErrnoException {
         throw new ErrnoException("onFsync", OsConstants.EINVAL);
