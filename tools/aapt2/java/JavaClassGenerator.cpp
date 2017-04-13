@@ -22,6 +22,7 @@
 #include <sstream>
 #include <tuple>
 
+#include "android-base/errors.h"
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
@@ -227,7 +228,8 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
                                           const Styleable& styleable,
                                           const StringPiece& package_name_to_generate,
                                           ClassDefinition* out_class_def,
-                                          MethodDefinition* out_rewrite_method) {
+                                          MethodDefinition* out_rewrite_method,
+                                          std::ostream* out_r_txt) {
   const std::string array_field_name = TransformToFieldName(name.entry);
   std::unique_ptr<ResourceArrayMember> array_def =
       util::make_unique<ResourceArrayMember>(array_field_name);
@@ -328,10 +330,25 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
     array_def->GetCommentBuilder()->AppendComment(styleable_comment.str());
   }
 
+  if (out_r_txt != nullptr) {
+    *out_r_txt << "int[] styleable " << array_field_name << " {";
+  }
+
   // Add the ResourceIds to the array member.
-  for (const StyleableAttr& styleable_attr : sorted_attributes) {
-    const ResourceId id = styleable_attr.attr_ref->id.value_or_default(ResourceId(0));
+  for (size_t i = 0; i < attr_count; i++) {
+    const ResourceId id = sorted_attributes[i].attr_ref->id.value_or_default(ResourceId(0));
     array_def->AddElement(id);
+
+    if (out_r_txt != nullptr) {
+      if (i != 0) {
+        *out_r_txt << ",";
+      }
+      *out_r_txt << " " << id;
+    }
+  }
+
+  if (out_r_txt != nullptr) {
+    *out_r_txt << " }\n";
   }
 
   // Add the Styleable array to the Styleable class.
@@ -386,6 +403,11 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
     attr_processor->AppendComment(
         StringPrintf("@attr name %s:%s", package_name.data(), attr_name.entry.data()));
 
+    if (out_r_txt != nullptr) {
+      *out_r_txt << StringPrintf("int styleable %s %d\n", sorted_attributes[i].field_name.data(),
+                                 (int)i);
+    }
+
     out_class_def->AddMember(std::move(index_member));
   }
 
@@ -406,7 +428,8 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
 
 void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const ResourceId& id,
                                          const ResourceEntry& entry, ClassDefinition* out_class_def,
-                                         MethodDefinition* out_rewrite_method) {
+                                         MethodDefinition* out_rewrite_method,
+                                         std::ostream* out_r_txt) {
   const std::string field_name = TransformToFieldName(name.entry);
   std::unique_ptr<ResourceMember> resource_member =
       util::make_unique<ResourceMember>(field_name, id);
@@ -433,6 +456,10 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
   }
 
   out_class_def->AddMember(std::move(resource_member));
+
+  if (out_r_txt != nullptr) {
+    *out_r_txt << "int " << name.type << " " << field_name << " " << id << "\n";
+  }
 
   if (out_rewrite_method != nullptr) {
     const StringPiece& type_str = ToString(name.type);
@@ -470,7 +497,8 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
                                      const ResourceTablePackage& package,
                                      const ResourceTableType& type,
                                      ClassDefinition* out_type_class_def,
-                                     MethodDefinition* out_rewrite_method_def) {
+                                     MethodDefinition* out_rewrite_method_def,
+                                     std::ostream* out_r_txt) {
   for (const auto& entry : type.entries) {
     const Maybe<std::string> unmangled_name =
         UnmangleResource(package.name, package_name_to_generate, *entry);
@@ -505,15 +533,17 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
           static_cast<const Styleable*>(entry->values.front()->value.get());
 
       ProcessStyleable(resource_name, id, *styleable, package_name_to_generate, out_type_class_def,
-                       out_rewrite_method_def);
+                       out_rewrite_method_def, out_r_txt);
     } else {
-      ProcessResource(resource_name, id, *entry, out_type_class_def, out_rewrite_method_def);
+      ProcessResource(resource_name, id, *entry, out_type_class_def, out_rewrite_method_def,
+                      out_r_txt);
     }
   }
   return true;
 }
 
-bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate, std::ostream* out) {
+bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate, std::ostream* out,
+                                  std::ostream* out_r_txt) {
   return Generate(package_name_to_generate, package_name_to_generate, out);
 }
 
@@ -527,8 +557,8 @@ static void AppendJavaDocAnnotations(const std::vector<std::string>& annotations
 }
 
 bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
-                                  const StringPiece& out_package_name,
-                                  std::ostream* out) {
+                                  const StringPiece& out_package_name, std::ostream* out,
+                                  std::ostream* out_r_txt) {
   ClassDefinition r_class("R", ClassQualifier::kNone, true);
   std::unique_ptr<MethodDefinition> rewrite_method;
 
@@ -558,7 +588,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
       std::unique_ptr<ClassDefinition> class_def = util::make_unique<ClassDefinition>(
           ToString(type->type), ClassQualifier::kStatic, force_creation_if_empty);
       if (!ProcessType(package_name_to_generate, *package, *type, class_def.get(),
-                       rewrite_method.get())) {
+                       rewrite_method.get(), out_r_txt)) {
         return false;
       }
 
@@ -567,7 +597,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
         const ResourceTableType* priv_type = package->FindType(ResourceType::kAttrPrivate);
         if (priv_type) {
           if (!ProcessType(package_name_to_generate, *package, *priv_type, class_def.get(),
-                           rewrite_method.get())) {
+                           rewrite_method.get(), out_r_txt)) {
             return false;
           }
         }
@@ -597,6 +627,16 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
   }
 
   out->flush();
+
+  if (out_r_txt != nullptr) {
+    out_r_txt->flush();
+
+    if (!*out_r_txt) {
+      error_ = android::base::SystemErrorCodeToString(errno);
+      return false;
+    }
+  }
+
   return true;
 }
 
