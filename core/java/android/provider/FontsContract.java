@@ -394,6 +394,150 @@ public class FontsContract {
     }
 
     /**
+     * Interface used to receive asynchronously fetched typefaces.
+     */
+    public static class FontRequestCallback {
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
+         * provider was not found on the device.
+         */
+        public static final int FAIL_REASON_PROVIDER_NOT_FOUND = RESULT_CODE_PROVIDER_NOT_FOUND;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
+         * provider must be authenticated and the given certificates do not match its signature.
+         */
+        public static final int FAIL_REASON_WRONG_CERTIFICATES = RESULT_CODE_WRONG_CERTIFICATES;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
+         * returned by the provider was not loaded properly.
+         */
+        public static final int FAIL_REASON_FONT_LOAD_ERROR = -3;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
+         * provider did not return any results for the given query.
+         */
+        public static final int FAIL_REASON_FONT_NOT_FOUND = Columns.RESULT_CODE_FONT_NOT_FOUND;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
+         * provider found the queried font, but it is currently unavailable.
+         */
+        public static final int FAIL_REASON_FONT_UNAVAILABLE = Columns.RESULT_CODE_FONT_UNAVAILABLE;
+        /**
+         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
+         * query was not supported by the provider.
+         */
+        public static final int FAIL_REASON_MALFORMED_QUERY = Columns.RESULT_CODE_MALFORMED_QUERY;
+
+        /** @hide */
+        @IntDef({ FAIL_REASON_PROVIDER_NOT_FOUND, FAIL_REASON_FONT_LOAD_ERROR,
+                FAIL_REASON_FONT_NOT_FOUND, FAIL_REASON_FONT_UNAVAILABLE,
+                FAIL_REASON_MALFORMED_QUERY })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface FontRequestFailReason {}
+
+        public FontRequestCallback() {}
+
+        /**
+         * Called then a Typeface request done via {@link Typeface#create(FontRequest,
+         * FontRequestCallback)} is complete. Note that this method will not be called if
+         * {@link #onTypefaceRequestFailed(int)} is called instead.
+         * @param typeface  The Typeface object retrieved.
+         */
+        public void onTypefaceRetrieved(Typeface typeface) {}
+
+        /**
+         * Called when a Typeface request done via {@link Typeface#create(FontRequest,
+         * FontRequestCallback)} fails.
+         * @param reason One of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
+         *               {@link #FAIL_REASON_FONT_NOT_FOUND},
+         *               {@link #FAIL_REASON_FONT_LOAD_ERROR},
+         *               {@link #FAIL_REASON_FONT_UNAVAILABLE} or
+         *               {@link #FAIL_REASON_MALFORMED_QUERY}.
+         */
+        public void onTypefaceRequestFailed(@FontRequestFailReason int reason) {}
+    }
+
+    /**
+     * Create a typeface object given a font request. The font will be asynchronously fetched,
+     * therefore the result is delivered to the given callback. See {@link FontRequest}.
+     * Only one of the methods in callback will be invoked, depending on whether the request
+     * succeeds or fails. These calls will happen on the caller thread.
+     * @param context A context to be used for fetching from font provider.
+     * @param request A {@link FontRequest} object that identifies the provider and query for the
+     *                request. May not be null.
+     * @param callback A callback that will be triggered when results are obtained. May not be null.
+     * @param handler A handler to be processed the font fetching.
+     */
+    public static void requestFont(@NonNull Context context, @NonNull FontRequest request,
+            @NonNull FontRequestCallback callback, @NonNull Handler handler) {
+
+        final Handler callerThreadHandler = new Handler();
+        handler.post(() -> {
+            // TODO: Cache the result.
+            FontFamilyResult result;
+            try {
+                result = fetchFonts(context, null /* cancellation signal */, request);
+            } catch (NameNotFoundException e) {
+                callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                        FontRequestCallback.FAIL_REASON_PROVIDER_NOT_FOUND));
+                return;
+            }
+
+            if (result.getStatusCode() != FontFamilyResult.STATUS_OK) {
+                switch (result.getStatusCode()) {
+                    case FontFamilyResult.STATUS_WRONG_CERTIFICATES:
+                        callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                                FontRequestCallback.FAIL_REASON_WRONG_CERTIFICATES));
+                        return;
+                    case FontFamilyResult.STATUS_UNEXPECTED_DATA_PROVIDED:
+                        callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                                FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR));
+                        return;
+                    default:
+                        // fetchFont returns unexpected status type. Fallback to load error.
+                        callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                                FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR));
+                        return;
+                }
+            }
+
+            final FontInfo[] fonts = result.getFonts();
+            if (fonts == null || fonts.length == 0) {
+                callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                        FontRequestCallback.FAIL_REASON_FONT_NOT_FOUND));
+                return;
+            }
+            for (final FontInfo font : fonts) {
+                if (font.getResultCode() != Columns.RESULT_CODE_OK) {
+                    // We proceed if all font entry is ready to use. Otherwise report the first
+                    // error.
+                    final int resultCode = font.getResultCode();
+                    if (resultCode < 0) {
+                        // Negative values are reserved for internal errors. Fallback to load error.
+                        callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                                FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR));
+                    } else {
+                        callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                                resultCode));
+                    }
+                    return;
+                }
+            }
+
+            final Typeface typeface = buildTypeface(context, null /* cancellation signal */, fonts);
+            if (typeface == null) {
+                // Something went wrong during reading font files. This happens if the given font
+                // file is an unsupported font type.
+                callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
+                        FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR));
+                return;
+            }
+
+            callerThreadHandler.post(() -> callback.onTypefaceRetrieved(typeface));
+        });
+    }
+
+    /**
      * Fetch fonts given a font request.
      *
      * @param context A {@link Context} to be used for fetching fonts.
