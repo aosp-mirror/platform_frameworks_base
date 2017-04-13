@@ -3205,9 +3205,10 @@ public class Notification implements Parcelable
          * This should only be used for high priority ongoing tasks like navigation, an ongoing
          * call, or other similarly high-priority events for the user.
          * <p>
-         * For most styles, the coloring will only be applied if the notification is ongoing.
+         * For most styles, the coloring will only be applied if the notification is for a
+         * foreground service notification.
          * However, for {@link MediaStyle} and {@link DecoratedMediaCustomViewStyle} notifications
-         * that have a media session attached there is no requirement for it to be ongoing.
+         * that have a media session attached there is no such requirement.
          *
          * @see Builder#setOngoing(boolean)
          * @see Builder#setColor(int)
@@ -4705,12 +4706,10 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @return whether this notification is ongoing and can't be dismissed by the user.
+     * @return whether this notification is a foreground service notification
      */
-    private boolean isOngoing() {
-        final int ongoingFlags = Notification.FLAG_FOREGROUND_SERVICE
-                | Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR;
-        return (flags & ongoingFlags) != 0;
+    private boolean isForegroundService() {
+        return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
 
     /**
@@ -4735,8 +4734,7 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @return true if this notification is colorized. This also factors in whether the
-     * notification is ongoing.
+     * @return true if this notification is colorized.
      *
      * @hide
      */
@@ -4752,7 +4750,7 @@ public class Notification implements Parcelable
                 return true;
             }
         }
-        return extras.getBoolean(EXTRA_COLORIZED) && isOngoing();
+        return extras.getBoolean(EXTRA_COLORIZED) && isForegroundService();
     }
 
     private boolean hasLargeIcon() {
