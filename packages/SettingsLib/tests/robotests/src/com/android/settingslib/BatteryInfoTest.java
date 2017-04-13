@@ -32,6 +32,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -44,10 +45,12 @@ public class BatteryInfoTest {
     private static final String STATUS_FULL = "Full";
     private static final String STATUS_CHARGING_NO_TIME = "Charging";
     private static final String STATUS_CHARGING_TIME = "Charging - 2h left";
+    private static final int PLUGGED_IN = 1;
     private static final long REMAINING_TIME_NULL = -1;
     private static final long REMAINING_TIME = 2;
     private Intent mDisChargingBatteryBroadcast;
     private Intent mChargingBatteryBroadcast;
+
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private BatteryStats mBatteryStats;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -95,7 +98,7 @@ public class BatteryInfoTest {
         BatteryInfo info = BatteryInfo.getBatteryInfo(mContext, mChargingBatteryBroadcast,
                 mBatteryStats, SystemClock.elapsedRealtime() * 1000, false);
 
-        assertThat(info.mChargeLabelString).isEqualTo(STATUS_CHARGING_TIME);
+        assertThat(info.chargeLabelString).isEqualTo(STATUS_CHARGING_TIME);
     }
 
     @Test
@@ -104,6 +107,14 @@ public class BatteryInfoTest {
         BatteryInfo info = BatteryInfo.getBatteryInfo(mContext, mChargingBatteryBroadcast,
                 mBatteryStats, SystemClock.elapsedRealtime() * 1000, false);
 
-        assertThat(info.mChargeLabelString).isEqualTo(STATUS_CHARGING_NO_TIME);
+        assertThat(info.chargeLabelString).isEqualTo(STATUS_CHARGING_NO_TIME);
+    }
+
+    @Test
+    public void testGetBatteryInfo_pluggedIn_dischargingFalse() {
+        BatteryInfo info = BatteryInfo.getBatteryInfo(mContext, mChargingBatteryBroadcast,
+                mBatteryStats, SystemClock.elapsedRealtime() * 1000, true);
+
+        assertThat(info.discharging).isEqualTo(false);
     }
 }

@@ -25,22 +25,21 @@ import android.os.BatteryStats.HistoryItem;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.util.SparseIntArray;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.settingslib.graph.UsageView;
 
 public class BatteryInfo {
 
-    public String mChargeLabelString;
-    public int mBatteryLevel;
-    public boolean mDischarging = true;
+    public String chargeLabelString;
+    public int batteryLevel;
+    public boolean discharging = true;
     public long remainingTimeUs = 0;
     public String batteryPercentString;
     public String remainingLabel;
     public String statusLabel;
-    private BatteryStats mStats;
     private boolean mCharging;
+    private BatteryStats mStats;
     private long timePeriod;
 
     public interface Callback {
@@ -132,10 +131,11 @@ public class BatteryInfo {
             BatteryStats stats, long elapsedRealtimeUs, boolean shortString) {
         BatteryInfo info = new BatteryInfo();
         info.mStats = stats;
-        info.mBatteryLevel = Utils.getBatteryLevel(batteryBroadcast);
-        info.batteryPercentString = Utils.formatPercentage(info.mBatteryLevel);
+        info.batteryLevel = Utils.getBatteryLevel(batteryBroadcast);
+        info.batteryPercentString = Utils.formatPercentage(info.batteryLevel);
         info.mCharging = batteryBroadcast.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
         final Resources resources = context.getResources();
+
         info.statusLabel = Utils.getBatteryStatus(resources, batteryBroadcast);
         if (!info.mCharging) {
             final long drainTime = stats.computeBatteryTimeRemaining(elapsedRealtimeUs);
@@ -147,20 +147,20 @@ public class BatteryInfo {
                         shortString ? R.string.power_remaining_duration_only_short
                                 : R.string.power_remaining_duration_only,
                         timeString);
-                info.mChargeLabelString = resources.getString(
+                info.chargeLabelString = resources.getString(
                         shortString ? R.string.power_discharging_duration_short
                                 : R.string.power_discharging_duration,
                         info.batteryPercentString, timeString);
             } else {
                 info.remainingLabel = null;
-                info.mChargeLabelString = info.batteryPercentString;
+                info.chargeLabelString = info.batteryPercentString;
             }
         } else {
             final long chargeTime = stats.computeChargeTimeRemaining(elapsedRealtimeUs);
             final int status = batteryBroadcast.getIntExtra(BatteryManager.EXTRA_STATUS,
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
+            info.discharging = false;
             if (chargeTime > 0 && status != BatteryManager.BATTERY_STATUS_FULL) {
-                info.mDischarging = false;
                 info.remainingTimeUs = chargeTime;
                 String timeString = Formatter.formatShortElapsedTime(context,
                         chargeTime / 1000);
@@ -168,13 +168,13 @@ public class BatteryInfo {
                         : R.string.power_charging_duration;
                 info.remainingLabel = resources.getString(
                         R.string.power_remaining_charging_duration_only, timeString);
-                info.mChargeLabelString = resources.getString(resId, info.batteryPercentString,
-                        timeString);
+                info.chargeLabelString = resources.getString(
+                        resId, info.batteryPercentString, timeString);
             } else {
                 final String chargeStatusLabel = resources.getString(
                         R.string.battery_info_status_charging_lower);
                 info.remainingLabel = null;
-                info.mChargeLabelString = resources.getString(
+                info.chargeLabelString = resources.getString(
                         R.string.power_charging, info.batteryPercentString, chargeStatusLabel);
             }
         }

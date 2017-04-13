@@ -53,7 +53,7 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
     @Test
     public void testDrawImageButNoTextIfPluggedIn() {
         mBatteryMeter.setBatteryLevel(0);
-        mBatteryMeter.setPluggedIn(true);
+        mBatteryMeter.setCharging(true);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         verify(canvas, atLeastOnce()).drawPath(any(), any());
@@ -63,7 +63,7 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
     @Test
     public void testDrawTextIfNotPluggedIn() {
         mBatteryMeter.setBatteryLevel(0);
-        mBatteryMeter.setPluggedIn(false);
+        mBatteryMeter.setCharging(false);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         verify(canvas, times(1)).drawText(anyString(), anyFloat(), anyFloat(), any());
@@ -72,7 +72,7 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
     @Test
     public void testDrawNoTextIfPowerSaveEnabled() {
         mBatteryMeter.setBatteryLevel(0);
-        mBatteryMeter.setPluggedIn(false);
+        mBatteryMeter.setCharging(false);
         mBatteryMeter.setPowerSave(true);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
@@ -84,7 +84,7 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
         int criticalLevel = mResources.getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
         mBatteryMeter.setBatteryLevel(criticalLevel);
-        mBatteryMeter.setPluggedIn(false);
+        mBatteryMeter.setCharging(false);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         String warningString = mResources.getString(R.string.battery_meter_very_low_overlay_symbol);
@@ -96,7 +96,7 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
         int criticalLevel = mResources.getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
         mBatteryMeter.setBatteryLevel(criticalLevel + 1);
-        mBatteryMeter.setPluggedIn(false);
+        mBatteryMeter.setCharging(false);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         String warningString = mResources.getString(R.string.battery_meter_very_low_overlay_symbol);
