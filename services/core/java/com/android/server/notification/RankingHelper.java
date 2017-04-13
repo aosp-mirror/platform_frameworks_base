@@ -570,10 +570,6 @@ public class RankingHelper implements RankingConfig {
         if (!r.showBadge) {
             channel.setShowBadge(false);
         }
-        if (channel.getSound() == null) {
-            channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
-                    Notification.AUDIO_ATTRIBUTES_DEFAULT);
-        }
         r.channels.put(channel.getId(), channel);
         MetricsLogger.action(getChannelLog(channel, pkg).setType(
                 MetricsProto.MetricsEvent.TYPE_OPEN));
