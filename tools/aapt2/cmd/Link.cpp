@@ -376,8 +376,8 @@ bool ResourceFileFlattener::LinkAndVersionXmlFile(ResourceTable* table, FileOper
         versioned_file_desc.config.sdkVersion = (uint16_t)sdk_level;
 
         FileOperation new_file_op;
-        new_file_op.xml_to_flatten =
-            util::make_unique<xml::XmlResource>(versioned_file_desc, doc->root->Clone());
+        new_file_op.xml_to_flatten = util::make_unique<xml::XmlResource>(
+            versioned_file_desc, StringPool{}, doc->root->Clone());
         new_file_op.config = versioned_file_desc.config;
         new_file_op.entry = file_op->entry;
         new_file_op.dst_path =
