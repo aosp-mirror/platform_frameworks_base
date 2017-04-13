@@ -8821,15 +8821,6 @@ public final class Settings {
         public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
 
         /**
-         * A "|" separated list of URLs used for captive portal detection in addition to the
-         * fallback HTTP url associated with the CAPTIVE_PORTAL_FALLBACK_URL settings.
-         *
-         * @hide
-         */
-        public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS =
-                "captive_portal_other_fallback_urls";
-
-        /**
          * Whether to use HTTPS for network validation. This is enabled by default and the setting
          * needs to be set to 0 to disable it. This setting is a misnomer because captive portals
          * don't actually use HTTPS, but it's consistent with the other settings.
