@@ -259,10 +259,70 @@ final public class MediaExtractor {
      * @param mediaCas the MediaCas object to use.
      */
     public final void setMediaCas(@NonNull MediaCas mediaCas) {
+        mMediaCas = mediaCas;
         nativeSetMediaCas(mediaCas.getBinder());
     }
 
     private native final void nativeSetMediaCas(@NonNull IBinder casBinder);
+
+    /**
+     * Describes the conditional access system used to scramble a track.
+     */
+    public static final class CasInfo {
+        private final int mSystemId;
+        private final MediaCas.Session mSession;
+
+        CasInfo(int systemId, @Nullable MediaCas.Session session) {
+            mSystemId = systemId;
+            mSession = session;
+        }
+
+        /**
+         * Retrieves the system id of the conditional access system.
+         *
+         * @return CA system id of the CAS used to scramble the track.
+         */
+        public int getSystemId() {
+            return mSystemId;
+        }
+
+        /**
+         * Retrieves the {@link MediaCas.Session} associated with a track. The
+         * session is needed to initialize a descrambler in order to decode the
+         * scrambled track.
+         * <p>
+         * @see MediaDescrambler#setMediaCasSession
+         * <p>
+         * @return a {@link MediaCas.Session} object associated with a track.
+         */
+        public MediaCas.Session getSession() {
+            return mSession;
+        }
+    }
+
+    /**
+     * Retrieves the information about the conditional access system used to scramble
+     * a track.
+     *
+     * @param index of the track.
+     * @return an {@link CasInfo} object describing the conditional access system.
+     */
+    public CasInfo getCasInfo(int index) {
+        Map<String, Object> formatMap = getTrackFormatNative(index);
+        if (formatMap.containsKey(MediaFormat.KEY_CA_SYSTEM_ID)) {
+            int systemId = ((Integer)formatMap.get(MediaFormat.KEY_CA_SYSTEM_ID)).intValue();
+            MediaCas.Session session = null;
+            if (mMediaCas != null && formatMap.containsKey(MediaFormat.KEY_CA_SESSION_ID)) {
+                ByteBuffer buf = (ByteBuffer) formatMap.get(MediaFormat.KEY_CA_SESSION_ID);
+                buf.rewind();
+                final byte[] sessionId = new byte[buf.remaining()];
+                buf.get(sessionId);
+                session = mMediaCas.createFromSessionId(sessionId);
+            }
+            return new CasInfo(systemId, session);
+        }
+        return null;
+    }
 
     @Override
     protected void finalize() {
@@ -307,31 +367,6 @@ final public class MediaExtractor {
                     return initDataMap.get(schemeUuid);
                 }
             };
-        } else if (formatMap.containsKey("mime")
-                && "video/mp2ts".equals(formatMap.get("mime"))) {
-            final Map<UUID, DrmInitData.SchemeInitData> initDataMap =
-                    new HashMap<UUID, DrmInitData.SchemeInitData>();
-
-            int numTracks = getTrackCount();
-            for (int i = 0; i < numTracks; ++i) {
-                Map<String, Object> trackFormatMap = getTrackFormatNative(i);
-                if (!trackFormatMap.containsKey("cas")) {
-                    continue;
-                }
-                ByteBuffer buf = (ByteBuffer) trackFormatMap.get("cas");
-                buf.rewind();
-                final byte[] data = new byte[buf.remaining()];
-                buf.get(data);
-                initDataMap.put(new UUID(0, i), new DrmInitData.SchemeInitData("cas", data));
-            }
-            if (initDataMap.isEmpty()) {
-                return null;
-            }
-            return new DrmInitData() {
-                public SchemeInitData get(UUID schemeUuid) {
-                    return initDataMap.get(schemeUuid);
-                }
-            };
         } else {
             int numTracks = getTrackCount();
             for (int i = 0; i < numTracks; ++i) {
@@ -349,8 +384,8 @@ final public class MediaExtractor {
                     }
                 };
             }
-            return null;
         }
+        return null;
     }
 
     /**
@@ -679,6 +714,8 @@ final public class MediaExtractor {
         System.loadLibrary("media_jni");
         native_init();
     }
+
+    private MediaCas mMediaCas;
 
     private long mNativeContext;
 }
