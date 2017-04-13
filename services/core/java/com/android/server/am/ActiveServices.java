@@ -324,7 +324,7 @@ public final class ActiveServices {
             if (callerApp == null) {
                 throw new SecurityException(
                         "Unable to find app for caller " + caller
-                        + " (pid=" + Binder.getCallingPid()
+                        + " (pid=" + callingPid
                         + ") when starting service " + service);
             }
             callerFg = callerApp.setSchedGroup != ProcessList.SCHED_GROUP_BACKGROUND;
@@ -353,29 +353,24 @@ public final class ActiveServices {
         // If this isn't a direct-to-foreground start, check our ability to kick off an
         // arbitrary service
         if (!r.startRequested && !fgRequired) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                // Before going further -- if this app is not allowed to start services in the
-                // background, then at this point we aren't going to let it period.
-                final int allowed = mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
-                        r.appInfo.targetSdkVersion, callingPid, false, false);
-                if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
-                    Slog.w(TAG, "Background start not allowed: service "
-                            + service + " to " + r.name.flattenToShortString()
-                            + " from pid=" + callingPid + " uid=" + callingUid
-                            + " pkg=" + callingPackage);
-                    if (allowed == ActivityManager.APP_START_MODE_DELAYED) {
-                        // In this case we are silently disabling the app, to disrupt as
-                        // little as possible existing apps.
-                        return null;
-                    }
-                    // This app knows it is in the new model where this operation is not
-                    // allowed, so tell it what has happened.
-                    UidRecord uidRec = mAm.mActiveUids.get(r.appInfo.uid);
-                    return new ComponentName("?", "app is in background uid " + uidRec);
+            // Before going further -- if this app is not allowed to start services in the
+            // background, then at this point we aren't going to let it period.
+            final int allowed = mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
+                    r.appInfo.targetSdkVersion, callingPid, false, false);
+            if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
+                Slog.w(TAG, "Background start not allowed: service "
+                        + service + " to " + r.name.flattenToShortString()
+                        + " from pid=" + callingPid + " uid=" + callingUid
+                        + " pkg=" + callingPackage);
+                if (allowed == ActivityManager.APP_START_MODE_DELAYED) {
+                    // In this case we are silently disabling the app, to disrupt as
+                    // little as possible existing apps.
+                    return null;
                 }
-            } finally {
-                Binder.restoreCallingIdentity(token);
+                // This app knows it is in the new model where this operation is not
+                // allowed, so tell it what has happened.
+                UidRecord uidRec = mAm.mActiveUids.get(r.appInfo.uid);
+                return new ComponentName("?", "app is in background uid " + uidRec);
             }
         }
 
