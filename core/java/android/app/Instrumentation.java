@@ -1779,7 +1779,7 @@ public class Instrumentation {
      * {@hide}
      */
     public ActivityResult execStartActivity(
-            Context who, IBinder contextThread, IBinder token, Activity target,
+            Context who, IBinder contextThread, IBinder token, String resultWho,
             Intent intent, int requestCode, Bundle options, UserHandle user) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
@@ -1810,7 +1810,7 @@ public class Instrumentation {
             int result = ActivityManager.getService()
                 .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target != null ? target.mEmbeddedID : null,
+                        token, resultWho,
                         requestCode, 0, null, options, user.getIdentifier());
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {

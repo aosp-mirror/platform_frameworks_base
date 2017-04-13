@@ -4521,12 +4521,20 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityForResultAsUser(Intent intent, int requestCode,
             @Nullable Bundle options, UserHandle user) {
+        startActivityForResultAsUser(intent, mEmbeddedID, requestCode, options, user);
+    }
+
+    /**
+     * @hide Implement to provide correct calling token.
+     */
+    public void startActivityForResultAsUser(Intent intent, String resultWho, int requestCode,
+            @Nullable Bundle options, UserHandle user) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
         options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar = mInstrumentation.execStartActivity(
-                this, mMainThread.getApplicationThread(), mToken, this, intent, requestCode,
+                this, mMainThread.getApplicationThread(), mToken, resultWho, intent, requestCode,
                 options, user);
         if (ar != null) {
             mMainThread.sendActivityResult(
@@ -4563,7 +4571,7 @@ public class Activity extends ContextThemeWrapper
         options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
-                        this, mMainThread.getApplicationThread(), mToken, this,
+                        this, mMainThread.getApplicationThread(), mToken, mEmbeddedID,
                         intent, -1, options, user);
         if (ar != null) {
             mMainThread.sendActivityResult(
@@ -5087,6 +5095,15 @@ public class Activity extends ContextThemeWrapper
     public void startActivityFromFragment(@NonNull Fragment fragment,
             @RequiresPermission Intent intent, int requestCode, @Nullable Bundle options) {
         startActivityForResult(fragment.mWho, intent, requestCode, options);
+    }
+
+    /**
+     * @hide
+     */
+    public void startActivityAsUserFromFragment(@NonNull Fragment fragment,
+            @RequiresPermission Intent intent, int requestCode, @Nullable Bundle options,
+            UserHandle user) {
+        startActivityForResultAsUser(intent, fragment.mWho, requestCode, options, user);
     }
 
     /**
@@ -7460,6 +7477,14 @@ public class Activity extends ContextThemeWrapper
         public void onStartActivityFromFragment(Fragment fragment, Intent intent, int requestCode,
                 Bundle options) {
             Activity.this.startActivityFromFragment(fragment, intent, requestCode, options);
+        }
+
+        @Override
+        public void onStartActivityAsUserFromFragment(
+                Fragment fragment, Intent intent, int requestCode, Bundle options,
+                UserHandle user) {
+            Activity.this.startActivityAsUserFromFragment(
+                    fragment, intent, requestCode, options, user);
         }
 
         @Override

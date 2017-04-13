@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionSet;
@@ -1185,6 +1186,19 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
         mHost.onStartActivityFromFragment(this, intent, requestCode, options);
+    }
+
+    /**
+     * @hide
+     * Call {@link Activity#startActivityForResultAsUser(Intent, int, UserHandle)} from the
+     * fragment's containing Activity.
+     */
+    public void startActivityForResultAsUser(
+            Intent intent, int requestCode, Bundle options, UserHandle user) {
+        if (mHost == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
+        mHost.onStartActivityAsUserFromFragment(this, intent, requestCode, options, user);
     }
 
     /**
