@@ -3363,7 +3363,12 @@ public class PackageParser {
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestApplication_persistent,
                     false)) {
-                ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
+                // Check if persistence is based on a feature being present
+                final String requiredFeature = sa.getNonResourceString(
+                    com.android.internal.R.styleable.AndroidManifestApplication_persistentFeature);
+                if (requiredFeature == null || mCallback.hasFeature(requiredFeature)) {
+                    ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
+                }
             }
         }
 
