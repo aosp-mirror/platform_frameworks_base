@@ -128,8 +128,13 @@ class Text : public BaseNode<Text> {
 class XmlResource {
  public:
   ResourceFile file;
-  std::unique_ptr<xml::Node> root;
+
+  // StringPool must come before the xml::Node. Destructors are called in reverse order, and
+  // the xml::Node may have StringPool references that need to be destroyed before the StringPool
+  // is destroyed.
   StringPool string_pool;
+
+  std::unique_ptr<xml::Node> root;
 };
 
 /**

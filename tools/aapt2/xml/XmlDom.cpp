@@ -224,7 +224,8 @@ std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag, const
 
   XML_ParserFree(parser);
   if (stack.root) {
-    return util::make_unique<XmlResource>(ResourceFile{{}, {}, source}, std::move(stack.root));
+    return util::make_unique<XmlResource>(ResourceFile{{}, {}, source}, StringPool{},
+                                          std::move(stack.root));
   }
   return {};
 }
@@ -357,7 +358,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
       }
     }
   }
-  return util::make_unique<XmlResource>(ResourceFile{}, std::move(root), std::move(string_pool));
+  return util::make_unique<XmlResource>(ResourceFile{}, std::move(string_pool), std::move(root));
 }
 
 std::unique_ptr<Node> Namespace::Clone() {
