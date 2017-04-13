@@ -423,11 +423,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                                 pw.print("\"");
                         pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
-                        pw.print(" backgroundColor=");
+                        pw.print(prefix + " backgroundColor=");
                         pw.println(Integer.toHexString(taskDescription.getBackgroundColor()));
-                        pw.print(" statusBarColor=");
+                        pw.print(prefix + " statusBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getStatusBarColor()));
-                        pw.print(" navigationBarColor=");
+                        pw.print(prefix + " navigationBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getNavigationBarColor()));
             }
             if (iconFilename == null && taskDescription.getIcon() != null) {
