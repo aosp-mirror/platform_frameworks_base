@@ -184,6 +184,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
 import android.util.DisplayMetrics;
@@ -512,6 +513,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mGoingToSleep;
     volatile boolean mRecentsVisible;
     volatile boolean mPictureInPictureVisible;
+    // Written by vr manager thread, only read in this class.
+    volatile private boolean mPersistentVrModeEnabled;
     volatile private boolean mDismissImeOnBackKeyPressed;
 
     // Used to hold the last user key used to wake the device.  This helps us prevent up events
@@ -1001,6 +1004,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     MyOrientationListener mOrientationListener;
+
+    final IPersistentVrStateCallbacks mPersistentVrModeListener =
+            new IPersistentVrStateCallbacks.Stub() {
+        @Override
+        public void onPersistentVrStateChanged(boolean enabled) {
+            mPersistentVrModeEnabled = enabled;
+        }
+    };
 
     private final StatusBarController mStatusBarController = new StatusBarController();
 
@@ -6909,7 +6920,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || mAllowAllRotations == 1
                         || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                         || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER) {
-                    preferredRotation = sensorRotation;
+                    // In VrMode, we report the sensor as always being in default orientation so:
+                    // 1) The orientation doesn't change as the user moves their head.
+                    // 2) 2D apps within VR show in the device's default orientation.
+                    // This only overwrites the sensor-provided orientation and does not affect any
+                    // explicit orientation preferences specified by any activities.
+                    preferredRotation =
+                            mPersistentVrModeEnabled ? Surface.ROTATION_0 : sensorRotation;
                 } else {
                     preferredRotation = lastRotation;
                 }
@@ -7083,6 +7100,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardDelegate.onSystemReady();
 
         mVrManagerInternal = LocalServices.getService(VrManagerInternal.class);
+        if (mVrManagerInternal != null) {
+            mVrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
+        }
 
         readCameraLensCoverState();
         updateUiMode();
