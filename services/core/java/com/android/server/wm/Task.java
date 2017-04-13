@@ -595,8 +595,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      * we will have a jump at the end.
      */
     boolean isFloating() {
-        return StackId.tasksAreFloating(mStack.mStackId)
-            && !mStack.isBoundsAnimatingToFullscreen();
+        return StackId.tasksAreFloating(mStack.mStackId) && !mStack.isAnimatingBoundsToFullscreen();
     }
 
     WindowState getTopVisibleAppMainWindow() {

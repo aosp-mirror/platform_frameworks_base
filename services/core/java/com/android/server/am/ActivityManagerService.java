@@ -71,7 +71,6 @@ import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.os.Process.getFreeMemory;
-import static android.os.Process.getThreadPriority;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
@@ -7895,7 +7894,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP
                     final PinnedActivityStack stack = r.getStack();
-                    if (!stack.isBoundsAnimatingToFullscreen()) {
+                    if (!stack.isAnimatingBoundsToFullscreen()) {
                         stack.setPictureInPictureAspectRatio(
                                 r.pictureInPictureArgs.getAspectRatio());
                         stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());

@@ -63,7 +63,7 @@ public class PinnedStackWindowController extends StackWindowController {
 
             final Rect originalBounds = new Rect();
             mContainer.getBounds(originalBounds);
-            mContainer.setAnimatingBounds(sourceBounds, toBounds);
+            mContainer.setAnimationFinalBounds(sourceBounds, toBounds);
             UiThread.getHandler().post(() -> {
                 if (mContainer == null) {
                     return;
@@ -87,7 +87,7 @@ public class PinnedStackWindowController extends StackWindowController {
             final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio,
                     true /* useExistingStackBounds */);
             final Rect targetBounds = new Rect();
-            mContainer.getAnimatingBounds(targetBounds);
+            mContainer.getAnimationOrCurrentBounds(targetBounds);
             final PinnedStackController pinnedStackController =
                     mContainer.getDisplayContent().getPinnedStackController();
 
@@ -118,8 +118,8 @@ public class PinnedStackWindowController extends StackWindowController {
     /**
      * @return whether the bounds are currently animating to fullscreen.
      */
-    public boolean isBoundsAnimatingToFullscreen() {
-        return mContainer.isBoundsAnimatingToFullscreen();
+    public boolean isAnimatingBoundsToFullscreen() {
+        return mContainer.isAnimatingBoundsToFullscreen();
     }
 
     public boolean pinnedStackResizeAllowed() {

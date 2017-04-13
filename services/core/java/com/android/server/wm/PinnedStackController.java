@@ -380,7 +380,7 @@ class PinnedStackController {
                 final Rect animatingBounds = mTmpAnimatingBoundsRect;
                 final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
                 if (pinnedStack != null) {
-                    pinnedStack.getAnimatingBounds(animatingBounds);
+                    pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
                 } else {
                     animatingBounds.set(normalBounds);
                 }

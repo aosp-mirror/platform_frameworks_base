@@ -1090,7 +1090,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // notify the client of frame changes in this case. Not only is it a lot of churn, but
         // the frame may not correspond to the surface size or the onscreen area at various
         // phases in the animation, and the client will become sad and confused.
-        if (task != null && task.mStack.getBoundsAnimating()) {
+        if (task != null && task.mStack.isAnimatingBounds()) {
             return;
         }
 

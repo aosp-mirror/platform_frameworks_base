@@ -31,7 +31,6 @@ import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.myPid;
-import static android.os.Process.myTid;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -148,7 +147,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -2782,7 +2780,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // If the stack exists, then use its final bounds to calculate the new aspect ratio
                 // bounds.
                 stackBounds = new Rect();
-                stack.getAnimatingBounds(stackBounds);
+                stack.getAnimationOrCurrentBounds(stackBounds);
             } else {
                 // Otherwise, just calculate the aspect ratio bounds from the default bounds
                 stackBounds = pinnedStackController.getDefaultBounds();

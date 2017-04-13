@@ -126,6 +126,9 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     // perfectly fit the region it would have been cropped to. We may also avoid certain logic we
     // would otherwise apply while resizing, while resizing in the bounds animating mode.
     private boolean mBoundsAnimating = false;
+    // Set when an animation has been requested but has not yet started from the UI thread. This is
+    // cleared when the animation actually starts.
+    private boolean mBoundsAnimatingRequested = false;
     private boolean mBoundsAnimatingToFullscreen = false;
     private boolean mCancelCurrentBoundsAnimation = false;
     private Rect mBoundsAnimationTarget = new Rect();
@@ -316,10 +319,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     /**
-     * Sets the bounds animation target bounds.  This can't currently be done in onAnimationStart()
-     * since that is started on the UiThread.
+     * Sets the bounds animation target bounds ahead of an animation.  This can't currently be done
+     * in onAnimationStart() since that is started on the UiThread.
      */
-    void setAnimatingBounds(Rect sourceBounds, Rect destBounds) {
+    void setAnimationFinalBounds(Rect sourceBounds, Rect destBounds) {
+        mBoundsAnimatingRequested = true;
         if (sourceBounds != null) {
             mBoundsAnimationSourceBounds.set(sourceBounds);
         } else {
@@ -333,23 +337,26 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     /**
-     * @return the source bounds for the bounds animation.
+     * @return the final bounds for the bounds animation.
      */
-    void getAnimatingSourceBounds(Rect outBounds) {
-        if (!mBoundsAnimationSourceBounds.isEmpty()) {
-            outBounds.set(mBoundsAnimationSourceBounds);
-            return;
-        }
-        outBounds.setEmpty();
+    void getFinalAnimationBounds(Rect outBounds) {
+        outBounds.set(mBoundsAnimationTarget);
     }
 
     /**
-     * @return the bounds that the task stack is currently being animated towards, or the current
-     *         stack bounds if there is no animation in progress.
+     * @return the final source bounds for the bounds animation.
      */
-    void getAnimatingBounds(Rect outBounds) {
-        if (!mBoundsAnimationTarget.isEmpty()) {
-            outBounds.set(mBoundsAnimationTarget);
+    void getFinalAnimationSourceBounds(Rect outBounds) {
+        outBounds.set(mBoundsAnimationSourceBounds);
+    }
+
+    /**
+     * @return the final animation bounds if the task stack is currently being animated, or the
+     *         current stack bounds otherwise.
+     */
+    void getAnimationOrCurrentBounds(Rect outBounds) {
+        if ((mBoundsAnimatingRequested || mBoundsAnimating) && !mBoundsAnimationTarget.isEmpty()) {
+            getFinalAnimationBounds(outBounds);
             return;
         }
         getBounds(outBounds);
@@ -396,7 +403,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         if (mStackId == PINNED_STACK_ID) {
-            getAnimatingBounds(mTmpRect2);
+            getAnimationOrCurrentBounds(mTmpRect2);
             boolean updated = mDisplayContent.mPinnedStackControllerLocked.onTaskStackBoundsChanged(
                     mTmpRect2, mTmpRect3);
             if (updated) {
@@ -694,7 +701,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                     dockedOnTopOrLeft);
         } else if (mStackId == PINNED_STACK_ID) {
             // Update the bounds based on any changes to the display info
-            getAnimatingBounds(mTmpRect2);
+            getAnimationOrCurrentBounds(mTmpRect2);
             boolean updated = mDisplayContent.mPinnedStackControllerLocked.onTaskStackBoundsChanged(
                     mTmpRect2, mTmpRect3);
             if (updated) {
@@ -1467,6 +1474,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     @Override  // AnimatesBounds
     public void onAnimationStart(boolean toFullscreen) {
         synchronized (mService.mWindowMap) {
+            mBoundsAnimatingRequested = false;
             mBoundsAnimating = true;
             mBoundsAnimatingToFullscreen = toFullscreen;
             mCancelCurrentBoundsAnimation = false;
@@ -1523,11 +1531,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return mBoundsAnimating;
     }
 
-    public boolean getBoundsAnimating() {
+    public boolean isAnimatingBounds() {
         return mBoundsAnimating;
     }
 
-    public boolean isBoundsAnimatingToFullscreen() {
+    public boolean isAnimatingBoundsToFullscreen() {
         return mBoundsAnimating && mBoundsAnimatingToFullscreen;
     }
 

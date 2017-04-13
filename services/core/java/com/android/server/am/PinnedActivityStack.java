@@ -22,7 +22,6 @@ import android.graphics.Rect;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.PinnedStackWindowListener;
-import com.android.server.wm.StackWindowController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +56,8 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
         getWindowContainerController().setPictureInPictureActions(actions);
     }
 
-    boolean isBoundsAnimatingToFullscreen() {
-        return getWindowContainerController().isBoundsAnimatingToFullscreen();
+    boolean isAnimatingBoundsToFullscreen() {
+        return getWindowContainerController().isAnimatingBoundsToFullscreen();
     }
 
     @Override
