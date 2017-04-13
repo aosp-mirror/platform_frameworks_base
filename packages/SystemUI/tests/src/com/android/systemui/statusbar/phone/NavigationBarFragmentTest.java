@@ -14,12 +14,14 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Looper;
 import android.testing.AndroidTestingRunner;
+import android.testing.LeakCheck.Tracker;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -29,11 +31,18 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.utils.leaks.BaseLeakChecker;
+
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -56,6 +65,20 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
         when(windowManager.getDefaultDisplay()).thenReturn(
                 defaultDisplay);
         mContext.addMockSystemService(Context.WINDOW_SERVICE, windowManager);
+
+        Tracker tracker = mLeakCheck.getTracker("accessibility_manager");
+        AccessibilityManagerWrapper wrapper = new AccessibilityManagerWrapper(mContext) {
+            @Override
+            public void addCallback(AccessibilityServicesStateChangeListener listener) {
+                tracker.getLeakInfo(listener).addAllocation(new Throwable());
+            }
+
+            @Override
+            public void removeCallback(AccessibilityServicesStateChangeListener listener) {
+                tracker.getLeakInfo(listener).clearAllocations();
+            }
+        };
+        mDependency.injectTestDependency(AccessibilityManagerWrapper.class, wrapper);
     }
 
     @Test
