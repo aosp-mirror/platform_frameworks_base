@@ -249,4 +249,65 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         assertEquals(2, bi.getUidStats().get(UID).getJobStats().size());
         bi.noteJobFinishLocked(jobName2, UID);
     }
+
+    @SmallTest
+    public void testSyncs() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        final String syncName = "sync_name";
+        long curr = 0; // realtime in us
+
+        // On battery
+        curr = 1000 * (clocks.realtime = clocks.uptime = 100);
+        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+        // App in foreground
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+
+        // Start timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 151);
+        bi.noteSyncStartLocked(syncName, UID);
+
+        // Stop timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 161);
+        bi.noteSyncFinishLocked(syncName, UID);
+
+        // Move to background
+        curr = 1000 * (clocks.realtime = clocks.uptime = 202);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        // Start timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 254);
+        bi.noteSyncStartLocked(syncName, UID);
+
+        // Off battery
+        curr = 1000 * (clocks.realtime = clocks.uptime = 305);
+        bi.updateTimeBasesLocked(false, false, curr, curr); // off battery
+
+        // Stop timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 409);
+        bi.noteSyncFinishLocked(syncName, UID);
+
+        // Test
+        curr = 1000 * (clocks.realtime = clocks.uptime = 657);
+        final ArrayMap<String, ? extends BatteryStats.Timer> syncs =
+                bi.getUidStats().get(UID).getSyncStats();
+        assertEquals(1, syncs.size());
+        BatteryStats.Timer timer = syncs.valueAt(0);
+        BatteryStats.Timer bgTimer = timer.getSubTimer();
+        long time = timer.getTotalTimeLocked(curr, STATS_SINCE_CHARGED);
+        int count = timer.getCountLocked(STATS_SINCE_CHARGED);
+        int bgCount = bgTimer.getCountLocked(STATS_SINCE_CHARGED);
+        long bgTime = bgTimer.getTotalTimeLocked(curr, STATS_SINCE_CHARGED);
+        assertEquals((161 - 151 + 305 - 254) * 1000, time);
+        assertEquals(2, count);
+        assertEquals(1, bgCount);
+        assertEquals((305 - 254) * 1000, bgTime);
+
+        // Test that a second sync is separate.
+        curr = 1000 * (clocks.realtime = clocks.uptime = 3000);
+        final String syncName2 = "second_sync";
+        bi.noteSyncStartLocked(syncName2, UID);
+        assertEquals(2, bi.getUidStats().get(UID).getSyncStats().size());
+        bi.noteSyncFinishLocked(syncName2, UID);
+    }
 }
