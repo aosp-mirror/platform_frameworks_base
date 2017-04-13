@@ -259,6 +259,12 @@ public class NetworkMonitor extends StateMachine {
     // This variable is set before transitioning to the mCaptivePortalState.
     private CaptivePortalProbeResult mLastPortalProbeResult = CaptivePortalProbeResult.FAILED;
 
+    // Configuration values for captive portal detection probes.
+    private final String mCaptivePortalUserAgent;
+    private final URL mCaptivePortalHttpsUrl;
+    private final URL mCaptivePortalHttpUrl;
+    private final URL mCaptivePortalFallbackUrl;
+
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
         this(context, handler, networkAgentInfo, defaultRequest, new IpConnectivityLog());
@@ -293,12 +299,22 @@ public class NetworkMonitor extends StateMachine {
         mUseHttps = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
 
+        mCaptivePortalUserAgent = getCaptivePortalUserAgent(context);
+        mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl(context));
+        mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(context));
+        mCaptivePortalFallbackUrl = makeURL(getCaptivePortalFallbackUrl(context));
+
         start();
     }
 
     @Override
     protected void log(String s) {
         if (DBG) Log.d(TAG + "/" + mNetworkAgentInfo.name(), s);
+    }
+
+    private void validationLog(int probeType, Object url, String msg) {
+        String probeName = ValidationProbeEvent.getProbeName(probeType);
+        validationLog(String.format("%s %s %s", probeName, url, msg));
     }
 
     private void validationLog(String s) {
@@ -671,7 +687,10 @@ public class NetworkMonitor extends StateMachine {
             return new CaptivePortalProbeResult(204);
         }
 
-        URL pacUrl = null, httpsUrl = null, httpUrl = null, fallbackUrl = null;
+        URL pacUrl = null;
+        URL httpsUrl = mCaptivePortalHttpsUrl;
+        URL httpUrl = mCaptivePortalHttpUrl;
+        URL fallbackUrl = mCaptivePortalFallbackUrl;
 
         // On networks with a PAC instead of fetching a URL that should result in a 204
         // response, we instead simply fetch the PAC script.  This is done for a few reasons:
@@ -698,13 +717,8 @@ public class NetworkMonitor extends StateMachine {
             }
         }
 
-        if (pacUrl == null) {
-            httpsUrl = makeURL(getCaptivePortalServerHttpsUrl(mContext));
-            httpUrl = makeURL(getCaptivePortalServerHttpUrl(mContext));
-            fallbackUrl = makeURL(getCaptivePortalFallbackUrl(mContext));
-            if (httpUrl == null || httpsUrl == null) {
-                return CaptivePortalProbeResult.FAILED;
-            }
+        if ((pacUrl == null) && (httpUrl == null || httpsUrl == null)) {
+            return CaptivePortalProbeResult.FAILED;
         }
 
         long startTime = SystemClock.elapsedRealtime();
@@ -752,20 +766,19 @@ public class NetworkMonitor extends StateMachine {
         String connectInfo;
         try {
             InetAddress[] addresses = mNetworkAgentInfo.network.getAllByName(host);
-            result = ValidationProbeEvent.DNS_SUCCESS;
-            StringBuffer buffer = new StringBuffer(host).append("=");
+            StringBuffer buffer = new StringBuffer();
             for (InetAddress address : addresses) {
-                buffer.append(address.getHostAddress());
-                if (address != addresses[addresses.length-1]) buffer.append(",");
+                buffer.append(',').append(address.getHostAddress());
             }
-            connectInfo = buffer.toString();
+            result = ValidationProbeEvent.DNS_SUCCESS;
+            connectInfo = "OK " + buffer.substring(1);
         } catch (UnknownHostException e) {
             result = ValidationProbeEvent.DNS_FAILURE;
-            connectInfo = host;
+            connectInfo = "FAIL";
         }
         final long latency = watch.stop();
-        String resultString = (ValidationProbeEvent.DNS_SUCCESS == result) ? "OK" : "FAIL";
-        validationLog(String.format("%s %s %dms, %s", name, resultString, latency, connectInfo));
+        validationLog(ValidationProbeEvent.PROBE_DNS, host,
+                String.format("%dms %s", latency, connectInfo));
         logValidationProbe(latency, ValidationProbeEvent.PROBE_DNS, result);
     }
 
@@ -786,9 +799,8 @@ public class NetworkMonitor extends StateMachine {
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setUseCaches(false);
-            final String userAgent = getCaptivePortalUserAgent(mContext);
-            if (userAgent != null) {
-               urlConnection.setRequestProperty("User-Agent", userAgent);
+            if (mCaptivePortalUserAgent != null) {
+                urlConnection.setRequestProperty("User-Agent", mCaptivePortalUserAgent);
             }
             // cannot read request header after connection
             String requestHeader = urlConnection.getRequestProperties().toString();
@@ -802,8 +814,7 @@ public class NetworkMonitor extends StateMachine {
             // Time how long it takes to get a response to our request
             long responseTimestamp = SystemClock.elapsedRealtime();
 
-            validationLog(ValidationProbeEvent.getProbeName(probeType) + " " + url +
-                    " time=" + (responseTimestamp - requestTimestamp) + "ms" +
+            validationLog(probeType, url, "time=" + (responseTimestamp - requestTimestamp) + "ms" +
                     " ret=" + httpResponseCode +
                     " request=" + requestHeader +
                     " headers=" + urlConnection.getHeaderFields());
@@ -815,27 +826,29 @@ public class NetworkMonitor extends StateMachine {
             // proxy server.
             if (httpResponseCode == 200) {
                 if (probeType == ValidationProbeEvent.PROBE_PAC) {
-                    validationLog("PAC fetch 200 response interpreted as 204 response.");
+                    validationLog(
+                            probeType, url, "PAC fetch 200 response interpreted as 204 response.");
                     httpResponseCode = 204;
                 } else if (urlConnection.getContentLengthLong() == 0) {
                     // Consider 200 response with "Content-length=0" to not be a captive portal.
                     // There's no point in considering this a captive portal as the user cannot
                     // sign-in to an empty page. Probably the result of a broken transparent proxy.
                     // See http://b/9972012.
-                    validationLog(
+                    validationLog(probeType, url,
                         "200 response with Content-length=0 interpreted as 204 response.");
                     httpResponseCode = 204;
                 } else if (urlConnection.getContentLengthLong() == -1) {
                     // When no Content-length (default value == -1), attempt to read a byte from the
                     // response. Do not use available() as it is unreliable. See http://b/33498325.
                     if (urlConnection.getInputStream().read() == -1) {
-                        validationLog("Empty 200 response interpreted as 204 response.");
+                        validationLog(
+                                probeType, url, "Empty 200 response interpreted as 204 response.");
                         httpResponseCode = 204;
                     }
                 }
             }
         } catch (IOException e) {
-            validationLog("Probably not a portal: exception " + e);
+            validationLog(probeType, url, "Probably not a portal: exception " + e);
             if (httpResponseCode == 599) {
                 // TODO: Ping gateway and DNS server and log results.
             }
