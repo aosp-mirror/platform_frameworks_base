@@ -23,6 +23,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.os.Process.FIRST_APPLICATION_UID;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -968,7 +969,8 @@ public class AudioService extends IAudioService.Stub
         VolumeStreamState[] streams = mStreamStates = new VolumeStreamState[numStreamTypes];
 
         for (int i = 0; i < numStreamTypes; i++) {
-            streams[i] = new VolumeStreamState(System.VOLUME_SETTINGS[mStreamVolumeAlias[i]], i);
+            streams[i] =
+                    new VolumeStreamState(System.VOLUME_SETTINGS_INT[mStreamVolumeAlias[i]], i);
         }
 
         checkAllFixedVolumeDevices();
@@ -1020,7 +1022,14 @@ public class AudioService extends IAudioService.Stub
         }
 
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
-        mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY] = a11yStreamAlias;
+        final int oldStreamA11yAlias = mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY];
+        if (oldStreamA11yAlias != a11yStreamAlias) {
+            mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY] = a11yStreamAlias;
+            mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].mVolumeIndexSettingName =
+                    System.VOLUME_SETTINGS_INT[a11yStreamAlias];
+            // restore the value from the settings when the alias changes
+            mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].readSettings();
+        }
 
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias],
@@ -3992,13 +4001,19 @@ public class AudioService extends IAudioService.Stub
             return devices;
         }
 
-        public String getSettingNameForDevice(int device) {
-            String name = mVolumeIndexSettingName;
-            String suffix = AudioSystem.getOutputDeviceName(device);
-            if (suffix.isEmpty()) {
-                return name;
+        public @Nullable String getSettingNameForDevice(int device) {
+            if (!hasValidSettingsName()) {
+                return null;
             }
-            return name + "_" + suffix;
+            final String suffix = AudioSystem.getOutputDeviceName(device);
+            if (suffix.isEmpty()) {
+                return mVolumeIndexSettingName;
+            }
+            return mVolumeIndexSettingName + "_" + suffix;
+        }
+
+        private boolean hasValidSettingsName() {
+            return (mVolumeIndexSettingName != null && !mVolumeIndexSettingName.isEmpty());
         }
 
         public void readSettings() {
@@ -4033,13 +4048,18 @@ public class AudioService extends IAudioService.Stub
                     remainingDevices &= ~device;
 
                     // retrieve current volume for device
-                    String name = getSettingNameForDevice(device);
                     // if no volume stored for current stream and device, use default volume if default
                     // device, continue otherwise
                     int defaultIndex = (device == AudioSystem.DEVICE_OUT_DEFAULT) ?
                             AudioSystem.DEFAULT_STREAM_VOLUME[mStreamType] : -1;
-                    int index = Settings.System.getIntForUser(
-                            mContentResolver, name, defaultIndex, UserHandle.USER_CURRENT);
+                    int index;
+                    if (!hasValidSettingsName()) {
+                        index = defaultIndex;
+                    } else {
+                        String name = getSettingNameForDevice(device);
+                        index = Settings.System.getIntForUser(
+                                mContentResolver, name, defaultIndex, UserHandle.USER_CURRENT);
+                    }
                     if (index == -1) {
                         continue;
                     }
@@ -4420,10 +4440,12 @@ public class AudioService extends IAudioService.Stub
             if (mIsSingleVolume && (streamState.mStreamType != AudioSystem.STREAM_MUSIC)) {
                 return;
             }
-            System.putIntForUser(mContentResolver,
-                      streamState.getSettingNameForDevice(device),
-                      (streamState.getIndex(device) + 5)/ 10,
-                      UserHandle.USER_CURRENT);
+            if (streamState.hasValidSettingsName()) {
+                System.putIntForUser(mContentResolver,
+                        streamState.getSettingNameForDevice(device),
+                        (streamState.getIndex(device) + 5)/ 10,
+                        UserHandle.USER_CURRENT);
+            }
         }
 
         private void persistRingerMode(int ringerMode) {
@@ -6059,6 +6081,7 @@ public class AudioService extends IAudioService.Stub
             mVolumeController.setA11yMode(sIndependentA11yVolume ?
                     VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME :
                         VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
+            mVolumeController.postVolumeChanged(AudioManager.STREAM_ACCESSIBILITY, 0);
         }
     }
 

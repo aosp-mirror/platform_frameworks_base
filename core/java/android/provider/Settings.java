@@ -3150,6 +3150,13 @@ public final class Settings {
         public static final String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
 
         /**
+         * @hide
+         * Acessibility volume. This is used internally, changing this
+         * value will not change the volume.
+         */
+        public static final String VOLUME_ACCESSIBILITY = "volume_a11y";
+
+        /**
          * Master volume (float in the range 0.0f to 1.0f).
          *
          * @hide
@@ -3210,6 +3217,22 @@ public final class Settings {
             VOLUME_VOICE, VOLUME_SYSTEM, VOLUME_RING, VOLUME_MUSIC,
             VOLUME_ALARM, VOLUME_NOTIFICATION, VOLUME_BLUETOOTH_SCO
         };
+
+        /**
+         * @hide
+         * The mapping of stream type (integer) to its setting.
+         * Unlike the VOLUME_SETTINGS array, this one contains as many entries as
+         * AudioSystem.NUM_STREAM_TYPES, and has empty strings for stream types whose volumes
+         * are never persisted.
+         */
+        public static final String[] VOLUME_SETTINGS_INT = {
+                VOLUME_VOICE, VOLUME_SYSTEM, VOLUME_RING, VOLUME_MUSIC,
+                VOLUME_ALARM, VOLUME_NOTIFICATION, VOLUME_BLUETOOTH_SCO,
+                "" /*STREAM_SYSTEM_ENFORCED, no setting for this stream*/,
+                "" /*STREAM_DTMF, no setting for this stream*/,
+                "" /*STREAM_TTS, no setting for this stream*/,
+                VOLUME_ACCESSIBILITY
+            };
 
         /**
          * Appended to various volume related settings to record the previous
