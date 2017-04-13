@@ -3071,32 +3071,34 @@ public class NotificationManagerService extends SystemService {
         public void removeForegroundServiceFlagFromNotification(String pkg, int notificationId,
                 int userId) {
             checkCallerIsSystem();
-            synchronized (mNotificationLock) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        NotificationRecord r =
-                                findNotificationLocked(pkg, null, notificationId, userId);
-                        if (r == null) {
-                            Log.d(TAG,
-                                    "stripForegroundServiceFlag: Could not find notification with "
-                                    + "pkg=" + pkg + " / id=" + notificationId
-                                    + " / userId=" + userId);
-                            return;
-                        }
-                        StatusBarNotification sbn = r.sbn;
-                        // NoMan adds flags FLAG_NO_CLEAR and FLAG_ONGOING_EVENT when it sees
-                        // FLAG_FOREGROUND_SERVICE. Hence it's not enough to remove
-                        // FLAG_FOREGROUND_SERVICE, we have to revert to the flags we received
-                        // initially *and* force remove FLAG_FOREGROUND_SERVICE.
-                        sbn.getNotification().flags =
-                                (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
-                        mRankingHelper.sort(mNotificationList);
-                        mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
-                        mGroupHelper.onNotificationPosted(sbn);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mNotificationLock) {
+                        removeForegroundServiceFlagByListLocked(mEnqueuedNotifications, pkg, notificationId, userId);
+                        removeForegroundServiceFlagByListLocked(mNotificationList, pkg, notificationId, userId);
                     }
-                });
+                }
+            });
+        }
+
+        private void removeForegroundServiceFlagByListLocked(
+                ArrayList<NotificationRecord> notificationList, String pkg, int notificationId, int userId) {
+            NotificationRecord r =
+                    findNotificationByListLocked(notificationList, pkg, null, notificationId, userId);
+            if (r == null) {
+                return;
             }
+            StatusBarNotification sbn = r.sbn;
+            // NoMan adds flags FLAG_NO_CLEAR and FLAG_ONGOING_EVENT when it sees
+            // FLAG_FOREGROUND_SERVICE. Hence it's not enough to remove
+            // FLAG_FOREGROUND_SERVICE, we have to revert to the flags we received
+            // initially *and* force remove FLAG_FOREGROUND_SERVICE.
+            sbn.getNotification().flags =
+                    (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
+            mRankingHelper.sort(mNotificationList);
+            mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
+            mGroupHelper.onNotificationPosted(sbn);
         }
     };
 
