@@ -75,8 +75,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         }
         final InputMethodInfo imi = new InputMethodInfo(ri, DUMMY_IS_AUX_IME,
                 DUMMY_SETTING_ACTIVITY_NAME, subtypes, DUMMY_IS_DEFAULT_RES_ID,
-                DUMMY_FORCE_DEFAULT, supportsSwitchingToNextInputMethod,
-                false /* supportsDismissingWindow */);
+                DUMMY_FORCE_DEFAULT, supportsSwitchingToNextInputMethod);
         if (subtypes == null) {
             items.add(new ImeSubtypeListItem(imeName, null /* variableName */, imi,
                     NOT_A_SUBTYPE_ID, null, SYSTEM_LOCALE));
@@ -112,8 +111,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                 .build());
         final InputMethodInfo imi = new InputMethodInfo(ri, DUMMY_IS_AUX_IME,
                 DUMMY_SETTING_ACTIVITY_NAME, subtypes, DUMMY_IS_DEFAULT_RES_ID,
-                DUMMY_FORCE_DEFAULT, true /* supportsSwitchingToNextInputMethod */,
-                false /* supportsDismissingWindow */);
+                DUMMY_FORCE_DEFAULT, true /* supportsSwitchingToNextInputMethod */);
         return new ImeSubtypeListItem(imeName, subtypeName, imi, subtypeIndex, subtypeLocale,
                 systemLocale);
     }
