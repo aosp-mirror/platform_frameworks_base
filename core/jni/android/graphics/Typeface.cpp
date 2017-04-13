@@ -42,6 +42,13 @@ static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandl
     return reinterpret_cast<jlong>(face);
 }
 
+static jlong Typeface_createFromTypefaceWithExactStyle(JNIEnv* env, jobject, jlong nativeInstance,
+        jint weight, jboolean italic) {
+    Typeface* baseTypeface = reinterpret_cast<Typeface*>(nativeInstance);
+    return reinterpret_cast<jlong>(
+            Typeface::createFromTypefaceWithStyle(baseTypeface, weight, italic));
+}
+
 static jlong Typeface_createFromTypefaceWithVariation(JNIEnv* env, jobject, jlong familyHandle,
         jobject listOfAxis) {
     std::vector<minikin::FontVariation> variations;
@@ -73,6 +80,11 @@ static void Typeface_unref(JNIEnv* env, jobject obj, jlong faceHandle) {
 static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
     Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
     return face->fSkiaStyle;
+}
+
+static jint Typeface_getBaseWeight(JNIEnv* env, jobject obj, jlong faceHandle) {
+    Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
+    return face->fBaseWeight;
 }
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray) {
@@ -113,11 +125,14 @@ static jobject Typeface_getSupportedAxes(JNIEnv *env, jobject, jlong faceHandle)
 
 static const JNINativeMethod gTypefaceMethods[] = {
     { "nativeCreateFromTypeface", "(JI)J", (void*)Typeface_createFromTypeface },
+    { "nativeCreateFromTypefaceWithExactStyle", "(JIZ)J",
+            (void*)Typeface_createFromTypefaceWithExactStyle },
     { "nativeCreateFromTypefaceWithVariation", "(JLjava/util/List;)J",
             (void*)Typeface_createFromTypefaceWithVariation },
     { "nativeCreateWeightAlias",  "(JI)J", (void*)Typeface_createWeightAlias },
     { "nativeUnref",              "(J)V",  (void*)Typeface_unref },
     { "nativeGetStyle",           "(J)I",  (void*)Typeface_getStyle },
+    { "nativeGetBaseWeight",      "(J)I",  (void*)Typeface_getBaseWeight },
     { "nativeCreateFromArray",    "([J)J",
                                            (void*)Typeface_createFromArray },
     { "nativeSetDefault",         "(J)V",   (void*)Typeface_setDefault },
