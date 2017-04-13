@@ -93,7 +93,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * artifacts may occur on previous versions of the platform when its window is
  * positioned asynchronously.</p>
  */
-public class SurfaceView extends View {
+public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallback {
     private static final String TAG = "SurfaceView";
     private static final boolean DEBUG = false;
 
@@ -169,6 +169,8 @@ public class SurfaceView extends View {
     boolean mWindowVisibility = false;
     boolean mLastWindowVisibility = false;
     boolean mViewVisibility = false;
+    boolean mWindowStopped = false;
+
     int mRequestedWidth = -1;
     int mRequestedHeight = -1;
     /* Set SurfaceView's format to 565 by default to maintain backward
@@ -226,12 +228,27 @@ public class SurfaceView extends View {
         return mSurfaceHolder;
     }
 
+    private void updateRequestedVisibility() {
+        mRequestedVisible = mViewVisibility && mWindowVisibility && !mWindowStopped;
+    }
+
+    /** @hide */
+    @Override
+    public void windowStopped(boolean stopped) {
+        mWindowStopped = stopped;
+        updateRequestedVisibility();
+        updateSurface();
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+
+        getViewRootImpl().addWindowStoppedCallback(this);
+
         mParent.requestTransparentRegion(this);
         mViewVisibility = getVisibility() == VISIBLE;
-        mRequestedVisible = mViewVisibility && mWindowVisibility;
+        updateRequestedVisibility();
 
         mAttachedToWindow = true;
         if (!mGlobalListenersAdded) {
@@ -246,7 +263,7 @@ public class SurfaceView extends View {
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         mWindowVisibility = visibility == VISIBLE;
-        mRequestedVisible = mWindowVisibility && mViewVisibility;
+        updateRequestedVisibility();
         updateSurface();
     }
 
@@ -254,7 +271,7 @@ public class SurfaceView extends View {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         mViewVisibility = visibility == VISIBLE;
-        boolean newRequestedVisible = mWindowVisibility && mViewVisibility;
+        boolean newRequestedVisible = mWindowVisibility && mViewVisibility && !mWindowStopped;
         if (newRequestedVisible != mRequestedVisible) {
             // our base class (View) invalidates the layout only when
             // we go from/to the GONE state. However, SurfaceView needs
@@ -278,6 +295,8 @@ public class SurfaceView extends View {
 
     @Override
     protected void onDetachedFromWindow() {
+        getViewRootImpl().removeWindowStoppedCallback(this);
+
         mAttachedToWindow = false;
         if (mGlobalListenersAdded) {
             ViewTreeObserver observer = getViewTreeObserver();
@@ -299,6 +318,7 @@ public class SurfaceView extends View {
         mSurfaceControl = null;
 
         mHaveFrame = false;
+
         super.onDetachedFromWindow();
     }
 
