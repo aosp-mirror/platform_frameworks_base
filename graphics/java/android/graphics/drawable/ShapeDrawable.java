@@ -17,6 +17,8 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -32,6 +34,7 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.graphics.Xfermode;
 import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 
@@ -303,6 +306,16 @@ public class ShapeDrawable extends Drawable {
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
         mShapeState.mPaint.setColorFilter(colorFilter);
+        invalidateSelf();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    @TestApi
+    public void setXfermode(@Nullable Xfermode mode) {
+        mShapeState.mPaint.setXfermode(mode);
         invalidateSelf();
     }
 
