@@ -438,6 +438,14 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                             + " in the manifest.");
                     continue;
                 }
+                if (PackageManager.PERMISSION_GRANTED != mPm.checkPermission(
+                        ResolverRankerService.HOLD_PERMISSION,
+                        resolveInfo.serviceInfo.packageName)) {
+                    Log.w(TAG, "ResolverRankerService " + componentName + " does not hold"
+                            + " permission " + ResolverRankerService.HOLD_PERMISSION
+                            + " - this service will not be queried for ResolverComparator.");
+                    continue;
+                }
             } catch (NameNotFoundException e) {
                 Log.e(TAG, "Could not look up service " + componentName
                         + "; component name not found");
