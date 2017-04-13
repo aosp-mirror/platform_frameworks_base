@@ -322,6 +322,10 @@
          your application running at all times. -->
     <attr name="persistent" format="boolean" />
 
+    <!-- If set, the "persistent" attribute will only be honored if the feature
+         specified here is present on the device. -->
+    <attr name="persistentFeature" format="string" />
+
     <!-- Flag to specify if this application needs to be present for all users. Only pre-installed
          applications can request this feature. Default value is false. -->
     <attr name="requiredForAllUsers" format="boolean" />
@@ -1358,6 +1362,7 @@
              for normal behavior. -->
         <attr name="hasCode" format="boolean" />
         <attr name="persistent" />
+        <attr name="persistentFeature" />
         <attr name="requiredForAllUsers" />
         <!-- Specify whether the components in this application are enabled or not (that is, can be
              instantiated by the system).
