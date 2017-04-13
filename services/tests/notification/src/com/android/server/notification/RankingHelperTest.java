@@ -738,15 +738,6 @@ public class RankingHelperTest {
     }
 
     @Test
-    public void testCreateChannel_addMissingSound() throws Exception {
-        final NotificationChannel channel =
-                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG, UID, channel, true);
-        assertNotNull(mHelper.getNotificationChannel(
-                PKG, UID, channel.getId(), false).getSound());
-    }
-
-    @Test
     public void testCreateChannel_noOverrideSound() throws Exception {
         Uri sound = new Uri.Builder().scheme("test").build();
         final NotificationChannel channel = new NotificationChannel("id2", "name2",
