@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static org.mockito.Mockito.mock;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -62,14 +63,16 @@ public class ActivityTestsBase {
     }
 
     protected ActivityManagerService createActivityManagerService() {
-        return new TestActivityManagerService(mContext);
+        final ActivityManagerService service = new TestActivityManagerService(mContext);
+        service.mWindowManager = WindowTestUtils.getWindowManagerService(mContext);
+        return service;
     }
 
     protected static TestActivityStack createActivityStack(ActivityManagerService service,
             int stackId, int displayId, boolean onTop) {
         if (service.mStackSupervisor instanceof TestActivityStackSupervisor) {
             final TestActivityStack stack = ((TestActivityStackSupervisor) service.mStackSupervisor)
-                    .createTestStack(stackId, onTop);
+                    .createTestStack(service, stackId, onTop);
             return stack;
         }
 
@@ -109,7 +112,7 @@ public class ActivityTestsBase {
         intent.setComponent(component);
 
         final TaskRecord task = new TaskRecord(service, 0, aInfo, intent /*intent*/,
-                null /*_taskDescription*/, null /*thumbnailInfo*/);
+                null /*_taskDescription*/, new ActivityManager.TaskThumbnailInfo());
         stack.addTask(task, true, "creating test task");
         task.setStack(stack);
         task.createWindowContainer(true, true);
@@ -146,25 +149,39 @@ public class ActivityTestsBase {
         void updateUIDsPresentOnDisplay() {
         }
 
-        public TestActivityStack createTestStack(int stackId, boolean onTop) {
+        public TestActivityStack createTestStack(ActivityManagerService service, int stackId,
+                boolean onTop) {
             final ActivityDisplay display = new ActivityDisplay();
             final TestActivityContainer container =
-                    new TestActivityContainer(stackId, display, onTop);
+                    new TestActivityContainer(service, stackId, display, onTop);
             return container.getStack();
         }
 
         private class TestActivityContainer extends ActivityContainer {
+            private ActivityManagerService mService;
             private TestActivityStack mStack;
-            TestActivityContainer(int stackId, ActivityDisplay activityDisplay, boolean onTop) {
+            private boolean mOnTop;
+
+            TestActivityContainer(ActivityManagerService service, int stackId,
+                    ActivityDisplay activityDisplay, boolean onTop) {
                 super(stackId, activityDisplay, onTop);
+                mService = service;
             }
 
             @Override
             protected void createStack(int stackId, boolean onTop) {
-                mStack = new TestActivityStack(this, null /*recentTasks*/, onTop);
+                // normally stack creation is done here. However we need to do it on demand since
+                // we cannot set {@link mService} by the time the super constructor calling this
+                // method is invoked.
+                mOnTop = onTop;
             }
 
             public TestActivityStack getStack() {
+                if (mStack == null) {
+                    mStack = new TestActivityStack(this,
+                            new RecentTasks(mService, mService.mStackSupervisor), mOnTop);
+                }
+
                 return mStack;
             }
         }
