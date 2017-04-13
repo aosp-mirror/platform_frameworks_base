@@ -35,6 +35,7 @@ import dalvik.system.CloseGuard;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -500,10 +501,8 @@ public class SystemSensorManager extends SensorManager {
     /** @hide */
     protected int configureDirectChannelImpl(
             SensorDirectChannel channel, Sensor sensor, int rate) {
-        if (channel == null) throw new IllegalArgumentException("channel cannot be null");
-
-        if (!channel.isValid()) {
-            throw new IllegalStateException("channel is invalid");
+        if (!channel.isOpen()) {
+            throw new IllegalStateException("channel is closed");
         }
 
         if (rate < SensorDirectChannel.RATE_STOP
@@ -532,7 +531,8 @@ public class SystemSensorManager extends SensorManager {
     /** @hide */
     protected SensorDirectChannel createDirectChannelImpl(
             MemoryFile memoryFile, HardwareBuffer hardwareBuffer) {
-        SensorDirectChannel ch = null;
+        int id;
+        int type;
         long size;
         if (memoryFile != null) {
             int fd;
@@ -549,11 +549,13 @@ public class SystemSensorManager extends SensorManager {
             }
 
             size = memoryFile.length();
-            int id = nativeCreateDirectChannel(
-                    mNativeInstance, size, SensorDirectChannel.TYPE_ASHMEM, fd, null);
-            if (id > 0) {
-                ch = new SensorDirectChannel(this, id, SensorDirectChannel.TYPE_ASHMEM, size);
+            id = nativeCreateDirectChannel(
+                    mNativeInstance, size, SensorDirectChannel.TYPE_MEMORY_FILE, fd, null);
+            if (id <= 0) {
+                throw new UncheckedIOException(
+                        new IOException("create MemoryFile direct channel failed " + id));
             }
+            type = SensorDirectChannel.TYPE_MEMORY_FILE;
         } else if (hardwareBuffer != null) {
             if (hardwareBuffer.getFormat() != HardwareBuffer.BLOB) {
                 throw new IllegalArgumentException("Format of HardwareBuffer must be BLOB");
@@ -571,18 +573,18 @@ public class SystemSensorManager extends SensorManager {
                         "HardwareBuffer must set usage flag USAGE0_SENSOR_DIRECT_DATA");
             }
             size = hardwareBuffer.getWidth();
-            int id = nativeCreateDirectChannel(
+            id = nativeCreateDirectChannel(
                     mNativeInstance, size, SensorDirectChannel.TYPE_HARDWARE_BUFFER,
                     -1, hardwareBuffer);
-            if (id > 0) {
-                ch = new SensorDirectChannel(
-                        this, id, SensorDirectChannel.TYPE_HARDWARE_BUFFER, size);
+            if (id <= 0) {
+                throw new UncheckedIOException(
+                        new IOException("create HardwareBuffer direct channel failed " + id));
             }
+            type = SensorDirectChannel.TYPE_HARDWARE_BUFFER;
         } else {
-            throw new IllegalArgumentException("Invalid parameter");
+            throw new NullPointerException("shared memory object cannot be null");
         }
-
-        return ch;
+        return new SensorDirectChannel(this, id, type, size);
     }
 
     /** @hide */
