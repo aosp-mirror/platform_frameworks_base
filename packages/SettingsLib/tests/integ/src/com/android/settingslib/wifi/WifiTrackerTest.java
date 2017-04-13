@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -99,6 +100,16 @@ public class WifiTrackerTest {
     private static final int RSSI_2 = -30;
     private static final byte SCORE_2 = 15;
     private static final int BADGE_2 = NetworkBadging.BADGING_HD;
+
+    private static final int CONNECTED_NETWORK_ID = 123;
+    private static final int CONNECTED_RSSI = -50;
+    private static final WifiInfo CONNECTED_AP_1_INFO = new WifiInfo();
+    static {
+        CONNECTED_AP_1_INFO.setSSID(WifiSsid.createFromAsciiEncoded(SSID_1));
+        CONNECTED_AP_1_INFO.setBSSID(BSSID_1);
+        CONNECTED_AP_1_INFO.setNetworkId(CONNECTED_NETWORK_ID);
+        CONNECTED_AP_1_INFO.setRssi(CONNECTED_RSSI);
+    }
 
     @Captor ArgumentCaptor<WifiNetworkScoreCache> mScoreCacheCaptor;
     @Mock private ConnectivityManager mockConnectivityManager;
@@ -312,18 +323,12 @@ public class WifiTrackerTest {
 
     private WifiTracker createTrackerWithScanResultsAndAccessPoint1Connected()
             throws InterruptedException {
-        int networkId = 123;
-
-        WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(SSID_1));
-        wifiInfo.setBSSID(BSSID_1);
-        wifiInfo.setNetworkId(networkId);
-        when(mockWifiManager.getConnectionInfo()).thenReturn(wifiInfo);
+        when(mockWifiManager.getConnectionInfo()).thenReturn(CONNECTED_AP_1_INFO);
 
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = SSID_1;
         configuration.BSSID = BSSID_1;
-        configuration.networkId = networkId;
+        configuration.networkId = CONNECTED_NETWORK_ID;
         when(mockWifiManager.getConfiguredNetworks()).thenReturn(Arrays.asList(configuration));
 
         NetworkInfo networkInfo = new NetworkInfo(
@@ -445,7 +450,8 @@ public class WifiTrackerTest {
     }
 
     @Test
-    public void scoreCacheUpdateScoresShouldTriggerOnAccessPointsChanged() throws InterruptedException {
+    public void scoreCacheUpdateScoresShouldTriggerOnAccessPointsChanged()
+            throws InterruptedException {
         WifiTracker tracker = createMockedWifiTracker();
         startTracking(tracker);
         sendScanResultsAndProcess(tracker);
@@ -463,7 +469,7 @@ public class WifiTrackerTest {
 
     @Test
     public void scoreCacheUpdateScoresShouldChangeSortOrder() throws InterruptedException {
-        WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
+        WifiTracker tracker =  createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
         List<AccessPoint> aps = tracker.getAccessPoints();
         assertTrue(aps.size() == 2);
         assertEquals(aps.get(0).getSsidStr(), SSID_1);
@@ -635,5 +641,29 @@ public class WifiTrackerTest {
                 .when(mockWifiManager).getMatchingWifiConfig(any(ScanResult.class));
         tracker.forceUpdate();
         verify(mockWifiManager).getMatchingWifiConfig(any(ScanResult.class));
+    }
+
+    @Test
+    public void rssiChangeBroadcastShouldUpdateConnectedAp() throws Exception {
+        WifiTracker tracker =  createTrackerWithScanResultsAndAccessPoint1Connected();
+        assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
+
+        WifiConfiguration configuration = new WifiConfiguration();
+        configuration.SSID = SSID_1;
+        configuration.BSSID = BSSID_1;
+        configuration.networkId = CONNECTED_NETWORK_ID;
+        when(mockWifiManager.getConfiguredNetworks()).thenReturn(Arrays.asList(configuration));
+
+        int newRssi = CONNECTED_RSSI + 10;
+        WifiInfo info = new WifiInfo(CONNECTED_AP_1_INFO);
+        info.setRssi(newRssi);
+        when(mockWifiManager.getConnectionInfo()).thenReturn(info);
+
+        mAccessPointsChangedLatch = new CountDownLatch(1);
+        tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.RSSI_CHANGED_ACTION));
+        assertTrue(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+
+        verify(mockWifiManager, atLeast(2)).getConnectionInfo();
+        assertThat(tracker.getAccessPoints().get(0).getRssi()).isEqualTo(newRssi);
     }
 }
