@@ -17,11 +17,8 @@
 package com.android.server.storage;
 
 import android.annotation.IntDef;
-import android.app.usage.ExternalStorageStats;
-import android.app.usage.StorageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.ArrayMap;
@@ -157,29 +154,8 @@ public class FileCollector {
     }
 
     /**
-     * Returns the file categorization result for the primary internal storage UUID.
-     *
-     * @param context
-     */
-    public static MeasurementResult getMeasurementResult(Context context) {
-        MeasurementResult result = new MeasurementResult();
-        StorageStatsManager ssm =
-                (StorageStatsManager) context.getSystemService(Context.STORAGE_STATS_SERVICE);
-        ExternalStorageStats stats =
-                ssm.queryExternalStatsForUser(
-                        StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.of(context.getUserId()));
-        result.imagesSize = stats.getImageBytes();
-        result.videosSize = stats.getVideoBytes();
-        result.audioSize = stats.getAudioBytes();
-        result.miscSize =
-                stats.getTotalBytes() - result.imagesSize - result.videosSize - result.audioSize;
-        return result;
-    }
-
-    /**
      * Returns the size of a system for a given context. This is done by finding the difference
      * between the shared data and the total primary storage size.
-     *
      * @param context Context to use to get storage information.
      */
     public static long getSystemSize(Context context) {
