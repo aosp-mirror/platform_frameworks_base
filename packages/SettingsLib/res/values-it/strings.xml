@@ -316,7 +316,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Correzione del colore"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Questa funzione è sperimentale e potrebbe influire sulle prestazioni."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Valore sostituito da <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Quasi scarica. Tempo rimanente: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Tempo approssimativo rimanente: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Tempo rimanente alla carica completa: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Tempo rimanente: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ancora circa <xliff:g id="TIME">%2$s</xliff:g>"</string>

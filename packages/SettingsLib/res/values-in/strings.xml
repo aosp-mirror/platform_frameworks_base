@@ -254,7 +254,7 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Paksa perenderan GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Paksa penggunaan GPU untuk gambar 2d"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Force 4x MSAA"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Debug operasi klip non-kotak"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Penguraian GPU profil"</string>
