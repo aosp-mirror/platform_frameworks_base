@@ -19,6 +19,15 @@
 
 <resources>
     <!-- Keyguard PIN pad styles -->
+    <style name="Keyguard.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
+        <item name="android:textColor">@*android:color/primary_device_default_light</item>
+        <item name="android:textSize">@dimen/kg_status_line_font_size</item>
+    </style>
+    <style name="Keyguard.TextView.EmergencyButton" parent="@android:style/DeviceDefault.ButtonBar">
+        <item name="android:textColor">@*android:color/primary_device_default_light</item>
+        <item name="android:textSize">@dimen/kg_status_line_font_size</item>
+        <item name="android:background">@null</item>
+    </style>
     <style name="Widget.TextView.NumPadKey" parent="@android:style/Widget.TextView">
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_horizontal|center_vertical</item>
