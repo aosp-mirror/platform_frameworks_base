@@ -172,6 +172,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Onartu beti ibiltaritzan Wi-Fi sareak bilatzea"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datu mugikorrak beti aktibo"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desgaitu bolumen absolutua"</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
+    <skip />
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Hautatu Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth bidezko audioaren kodeka"</string>
@@ -209,6 +211,8 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Egiaztatu USBko aplikazioak."</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak antzemateko."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desgaitu egiten du Bluetooth bidezko bolumen absolutuaren eginbidea urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu."</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Tokiko terminala"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Gaitu tokiko shell-sarbidea duen terminal-aplikazioa"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP egiaztapena"</string>
@@ -317,7 +321,7 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Eginbidea esperimentala da eta eragina izan dezake funtzionamenduan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> gelditzen dira guztiz kargatu arte"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> inguru gelditzen dira"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>

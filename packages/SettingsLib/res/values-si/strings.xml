@@ -172,6 +172,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi රෝම් පරිලෝකන වෙතට සැමවිට අවසර දෙන්න"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
+    <skip />
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"බ්ලූටූත් AVRCP අනුවාදය"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"බ්ලූටූත් AVRCP අනුවාදය තෝරන්න"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"බ්ලූටූත් ශ්‍රව්‍ය Codec"</string>
@@ -209,6 +211,8 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ඔස්සේ යෙදුම් සත්‍යාපනය කරගන්න"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT හරහා ස්ථාපනය වූ යෙදුම්, විනාශකාරී ක්‍රියාවන් ඇත්දැයි පරික්ෂාකර බලන්න."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"පිළිගත නොහැකි ලෙස වැඩි හඩ පරිමාව හෝ පාලනය නොමැති වීම යනාදී දුරස්ථ උපාංග සමගින් වන හඬ පරිමා ගැටලුවලදී බ්ලූටූත් නිරපේක්ෂ හඬ පරිමා විශේෂාංගය අබල කරයි."</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"අභ්‍යන්තර අන්තය"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"දේශීය ෂෙල් ප්‍රවේශනය පිරිනමන ටර්මිනල් යෙදුම සබල කරන්න"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP පරික්ෂාව"</string>

@@ -172,6 +172,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ใช้การสแกน Wi-Fi ข้ามเครือข่ายเสมอ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"เปิดใช้อินเทอร์เน็ตมือถือเสมอ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ปิดใช้การควบคุมระดับเสียงของอุปกรณ์อื่น"</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
+    <skip />
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
@@ -209,6 +211,8 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้คุณลักษณะการควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"การตรวจสอบ HDCP"</string>

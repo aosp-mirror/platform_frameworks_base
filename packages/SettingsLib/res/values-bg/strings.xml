@@ -172,6 +172,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Сканирането за роуминг на Wi-Fi да е разрешено винаги"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Винаги активни мобилни данни"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Деактивиране на пълната сила на звука"</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
+    <skip />
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Избиране на версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек за Bluetooth"</string>
@@ -209,6 +211,8 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Потвържд. на прил. през USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверка на инсталираните чрез ADB/ADT приложения за опасно поведение."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Деактивира функцията на Bluetooth за пълна сила на звука в случай на проблеми със звука на отдалечени устройства, като например неприемливо висока сила на звука или липса на управление."</string>
+    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Актив. на прил. за терминал с достъп до локалния команден ред"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка с HDCP"</string>
@@ -316,7 +320,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекция на цветове"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Тази функция е експериментална и може да се отрази на ефективността."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Заменено от „<xliff:g id="TITLE">%1$s</xliff:g>“"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Оставащо време: Около <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Оставащо време: около <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Оставащо време до пълно зареждане: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Оставащо време: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – около <xliff:g id="TIME">%2$s</xliff:g> оставащо време"</string>
