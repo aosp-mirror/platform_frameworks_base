@@ -4663,8 +4663,11 @@ public class NotificationManagerService extends SystemService {
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {
         if (mCompanionManager == null) {
-            mCompanionManager = ICompanionDeviceManager.Stub.asInterface(
-                    ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE));
+            mCompanionManager = getCompanionManager();
+        }
+        // Companion mgr doesn't exist on all device types
+        if (mCompanionManager == null) {
+            return false;
         }
         long identity = Binder.clearCallingIdentity();
         try {
@@ -4683,6 +4686,11 @@ public class NotificationManagerService extends SystemService {
             Binder.restoreCallingIdentity(identity);
         }
         return false;
+    }
+
+    protected ICompanionDeviceManager getCompanionManager() {
+        return ICompanionDeviceManager.Stub.asInterface(
+                ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE));
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
