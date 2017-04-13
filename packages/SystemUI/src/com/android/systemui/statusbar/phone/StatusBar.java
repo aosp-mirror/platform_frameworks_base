@@ -716,6 +716,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ConfigurationListener mConfigurationListener;
     private InflationExceptionHandler mInflationExceptionHandler = this::handleInflationException;
     private boolean mReinflateNotificationsOnUserSwitched;
+    private boolean mClearAllEnabled;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -758,18 +759,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAssistManager = Dependency.get(AssistManager.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
 
-        mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
         updateDisplaySize();
-        mScrimSrcModeEnabled = mContext.getResources().getBoolean(
-                R.bool.config_status_bar_scrim_behind_use_src);
+
+        Resources res = mContext.getResources();
+        mScrimSrcModeEnabled = res.getBoolean(R.bool.config_status_bar_scrim_behind_use_src);
+        mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
 
         DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
         putComponent(StatusBar.class, this);
 
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
-        mDevicePolicyManager = (DevicePolicyManager)mContext.getSystemService(
+        mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
 
         mNotificationData = new NotificationData(this);
@@ -810,7 +813,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mRecents = getComponent(Recents.class);
 
-        final Configuration currentConfig = mContext.getResources().getConfiguration();
+        final Configuration currentConfig = res.getConfiguration();
         mLocale = currentConfig.locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
 
@@ -823,7 +826,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue.addCallbacks(this);
 
         int[] switches = new int[9];
-        ArrayList<IBinder> binders = new ArrayList<IBinder>();
+        ArrayList<IBinder> binders = new ArrayList<>();
         ArrayList<String> iconSlots = new ArrayList<>();
         ArrayList<StatusBarIcon> icons = new ArrayList<>();
         Rect fullscreenStackBounds = new Rect();
@@ -904,8 +907,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             Slog.e(TAG, "Failed to register VR mode state listener: " + e);
         }
 
-        mNonBlockablePkgs = new HashSet<String>();
-        Collections.addAll(mNonBlockablePkgs, mContext.getResources().getStringArray(
+        mNonBlockablePkgs = new HashSet<>();
+        Collections.addAll(mNonBlockablePkgs, res.getStringArray(
                 com.android.internal.R.array.config_nonBlockableNotificationPackages));
         // end old BaseStatusBar.start().
 
@@ -1358,6 +1361,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void inflateDismissView() {
+        if (!mClearAllEnabled) {
+            return;
+        }
+
         mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
         mDismissView.setOnButtonClickListener(new View.OnClickListener() {
@@ -2023,9 +2030,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateClearAll() {
-        boolean showDismissView =
-                mState != StatusBarState.KEYGUARD &&
-               hasActiveClearableNotifications();
+        if (!mClearAllEnabled) {
+            return;
+        }
+        boolean showDismissView = mState != StatusBarState.KEYGUARD
+                && hasActiveClearableNotifications();
         mStackScroller.updateDismissView(showDismissView);
     }
 
@@ -6615,9 +6624,23 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mNotificationPanel.setNoVisibleNotifications(visibleNotifications == 0);
 
-        mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 1);
-        mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 2);
-        mStackScroller.changeViewPosition(mNotificationShelf, mStackScroller.getChildCount() - 3);
+        // The following views will be moved to the end of mStackScroller. This counter represents
+        // the offset from the last child. Initialized to 1 for the very last position. It is post-
+        // incremented in the following "changeViewPosition" calls so that its value is correct for
+        // subsequent calls.
+        int offsetFromEnd = 1;
+        if (mDismissView != null) {
+            mStackScroller.changeViewPosition(mDismissView,
+                    mStackScroller.getChildCount() - offsetFromEnd++);
+        }
+
+        mStackScroller.changeViewPosition(mEmptyShadeView,
+                mStackScroller.getChildCount() - offsetFromEnd++);
+
+        // No post-increment for this call because it is the last one. Make sure to add one if
+        // another "changeViewPosition" call is ever added.
+        mStackScroller.changeViewPosition(mNotificationShelf,
+                mStackScroller.getChildCount() - offsetFromEnd);
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
