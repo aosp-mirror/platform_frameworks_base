@@ -163,32 +163,6 @@ class WindowSurfaceController {
         }
     }
 
-    void setPositionAndLayer(float left, float top, int layerStack, int layer) {
-        mService.openSurfaceTransaction();
-        try {
-            mSurfaceX = left;
-            mSurfaceY = top;
-
-            try {
-                if (SHOW_TRANSACTIONS) logSurface(
-                        "POS (setPositionAndLayer) @ (" + left + "," + top + ")", null);
-                mSurfaceControl.setPosition(left, top);
-                mSurfaceControl.setLayerStack(layerStack);
-
-                mSurfaceControl.setLayer(layer);
-                mSurfaceControl.setAlpha(0);
-                setShown(false);
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Error creating surface in " + this, e);
-                mAnimator.reclaimSomeSurfaceMemory("create-init", true);
-            }
-        } finally {
-            mService.closeSurfaceTransaction();
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    "<<< CLOSE TRANSACTION setPositionAndLayer");
-        }
-    }
-
     void destroyInTransaction() {
         if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
             Slog.i(TAG, "Destroying surface " + this + " called by " + Debug.getCallers(8));
@@ -269,7 +243,15 @@ class WindowSurfaceController {
         if (mSurfaceControl != null) {
             mService.openSurfaceTransaction();
             try {
-                mSurfaceControl.setLayer(layer);
+                if (mAnimator.mWin.usesRelativeZOrdering()) {
+                    mSurfaceControl.setRelativeLayer(
+                            mAnimator.mWin.getParentWindow()
+                            .mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
+                            -1);
+                } else {
+                    mSurfaceLayer = layer;
+                    mSurfaceControl.setLayer(layer);
+                }
             } finally {
                 mService.closeSurfaceTransaction();
             }
@@ -363,15 +345,13 @@ class WindowSurfaceController {
         return false;
     }
 
-    boolean prepareToShowInTransaction(float alpha, int layer,
+    boolean prepareToShowInTransaction(float alpha,
             float dsdx, float dtdx, float dsdy,
             float dtdy, boolean recoveringMemory) {
         if (mSurfaceControl != null) {
             try {
                 mSurfaceAlpha = alpha;
                 mSurfaceControl.setAlpha(alpha);
-                mSurfaceLayer = layer;
-                mSurfaceControl.setLayer(layer);
                 mLastDsdx = dsdx;
                 mLastDtdx = dtdx;
                 mLastDsdy = dsdy;
