@@ -1954,6 +1954,33 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void requestChannelBrowsable(Uri channelUri, int userId)
+                throws RemoteException {
+            final String callingPackageName = getCallingPackageName();
+            final long identity = Binder.clearCallingIdentity();
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                userId, "requestChannelBrowsable");
+            try {
+                Intent intent = new Intent(TvContract.ACTION_CHANNEL_BROWSABLE_REQUESTED);
+                List<ResolveInfo> list = getContext().getPackageManager()
+                    .queryBroadcastReceivers(intent, 0);
+                if (list != null) {
+                    for (ResolveInfo info : list) {
+                        String receiverPackageName = info.activityInfo.packageName;
+                        intent.putExtra(TvContract.EXTRA_CHANNEL_ID, ContentUris.parseId(
+                                channelUri));
+                        intent.putExtra(TvContract.EXTRA_PACKAGE_NAME, callingPackageName);
+                        intent.setPackage(receiverPackageName);
+                        getContext().sendBroadcastAsUser(intent, new UserHandle(resolvedUserId));
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         @SuppressWarnings("resource")
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
