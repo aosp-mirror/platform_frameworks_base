@@ -2745,7 +2745,8 @@ public abstract class Context {
      *          {@link #BIND_WAIVE_PRIORITY}.
      * @return If you have successfully bound to the service, {@code true} is returned;
      *         {@code false} is returned if the connection is not made so you will not
-     *         receive the service object.
+     *         receive the service object. However, you should still call
+     *         {@link #unbindService} to release the connection.
      *
      * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
