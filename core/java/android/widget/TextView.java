@@ -16,7 +16,6 @@
 
 package android.widget;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
@@ -59,6 +58,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.fonts.FontVariationAxis;
 import android.icu.text.DecimalFormatSymbols;
 import android.os.AsyncTask;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -408,7 +408,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public Drawables(Context context) {
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
-            mIsRtlCompatibilityMode = targetSdkVersion < JELLY_BEAN_MR1
+            mIsRtlCompatibilityMode = targetSdkVersion < VERSION_CODES.JELLY_BEAN_MR1
                     || !context.getApplicationInfo().hasRtlSupport();
             mOverride = false;
         }
@@ -1363,7 +1363,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 == (EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
 
         mUseInternationalizedInput =
-                context.getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.O;
+                context.getApplicationInfo().targetSdkVersion >= VERSION_CODES.O;
 
         if (inputMethod != null) {
             Class<?> c;
@@ -1408,7 +1408,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else if (numeric != 0) {
             createEditorIfNeeded();
             mEditor.mKeyListener = DigitsKeyListener.getInstance(
-                    mUseInternationalizedInput ? getTextLocale() : null,
+                    null,  // locale
                     (numeric & SIGNED) != 0,
                     (numeric & DECIMAL) != 0);
             inputType = mEditor.mKeyListener.getInputType();
@@ -3400,11 +3400,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mTextPaint.getTextLocales();
     }
 
-    private void changeListenerLocaleTo(@NonNull Locale locale) {
+    private void changeListenerLocaleTo(@Nullable Locale locale) {
         if (mListenerChanged) {
             // If a listener has been explicitly set, don't change it. We may break something.
             return;
         }
+        // The following null check is not absolutely necessary since all calling points of
+        // changeListenerLocaleTo() guarantee a non-null mEditor at the moment. But this is left
+        // here in case others would want to call this method in the future.
         if (mEditor != null) {
             KeyListener listener = mEditor.mKeyListener;
             if (listener instanceof DigitsKeyListener) {
@@ -3418,8 +3421,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 return;
             }
+            final boolean wasPasswordType = isPasswordInputType(mEditor.mInputType);
             setKeyListenerOnly(listener);
             setInputTypeFromEditor();
+            if (wasPasswordType) {
+                final int newInputClass = mEditor.mInputType & EditorInfo.TYPE_MASK_CLASS;
+                if (newInputClass == EditorInfo.TYPE_CLASS_TEXT) {
+                    mEditor.mInputType |= EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
+                } else if (newInputClass == EditorInfo.TYPE_CLASS_NUMBER) {
+                    mEditor.mInputType |= EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD;
+                }
+            }
         }
     }
 
@@ -3434,7 +3446,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setTextLocale(@NonNull Locale locale) {
         mLocalesChanged = true;
         mTextPaint.setTextLocale(locale);
-        changeListenerLocaleTo(locale);
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -3456,7 +3467,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setTextLocales(@NonNull @Size(min = 1) LocaleList locales) {
         mLocalesChanged = true;
         mTextPaint.setTextLocales(locales);
-        changeListenerLocaleTo(locales.get(0));
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -3468,9 +3478,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (!mLocalesChanged) {
-            final LocaleList locales = LocaleList.getDefault();
-            mTextPaint.setTextLocales(locales);
-            changeListenerLocaleTo(locales.get(0));
+            mTextPaint.setTextLocales(LocaleList.getDefault());
             if (mLayout != null) {
                 nullLayouts();
                 requestLayout();
@@ -5586,6 +5594,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mEditor.mInputType = type;
     }
 
+    /**
+     * @return {@code null} if the key listener should use pre-O (locale-independent). Otherwise
+     *         a {@code Locale} object that can be used to customize key various listeners.
+     * @see DateKeyListener#getInstance(Locale)
+     * @see DateTimeKeyListener#getInstance(Locale)
+     * @see DigitsKeyListener#getInstance(Locale)
+     * @see TimeKeyListener#getInstance(Locale)
+     */
+    @Nullable
+    private Locale getCustomLocaleForKeyListenerOrNull() {
+        if (!mUseInternationalizedInput) {
+            // If the application does not target O, stick to the previous behavior.
+            return null;
+        }
+        final LocaleList locales = getImeHintLocales();
+        if (locales == null) {
+            // If the application does not explicitly specify IME hint locale, also stick to the
+            // previous behavior.
+            return null;
+        }
+        return locales.get(0);
+    }
+
     private void setInputType(int type, boolean direct) {
         final int cls = type & EditorInfo.TYPE_MASK_CLASS;
         KeyListener input;
@@ -5603,15 +5634,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             input = TextKeyListener.getInstance(autotext, cap);
         } else if (cls == EditorInfo.TYPE_CLASS_NUMBER) {
+            final Locale locale = getCustomLocaleForKeyListenerOrNull();
             input = DigitsKeyListener.getInstance(
-                    mUseInternationalizedInput ? getTextLocale() : null,
+                    locale,
                     (type & EditorInfo.TYPE_NUMBER_FLAG_SIGNED) != 0,
                     (type & EditorInfo.TYPE_NUMBER_FLAG_DECIMAL) != 0);
-            if (mUseInternationalizedInput) {
-                type = input.getInputType(); // Override type, if necessary for i18n.
+            if (locale != null) {
+                // Override type, if necessary for i18n.
+                int newType = input.getInputType();
+                final int newClass = newType & EditorInfo.TYPE_MASK_CLASS;
+                if (newClass != EditorInfo.TYPE_CLASS_NUMBER) {
+                    // The class is different from the original class. So we need to override
+                    // 'type'. But we want to keep the password flag if it's there.
+                    if ((type & EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD) != 0) {
+                        newType |= EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
+                    }
+                    type = newType;
+                }
             }
         } else if (cls == EditorInfo.TYPE_CLASS_DATETIME) {
-            final Locale locale = mUseInternationalizedInput ? getTextLocale() : null;
+            final Locale locale = getCustomLocaleForKeyListenerOrNull();
             switch (type & EditorInfo.TYPE_MASK_VARIATION) {
                 case EditorInfo.TYPE_DATETIME_VARIATION_DATE:
                     input = DateKeyListener.getInstance(locale);
@@ -5884,6 +5926,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Change "hint" locales associated with the text view, which will be reported to an IME with
      * {@link EditorInfo#hintLocales} when it has focus.
      *
+     * Starting with Android O, this also causes internationalized listeners to be created (or
+     * change locale) based on the first locale in the input locale list.
+     *
      * <p><strong>Note:</strong> If you want new "hint" to take effect immediately you need to
      * call {@link InputMethodManager#restartInput(View)}.</p>
      * @param hintLocales List of the languages that the user is supposed to switch to no matter
@@ -5895,6 +5940,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         createEditorIfNeeded();
         mEditor.createInputContentTypeIfNeeded();
         mEditor.mInputContentType.imeHintLocales = hintLocales;
+        if (mUseInternationalizedInput) {
+            changeListenerLocaleTo(hintLocales == null ? null : hintLocales.get(0));
+        }
     }
 
     /**
