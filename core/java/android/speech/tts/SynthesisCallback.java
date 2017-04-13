@@ -151,6 +151,9 @@ public interface SynthesisCallback {
      * listener ({@link UtteranceProgressListener#onRangeStart}) at the moment that frame has been
      * reached by the playback head.
      *
+     * <p>This information can be used by the client, for example, to highlight ranges of the text
+     * while it is spoken.
+     *
      * <p>The markerInFrames is a frame index into the audio for this synthesis request, i.e. into
      * the concatenation of the audio bytes sent to audioAvailable for this synthesis request. The
      * definition of a frame depends on the format given by {@link #start}. See {@link AudioFormat}
