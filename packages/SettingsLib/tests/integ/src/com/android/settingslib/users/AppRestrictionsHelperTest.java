@@ -159,14 +159,14 @@ public class AppRestrictionsHelperTest extends BaseTest {
         for (String pkg : defaultImes) {
             final ResolveInfo ri = createResolveInfoForSystemApp(pkg);
             final InputMethodInfo inputMethodInfo = new InputMethodInfo(
-                    ri, false, null, null, 0, true, true, false);
+                    ri, false, null, null, 0, true, true);
             inputMethods.add(inputMethodInfo);
             addInstalledApp(ri);
         }
         for (String pkg : otherImes) {
             final ResolveInfo ri = createResolveInfoForSystemApp(pkg);
             final InputMethodInfo inputMethodInfo = new InputMethodInfo(
-                    ri, false, null, null, 0, false, true, false);
+                    ri, false, null, null, 0, false, true);
             inputMethods.add(inputMethodInfo);
             addInstalledApp(ri);
         }
