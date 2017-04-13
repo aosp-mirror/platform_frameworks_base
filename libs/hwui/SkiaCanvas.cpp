@@ -23,6 +23,7 @@
 #include "hwui/MinikinUtils.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 
+#include <SkCanvasStateUtils.h>
 #include <SkColorSpaceXformCanvas.h>
 #include <SkDrawable.h>
 #include <SkDeque.h>
@@ -408,6 +409,30 @@ SkDrawFilter* SkiaCanvas::getDrawFilter() {
 
 void SkiaCanvas::setDrawFilter(SkDrawFilter* drawFilter) {
     mCanvas->setDrawFilter(drawFilter);
+}
+
+// ----------------------------------------------------------------------------
+// Canvas state operations: Capture
+// ----------------------------------------------------------------------------
+
+SkCanvasState* SkiaCanvas::captureCanvasState() const {
+    SkCanvas* canvas = mCanvas;
+    if (mCanvasOwned) {
+        // Important to use the underlying SkCanvas, not the wrapper.
+        canvas = mCanvasOwned.get();
+    }
+
+    // Workarounds for http://crbug.com/271096: SW draw only supports
+    // translate & scale transforms, and a simple rectangular clip.
+    // (This also avoids significant wasted time in calling
+    // SkCanvasStateUtils::CaptureCanvasState when the clip is complex).
+    if (!canvas->isClipRect() ||
+        (canvas->getTotalMatrix().getType() &
+                  ~(SkMatrix::kTranslate_Mask | SkMatrix::kScale_Mask))) {
+      return nullptr;
+    }
+
+    return SkCanvasStateUtils::CaptureCanvasState(canvas);
 }
 
 // ----------------------------------------------------------------------------
