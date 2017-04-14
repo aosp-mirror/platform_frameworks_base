@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.policy.AccessibilityController;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -259,6 +260,9 @@ public class Dependency extends SystemUI {
                 new VolumeDialogControllerImpl(mContext));
 
         mProviders.put(MetricsLogger.class, () -> new MetricsLogger());
+
+        mProviders.put(AccessibilityManagerWrapper.class,
+                () -> new AccessibilityManagerWrapper(mContext));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
