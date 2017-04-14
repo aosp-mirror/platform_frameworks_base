@@ -231,9 +231,9 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
-        mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
-        mClockView = (TextView) findViewById(R.id.clock_view);
+        mKeyguardStatusBar = findViewById(R.id.keyguard_header);
+        mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
+        mClockView = findViewById(R.id.clock_view);
 
         mNotificationContainerParent = (NotificationsQuickSettingsContainer)
                 findViewById(R.id.notification_container_parent);
@@ -242,13 +242,13 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setOnHeightChangedListener(this);
         mNotificationStackScroller.setOverscrollTopChangedListener(this);
         mNotificationStackScroller.setOnEmptySpaceClickListener(this);
-        mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
+        mKeyguardBottomArea = findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext());
         mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mLastOrientation = getResources().getConfiguration().orientation;
 
-        mQsFrame = (FrameLayout) findViewById(R.id.qs_frame);
+        mQsFrame = findViewById(R.id.qs_frame);
     }
 
     @Override

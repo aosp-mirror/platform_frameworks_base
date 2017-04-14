@@ -40,7 +40,7 @@ public class Demo1 extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_screen);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
 //        mResultsScreen = new MyScene(mSceneRoot, R.layout.results_screen);

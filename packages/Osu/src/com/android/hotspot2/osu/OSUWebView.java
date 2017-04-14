@@ -37,7 +37,7 @@ public class OSUWebView extends Activity {
         setContentView(R.layout.osu_web_view);
         getActionBar().setDisplayShowHomeEnabled(false);
 
-        final WebView myWebView = (WebView) findViewById(R.id.webview);
+        final WebView myWebView = findViewById(R.id.webview);
         myWebView.clearCache(true);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);

@@ -136,7 +136,7 @@ mTabHost.setup();
 mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
       */
     public void setup() {
-        mTabWidget = (TabWidget) findViewById(com.android.internal.R.id.tabs);
+        mTabWidget = findViewById(com.android.internal.R.id.tabs);
         if (mTabWidget == null) {
             throw new RuntimeException(
                     "Your TabHost must have a TabWidget whose id attribute is 'android.R.id.tabs'");
@@ -171,7 +171,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             }
         });
 
-        mTabContent = (FrameLayout) findViewById(com.android.internal.R.id.tabcontent);
+        mTabContent = findViewById(com.android.internal.R.id.tabcontent);
         if (mTabContent == null) {
             throw new RuntimeException(
                     "Your TabHost must have a FrameLayout whose id attribute is "

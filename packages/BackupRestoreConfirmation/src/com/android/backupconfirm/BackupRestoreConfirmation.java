@@ -173,13 +173,13 @@ public class BackupRestoreConfirmation extends Activity {
         setContentView(layoutId);
 
         // Same resource IDs for each layout variant (backup / restore)
-        mStatusView = (TextView) findViewById(R.id.package_name);
-        mAllowButton = (Button) findViewById(R.id.button_allow);
-        mDenyButton = (Button) findViewById(R.id.button_deny);
+        mStatusView = findViewById(R.id.package_name);
+        mAllowButton = findViewById(R.id.button_allow);
+        mDenyButton = findViewById(R.id.button_deny);
 
-        mCurPassword = (TextView) findViewById(R.id.password);
-        mEncPassword = (TextView) findViewById(R.id.enc_password);
-        TextView curPwDesc = (TextView) findViewById(R.id.password_desc);
+        mCurPassword = findViewById(R.id.password);
+        mEncPassword = findViewById(R.id.enc_password);
+        TextView curPwDesc = findViewById(R.id.password_desc);
 
         mAllowButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,7 +214,7 @@ public class BackupRestoreConfirmation extends Activity {
             curPwDesc.setVisibility(View.GONE);
             mCurPassword.setVisibility(View.GONE);
             if (layoutId == R.layout.confirm_backup) {
-                TextView encPwDesc = (TextView) findViewById(R.id.enc_password_desc);
+                TextView encPwDesc = findViewById(R.id.enc_password_desc);
                 if (mIsEncrypted) {
                     encPwDesc.setText(R.string.backup_enc_password_required);
                     monitorEncryptionPassword();

@@ -35,15 +35,15 @@ public class UsageView extends FrameLayout {
     public UsageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.usage_view, this);
-        mUsageGraph = (UsageGraph) findViewById(R.id.usage_graph);
+        mUsageGraph = findViewById(R.id.usage_graph);
         mLabels = new TextView[] {
-                (TextView) findViewById(R.id.label_bottom),
-                (TextView) findViewById(R.id.label_middle),
-                (TextView) findViewById(R.id.label_top),
+                findViewById(R.id.label_bottom),
+                findViewById(R.id.label_middle),
+                findViewById(R.id.label_top),
         };
         mBottomLabels = new TextView[] {
-                (TextView) findViewById(R.id.label_start),
-                (TextView) findViewById(R.id.label_end),
+                findViewById(R.id.label_start),
+                findViewById(R.id.label_end),
         };
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.UsageView, 0, 0);
         if (a.hasValue(R.styleable.UsageView_sideLabels)) {
@@ -64,15 +64,15 @@ public class UsageView extends FrameLayout {
         if (a.hasValue(R.styleable.UsageView_android_gravity)) {
             int gravity = a.getInt(R.styleable.UsageView_android_gravity, 0);
             if (gravity == Gravity.END) {
-                LinearLayout layout = (LinearLayout) findViewById(R.id.graph_label_group);
-                LinearLayout labels = (LinearLayout) findViewById(R.id.label_group);
+                LinearLayout layout = findViewById(R.id.graph_label_group);
+                LinearLayout labels = findViewById(R.id.label_group);
                 // Swap the children order.
                 layout.removeView(labels);
                 layout.addView(labels);
                 // Set gravity.
                 labels.setGravity(Gravity.END);
                 // Swap the bottom space order.
-                LinearLayout bottomLabels = (LinearLayout) findViewById(R.id.bottom_label_group);
+                LinearLayout bottomLabels = findViewById(R.id.bottom_label_group);
                 View bottomSpace = bottomLabels.findViewById(R.id.bottom_label_space);
                 bottomLabels.removeView(bottomSpace);
                 bottomLabels.addView(bottomSpace);

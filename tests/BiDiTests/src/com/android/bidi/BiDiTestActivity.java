@@ -75,7 +75,7 @@ public class BiDiTestActivity extends Activity {
 
         setContentView(R.layout.main);
 
-        mList = (ListView) findViewById(R.id.testlist);
+        mList = findViewById(R.id.testlist);
         mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mList.setFocusableInTouchMode(true);
         

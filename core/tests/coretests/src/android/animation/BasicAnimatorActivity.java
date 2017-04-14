@@ -27,6 +27,6 @@ public class BasicAnimatorActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.animator_basic);
-        mAnimatingButton = (Button) findViewById(R.id.animatingButton);
+        mAnimatingButton = findViewById(R.id.animatingButton);
     }
 }

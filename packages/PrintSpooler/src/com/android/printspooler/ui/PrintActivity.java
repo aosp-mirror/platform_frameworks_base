@@ -1290,11 +1290,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private void bindUi() {
         // Summary
         mSummaryContainer = findViewById(R.id.summary_content);
-        mSummaryCopies = (TextView) findViewById(R.id.copies_count_summary);
-        mSummaryPaperSize = (TextView) findViewById(R.id.paper_size_summary);
+        mSummaryCopies = findViewById(R.id.copies_count_summary);
+        mSummaryPaperSize = findViewById(R.id.paper_size_summary);
 
         // Options container
-        mOptionsContent = (PrintContentView) findViewById(R.id.options_content);
+        mOptionsContent = findViewById(R.id.options_content);
         mOptionsContent.setOptionsStateChangeListener(this);
         mOptionsContent.setOpenOptionsController(this);
 
@@ -1302,7 +1302,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         OnClickListener clickListener = new MyClickListener();
 
         // Copies
-        mCopiesEditText = (EditText) findViewById(R.id.copies_edittext);
+        mCopiesEditText = findViewById(R.id.copies_edittext);
         mCopiesEditText.setOnFocusChangeListener(mSelectAllOnFocusListener);
         mCopiesEditText.setText(MIN_COPIES_STRING);
         mCopiesEditText.setSelection(mCopiesEditText.getText().length());
@@ -1311,28 +1311,28 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Destination.
         mPrintersObserver = new PrintersObserver();
         mDestinationSpinnerAdapter.registerDataSetObserver(mPrintersObserver);
-        mDestinationSpinner = (Spinner) findViewById(R.id.destination_spinner);
+        mDestinationSpinner = findViewById(R.id.destination_spinner);
         mDestinationSpinner.setAdapter(mDestinationSpinnerAdapter);
         mDestinationSpinner.setOnItemSelectedListener(itemSelectedListener);
 
         // Media size.
         mMediaSizeSpinnerAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
-        mMediaSizeSpinner = (Spinner) findViewById(R.id.paper_size_spinner);
+        mMediaSizeSpinner = findViewById(R.id.paper_size_spinner);
         mMediaSizeSpinner.setAdapter(mMediaSizeSpinnerAdapter);
         mMediaSizeSpinner.setOnItemSelectedListener(itemSelectedListener);
 
         // Color mode.
         mColorModeSpinnerAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
-        mColorModeSpinner = (Spinner) findViewById(R.id.color_spinner);
+        mColorModeSpinner = findViewById(R.id.color_spinner);
         mColorModeSpinner.setAdapter(mColorModeSpinnerAdapter);
         mColorModeSpinner.setOnItemSelectedListener(itemSelectedListener);
 
         // Duplex mode.
         mDuplexModeSpinnerAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
-        mDuplexModeSpinner = (Spinner) findViewById(R.id.duplex_spinner);
+        mDuplexModeSpinner = findViewById(R.id.duplex_spinner);
         mDuplexModeSpinner.setAdapter(mDuplexModeSpinnerAdapter);
         mDuplexModeSpinner.setOnItemSelectedListener(itemSelectedListener);
 
@@ -1345,32 +1345,32 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 ORIENTATION_PORTRAIT, orientationLabels[0]));
         mOrientationSpinnerAdapter.add(new SpinnerItem<>(
                 ORIENTATION_LANDSCAPE, orientationLabels[1]));
-        mOrientationSpinner = (Spinner) findViewById(R.id.orientation_spinner);
+        mOrientationSpinner = findViewById(R.id.orientation_spinner);
         mOrientationSpinner.setAdapter(mOrientationSpinnerAdapter);
         mOrientationSpinner.setOnItemSelectedListener(itemSelectedListener);
 
         // Range options
         ArrayAdapter<SpinnerItem<Integer>> rangeOptionsSpinnerAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
-        mRangeOptionsSpinner = (Spinner) findViewById(R.id.range_options_spinner);
+        mRangeOptionsSpinner = findViewById(R.id.range_options_spinner);
         mRangeOptionsSpinner.setAdapter(rangeOptionsSpinnerAdapter);
         mRangeOptionsSpinner.setOnItemSelectedListener(itemSelectedListener);
         updatePageRangeOptions(PrintDocumentInfo.PAGE_COUNT_UNKNOWN);
 
         // Page range
-        mPageRangeTitle = (TextView) findViewById(R.id.page_range_title);
-        mPageRangeEditText = (EditText) findViewById(R.id.page_range_edittext);
+        mPageRangeTitle = findViewById(R.id.page_range_title);
+        mPageRangeEditText = findViewById(R.id.page_range_edittext);
         mPageRangeEditText.setVisibility(View.GONE);
         mPageRangeTitle.setVisibility(View.GONE);
         mPageRangeEditText.setOnFocusChangeListener(mSelectAllOnFocusListener);
         mPageRangeEditText.addTextChangedListener(new RangeTextWatcher());
 
         // Advanced options button.
-        mMoreOptionsButton = (Button) findViewById(R.id.more_options_button);
+        mMoreOptionsButton = findViewById(R.id.more_options_button);
         mMoreOptionsButton.setOnClickListener(clickListener);
 
         // Print button
-        mPrintButton = (ImageView) findViewById(R.id.print_button);
+        mPrintButton = findViewById(R.id.print_button);
         mPrintButton.setOnClickListener(clickListener);
 
         // The UI is now initialized

@@ -50,7 +50,7 @@ public class AutoCompleteTextViewActivityLandscape extends Activity
 
        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
                android.R.layout.simple_dropdown_item_1line, COUNTRIES);
-       AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.edit);
+       AutoCompleteTextView textView = findViewById(R.id.edit);
        textView.setAdapter(adapter);
    }
 

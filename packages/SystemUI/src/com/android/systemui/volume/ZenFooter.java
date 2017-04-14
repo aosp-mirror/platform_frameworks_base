@@ -60,10 +60,10 @@ public class ZenFooter extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mIcon = (ImageView) findViewById(R.id.volume_zen_icon);
-        mSummaryLine1 = (TextView) findViewById(R.id.volume_zen_summary_line_1);
-        mSummaryLine2 = (TextView) findViewById(R.id.volume_zen_summary_line_2);
-        mEndNowButton = (TextView) findViewById(R.id.volume_zen_end_now);
+        mIcon = findViewById(R.id.volume_zen_icon);
+        mSummaryLine1 = findViewById(R.id.volume_zen_summary_line_1);
+        mSummaryLine2 = findViewById(R.id.volume_zen_summary_line_2);
+        mEndNowButton = findViewById(R.id.volume_zen_end_now);
         mConfigurableTexts.add(mSummaryLine1);
         mConfigurableTexts.add(mSummaryLine2);
         mConfigurableTexts.add(mEndNowButton, R.string.volume_zen_end_now);

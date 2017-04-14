@@ -151,7 +151,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 pkg, mAppUid, false /* includeDeleted */);
 
         String channelsDescText;
-        mNumChannelsView = (TextView) (findViewById(R.id.num_channels_desc));
+        mNumChannelsView = findViewById(R.id.num_channels_desc);
         if (isSingleDefaultChannel) {
             channelsDescText = mContext.getString(R.string.notification_default_channel_desc);
         } else {

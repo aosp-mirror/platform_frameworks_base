@@ -65,7 +65,7 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
         mEnterAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                ImageView button = (ImageView) findViewById(R.id.remote_button);
+                ImageView button = findViewById(R.id.remote_button);
                 ((AnimationDrawable) button.getDrawable()).start();
             }
         });

@@ -85,12 +85,12 @@ public class RenderingJitter extends Activity {
         View content = findViewById(android.R.id.content);
         content.setBackground(new AnimatedBackgroundDrawable());
         content.setKeepScreenOn(true);
-        mJitterReport = (TextView) findViewById(R.id.jitter_mma);
-        mMostlyTotalFrameTimeReport = (TextView) findViewById(R.id.totalish_mma);
-        mUiFrameTimeReport = (TextView) findViewById(R.id.ui_frametime_mma);
-        mRenderThreadTimeReport = (TextView) findViewById(R.id.rt_frametime_mma);
-        mTotalFrameTimeReport = (TextView) findViewById(R.id.total_mma);
-        mGraph = (PointGraphView) findViewById(R.id.graph);
+        mJitterReport = findViewById(R.id.jitter_mma);
+        mMostlyTotalFrameTimeReport = findViewById(R.id.totalish_mma);
+        mUiFrameTimeReport = findViewById(R.id.ui_frametime_mma);
+        mRenderThreadTimeReport = findViewById(R.id.rt_frametime_mma);
+        mTotalFrameTimeReport = findViewById(R.id.total_mma);
+        mGraph = findViewById(R.id.graph);
         mJitterReport.setText("abcdefghijklmnopqrstuvwxyz");
         mMostlyTotalFrameTimeReport.setText("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         mUiFrameTimeReport.setText("0123456789");

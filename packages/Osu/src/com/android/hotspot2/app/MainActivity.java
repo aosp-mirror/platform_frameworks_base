@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
         if (osuData.size() > 0) {
             noOsuView.setVisibility(View.GONE);
             osuListAdapter = new OsuListAdapter(this, osuData);
-            osuListView = (ListView) findViewById(R.id.profile_list);
+            osuListView = findViewById(R.id.profile_list);
             osuListView.setAdapter(osuListAdapter);
             osuListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override

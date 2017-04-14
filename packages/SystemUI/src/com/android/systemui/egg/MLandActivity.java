@@ -30,8 +30,8 @@ public class MLandActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mland);
-        mLand = (MLand) findViewById(R.id.world);
-        mLand.setScoreFieldHolder((ViewGroup) findViewById(R.id.scores));
+        mLand = findViewById(R.id.world);
+        mLand.setScoreFieldHolder(findViewById(R.id.scores));
         final View welcome = findViewById(R.id.welcome);
         mLand.setSplash(welcome);
         final int numControllers = mLand.getGameControllers().size();

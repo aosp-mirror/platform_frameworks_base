@@ -40,7 +40,7 @@ public class GridPadding extends Activity {
             values[i] = String.valueOf(i);
         }
 
-        mGridView = (GridView) findViewById(R.id.grid);
+        mGridView = findViewById(R.id.grid);
         mGridView.setAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, values));
     }

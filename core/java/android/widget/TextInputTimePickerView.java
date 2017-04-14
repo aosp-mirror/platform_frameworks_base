@@ -76,12 +76,12 @@ public class TextInputTimePickerView extends RelativeLayout {
 
         inflate(context, R.layout.time_picker_text_input_material, this);
 
-        mHourEditText = (EditText) findViewById(R.id.input_hour);
-        mMinuteEditText = (EditText) findViewById(R.id.input_minute);
-        mInputSeparatorView = (TextView) findViewById(R.id.input_separator);
-        mErrorLabel = (TextView) findViewById(R.id.label_error);
-        mHourLabel = (TextView) findViewById(R.id.label_hour);
-        mMinuteLabel = (TextView) findViewById(R.id.label_minute);
+        mHourEditText = findViewById(R.id.input_hour);
+        mMinuteEditText = findViewById(R.id.input_minute);
+        mInputSeparatorView = findViewById(R.id.input_separator);
+        mErrorLabel = findViewById(R.id.label_error);
+        mHourLabel = findViewById(R.id.label_hour);
+        mMinuteLabel = findViewById(R.id.label_minute);
 
         mHourEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -109,7 +109,7 @@ public class TextInputTimePickerView extends RelativeLayout {
             }
         });
 
-        mAmPmSpinner = (Spinner) findViewById(R.id.am_pm_spinner);
+        mAmPmSpinner = findViewById(R.id.am_pm_spinner);
         final String[] amPmStrings = TimePicker.getAmPmStrings(context);
         ArrayAdapter<CharSequence> adapter =
                 new ArrayAdapter<CharSequence>(context, R.layout.simple_spinner_dropdown_item);

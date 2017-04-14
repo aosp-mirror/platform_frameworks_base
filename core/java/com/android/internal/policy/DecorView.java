@@ -1688,7 +1688,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     }
                 };
             } else {
-                ViewStub stub = (ViewStub) findViewById(R.id.action_mode_bar_stub);
+                ViewStub stub = findViewById(R.id.action_mode_bar_stub);
                 if (stub != null) {
                     mPrimaryActionModeView = (ActionBarContextView) stub.inflate();
                     mPrimaryActionModePopup = null;

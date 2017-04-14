@@ -82,7 +82,7 @@ public class ListActivity extends Activity {
 
         ListAdapter adapter = new SimpleListAdapter(this);
 
-        final ListView list = (ListView) findViewById(R.id.list);
+        final ListView list = findViewById(R.id.list);
         list.setAdapter(adapter);
         
         registerForContextMenu(list);

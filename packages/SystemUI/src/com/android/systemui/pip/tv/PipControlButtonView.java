@@ -77,9 +77,9 @@ public class PipControlButtonView extends RelativeLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.tv_pip_control_button, this);
 
-        mIconImageView = (ImageView) findViewById(R.id.icon);
-        mButtonImageView = (ImageView) findViewById(R.id.button);
-        mDescriptionTextView = (TextView) findViewById(R.id.desc);
+        mIconImageView = findViewById(R.id.icon);
+        mButtonImageView = findViewById(R.id.button);
+        mDescriptionTextView = findViewById(R.id.desc);
 
         int[] values = new int[] {android.R.attr.src, android.R.attr.text};
         TypedArray typedArray =

@@ -32,12 +32,12 @@ public class OverlayTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.overlay_test);
 
-        mContainer = (ViewGroup) findViewById(R.id.container);
+        mContainer = findViewById(R.id.container);
         mRoot = (ViewGroup) mContainer.getParent();
     }
 
     public void onClick(View view) {
-        final Button fadingButton = (Button) findViewById(R.id.fadingButton);
+        final Button fadingButton = findViewById(R.id.fadingButton);
         if (fadingButton != null) {
             mContainer.removeView(fadingButton);
             mRoot.getOverlay().add(fadingButton);
