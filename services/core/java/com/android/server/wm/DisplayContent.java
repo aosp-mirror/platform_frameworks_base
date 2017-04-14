@@ -1420,6 +1420,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 changedStackList.add(stack.mStackId);
             }
         }
+
+        // If there was no pinned stack, we still need to notify the controller of the display info
+        // update as a result of the config change.  We do this here to consolidate the flow between
+        // changes when there is and is not a stack.
+        if (getStackById(PINNED_STACK_ID) == null) {
+            mPinnedStackControllerLocked.onDisplayInfoChanged();
+        }
     }
 
     @Override

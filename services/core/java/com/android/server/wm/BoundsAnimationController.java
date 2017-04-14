@@ -33,6 +33,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.WindowManagerInternal;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Enables animating bounds of objects.
  *
@@ -103,7 +105,8 @@ public class BoundsAnimationController {
                 com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
-    private final class BoundsAnimator extends ValueAnimator
+    @VisibleForTesting
+    final class BoundsAnimator extends ValueAnimator
             implements ValueAnimator.AnimatorUpdateListener, ValueAnimator.AnimatorListener {
         private final AnimateBoundsUser mTarget;
         private final Rect mFrom = new Rect();
@@ -113,10 +116,12 @@ public class BoundsAnimationController {
         private final boolean mMoveToFullScreen;
         // True if this this animation was cancelled and will be replaced the another animation from
         // the same {@link #AnimateBoundsUser} target.
-        private boolean mSkipAnimationEnd;
+        private boolean mSkipFinalResize;
         // True if this animation replaced a previous animation of the same
         // {@link #AnimateBoundsUser} target.
         private final boolean mSkipAnimationStart;
+        // True if this animation was cancelled by the user, not as a part of a replacing animation
+        private boolean mSkipAnimationEnd;
         // True if this animation is not replacing a previous animation, or if the previous
         // animation is animating to a different fullscreen state than the current animation.
         // We use this to ensure that we always provide a consistent set/order of callbacks when we
@@ -200,7 +205,11 @@ public class BoundsAnimationController {
                 // Whoops, the target doesn't feel like animating anymore. Let's immediately finish
                 // any further animation.
                 if (DEBUG) Slog.d(TAG, "animateUpdate: cancelled");
-                animation.cancel();
+
+                // Since we are cancelling immediately without a replacement animation, send the
+                // animation end to maintain callback parity, but also skip any further resizes
+                prepareCancel(false /* skipAnimationEnd */, true /* skipFinalResize */);
+                cancel();
             }
         }
 
@@ -208,7 +217,7 @@ public class BoundsAnimationController {
         public void onAnimationEnd(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationEnd: mTarget=" + mTarget
                     + " mMoveToFullScreen=" + mMoveToFullScreen
-                    + " mSkipAnimationEnd=" + mSkipAnimationEnd
+                    + " mSkipFinalResize=" + mSkipFinalResize
                     + " mFinishAnimationAfterTransition=" + mFinishAnimationAfterTransition
                     + " mAppTransitionIsRunning=" + mAppTransition.isRunning());
 
@@ -222,10 +231,15 @@ public class BoundsAnimationController {
                 return;
             }
 
+            if (!mSkipFinalResize) {
+                // If not cancelled, resize the pinned stack to the final size. All calls to
+                // setPinnedStackSize() must be done between onAnimationStart() and onAnimationEnd()
+                mTarget.setPinnedStackSize(mTo, null);
+            }
+
             finishAnimation();
 
-            mTarget.setPinnedStackSize(mTo, null);
-            if (mMoveToFullScreen && !mSkipAnimationEnd) {
+            if (mMoveToFullScreen && !mSkipFinalResize) {
                 mTarget.moveToFullscreen();
             }
         }
@@ -235,10 +249,16 @@ public class BoundsAnimationController {
             finishAnimation();
         }
 
+        public void prepareCancel(boolean skipAnimationEnd, boolean skipFinalResize) {
+            if (DEBUG) Slog.d(TAG, "prepareCancel: skipAnimationEnd=" + skipAnimationEnd
+                    + " skipFinalResize=" + skipFinalResize);
+            mSkipAnimationEnd = skipAnimationEnd;
+            mSkipFinalResize = skipFinalResize;
+        }
+
         @Override
         public void cancel() {
-            mSkipAnimationEnd = true;
-            if (DEBUG) Slog.d(TAG, "cancel: willReplace mTarget=" + mTarget);
+            if (DEBUG) Slog.d(TAG, "cancel: mTarget=" + mTarget);
             super.cancel();
         }
 
@@ -273,19 +293,15 @@ public class BoundsAnimationController {
 
     public interface AnimateBoundsUser {
         /**
-         * Asks the target to directly (without any intermediate steps, like scheduling animation)
-         * resize its bounds.
-         *
-         * @return Whether the target still wants to be animated and successfully finished the
-         * operation. If it returns false, the animation will immediately be cancelled. The target
-         * should return false when something abnormal happened, e.g. it was completely removed
-         * from the hierarchy and is not valid anymore.
-         */
-        boolean setSize(Rect bounds);
-        /**
-         * Behaves as setSize, but freezes the bounds of any tasks in the target at taskBounds,
+         * Sets the size of the target (without any intermediate steps, like scheduling animation)
+         * but freezes the bounds of any tasks in the target at taskBounds,
          * to allow for more flexibility during resizing. Only works for the pinned stack at the
          * moment.
+         *
+         * @return Whether the target should continue to be animated and this call was successful.
+         * If false, the animation will be cancelled because the user has determined that the
+         * animation is now invalid and not required. In such a case, the cancel will trigger the
+         * animation end callback as well, but will not send any further size changes.
          */
         boolean setPinnedStackSize(Rect bounds, Rect taskBounds);
 
@@ -310,11 +326,20 @@ public class BoundsAnimationController {
          */
         void onAnimationEnd();
 
+        /**
+         * Callback for the target to inform it to reparent to the fullscreen stack.
+         */
         void moveToFullscreen();
     }
 
-    void animateBounds(final AnimateBoundsUser target, Rect from, Rect to, int animationDuration,
-            boolean moveToFullscreen) {
+    public void animateBounds(final AnimateBoundsUser target, Rect from, Rect to,
+            int animationDuration, boolean moveToFullscreen) {
+        animateBoundsImpl(target, from, to, animationDuration, moveToFullscreen);
+    }
+
+    @VisibleForTesting
+    BoundsAnimator animateBoundsImpl(final AnimateBoundsUser target, Rect from, Rect to,
+            int animationDuration, boolean moveToFullscreen) {
         final BoundsAnimator existing = mRunningAnimations.get(target);
         final boolean replacing = existing != null;
         final boolean animatingToNewFullscreenState = (existing == null) ||
@@ -326,12 +351,15 @@ public class BoundsAnimationController {
 
         if (replacing) {
             if (existing.isAnimatingTo(to)) {
-                // Just les the current animation complete if it has the same destination as the
+                // Just let the current animation complete if it has the same destination as the
                 // one we are trying to start.
                 if (DEBUG) Slog.d(TAG, "animateBounds: same destination as existing=" + existing
                         + " ignoring...");
-                return;
+                return existing;
             }
+            // Since we are replacing, we skip both animation start and end callbacks, and don't
+            // animate to the final bounds when cancelling
+            existing.prepareCancel(true /* skipAnimationEnd */, true /* skipFinalResize */);
             existing.cancel();
         }
         final BoundsAnimator animator = new BoundsAnimator(target, from, to, moveToFullscreen,
@@ -342,5 +370,6 @@ public class BoundsAnimationController {
                 : DEFAULT_TRANSITION_DURATION) * DEBUG_ANIMATION_SLOW_DOWN_FACTOR);
         animator.setInterpolator(mFastOutSlowInInterpolator);
         animator.start();
+        return animator;
     }
 }

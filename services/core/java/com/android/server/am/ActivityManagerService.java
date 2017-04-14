@@ -7864,9 +7864,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                     final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                     final Rect sourceBounds = r.pictureInPictureArgs.getSourceRectHint();
-                    final Rect destBounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
-                            aspectRatio);
-                    mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, destBounds,
+                    mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, aspectRatio,
                             true /* moveHomeStackToFront */, "enterPictureInPictureMode");
                     final PinnedActivityStack stack = mStackSupervisor.getStack(PINNED_STACK_ID);
                     stack.setPictureInPictureAspectRatio(aspectRatio);
@@ -7927,7 +7925,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP
                     final PinnedActivityStack stack = r.getStack();
-                    if (!stack.isBoundsAnimatingToFullscreen()) {
+                    if (!stack.isAnimatingBoundsToFullscreen()) {
                         stack.setPictureInPictureAspectRatio(
                                 r.pictureInPictureArgs.getAspectRatio());
                         stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());

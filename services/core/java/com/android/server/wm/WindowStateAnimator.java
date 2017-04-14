@@ -1360,11 +1360,11 @@ class WindowStateAnimator {
             int posX = mTmpSize.left;
             int posY = mTmpSize.top;
             task.mStack.getDimBounds(mTmpStackBounds);
-            task.mStack.getAnimatingSourceBounds(mTmpSourceBounds);
+            task.mStack.getFinalAnimationSourceBounds(mTmpSourceBounds);
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
                 // current stack bounds
-                task.mStack.getAnimatingBounds(mTmpAnimatingBounds);
+                task.mStack.getFinalAnimationBounds(mTmpAnimatingBounds);
 
                 // Calculate the current progress and interpolate the difference between the target
                 // and source bounds
