@@ -2276,6 +2276,17 @@ public abstract class PackageManager {
     public static final String FEATURE_EMBEDDED = "android.hardware.type.embedded";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This is a device dedicated to be primarily used
+     * with keyboard, mouse or touchpad. This includes traditional desktop
+     * computers, laptops and variants such as convertibles or detachables.
+     * Due to the larger screen, the device will most likely use the
+     * {@link #FEATURE_FREEFORM_WINDOW_MANAGEMENT} feature as well.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_PC = "android.hardware.type.pc";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports printing.
      */
