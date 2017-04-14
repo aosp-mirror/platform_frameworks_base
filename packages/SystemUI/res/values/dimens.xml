@@ -738,7 +738,7 @@
     <dimen name="pip_dismiss_gradient_height">196dp</dimen>
 
     <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
-    <dimen name="pip_dismiss_text_bottom_margin">36dp</dimen>
+    <dimen name="pip_dismiss_text_bottom_margin">24dp</dimen>
 
     <!-- The shortest-edge size of the expanded PiP. -->
     <dimen name="pip_expanded_shortest_edge_size">160dp</dimen>
