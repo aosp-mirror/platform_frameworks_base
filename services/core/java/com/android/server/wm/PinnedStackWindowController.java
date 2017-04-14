@@ -32,8 +32,8 @@ public class PinnedStackWindowController extends StackWindowController {
 
     private Rect mTmpBoundsRect = new Rect();
 
-    public PinnedStackWindowController(int stackId, StackWindowListener listener, int displayId,
-            boolean onTop, Rect outBounds) {
+    public PinnedStackWindowController(int stackId, PinnedStackWindowListener listener,
+            int displayId, boolean onTop, Rect outBounds) {
         super(stackId, listener, displayId, onTop, outBounds, WindowManagerService.getInstance());
     }
 
@@ -63,7 +63,7 @@ public class PinnedStackWindowController extends StackWindowController {
 
             final Rect originalBounds = new Rect();
             mContainer.getBounds(originalBounds);
-            mContainer.setAnimatingBounds(sourceBounds, toBounds);
+            mContainer.setAnimationFinalBounds(sourceBounds, toBounds);
             UiThread.getHandler().post(() -> {
                 if (mContainer == null) {
                     return;
@@ -84,9 +84,10 @@ public class PinnedStackWindowController extends StackWindowController {
             }
 
             final int displayId = mContainer.getDisplayContent().getDisplayId();
-            final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio);
+            final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio,
+                    true /* useExistingStackBounds */);
             final Rect targetBounds = new Rect();
-            mContainer.getAnimatingBounds(targetBounds);
+            mContainer.getAnimationOrCurrentBounds(targetBounds);
             final PinnedStackController pinnedStackController =
                     mContainer.getDisplayContent().getPinnedStackController();
 
@@ -117,8 +118,12 @@ public class PinnedStackWindowController extends StackWindowController {
     /**
      * @return whether the bounds are currently animating to fullscreen.
      */
-    public boolean isBoundsAnimatingToFullscreen() {
-        return mContainer.isBoundsAnimatingToFullscreen();
+    public boolean isAnimatingBoundsToFullscreen() {
+        return mContainer.isAnimatingBoundsToFullscreen();
+    }
+
+    public boolean pinnedStackResizeAllowed() {
+        return mContainer.pinnedStackResizeAllowed();
     }
 
     /**
@@ -131,5 +136,17 @@ public class PinnedStackWindowController extends StackWindowController {
             bounds = new Rect(mTmpBoundsRect);
         }
         return bounds;
+    }
+
+    /**
+     * The following calls are made from WM to AM.
+     */
+
+    /** Calls directly into activity manager so window manager lock shouldn't held. */
+    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
+        if (mListener != null) {
+            PinnedStackWindowListener listener = (PinnedStackWindowListener) mListener;
+            listener.updatePictureInPictureModeForPinnedStackAnimation(targetStackBounds);
+        }
     }
 }
