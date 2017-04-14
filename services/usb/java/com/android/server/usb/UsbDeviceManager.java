@@ -135,6 +135,7 @@ public class UsbDeviceManager {
     private static final int MSG_ACCESSORY_MODE_ENTER_TIMEOUT = 8;
     private static final int MSG_UPDATE_CHARGING_STATE = 9;
     private static final int MSG_UPDATE_HOST_STATE = 10;
+    private static final int MSG_LOCALE_CHANGED = 11;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -255,6 +256,13 @@ public class UsbDeviceManager {
         }
     };
 
+    private final BroadcastReceiver mLanguageChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mHandler.sendEmptyMessage(MSG_LOCALE_CHANGED);
+        }
+    };
+
     public UsbDeviceManager(Context context, UsbAlsaManager alsaManager,
             UsbSettingsManager settingsManager) {
         mContext = context;
@@ -288,6 +296,9 @@ public class UsbDeviceManager {
                 new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         mContext.registerReceiver(mHostReceiver, filter);
+
+        mContext.registerReceiver(mLanguageChangedReceiver,
+                new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
     }
 
     private UsbProfileGroupSettingsManager getCurrentSettings() {
@@ -593,7 +604,7 @@ public class UsbDeviceManager {
                 }
 
                 setEnabledFunctions(oldFunctions, true, mUsbDataUnlocked);
-                updateAdbNotification();
+                updateAdbNotification(false);
             }
 
             if (mDebuggingManager != null) {
@@ -613,7 +624,7 @@ public class UsbDeviceManager {
 
             if (usbDataUnlocked != mUsbDataUnlocked) {
                 mUsbDataUnlocked = usbDataUnlocked;
-                updateUsbNotification();
+                updateUsbNotification(false);
                 forceRestart = true;
             }
 
@@ -893,8 +904,8 @@ public class UsbDeviceManager {
                     mConnected = (msg.arg1 == 1);
                     mConfigured = (msg.arg2 == 1);
 
-                    updateUsbNotification();
-                    updateAdbNotification();
+                    updateUsbNotification(false);
+                    updateAdbNotification(false);
                     if (UsbManager.containsFunction(mCurrentFunctions,
                             UsbManager.USB_FUNCTION_ACCESSORY)) {
                         updateCurrentAccessory();
@@ -917,7 +928,7 @@ public class UsbDeviceManager {
                     mSinkPower = (args.argi3 == 1);
                     mSupportsAllCombinations = (args.argi4 == 1);
                     args.recycle();
-                    updateUsbNotification();
+                    updateUsbNotification(false);
                     if (mBootCompleted) {
                         updateUsbStateBroadcastIfNeeded(false);
                     } else {
@@ -926,7 +937,7 @@ public class UsbDeviceManager {
                     break;
                 case MSG_UPDATE_CHARGING_STATE:
                     mUsbCharging = (msg.arg1 == 1);
-                    updateUsbNotification();
+                    updateUsbNotification(false);
                     break;
                 case MSG_UPDATE_HOST_STATE:
                     Iterator devices = (Iterator) msg.obj;
@@ -963,7 +974,7 @@ public class UsbDeviceManager {
                             }
                         }
                     }
-                    updateUsbNotification();
+                    updateUsbNotification(false);
                     break;
                 case MSG_ENABLE_ADB:
                     setAdbEnabled(msg.arg1 == 1);
@@ -981,9 +992,13 @@ public class UsbDeviceManager {
                             mCurrentFunctions, forceRestart, mUsbDataUnlocked && !forceRestart);
                     break;
                 case MSG_SYSTEM_READY:
-                    updateUsbNotification();
-                    updateAdbNotification();
+                    updateUsbNotification(false);
+                    updateAdbNotification(false);
                     updateUsbFunctions();
+                    break;
+                case MSG_LOCALE_CHANGED:
+                    updateAdbNotification(true);
+                    updateUsbNotification(true);
                     break;
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;
@@ -1035,7 +1050,7 @@ public class UsbDeviceManager {
             return mCurrentAccessory;
         }
 
-        private void updateUsbNotification() {
+        private void updateUsbNotification(boolean force) {
             if (mNotificationManager == null || !mUseUsbNotification
                     || ("0".equals(SystemProperties.get("persist.charging.notify")))
                     // Dont show the notification when connected to a USB peripheral
@@ -1085,7 +1100,7 @@ public class UsbDeviceManager {
                 titleRes = com.android.internal.R.string.usb_charging_notification_title;
                 id = SystemMessage.NOTE_USB_CHARGING;
             }
-            if (id != mUsbNotificationId) {
+            if (id != mUsbNotificationId || force) {
                 // clear notification if title needs changing
                 if (mUsbNotificationId != 0) {
                     mNotificationManager.cancelAsUser(null, mUsbNotificationId,
@@ -1125,12 +1140,18 @@ public class UsbDeviceManager {
             }
         }
 
-        private void updateAdbNotification() {
+        private void updateAdbNotification(boolean force) {
             if (mNotificationManager == null) return;
             final int id = SystemMessage.NOTE_ADB_ACTIVE;
             final int titleRes = com.android.internal.R.string.adb_active_notification_title;
+
             if (mAdbEnabled && mConnected) {
                 if ("0".equals(SystemProperties.get("persist.adb.notify"))) return;
+
+                if (force && mAdbNotificationShown) {
+                    mAdbNotificationShown = false;
+                    mNotificationManager.cancelAsUser(null, id, UserHandle.ALL);
+                }
 
                 if (!mAdbNotificationShown) {
                     Resources r = mContext.getResources();
