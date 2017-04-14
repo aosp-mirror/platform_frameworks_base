@@ -1787,7 +1787,7 @@ public class IntentFilter implements Parcelable {
                     sb.append(", mHasPartialTypes="); sb.append(mHasPartialTypes);
             du.println(sb.toString());
         }
-        {
+        if (getAutoVerify()) {
             sb.setLength(0);
             sb.append(prefix); sb.append("AutoVerify="); sb.append(getAutoVerify());
             du.println(sb.toString());
