@@ -67,6 +67,7 @@ public final class AutoFillUI {
         void requestShowFillUi(AutofillId id, int width, int height,
                 IAutofillWindowPresenter presenter);
         void requestHideFillUi(AutofillId id);
+        void startIntentSender(IntentSender intentSender);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -199,6 +200,13 @@ public final class AutoFillUI {
                 public void requestHideFillUi() {
                     if (mCallback != null) {
                         mCallback.requestHideFillUi(focusedId);
+                    }
+                }
+
+                @Override
+                public void startIntentSender(IntentSender intentSender) {
+                    if (mCallback != null) {
+                        mCallback.startIntentSender(intentSender);
                     }
                 }
             });
