@@ -190,6 +190,8 @@ interface IActivityManager {
             int flags, in Bundle options, int userId);
     void cancelIntentSender(in IIntentSender sender);
     String getPackageForIntentSender(in IIntentSender sender);
+    void registerIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
+    void unregisterIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
     void enterSafeMode();
     boolean startNextMatchingActivity(in IBinder callingActivity,
             in Intent intent, in Bundle options);
