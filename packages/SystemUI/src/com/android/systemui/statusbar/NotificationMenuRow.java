@@ -306,6 +306,10 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     }
 
     private void snapBack(View animView, float velocity) {
+        if (mFadeAnimator != null) {
+            mFadeAnimator.cancel();
+        }
+        mHandler.removeCallbacks(mCheckForDrag);
         mMenuSnappedTo = false;
         mSnapping = true;
         mSwipeHelper.snap(animView, 0 /* leftTarget */, velocity);
