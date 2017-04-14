@@ -6970,7 +6970,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             dispatchPopulateAccessibilityEvent(event);
         }
         // In the beginning we called #isShown(), so we know that getParent() is not null.
-        getParent().requestSendAccessibilityEvent(this, event);
+        ViewParent parent = getParent();
+        if (parent != null) {
+            getParent().requestSendAccessibilityEvent(this, event);
+        }
     }
 
     /**
