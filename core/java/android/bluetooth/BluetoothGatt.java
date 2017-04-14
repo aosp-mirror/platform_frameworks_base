@@ -973,6 +973,41 @@ public final class BluetoothGatt implements BluetoothProfile {
     }
 
     /**
+     * Reads the characteristic using its UUID from the associated remote device.
+     *
+     * <p>This is an asynchronous operation. The result of the read operation
+     * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
+     * callback.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param uuid UUID of characteristic to read from the remote device
+     * @return true, if the read operation was initiated successfully
+     * @hide
+     */
+    public boolean readUsingCharacteristicUuid(UUID uuid, int startHandle, int endHandle) {
+        if (VDBG) Log.d(TAG, "readUsingCharacteristicUuid() - uuid: " + uuid);
+        if (mService == null || mClientIf == 0) return false;
+
+        synchronized(mDeviceBusy) {
+            if (mDeviceBusy) return false;
+            mDeviceBusy = true;
+        }
+
+        try {
+            mService.readUsingCharacteristicUuid(mClientIf, mDevice.getAddress(),
+                new ParcelUuid(uuid), startHandle, endHandle, AUTHENTICATION_NONE);
+        } catch (RemoteException e) {
+            Log.e(TAG,"",e);
+            mDeviceBusy = false;
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
      * Writes a given characteristic and its values to the associated remote device.
      *
      * <p>Once the write operation has been completed, the
