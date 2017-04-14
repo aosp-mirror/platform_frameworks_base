@@ -33,6 +33,8 @@ public class RoSystemProperties {
     // ------ ro.config.* -------- //
     public static final boolean CONFIG_LOW_RAM =
             SystemProperties.getBoolean("ro.config.low_ram", false);
+    public static final boolean CONFIG_SMALL_BATTERY =
+            SystemProperties.getBoolean("ro.config.small_battery", false);
 
     // ------ ro.fw.* ------------ //
     public static final boolean FW_SYSTEM_USER_SPLIT =
