@@ -277,6 +277,9 @@
         <font weight="400" style="normal">NotoSansCham-Regular.ttf</font>
         <font weight="700" style="normal">NotoSansCham-Bold.ttf</font>
     </family>
+    <family lang="und-Adlm">
+        <font weight="400" style="normal">NotoSansAdlam-Regular.ttf</font>
+    </family>
     <family lang="und-Avst">
         <font weight="400" style="normal">NotoSansAvestan-Regular.ttf</font>
     </family>
