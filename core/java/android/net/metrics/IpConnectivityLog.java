@@ -23,6 +23,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.BitUtils;
 
 /**
  * Class for logging IpConnectvity events with IpConnectivityMetrics
@@ -117,10 +118,10 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(int netid, long transports, Parcelable data) {
+    public boolean log(int netid, int[] transports, Parcelable data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.netId = netid;
-        ev.transports = transports;
+        ev.transports = BitUtils.packBits(transports);
         return log(ev);
     }
 
