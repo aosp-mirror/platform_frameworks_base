@@ -204,7 +204,7 @@ public class TileServices extends IQSService.Stub {
         if (customTile != null) {
             verifyCaller(customTile);
             customTile.onDialogShown();
-            mHost.collapsePanels();
+            mHost.forceCollapsePanels();
             mServices.get(customTile).setShowingDialog(true);
         }
     }
@@ -224,7 +224,7 @@ public class TileServices extends IQSService.Stub {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
             verifyCaller(customTile);
-            mHost.collapsePanels();
+            mHost.forceCollapsePanels();
         }
     }
 
