@@ -586,7 +586,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 viewState = new ViewState(this, id, value, this, ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
-            } else if ((flags & FLAG_VIEW_ENTERED) != 0) {
+            } else if (mStructure != null && (flags & FLAG_VIEW_ENTERED) != 0) {
                 viewState = startPartitionLocked(id, value);
             } else {
                 if (VERBOSE) Slog.v(TAG, "Ignored " + getFlagAsString(flags) + " for " + id);
