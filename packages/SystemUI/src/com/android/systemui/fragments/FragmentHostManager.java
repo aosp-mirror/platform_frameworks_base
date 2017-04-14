@@ -157,7 +157,7 @@ public class FragmentHostManager {
         // TODO: Do something?
     }
 
-    private View findViewById(int id) {
+    private <T extends View> T findViewById(int id) {
         return mRootView.findViewById(id);
     }
 
@@ -245,7 +245,7 @@ public class FragmentHostManager {
 
         @Override
         @Nullable
-        public View onFindViewById(int id) {
+        public <T extends View> T onFindViewById(int id) {
             return FragmentHostManager.this.findViewById(id);
         }
 

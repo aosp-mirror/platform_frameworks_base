@@ -1787,7 +1787,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public Action initActionAsync(ViewTree root, ViewGroup rootParent, OnClickHandler handler) {
-            final TextView target = (TextView) root.findViewById(viewId);
+            final TextView target = root.findViewById(viewId);
             if (target == null) return ACTION_NOOP;
 
             TextViewDrawableAction copy = useIcons ?
@@ -3688,12 +3688,12 @@ public class RemoteViews implements Parcelable, Filter {
             createTree();
         }
 
-        public View findViewById(int id) {
+        public <T extends View> T findViewById(int id) {
             if (mChildren == null) {
                 return mRoot.findViewById(id);
             }
             ViewTree tree = findViewTreeById(id);
-            return tree == null ? null : tree.mRoot;
+            return tree == null ? null : (T) tree.mRoot;
         }
 
         public void addChild(ViewTree child) {
