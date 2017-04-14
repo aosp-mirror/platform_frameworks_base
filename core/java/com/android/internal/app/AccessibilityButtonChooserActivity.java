@@ -65,7 +65,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         mMagnificationTarget = new AccessibilityButtonTarget(this, MAGNIFICATION_COMPONENT_ID,
                 R.string.accessibility_magnification_chooser_text,
-                R.drawable.resolver_icon_placeholder);
+                R.drawable.ic_accessibility_magnification);
 
         mTargets = getServiceAccessibilityButtonTargets(this);
         if (Settings.Secure.getInt(getContentResolver(),
