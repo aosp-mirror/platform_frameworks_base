@@ -3424,8 +3424,10 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Deprecated - use ACTION_FACTORY_RESET instead.
+     * @hide
      */
     @Deprecated
+    @SystemApi
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
     /**
