@@ -4783,7 +4783,7 @@ public class NotificationManagerService extends SystemService {
 
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
-            for (final ManagedServiceInfo info : NotificationAssistants.this.mServices) {
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
                 boolean sbnVisible = isVisibleToListener(sbn, info);
                 if (!sbnVisible) {
                     continue;
@@ -4819,7 +4819,7 @@ public class NotificationManagerService extends SystemService {
         public void notifyAssistantSnoozedLocked(final StatusBarNotification sbn,
                 final String snoozeCriterionId) {
             TrimCache trimCache = new TrimCache(sbn);
-            for (final ManagedServiceInfo info : mServices) {
+            for (final ManagedServiceInfo info : getServices()) {
                 final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
                 mHandler.post(new Runnable() {
                     @Override
@@ -4840,7 +4840,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         public boolean isEnabled() {
-            return !mServices.isEmpty();
+            return !getServices().isEmpty();
         }
     }
 
@@ -4920,7 +4920,7 @@ public class NotificationManagerService extends SystemService {
             // Lazily initialized snapshots of the notification.
             TrimCache trimCache = new TrimCache(sbn);
 
-            for (final ManagedServiceInfo info : mServices) {
+            for (final ManagedServiceInfo info : getServices()) {
                 boolean sbnVisible = isVisibleToListener(sbn, info);
                 boolean oldSbnVisible = oldSbn != null ? isVisibleToListener(oldSbn, info) : false;
                 // This notification hasn't been and still isn't visible -> ignore.
@@ -4959,7 +4959,7 @@ public class NotificationManagerService extends SystemService {
             // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the
             // notification
             final StatusBarNotification sbnLight = sbn.cloneLight();
-            for (final ManagedServiceInfo info : mServices) {
+            for (final ManagedServiceInfo info : getServices()) {
                 if (!isVisibleToListener(sbn, info)) {
                     continue;
                 }
@@ -4977,7 +4977,7 @@ public class NotificationManagerService extends SystemService {
          * asynchronously notify all listeners about a reordering of notifications
          */
         public void notifyRankingUpdateLocked() {
-            for (final ManagedServiceInfo serviceInfo : mServices) {
+            for (final ManagedServiceInfo serviceInfo : getServices()) {
                 if (!serviceInfo.isEnabledForCurrentProfiles()) {
                     continue;
                 }
@@ -4992,7 +4992,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         public void notifyListenerHintsChangedLocked(final int hints) {
-            for (final ManagedServiceInfo serviceInfo : mServices) {
+            for (final ManagedServiceInfo serviceInfo : getServices()) {
                 if (!serviceInfo.isEnabledForCurrentProfiles()) {
                     continue;
                 }
@@ -5006,7 +5006,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         public void notifyInterruptionFilterChanged(final int interruptionFilter) {
-            for (final ManagedServiceInfo serviceInfo : mServices) {
+            for (final ManagedServiceInfo serviceInfo : getServices()) {
                 if (!serviceInfo.isEnabledForCurrentProfiles()) {
                     continue;
                 }
@@ -5145,7 +5145,7 @@ public class NotificationManagerService extends SystemService {
             }
             // TODO: clean up locking object later
             synchronized (mNotificationLock) {
-                for (final ManagedServiceInfo serviceInfo : mServices) {
+                for (final ManagedServiceInfo serviceInfo : getServices()) {
                     if (packageName.equals(serviceInfo.component.getPackageName())) {
                         return true;
                     }
