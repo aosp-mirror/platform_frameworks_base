@@ -343,9 +343,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (id.equals(mCurrentViewId)) {
                 try {
                     final ViewState view = mViewStates.get(id);
-                    mClient.requestShowFillUi(mWindowToken, id, width, height,
-                            view.getVirtualBounds(),
-                            presenter);
+                    mClient.requestShowFillUi(this.id, mWindowToken, id, width, height,
+                            view.getVirtualBounds(), presenter);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error requesting to show fill UI", e);
                 }
@@ -363,7 +362,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     public void requestHideFillUi(AutofillId id) {
         synchronized (mLock) {
             try {
-                mClient.requestHideFillUi(mWindowToken, id);
+                mClient.requestHideFillUi(this.id, mWindowToken, id);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error requesting to hide fill UI", e);
             }
@@ -716,7 +715,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             if (!mHasCallback) return;
             try {
-                mClient.notifyNoFillUi(mWindowToken, mCurrentViewId);
+                mClient.notifyNoFillUi(id, mWindowToken, mCurrentViewId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: windowToken=" + mWindowToken
                         + " id=" + mCurrentViewId, e);
@@ -852,7 +851,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private void startAuthentication(IntentSender intent, Intent fillInIntent) {
         try {
             synchronized (mLock) {
-                mClient.authenticate(intent, fillInIntent);
+                mClient.authenticate(id, intent, fillInIntent);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Error launching auth intent", e);
@@ -895,7 +894,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (DEBUG) {
                     Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
                 }
-                mClient.autofill(mWindowToken, dataset.getFieldIds(), dataset.getFieldValues());
+                mClient.autofill(id, mWindowToken, dataset.getFieldIds(), dataset.getFieldValues());
                 setViewStatesLocked(null, dataset, ViewState.STATE_AUTOFILLED);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Error autofilling activity: " + e);

@@ -760,8 +760,8 @@ public final class AutofillManager {
         }
     }
 
-    private void requestShowFillUi(IBinder windowToken, AutofillId id, int width, int height,
-            Rect anchorBounds, IAutofillWindowPresenter presenter) {
+    private void requestShowFillUi(int sessionId, IBinder windowToken, AutofillId id, int width,
+            int height, Rect anchorBounds, IAutofillWindowPresenter presenter) {
         final View anchor = findAchorView(windowToken, id);
         if (anchor == null) {
             return;
@@ -769,9 +769,15 @@ public final class AutofillManager {
 
         AutofillCallback callback = null;
         synchronized (mLock) {
-            if (getClientLocked().autofillCallbackRequestShowFillUi(anchor, width, height,
-                    anchorBounds, presenter) && mCallback != null) {
-                callback = mCallback;
+            if (mSessionId == sessionId) {
+                AutofillClient client = getClientLocked();
+
+                if (client != null) {
+                    if (client.autofillCallbackRequestShowFillUi(anchor, width, height,
+                            anchorBounds, presenter) && mCallback != null) {
+                        callback = mCallback;
+                    }
+                }
             }
         }
 
@@ -782,6 +788,23 @@ public final class AutofillManager {
             } else {
                 callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_SHOWN);
             }
+        }
+    }
+
+    private void authenticate(int sessionId, IntentSender intent, Intent fillInIntent) {
+        synchronized (mLock) {
+            if (sessionId == mSessionId) {
+                AutofillClient client = getClientLocked();
+                if (client != null) {
+                    client.autofillCallbackAuthenticate(intent, fillInIntent);
+                }
+            }
+        }
+    }
+
+    private void setState(boolean enabled) {
+        synchronized (mLock) {
+            mEnabled = enabled;
         }
     }
 
@@ -804,80 +827,92 @@ public final class AutofillManager {
         }
     }
 
-    private void handleAutofill(IBinder windowToken, List<AutofillId> ids,
+    private void autofill(int sessionId, IBinder windowToken, List<AutofillId> ids,
             List<AutofillValue> values) {
-        final View root = WindowManagerGlobal.getInstance().getWindowView(windowToken);
-        if (root == null) {
-            return;
-        }
-
-        final int itemCount = ids.size();
-        int numApplied = 0;
-        ArrayMap<View, SparseArray<AutofillValue>> virtualValues = null;
-
-        for (int i = 0; i < itemCount; i++) {
-            final AutofillId id = ids.get(i);
-            final AutofillValue value = values.get(i);
-            final int viewId = id.getViewId();
-            final View view = root.findViewByAccessibilityIdTraversal(viewId);
-            if (view == null) {
-                Log.w(TAG, "autofill(): no View with id " + viewId);
-                continue;
+        synchronized (mLock) {
+            if (sessionId != mSessionId) {
+                return;
             }
-            if (id.isVirtual()) {
-                if (virtualValues == null) {
-                    // Most likely there will be just one view with virtual children.
-                    virtualValues = new ArrayMap<>(1);
+
+            final View root = WindowManagerGlobal.getInstance().getWindowView(windowToken);
+            if (root == null) {
+                return;
+            }
+
+            final int itemCount = ids.size();
+            int numApplied = 0;
+            ArrayMap<View, SparseArray<AutofillValue>> virtualValues = null;
+
+            for (int i = 0; i < itemCount; i++) {
+                final AutofillId id = ids.get(i);
+                final AutofillValue value = values.get(i);
+                final int viewId = id.getViewId();
+                final View view = root.findViewByAccessibilityIdTraversal(viewId);
+                if (view == null) {
+                    Log.w(TAG, "autofill(): no View with id " + viewId);
+                    continue;
                 }
-                SparseArray<AutofillValue> valuesByParent = virtualValues.get(view);
-                if (valuesByParent == null) {
-                    // We don't know the size yet, but usually it will be just a few fields...
-                    valuesByParent = new SparseArray<>(5);
-                    virtualValues.put(view, valuesByParent);
-                }
-                valuesByParent.put(id.getVirtualChildId(), value);
-            } else {
-                synchronized (mLock) {
+                if (id.isVirtual()) {
+                    if (virtualValues == null) {
+                        // Most likely there will be just one view with virtual children.
+                        virtualValues = new ArrayMap<>(1);
+                    }
+                    SparseArray<AutofillValue> valuesByParent = virtualValues.get(view);
+                    if (valuesByParent == null) {
+                        // We don't know the size yet, but usually it will be just a few fields...
+                        valuesByParent = new SparseArray<>(5);
+                        virtualValues.put(view, valuesByParent);
+                    }
+                    valuesByParent.put(id.getVirtualChildId(), value);
+                } else {
                     // Mark the view as to be autofilled with 'value'
                     if (mLastAutofilledData == null) {
                         mLastAutofilledData = new ParcelableMap(itemCount - i);
                     }
                     mLastAutofilledData.put(id, value);
+
+                    view.autofill(value);
+
+                    // Set as autofilled if the values match now, e.g. when the value was updated
+                    // synchronously.
+                    // If autofill happens async, the view is set to autofilled in
+                    // notifyValueChanged.
+                    setAutofilledIfValuesIs(view, value);
+
+                    numApplied++;
                 }
-
-                view.autofill(value);
-
-                // Set as autofilled if the values match now, e.g. when the value was updated
-                // synchronously.
-                // If autofill happens async, the view is set to autofilled in notifyValueChanged.
-                setAutofilledIfValuesIs(view, value);
-
-                numApplied++;
             }
-        }
 
-        if (virtualValues != null) {
-            for (int i = 0; i < virtualValues.size(); i++) {
-                final View parent = virtualValues.keyAt(i);
-                final SparseArray<AutofillValue> childrenValues = virtualValues.valueAt(i);
-                parent.autofill(childrenValues);
-                numApplied += childrenValues.size();
+            if (virtualValues != null) {
+                for (int i = 0; i < virtualValues.size(); i++) {
+                    final View parent = virtualValues.keyAt(i);
+                    final SparseArray<AutofillValue> childrenValues = virtualValues.valueAt(i);
+                    parent.autofill(childrenValues);
+                    numApplied += childrenValues.size();
+                }
             }
-        }
 
-        final LogMaker log = new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_DATASET_APPLIED);
-        log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, itemCount);
-        log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED, numApplied);
-        mMetricsLogger.write(log);
+            final LogMaker log = new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_DATASET_APPLIED);
+            log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, itemCount);
+            log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED,
+                    numApplied);
+            mMetricsLogger.write(log);
+        }
     }
 
-    private void requestHideFillUi(IBinder windowToken, AutofillId id) {
+    private void requestHideFillUi(int sessionId, IBinder windowToken, AutofillId id) {
         final View anchor = findAchorView(windowToken, id);
 
         AutofillCallback callback = null;
         synchronized (mLock) {
-            if (getClientLocked().autofillCallbackRequestHideFillUi() && mCallback != null) {
-                callback = mCallback;
+            if (mSessionId == sessionId) {
+                AutofillClient client = getClientLocked();
+
+                if (client != null) {
+                    if (client.autofillCallbackRequestHideFillUi() && mCallback != null) {
+                        callback = mCallback;
+                    }
+                }
             }
         }
 
@@ -891,12 +926,14 @@ public final class AutofillManager {
         }
     }
 
-    private void notifyNoFillUi(IBinder windowToken, AutofillId id) {
+    private void notifyNoFillUi(int sessionId, IBinder windowToken, AutofillId id) {
         final View anchor = findAchorView(windowToken, id);
 
-        AutofillCallback callback;
+        AutofillCallback callback = null;
         synchronized (mLock) {
-            callback = mCallback;
+            if (mSessionId == sessionId && getClientLocked() != null) {
+                callback = mCallback;
+            }
         }
 
         if (callback != null) {
@@ -999,73 +1036,57 @@ public final class AutofillManager {
         public void setState(boolean enabled) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> {
-                    synchronized (afm.mLock) {
-                        afm.mEnabled = enabled;
-                    }
-                });
+                afm.mContext.getMainThreadHandler().post(() -> afm.setState(enabled));
             }
         }
 
         @Override
-        public void autofill(IBinder windowToken, List<AutofillId> ids,
+        public void autofill(int sessionId, IBinder windowToken, List<AutofillId> ids,
                 List<AutofillValue> values) {
             // TODO(b/33197203): must keep the dataset so subsequent calls pass the same
             // dataset.extras to service
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() ->
-                        afm.handleAutofill(windowToken, ids, values));
+                afm.mContext.getMainThreadHandler().post(
+                        () -> afm.autofill(sessionId, windowToken, ids, values));
             }
         }
 
         @Override
-        public void authenticate(IntentSender intent, Intent fillInIntent) {
+        public void authenticate(int sessionId, IntentSender intent, Intent fillInIntent) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> {
-                    if (afm.getClientLocked() != null) {
-                        afm.getClientLocked().autofillCallbackAuthenticate(intent, fillInIntent);
-                    }
-                });
+                afm.mContext.getMainThreadHandler().post(
+                        () -> afm.authenticate(sessionId, intent, fillInIntent));
             }
         }
 
         @Override
-        public void requestShowFillUi(IBinder windowToken, AutofillId id,
+        public void requestShowFillUi(int sessionId, IBinder windowToken, AutofillId id,
                 int width, int height, Rect anchorBounds, IAutofillWindowPresenter presenter) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> {
-                    if (afm.getClientLocked() != null) {
-                        afm.requestShowFillUi(windowToken, id, width,
-                                height, anchorBounds, presenter);
-                    }
-                });
+                afm.mContext.getMainThreadHandler().post(
+                        () -> afm.requestShowFillUi(sessionId, windowToken, id, width, height,
+                                anchorBounds, presenter));
             }
         }
 
         @Override
-        public void requestHideFillUi(IBinder windowToken, AutofillId id) {
+        public void requestHideFillUi(int sessionId, IBinder windowToken, AutofillId id) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> {
-                    if (afm.getClientLocked() != null) {
-                        afm.requestHideFillUi(windowToken, id);
-                    }
-                });
+                afm.mContext.getMainThreadHandler().post(
+                        () -> afm.requestHideFillUi(sessionId, windowToken, id));
             }
         }
 
         @Override
-        public void notifyNoFillUi(IBinder windowToken, AutofillId id) {
+        public void notifyNoFillUi(int sessionId, IBinder windowToken, AutofillId id) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> {
-                    if (afm.getClientLocked() != null) {
-                        afm.notifyNoFillUi(windowToken, id);
-                    }
-                });
+                afm.mContext.getMainThreadHandler().post(
+                        () -> afm.notifyNoFillUi(sessionId, windowToken, id));
             }
         }
 
