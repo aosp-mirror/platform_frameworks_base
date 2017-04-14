@@ -4240,7 +4240,7 @@ public class TelephonyManager {
      * Returns null if the query fails.
      *
      *
-     * <p>Requires that the caller has READ_PRIVILEGED_PHONE_STATE
+     * <p>Requires that the caller has READ_PHONE_STATE
      *
      * @return an array of forbidden PLMNs or null if not available
      */
@@ -4253,7 +4253,7 @@ public class TelephonyManager {
      * Returns null if the query fails.
      *
      *
-     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE
+     * <p>Requires that the calling app has READ_PHONE_STATE
      *
      * @param subId subscription ID used for authentication
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
