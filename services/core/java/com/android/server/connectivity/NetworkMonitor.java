@@ -70,6 +70,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -90,6 +91,8 @@ public class NetworkMonitor extends StateMachine {
     private static final String DEFAULT_HTTP_URL      =
             "http://connectivitycheck.gstatic.com/generate_204";
     private static final String DEFAULT_FALLBACK_URL  = "http://www.google.com/gen_204";
+    private static final String DEFAULT_OTHER_FALLBACK_URLS =
+            "http://play.googleapis.com/generate_204";
     private static final String DEFAULT_USER_AGENT    = "Mozilla/5.0 (X11; Linux x86_64) "
                                                       + "AppleWebKit/537.36 (KHTML, like Gecko) "
                                                       + "Chrome/52.0.2743.82 Safari/537.36";
@@ -263,7 +266,8 @@ public class NetworkMonitor extends StateMachine {
     private final String mCaptivePortalUserAgent;
     private final URL mCaptivePortalHttpsUrl;
     private final URL mCaptivePortalHttpUrl;
-    private final URL mCaptivePortalFallbackUrl;
+    private final URL[] mCaptivePortalFallbackUrls;
+    private int mNextFallbackUrlIndex = 0;
 
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
@@ -302,7 +306,7 @@ public class NetworkMonitor extends StateMachine {
         mCaptivePortalUserAgent = getCaptivePortalUserAgent(context);
         mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl(context));
         mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(context));
-        mCaptivePortalFallbackUrl = makeURL(getCaptivePortalFallbackUrl(context));
+        mCaptivePortalFallbackUrls = makeCaptivePortalFallbackUrls(context);
 
         start();
     }
@@ -450,7 +454,7 @@ public class NetworkMonitor extends StateMachine {
                     intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL,
                             mLastPortalProbeResult.detectUrl);
                     intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT,
-                            getCaptivePortalUserAgent(mContext));
+                            mCaptivePortalUserAgent);
                     intent.setFlags(
                             Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivityAsUser(intent, UserHandle.CURRENT);
@@ -677,9 +681,24 @@ public class NetworkMonitor extends StateMachine {
         return getSetting(context, Settings.Global.CAPTIVE_PORTAL_HTTP_URL, DEFAULT_HTTP_URL);
     }
 
-    private static String getCaptivePortalFallbackUrl(Context context) {
-        return getSetting(context,
+    private URL[] makeCaptivePortalFallbackUrls(Context context) {
+        String separator = ",";
+        String firstUrl = getSetting(context,
                 Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, DEFAULT_FALLBACK_URL);
+        String joinedUrls = firstUrl + separator + getSetting(context,
+                Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, DEFAULT_OTHER_FALLBACK_URLS);
+        List<URL> urls = new ArrayList<>();
+        for (String s : joinedUrls.split(separator)) {
+            URL u = makeURL(s);
+            if (u == null) {
+                continue;
+            }
+            urls.add(u);
+        }
+        if (urls.isEmpty()) {
+            Log.e(TAG, String.format("could not create any url from %s", joinedUrls));
+        }
+        return urls.toArray(new URL[urls.size()]);
     }
 
     private static String getCaptivePortalUserAgent(Context context) {
@@ -689,6 +708,15 @@ public class NetworkMonitor extends StateMachine {
     private static String getSetting(Context context, String symbol, String defaultValue) {
         final String value = Settings.Global.getString(context.getContentResolver(), symbol);
         return value != null ? value : defaultValue;
+    }
+
+    private URL nextFallbackUrl() {
+        if (mCaptivePortalFallbackUrls.length == 0) {
+            return null;
+        }
+        int idx = Math.abs(mNextFallbackUrlIndex) % mCaptivePortalFallbackUrls.length;
+        mNextFallbackUrlIndex += new Random().nextInt(); // randomely change url without memory.
+        return mCaptivePortalFallbackUrls[idx];
     }
 
     @VisibleForTesting
@@ -701,7 +729,6 @@ public class NetworkMonitor extends StateMachine {
         URL pacUrl = null;
         URL httpsUrl = mCaptivePortalHttpsUrl;
         URL httpUrl = mCaptivePortalHttpUrl;
-        URL fallbackUrl = mCaptivePortalFallbackUrl;
 
         // On networks with a PAC instead of fetching a URL that should result in a 204
         // response, we instead simply fetch the PAC script.  This is done for a few reasons:
@@ -738,7 +765,7 @@ public class NetworkMonitor extends StateMachine {
         if (pacUrl != null) {
             result = sendDnsAndHttpProbes(null, pacUrl, ValidationProbeEvent.PROBE_PAC);
         } else if (mUseHttps) {
-            result = sendParallelHttpProbes(proxyInfo, httpsUrl, httpUrl, fallbackUrl);
+            result = sendParallelHttpProbes(proxyInfo, httpsUrl, httpUrl);
         } else {
             result = sendDnsAndHttpProbes(proxyInfo, httpUrl, ValidationProbeEvent.PROBE_HTTP);
         }
@@ -872,7 +899,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private CaptivePortalProbeResult sendParallelHttpProbes(
-            ProxyInfo proxy, URL httpsUrl, URL httpUrl, URL fallbackUrl) {
+            ProxyInfo proxy, URL httpsUrl, URL httpUrl) {
         // Number of probes to wait for. If a probe completes with a conclusive answer
         // it shortcuts the latch immediately by forcing the count to 0.
         final CountDownLatch latch = new CountDownLatch(2);
@@ -931,7 +958,8 @@ public class NetworkMonitor extends StateMachine {
         if (httpsResult.isPortal() || httpsResult.isSuccessful()) {
             return httpsResult;
         }
-        // If a fallback url is specified, use a fallback probe to try again portal detection.
+        // If a fallback url exists, use a fallback probe to try again portal detection.
+        URL fallbackUrl = nextFallbackUrl();
         if (fallbackUrl != null) {
             CaptivePortalProbeResult result =
                     sendHttpProbe(fallbackUrl, ValidationProbeEvent.PROBE_FALLBACK);
