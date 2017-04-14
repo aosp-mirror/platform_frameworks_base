@@ -121,12 +121,15 @@ public final class DumpUtils {
         final String[] pkgs = context.getPackageManager().getPackagesForUid(uid);
         if (pkgs != null) {
             for (String pkg : pkgs) {
-                if (appOps.checkOpNoThrow(AppOpsManager.OP_GET_USAGE_STATS, uid,
-                        pkg) == AppOpsManager.MODE_ALLOWED) {
-                    appOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS, uid, pkg);
-                    if (DEBUG) Slog.v(TAG, "Found package " + pkg + " with "
-                                + "android:get_usage_stats access");
-                    return true;
+                switch (appOps.checkOpNoThrow(AppOpsManager.OP_GET_USAGE_STATS, uid, pkg)) {
+                    case AppOpsManager.MODE_ALLOWED:
+                        if (DEBUG) Slog.v(TAG, "Found package " + pkg + " with "
+                                + "android:get_usage_stats allowed");
+                        return true;
+                    case AppOpsManager.MODE_DEFAULT:
+                        if (DEBUG) Slog.v(TAG, "Found package " + pkg + " with "
+                                + "android:get_usage_stats default");
+                        return true;
                 }
             }
         }
