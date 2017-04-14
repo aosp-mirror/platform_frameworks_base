@@ -885,8 +885,32 @@ public abstract class ColorSpace {
     }
 
     /**
-     * Returns the name of this color space. The name is never null
-     * and contains always at least 1 character.
+     * <p>Returns the name of this color space. The name is never null
+     * and contains always at least 1 character.</p>
+     *
+     * <p>Color space names are recommended to be unique but are not
+     * guaranteed to be. There is no defined format but the name usually
+     * falls in one of the following categories:</p>
+     * <ul>
+     *     <li>Generic names used to identify color spaces in non-RGB
+     *     color models. For instance: {@link Named#CIE_LAB Generic L*a*b*}.</li>
+     *     <li>Names tied to a particular specification. For instance:
+     *     {@link Named#SRGB sRGB IEC61966-2.1} or
+     *     {@link Named#ACES SMPTE ST 2065-1:2012 ACES}.</li>
+     *     <li>Ad-hoc names, often generated procedurally or by the user
+     *     during a calibration workflow. These names often contain the
+     *     make and model of the display.</li>
+     * </ul>
+     *
+     * <p>Because the format of color space names is not defined, it is
+     * not recommended to programmatically identify a color space by its
+     * name alone. Names can be used as a first approximation.</p>
+     *
+     * <p>It is however perfectly acceptable to display color space names to
+     * users in a UI, or in debuggers and logs. When displaying a color space
+     * name to the user, it is recommended to add extra information to avoid
+     * ambiguities: color model, a representation of the color space's gamut,
+     * white point, etc.</p>
      *
      * @return A non-null String of length >= 1
      */
