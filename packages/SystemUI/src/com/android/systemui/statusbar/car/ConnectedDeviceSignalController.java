@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.telephony.SignalStrength;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ScalingDrawableWrapper;
+import com.android.systemui.statusbar.phone.SignalDrawable;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
@@ -47,12 +49,12 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver implement
      * Note that the icon is the same for 0 and 1.
      */
     private static final int[] SIGNAL_STRENGTH_ICONS = {
-            R.drawable.stat_sys_signal_0_fully,
-            R.drawable.stat_sys_signal_0_fully,
-            R.drawable.stat_sys_signal_1_fully,
-            R.drawable.stat_sys_signal_2_fully,
-            R.drawable.stat_sys_signal_3_fully,
-            R.drawable.stat_sys_signal_4_fully,
+            0,
+            0,
+            1,
+            2,
+            3,
+            4,
     };
 
     private static final int INVALID_SIGNAL = -1;
@@ -65,6 +67,7 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver implement
     private final ImageView mNetworkSignalView;
 
     private final float mIconScaleFactor;
+    private final SignalDrawable mSignalDrawable;
 
     private BluetoothHeadsetClient mBluetoothHeadsetClient;
 
@@ -79,6 +82,9 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver implement
         TypedValue typedValue = new TypedValue();
         context.getResources().getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
         mIconScaleFactor = typedValue.getFloat();
+        mSignalDrawable = new SignalDrawable(mNetworkSignalView.getContext());
+        mNetworkSignalView.setImageDrawable(
+                new ScalingDrawableWrapper(mSignalDrawable, mIconScaleFactor));
 
         if (mAdapter == null) {
           return;
@@ -187,14 +193,12 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver implement
         }
     }
 
-    private void setNetworkSignalIcon(int iconId) {
+    private void setNetworkSignalIcon(int level) {
         // Setting the icon on a child view of mSignalView, so toggle this container visible.
         mSignalsView.setVisibility(View.VISIBLE);
 
-        // Using mNetworkSignalView's context to get the Drawable in order to preserve the theme.
-        Drawable icon = mNetworkSignalView.getContext().getDrawable(iconId);
-
-        mNetworkSignalView.setImageDrawable(new ScalingDrawableWrapper(icon, mIconScaleFactor));
+        mSignalDrawable.setLevel(SignalDrawable.getState(level,
+                SignalStrength.NUM_SIGNAL_STRENGTH_BINS, false));
         mNetworkSignalView.setVisibility(View.VISIBLE);
     }
 

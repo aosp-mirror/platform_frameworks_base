@@ -30,6 +30,7 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SignalDrawable;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +61,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mMockSubDefaults, mock(DeviceProvisionedController.class));
         setupNetworkController();
 
-        verifyLastMobileDataIndicators(false, 0, 0);
+        verifyLastMobileDataIndicators(false, -1, 0);
     }
 
     @Test
@@ -132,45 +133,45 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test
     public void testSignalStrength() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-                testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
+        for (int testStrength = 0;
+                testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
             setupDefaultSignal();
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][testStrength], DEFAULT_ICON);
+                    testStrength, DEFAULT_ICON);
 
             // Verify low inet number indexing.
             setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[0][testStrength], DEFAULT_ICON);
+                    testStrength, DEFAULT_ICON, false, false);
         }
     }
 
     @Test
     public void testCdmaSignalStrength() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-                testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
+        for (int testStrength = 0;
+                testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
             setupDefaultSignal();
             setCdma();
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][testStrength],
-                    TelephonyIcons.DATA_1X[1][0 /* No direction */]);
+                    testStrength,
+                    TelephonyIcons.ICON_1X);
         }
     }
 
     @Test
     public void testSignalRoaming() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-                testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
+        for (int testStrength = 0;
+                testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
             setupDefaultSignal();
             setGsmRoaming(true);
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][testStrength],
+                    testStrength,
                     DEFAULT_ICON, true);
         }
     }
@@ -185,8 +186,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][testStrength],
-                    TelephonyIcons.DATA_1X[1][0 /* No direction */], true);
+                    testStrength,
+                    TelephonyIcons.ICON_1X, true);
         }
     }
 
@@ -198,7 +199,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
 
             verifyLastQsMobileDataIndicators(true,
-                    TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][testStrength],
+                    testStrength,
                     DEFAULT_QS_ICON, false, false);
         }
     }
@@ -212,8 +213,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
 
             verifyLastQsMobileDataIndicators(true,
-                    TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][testStrength],
-                    TelephonyIcons.QS_ICON_1X, false, false);
+                    testStrength,
+                    TelephonyIcons.QS_DATA_1X, false, false);
         }
     }
 
@@ -223,7 +224,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         setConnectivity(mMobileSignalController.mTransportType, false, false);
         setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
 
-        verifyLastMobileDataIndicators(true, TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][2], 0);
+        verifyLastMobileDataIndicators(true, DEFAULT_LEVEL, 0);
     }
 
     // Some tests of actual NetworkController code, just internals not display stuff
@@ -418,7 +419,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         updateDataActivity(TelephonyManager.DATA_ACTIVITY_IN);
 
         verifyLastQsMobileDataIndicators(true /* visible */,
-                TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+                DEFAULT_LEVEL /* icon */,
                 DEFAULT_QS_ICON /* typeIcon */,
                 true /* dataIn */,
                 false /* dataOut */);
@@ -432,11 +433,10 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
       updateDataActivity(TelephonyManager.DATA_ACTIVITY_OUT);
 
       verifyLastQsMobileDataIndicators(true /* visible */,
-              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_LEVEL /* icon */,
               DEFAULT_QS_ICON /* typeIcon */,
               false /* dataIn */,
               true /* dataOut */);
-
     }
 
     @Test
@@ -446,7 +446,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
       updateDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
 
       verifyLastQsMobileDataIndicators(true /* visible */,
-              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_LEVEL /* icon */,
               DEFAULT_QS_ICON /* typeIcon */,
               true /* dataIn */,
               true /* dataOut */);
@@ -460,7 +460,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
       updateDataActivity(TelephonyManager.DATA_ACTIVITY_NONE);
 
       verifyLastQsMobileDataIndicators(true /* visible */,
-              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_LEVEL /* icon */,
               DEFAULT_QS_ICON /* typeIcon */,
               false /* dataIn */,
               false /* dataOut */);
@@ -476,7 +476,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
       // Verify baseline
       verifyLastMobileDataIndicators(true /* visible */,
-              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              strength /* strengthIcon */,
               DEFAULT_ICON /* typeIcon */);
 
       // API call is made
@@ -484,7 +484,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
       // Carrier network change is true, show special indicator
       verifyLastMobileDataIndicators(true /* visible */,
-              TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE[0][0] /* strengthIcon */,
+              SignalDrawable.getCarrierChangeState(SignalStrength.NUM_SIGNAL_STRENGTH_BINS),
               0 /* typeIcon */);
 
       // Revert back
@@ -492,7 +492,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
       // Verify back in previous state
       verifyLastMobileDataIndicators(true /* visible */,
-              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              strength /* strengthIcon */,
               DEFAULT_ICON /* typeIcon */);
     }
 

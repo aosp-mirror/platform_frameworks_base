@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
@@ -872,11 +873,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 if (args.containsKey("roam")) {
                     controller.getState().roaming = "show".equals(args.getString("roam"));
                 }
-                int[][] icons = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH;
                 String level = args.getString("level");
                 if (level != null) {
                     controller.getState().level = level.equals("null") ? -1
-                            : Math.min(Integer.parseInt(level), icons[0].length - 1);
+                            : Math.min(Integer.parseInt(level),
+                                    SignalStrength.NUM_SIGNAL_STRENGTH_BINS);
                     controller.getState().connected = controller.getState().level >= 0;
                 }
                 String activity = args.getString("activity");
