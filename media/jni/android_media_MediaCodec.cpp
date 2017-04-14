@@ -2002,7 +2002,7 @@ static const JNINativeMethod gMethods[] = {
     { "getName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },
 
-    { "native_getMetrics", "()Landroid/os/Bundle;",
+    { "native_getMetrics", "()Landroid/os/PersistableBundle;",
       (void *)android_media_MediaCodec_native_getMetrics},
 
     { "setParameters", "([Ljava/lang/String;[Ljava/lang/Object;)V",

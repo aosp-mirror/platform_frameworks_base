@@ -905,7 +905,7 @@ static const JNINativeMethod gMethods[] = {
     { "hasCacheReachedEndOfStream", "()Z",
       (void *)android_media_MediaExtractor_hasCacheReachedEOS },
 
-    {"native_getMetrics",          "()Landroid/os/Bundle;",
+    {"native_getMetrics",          "()Landroid/os/PersistableBundle;",
       (void *)android_media_MediaExtractor_native_getMetrics},
 };
 
