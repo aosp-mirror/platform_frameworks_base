@@ -127,4 +127,29 @@ public class CollectionUtils {
         }
         return null;
     }
+
+    /**
+     * Similar to {@link List#add}, but with support for list values of {@code null} and
+     * {@link Collections#emptyList}
+     */
+    public static @NonNull <T> List<T> add(@Nullable List<T> cur, T val) {
+        if (cur == null || cur == Collections.emptyList()) {
+            cur = new ArrayList<>();
+        }
+        cur.add(val);
+        return cur;
+    }
+
+    /**
+     * Similar to {@link List#remove}, but with support for list values of {@code null} and
+     * {@link Collections#emptyList}
+     */
+    public static @NonNull <T> List<T> remove(@Nullable List<T> cur, T val) {
+        if (cur == null || cur == Collections.emptyList()) {
+            return Collections.emptyList();
+        }
+        cur.remove(val);
+        return cur;
+    }
+
 }

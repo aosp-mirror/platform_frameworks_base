@@ -17,6 +17,7 @@
 
 package com.android.server.print;
 
+import static com.android.internal.util.CollectionUtils.size;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
@@ -221,7 +222,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 throws RemoteException {
             checkNotNull(deviceMacAddress);
             checkCallerIsSystemOr(callingPackage);
-            updateAssociations(associations -> ArrayUtils.remove(associations,
+            updateAssociations(associations -> CollectionUtils.remove(associations,
                     new Association(getCallingUserId(), deviceMacAddress, callingPackage)));
         }
 
@@ -350,22 +351,24 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void recordAssociation(String priviledgedPackage, String deviceAddress) {
-        updateAssociations((associations) -> ArrayUtils.add(associations,
+        updateAssociations(associations -> CollectionUtils.add(associations,
                 new Association(getCallingUserId(), deviceAddress, priviledgedPackage)));
     }
 
-    private void updateAssociations(Function<ArrayList<Association>, List<Association>> update) {
+    private void updateAssociations(Function<List<Association>, List<Association>> update) {
         updateAssociations(update, getCallingUserId());
     }
 
-    private void updateAssociations(Function<ArrayList<Association>, List<Association>> update,
+    private void updateAssociations(Function<List<Association>, List<Association>> update,
             int userId) {
         final AtomicFile file = getStorageFileForUser(userId);
         synchronized (file) {
-            final ArrayList<Association> old = readAllAssociations(userId);
-            final List<Association> associations = update.apply(old);
-            if (Objects.equals(old, associations)) return;
+            List<Association> associations = readAllAssociations(userId);
+            final ArrayList<Association> old = new ArrayList<>(associations);
+            associations = update.apply(associations);
+            if (size(old) == size(associations)) return;
 
+            List<Association> finalAssociations = associations;
             file.write((out) -> {
                 XmlSerializer xml = Xml.newSerializer();
                 try {
@@ -374,8 +377,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     xml.startDocument(null, true);
                     xml.startTag(null, XML_TAG_ASSOCIATIONS);
 
-                    for (int i = 0; i < CollectionUtils.size(associations); i++) {
-                        Association association = associations.get(i);
+                    for (int i = 0; i < size(finalAssociations); i++) {
+                        Association association = finalAssociations.get(i);
                         xml.startTag(null, XML_TAG_ASSOCIATION)
                             .attribute(null, XML_ATTR_PACKAGE, association.companionAppPackage)
                             .attribute(null, XML_ATTR_DEVICE, association.deviceAddress)
