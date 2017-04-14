@@ -40,7 +40,7 @@ public class UniqueIds extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.unique_id_test);
 
-        LinearLayout container = (LinearLayout) findViewById(R.id.container);
+        LinearLayout container = findViewById(R.id.container);
         LayoutInflater inflater = getLayoutInflater();
         Button button = (Button) inflater.inflate(R.layout.button_template, null);
         container.addView(button);

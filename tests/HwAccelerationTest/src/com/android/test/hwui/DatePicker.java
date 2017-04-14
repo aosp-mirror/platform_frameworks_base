@@ -101,7 +101,7 @@ public class DatePicker extends FrameLayout {
                         Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.date_picker, this, true);
 
-        mDayPicker = (NumberPicker) findViewById(R.id.day);
+        mDayPicker = findViewById(R.id.day);
         mDayPicker.setFormatter(NumberPicker.getTwoDigitFormatter());
         mDayPicker.setOnLongPressUpdateInterval(100);
         mDayPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
@@ -110,7 +110,7 @@ public class DatePicker extends FrameLayout {
                 notifyDateChanged();
             }
         });
-        mMonthPicker = (NumberPicker) findViewById(R.id.month);
+        mMonthPicker = findViewById(R.id.month);
         mMonthPicker.setFormatter(NumberPicker.getTwoDigitFormatter());
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getShortMonths();
@@ -146,7 +146,7 @@ public class DatePicker extends FrameLayout {
                 updateDaySpinner();
             }
         });
-        mYearPicker = (NumberPicker) findViewById(R.id.year);
+        mYearPicker = findViewById(R.id.year);
         mYearPicker.setOnLongPressUpdateInterval(100);
         mYearPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
@@ -158,7 +158,7 @@ public class DatePicker extends FrameLayout {
             }
         });
 
-        mYearToggle = (CheckBox) findViewById(R.id.yearToggle);
+        mYearToggle = findViewById(R.id.yearToggle);
         mYearToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -229,7 +229,7 @@ public class DatePicker extends FrameLayout {
         /* Remove the 3 pickers from their parent and then add them back in the
          * required order.
          */
-        LinearLayout parent = (LinearLayout) findViewById(R.id.parent);
+        LinearLayout parent = findViewById(R.id.parent);
         parent.removeAllViews();
 
         boolean quoted = false;

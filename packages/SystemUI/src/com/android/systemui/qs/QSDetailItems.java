@@ -76,7 +76,7 @@ public class QSDetailItems extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mItemList = (AutoSizingList) findViewById(android.R.id.list);
+        mItemList = findViewById(android.R.id.list);
         mItemList.setVisibility(GONE);
         mItemList.setAdapter(mAdapter);
         mEmpty = findViewById(android.R.id.empty);

@@ -68,12 +68,12 @@ public class UsbHostManagementActivity extends Activity
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.host_management);
-        mDeviceInfoText = (TextView) findViewById(R.id.device_info_text);
-        mStartAoapButton = (Button) findViewById(R.id.start_aoap_button);
-        mStartAoapActivityButton = (Button) findViewById(R.id.start_aoap_activity_button);
-        mAoapAppLog = (TextView) findViewById(R.id.aoap_apps_text);
-        mResetUsbButton = (Button) findViewById(R.id.reset_button);
-        mFinishButton = (Button) findViewById(R.id.finish_button);
+        mDeviceInfoText = findViewById(R.id.device_info_text);
+        mStartAoapButton = findViewById(R.id.start_aoap_button);
+        mStartAoapActivityButton = findViewById(R.id.start_aoap_activity_button);
+        mAoapAppLog = findViewById(R.id.aoap_apps_text);
+        mResetUsbButton = findViewById(R.id.reset_button);
+        mFinishButton = findViewById(R.id.finish_button);
 
         Intent intent = getIntent();
         if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(intent.getAction())) {

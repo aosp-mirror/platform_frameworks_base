@@ -34,7 +34,7 @@ public class RequestFocus extends Activity {
         setContentView(R.layout.focus_after_removal);
 
         // bottom right button starts with the focus.
-        final Button bottomRightButton = (Button) findViewById(R.id.bottomRightButton);
+        final Button bottomRightButton = findViewById(R.id.bottomRightButton);
         bottomRightButton.requestFocus();
         bottomRightButton.setText("I should have focus");
     }

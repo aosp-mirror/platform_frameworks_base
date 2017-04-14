@@ -44,7 +44,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         mPipManager.addListener(this);
 
         mRestorePipSizeWhenClose = true;
-        mPipControlsView = (PipControlsView) findViewById(R.id.pip_controls);
+        mPipControlsView = findViewById(R.id.pip_controls);
         mFadeInAnimation = AnimatorInflater.loadAnimator(
                 this, R.anim.tv_pip_menu_fade_in_animation);
         mFadeInAnimation.setTarget(mPipControlsView);

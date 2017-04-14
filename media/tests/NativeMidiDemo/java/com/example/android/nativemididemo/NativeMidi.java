@@ -269,12 +269,12 @@ public class NativeMidi extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        mCallbackStatusTextView = (TextView) findViewById(R.id.callback_status);
-        mJavaMidiStatusTextView = (TextView) findViewById(R.id.java_midi_status);
-        mMessagesTextView = (TextView) findViewById(R.id.messages);
-        mMessagesContainer = (TouchableScrollView) findViewById(R.id.messages_scroll);
-        mMidiDevicesRadioGroup = (RadioGroup) findViewById(R.id.devices);
-        RadioButton deviceNone = (RadioButton) findViewById(R.id.device_none);
+        mCallbackStatusTextView = findViewById(R.id.callback_status);
+        mJavaMidiStatusTextView = findViewById(R.id.java_midi_status);
+        mMessagesTextView = findViewById(R.id.messages);
+        mMessagesContainer = findViewById(R.id.messages_scroll);
+        mMidiDevicesRadioGroup = findViewById(R.id.devices);
+        RadioButton deviceNone = findViewById(R.id.device_none);
         deviceNone.setOnClickListener(new MidiOutputPortSelector());
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);

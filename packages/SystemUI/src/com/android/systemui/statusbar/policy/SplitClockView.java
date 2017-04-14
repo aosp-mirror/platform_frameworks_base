@@ -59,8 +59,8 @@ public class SplitClockView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mTimeView = (TextClock) findViewById(R.id.time_view);
-        mAmPmView = (TextClock) findViewById(R.id.am_pm_view);
+        mTimeView = findViewById(R.id.time_view);
+        mAmPmView = findViewById(R.id.am_pm_view);
         mTimeView.setShowCurrentUserTime(true);
         mAmPmView.setShowCurrentUserTime(true);
     }

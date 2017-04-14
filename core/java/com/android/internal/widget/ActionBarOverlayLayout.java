@@ -569,10 +569,10 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     void pullChildren() {
         if (mContent == null) {
             mContent = findViewById(com.android.internal.R.id.content);
-            mActionBarTop = (ActionBarContainer) findViewById(
+            mActionBarTop = findViewById(
                     com.android.internal.R.id.action_bar_container);
             mDecorToolbar = getDecorToolbar(findViewById(com.android.internal.R.id.action_bar));
-            mActionBarBottom = (ActionBarContainer) findViewById(
+            mActionBarBottom = findViewById(
                     com.android.internal.R.id.split_action_bar);
         }
     }
@@ -707,7 +707,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
                 mDecorToolbar.setSplitToolbar(splitActionBar);
                 mDecorToolbar.setSplitWhenNarrow(splitWhenNarrow);
 
-                final ActionBarContextView cab = (ActionBarContextView) findViewById(
+                final ActionBarContextView cab = findViewById(
                         com.android.internal.R.id.action_context_bar);
                 cab.setSplitView(mActionBarBottom);
                 cab.setSplitToolbar(splitActionBar);

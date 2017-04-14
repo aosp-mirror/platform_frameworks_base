@@ -71,9 +71,9 @@ public class HugeBackupActivity extends Activity {
         setContentView(R.layout.backup_restore);
 
         /** Once the UI has been inflated, cache the controls for later */
-        mFillingGroup = (RadioGroup) findViewById(R.id.filling_group);
-        mAddMayoCheckbox = (CheckBox) findViewById(R.id.mayo);
-        mAddTomatoCheckbox = (CheckBox) findViewById(R.id.tomato);
+        mFillingGroup = findViewById(R.id.filling_group);
+        mAddMayoCheckbox = findViewById(R.id.mayo);
+        mAddTomatoCheckbox = findViewById(R.id.tomato);
 
         /** Set up our file bookkeeping */
         mDataFile = new File(getFilesDir(), HugeBackupActivity.DATA_FILE_NAME);

@@ -60,13 +60,13 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ToggleSliderView, defStyle, 0);
 
-        mToggle = (CompoundButton) findViewById(R.id.toggle);
+        mToggle = findViewById(R.id.toggle);
         mToggle.setOnCheckedChangeListener(mCheckListener);
 
-        mSlider = (ToggleSeekBar) findViewById(R.id.slider);
+        mSlider = findViewById(R.id.slider);
         mSlider.setOnSeekBarChangeListener(mSeekListener);
 
-        mLabel = (TextView) findViewById(R.id.label);
+        mLabel = findViewById(R.id.label);
         mLabel.setText(a.getString(R.styleable.ToggleSliderView_text));
 
         mSlider.setAccessibilityLabel(getContentDescription().toString());

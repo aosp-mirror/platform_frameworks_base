@@ -77,7 +77,7 @@ public class ChooseAccountActivity extends Activity {
         setContentView(R.layout.choose_account);
 
         // Setup the list
-        ListView list = (ListView) findViewById(android.R.id.list);
+        ListView list = findViewById(android.R.id.list);
         // Use an existing ListAdapter that will map an array of strings to TextViews
         list.setAdapter(new AccountArrayAdapter(this,
                 android.R.layout.simple_list_item_1, mAccountInfos));

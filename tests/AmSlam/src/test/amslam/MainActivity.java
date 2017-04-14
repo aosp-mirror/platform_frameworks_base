@@ -60,7 +60,7 @@ public class MainActivity extends Activity implements PongReceiver.PingPongRespo
         super.onCreate(savedInstanceState);
         sAppContext = getApplicationContext();
         setContentView(R.layout.activity_main);
-        mOutput = (TextView) findViewById(R.id.output);
+        mOutput = findViewById(R.id.output);
         PongReceiver.addListener(this);
 
         findViewById(R.id.run).setOnClickListener(view -> {

@@ -66,7 +66,7 @@ public class DeviceChooserActivity extends Activity {
         } else {
             setContentView(R.layout.device_chooser);
             setTitle(Html.fromHtml(getString(R.string.chooser_title, getCallingAppName()), 0));
-            mDeviceListView = (ListView) findViewById(R.id.device_list);
+            mDeviceListView = findViewById(R.id.device_list);
             final DeviceDiscoveryService.DevicesAdapter adapter = getService().mDevicesAdapter;
             mDeviceListView.setAdapter(adapter);
             adapter.registerDataSetObserver(new DataSetObserver() {
@@ -115,7 +115,7 @@ public class DeviceChooserActivity extends Activity {
 
     @Override
     public void setTitle(CharSequence title) {
-        final TextView titleView = (TextView) findViewById(R.id.title);
+        final TextView titleView = findViewById(R.id.title);
         final int padding = getPadding(getResources());
         titleView.setPadding(padding, padding, padding, padding);
         titleView.setText(title);

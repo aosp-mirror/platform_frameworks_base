@@ -137,7 +137,7 @@ public class AssistOrbView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mLogo = (ImageView) findViewById(R.id.search_logo);
+        mLogo = findViewById(R.id.search_logo);
     }
 
     @Override

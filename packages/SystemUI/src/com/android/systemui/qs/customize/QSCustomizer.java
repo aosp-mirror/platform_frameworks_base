@@ -82,7 +82,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
 
-        mToolbar = (Toolbar) findViewById(com.android.internal.R.id.action_bar);
+        mToolbar = findViewById(com.android.internal.R.id.action_bar);
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
         mToolbar.setNavigationIcon(
@@ -98,7 +98,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                 mContext.getString(com.android.internal.R.string.reset));
         mToolbar.setTitle(R.string.qs_edit);
 
-        mRecyclerView = (RecyclerView) findViewById(android.R.id.list);
+        mRecyclerView = findViewById(android.R.id.list);
         mTileAdapter = new TileAdapter(getContext());
         mRecyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);

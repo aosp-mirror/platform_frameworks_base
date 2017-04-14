@@ -35,10 +35,10 @@ public class FocusAfterRemoval extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.focus_after_removal);
 
-        final LinearLayout left = (LinearLayout) findViewById(R.id.leftLayout);
+        final LinearLayout left = findViewById(R.id.leftLayout);
 
         // top left makes parent layout GONE
-        Button topLeftButton = (Button) findViewById(R.id.topLeftButton);
+        Button topLeftButton = findViewById(R.id.topLeftButton);
         topLeftButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
@@ -48,7 +48,7 @@ public class FocusAfterRemoval extends Activity {
 
         // bottom left makes parent layout INVISIBLE
         // top left makes parent layout GONE
-        Button bottomLeftButton = (Button) findViewById(R.id.bottomLeftButton);
+        Button bottomLeftButton = findViewById(R.id.bottomLeftButton);
         bottomLeftButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
@@ -57,7 +57,7 @@ public class FocusAfterRemoval extends Activity {
         });
 
         // top right button makes top right button GONE
-        final Button topRightButton = (Button) findViewById(R.id.topRightButton);
+        final Button topRightButton = findViewById(R.id.topRightButton);
         topRightButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
@@ -66,7 +66,7 @@ public class FocusAfterRemoval extends Activity {
         });
 
         // bottom right button makes bottom right button INVISIBLE
-        final Button bottomRightButton = (Button) findViewById(R.id.bottomRightButton);
+        final Button bottomRightButton = findViewById(R.id.bottomRightButton);
         bottomRightButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {

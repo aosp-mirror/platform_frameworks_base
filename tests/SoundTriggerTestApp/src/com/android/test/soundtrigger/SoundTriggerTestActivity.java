@@ -81,14 +81,14 @@ public class SoundTriggerTestActivity extends Activity implements SoundTriggerTe
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        mDebugView = (TextView) findViewById(R.id.console);
-        mScrollView = (ScrollView) findViewById(R.id.scroller_id);
-        mRadioGroup = (RadioGroup) findViewById(R.id.model_group_id);
-        mPlayTriggerButton = (Button) findViewById(R.id.play_trigger_id);
+        mDebugView = findViewById(R.id.console);
+        mScrollView = findViewById(R.id.scroller_id);
+        mRadioGroup = findViewById(R.id.model_group_id);
+        mPlayTriggerButton = findViewById(R.id.play_trigger_id);
         mDebugView.setText(mDebugView.getText(), TextView.BufferType.EDITABLE);
         mDebugView.setMovementMethod(new ScrollingMovementMethod());
-        mCaptureAudioCheckBox = (CheckBox) findViewById(R.id.caputre_check_box);
-        mPlayCapturedAudioButton = (Button) findViewById(R.id.play_captured_id);
+        mCaptureAudioCheckBox = findViewById(R.id.caputre_check_box);
+        mPlayCapturedAudioButton = findViewById(R.id.play_captured_id);
         mHandler = new Handler();
         mButtonModelUuidMap = new HashMap();
         mModelButtons = new HashMap();

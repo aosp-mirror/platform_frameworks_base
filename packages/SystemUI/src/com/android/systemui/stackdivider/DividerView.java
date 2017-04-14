@@ -269,9 +269,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mHandle = (DividerHandleView) findViewById(R.id.docked_divider_handle);
+        mHandle = findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
-        mMinimizedShadow = (MinimizedDockShadow) findViewById(R.id.minimized_dock_shadow);
+        mMinimizedShadow = findViewById(R.id.minimized_dock_shadow);
         mHandle.setOnTouchListener(this);
         mDividerWindowWidth = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);

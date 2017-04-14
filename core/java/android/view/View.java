@@ -321,7 +321,7 @@ import java.util.function.Predicate;
  * </pre></li>
  * <li>From the onCreate method of an Activity, find the Button
  * <pre class="prettyprint">
- *      Button myButton = (Button) findViewById(R.id.my_button);
+ *      Button myButton = findViewById(R.id.my_button);
  * </pre></li>
  * </ul>
  * <p>
