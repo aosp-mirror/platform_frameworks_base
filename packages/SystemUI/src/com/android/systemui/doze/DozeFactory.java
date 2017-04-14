@@ -27,6 +27,7 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.plugins.doze.DozeProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
 public class DozeFactory {
@@ -47,7 +48,8 @@ public class DozeFactory {
         AmbientDisplayConfiguration config = new AmbientDisplayConfiguration(context);
         DozeParameters params = new DozeParameters(context);
         Handler handler = new Handler();
-        WakeLock wakeLock = WakeLock.createPartial(context, "Doze");
+        WakeLock wakeLock = new DelayedWakeLock(handler,
+                WakeLock.createPartial(context, "Doze"));
 
         DozeMachine machine = new DozeMachine(
                 DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(
