@@ -27,6 +27,10 @@
         android:layout_gravity="bottom|center_horizontal"
         android:text="@string/pip_phone_dismiss_hint"
         android:textColor="#FFFFFFFF"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:shadowColor="@android:color/black"
+        android:shadowDx="-2"
+        android:shadowDy="2"
+        android:shadowRadius="0.01" />
 
 </FrameLayout>
