@@ -84,8 +84,7 @@ public class ConnectivityController extends StateController implements
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()
-                || jobStatus.hasNotRoamingConstraint()) {
+        if (jobStatus.hasConnectivityConstraint()) {
             updateConstraintsSatisfied(jobStatus, null);
             mTrackedJobs.add(jobStatus);
         }
@@ -94,8 +93,7 @@ public class ConnectivityController extends StateController implements
     @Override
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
-        if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()
-                || jobStatus.hasNotRoamingConstraint()) {
+        if (jobStatus.hasConnectivityConstraint()) {
             mTrackedJobs.remove(jobStatus);
         }
     }
@@ -114,11 +112,13 @@ public class ConnectivityController extends StateController implements
                 && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
         final boolean connected = info != null && info.isConnected();
         final boolean connectionUsable = connected && validated;
+        final boolean metered = connected && info.isMetered();
         final boolean unmetered = connected && !info.isMetered();
         final boolean notRoaming = connected && !info.isRoaming();
 
         boolean changed = false;
         changed |= jobStatus.setConnectivityConstraintSatisfied(connectionUsable);
+        changed |= jobStatus.setMeteredConstraintSatisfied(metered);
         changed |= jobStatus.setUnmeteredConstraintSatisfied(unmetered);
         changed |= jobStatus.setNotRoamingConstraintSatisfied(notRoaming);
 
@@ -134,6 +134,7 @@ public class ConnectivityController extends StateController implements
                     + " for " + jobStatus + ": usable=" + connectionUsable
                     + " connected=" + connected
                     + " validated=" + validated
+                    + " metered=" + metered
                     + " unmetered=" + unmetered
                     + " notRoaming=" + notRoaming);
         }
@@ -244,9 +245,10 @@ public class ConnectivityController extends StateController implements
                 js.printUniqueId(pw);
                 pw.print(" from ");
                 UserHandle.formatUid(pw, js.getSourceUid());
-                pw.print(": C="); pw.print(js.hasConnectivityConstraint());
-                pw.print(": UM="); pw.print(js.hasUnmeteredConstraint());
-                pw.print(": NR="); pw.println(js.hasNotRoamingConstraint());
+                pw.print(": C="); pw.print(js.needsAnyConnectivity());
+                pw.print(": M="); pw.print(js.needsMeteredConnectivity());
+                pw.print(": UM="); pw.print(js.needsUnmeteredConnectivity());
+                pw.print(": NR="); pw.println(js.needsNonRoamingConnectivity());
             }
         }
     }

@@ -1271,8 +1271,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (job.hasIdleConstraint()) {
                         idleCount++;
                     }
-                    if (job.hasConnectivityConstraint() || job.hasUnmeteredConstraint()
-                            || job.hasNotRoamingConstraint()) {
+                    if (job.hasConnectivityConstraint()) {
                         connectivityCount++;
                     }
                     if (job.hasChargingConstraint()) {
