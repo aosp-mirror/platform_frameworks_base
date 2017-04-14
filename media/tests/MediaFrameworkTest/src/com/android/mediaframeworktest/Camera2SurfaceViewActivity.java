@@ -43,7 +43,7 @@ public class Camera2SurfaceViewActivity extends Activity implements SurfaceHolde
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.surface_view_2);
-        mSurfaceView = (SurfaceView) findViewById(R.id.surface_view);
+        mSurfaceView = findViewById(R.id.surface_view);
         mSurfaceView.getHolder().addCallback(this);
 
         //Acquire the full wake lock to keep the device up

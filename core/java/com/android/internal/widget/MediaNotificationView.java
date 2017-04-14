@@ -152,7 +152,7 @@ public class MediaNotificationView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mRightIcon = (ImageView) findViewById(com.android.internal.R.id.right_icon);
+        mRightIcon = findViewById(com.android.internal.R.id.right_icon);
         mActions = findViewById(com.android.internal.R.id.media_actions);
         mHeader = findViewById(com.android.internal.R.id.notification_header);
         mMainColumn = findViewById(com.android.internal.R.id.notification_main_column);

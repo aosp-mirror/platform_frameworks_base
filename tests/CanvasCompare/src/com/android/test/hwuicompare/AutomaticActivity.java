@@ -111,8 +111,8 @@ public class AutomaticActivity extends CompareActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.automatic_layout);
 
-        mSoftwareImageView = (ImageView) findViewById(R.id.software_image_view);
-        mHardwareImageView = (ImageView) findViewById(R.id.hardware_image_view);
+        mSoftwareImageView = findViewById(R.id.software_image_view);
+        mHardwareImageView = findViewById(R.id.hardware_image_view);
 
         onCreateCommon(mRunnable);
         beginTest();

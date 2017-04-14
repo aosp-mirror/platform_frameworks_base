@@ -287,7 +287,7 @@ public class ResolverActivity extends Activity {
             return;
         }
 
-        final ResolverDrawerLayout rdl = (ResolverDrawerLayout) findViewById(R.id.contentPanel);
+        final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
         if (rdl != null) {
             rdl.setOnDismissedListener(new ResolverDrawerLayout.OnDismissedListener() {
                 @Override
@@ -922,10 +922,10 @@ public class ResolverActivity extends Activity {
         }
 
 
-        mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
+        mAdapterView = findViewById(R.id.resolver_list);
 
         if (count == 0 && mAdapter.mPlaceholderCount == 0) {
-            final TextView emptyView = (TextView) findViewById(R.id.empty);
+            final TextView emptyView = findViewById(R.id.empty);
             emptyView.setVisibility(View.VISIBLE);
             mAdapterView.setVisibility(View.GONE);
         } else {
@@ -959,7 +959,7 @@ public class ResolverActivity extends Activity {
 
     public void setTitleAndIcon() {
         if (mAdapter.getCount() == 0 && mAdapter.mPlaceholderCount == 0) {
-            final TextView titleView = (TextView) findViewById(R.id.title);
+            final TextView titleView = findViewById(R.id.title);
             if (titleView != null) {
                 titleView.setVisibility(View.GONE);
             }
@@ -970,14 +970,14 @@ public class ResolverActivity extends Activity {
                 : getTitleForAction(getTargetIntent().getAction(), mDefaultTitleResId);
 
         if (!TextUtils.isEmpty(title)) {
-            final TextView titleView = (TextView) findViewById(R.id.title);
+            final TextView titleView = findViewById(R.id.title);
             if (titleView != null) {
                 titleView.setText(title);
             }
             setTitle(title);
 
             // Try to initialize the title icon if we have a view for it and a title to match
-            final ImageView titleIcon = (ImageView) findViewById(R.id.title_icon);
+            final ImageView titleIcon = findViewById(R.id.title_icon);
             if (titleIcon != null) {
                 ApplicationInfo ai = null;
                 try {
@@ -994,7 +994,7 @@ public class ResolverActivity extends Activity {
             }
         }
 
-        final ImageView iconView = (ImageView) findViewById(R.id.icon);
+        final ImageView iconView = findViewById(R.id.icon);
         final DisplayResolveInfo iconInfo = mAdapter.getFilteredItem();
         if (iconView != null && iconInfo != null) {
             new LoadIconIntoViewTask(iconInfo, iconView).execute();
@@ -1003,7 +1003,7 @@ public class ResolverActivity extends Activity {
 
     public void resetAlwaysOrOnceButtonBar() {
         if (mSupportsAlwaysUseOption) {
-            final ViewGroup buttonLayout = (ViewGroup) findViewById(R.id.button_bar);
+            final ViewGroup buttonLayout = findViewById(R.id.button_bar);
             if (buttonLayout != null) {
                 buttonLayout.setVisibility(View.VISIBLE);
                 mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);

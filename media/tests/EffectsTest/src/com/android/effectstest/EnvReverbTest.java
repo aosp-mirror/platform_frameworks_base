@@ -73,9 +73,9 @@ public class EnvReverbTest extends Activity implements OnCheckedChangeListener, 
         ToggleButton button;
         setContentView(R.layout.envreverbtest);
 
-        ImageView playPause = (ImageView) findViewById(R.id.playPause1);
-        ImageView stop = (ImageView) findViewById(R.id.stop1);
-        textView = (TextView) findViewById(R.id.sessionText);
+        ImageView playPause = findViewById(R.id.playPause1);
+        ImageView stop = findViewById(R.id.stop1);
+        textView = findViewById(R.id.sessionText);
         if (sPlayerController == null) {
             sPlayerController = new SimplePlayer(this, R.id.playPause1, playPause,
                     R.id.stop1, stop, textView,

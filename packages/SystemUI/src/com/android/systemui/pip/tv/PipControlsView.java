@@ -107,7 +107,7 @@ public class PipControlsView extends LinearLayout {
     public void onFinishInflate() {
         super.onFinishInflate();
 
-        mFullButtonView = (PipControlButtonView) findViewById(R.id.full_button);
+        mFullButtonView = findViewById(R.id.full_button);
         mFullButtonView.setOnFocusChangeListener(mFocusChangeListener);
         mFullButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,7 +116,7 @@ public class PipControlsView extends LinearLayout {
             }
         });
 
-        mCloseButtonView = (PipControlButtonView) findViewById(R.id.close_button);
+        mCloseButtonView = findViewById(R.id.close_button);
         mCloseButtonView.setOnFocusChangeListener(mFocusChangeListener);
         mCloseButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,7 +128,7 @@ public class PipControlsView extends LinearLayout {
             }
         });
 
-        mPlayPauseButtonView = (PipControlButtonView) findViewById(R.id.play_pause_button);
+        mPlayPauseButtonView = findViewById(R.id.play_pause_button);
         mPlayPauseButtonView.setOnFocusChangeListener(mFocusChangeListener);
         mPlayPauseButtonView.setOnClickListener(new View.OnClickListener() {
             @Override

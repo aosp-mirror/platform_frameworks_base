@@ -227,14 +227,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     protected void onFinishInflate() {
         super.onFinishInflate();
         mLockPatternUtils = new LockPatternUtils(mContext);
-        mPreviewContainer = (ViewGroup) findViewById(R.id.preview_container);
-        mRightAffordanceView = (KeyguardAffordanceView) findViewById(R.id.camera_button);
-        mLeftAffordanceView = (KeyguardAffordanceView) findViewById(R.id.left_button);
-        mLockIcon = (LockIcon) findViewById(R.id.lock_icon);
-        mIndicationArea = (ViewGroup) findViewById(R.id.keyguard_indication_area);
-        mEnterpriseDisclosure = (TextView) findViewById(
+        mPreviewContainer = findViewById(R.id.preview_container);
+        mRightAffordanceView = findViewById(R.id.camera_button);
+        mLeftAffordanceView = findViewById(R.id.left_button);
+        mLockIcon = findViewById(R.id.lock_icon);
+        mIndicationArea = findViewById(R.id.keyguard_indication_area);
+        mEnterpriseDisclosure = findViewById(
                 R.id.keyguard_indication_enterprise_disclosure);
-        mIndicationText = (TextView) findViewById(R.id.keyguard_indication_text);
+        mIndicationText = findViewById(R.id.keyguard_indication_text);
         watchForCameraPolicyChanges();
         updateCameraVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());

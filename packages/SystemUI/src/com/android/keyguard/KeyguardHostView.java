@@ -143,7 +143,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     @Override
     protected void onFinishInflate() {
         mSecurityContainer =
-                (KeyguardSecurityContainer) findViewById(R.id.keyguard_security_container);
+                findViewById(R.id.keyguard_security_container);
         mLockPatternUtils = new LockPatternUtils(mContext);
         mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
         mSecurityContainer.setSecurityCallback(this);

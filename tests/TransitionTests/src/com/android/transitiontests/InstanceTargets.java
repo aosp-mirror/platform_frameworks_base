@@ -37,7 +37,7 @@ public class InstanceTargets extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.instance_targets);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container;
     }
 

@@ -44,8 +44,8 @@ public class KeyboardShortcutAppItemLayout extends RelativeLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) {
-            ImageView shortcutIcon = (ImageView) findViewById(R.id.keyboard_shortcuts_icon);
-            TextView shortcutKeyword = (TextView) findViewById(R.id.keyboard_shortcuts_keyword);
+            ImageView shortcutIcon = findViewById(R.id.keyboard_shortcuts_icon);
+            TextView shortcutKeyword = findViewById(R.id.keyboard_shortcuts_keyword);
             int totalMeasuredWidth = MeasureSpec.getSize(widthMeasureSpec);
             int totalPadding = getPaddingLeft() + getPaddingRight();
             int availableWidth = totalMeasuredWidth - totalPadding;

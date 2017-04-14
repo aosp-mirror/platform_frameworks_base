@@ -706,7 +706,7 @@ public class NumberPicker extends LinearLayout {
 
         // increment button
         if (!mHasSelectorWheel) {
-            mIncrementButton = (ImageButton) findViewById(R.id.increment);
+            mIncrementButton = findViewById(R.id.increment);
             mIncrementButton.setOnClickListener(onClickListener);
             mIncrementButton.setOnLongClickListener(onLongClickListener);
         } else {
@@ -715,7 +715,7 @@ public class NumberPicker extends LinearLayout {
 
         // decrement button
         if (!mHasSelectorWheel) {
-            mDecrementButton = (ImageButton) findViewById(R.id.decrement);
+            mDecrementButton = findViewById(R.id.decrement);
             mDecrementButton.setOnClickListener(onClickListener);
             mDecrementButton.setOnLongClickListener(onLongClickListener);
         } else {
@@ -723,7 +723,7 @@ public class NumberPicker extends LinearLayout {
         }
 
         // input text
-        mInputText = (EditText) findViewById(R.id.numberpicker_input);
+        mInputText = findViewById(R.id.numberpicker_input);
         mInputText.setOnFocusChangeListener(new OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {

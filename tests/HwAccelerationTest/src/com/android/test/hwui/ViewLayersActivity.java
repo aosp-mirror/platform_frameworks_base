@@ -94,7 +94,7 @@ public class ViewLayersActivity extends Activity {
     }
 
     private void setupList(int listId) {
-        final ListView list = (ListView) findViewById(listId);
+        final ListView list = findViewById(listId);
         list.setAdapter(new SimpleListAdapter(this));
     }
 

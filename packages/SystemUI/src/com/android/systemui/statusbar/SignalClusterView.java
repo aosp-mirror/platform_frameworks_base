@@ -177,22 +177,22 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mVpn            = (ImageView) findViewById(R.id.vpn);
-        mEthernetGroup  = (ViewGroup) findViewById(R.id.ethernet_combo);
-        mEthernet       = (ImageView) findViewById(R.id.ethernet);
-        mEthernetDark   = (ImageView) findViewById(R.id.ethernet_dark);
-        mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
-        mWifi           = (ImageView) findViewById(R.id.wifi_signal);
-        mWifiDark       = (ImageView) findViewById(R.id.wifi_signal_dark);
-        mWifiActivityIn = (ImageView) findViewById(R.id.wifi_in);
-        mWifiActivityOut= (ImageView) findViewById(R.id.wifi_out);
-        mAirplane       = (ImageView) findViewById(R.id.airplane);
-        mNoSims         = (ImageView) findViewById(R.id.no_sims);
-        mNoSimsDark     = (ImageView) findViewById(R.id.no_sims_dark);
+        mVpn            = findViewById(R.id.vpn);
+        mEthernetGroup  = findViewById(R.id.ethernet_combo);
+        mEthernet       = findViewById(R.id.ethernet);
+        mEthernetDark   = findViewById(R.id.ethernet_dark);
+        mWifiGroup      = findViewById(R.id.wifi_combo);
+        mWifi           = findViewById(R.id.wifi_signal);
+        mWifiDark       = findViewById(R.id.wifi_signal_dark);
+        mWifiActivityIn = findViewById(R.id.wifi_in);
+        mWifiActivityOut= findViewById(R.id.wifi_out);
+        mAirplane       = findViewById(R.id.airplane);
+        mNoSims         = findViewById(R.id.no_sims);
+        mNoSimsDark     = findViewById(R.id.no_sims_dark);
         mNoSimsCombo    =             findViewById(R.id.no_sims_combo);
         mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
         mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
-        mMobileSignalGroup = (LinearLayout) findViewById(R.id.mobile_signal_group);
+        mMobileSignalGroup = findViewById(R.id.mobile_signal_group);
 
         maybeScaleVpnAndNoSimsIcons();
     }

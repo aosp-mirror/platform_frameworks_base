@@ -84,7 +84,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
             return;
         }
 
-        final TextView authTokenTypeView = (TextView) findViewById(R.id.authtoken_type);
+        final TextView authTokenTypeView = findViewById(R.id.authtoken_type);
         authTokenTypeView.setVisibility(View.GONE);
 
         final AccountManagerCallback<String> callback = new AccountManagerCallback<String>() {
@@ -116,7 +116,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
         findViewById(R.id.allow_button).setOnClickListener(this);
         findViewById(R.id.deny_button).setOnClickListener(this);
 
-        LinearLayout packagesListView = (LinearLayout) findViewById(R.id.packages_list);
+        LinearLayout packagesListView = findViewById(R.id.packages_list);
 
         for (String pkg : packages) {
             String packageLabel;

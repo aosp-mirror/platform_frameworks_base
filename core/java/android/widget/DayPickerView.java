@@ -124,13 +124,13 @@ class DayPickerView extends ViewGroup {
             addView(child);
         }
 
-        mPrevButton = (ImageButton) findViewById(R.id.prev);
+        mPrevButton = findViewById(R.id.prev);
         mPrevButton.setOnClickListener(mOnClickListener);
 
-        mNextButton = (ImageButton) findViewById(R.id.next);
+        mNextButton = findViewById(R.id.next);
         mNextButton.setOnClickListener(mOnClickListener);
 
-        mViewPager = (ViewPager) findViewById(R.id.day_picker_view_pager);
+        mViewPager = findViewById(R.id.day_picker_view_pager);
         mViewPager.setAdapter(mAdapter);
         mViewPager.setOnPageChangeListener(mOnPageChangedListener);
 

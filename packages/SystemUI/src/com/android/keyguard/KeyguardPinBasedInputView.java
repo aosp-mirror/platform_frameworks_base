@@ -171,7 +171,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
     @Override
     protected void onFinishInflate() {
-        mPasswordEntry = (PasswordTextView) findViewById(getPasswordTextViewId());
+        mPasswordEntry = findViewById(getPasswordTextViewId());
         mPasswordEntry.setOnKeyListener(this);
 
         // Set selected property on so the view can send accessibility events.

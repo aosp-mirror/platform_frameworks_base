@@ -43,7 +43,7 @@ import android.util.AttributeSet;
  *
  *         ArrayAdapter&lt;String&gt; adapter = new ArrayAdapter&lt;String&gt;(this,
  *                 android.R.layout.simple_dropdown_item_1line, COUNTRIES);
- *         MultiAutoCompleteTextView textView = (MultiAutoCompleteTextView) findViewById(R.id.edit);
+ *         MultiAutoCompleteTextView textView = findViewById(R.id.edit);
  *         textView.setAdapter(adapter);
  *         textView.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
  *     }

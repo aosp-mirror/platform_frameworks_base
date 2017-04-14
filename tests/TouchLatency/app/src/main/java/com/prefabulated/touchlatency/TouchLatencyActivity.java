@@ -180,7 +180,7 @@ public class TouchLatencyActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_touch_latency);
 
-        mTouchView = (TouchLatencyView) findViewById(R.id.canvasView);
+        mTouchView = findViewById(R.id.canvasView);
     }
 
 

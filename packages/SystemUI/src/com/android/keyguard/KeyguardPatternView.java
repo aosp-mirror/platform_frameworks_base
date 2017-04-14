@@ -140,7 +140,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternUtils = mLockPatternUtils == null
                 ? new LockPatternUtils(mContext) : mLockPatternUtils;
 
-        mLockPatternView = (LockPatternView) findViewById(R.id.lockPatternView);
+        mLockPatternView = findViewById(R.id.lockPatternView);
         mLockPatternView.setSaveEnabled(false);
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
 
@@ -150,9 +150,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mSecurityMessageDisplay =
                 (KeyguardMessageArea) KeyguardMessageArea.findSecurityMessageDisplay(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
-        mContainer = (ViewGroup) findViewById(R.id.container);
+        mContainer = findViewById(R.id.container);
 
-        EmergencyButton button = (EmergencyButton) findViewById(R.id.emergency_call_button);
+        EmergencyButton button = findViewById(R.id.emergency_call_button);
         if (button != null) {
             button.setCallback(this);
         }

@@ -58,7 +58,7 @@ import java.lang.ref.WeakReference;
  * The preferred way to perform the inflation of the layout resource is the following:
  *
  * <pre>
- *     ViewStub stub = (ViewStub) findViewById(R.id.stub);
+ *     ViewStub stub = findViewById(R.id.stub);
  *     View inflated = stub.inflate();
  * </pre>
  *

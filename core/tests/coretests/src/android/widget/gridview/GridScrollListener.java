@@ -46,8 +46,8 @@ public class GridScrollListener extends Activity implements AbsListView.OnScroll
             values[i] = ((Integer)i).toString();
         }
         
-        mText = (TextView) findViewById(R.id.text);
-        mGridView = (GridView) findViewById(R.id.grid);
+        mText = findViewById(R.id.text);
+        mGridView = findViewById(R.id.grid);
         mGridView.setAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, values));
 

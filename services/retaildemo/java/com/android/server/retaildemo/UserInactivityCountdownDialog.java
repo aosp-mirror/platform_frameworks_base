@@ -67,7 +67,7 @@ public class UserInactivityCountdownDialog extends AlertDialog {
     @Override
     public void show() {
         super.show();
-        final TextView messageView = (TextView) findViewById(R.id.message);
+        final TextView messageView = findViewById(R.id.message);
         messageView.post(new Runnable() {
             @Override
             public void run() {

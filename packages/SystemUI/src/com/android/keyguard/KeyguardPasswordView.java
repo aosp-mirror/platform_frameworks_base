@@ -174,7 +174,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         mImm = (InputMethodManager) getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
 
-        mPasswordEntry = (TextView) findViewById(getPasswordTextViewId());
+        mPasswordEntry = findViewById(getPasswordTextViewId());
         mPasswordEntryDisabler = new TextViewInputDisabler(mPasswordEntry);
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT

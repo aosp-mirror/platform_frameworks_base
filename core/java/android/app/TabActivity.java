@@ -108,7 +108,7 @@ public class TabActivity extends ActivityGroup {
     @Override
     public void onContentChanged() {
         super.onContentChanged();
-        mTabHost = (TabHost) findViewById(com.android.internal.R.id.tabhost);
+        mTabHost = findViewById(com.android.internal.R.id.tabhost);
 
         if (mTabHost == null) {
             throw new RuntimeException(

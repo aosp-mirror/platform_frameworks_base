@@ -188,10 +188,10 @@ public class PipMenuActivity extends Activity {
         mDismissButton.setOnClickListener((v) -> {
             dismissPip();
         });
-        mActionsGroup = (LinearLayout) findViewById(R.id.actions_group);
+        mActionsGroup = findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
-        mExpandButton = (ImageView) findViewById(R.id.expand_button);
+        mExpandButton = findViewById(R.id.expand_button);
 
         updateFromIntent(getIntent());
         setTitle(R.string.pip_menu_title);
@@ -392,8 +392,8 @@ public class PipMenuActivity extends Activity {
     }
 
     private void updateActionViews(Rect stackBounds) {
-        ViewGroup expandContainer = (ViewGroup) findViewById(R.id.expand_container);
-        ViewGroup actionsContainer = (ViewGroup) findViewById(R.id.actions_container);
+        ViewGroup expandContainer = findViewById(R.id.expand_container);
+        ViewGroup actionsContainer = findViewById(R.id.actions_container);
         actionsContainer.setOnTouchListener((v, ev) -> {
             // Do nothing, prevent click through to parent
             return true;

@@ -79,11 +79,11 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mContainer = (ViewGroup) findViewById(R.id.container);
-        mRow0 = (ViewGroup) findViewById(R.id.row0);
-        mRow1 = (ViewGroup) findViewById(R.id.row1);
-        mRow2 = (ViewGroup) findViewById(R.id.row2);
-        mRow3 = (ViewGroup) findViewById(R.id.row3);
+        mContainer = findViewById(R.id.container);
+        mRow0 = findViewById(R.id.row0);
+        mRow1 = findViewById(R.id.row1);
+        mRow2 = findViewById(R.id.row2);
+        mRow3 = findViewById(R.id.row3);
         mDivider = findViewById(R.id.divider);
         mViews = new View[][]{
                 new View[]{

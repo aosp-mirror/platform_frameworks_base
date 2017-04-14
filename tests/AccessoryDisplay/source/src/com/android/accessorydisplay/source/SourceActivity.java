@@ -63,7 +63,7 @@ public class SourceActivity extends Activity {
 
         setContentView(R.layout.source_activity);
 
-        mLogTextView = (TextView) findViewById(R.id.logTextView);
+        mLogTextView = findViewById(R.id.logTextView);
         mLogTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
         mLogger = new TextLogger();
         mPresenter = new Presenter();

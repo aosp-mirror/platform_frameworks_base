@@ -70,8 +70,8 @@ public class TwoLineListItem extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mText1 = (TextView) findViewById(com.android.internal.R.id.text1);
-        mText2 = (TextView) findViewById(com.android.internal.R.id.text2);
+        mText1 = findViewById(com.android.internal.R.id.text1);
+        mText2 = findViewById(com.android.internal.R.id.text2);
     }
 
     /**

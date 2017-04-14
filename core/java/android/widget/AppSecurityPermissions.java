@@ -151,8 +151,8 @@ public class AppSecurityPermissions {
             mShowRevokeUI = showRevokeUI;
             mPackageName = packageName;
 
-            ImageView permGrpIcon = (ImageView) findViewById(R.id.perm_icon);
-            TextView permNameView = (TextView) findViewById(R.id.perm_name);
+            ImageView permGrpIcon = findViewById(R.id.perm_icon);
+            TextView permNameView = findViewById(R.id.perm_name);
 
             PackageManager pm = getContext().getPackageManager();
             Drawable icon = null;

@@ -1593,7 +1593,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (featureId == FEATURE_PROGRESS || featureId == FEATURE_INDETERMINATE_PROGRESS) {
             updateProgressBars(value);
         } else if (featureId == FEATURE_CUSTOM_TITLE) {
-            FrameLayout titleContainer = (FrameLayout) findViewById(R.id.title_container);
+            FrameLayout titleContainer = findViewById(R.id.title_container);
             if (titleContainer != null) {
                 mLayoutInflater.inflate(value, titleContainer);
             }
@@ -2690,7 +2690,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     invalidatePanelMenu(FEATURE_ACTION_BAR);
                 }
             } else {
-                mTitleView = (TextView) findViewById(R.id.title);
+                mTitleView = findViewById(R.id.title);
                 if (mTitleView != null) {
                     if ((getLocalFeatures() & (1 << FEATURE_NO_TITLE)) != 0) {
                         final View titleContainer = findViewById(R.id.title_container);
@@ -2967,7 +2967,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mCircularProgressBar = (ProgressBar) findViewById(R.id.progress_circular);
+        mCircularProgressBar = findViewById(R.id.progress_circular);
         if (mCircularProgressBar != null) {
             mCircularProgressBar.setVisibility(View.INVISIBLE);
         }
@@ -2981,7 +2981,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContentParent == null && shouldInstallDecor) {
             installDecor();
         }
-        mHorizontalProgressBar = (ProgressBar) findViewById(R.id.progress_horizontal);
+        mHorizontalProgressBar = findViewById(R.id.progress_horizontal);
         if (mHorizontalProgressBar != null) {
             mHorizontalProgressBar.setVisibility(View.INVISIBLE);
         }

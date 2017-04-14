@@ -56,16 +56,16 @@ public class MainActivity extends Activity {
         stopJobColor = getColor(R.color.stop_received);
 
         // Set up UI.
-        mShowStartView = (TextView) findViewById(R.id.onstart_textview);
-        mShowStopView = (TextView) findViewById(R.id.onstop_textview);
-        mParamsTextView = (TextView) findViewById(R.id.task_params);
-        mDelayEditText = (EditText) findViewById(R.id.delay_time);
-        mDeadlineEditText = (EditText) findViewById(R.id.deadline_time);
-        mWiFiConnectivityRadioButton = (RadioButton) findViewById(R.id.checkbox_unmetered);
-        mAnyConnectivityRadioButton = (RadioButton) findViewById(R.id.checkbox_any);
-        mRequiresChargingCheckBox = (CheckBox) findViewById(R.id.checkbox_charging);
-        mRequiresIdleCheckbox = (CheckBox) findViewById(R.id.checkbox_idle);
-        mIsPersistedCheckbox = (CheckBox) findViewById(R.id.checkbox_persisted);
+        mShowStartView = findViewById(R.id.onstart_textview);
+        mShowStopView = findViewById(R.id.onstop_textview);
+        mParamsTextView = findViewById(R.id.task_params);
+        mDelayEditText = findViewById(R.id.delay_time);
+        mDeadlineEditText = findViewById(R.id.deadline_time);
+        mWiFiConnectivityRadioButton = findViewById(R.id.checkbox_unmetered);
+        mAnyConnectivityRadioButton = findViewById(R.id.checkbox_any);
+        mRequiresChargingCheckBox = findViewById(R.id.checkbox_charging);
+        mRequiresIdleCheckbox = findViewById(R.id.checkbox_idle);
+        mIsPersistedCheckbox = findViewById(R.id.checkbox_persisted);
 
         mServiceComponent = new ComponentName(this, TestJobService.class);
         // Start service and provide it a way to communicate with us.
