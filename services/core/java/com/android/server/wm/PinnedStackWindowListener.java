@@ -19,11 +19,14 @@ package com.android.server.wm;
 import android.graphics.Rect;
 
 /**
- * Interface used by the creator of {@link StackWindowController} to listen to changes with
+ * Interface used by the creator of {@link PinnedStackWindowController} to listen to changes with
  * the stack container.
  */
-public interface StackWindowListener extends WindowContainerListener {
+public interface PinnedStackWindowListener extends StackWindowListener {
 
-    /** Called when the stack container would like its controller to resize. */
-    void requestResize(Rect bounds);
+    /**
+     * Called when the stack container pinned stack animation will change the picture-in-picture
+     * mode. This is a direct call into ActivityManager.
+     */
+    default void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {}
 }
