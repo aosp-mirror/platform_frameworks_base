@@ -68,6 +68,11 @@ public final class JobStatus {
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
     static final int CONSTRAINT_NOT_ROAMING = 1<<24;
+    static final int CONSTRAINT_METERED = 1<<23;
+
+    static final int CONNECTIVITY_MASK =
+            CONSTRAINT_UNMETERED | CONSTRAINT_CONNECTIVITY |
+            CONSTRAINT_NOT_ROAMING | CONSTRAINT_METERED;
 
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
@@ -191,15 +196,28 @@ public final class JobStatus {
         this.numFailures = numFailures;
 
         int requiredConstraints = job.getConstraintFlags();
-        if (job.getNetworkType() == JobInfo.NETWORK_TYPE_ANY) {
-            requiredConstraints |= CONSTRAINT_CONNECTIVITY;
+
+        switch (job.getNetworkType()) {
+            case JobInfo.NETWORK_TYPE_NONE:
+                // No constraint.
+                break;
+            case JobInfo.NETWORK_TYPE_ANY:
+                requiredConstraints |= CONSTRAINT_CONNECTIVITY;
+                break;
+            case JobInfo.NETWORK_TYPE_UNMETERED:
+                requiredConstraints |= CONSTRAINT_UNMETERED;
+                break;
+            case JobInfo.NETWORK_TYPE_NOT_ROAMING:
+                requiredConstraints |= CONSTRAINT_NOT_ROAMING;
+                break;
+            case JobInfo.NETWORK_TYPE_METERED:
+                requiredConstraints |= CONSTRAINT_METERED;
+                break;
+            default:
+                Slog.w(TAG, "Unrecognized networking constraint " + job.getNetworkType());
+                break;
         }
-        if (job.getNetworkType() == JobInfo.NETWORK_TYPE_UNMETERED) {
-            requiredConstraints |= CONSTRAINT_UNMETERED;
-        }
-        if (job.getNetworkType() == JobInfo.NETWORK_TYPE_NOT_ROAMING) {
-            requiredConstraints |= CONSTRAINT_NOT_ROAMING;
-        }
+
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
         }
@@ -467,15 +485,24 @@ public final class JobStatus {
         return job.getFlags();
     }
 
+    /** Does this job have any sort of networking constraint? */
     public boolean hasConnectivityConstraint() {
+        return (requiredConstraints&CONNECTIVITY_MASK) != 0;
+    }
+
+    public boolean needsAnyConnectivity() {
         return (requiredConstraints&CONSTRAINT_CONNECTIVITY) != 0;
     }
 
-    public boolean hasUnmeteredConstraint() {
+    public boolean needsUnmeteredConnectivity() {
         return (requiredConstraints&CONSTRAINT_UNMETERED) != 0;
     }
 
-    public boolean hasNotRoamingConstraint() {
+    public boolean needsMeteredConnectivity() {
+        return (requiredConstraints&CONSTRAINT_METERED) != 0;
+    }
+
+    public boolean needsNonRoamingConnectivity() {
         return (requiredConstraints&CONSTRAINT_NOT_ROAMING) != 0;
     }
 
@@ -569,6 +596,10 @@ public final class JobStatus {
 
     boolean setUnmeteredConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_UNMETERED, state);
+    }
+
+    boolean setMeteredConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_METERED, state);
     }
 
     boolean setNotRoamingConstraintSatisfied(boolean state) {
