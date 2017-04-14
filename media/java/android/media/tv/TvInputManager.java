@@ -1681,6 +1681,23 @@ public final class TvInputManager {
     }
 
     /**
+     * Requests to make a channel browsable.
+     *
+     * <p>Once called, the system will review the request and make the channel browsable based on
+     * its policy. The first request from a package is guaranteed to be approved.
+     *
+     * @param channelUri The URI for the channel to be browsable.
+     * @hide
+     */
+    public void requestChannelBrowsable(Uri channelUri) {
+        try {
+            mService.requestChannelBrowsable(channelUri, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * The Session provides the per-session functionality of TV inputs.
      * @hide
      */
