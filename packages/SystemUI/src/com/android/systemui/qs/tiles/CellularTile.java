@@ -163,7 +163,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
         boolean enabled;
         boolean wifiEnabled;
         boolean airplaneModeEnabled;
-        int mobileSignalIconId;
         String signalContentDescription;
         int dataTypeIconId;
         String dataContentDescription;
@@ -193,7 +192,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
                 return;
             }
             mInfo.enabled = qsIcon.visible;
-            mInfo.mobileSignalIconId = qsIcon.icon;
             mInfo.signalContentDescription = qsIcon.contentDescription;
             mInfo.dataTypeIconId = qsType;
             mInfo.dataContentDescription = typeContentDescription;
@@ -210,7 +208,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
             mInfo.noSim = show;
             if (mInfo.noSim) {
                 // Make sure signal gets cleared out when no sims.
-                mInfo.mobileSignalIconId = 0;
                 mInfo.dataTypeIconId = 0;
                 // Show a No SIMs description to avoid emergency calls message.
                 mInfo.enabled = true;

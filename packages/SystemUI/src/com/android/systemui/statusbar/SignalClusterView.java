@@ -42,6 +42,7 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SignalDrawable;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
@@ -192,7 +193,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         mNoSimsCombo    =             findViewById(R.id.no_sims_combo);
         mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
         mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
-        mMobileSignalGroup = findViewById(R.id.mobile_signal_group);
+        mMobileSignalGroup =          findViewById(R.id.mobile_signal_group);
 
         maybeScaleVpnAndNoSimsIcons();
     }
@@ -327,15 +328,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         if (hasCorrectSubs(subs)) {
             return;
         }
-        // Clear out all old subIds.
-        for (PhoneState state : mPhoneStates) {
-            if (state.mMobile != null) {
-                state.maybeStopAnimatableDrawable(state.mMobile);
-            }
-            if (state.mMobileDark != null) {
-                state.maybeStopAnimatableDrawable(state.mMobileDark);
-            }
-        }
         mPhoneStates.clear();
         if (mMobileSignalGroup != null) {
             mMobileSignalGroup.removeAllViews();
@@ -428,16 +420,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         }
 
         for (PhoneState state : mPhoneStates) {
-            if (state.mMobile != null) {
-                state.maybeStopAnimatableDrawable(state.mMobile);
-                state.mMobile.setImageDrawable(null);
-                state.mLastMobileStrengthId = -1;
-            }
-            if (state.mMobileDark != null) {
-                state.maybeStopAnimatableDrawable(state.mMobileDark);
-                state.mMobileDark.setImageDrawable(null);
-                state.mLastMobileStrengthId = -1;
-            }
             if (state.mMobileType != null) {
                 state.mMobileType.setImageDrawable(null);
                 state.mLastMobileTypeId = -1;
@@ -654,7 +636,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         private int mMobileStrengthId = 0, mMobileTypeId = 0;
         private int mLastMobileStrengthId = -1;
         private int mLastMobileTypeId = -1;
-        private int mLastMobileActivityId = -1;
         private boolean mIsMobileTypeIconWide;
         private String mMobileDescription, mMobileTypeDescription;
 
@@ -681,13 +662,18 @@ public class SignalClusterView extends LinearLayout implements NetworkController
             mMobileRoaming  = root.findViewById(R.id.mobile_roaming);
             mMobileActivityIn = root.findViewById(R.id.mobile_in);
             mMobileActivityOut = root.findViewById(R.id.mobile_out);
+            // TODO: Remove the 2 instances because now the drawable can handle darkness.
+            mMobile.setImageDrawable(new SignalDrawable(mMobile.getContext()));
+            SignalDrawable drawable = new SignalDrawable(mMobileDark.getContext());
+            drawable.setDarkIntensity(1);
+            mMobileDark.setImageDrawable(drawable);
         }
 
         public boolean apply(boolean isSecondaryIcon) {
             if (mMobileVisible && !mIsAirplaneMode) {
                 if (mLastMobileStrengthId != mMobileStrengthId) {
-                    updateAnimatableIcon(mMobile, mMobileStrengthId);
-                    updateAnimatableIcon(mMobileDark, mMobileStrengthId);
+                    mMobile.getDrawable().setLevel(mMobileStrengthId);
+                    mMobileDark.getDrawable().setLevel(mMobileStrengthId);
                     mLastMobileStrengthId = mMobileStrengthId;
                 }
 
@@ -722,49 +708,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
             mMobileActivityOut.setVisibility(mActivityOut ? View.VISIBLE : View.GONE);
 
             return mMobileVisible;
-        }
-
-        private void updateAnimatableIcon(ImageView view, int resId) {
-            maybeStopAnimatableDrawable(view);
-            setIconForView(view, resId);
-            maybeStartAnimatableDrawable(view);
-        }
-
-        private void maybeStopAnimatableDrawable(ImageView view) {
-            Drawable drawable = view.getDrawable();
-
-            // Check if the icon has been scaled. If it has retrieve the actual drawable out of the
-            // wrapper.
-            if (drawable instanceof ScalingDrawableWrapper) {
-                drawable = ((ScalingDrawableWrapper) drawable).getDrawable();
-            }
-
-            if (drawable instanceof Animatable) {
-                Animatable ad = (Animatable) drawable;
-                if (ad.isRunning()) {
-                    ad.stop();
-                }
-            }
-        }
-
-        private void maybeStartAnimatableDrawable(ImageView view) {
-            Drawable drawable = view.getDrawable();
-
-            // Check if the icon has been scaled. If it has retrieve the actual drawable out of the
-            // wrapper.
-            if (drawable instanceof ScalingDrawableWrapper) {
-                drawable = ((ScalingDrawableWrapper) drawable).getDrawable();
-            }
-
-            if (drawable instanceof Animatable) {
-                Animatable ad = (Animatable) drawable;
-                if (ad instanceof AnimatedVectorDrawable) {
-                    ((AnimatedVectorDrawable) ad).forceAnimationOnUI();
-                }
-                if (!ad.isRunning()) {
-                    ad.start();
-                }
-            }
         }
 
         public void populateAccessibilityEvent(AccessibilityEvent event) {

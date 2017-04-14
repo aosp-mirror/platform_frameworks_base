@@ -763,4 +763,6 @@
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
+    <dimen name="signal_icon_size">17dp</dimen>
+
 </resources>

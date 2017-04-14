@@ -24,7 +24,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     public void test3gDataIcon() {
         setupDefaultSignal();
 
-        verifyDataIndicators(TelephonyIcons.DATA_3G[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_3G,
                 TelephonyIcons.QS_DATA_3G);
     }
 
@@ -34,7 +34,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_GSM);
 
-        verifyDataIndicators(TelephonyIcons.DATA_G[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_G,
                 TelephonyIcons.QS_DATA_G);
     }
 
@@ -44,7 +44,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_CDMA);
 
-        verifyDataIndicators(TelephonyIcons.DATA_1X[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_1X,
                 TelephonyIcons.QS_DATA_1X);
     }
 
@@ -54,7 +54,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_EDGE);
 
-        verifyDataIndicators(TelephonyIcons.DATA_E[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_E,
                 TelephonyIcons.QS_DATA_E);
     }
 
@@ -64,7 +64,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
 
-        verifyDataIndicators(TelephonyIcons.DATA_LTE[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_LTE,
                 TelephonyIcons.QS_DATA_LTE);
     }
 
@@ -74,7 +74,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_HSPA);
 
-        verifyDataIndicators(TelephonyIcons.DATA_H[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_H,
                 TelephonyIcons.QS_DATA_H);
     }
 
@@ -103,7 +103,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
 
-        verifyDataIndicators(TelephonyIcons.DATA_4G[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_4G,
                 TelephonyIcons.QS_DATA_4G);
     }
 
@@ -147,7 +147,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         // the after work.
         mNetworkController.handleConfigurationChanged();
 
-        verifyDataIndicators(TelephonyIcons.DATA_4G[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_4G,
                 TelephonyIcons.QS_DATA_4G);
     }
 
@@ -157,13 +157,13 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
 
-        verifyDataIndicators(TelephonyIcons.DATA_LTE[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_LTE,
                 TelephonyIcons.QS_DATA_LTE);
 
         when(mServiceState.getDataNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_HSPA);
         updateServiceState();
-        verifyDataIndicators(TelephonyIcons.DATA_H[1][0 /* No direction */],
+        verifyDataIndicators(TelephonyIcons.ICON_H,
                 TelephonyIcons.QS_DATA_H);
     }
 

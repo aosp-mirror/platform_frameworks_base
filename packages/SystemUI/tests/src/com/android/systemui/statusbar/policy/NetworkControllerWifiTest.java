@@ -218,7 +218,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
         setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
         verifyLastMobileDataIndicators(true,
-                TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][DEFAULT_LEVEL],
+                DEFAULT_LEVEL,
                 0, true);
     }
 
