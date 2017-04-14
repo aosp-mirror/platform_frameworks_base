@@ -1865,13 +1865,6 @@ public class BridgeContext extends Context {
     }
 
     @Override
-    public ComponentName startServiceInForeground(Intent service,
-            int id, Notification notification) {
-        // pass
-        return null;
-    }
-
-    @Override
     public boolean stopService(Intent arg0) {
         // pass
         return false;
@@ -1879,13 +1872,6 @@ public class BridgeContext extends Context {
 
     @Override
     public ComponentName startServiceAsUser(Intent arg0, UserHandle arg1) {
-        // pass
-        return null;
-    }
-
-    @Override
-    public ComponentName startServiceInForegroundAsUser(Intent service,
-            int id, Notification notification, UserHandle user) {
         // pass
         return null;
     }
