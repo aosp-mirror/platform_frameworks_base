@@ -984,18 +984,27 @@ public class ApplicationsState {
                                     mCurComputingSizeUserId = UserHandle.getUserId(entry.info.uid);
 
                                     mBackgroundHandler.post(() -> {
-                                        final StorageStats stats = mStats.queryStatsForPackage(
-                                                mCurComputingSizeUuid, mCurComputingSizePkg,
-                                                UserHandle.of(mCurComputingSizeUserId));
-                                        final PackageStats legacyStats = new PackageStats(
-                                                mCurComputingSizePkg, mCurComputingSizeUserId);
-                                        legacyStats.codeSize = stats.getCodeBytes();
-                                        legacyStats.dataSize = stats.getDataBytes();
-                                        legacyStats.cacheSize = stats.getCacheBytes();
                                         try {
-                                            mStatsObserver.onGetStatsCompleted(legacyStats, true);
-                                        } catch (RemoteException ignored) {
+                                            final StorageStats stats = mStats.queryStatsForPackage(
+                                                    mCurComputingSizeUuid, mCurComputingSizePkg,
+                                                    UserHandle.of(mCurComputingSizeUserId));
+                                            final PackageStats legacyStats = new PackageStats(
+                                                    mCurComputingSizePkg, mCurComputingSizeUserId);
+                                            legacyStats.codeSize = stats.getCodeBytes();
+                                            legacyStats.dataSize = stats.getDataBytes();
+                                            legacyStats.cacheSize = stats.getCacheBytes();
+                                            try {
+                                                mStatsObserver.onGetStatsCompleted(legacyStats, true);
+                                            } catch (RemoteException ignored) {
+                                            }
+                                        } catch (IllegalStateException e) {
+                                            Log.e(TAG,"An exception occurred while fetching app size", e);
+                                            try {
+                                                mStatsObserver.onGetStatsCompleted(null, false);
+                                            } catch (RemoteException ignored) {
+                                            }
                                         }
+
                                     });
                                 }
                                 if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing: now computing");
