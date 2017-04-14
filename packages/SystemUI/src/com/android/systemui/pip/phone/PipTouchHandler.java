@@ -662,6 +662,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         mMovementBounds, true /* allowMenuTimeout */);
             } else {
+                mMenuController.hideMenu();
                 mMotionHelper.expandPip();
             }
             return true;
