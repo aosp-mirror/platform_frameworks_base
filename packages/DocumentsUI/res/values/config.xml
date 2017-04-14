@@ -16,7 +16,7 @@
 
 <resources>
     <!-- Allow Advanced Devices default value to be customised -->
-    <bool name="config_defaultAdvancedDevices">false</bool>
+    <bool name="config_defaultAdvancedDevices">true</bool>
 
     <!-- Intentionally unset. Vendors should set this in an overlay. -->
     <string name="trusted_quick_viewer_package" translatable="false"></string>
