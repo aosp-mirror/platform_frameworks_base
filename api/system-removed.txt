@@ -98,6 +98,18 @@ package android.graphics {
 
 }
 
+package android.hardware {
+
+  public final class SensorDirectChannel implements java.nio.channels.Channel {
+    method public deprecated boolean isValid();
+  }
+
+  public abstract class SensorManager {
+    method public deprecated int configureDirectChannel(android.hardware.SensorDirectChannel, android.hardware.Sensor, int);
+  }
+
+}
+
 package android.media {
 
   public final class AudioFormat implements android.os.Parcelable {
