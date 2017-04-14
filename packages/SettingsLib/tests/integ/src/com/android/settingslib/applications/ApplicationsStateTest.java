@@ -174,6 +174,13 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testOtherAppsRejectsLegacyGame() {
+        mEntry.info.flags = ApplicationInfo.FLAG_IS_GAME;
+
+        assertThat(ApplicationsState.FILTER_OTHER_APPS.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
     public void testInstantFilterAcceptsInstantApp() {
         when(mEntry.info.isInstantApp()).thenReturn(true);
         assertThat(ApplicationsState.FILTER_INSTANT.filterApp(mEntry)).isTrue();

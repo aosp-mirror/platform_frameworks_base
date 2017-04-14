@@ -1616,20 +1616,21 @@ public class ApplicationsState {
         }
     };
 
-    public static final AppFilter FILTER_OTHER_APPS = new AppFilter() {
-        @Override
-        public void init() {
-        }
+    public static final AppFilter FILTER_OTHER_APPS =
+            new AppFilter() {
+                @Override
+                public void init() {}
 
-        @Override
-        public boolean filterApp(AppEntry entry) {
-            boolean isCategorized;
-            synchronized(entry) {
-                isCategorized = entry.info.category == ApplicationInfo.CATEGORY_AUDIO ||
-                    entry.info.category == ApplicationInfo.CATEGORY_GAME ||
-                    entry.info.category == ApplicationInfo.CATEGORY_VIDEO;
-            }
-            return !isCategorized;
-        }
-    };
+                @Override
+                public boolean filterApp(AppEntry entry) {
+                    boolean isCategorized;
+                    synchronized (entry) {
+                        isCategorized =
+                                FILTER_AUDIO.filterApp(entry)
+                                        || FILTER_GAMES.filterApp(entry)
+                                        || FILTER_MOVIES.filterApp(entry);
+                    }
+                    return !isCategorized;
+                }
+            };
 }
