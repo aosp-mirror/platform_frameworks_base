@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -1278,15 +1280,34 @@ public class LauncherApps {
      * an {@link #ACTION_CONFIRM_PIN_SHORTCUT} or {@link #ACTION_CONFIRM_PIN_APPWIDGET} intent
      * respectively to the default launcher app.
      *
-     * <p>Note the launcher may receive a request to pin a shortcut that is already pinned, because
-     * the user may actually want to have multiple icons of the same shortcut on the launcher.
-     * The launcher can tell this case by calling {@link ShortcutInfo#isPinned()} on the shortcut
-     * returned by {@link #getShortcutInfo()}.  In this case, calling {@link #accept()} is optional;
-     * even if the launcher does not call it, the shortcut is already pinned.  Also in this case,
-     * the {@code options} argument to {@link #accept(Bundle)} will be ignored.
+     * <h3>Request of the {@link #REQUEST_TYPE_SHORTCUT} type.
      *
-     * <p>For AppWidget pin requests launcher should send back the appwidget id as an extra for
-     * {@link #accept(Bundle)} as {@link android.appwidget.AppWidgetManager#EXTRA_APPWIDGET_ID}.
+     * <p>A {@link #REQUEST_TYPE_SHORTCUT} request represents a request to pin a
+     * {@link ShortcutInfo}.  If the launcher accepts a request, call {@link #accept()},
+     * or {@link #accept(Bundle)} with a null or empty Bundle.  No options are defined for
+     * pin-shortcuts requests.
+     *
+     * <p>{@link #getShortcutInfo()} always returns a non-null {@link ShortcutInfo} for this type.
+     *
+     * <p>The launcher may receive a request with a {@link ShortcutInfo} that is already pinned, in
+     * which case {@link ShortcutInfo#isPinned()} returns true.  This means the user wants to create
+     * another pinned shortcut for a shortcut that's already pinned.  If the launcher accepts it,
+     * {@link #accept()} must still be called even though the shortcut is already pinned, and
+     * create a new pinned shortcut icon for it.
+     *
+     * <p>See also {@link ShortcutManager} for more details.
+     *
+     * <h3>Request of the {@link #REQUEST_TYPE_APPWIDGET} type.
+     *
+     * <p>A {@link #REQUEST_TYPE_SHORTCUT} request represents a request to pin a
+     * an AppWidget.  If the launcher accepts a request, call {@link #accept(Bundle)} with
+     * the appwidget integer ID set to the
+     * {@link android.appwidget.AppWidgetManager#EXTRA_APPWIDGET_ID} extra.
+     *
+     * <p>{@link #getAppWidgetProviderInfo(Context)} always returns a non-null
+     * {@link AppWidgetProviderInfo} for this type.
+     *
+     * <p>See also {@link AppWidgetManager} for more details.
      *
      * @see #EXTRA_PIN_ITEM_REQUEST
      * @see #getPinItemRequest(Intent)
@@ -1316,8 +1337,9 @@ public class LauncherApps {
         }
 
         /**
-         * Represents the type of a request.  For now {@link #REQUEST_TYPE_SHORTCUT} is the only
-         * valid type.
+         * Represents the type of a request, which is one of the {@code REQUEST_TYPE_} constants.
+         *
+         * @return one of the {@code REQUEST_TYPE_} constants.
          */
         @RequestType
         public int getRequestType() {
@@ -1325,8 +1347,12 @@ public class LauncherApps {
         }
 
         /**
-         * {@link ShortcutInfo} sent by the requesting app.  Always non-null for a
-         * {@link #REQUEST_TYPE_SHORTCUT} request.
+         * {@link ShortcutInfo} sent by the requesting app.
+         * Always non-null for a {@link #REQUEST_TYPE_SHORTCUT} request, and always null for a
+         * different request type.
+         *
+         * @return requested {@link ShortcutInfo} when a request is of the
+         * {@link #REQUEST_TYPE_SHORTCUT} type.  Null otherwise.
          */
         @Nullable
         public ShortcutInfo getShortcutInfo() {
@@ -1338,8 +1364,12 @@ public class LauncherApps {
         }
 
         /**
-         * {@link AppWidgetProviderInfo} sent by the requesting app.  Always non-null for a
-         * {@link #REQUEST_TYPE_APPWIDGET} request.
+         * {@link AppWidgetProviderInfo} sent by the requesting app.
+         * Always non-null for a {@link #REQUEST_TYPE_APPWIDGET} request, and always null for a
+         * different request type.
+         *
+         * @return requested {@link AppWidgetProviderInfo} when a request is of the
+         * {@link #REQUEST_TYPE_APPWIDGET} type.  Null otherwise.
          */
         @Nullable
         public AppWidgetProviderInfo getAppWidgetProviderInfo(Context context) {
@@ -1357,6 +1387,11 @@ public class LauncherApps {
 
         /**
          * Any extras sent by the requesting app.
+         *
+         * @return For a shortcut request, this method always return null.  For an AppWidget
+         * request, this method returns the extras passed to the
+         * {@link android.appwidget.AppWidgetManager#requestPinAppWidget(
+         * ComponentName, Bundle, PendingIntent)} API.  See {@link AppWidgetManager} for details.
          */
         @Nullable
         public Bundle getExtras() {
@@ -1368,8 +1403,9 @@ public class LauncherApps {
         }
 
         /**
-         * Return {@code TRUE} if a request is valid -- i.e. {@link #accept(Bundle)} has not been
-         * called yet.
+         * Return whether a request is still valid.
+         *
+         * @return {@code TRUE} if a request is valid and {@link #accept(Bundle)} may be called.
          */
         public boolean isValid() {
             try {
@@ -1381,6 +1417,12 @@ public class LauncherApps {
 
         /**
          * Called by the receiving launcher app when the user accepts the request.
+         *
+         * @param options must be set for a {@link #REQUEST_TYPE_APPWIDGET} request.
+         *
+         * @return {@code TRUE} if the shortcut or the AppWidget has actually been pinned.
+         * {@code FALSE} if the item hasn't been pinned, for example, because the request had
+         * already been canceled, in which case the launcher must not pin the requested item.
          */
         public boolean accept(@Nullable Bundle options) {
             try {
@@ -1391,7 +1433,11 @@ public class LauncherApps {
         }
 
         /**
-         * Same as as {@link #accept(Bundle)} with no options.
+         * Called by the receiving launcher app when the user accepts the request, with no options.
+         *
+         * @return {@code TRUE} if the shortcut or the AppWidget has actually been pinned.
+         * {@code FALSE} if the item hasn't been pinned, for example, because the request had
+         * already been canceled, in which case the launcher must not pin the requested item.
          */
         public boolean accept() {
             return accept(/* options= */ null);
