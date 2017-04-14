@@ -1032,20 +1032,6 @@ public final class ShortcutInfo implements Parcelable {
             return this;
         }
 
-        /** @deprecated punted, don't use. */
-        @Deprecated
-        @NonNull
-        public Builder setChooserExtras(@NonNull PersistableBundle extras) {
-            return this;
-        }
-
-        /** @deprecated punted, don't use. */
-        @Deprecated
-        public Builder addChooserIntentFilter(@NonNull IntentFilter filter,
-                @NonNull ComponentName name) {
-            return this;
-        }
-
         /**
          * Creates a {@link ShortcutInfo} instance.
          */
@@ -1246,27 +1232,6 @@ public final class ShortcutInfo implements Parcelable {
         return mIntentPersistableExtrases;
     }
 
-    /** @deprecated punted, don't use. */
-    @Deprecated
-    @NonNull
-    public PersistableBundle getChooserExtras() {
-        return new PersistableBundle();
-    }
-
-    /** @deprecated punted, don't use. */
-    @Deprecated
-    @NonNull
-    public IntentFilter[] getChooserIntentFilters() {
-        return new IntentFilter[0];
-    }
-
-    /** @deprecated punted, don't use. */
-    @Deprecated
-    @NonNull
-    public ComponentName[] getChooserComponentNames() {
-        return new ComponentName[0];
-    }
-
     /**
      * "Rank" of a shortcut, which is a non-negative, sequential value that's unique for each
      * {@link #getActivity} for each of the two types of shortcuts (static and dynamic).
@@ -1386,12 +1351,6 @@ public final class ShortcutInfo implements Parcelable {
     /** Return whether a shortcut is pinned. */
     public boolean isPinned() {
         return hasFlags(FLAG_PINNED);
-    }
-
-    /** @deprecated punted, don't use. */
-    @Deprecated
-    public boolean isChooser() {
-        return false;
     }
 
     /**
