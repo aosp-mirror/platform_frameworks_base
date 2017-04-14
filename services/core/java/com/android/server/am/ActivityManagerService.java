@@ -2717,17 +2717,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mConstants = new ActivityManagerConstants(this, mHandler);
 
-        if (DEBUG_BACKGROUND_CHECK) {
-            Slog.d(TAG, "Enforcing O+ bg restrictions: " + mConstants.ENFORCE_BG_CHECK);
-            StringBuilder sb = new StringBuilder(200);
-            sb.append("  ");
-            for (String a : getBackgroundLaunchBroadcasts()) {
-                sb.append(' '); sb.append(a);
-            }
-            Slog.d(TAG, "Background implicit broadcasts:");
-            Slog.d(TAG, sb.toString());
-        }
-
         /* static; one-time init here */
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",
@@ -8309,7 +8298,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Unified app-op and target sdk check
     int appRestrictedInBackgroundLocked(int uid, String packageName, int packageTargetSdk) {
         // Apps that target O+ are always subject to background check
-        if (mConstants.ENFORCE_BG_CHECK && packageTargetSdk >= Build.VERSION_CODES.O) {
+        if (packageTargetSdk >= Build.VERSION_CODES.O) {
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName + " targets O+, restricted");
             }
