@@ -201,6 +201,22 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testFilterWithDomainUrls() {
+        mEntry.info.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
+        // should included updated system apps
+        when(mEntry.info.isInstantApp()).thenReturn(false);
+        assertThat(ApplicationsState.FILTER_WITH_DOMAIN_URLS.filterApp(mEntry))
+                .isTrue();
+        mEntry.info.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
+        assertThat(ApplicationsState.FILTER_WITH_DOMAIN_URLS.filterApp(mEntry))
+                .isFalse();
+        mEntry.info.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
+        when(mEntry.info.isInstantApp()).thenReturn(true);
+        assertThat(ApplicationsState.FILTER_WITH_DOMAIN_URLS.filterApp(mEntry))
+                .isFalse();
+    }
+
+    @Test
     public void testDisabledFilterRejectsInstantApp() {
         mEntry.info.enabled = false;
         assertThat(ApplicationsState.FILTER_DISABLED.filterApp(mEntry)).isTrue();
