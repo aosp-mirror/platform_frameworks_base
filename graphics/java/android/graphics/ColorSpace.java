@@ -1314,9 +1314,8 @@ public abstract class ColorSpace {
     }
 
     /**
-     * <p>Returns an instance of {@link ColorSpace} whose ID matches the specified
-     * ID. If the ID is < 0 or &gt; {@link #MAX_ID}, calling this method is equivalent
-     * to calling <code>get(Named.SRGB)</code>.</p>
+     * <p>Returns an instance of {@link ColorSpace} whose ID matches the
+     * specified ID.</p>
      *
      * <p>This method always returns the same instance for a given ID.</p>
      *
@@ -1324,11 +1323,14 @@ public abstract class ColorSpace {
      *
      * @param index An integer ID between {@link #MIN_ID} and {@link #MAX_ID}
      * @return A non-null {@link ColorSpace} instance
+     * @throws IllegalArgumentException If the ID does not match the ID of one of the
+     *         {@link Named named color spaces}
      */
     @NonNull
     static ColorSpace get(@IntRange(from = MIN_ID, to = MAX_ID) int index) {
         if (index < 0 || index > Named.values().length) {
-            return get(Named.SRGB);
+            throw new IllegalArgumentException("Invalid ID, must be in the range [0.." +
+                    Named.values().length + "]");
         }
         return sNamedColorSpaces[index];
     }
