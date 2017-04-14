@@ -370,6 +370,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    // AutoFillUiCallback
+    @Override
+    public void startIntentSender(IntentSender intentSender) {
+        synchronized (mLock) {
+            removeSelfLocked();
+        }
+        mHandlerCaller.getHandler().post(() -> {
+            try {
+                synchronized (mLock) {
+                    mClient.startIntentSender(intentSender);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error launching auth intent", e);
+            }
+        });
+    }
+
     public void setAuthenticationResultLocked(Bundle data) {
         if ((mResponseWaitingAuth == null && mDatasetWaitingAuth == null) || data == null) {
             removeSelf();
