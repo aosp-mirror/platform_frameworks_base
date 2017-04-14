@@ -145,6 +145,7 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
@@ -221,6 +222,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -2809,6 +2811,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + overrideConfig + " to starting window resId=" + resId);
                     context = overrideContext;
                 }
+                typedArray.recycle();
             }
 
             final PhoneWindow win = new PhoneWindow(context);
@@ -2868,6 +2871,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             params.setTitle("Splash Screen " + packageName);
+            addSplashscreenContent(win, context);
+
             wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
             view = win.getDecorView();
 
@@ -2896,6 +2901,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return null;
+    }
+
+    private void addSplashscreenContent(PhoneWindow win, Context ctx) {
+        final TypedArray a = ctx.obtainStyledAttributes(R.styleable.Window);
+        final int resId = a.getResourceId(R.styleable.Window_windowSplashscreenContent, 0);
+        a.recycle();
+        if (resId == 0) {
+            return;
+        }
+        final Drawable drawable = ctx.getDrawable(resId);
+        if (drawable == null) {
+            return;
+        }
+
+        // We wrap this into a view so the system insets get applied to the drawable.
+        final View v = new View(ctx);
+        v.setBackground(drawable);
+        win.setContentView(v);
     }
 
     /** Obtain proper context for showing splash screen on the provided display. */

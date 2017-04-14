@@ -2816,6 +2816,7 @@
         <public name="iconSpaceReserved"/>
         <public name="defaultFocusHighlightEnabled" />
         <public name="persistentFeature"/>
+        <public name="windowSplashscreenContent" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
@@ -2834,7 +2835,6 @@
     <public-group type="string" first-id="0x01040019">
         <public name="paste_as_plain_text" />
     </public-group>
-
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
