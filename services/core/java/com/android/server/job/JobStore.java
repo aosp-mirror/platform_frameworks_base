@@ -368,13 +368,16 @@ public class JobStore {
          */
         private void writeConstraintsToXml(XmlSerializer out, JobStatus jobStatus) throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
-            if (jobStatus.hasConnectivityConstraint()) {
+            if (jobStatus.needsAnyConnectivity()) {
                 out.attribute(null, "connectivity", Boolean.toString(true));
             }
-            if (jobStatus.hasUnmeteredConstraint()) {
+            if (jobStatus.needsMeteredConnectivity()) {
+                out.attribute(null, "metered", Boolean.toString(true));
+            }
+            if (jobStatus.needsUnmeteredConnectivity()) {
                 out.attribute(null, "unmetered", Boolean.toString(true));
             }
-            if (jobStatus.hasNotRoamingConstraint()) {
+            if (jobStatus.needsNonRoamingConnectivity()) {
                 out.attribute(null, "not-roaming", Boolean.toString(true));
             }
             if (jobStatus.hasIdleConstraint()) {
@@ -712,6 +715,10 @@ public class JobStore {
             String val = parser.getAttributeValue(null, "connectivity");
             if (val != null) {
                 jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+            }
+            val = parser.getAttributeValue(null, "metered");
+            if (val != null) {
+                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_METERED);
             }
             val = parser.getAttributeValue(null, "unmetered");
             if (val != null) {
