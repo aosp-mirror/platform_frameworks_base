@@ -57,10 +57,17 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
   CHECK(out_path != nullptr);
   CHECK(out_split != nullptr);
 
-  std::vector<std::string> parts = util::Split(arg, ':');
+#ifdef _WIN32
+  const char sSeparator = ';';
+#else
+  const char sSeparator = ':';
+#endif
+
+  std::vector<std::string> parts = util::Split(arg, sSeparator);
   if (parts.size() != 2) {
     diag->Error(DiagMessage() << "invalid split parameter '" << arg << "'");
-    diag->Note(DiagMessage() << "should be --split path/to/output.apk:<config>[,<config>...]");
+    diag->Note(DiagMessage() << "should be --split path/to/output.apk" << sSeparator
+                             << "<config>[,<config>...].");
     return false;
   }
 
