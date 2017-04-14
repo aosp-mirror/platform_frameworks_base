@@ -73,6 +73,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
@@ -86,10 +88,12 @@ import com.android.systemui.util.NotificationChannels;
  * strictly doesn't need to.
  */
 public class PhoneStatusBarPolicy implements Callback, Callbacks,
-        RotationLockControllerCallback, Listener,
+        RotationLockControllerCallback, Listener, LocationChangeCallback,
         ZenModeController.Callback, DeviceProvisionedListener, KeyguardMonitor.Callback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    public static final int LOCATION_STATUS_ICON_ID = R.drawable.stat_sys_location;
 
     private final String mSlotCast;
     private final String mSlotHotspot;
@@ -102,6 +106,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private final String mSlotRotate;
     private final String mSlotHeadset;
     private final String mSlotDataSaver;
+    private final String mSlotLocation;
 
     private final Context mContext;
     private final Handler mHandler = new Handler();
@@ -117,6 +122,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private final ZenModeController mZenController;
     private final DeviceProvisionedController mProvisionedController;
     private final KeyguardMonitor mKeyguardMonitor;
+    private final LocationController mLocationController;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
@@ -147,6 +153,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mZenController = Dependency.get(ZenModeController.class);
         mProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mLocationController = Dependency.get(LocationController.class);
 
         mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
@@ -160,7 +167,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mSlotRotate = context.getString(com.android.internal.R.string.status_bar_rotate);
         mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
         mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
-
+        mSlotLocation = context.getString(com.android.internal.R.string.status_bar_location);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -229,6 +236,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mNextAlarm.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
         mKeyguardMonitor.addCallback(this);
+        mLocationController.addCallback(this);
 
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallbacks(this);
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskListener);
@@ -252,6 +260,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mNextAlarm.removeCallback(mNextAlarmCallback);
         mDataSaver.removeCallback(this);
         mKeyguardMonitor.removeCallback(this);
+        mLocationController.removeCallback(this);
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
         mContext.unregisterReceiver(mIntentReceiver);
 
@@ -263,6 +272,21 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     @Override
     public void onZenChanged(int zen) {
         updateVolumeZen();
+    }
+
+    @Override
+    public void onLocationActiveChanged(boolean active) {
+        updateLocation();
+    }
+
+    // Updates the status view based on the current state of location requests.
+    private void updateLocation() {
+        if (mLocationController.isLocationActive()) {
+            mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
+                    mContext.getString(R.string.accessibility_location_active));
+        } else {
+            mIconController.removeIcon(mSlotLocation);
+        }
     }
 
     private void updateAlarm() {

@@ -22,7 +22,6 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -32,7 +31,7 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
+import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
@@ -132,7 +131,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         }
     }
 
-    private final class Callback implements LocationSettingsChangeCallback,
+    private final class Callback implements LocationChangeCallback,
             KeyguardMonitor.Callback {
         @Override
         public void onLocationSettingsChanged(boolean enabled) {
