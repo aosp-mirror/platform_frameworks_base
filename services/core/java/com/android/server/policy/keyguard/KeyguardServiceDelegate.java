@@ -427,6 +427,12 @@ public class KeyguardServiceDelegate {
         }
     }
 
+    public void onShortPowerPressedGoHome() {
+        if (mKeyguardService != null) {
+            mKeyguardService.onShortPowerPressedGoHome();
+        }
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + TAG);
         prefix += "  ";

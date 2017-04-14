@@ -98,4 +98,10 @@ oneway interface IKeyguardService {
      * to start the keyguard dismiss sequence.
      */
     void onActivityDrawn();
+
+    /**
+     * Notifies the Keyguard that the power key was pressed while locked and launched Home rather
+     * than putting the device to sleep or waking up.
+     */
+    void onShortPowerPressedGoHome();
 }

@@ -1943,6 +1943,10 @@ public class KeyguardViewMediator extends SystemUI {
         mHandler.sendEmptyMessage(ON_ACTIVITY_DRAWN);
     }
 
+    public void onShortPowerPressedGoHome() {
+        // do nothing
+    }
+
     public ViewMediatorCallback getViewMediatorCallback() {
         return mViewMediatorCallback;
     }
