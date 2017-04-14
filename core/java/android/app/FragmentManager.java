@@ -1243,7 +1243,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                                     + f
                                                     + " for a container view with no id"));
                                 }
-                                container = (ViewGroup) mContainer.onFindViewById(f.mContainerId);
+                                container = mContainer.onFindViewById(f.mContainerId);
                                 if (container == null && !f.mRestored) {
                                     String resName;
                                     try {
