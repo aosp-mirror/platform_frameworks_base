@@ -180,7 +180,9 @@ public final class BitmapRegionDecoder {
      *         decoded.
      * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
      *         is {@link android.graphics.Bitmap.Config#HARDWARE}
-     *         and {@link BitmapFactory.Options#inMutable} is set.
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public Bitmap decodeRegion(Rect rect, BitmapFactory.Options options) {
         BitmapFactory.Options.validate(options);

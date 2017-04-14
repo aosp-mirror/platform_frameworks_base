@@ -44,14 +44,6 @@ static jmethodID gBitmap_constructorMethodID;
 static jmethodID gBitmap_reinitMethodID;
 static jmethodID gBitmap_getAllocationByteCountMethodID;
 
-static jfieldID gTransferParams_aFieldID;
-static jfieldID gTransferParams_bFieldID;
-static jfieldID gTransferParams_cFieldID;
-static jfieldID gTransferParams_dFieldID;
-static jfieldID gTransferParams_eFieldID;
-static jfieldID gTransferParams_fFieldID;
-static jfieldID gTransferParams_gFieldID;
-
 namespace android {
 
 class BitmapWrapper {
@@ -742,28 +734,8 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     if (colorType != kN32_SkColorType || xyzD50 == nullptr || transferParameters == nullptr) {
         colorSpace = GraphicsJNI::colorSpaceForType(colorType);
     } else {
-        SkColorSpaceTransferFn p;
-        p.fA = (float) env->GetDoubleField(transferParameters, gTransferParams_aFieldID);
-        p.fB = (float) env->GetDoubleField(transferParameters, gTransferParams_bFieldID);
-        p.fC = (float) env->GetDoubleField(transferParameters, gTransferParams_cFieldID);
-        p.fD = (float) env->GetDoubleField(transferParameters, gTransferParams_dFieldID);
-        p.fE = (float) env->GetDoubleField(transferParameters, gTransferParams_eFieldID);
-        p.fF = (float) env->GetDoubleField(transferParameters, gTransferParams_fFieldID);
-        p.fG = (float) env->GetDoubleField(transferParameters, gTransferParams_gFieldID);
-
-        SkMatrix44 xyzMatrix(SkMatrix44::kIdentity_Constructor);
-        jfloat* array = env->GetFloatArrayElements(xyzD50, NULL);
-        xyzMatrix.setFloat(0, 0, array[0]);
-        xyzMatrix.setFloat(1, 0, array[1]);
-        xyzMatrix.setFloat(2, 0, array[2]);
-        xyzMatrix.setFloat(0, 1, array[3]);
-        xyzMatrix.setFloat(1, 1, array[4]);
-        xyzMatrix.setFloat(2, 1, array[5]);
-        xyzMatrix.setFloat(0, 2, array[6]);
-        xyzMatrix.setFloat(1, 2, array[7]);
-        xyzMatrix.setFloat(2, 2, array[8]);
-        env->ReleaseFloatArrayElements(xyzD50, array, 0);
-
+        SkColorSpaceTransferFn p = GraphicsJNI::getNativeTransferParameters(env, transferParameters);
+        SkMatrix44 xyzMatrix = GraphicsJNI::getNativeXYZMatrix(env, xyzD50);
         colorSpace = SkColorSpace::MakeRGB(p, xyzMatrix);
     }
 
@@ -1635,20 +1607,6 @@ static void Bitmap_copyColorSpace(JNIEnv* env, jobject, jlong srcBitmapPtr, jlon
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static jclass make_globalref(JNIEnv* env, const char classname[])
-{
-    jclass c = env->FindClass(classname);
-    SkASSERT(c);
-    return (jclass) env->NewGlobalRef(c);
-}
-
-static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
-                                const char fieldname[], const char type[])
-{
-    jfieldID id = env->GetFieldID(clazz, fieldname, type);
-    SkASSERT(id);
-    return id;
-}
 
 static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCreate",             "([IIIIIIZ[FLandroid/graphics/ColorSpace$Rgb$TransferParameters;)Landroid/graphics/Bitmap;",
@@ -1706,20 +1664,11 @@ static const JNINativeMethod gBitmapMethods[] = {
 
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
-    jclass transfer_params_class = FindClassOrDie(env, "android/graphics/ColorSpace$Rgb$TransferParameters");
-    gTransferParams_aFieldID = GetFieldIDOrDie(env, transfer_params_class, "a", "D");
-    gTransferParams_bFieldID = GetFieldIDOrDie(env, transfer_params_class, "b", "D");
-    gTransferParams_cFieldID = GetFieldIDOrDie(env, transfer_params_class, "c", "D");
-    gTransferParams_dFieldID = GetFieldIDOrDie(env, transfer_params_class, "d", "D");
-    gTransferParams_eFieldID = GetFieldIDOrDie(env, transfer_params_class, "e", "D");
-    gTransferParams_fFieldID = GetFieldIDOrDie(env, transfer_params_class, "f", "D");
-    gTransferParams_gFieldID = GetFieldIDOrDie(env, transfer_params_class, "g", "D");
-
-    gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
-    gBitmap_nativePtr = getFieldIDCheck(env, gBitmap_class, "mNativePtr", "J");
-    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(JIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
-    gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "(IIZ)V");
-    gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");
+    gBitmap_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Bitmap"));
+    gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
+    gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
+    gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
+    gBitmap_getAllocationByteCountMethodID = GetMethodIDOrDie(env, gBitmap_class, "getAllocationByteCount", "()I");
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));
 }
