@@ -563,6 +563,9 @@ public class Typeface {
         /**
          * Constructs a builder with a file descriptor.
          *
+         * Caller is responsible for closing the passed file descriptor after {@link #build} is
+         * called.
+         *
          * @param fd The file descriptor. The passed fd must be mmap-able.
          */
         public Builder(@NonNull FileDescriptor fd) {
