@@ -195,6 +195,7 @@ public class PipMenuActivity extends Activity {
 
         updateFromIntent(getIntent());
         setTitle(R.string.pip_menu_title);
+        setDisablePreviewScreenshots(true);
     }
 
     @Override
