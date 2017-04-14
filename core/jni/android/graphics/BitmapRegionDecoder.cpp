@@ -132,11 +132,14 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     bool requireUnpremul = false;
     jobject javaBitmap = NULL;
     bool isHardware = false;
+    sk_sp<SkColorSpace> colorSpace = nullptr;
     // Update the default options with any options supplied by the client.
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         colorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
+        jobject jcolorSpace = env->GetObjectField(options, gOptions_colorSpaceFieldID);
+        colorSpace = GraphicsJNI::getNativeColorSpace(env, jcolorSpace);
         isHardware = GraphicsJNI::isHardwareConfig(env, jconfig);
         requireUnpremul = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
@@ -148,7 +151,15 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         env->SetIntField(options, gOptions_widthFieldID, -1);
         env->SetIntField(options, gOptions_heightFieldID, -1);
         env->SetObjectField(options, gOptions_mimeFieldID, 0);
+        env->SetObjectField(options, gOptions_outConfigFieldID, 0);
+        env->SetObjectField(options, gOptions_outColorSpaceFieldID, 0);
     }
+
+    SkBitmapRegionDecoder* brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+
+    SkColorType decodeColorType = brd->computeOutputColorType(colorType);
+    sk_sp<SkColorSpace> decodeColorSpace = brd->computeOutputColorSpace(
+            decodeColorType, colorSpace);
 
     // Recycle a bitmap if possible.
     android::Bitmap* recycledBitmap = nullptr;
@@ -168,17 +179,16 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     if (javaBitmap) {
         allocator = &recycleAlloc;
         // We are required to match the color type of the recycled bitmap.
-        colorType = recycledBitmap->info().colorType();
+        decodeColorType = recycledBitmap->info().colorType();
     } else {
         allocator = &heapAlloc;
     }
 
     // Decode the region.
     SkIRect subset = SkIRect::MakeXYWH(inputX, inputY, inputWidth, inputHeight);
-    SkBitmapRegionDecoder* brd =
-            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     SkBitmap bitmap;
-    if (!brd->decodeRegion(&bitmap, allocator, subset, sampleSize, colorType, requireUnpremul)) {
+    if (!brd->decodeRegion(&bitmap, allocator, subset, sampleSize,
+            decodeColorType, requireUnpremul, decodeColorSpace)) {
         return nullObjectReturn("Failed to decode region.");
     }
 
@@ -186,11 +196,23 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     if (NULL != options) {
         env->SetIntField(options, gOptions_widthFieldID, bitmap.width());
         env->SetIntField(options, gOptions_heightFieldID, bitmap.height());
+
         env->SetObjectField(options, gOptions_mimeFieldID,
                 encodedFormatToString(env, (SkEncodedImageFormat)brd->getEncodedFormat()));
         if (env->ExceptionCheck()) {
             return nullObjectReturn("OOM in encodedFormatToString()");
         }
+
+        jint configID = GraphicsJNI::colorTypeToLegacyBitmapConfig(decodeColorType);
+        if (isHardware) {
+            configID = GraphicsJNI::kHardware_LegacyBitmapConfig;
+        }
+        jobject config = env->CallStaticObjectMethod(gBitmapConfig_class,
+                gBitmapConfig_nativeToConfigMethodID, configID);
+        env->SetObjectField(options, gOptions_outConfigFieldID, config);
+
+        env->SetObjectField(options, gOptions_outColorSpaceFieldID,
+                GraphicsJNI::getColorSpace(env, decodeColorSpace, decodeColorType));
     }
 
     // If we may have reused a bitmap, we need to indicate that the pixels have changed.
