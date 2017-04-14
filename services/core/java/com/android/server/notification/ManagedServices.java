@@ -90,7 +90,7 @@ abstract public class ManagedServices {
 
     // contains connections to all connected services, including app services
     // and system services
-    protected final ArrayList<ManagedServiceInfo> mServices = new ArrayList<ManagedServiceInfo>();
+    private final ArrayList<ManagedServiceInfo> mServices = new ArrayList<ManagedServiceInfo>();
     // things that will be put into mServices as soon as they're ready
     private final ArrayList<String> mServicesBinding = new ArrayList<String>();
     // lists the component names of all enabled (and therefore potentially connected)
