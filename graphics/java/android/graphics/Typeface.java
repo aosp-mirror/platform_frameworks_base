@@ -1135,6 +1135,7 @@ public class Typeface {
             // Treat as system error since reaching here means that a system pre-installed font
             // can't be used by our font stack.
             Log.e(TAG, "Unable to load Family: " + family.getName() + ":" + family.getLanguage());
+            return null;
         }
         return fontFamily;
     }
@@ -1160,7 +1161,10 @@ public class Typeface {
             for (int i = 0; i < fontConfig.getFamilies().length; i++) {
                 FontConfig.Family f = fontConfig.getFamilies()[i];
                 if (i == 0 || f.getName() == null) {
-                    familyList.add(makeFamilyFromParsed(f, bufferForPath));
+                    FontFamily family = makeFamilyFromParsed(f, bufferForPath);
+                    if (family != null) {
+                        familyList.add(family);
+                    }
                 }
             }
             sFallbackFonts = familyList.toArray(new FontFamily[familyList.size()]);
@@ -1177,6 +1181,9 @@ public class Typeface {
                         typeface = sDefaultTypeface;
                     } else {
                         FontFamily fontFamily = makeFamilyFromParsed(f, bufferForPath);
+                        if (fontFamily == null) {
+                            continue;
+                        }
                         FontFamily[] families = { fontFamily };
                         typeface = Typeface.createFromFamiliesWithDefault(families,
                                 RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
