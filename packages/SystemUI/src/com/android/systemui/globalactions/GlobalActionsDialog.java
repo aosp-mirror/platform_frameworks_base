@@ -339,6 +339,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     long id) {
                 final Action action = mAdapter.getItem(position);
                 if (action instanceof LongPressAction) {
+                    mDialog.dismiss();
                     return ((LongPressAction) action).onLongPress();
                 }
                 return false;
