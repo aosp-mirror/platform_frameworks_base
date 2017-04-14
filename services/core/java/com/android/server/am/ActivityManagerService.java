@@ -10534,8 +10534,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (stackId == PINNED_STACK_ID) {
                         final PinnedActivityStack pinnedStack =
                                 mStackSupervisor.getStack(PINNED_STACK_ID);
-                        pinnedStack.animateResizePinnedStack(null /* sourceBounds */, destBounds,
-                                animationDuration);
+                        if (pinnedStack != null) {
+                            pinnedStack.animateResizePinnedStack(null /* sourceBounds */,
+                                    destBounds, animationDuration);
+                        }
                     } else {
                         throw new IllegalArgumentException("Stack: " + stackId
                                 + " doesn't support animated resize.");
