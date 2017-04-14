@@ -4761,8 +4761,19 @@ public class Intent implements Parcelable, Cloneable {
     /** {@hide} */
     public static final String EXTRA_REASON = "android.intent.extra.REASON";
 
-    /** {@hide} */
+    /**
+     * {@hide}
+     * This extra will be send together with {@link #ACTION_FACTORY_RESET}
+     */
     public static final String EXTRA_WIPE_EXTERNAL_STORAGE = "android.intent.extra.WIPE_EXTERNAL_STORAGE";
+
+    /**
+     * {@hide}
+     * This extra will be set to true when the user choose to wipe the data on eSIM during factory
+     * reset for the device with eSIM. This extra will be sent together with
+     * {@link #ACTION_FACTORY_RESET}
+     */
+    public static final String EXTRA_WIPE_ESIMS = "com.android.internal.intent.extra.WIPE_ESIMS";
 
     /**
      * Optional {@link android.app.PendingIntent} extra used to deliver the result of the SIM
