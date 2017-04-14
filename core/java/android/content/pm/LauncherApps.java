@@ -52,6 +52,8 @@ import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -622,11 +624,20 @@ public class LauncherApps {
      *         null if the package isn't installed for the given user, or the target user
      *         is not enabled.
      */
-    public ApplicationInfo getApplicationInfo(String packageName, @ApplicationInfoFlags int flags,
-            UserHandle user) {
+    public ApplicationInfo getApplicationInfo(@NonNull String packageName,
+            @ApplicationInfoFlags int flags, @NonNull UserHandle user)
+            throws PackageManager.NameNotFoundException {
+        Preconditions.checkNotNull(packageName, "packageName");
+        Preconditions.checkNotNull(packageName, "user");
         logErrorForInvalidProfileAccess(user);
         try {
-            return mService.getApplicationInfo(mContext.getPackageName(), packageName, flags, user);
+            final ApplicationInfo ai = mService
+                    .getApplicationInfo(mContext.getPackageName(), packageName, flags, user);
+            if (ai == null) {
+                throw new NameNotFoundException("Package " + packageName + " not found for user "
+                        + user.getIdentifier());
+            }
+            return ai;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
