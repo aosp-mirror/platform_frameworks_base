@@ -100,8 +100,8 @@ public final class BluetoothMidiDevice {
                 int newState) {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.i(TAG, "Connected to GATT server.");
-                Log.i(TAG, "Attempting to start service discovery:" +
+                Log.d(TAG, "Connected to GATT server.");
+                Log.d(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Disconnected from GATT server.");
@@ -112,24 +112,24 @@ public final class BluetoothMidiDevice {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                List<BluetoothGattService> services = mBluetoothGatt.getServices();
-                for (BluetoothGattService service : services) {
-                    if (MIDI_SERVICE.equals(service.getUuid())) {
-                        Log.d(TAG, "found MIDI_SERVICE");
-                        List<BluetoothGattCharacteristic> characteristics
-                            = service.getCharacteristics();
-                        for (BluetoothGattCharacteristic characteristic : characteristics) {
-                            if (MIDI_CHARACTERISTIC.equals(characteristic.getUuid())) {
-                                Log.d(TAG, "found MIDI_CHARACTERISTIC");
-                                mCharacteristic = characteristic;
+                BluetoothGattService service = gatt.getService(MIDI_SERVICE);
+                if (service != null) {
+                    Log.d(TAG, "found MIDI_SERVICE");
+                    BluetoothGattCharacteristic characteristic
+                            = service.getCharacteristic(MIDI_CHARACTERISTIC);
+                    if (characteristic != null) {
+                        Log.d(TAG, "found MIDI_CHARACTERISTIC");
+                        mCharacteristic = characteristic;
 
-                                // Specification says to read the characteristic first and then
-                                // switch to receiving notifications
-                                mBluetoothGatt.readCharacteristic(characteristic);
-                                break;
-                            }
-                        }
-                        break;
+                        // Request a lower Connection Interval for better latency.
+                        boolean result = gatt.requestConnectionPriority(
+                                BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+                        Log.d(TAG, "requestConnectionPriority(CONNECTION_PRIORITY_HIGH):"
+                            + result);
+
+                        // Specification says to read the characteristic first and then
+                        // switch to receiving notifications
+                        mBluetoothGatt.readCharacteristic(characteristic);
                     }
                 }
             } else {
