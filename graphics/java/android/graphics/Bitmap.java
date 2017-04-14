@@ -916,9 +916,8 @@ public final class Bitmap implements Parcelable {
      * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
      *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
-     * @param colorSpace The color space of the bitmap. If null,
-     *                   {@link ColorSpace.Named#SRGB sRGB} is assumed. This argument is
-     *                   ignored if the config is not {@link Config#ARGB_8888}.
+     * @param colorSpace The color space of the bitmap. If null or if the config is not
+     *                   {@link Config#ARGB_8888}, {@link ColorSpace.Named#SRGB sRGB} is assumed.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, if
      *         Config is Config.HARDWARE (because hardware bitmaps are always
@@ -968,9 +967,8 @@ public final class Bitmap implements Parcelable {
      * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
      *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
-     * @param colorSpace The color space of the bitmap. If null,
-     *                   {@link ColorSpace.Named#SRGB sRGB} is assumed. This argument is
-     *                   ignored if the config is not {@link Config#ARGB_8888}.
+     * @param colorSpace The color space of the bitmap. If null or if the config is not
+     *                   {@link Config#ARGB_8888}, {@link ColorSpace.Named#SRGB sRGB} is assumed.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, if
      *         Config is Config.HARDWARE (because hardware bitmaps are always
