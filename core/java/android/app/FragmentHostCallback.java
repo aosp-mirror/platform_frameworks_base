@@ -207,7 +207,7 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
 
     @Nullable
     @Override
-    public View onFindViewById(int id) {
+    public <T extends View> T onFindViewById(int id) {
         return null;
     }
 

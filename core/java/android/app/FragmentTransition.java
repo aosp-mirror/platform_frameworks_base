@@ -193,7 +193,7 @@ class FragmentTransition {
             View nonExistentView, ArrayMap<String, String> nameOverrides) {
         ViewGroup sceneRoot = null;
         if (fragmentManager.mContainer.onHasView()) {
-            sceneRoot = (ViewGroup) fragmentManager.mContainer.onFindViewById(containerId);
+            sceneRoot = fragmentManager.mContainer.onFindViewById(containerId);
         }
         if (sceneRoot == null) {
             return;
@@ -265,7 +265,7 @@ class FragmentTransition {
             View nonExistentView, ArrayMap<String, String> nameOverrides) {
         ViewGroup sceneRoot = null;
         if (fragmentManager.mContainer.onHasView()) {
-            sceneRoot = (ViewGroup) fragmentManager.mContainer.onFindViewById(containerId);
+            sceneRoot = fragmentManager.mContainer.onFindViewById(containerId);
         }
         if (sceneRoot == null) {
             return;

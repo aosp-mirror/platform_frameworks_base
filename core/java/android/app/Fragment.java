@@ -2527,7 +2527,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         mChildFragmentManager.attachController(mHost, new FragmentContainer() {
             @Override
             @Nullable
-            public View onFindViewById(int id) {
+            public <T extends View> T onFindViewById(int id) {
                 if (mView == null) {
                     throw new IllegalStateException("Fragment does not have a view");
                 }
