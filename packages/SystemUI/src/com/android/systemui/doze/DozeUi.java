@@ -20,6 +20,8 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.text.format.Formatter;
+import android.util.Log;
 
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -31,6 +33,7 @@ import java.util.GregorianCalendar;
  */
 public class DozeUi implements DozeMachine.Part {
 
+    private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
     private final Context mContext;
     private final AlarmManager mAlarmManager;
     private final DozeHost mHost;
@@ -40,6 +43,7 @@ public class DozeUi implements DozeMachine.Part {
     private final AlarmManager.OnAlarmListener mTimeTick;
 
     private boolean mTimeTickScheduled = false;
+    private long mLastTimeTickElapsed = 0;
 
     public DozeUi(Context context, AlarmManager alarmManager, DozeMachine machine,
             WakeLock wakeLock, DozeHost host, Handler handler) {
@@ -100,13 +104,24 @@ public class DozeUi implements DozeMachine.Part {
                 SystemClock.elapsedRealtime() + delta, "doze_time_tick", mTimeTick, mHandler);
 
         mTimeTickScheduled = true;
+        mLastTimeTickElapsed = SystemClock.elapsedRealtime();
     }
 
     private void unscheduleTimeTick() {
         if (!mTimeTickScheduled) {
             return;
         }
+        verifyLastTimeTick();
         mAlarmManager.cancel(mTimeTick);
+    }
+
+    private void verifyLastTimeTick() {
+        long millisSinceLastTick = SystemClock.elapsedRealtime() - mLastTimeTickElapsed;
+        if (millisSinceLastTick > TIME_TICK_DEADLINE_MILLIS) {
+            String delay = Formatter.formatShortElapsedTime(mContext, millisSinceLastTick);
+            DozeLog.traceMissedTick(delay);
+            Log.e(DozeMachine.TAG, "Missed AOD time tick by " + delay);
+        }
     }
 
     private long roundToNextMinute(long timeInMillis) {
@@ -124,6 +139,7 @@ public class DozeUi implements DozeMachine.Part {
             // Alarm was canceled, but we still got the callback. Ignore.
             return;
         }
+        verifyLastTimeTick();
 
         mHost.dozeTimeTick();
 
