@@ -32,15 +32,9 @@ import java.io.PrintWriter;
  */
 final class ActivityManagerConstants extends ContentObserver {
     // Key names stored in the settings value.
-    private static final String KEY_ENFORCE_BG_CHECK = "enforce_bg_check";
     private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
 
-    private static final boolean DEFAULT_ENFORCE_BG_CHECK = SystemProperties.getBoolean(
-            "debug.bgcheck", true);
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
-
-    // Enforce background check on apps targeting O?
-    public boolean ENFORCE_BG_CHECK = DEFAULT_ENFORCE_BG_CHECK;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -115,7 +109,6 @@ final class ActivityManagerConstants extends ContentObserver {
                 // with defaults.
                 Slog.e("ActivityManagerConstants", "Bad activity manager config settings", e);
             }
-            ENFORCE_BG_CHECK = mParser.getBoolean(KEY_ENFORCE_BG_CHECK, DEFAULT_ENFORCE_BG_CHECK);
             MAX_CACHED_PROCESSES = mParser.getInt(KEY_MAX_CACHED_PROCESSES,
                     DEFAULT_MAX_CACHED_PROCESSES);
             updateMaxCachedProcesses();
@@ -138,9 +131,6 @@ final class ActivityManagerConstants extends ContentObserver {
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
                 + Settings.Global.ACTIVITY_MANAGER_CONSTANTS + ":");
-
-        pw.print("  "); pw.print(KEY_ENFORCE_BG_CHECK); pw.print("=");
-        pw.println(ENFORCE_BG_CHECK);
 
         pw.print("  "); pw.print(KEY_MAX_CACHED_PROCESSES); pw.print("=");
         pw.println(MAX_CACHED_PROCESSES);
