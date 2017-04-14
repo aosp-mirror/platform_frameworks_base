@@ -658,7 +658,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
             // Must reparent first in window manager to avoid a situation where AM can delete the
             // we are coming from in WM before we reparent because it became empty.
-            mWindowContainerController.reparent(toStack.getWindowContainerController(), position);
+            mWindowContainerController.reparent(toStack.getWindowContainerController(), position,
+                    moveStackMode == REPARENT_MOVE_STACK_TO_FRONT);
 
             // Move the task
             sourceStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);
