@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Read platform logs.
@@ -80,7 +81,7 @@ public class MetricsReader {
         mPendingQueue.clear();
         mSeenQueue.clear();
         for (Event event : nativeEvents) {
-            final long eventTimestampMs = event.getTimeNanos() / 1000000;
+            final long eventTimestampMs = event.getTimeMillis();
             Object data = event.getData();
             Object[] objects;
             if (data instanceof Object[]) {
@@ -152,24 +153,25 @@ public class MetricsReader {
      */
     @VisibleForTesting
     public static class Event {
-        long mTimeNanos;
+        long mTimeMillis;
         int mPid;
         Object mData;
 
-        public Event(long timeNanos, int pid, Object data) {
-            mTimeNanos = timeNanos;
+        public Event(long timeMillis, int pid, Object data) {
+            mTimeMillis = timeMillis;
             mPid = pid;
             mData = data;
         }
 
         Event(EventLog.Event nativeEvent) {
-            mTimeNanos = nativeEvent.getTimeNanos();
+            mTimeMillis = TimeUnit.MILLISECONDS.convert(
+                    nativeEvent.getTimeNanos(), TimeUnit.NANOSECONDS);
             mPid = nativeEvent.getProcessId();
             mData = nativeEvent.getData();
         }
 
-        public long getTimeNanos() {
-            return mTimeNanos;
+        public long getTimeMillis() {
+            return mTimeMillis;
         }
 
         public int getProcessId() {
@@ -196,7 +198,8 @@ public class MetricsReader {
                 throws IOException {
             // Testing in Android: the Static Final Class Strikes Back!
             ArrayList<EventLog.Event> nativeEvents = new ArrayList<>();
-            EventLog.readEventsOnWrapping(tags, horizonMs, nativeEvents);
+            long horizonNs = TimeUnit.NANOSECONDS.convert(horizonMs, TimeUnit.MILLISECONDS);
+            EventLog.readEventsOnWrapping(tags, horizonNs, nativeEvents);
             for (EventLog.Event nativeEvent : nativeEvents) {
                 Event event = new Event(nativeEvent);
                 events.add(event);
