@@ -117,6 +117,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @Captor private ArgumentCaptor<Bundle> mBundleCaptor;
     private int mVisibleAccountsChangedBroadcasts;
     private int mLoginAccountsChangedBroadcasts;
+    private int mAccountRemovedBroadcasts;
 
     private static final int LATCH_TIMEOUT_MS = 500;
     private static final String PREN_DB = "pren.db";
@@ -2510,6 +2511,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         updateBroadcastCounters(2);
         assertEquals(mVisibleAccountsChangedBroadcasts, 0); // broadcast was not sent
         assertEquals(mLoginAccountsChangedBroadcasts, 2);
+        assertEquals(mAccountRemovedBroadcasts, 0);
     }
 
     @SmallTest
@@ -2533,9 +2535,10 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mAms.registerAccountListener( null /* accountTypes */, "testpackage");
         mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE);
 
-        updateBroadcastCounters(6);
+        updateBroadcastCounters(8);
         assertEquals(mVisibleAccountsChangedBroadcasts, 2);
         assertEquals(mLoginAccountsChangedBroadcasts, 4);
+        assertEquals(mAccountRemovedBroadcasts, 2);
     }
 
     @SmallTest
@@ -2560,17 +2563,19 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             "testpackage3"); // opPackageName
         // Remove account with 2 active listeners.
         mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS);
-        updateBroadcastCounters(7);
+        updateBroadcastCounters(8);
         assertEquals(mVisibleAccountsChangedBroadcasts, 5);
         assertEquals(mLoginAccountsChangedBroadcasts, 2); // 3 add, 2 remove
+        assertEquals(mAccountRemovedBroadcasts, 1);
 
         // Add account of another type.
         mAms.addAccountExplicitly(
             AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS_TYPE_2, "p11", null);
 
-        updateBroadcastCounters(8);
+        updateBroadcastCounters(9);
         assertEquals(mVisibleAccountsChangedBroadcasts, 5);
         assertEquals(mLoginAccountsChangedBroadcasts, 3);
+        assertEquals(mAccountRemovedBroadcasts, 1);
     }
 
     @SmallTest
@@ -2602,15 +2607,19 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     private void updateBroadcastCounters (int expectedBroadcasts){
         mVisibleAccountsChangedBroadcasts = 0;
         mLoginAccountsChangedBroadcasts = 0;
+        mAccountRemovedBroadcasts = 0;
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mMockContext, times(expectedBroadcasts)).sendBroadcastAsUser(captor.capture(),
             any(UserHandle.class));
         for (Intent intent : captor.getAllValues()) {
-            if (AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED. equals(intent.getAction())) {
+            if (AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED.equals(intent.getAction())) {
                 mVisibleAccountsChangedBroadcasts++;
             }
-            if (AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION. equals(intent.getAction())) {
+            if (AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION.equals(intent.getAction())) {
                 mLoginAccountsChangedBroadcasts++;
+            }
+            if (AccountManager.ACTION_ACCOUNT_REMOVED.equals(intent.getAction())) {
+                mAccountRemovedBroadcasts++;
             }
         }
     }

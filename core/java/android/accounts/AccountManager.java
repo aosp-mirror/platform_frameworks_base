@@ -335,6 +335,7 @@ public class AccountManager {
      * are removed, or an account's credentials (saved password, etc) are changed.
      *
      * @see #addOnAccountsUpdatedListener
+     * @see #ACTION_ACCOUNT_REMOVED
      *
      * @deprecated use {@link #addOnAccountsUpdatedListener} to get account updates in runtime.
      */
@@ -342,6 +343,14 @@ public class AccountManager {
     @BroadcastBehavior(includeBackground = true)
     public static final String LOGIN_ACCOUNTS_CHANGED_ACTION =
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
+
+    /**
+     * Action sent as a broadcast Intent by the AccountsService when any account is removed.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(includeBackground = true)
+    public static final String ACTION_ACCOUNT_REMOVED =
+        "android.accounts.action.ACCOUNT_REMOVED";
 
     /**
      * Action sent as a broadcast Intent to specific package by the AccountsService
