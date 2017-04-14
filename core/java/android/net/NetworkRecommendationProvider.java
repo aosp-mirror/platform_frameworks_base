@@ -83,10 +83,7 @@ public abstract class NetworkRecommendationProvider {
      *                 {@link ResultCallback#onResult(RecommendationResult)}.
      * @deprecated to be removed.
      */
-    public void onRequestRecommendation(RecommendationRequest request,
-            ResultCallback callback) {
-        callback.onResult(RecommendationResult.createDoNotConnectRecommendation());
-    }
+    public void onRequestRecommendation(RecommendationRequest request, ResultCallback callback) {}
 
     /**
      * Invoked when network scores have been requested.
@@ -182,23 +179,6 @@ public abstract class NetworkRecommendationProvider {
             mContext = context;
             mExecutor = executor;
             mHandler = null;
-        }
-
-        @Override
-        public void requestRecommendation(final RecommendationRequest request,
-                final IRemoteCallback callback, final int sequence) throws RemoteException {
-            enforceCallingPermission();
-            if (VERBOSE) Log.v(TAG, "requestRecommendation(seq=" + sequence + ")");
-            execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (VERBOSE) {
-                        Log.v(TAG, "requestRecommendation(seq=" + sequence + ") running...");
-                    }
-                    ResultCallback resultCallback = new ResultCallback(callback, sequence);
-                    onRequestRecommendation(request, resultCallback);
-                }
-            });
         }
 
         @Override
