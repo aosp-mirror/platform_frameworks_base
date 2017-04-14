@@ -50,6 +50,8 @@ public abstract class ScanCallback {
      */
     public static final int SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES = 5;
 
+    static final int NO_ERROR = 0;
+
     /**
      * Callback when a BLE advertisement has been found.
      *
