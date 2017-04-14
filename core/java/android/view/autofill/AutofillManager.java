@@ -1068,5 +1068,19 @@ public final class AutofillManager {
                 });
             }
         }
+
+        @Override
+        public void startIntentSender(IntentSender intentSender) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.mContext.getMainThreadHandler().post(() -> {
+                    try {
+                        afm.mContext.startIntentSender(intentSender, null, 0, 0, 0);
+                    } catch (IntentSender.SendIntentException e) {
+                        Log.e(TAG, "startIntentSender() failed for intent:" + intentSender, e);
+                    }
+                });
+            }
+        }
     }
 }
