@@ -121,7 +121,7 @@ public class TaskWindowContainerController
         }
     }
 
-    public void reparent(StackWindowController stackController, int position) {
+    public void reparent(StackWindowController stackController, int position, boolean moveParents) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "reparent: moving taskId=" + mTaskId
                     + " to stack=" + stackController + " at " + position);
@@ -135,7 +135,7 @@ public class TaskWindowContainerController
                 throw new IllegalArgumentException("reparent: could not find stack="
                         + stackController);
             }
-            mContainer.reparent(stack, position);
+            mContainer.reparent(stack, position, moveParents);
             mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
         }
     }
