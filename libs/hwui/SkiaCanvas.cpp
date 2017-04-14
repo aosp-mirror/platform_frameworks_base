@@ -60,7 +60,8 @@ SkiaCanvas::SkiaCanvas(SkCanvas* canvas, XformToSRGB xformToSRGB)
 
 SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
     sk_sp<SkColorSpace> cs = bitmap.refColorSpace();
-    mCanvasOwned = std::unique_ptr<SkCanvas>(new SkCanvas(bitmap));
+    mCanvasOwned =
+            std::unique_ptr<SkCanvas>(new SkCanvas(bitmap, SkCanvas::ColorBehavior::kLegacy));
     mCanvasWrapper = SkCreateColorSpaceXformCanvas(mCanvasOwned.get(),
             cs == nullptr ? SkColorSpace::MakeSRGB() : std::move(cs));
     mCanvas = mCanvasWrapper.get();
@@ -83,7 +84,8 @@ void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
 
 void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
     sk_sp<SkColorSpace> cs = bitmap.refColorSpace();
-    std::unique_ptr<SkCanvas> newCanvas = std::unique_ptr<SkCanvas>(new SkCanvas(bitmap));
+    std::unique_ptr<SkCanvas> newCanvas =
+            std::unique_ptr<SkCanvas>(new SkCanvas(bitmap, SkCanvas::ColorBehavior::kLegacy));
     std::unique_ptr<SkCanvas> newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(),
             cs == nullptr ? SkColorSpace::MakeSRGB() : std::move(cs));
 
