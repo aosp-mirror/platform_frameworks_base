@@ -43,7 +43,6 @@ public class BitmapFactory {
          * the same result from the decoder as if null were passed.
          */
         public Options() {
-            inDither = false;
             inScaled = true;
             inPremultiplied = true;
         }
@@ -114,8 +113,8 @@ public class BitmapFactory {
 
         /**
          * If set to true, the decoder will return null (no bitmap), but
-         * the out... fields will still be set, allowing the caller to query
-         * the bitmap without having to allocate the memory for its pixels.
+         * the <code>out...</code> fields will still be set, allowing the caller to
+         * query the bitmap without having to allocate the memory for its pixels.
          */
         public boolean inJustDecodeBounds;
 
@@ -142,6 +141,35 @@ public class BitmapFactory {
          * default.
          */
         public Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+        /**
+         * <p>If this is non-null, the decoder will try to decode into this
+         * color space. If it is null, or the request cannot be met,
+         * the decoder will pick either the color space embedded in the image
+         * or the color space best suited for the requested image configuration
+         * (for instance {@link ColorSpace.Named#SRGB sRGB} for
+         * the {@link Bitmap.Config#ARGB_8888} configuration).</p>
+         *
+         * <p>{@link Bitmap.Config#RGBA_F16} always uses the
+         * {@link ColorSpace.Named#LINEAR_EXTENDED_SRGB scRGB} color space).
+         * Bitmaps in other configurations without an embedded color space are
+         * assumed to be in the {@link ColorSpace.Named#SRGB sRGB} color space.</p>
+         *
+         * <p class="note">Only {@link ColorSpace.Model#RGB} color spaces are
+         * currently supported. An <code>IllegalArgumentException</code> will
+         * be thrown by the decode methods when setting a non-RGB color space
+         * such as {@link ColorSpace.Named#CIE_LAB Lab}.</p>
+         *
+         * <p class="note">The specified color space's transfer function must be
+         * an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}. An
+         * <code>IllegalArgumentException</code> will be thrown by the decode methods
+         * if calling {@link ColorSpace.Rgb#getTransferParameters()} on the
+         * specified color space returns null.</p>
+         *
+         * <p>After decode, the bitmap's color space is stored in
+         * {@link #outColorSpace}.</p>
+         */
+        public ColorSpace inPreferredColorSpace = null;
 
         /**
          * If true (which is the default), the resulting bitmap will have its
@@ -403,8 +431,21 @@ public class BitmapFactory {
         }
 
         static void validate(Options opts) {
-            if (opts != null && opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
+            if (opts == null) return;
+
+            if (opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
                 throw new IllegalArgumentException("Bitmaps with Config.HARWARE are always immutable");
+            }
+
+            if (opts.inPreferredColorSpace != null) {
+                if (!(opts.inPreferredColorSpace instanceof ColorSpace.Rgb)) {
+                    throw new IllegalArgumentException("The destination color space must use the " +
+                            "RGB color model");
+                }
+                if (((ColorSpace.Rgb) opts.inPreferredColorSpace).getTransferParameters() == null) {
+                    throw new IllegalArgumentException("The destination color space must use an " +
+                            "ICC parametric transfer function");
+                }
             }
         }
     }
@@ -421,7 +462,9 @@ public class BitmapFactory {
      *         size be returned (in opts.outWidth and opts.outHeight)
      * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
      *         is {@link android.graphics.Bitmap.Config#HARDWARE}
-     *         and {@link BitmapFactory.Options#inMutable} is set.
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeFile(String pathName, Options opts) {
         validate(opts);
@@ -463,7 +506,9 @@ public class BitmapFactory {
      * resources, which we pass to be able to scale the bitmap accordingly.
      * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
      *         is {@link android.graphics.Bitmap.Config#HARDWARE}
-     *         and {@link BitmapFactory.Options#inMutable} is set.
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeResourceStream(Resources res, TypedValue value,
             InputStream is, Rect pad, Options opts) {
@@ -501,7 +546,9 @@ public class BitmapFactory {
      *         size be returned (in opts.outWidth and opts.outHeight)
      * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
      *         is {@link android.graphics.Bitmap.Config#HARDWARE}
-     *         and {@link BitmapFactory.Options#inMutable} is set.
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeResource(Resources res, int id, Options opts) {
         validate(opts);
@@ -559,7 +606,9 @@ public class BitmapFactory {
      *         size be returned (in opts.outWidth and opts.outHeight)
      * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
      *         is {@link android.graphics.Bitmap.Config#HARDWARE}
-     *         and {@link BitmapFactory.Options#inMutable} is set.
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeByteArray(byte[] data, int offset, int length, Options opts) {
         if ((offset | length) < 0 || data.length < offset + length) {
@@ -641,7 +690,9 @@ public class BitmapFactory {
      *         size be returned (in opts.outWidth and opts.outHeight)
      * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
      *         is {@link android.graphics.Bitmap.Config#HARDWARE}
-     *         and {@link BitmapFactory.Options#inMutable} is set.
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      *
      * <p class="note">Prior to {@link android.os.Build.VERSION_CODES#KITKAT},
      * if {@link InputStream#markSupported is.markSupported()} returns true,
@@ -720,7 +771,9 @@ public class BitmapFactory {
      * @return the decoded bitmap, or null
      * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
      *         is {@link android.graphics.Bitmap.Config#HARDWARE}
-     *         and {@link BitmapFactory.Options#inMutable} is set.
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
         validate(opts);

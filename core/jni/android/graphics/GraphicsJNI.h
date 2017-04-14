@@ -10,6 +10,7 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkColorSpace.h"
+#include "SkMatrix44.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
 #include <hwui/Bitmap.h>
@@ -112,6 +113,13 @@ public:
     static sk_sp<SkColorSpace> linearColorSpace();
     static sk_sp<SkColorSpace> colorSpaceForType(SkColorType type);
     static bool isColorSpaceSRGB(SkColorSpace* colorSpace);
+
+    static SkColorSpaceTransferFn getNativeTransferParameters(JNIEnv* env, jobject transferParams);
+    static SkMatrix44 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50);
+    static sk_sp<SkColorSpace> getNativeColorSpace(JNIEnv* env, jobject colorSpace);
+
+    static jobject getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColorSpace,
+            SkColorType decodeColorType);
 };
 
 class HeapAllocator : public SkBRDAllocator {
