@@ -135,6 +135,7 @@ public class Preference implements Comparable<Preference> {
     private boolean mDependencyMet = true;
     private boolean mParentDependencyMet = true;
     private boolean mRecycleEnabled = true;
+    private boolean mHasSingleLineTitleAttr;
     private boolean mSingleLineTitle = true;
     private boolean mIconSpaceReserved;
 
@@ -303,6 +304,7 @@ public class Preference implements Comparable<Preference> {
 
                 case com.android.internal.R.styleable.Preference_singleLineTitle:
                     mSingleLineTitle = a.getBoolean(attr, mSingleLineTitle);
+                    mHasSingleLineTitleAttr = true;
                     break;
 
                 case com.android.internal.R.styleable.Preference_iconSpaceReserved:
@@ -609,7 +611,9 @@ public class Preference implements Comparable<Preference> {
             if (!TextUtils.isEmpty(title)) {
                 titleView.setText(title);
                 titleView.setVisibility(View.VISIBLE);
-                titleView.setSingleLine(mSingleLineTitle);
+                if (mHasSingleLineTitleAttr) {
+                    titleView.setSingleLine(mSingleLineTitle);
+                }
             } else {
                 titleView.setVisibility(View.GONE);
             }
