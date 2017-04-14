@@ -205,6 +205,7 @@ public final class Display {
      * </p>
      *
      * @see #getFlags
+     * @hide
      */
     public static final int FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
