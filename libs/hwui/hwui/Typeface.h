@@ -50,7 +50,8 @@ struct ANDROID_API Typeface {
     static Typeface* createWeightAlias(Typeface* src, int baseweight);
 
     static Typeface* createFromFamilies(
-            std::vector<std::shared_ptr<minikin::FontFamily>>&& families);
+            std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
+            int weight, int italic);
 
     static void setDefault(Typeface* face);
 
