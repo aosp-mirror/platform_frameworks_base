@@ -39,14 +39,22 @@
 
 namespace android {
 
-// Resolve the 1..9 weight based on base weight and bold flag
+// This indicates that the passed information should be resolved by OS/2 table.
+// This value must be the same as the android.graphics.Typeface$Builder.RESOLVE_BY_FONT_TABLE.
+constexpr int RESOLVE_BY_FONT_TABLE = -1;
+
+// Resolve the 1..10 weight based on base weight and bold flag
 static void resolveStyle(Typeface* typeface) {
-    int weight = typeface->fBaseWeight / 100;
+    // TODO: Better to use raw base weight value for font selection instead of dividing by 100.
+    int weight = (typeface->fBaseWeight + 50) / 100;
     if (typeface->fSkiaStyle & SkTypeface::kBold) {
         weight += 3;
     }
-    if (weight > 9) {
-        weight = 9;
+    if (weight > 10) {
+        weight = 10;
+    }
+    if (weight < 1) {
+        weight = 1;
     }
     bool italic = (typeface->fSkiaStyle & SkTypeface::kItalic) != 0;
     typeface->fStyle = minikin::FontStyle(weight, italic);
@@ -115,26 +123,50 @@ Typeface* Typeface::createWeightAlias(Typeface* src, int weight) {
 }
 
 Typeface* Typeface::createFromFamilies(
-        std::vector<std::shared_ptr<minikin::FontFamily>>&& families) {
+        std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
+        int weight, int italic) {
     Typeface* result = new Typeface;
     result->fFontCollection.reset(new minikin::FontCollection(families));
-    if (families.empty()) {
-        ALOGW("createFromFamilies creating empty collection");
-        result->fSkiaStyle = SkTypeface::kNormal;
-    } else {
+
+    if (weight == RESOLVE_BY_FONT_TABLE || italic == RESOLVE_BY_FONT_TABLE) {
+        int weightFromFont;
+        bool italicFromFont;
+
         const minikin::FontStyle defaultStyle;
-        const std::shared_ptr<minikin::FontFamily>& firstFamily = families[0];
-        const minikin::MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle).font;
+        const minikin::MinikinFont* mf =
+                families.empty() ?  nullptr : families[0]->getClosestMatch(defaultStyle).font;
         if (mf != nullptr) {
             SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(mf)->GetSkTypeface();
-            // TODO: probably better to query more precise style from family, will be important
-            // when we open up API to access 100..900 weights
-            result->fSkiaStyle = skTypeface->style();
+            const SkFontStyle& style = skTypeface->fontStyle();
+            weightFromFont = style.weight();
+            italicFromFont = style.slant() != SkFontStyle::kUpright_Slant;
         } else {
-            result->fSkiaStyle = SkTypeface::kNormal;
+            // We can't obtain any information from fonts. Just use default values.
+            weightFromFont = SkFontStyle::kNormal_Weight;
+            italicFromFont = false;
+        }
+
+        if (weight == RESOLVE_BY_FONT_TABLE) {
+            weight = weightFromFont;
+        }
+        if (italic == RESOLVE_BY_FONT_TABLE) {
+            italic = italicFromFont? 1 : 0;
         }
     }
-    result->fBaseWeight = 400;
+
+    // Sanitize the invalid value passed from public API.
+    if (weight < 0) {
+        weight = SkFontStyle::kNormal_Weight;
+    }
+
+    result->fBaseWeight = weight;
+    // This bold detection comes from SkTypefae.h
+    const bool isBold = weight >= SkFontStyle::kSemiBold_Weight;
+    const bool isItalic = italic == 1;
+    // TODO: remove fSkiaStyle
+    result->fSkiaStyle = isBold ?
+            (isItalic ? SkTypeface::kBoldItalic : SkTypeface::kBold) :
+            (isItalic ? SkTypeface::kItalic : SkTypeface::kNormal);
     resolveStyle(result);
     return result;
 }
@@ -165,7 +197,7 @@ void Typeface::setRobotoTypefaceForTest() {
     Typeface* hwTypeface = new Typeface();
     hwTypeface->fFontCollection = collection;
     hwTypeface->fSkiaStyle = SkTypeface::kNormal;
-    hwTypeface->fBaseWeight = 400;
+    hwTypeface->fBaseWeight = SkFontStyle::kSemiBold_Weight;
     hwTypeface->fStyle = minikin::FontStyle(4 /* weight */, false /* italic */);
 
     Typeface::setDefault(hwTypeface);
