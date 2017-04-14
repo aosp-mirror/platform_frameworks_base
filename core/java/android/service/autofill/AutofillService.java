@@ -34,6 +34,8 @@ import android.view.autofill.AutofillManager;
 
 import com.android.internal.os.SomeArgs;
 
+import java.util.List;
+
 //TODO(b/33197203): improve javadoc (of both class and methods); in particular, make sure the
 //life-cycle (and how state could be maintained on server-side) is well documented.
 
@@ -103,24 +105,22 @@ public abstract class AutofillService extends Service {
         }
 
         @Override
-        public void onFillRequest(AssistStructure structure, Bundle extras,
-                IFillCallback callback, int flags) {
+        public void onFillRequest(FillRequest request, IFillCallback callback) {
             ICancellationSignal transport = CancellationSignal.createTransport();
             try {
                 callback.onCancellable(transport);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
-            mHandlerCaller.obtainMessageIIOOOO(MSG_ON_FILL_REQUEST, flags, UNUSED_ARG, structure,
-                    CancellationSignal.fromTransport(transport), extras, callback)
+            mHandlerCaller.obtainMessageOOO(MSG_ON_FILL_REQUEST, request,
+                    CancellationSignal.fromTransport(transport), callback)
                     .sendToTarget();
         }
 
         @Override
-        public void onSaveRequest(AssistStructure structure, Bundle extras,
-                ISaveCallback callback) {
-            mHandlerCaller.obtainMessageOOO(MSG_ON_SAVE_REQUEST, structure,
-                    extras, callback).sendToTarget();
+        public void onSaveRequest(SaveRequest request, ISaveCallback callback) {
+            mHandlerCaller.obtainMessageOO(MSG_ON_SAVE_REQUEST, request,
+                    callback).sendToTarget();
         }
     };
 
@@ -131,23 +131,20 @@ public abstract class AutofillService extends Service {
                 break;
             } case MSG_ON_FILL_REQUEST: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final AssistStructure structure = (AssistStructure) args.arg1;
+                final FillRequest request = (FillRequest) args.arg1;
                 final CancellationSignal cancellation = (CancellationSignal) args.arg2;
-                final Bundle extras = (Bundle) args.arg3;
-                final IFillCallback callback = (IFillCallback) args.arg4;
-                final FillCallback fillCallback = new FillCallback(callback);
-                final int flags = msg.arg1;
+                final IFillCallback callback = (IFillCallback) args.arg3;
+                final FillCallback fillCallback = new FillCallback(callback, request.getId());
                 args.recycle();
-                onFillRequest(structure, extras, flags, cancellation, fillCallback);
+                onFillRequest(request, cancellation, fillCallback);
                 break;
             } case MSG_ON_SAVE_REQUEST: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final AssistStructure structure = (AssistStructure) args.arg1;
-                final Bundle extras = (Bundle) args.arg2;
-                final ISaveCallback callback = (ISaveCallback) args.arg3;
+                final SaveRequest request = (SaveRequest) args.arg1;
+                final ISaveCallback callback = (ISaveCallback) args.arg2;
                 final SaveCallback saveCallback = new SaveCallback(callback);
                 args.recycle();
-                onSaveRequest(structure, extras, saveCallback);
+                onSaveRequest(request, saveCallback);
                 break;
             } case MSG_DISCONNECT: {
                 onDisconnected();
@@ -198,6 +195,28 @@ public abstract class AutofillService extends Service {
      * or {@link FillCallback#onFailure(CharSequence)})
      * to notify the result of the request.
      *
+     * @param request the {@link FillRequest request} to handle.
+     *        See {@link FillResponse} for examples of multiple-sections requests.
+     * @param cancellationSignal signal for observing cancellation requests. The system will use
+     *     this to notify you that the fill result is no longer needed and you should stop
+     *     handling this fill request in order to save resources.
+     * @param callback object used to notify the result of the request.
+     */
+    public void onFillRequest(@NonNull FillRequest request,
+            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback) {
+        onFillRequest(request.getStructure(), request.getClientState(), request.getFlags(),
+                cancellationSignal, callback);
+    }
+
+    /**
+     * Called by the Android system do decide if an {@link Activity} can be autofilled by the
+     * service.
+     *
+     * <p>Service must call one of the {@link FillCallback} methods (like
+     * {@link FillCallback#onSuccess(FillResponse)}
+     * or {@link FillCallback#onFailure(CharSequence)})
+     * to notify the result of the request.
+     *
      * @param structure {@link Activity}'s view structure.
      * @param data bundle containing data passed by the service in a last call to
      *        {@link FillResponse.Builder#setExtras(Bundle)}, if any. This bundle allows your
@@ -211,9 +230,27 @@ public abstract class AutofillService extends Service {
      *     handling this fill request in order to save resources.
      * @param callback object used to notify the result of the request.
      */
+    @Deprecated
     public abstract void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
             int flags, @NonNull CancellationSignal cancellationSignal,
             @NonNull FillCallback callback);
+
+    /**
+     * Called when user requests service to save the fields of an {@link Activity}.
+     *
+     * <p>Service must call one of the {@link SaveCallback} methods (like
+     * {@link SaveCallback#onSuccess()} or {@link SaveCallback#onFailure(CharSequence)})
+     * to notify the result of the request.
+     *
+     * @param request the {@link SaveRequest request} to handle.
+     *        See {@link FillResponse} for examples of multiple-sections requests.
+     * @param callback object used to notify the result of the request.
+     */
+    public void onSaveRequest(@NonNull SaveRequest request, @NonNull SaveCallback callback) {
+        List<FillContext> contexts = request.getFillContexts();
+        onSaveRequest(contexts.get(contexts.size() - 1).getStructure(),
+                request.getClientState(), callback);
+    }
 
     /**
      * Called when user requests service to save the fields of an {@link Activity}.
@@ -231,6 +268,7 @@ public abstract class AutofillService extends Service {
      *        See {@link FillResponse} for examples of multiple-sections requests.
      * @param callback object used to notify the result of the request.
      */
+    @Deprecated
     public abstract void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
             @NonNull SaveCallback callback);
 

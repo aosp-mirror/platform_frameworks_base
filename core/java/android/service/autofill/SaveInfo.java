@@ -140,7 +140,19 @@ public final class SaveInfo implements Parcelable {
      */
     public static final int SAVE_DATA_TYPE_EMAIL_ADDRESS = 0x10;
 
-    private final int mType;
+    /** @hide */
+    @IntDef(
+       flag = true,
+       value = {
+               SAVE_DATA_TYPE_GENERIC,
+               SAVE_DATA_TYPE_PASSWORD,
+               SAVE_DATA_TYPE_ADDRESS,
+               SAVE_DATA_TYPE_CREDIT_CARD,
+               SAVE_DATA_TYPE_EMAIL_ADDRESS})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface SaveDataType{}
+
+    private final @SaveDataType int mType;
     private final CharSequence mNegativeActionTitle;
     private final IntentSender mNegativeActionListener;
     private final AutofillId[] mRequiredIds;
@@ -177,7 +189,7 @@ public final class SaveInfo implements Parcelable {
     }
 
     /** @hide */
-    public int getType() {
+    public @SaveDataType int getType() {
         return mType;
     }
 
@@ -191,7 +203,7 @@ public final class SaveInfo implements Parcelable {
      */
     public static final class Builder {
 
-        private final int mType;
+        private final @SaveDataType int mType;
         private CharSequence mNegativeActionTitle;
         private IntentSender mNegativeActionListener;
         // TODO(b/33197203): make mRequiredIds final once addSavableIds() is gone
@@ -215,7 +227,7 @@ public final class SaveInfo implements Parcelable {
          *
          * @throws IllegalArgumentException if {@code requiredIds} is {@code null} or empty.
          */
-        public Builder(int type, @NonNull AutofillId[] requiredIds) {
+        public Builder(@SaveDataType int type, @NonNull AutofillId[] requiredIds) {
             if (false) {// TODO(b/33197203): re-move when clients use it
             Preconditions.checkArgument(requiredIds != null && requiredIds.length > 0,
                     "must have at least one required id: " + Arrays.toString(requiredIds));
@@ -230,7 +242,7 @@ public final class SaveInfo implements Parcelable {
          * // TODO(b/33197203): make sure is removed when clients migrated
          */
         @Deprecated
-        public Builder(int type) {
+        public Builder(@SaveDataType int type) {
             this(type, null);
         }
 

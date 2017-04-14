@@ -161,7 +161,8 @@ public final class AutoFillUI {
                     log.setType(MetricsProto.MetricsEvent.TYPE_DETAIL);
                     hideFillUiUiThread();
                     if (mCallback != null) {
-                        mCallback.authenticate(response.getAuthentication(), response.getExtras());
+                        mCallback.authenticate(response.getAuthentication(),
+                                response.getClientState());
                     }
                 }
 

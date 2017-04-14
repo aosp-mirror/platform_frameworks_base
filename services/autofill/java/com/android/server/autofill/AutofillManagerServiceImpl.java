@@ -48,6 +48,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
+import android.service.autofill.FillRequest;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
 import android.util.LocalLog;
@@ -169,7 +170,8 @@ final class AutofillManagerServiceImpl {
             structure.sanitizeForParceling(true);
 
             // TODO(b/33197203): Need to pipe the bundle
-            session.mRemoteFillService.onFillRequest(structure, null, session.mFlags);
+            FillRequest request = new FillRequest(structure, null, session.mFlags);
+            session.mRemoteFillService.onFillRequest(request);
         }
     };
 
