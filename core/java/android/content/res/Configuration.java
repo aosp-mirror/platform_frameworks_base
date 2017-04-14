@@ -127,7 +127,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public static final int COLOR_MODE_WIDE_COLOR_GAMUT_YES = 0x2;
 
-    /** Constant for {@link #colorMode}: bits that encode whether the dynamic range of the screen. */
+    /** Constant for {@link #colorMode}: bits that encode the dynamic range of the screen. */
     public static final int COLOR_MODE_HDR_MASK = 0xc;
     /** Constant for {@link #colorMode}: bits shift to get the screen dynamic range. */
     public static final int COLOR_MODE_HDR_SHIFT = 2;
@@ -155,7 +155,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             COLOR_MODE_HDR_UNDEFINED;
 
     /**
-     * Bit mask of for color capabilities of the screen. Currently there are two fields:
+     * Bit mask of color capabilities of the screen. Currently there are two fields:
      * <p>The {@link #COLOR_MODE_WIDE_COLOR_GAMUT_MASK} bits define the color gamut of
      * the screen. They may be one of
      * {@link #COLOR_MODE_WIDE_COLOR_GAMUT_NO} or {@link #COLOR_MODE_WIDE_COLOR_GAMUT_YES}.</p>
