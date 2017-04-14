@@ -8371,6 +8371,7 @@ public final class Settings {
          *
          * Type: long
          * @hide
+         * @deprecated to be removed
          */
         public static final String NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS =
                 "network_recommendation_request_timeout_ms";
