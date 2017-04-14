@@ -36,21 +36,50 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
-
+import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
+import android.content.pm.ApplicationInfo;
+import android.os.Build.VERSION_CODES;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.runner.RunWith;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ConnectivityManagerTest {
+
+    @Mock Context mCtx;
+    @Mock IConnectivityManager mService;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     static NetworkCapabilities verifyNetworkCapabilities(
             int legacyType, int transportType, int... capabilities) {
         final NetworkCapabilities nc = ConnectivityManager.networkCapabilitiesForType(legacyType);
@@ -172,5 +201,125 @@ public class ConnectivityManagerTest {
     public void testNetworkCapabilitiesForTypeEthernet() {
         verifyUnrestrictedNetworkCapabilities(
                 ConnectivityManager.TYPE_ETHERNET, TRANSPORT_ETHERNET);
+    }
+
+    @Test
+    public void testCallbackRelease() throws Exception {
+        ConnectivityManager manager = new ConnectivityManager(mCtx, mService);
+        NetworkRequest request = makeRequest(1);
+        NetworkCallback callback = mock(ConnectivityManager.NetworkCallback.class);
+        Handler handler = new Handler(Looper.getMainLooper());
+        ArgumentCaptor<Messenger> captor = ArgumentCaptor.forClass(Messenger.class);
+
+        // register callback
+        when(mService.requestNetwork(any(), captor.capture(), anyInt(), any(), anyInt()))
+                .thenReturn(request);
+        manager.requestNetwork(request, callback, handler);
+
+        // callback triggers
+        captor.getValue().send(makeMessage(request, ConnectivityManager.CALLBACK_AVAILABLE));
+        verify(callback, timeout(500).times(1)).onAvailable(any());
+
+        // unregister callback
+        manager.unregisterNetworkCallback(callback);
+        verify(mService, times(1)).releaseNetworkRequest(request);
+
+        // callback does not trigger anymore.
+        captor.getValue().send(makeMessage(request, ConnectivityManager.CALLBACK_LOSING));
+        verify(callback, timeout(500).times(0)).onLosing(any(), anyInt());
+    }
+
+    @Test
+    public void testCallbackRecycling() throws Exception {
+        ConnectivityManager manager = new ConnectivityManager(mCtx, mService);
+        NetworkRequest req1 = makeRequest(1);
+        NetworkRequest req2 = makeRequest(2);
+        NetworkCallback callback = mock(ConnectivityManager.NetworkCallback.class);
+        Handler handler = new Handler(Looper.getMainLooper());
+        ArgumentCaptor<Messenger> captor = ArgumentCaptor.forClass(Messenger.class);
+
+        // register callback
+        when(mService.requestNetwork(any(), captor.capture(), anyInt(), any(), anyInt()))
+                .thenReturn(req1);
+        manager.requestNetwork(req1, callback, handler);
+
+        // callback triggers
+        captor.getValue().send(makeMessage(req1, ConnectivityManager.CALLBACK_AVAILABLE));
+        verify(callback, timeout(100).times(1)).onAvailable(any());
+
+        // unregister callback
+        manager.unregisterNetworkCallback(callback);
+        verify(mService, times(1)).releaseNetworkRequest(req1);
+
+        // callback does not trigger anymore.
+        captor.getValue().send(makeMessage(req1, ConnectivityManager.CALLBACK_LOSING));
+        verify(callback, timeout(100).times(0)).onLosing(any(), anyInt());
+
+        // callback can be registered again
+        when(mService.requestNetwork(any(), captor.capture(), anyInt(), any(), anyInt()))
+                .thenReturn(req2);
+        manager.requestNetwork(req2, callback, handler);
+
+        // callback triggers
+        captor.getValue().send(makeMessage(req2, ConnectivityManager.CALLBACK_LOST));
+        verify(callback, timeout(100).times(1)).onLost(any());
+
+        // unregister callback
+        manager.unregisterNetworkCallback(callback);
+        verify(mService, times(1)).releaseNetworkRequest(req2);
+    }
+
+    // TODO: turn on this test when request  callback 1:1 mapping is enforced
+    //@Test
+    private void noDoubleCallbackRegistration() throws Exception {
+        ConnectivityManager manager = new ConnectivityManager(mCtx, mService);
+        NetworkRequest request = makeRequest(1);
+        NetworkCallback callback = new ConnectivityManager.NetworkCallback();
+        ApplicationInfo info = new ApplicationInfo();
+        // TODO: update version when starting to enforce 1:1 mapping
+        info.targetSdkVersion = VERSION_CODES.N_MR1 + 1;
+
+        when(mCtx.getApplicationInfo()).thenReturn(info);
+        when(mService.requestNetwork(any(), any(), anyInt(), any(), anyInt())).thenReturn(request);
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        manager.requestNetwork(request, callback, handler);
+
+        // callback is already registered, reregistration should fail.
+        Class<IllegalArgumentException> wantException = IllegalArgumentException.class;
+        expectThrowable(() -> manager.requestNetwork(request, callback), wantException);
+
+        manager.unregisterNetworkCallback(callback);
+        verify(mService, times(1)).releaseNetworkRequest(request);
+
+        // unregistering the callback should make it registrable again.
+        manager.requestNetwork(request, callback);
+    }
+
+    static Message makeMessage(NetworkRequest req, int messageType) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(NetworkRequest.class.getSimpleName(), req);
+        Message msg = Message.obtain();
+        msg.what = messageType;
+        msg.setData(bundle);
+        return msg;
+    }
+
+    static NetworkRequest makeRequest(int requestId) {
+        NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
+        return new NetworkRequest(request.networkCapabilities, ConnectivityManager.TYPE_NONE,
+                requestId, NetworkRequest.Type.NONE);
+    }
+
+    static void expectThrowable(Runnable block, Class<? extends Throwable> throwableType) {
+        try {
+            block.run();
+        } catch (Throwable t) {
+            if (t.getClass().equals(throwableType)) {
+                return;
+            }
+            fail("expected exception of type " + throwableType + ", but was " + t.getClass());
+        }
+        fail("expected exception of type " + throwableType);
     }
 }
