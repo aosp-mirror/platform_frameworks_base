@@ -25,6 +25,7 @@ import android.os.RemoteException;
 import android.telecom.InCallService.VideoCall;
 import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
@@ -44,7 +45,8 @@ public class VideoCallImpl extends VideoCall {
     private int mVideoQuality = VideoProfile.QUALITY_UNKNOWN;
     private int mVideoState = VideoProfile.STATE_AUDIO_ONLY;
     private final String mCallingPackageName;
-    private final int mTargetSdkVersion;
+
+    private int mTargetSdkVersion;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
@@ -207,7 +209,12 @@ public class VideoCallImpl extends VideoCall {
         mBinder = new VideoCallListenerBinder();
         mVideoProvider.addVideoCallback(mBinder);
         mCallingPackageName = callingPackageName;
-        mTargetSdkVersion = targetSdkVersion;
+        setTargetSdkVersion(targetSdkVersion);
+    }
+
+    @VisibleForTesting
+    public void setTargetSdkVersion(int sdkVersion) {
+        mTargetSdkVersion = sdkVersion;
     }
 
     public void destroy() {
