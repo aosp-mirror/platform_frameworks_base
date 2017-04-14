@@ -17904,8 +17904,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (removedAppId >= 0) {
-                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, 0, null, null,
-                        broadcastUsers);
+                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras,
+                        Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null, null, broadcastUsers);
             }
         }
     }
