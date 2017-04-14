@@ -61,7 +61,6 @@ import android.view.animation.Transformation;
 import com.android.internal.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -1216,7 +1215,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 children[count++] = child;
             }
         }
-        Arrays.sort(children, 0, count, FocusFinder.getFocusComparator(this, false));
+        FocusFinder.sort(children, 0, count, this, isLayoutRtl());
         for (int i = 0; i < count; ++i) {
             children[i].addFocusables(views, direction, focusableMode);
         }
@@ -1266,7 +1265,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 visibleChildren[count++] = child;
             }
         }
-        Arrays.sort(visibleChildren, 0, count, FocusFinder.getFocusComparator(this, false));
+        FocusFinder.sort(visibleChildren, 0, count, this, isLayoutRtl());
         for (int i = 0; i < count; ++i) {
             visibleChildren[i].addKeyboardNavigationClusters(views, direction);
         }
