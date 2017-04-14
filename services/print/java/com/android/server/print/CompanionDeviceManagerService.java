@@ -140,10 +140,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     @Override
     public void binderDied() {
-        Handler.getMain().post(this::handleBinderDied);
+        Handler.getMain().post(this::cleanup);
     }
 
-    private void handleBinderDied() {
+    private void cleanup() {
         mServiceConnection = unbind(mServiceConnection);
         mFindDeviceCallback = unlinkToDeath(mFindDeviceCallback, this, 0);
     }
@@ -207,7 +207,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
         }
 
-
         @Override
         public List<String> getAssociations(String callingPackage, int userId)
                 throws RemoteException {
@@ -263,7 +262,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     mFindDeviceCallback.asBinder().linkToDeath(
                             CompanionDeviceManagerService.this, 0);
                 } catch (RemoteException e) {
-                    handleBinderDied();
+                    cleanup();
                     return;
                 }
                 try {
@@ -292,10 +291,16 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             @Override
             public void onDeviceSelected(String packageName, int userId, String deviceAddress) {
-                //TODO unbind
                 updateSpecialAccessPermissionForAssociatedPackage(packageName, userId);
                 recordAssociation(packageName, deviceAddress);
+                cleanup();
             }
+
+            @Override
+            public void onDeviceSelectionCancel() {
+                cleanup();
+            }
+
         };
     }
 
