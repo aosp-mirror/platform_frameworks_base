@@ -657,6 +657,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_VIEW = "android.intent.action.VIEW";
 
     /**
+     * Extra that can be included on activity intents coming from the storage UI
+     * when it launches sub-activities to manage various types of storage.  For example,
+     * it may use {@link #ACTION_VIEW} with a "image/*" MIME type to have an app show
+     * the images on the device, and in that case also include this extra to tell the
+     * app it is coming from the storage UI so should help the user manage storage of
+     * this type.
+     */
+    public static final String EXTRA_FROM_STORAGE = "android.intent.extra.FROM_STORAGE";
+
+    /**
      * A synonym for {@link #ACTION_VIEW}, the "standard" action that is
      * performed on a piece of data.
      */
