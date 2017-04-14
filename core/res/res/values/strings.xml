@@ -3000,6 +3000,8 @@
 
     <!-- Do not translate. Default access point SSID used for tethering -->
     <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
+    <!-- Do not translate. Default access point SSID used for local only hotspot -->
+    <string name="wifi_localhotspot_configure_ssid_default" translatable="false">AndroidShare</string>
 
     <!-- A notification is shown the first time a connection is attempted on an app owned AP -->
     <!-- title for this message -->
