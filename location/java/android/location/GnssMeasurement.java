@@ -670,6 +670,8 @@ public final class GnssMeasurement implements Parcelable {
      * related to L5 will be filled.
      *
      * <p>The value is only available if {@link #hasCarrierFrequencyHz()} is {@code true}.
+     *
+     * @return the carrier frequency of the signal tracked in Hz.
      */
     public float getCarrierFrequencyHz() {
         return mCarrierFrequencyHz;
@@ -888,10 +890,10 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if {@link #getAutomaticGainControlLevelInDb()} is available,
+     * Returns {@code true} if {@link #getAutomaticGainControlLevelDb()} is available,
      * {@code false} otherwise.
      */
-    public boolean hasAutomaticGainControlLevelInDb() {
+    public boolean hasAutomaticGainControlLevelDb() {
         return isFlagSet(HAS_AUTOMATIC_GAIN_CONTROL);
     }
 
@@ -908,9 +910,9 @@ public final class GnssMeasurement implements Parcelable {
      * components) may also affect the typical output of of this value on any given hardware design
      * in an open sky test - the important aspect of this output is that changes in this value are
      * indicative of changes on input signal power in the frequency band for this measurement.
-     * <p>The value is only available if {@link #hasAutomaticGainControlLevelInDb()} is {@code true}
+     * <p>The value is only available if {@link #hasAutomaticGainControlLevelDb()} is {@code true}
      */
-    public double getAutomaticGainControlLevelInDb() {
+    public double getAutomaticGainControlLevelDb() {
         return mAutomaticGainControlLevelInDb;
     }
 
@@ -1064,7 +1066,7 @@ public final class GnssMeasurement implements Parcelable {
         builder.append(String.format(
             format,
             "AgcLevelDb",
-            hasAutomaticGainControlLevelInDb() ? mAutomaticGainControlLevelInDb : null));
+            hasAutomaticGainControlLevelDb() ? mAutomaticGainControlLevelInDb : null));
 
         return builder.toString();
     }

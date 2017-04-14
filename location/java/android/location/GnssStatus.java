@@ -224,7 +224,7 @@ public final class GnssStatus {
      *
      * @param satIndex the index of the satellite in the list.
      */
-    public boolean hasCarrierFrequency(int satIndex) {
+    public boolean hasCarrierFrequencyHz(int satIndex) {
         return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) != 0;
     }
 
@@ -239,7 +239,11 @@ public final class GnssStatus {
      * will be reported for this same satellite, in one all the values related to L1 will be filled,
      * and in the other all of the values related to L5 will be filled.
      *
-     * <p>The value is only available if {@link #hasCarrierFrequency(int satIndex)} is {@code true}.
+     * <p>The value is only available if {@link #hasCarrierFrequencyHz(int satIndex)} is {@code true}.
+     *
+     * @param satIndex the index of the satellite in the list.
+     *
+     * @return the carrier frequency of the signal tracked in Hz.
      */
     public float getCarrierFrequencyHz(int satIndex) {
         return mCarrierFrequencies[satIndex];
