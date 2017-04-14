@@ -34,6 +34,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.companiondevicemanager.DeviceDiscoveryService.DeviceFilterPair;
+import com.android.internal.util.Preconditions;
 
 public class DeviceChooserActivity extends Activity {
 
@@ -92,8 +93,11 @@ public class DeviceChooserActivity extends Activity {
     private CharSequence getCallingAppName() {
         try {
             final PackageManager packageManager = getPackageManager();
+            String callingPackage = Preconditions.checkStringNotEmpty(
+                    getCallingPackage(),
+                    "This activity must be called for result");
             return packageManager.getApplicationLabel(
-                    packageManager.getApplicationInfo(getCallingPackage(), 0));
+                    packageManager.getApplicationInfo(callingPackage, 0));
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
