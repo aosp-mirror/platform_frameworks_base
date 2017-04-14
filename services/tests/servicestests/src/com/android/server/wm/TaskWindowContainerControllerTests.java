@@ -89,7 +89,7 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
 
         boolean gotException = false;
         try {
-            taskController.reparent(stackController1, 0);
+            taskController.reparent(stackController1, 0, false/* moveParents */);
         } catch (IllegalArgumentException e) {
             gotException = true;
         }
@@ -100,14 +100,14 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
         stackController3.setContainer(null);
         gotException = false;
         try {
-            taskController.reparent(stackController3, 0);
+            taskController.reparent(stackController3, 0, false/* moveParents */);
         } catch (IllegalArgumentException e) {
             gotException = true;
         }
         assertTrue("Should not be able to reparent to a stack that doesn't have a container",
                 gotException);
 
-        taskController.reparent(stackController2, 0);
+        taskController.reparent(stackController2, 0, false/* moveParents */);
         assertEquals(stackController2.mContainer, taskController.mContainer.getParent());
         assertEquals(0, ((WindowTestUtils.TestTask) taskController.mContainer).positionInParent());
         assertEquals(1, ((WindowTestUtils.TestTask) taskController2.mContainer).positionInParent());
@@ -135,7 +135,7 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
                 (WindowTestUtils.TestTask) taskController2.mContainer;
 
         // Reparent and check state
-        taskController.reparent(stack2Controller, 0);
+        taskController.reparent(stack2Controller, 0, false /* moveParents */);
         assertEquals(stack2, task1.getParent());
         assertEquals(0, task1.positionInParent());
         assertEquals(1, task2.positionInParent());
