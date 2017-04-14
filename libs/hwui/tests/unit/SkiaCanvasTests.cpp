@@ -104,14 +104,20 @@ TEST(SkiaCanvas, colorSpaceXform) {
     skBitmap.lockPixels();
     ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
 
+    // Create a software canvas with an Adobe color space.
+    SkiaCanvas adobeSkCanvas(adobeSkBitmap);
+    adobeSkCanvas.drawBitmap(*bitmap, 0, 0, nullptr);
+    // The result should be less than fully red, since we convert to Adobe RGB at draw time.
+    ASSERT_EQ(0xFF0000DC, *adobeSkBitmap.getAddr32(0, 0));
+
     // Now try in kDefer mode.  This is a little strange given that, in practice, all software
     // canvases are kImmediate.
     SkCanvas skCanvas(skBitmap);
     SkiaCanvas deferCanvas(&skCanvas, Canvas::XformToSRGB::kDefer);
     deferCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
-    // The result should be as initialized, since we deferred the conversion to sRGB.
+    // The result should be as before, since we deferred the conversion to sRGB.
     skBitmap.lockPixels();
-    ASSERT_EQ(0xFF0000F0, *skBitmap.getAddr32(0, 0));
+    ASSERT_EQ(0xFF0000DC, *skBitmap.getAddr32(0, 0));
 
     // Test picture recording.  We will kDefer the xform at recording time, but handle it when
     // we playback to the software canvas.
@@ -121,9 +127,9 @@ TEST(SkiaCanvas, colorSpaceXform) {
     picCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
-    // Playback to a deferred canvas.  The result should be as initialized.
+    // Playback to a deferred canvas.  The result should be as before.
     deferCanvas.asSkCanvas()->drawPicture(picture);
-    ASSERT_EQ(0xFF0000F0, *skBitmap.getAddr32(0, 0));
+    ASSERT_EQ(0xFF0000DC, *skBitmap.getAddr32(0, 0));
 
     // Playback to an immediate canvas.  The result should be fully red.
     canvas.asSkCanvas()->drawPicture(picture);
