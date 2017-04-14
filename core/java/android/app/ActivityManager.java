@@ -1222,6 +1222,27 @@ public class ActivityManager {
             mNavigationBarColor = other.mNavigationBarColor;
         }
 
+        /**
+         * Copies this the values from another TaskDescription, but preserves the hidden fields
+         * if they weren't set on {@code other}
+         * @hide
+         */
+        public void copyFromPreserveHiddenFields(TaskDescription other) {
+            mLabel = other.mLabel;
+            mIcon = other.mIcon;
+            mIconFilename = other.mIconFilename;
+            mColorPrimary = other.mColorPrimary;
+            if (other.mColorBackground != 0) {
+                mColorBackground = other.mColorBackground;
+            }
+            if (other.mStatusBarColor != 0) {
+                mStatusBarColor = other.mStatusBarColor;
+            }
+            if (other.mNavigationBarColor != 0) {
+                mNavigationBarColor = other.mNavigationBarColor;
+            }
+        }
+
         private TaskDescription(Parcel source) {
             readFromParcel(source);
         }
