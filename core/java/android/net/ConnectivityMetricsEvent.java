@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.android.internal.util.BitUtils;
 
 /**
  * Represents a core networking event defined in package android.net.metrics.
@@ -78,12 +79,14 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     public String toString() {
         StringBuilder buffer = new StringBuilder("ConnectivityMetricsEvent(");
         buffer.append(String.format("%tT.%tL", timestamp, timestamp));
-        // TODO: add transports
         if (netId != 0) {
             buffer.append(", ").append(netId);
         }
         if (ifname != null) {
             buffer.append(", ").append(ifname);
+        }
+        for (int t : BitUtils.unpackBits(transports)) {
+            buffer.append(", ").append(NetworkCapabilities.transportNameOf(t));
         }
         buffer.append("): ").append(data.toString());
         return buffer.toString();

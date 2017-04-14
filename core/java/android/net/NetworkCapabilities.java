@@ -18,9 +18,9 @@ package android.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.Objects;
+import com.android.internal.util.BitUtils;
 
 /**
  * This class represents the capabilities of a network.  This is used both to specify
@@ -279,7 +279,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public int[] getCapabilities() {
-        return enumerateBits(mNetworkCapabilities);
+        return BitUtils.unpackBits(mNetworkCapabilities);
     }
 
     /**
@@ -293,19 +293,6 @@ public final class NetworkCapabilities implements Parcelable {
             return false;
         }
         return ((mNetworkCapabilities & (1 << capability)) != 0);
-    }
-
-    private int[] enumerateBits(long val) {
-        int size = Long.bitCount(val);
-        int[] result = new int[size];
-        int index = 0;
-        int resource = 0;
-        while (val > 0) {
-            if ((val & 1) == 1) result[index++] = resource;
-            val = val >> 1;
-            resource++;
-        }
-        return result;
     }
 
     private void combineNetCapabilities(NetworkCapabilities nc) {
@@ -418,6 +405,15 @@ public final class NetworkCapabilities implements Parcelable {
     /** @hide */
     public static final int MAX_TRANSPORT = TRANSPORT_WIFI_AWARE;
 
+    private static final String[] TRANSPORT_NAMES = {
+        "CELLULAR",
+        "WIFI",
+        "BLUETOOTH",
+        "ETHERNET",
+        "VPN",
+        "WIFI_AWARE"
+    };
+
     /**
      * Adds the given transport type to this {@code NetworkCapability} instance.
      * Multiple transports may be applied sequentially.  Note that when searching
@@ -464,18 +460,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public int[] getTransportTypes() {
-        return enumerateBits(mTransportTypes);
-    }
-
-    /**
-     * Gets all the transports set on this {@code NetworkCapability} instance.
-     *
-     * @return a bit field composed of up bits at indexes defined by
-     * {@code NetworkCapabilities.TRANSPORT_*} values for this instance.
-     * @hide
-     */
-    public long getTransports() {
-        return mTransportTypes;
+        return BitUtils.unpackBits(mTransportTypes);
     }
 
     /**
@@ -882,18 +867,23 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public static String transportNamesOf(int[] types) {
-        String transports = "";
-        for (int i = 0; i < types.length;) {
-            switch (types[i]) {
-                case TRANSPORT_CELLULAR:    transports += "CELLULAR"; break;
-                case TRANSPORT_WIFI:        transports += "WIFI"; break;
-                case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
-                case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
-                case TRANSPORT_VPN:         transports += "VPN"; break;
-                case TRANSPORT_WIFI_AWARE:  transports += "WIFI_AWARE"; break;
-            }
-            if (++i < types.length) transports += "|";
+        if (types == null || types.length == 0) {
+            return "";
         }
-        return transports;
+        StringBuilder transports = new StringBuilder();
+        for (int t : types) {
+            transports.append("|").append(transportNameOf(t));
+        }
+        return transports.substring(1);
+    }
+
+    /**
+     * @hide
+     */
+    public static String transportNameOf(int transport) {
+        if (transport < 0 || TRANSPORT_NAMES.length <= transport) {
+            return "UNKNOWN";
+        }
+        return TRANSPORT_NAMES[transport];
     }
 }
