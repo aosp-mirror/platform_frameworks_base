@@ -3413,9 +3413,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_SUBSCRIPTION_INDEX = "android.intent.extra.SUBSCRIPTION_INDEX";
 
     /**
-     * Deprecated - use {@link #ACTION_FACTORY_RESET} instead.
-     *
-     * {@hide}
+     * Deprecated - use ACTION_FACTORY_RESET instead.
      */
     @Deprecated
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
