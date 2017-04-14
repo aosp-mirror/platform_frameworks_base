@@ -146,6 +146,8 @@ public class PersistentDataBlockManager {
 
     /**
      * Writes a byte enabling or disabling the ability to "OEM unlock" the device.
+     *
+     * @deprecated use {@link OemLockManager#setOemUnlockAllowedByUser(boolean)} instead.
      */
     public void setOemUnlockEnabled(boolean enabled) {
         try {
@@ -157,6 +159,8 @@ public class PersistentDataBlockManager {
 
     /**
      * Returns whether or not "OEM unlock" is enabled or disabled on this device.
+     *
+     * @deprecated use {@link OemLockManager#isOemUnlockAllowedByUser()} instead.
      */
     public boolean getOemUnlockEnabled() {
         try {
