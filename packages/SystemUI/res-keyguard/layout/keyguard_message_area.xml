@@ -23,11 +23,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
+    style="@style/Keyguard.TextView"
     android:id="@+id/keyguard_message_area"
     android:singleLine="true"
     android:ellipsize="marquee"
-    android:textAppearance="?android:attr/textAppearance"
-    android:textSize="@dimen/kg_status_line_font_size"
-    android:textColor="?android:attr/textColorSecondary"
     android:focusable="true" />
 
