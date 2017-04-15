@@ -58,12 +58,15 @@ public class DozeMachine {
         /** Pulse is done showing. Followed by transition to DOZE or DOZE_AOD. */
         DOZE_PULSE_DONE,
         /** Doze is done. DozeService is finished. */
-        FINISH;
+        FINISH,
+        /** AOD, but the display is temporarily off. */
+        DOZE_AOD_PAUSED;
 
         boolean canPulse() {
             switch (this) {
                 case DOZE:
                 case DOZE_AOD:
+                case DOZE_AOD_PAUSED:
                     return true;
                 default:
                     return false;
@@ -85,6 +88,7 @@ public class DozeMachine {
                 case UNINITIALIZED:
                 case INITIALIZED:
                 case DOZE:
+                case DOZE_AOD_PAUSED:
                     return Display.STATE_OFF;
                 case DOZE_PULSING:
                     return Display.STATE_DOZE;
@@ -241,6 +245,11 @@ public class DozeMachine {
     private State transitionPolicy(State requestedState) {
         if (mState == State.FINISH) {
             return State.FINISH;
+        }
+        if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD || mState == State.DOZE)
+                && requestedState == State.DOZE_PULSE_DONE) {
+            Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
+            return mState;
         }
         if (requestedState == State.DOZE_REQUEST_PULSE && !mState.canPulse()) {
             Log.i(TAG, "Dropping pulse request because current state can't pulse: " + mState);

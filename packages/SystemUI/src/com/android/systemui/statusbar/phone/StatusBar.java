@@ -1117,8 +1117,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mHeadsUpManager.addListener(mScrimController);
         mStackScroller.setScrimController(mScrimController);
-        mDozeScrimController = new DozeScrimController(mScrimController, context, mStackScroller,
-                mNotificationPanel);
+        mDozeScrimController = new DozeScrimController(mScrimController, context);
 
         // Other icons
         mVolumeComponent = getComponent(VolumeComponent.class);
@@ -4345,6 +4344,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStackScroller.setDark(mDozing, animate, mWakeUpTouchLocation);
         mScrimController.setDozing(mDozing);
         mKeyguardIndicationController.setDozing(mDozing);
+        mNotificationPanel.setDark(mDozing);
 
         // Immediately abort the dozing from the doze scrim controller in case of wake-and-unlock
         // for pulsing so the Keyguard fade-out animation scrim can take over.
@@ -4975,6 +4975,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozing = mDozingRequested && mState == StatusBarState.KEYGUARD
                 || mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
+        mStatusBarWindowManager.setDozing(mDozing);
         updateDozingState();
         Trace.endSection();
     }
@@ -5080,6 +5081,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
             StatusBar.this.startPendingIntentDismissingKeyguard(intent);
+        }
+
+        @Override
+        public void abortPulsing() {
+            mDozeScrimController.abortPulsing();
+        }
+
+        @Override
+        public void extendPulse() {
+            mDozeScrimController.extendPulse();
         }
 
     }

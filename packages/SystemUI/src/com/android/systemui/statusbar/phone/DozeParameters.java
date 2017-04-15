@@ -162,6 +162,10 @@ public class DozeParameters {
         return sPickupSubtypePerformsProxMatcher.isIn(subType);
     }
 
+    public int getPulseVisibleDurationExtended() {
+        return 2 * getPulseVisibleDuration();
+    }
+
 
     /**
      * Parses a spec of the form `1,2,3,!5,*`. The resulting object will match numbers that are
