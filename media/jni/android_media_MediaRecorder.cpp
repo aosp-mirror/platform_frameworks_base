@@ -688,7 +688,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
     {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },
 
-    {"native_getMetrics",          "()Landroid/os/Bundle;",            (void *)android_media_MediaRecorder_native_getMetrics},
+    {"native_getMetrics",    "()Landroid/os/PersistableBundle;", (void *)android_media_MediaRecorder_native_getMetrics},
 };
 
 // This function only registers the native methods, and is called from
