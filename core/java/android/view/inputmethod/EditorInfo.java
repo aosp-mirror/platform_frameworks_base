@@ -155,7 +155,7 @@ public class EditorInfo implements InputType, Parcelable {
     public static final int IME_ACTION_PREVIOUS = 0x00000007;
 
     /**
-     * Flag of {@link #imeOptions}: used to request that the IME does not update any personalized
+     * Flag of {@link #imeOptions}: used to request that the IME should not update any personalized
      * data such as typing history and personalized language model based on what the user typed on
      * this text editing object.  Typical use cases are:
      * <ul>
