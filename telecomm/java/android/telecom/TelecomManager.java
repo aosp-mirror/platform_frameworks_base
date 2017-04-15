@@ -112,20 +112,26 @@ public class TelecomManager {
             "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
 
     /**
-     * The {@link android.content.Intent} action used indicate that a new phone account was
-     * just registered.
-     * @hide
+     * {@link android.content.Intent} action used indicate that a new phone account was just
+     * registered.
+     * <p>
+     * The Intent {@link Intent#getExtras() extras} will contain {@link #EXTRA_PHONE_ACCOUNT_HANDLE}
+     * to indicate which {@link PhoneAccount} was registered.
+     * <p>
+     * Will only be sent to the default dialer app (see {@link #getDefaultDialerPackage()}).
      */
-    @SystemApi
     public static final String ACTION_PHONE_ACCOUNT_REGISTERED =
             "android.telecom.action.PHONE_ACCOUNT_REGISTERED";
 
     /**
-     * The {@link android.content.Intent} action used indicate that a phone account was
-     * just unregistered.
-     * @hide
+     * {@link android.content.Intent} action used indicate that a phone account was just
+     * unregistered.
+     * <p>
+     * The Intent {@link Intent#getExtras() extras} will contain {@link #EXTRA_PHONE_ACCOUNT_HANDLE}
+     * to indicate which {@link PhoneAccount} was unregistered.
+     * <p>
+     * Will only be sent to the default dialer app (see {@link #getDefaultDialerPackage()}).
      */
-    @SystemApi
     public static final String ACTION_PHONE_ACCOUNT_UNREGISTERED =
             "android.telecom.action.PHONE_ACCOUNT_UNREGISTERED";
 
