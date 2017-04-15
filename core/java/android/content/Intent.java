@@ -1507,7 +1507,7 @@ public class Intent implements Parcelable, Cloneable {
      * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the install
      * succeeded.
      * <p>
-     * <strong>Note:</strong>If your app is targeting API level higher than 22 you
+     * <strong>Note:</strong>If your app is targeting API level higher than 25 you
      * need to hold {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES}
      * in order to launch the application installer.
      * </p>
@@ -1646,6 +1646,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Used as an int extra field with {@link #ACTION_INSTALL_PACKAGE} and
      * {@link #ACTION_VIEW} to indicate the uid of the package that initiated the install
+     * Currently only a system app that hosts the provider authority "downloads" or holds the
+     * permission {@link android.Manifest.permission.MANAGE_DOCUMENTS} can use this.
      * @hide
      */
     @SystemApi
