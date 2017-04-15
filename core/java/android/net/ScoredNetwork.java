@@ -73,29 +73,6 @@ public class ScoredNetwork implements Parcelable {
     /** A {@link NetworkKey} uniquely identifying this network. */
     public final NetworkKey networkKey;
 
-    // TODO(b/35323372): Delete these once external references are switched.
-    /** @deprecated Use {@link NetworkBadging#Badging} instead. */
-    @Deprecated
-    @IntDef({BADGING_NONE, BADGING_SD, BADGING_HD, BADGING_4K})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Badging {}
-
-    /** @deprecated Use {@link NetworkBadging#BADGING_NONE} instead. */
-    @Deprecated
-    public static final int BADGING_NONE = 0;
-
-    /** @deprecated Use {@link NetworkBadging#BADGING_SD} instead. */
-    @Deprecated
-    public static final int BADGING_SD = 10;
-
-    /** @deprecated Use {@link NetworkBadging#BADGING_HD} instead. */
-    @Deprecated
-    public static final int BADGING_HD = 20;
-
-    /** @deprecated Use {@link NetworkBadging#BADGING_4K} instead. */
-    @Deprecated
-    public static final int BADGING_4K = 30;
-
     /**
      * The {@link RssiCurve} representing the scores for this network based on the RSSI.
      *
