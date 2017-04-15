@@ -923,6 +923,15 @@ public class TypedArray {
      */
     @Nullable
     public Drawable getDrawable(@StyleableRes int index) {
+        return getDrawableForDensity(index, 0);
+    }
+
+    /**
+     * Version of {@link #getDrawable(int)} that accepts an override density.
+     * @hide
+     */
+    @Nullable
+    public Drawable getDrawableForDensity(@StyleableRes int index, int density) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -933,7 +942,13 @@ public class TypedArray {
                 throw new UnsupportedOperationException(
                         "Failed to resolve attribute at index " + index + ": " + value);
             }
-            return mResources.loadDrawable(value, value.resourceId, mTheme);
+
+            if (density > 0) {
+                // If the density is overridden, the value in the TypedArray will not reflect this.
+                // Do a separate lookup of the resourceId with the density override.
+                mResources.getValueForDensity(value.resourceId, density, value, true);
+            }
+            return mResources.loadDrawable(value, value.resourceId, density, mTheme);
         }
         return null;
     }

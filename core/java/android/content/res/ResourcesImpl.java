@@ -523,8 +523,27 @@ public class ResourcesImpl {
     }
 
     @Nullable
-    Drawable loadDrawable(Resources wrapper, TypedValue value, int id, Resources.Theme theme,
-            boolean useCache) throws NotFoundException {
+    Drawable loadDrawable(@NonNull Resources wrapper, @NonNull TypedValue value, int id,
+            int density, @Nullable Resources.Theme theme)
+            throws NotFoundException {
+        // If the drawable's XML lives in our current density qualifier,
+        // it's okay to use a scaled version from the cache. Otherwise, we
+        // need to actually load the drawable from XML.
+        final boolean useCache = density == 0 || value.density == mMetrics.densityDpi;
+
+        // Pretend the requested density is actually the display density. If
+        // the drawable returned is not the requested density, then force it
+        // to be scaled later by dividing its density by the ratio of
+        // requested density to actual device density. Drawables that have
+        // undefined density or no density don't need to be handled here.
+        if (density > 0 && value.density > 0 && value.density != TypedValue.DENSITY_NONE) {
+            if (value.density == density) {
+                value.density = mMetrics.densityDpi;
+            } else {
+                value.density = (value.density * mMetrics.densityDpi) / density;
+            }
+        }
+
         try {
             if (TRACE_FOR_PRELOAD) {
                 // Log only framework resources
@@ -576,7 +595,7 @@ public class ResourcesImpl {
             } else if (isColorDrawable) {
                 dr = new ColorDrawable(value.data);
             } else {
-                dr = loadDrawableForCookie(wrapper, value, id, null);
+                dr = loadDrawableForCookie(wrapper, value, id, density, null);
             }
 
             // Determine if the drawable has unresolved theme attributes. If it
@@ -691,8 +710,8 @@ public class ResourcesImpl {
     /**
      * Loads a drawable from XML or resources stream.
      */
-    private Drawable loadDrawableForCookie(Resources wrapper, TypedValue value, int id,
-            Resources.Theme theme) {
+    private Drawable loadDrawableForCookie(@NonNull Resources wrapper, @NonNull TypedValue value,
+            int id, int density, @Nullable Resources.Theme theme) {
         if (value.string == null) {
             throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
                     + Integer.toHexString(id) + ") is not a Drawable (color or path): " + value);
@@ -722,7 +741,7 @@ public class ResourcesImpl {
             if (file.endsWith(".xml")) {
                 final XmlResourceParser rp = loadXmlResourceParser(
                         file, id, value.assetCookie, "drawable");
-                dr = Drawable.createFromXml(wrapper, rp, theme);
+                dr = Drawable.createFromXmlForDensity(wrapper, rp, density, theme);
                 rp.close();
             } else {
                 final InputStream is = mAssets.openNonAsset(
