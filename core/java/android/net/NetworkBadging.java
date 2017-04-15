@@ -56,7 +56,7 @@ public class NetworkBadging {
      *
      * @param signalLevel The level returned by {@link WifiManager#calculateSignalLevel(int, int)}
      *                    for a network. Must be between 0 and {@link WifiManager#RSSI_LEVELS}-1.
-     * @param badging  {@see ScoredNetwork#Badging}, retrieved from
+     * @param badging  {@see NetworkBadging#Badging}, retrieved from
      *                 {@link ScoredNetwork#calculateBadge(int)}.
      * @param theme The theme for the current application, may be null.
      * @return Drawable for the given icon
@@ -140,7 +140,7 @@ public class NetworkBadging {
      * <p>This badge should be displayed with the badge signal resource retrieved from
      * {@link #getBadgedWifiSignalResource(int)}.
      *
-     * @param badging {@see ScoredNetwork#Badging} from {@link ScoredNetwork#calculateBadge(int)}.
+     * @param badging {@see NetworkBadging#Badging} from {@link ScoredNetwork#calculateBadge(int)}.
      * @return the @DrawableRes for the icon or {@link View#NO_ID} for
      *         {@link NetworkBadging#BADGING_NONE}
      * @throws IllegalArgumentException for an invalid badging value.
