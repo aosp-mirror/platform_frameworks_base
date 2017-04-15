@@ -30,6 +30,7 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.doze.DozeTriggers;
 
 /**
  * Controller which handles all the doze animations of the scrims.
@@ -43,8 +44,6 @@ public class DozeScrimController {
     private final ScrimController mScrimController;
 
     private final Context mContext;
-    private final View mStackScroller;
-    private final NotificationPanelView mNotificationPanelView;
 
     private boolean mDozing;
     private DozeHost.PulseCallback mPulseCallback;
@@ -53,24 +52,22 @@ public class DozeScrimController {
     private Animator mBehindAnimator;
     private float mInFrontTarget;
     private float mBehindTarget;
+    private boolean mDozingAborted;
 
-    public DozeScrimController(ScrimController scrimController, Context context,
-            View stackScroller, NotificationPanelView notificationPanelView) {
+    public DozeScrimController(ScrimController scrimController, Context context) {
         mContext = context;
-        mStackScroller = stackScroller;
         mScrimController = scrimController;
         mDozeParameters = new DozeParameters(context);
-        mNotificationPanelView = notificationPanelView;
     }
 
     public void setDozing(boolean dozing, boolean animate) {
         if (mDozing == dozing) return;
         mDozing = dozing;
         if (mDozing) {
+            mDozingAborted = false;
             abortAnimations();
             mScrimController.setDozeBehindAlpha(1f);
             mScrimController.setDozeInFrontAlpha(mDozeParameters.getAlwaysOn() ? 0f : 1f);
-            mNotificationPanelView.setDark(true);
         } else {
             cancelPulsing();
             if (animate) {
@@ -85,8 +82,6 @@ public class DozeScrimController {
                 mScrimController.setDozeBehindAlpha(0f);
                 mScrimController.setDozeInFrontAlpha(0f);
             }
-            // TODO: animate
-            mNotificationPanelView.setDark(false);
         }
     }
 
@@ -116,8 +111,17 @@ public class DozeScrimController {
         cancelPulsing();
         if (mDozing) {
             mScrimController.setDozeBehindAlpha(1f);
-            mScrimController.setDozeInFrontAlpha(1f);
+            mScrimController.setDozeInFrontAlpha(
+                    mDozeParameters.getAlwaysOn() && !mDozingAborted ? 0f : 1f);
         }
+    }
+
+    /**
+     * Aborts dozing immediately.
+     */
+    public void abortDoze() {
+        mDozingAborted = true;
+        abortPulsing();
     }
 
     public void onScreenTurnedOn() {
@@ -139,12 +143,17 @@ public class DozeScrimController {
         return mDozing;
     }
 
+    public void extendPulse() {
+        mHandler.removeCallbacks(mPulseOut);
+    }
+
     private void cancelPulsing() {
         if (DEBUG) Log.d(TAG, "Cancel pulsing");
 
         if (mPulseCallback != null) {
             mHandler.removeCallbacks(mPulseIn);
             mHandler.removeCallbacks(mPulseOut);
+            mHandler.removeCallbacks(mPulseOutExtended);
             pulseFinished();
         }
     }
@@ -271,12 +280,23 @@ public class DozeScrimController {
             if (DEBUG) Log.d(TAG, "Pulse in finished, mDozing=" + mDozing);
             if (!mDozing) return;
             mHandler.postDelayed(mPulseOut, mDozeParameters.getPulseVisibleDuration());
+            mHandler.postDelayed(mPulseOutExtended,
+                    mDozeParameters.getPulseVisibleDurationExtended());
+        }
+    };
+
+    private final Runnable mPulseOutExtended = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.removeCallbacks(mPulseOut);
+            mPulseOut.run();
         }
     };
 
     private final Runnable mPulseOut = new Runnable() {
         @Override
         public void run() {
+            mHandler.removeCallbacks(mPulseOutExtended);
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
             startScrimAnimation(true /* inFront */, mDozeParameters.getAlwaysOn() ? 0 : 1,

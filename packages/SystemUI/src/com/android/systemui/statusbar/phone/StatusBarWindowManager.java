@@ -118,7 +118,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
             mLpChanged.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
         }
 
-        if (state.keyguardShowing && !state.backdropShowing) {
+        if (state.keyguardShowing && !state.backdropShowing && !state.dozing) {
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -357,6 +357,11 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         apply(mCurrentState);
     }
 
+    public void setDozing(boolean dozing) {
+        mCurrentState.dozing = dozing;
+        apply(mCurrentState);
+    }
+
     public void setBarHeight(int barHeight) {
         mBarHeight = barHeight;
         apply(mCurrentState);
@@ -404,6 +409,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
 
         boolean remoteInputActive;
         boolean forcePluginOpen;
+        boolean dozing;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;

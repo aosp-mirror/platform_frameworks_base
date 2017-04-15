@@ -75,11 +75,14 @@ public class DozeUi implements DozeMachine.Part {
                 scheduleTimeTick();
                 break;
             case DOZE:
+            case DOZE_AOD_PAUSED:
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:
                 pulseWhileDozing(DozeLog.PULSE_REASON_NOTIFICATION /* TODO */);
                 break;
+            case DOZE_PULSE_DONE:
+                mHost.abortPulsing();
             case INITIALIZED:
                 mHost.startDozing();
                 break;

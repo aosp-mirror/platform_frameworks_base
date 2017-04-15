@@ -22,6 +22,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
@@ -40,6 +42,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class DozeSensors {
 
@@ -55,18 +58,22 @@ public class DozeSensors {
     private final DozeParameters mDozeParameters;
     private final AmbientDisplayConfiguration mConfig;
     private final WakeLock mWakeLock;
+    private final Consumer<Boolean> mProxCallback;
     private final Callback mCallback;
 
     private final Handler mHandler = new Handler();
+    private final ProxSensor mProxSensor;
 
 
     public DozeSensors(Context context, SensorManager sensorManager, DozeParameters dozeParameters,
-            AmbientDisplayConfiguration config, WakeLock wakeLock, Callback callback) {
+            AmbientDisplayConfiguration config, WakeLock wakeLock, Callback callback,
+            Consumer<Boolean> proxCallback) {
         mContext = context;
         mSensorManager = sensorManager;
         mDozeParameters = dozeParameters;
         mConfig = config;
         mWakeLock = wakeLock;
+        mProxCallback = proxCallback;
         mResolver = mContext.getContentResolver();
 
         mSensors = new TriggerSensor[] {
@@ -86,6 +93,8 @@ public class DozeSensors {
                         true /* configured */,
                         DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP)
         };
+
+        mProxSensor = new ProxSensor();
         mCallback = callback;
     }
 
@@ -129,6 +138,10 @@ public class DozeSensors {
         }
     }
 
+    public void setProxListening(boolean listen) {
+        mProxSensor.setRegistered(listen);
+    }
+
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
@@ -149,6 +162,43 @@ public class DozeSensors {
     public void dump(PrintWriter pw) {
         for (TriggerSensor s : mSensors) {
             pw.print("Sensor: "); pw.println(s.toString());
+        }
+    }
+
+    private class ProxSensor implements SensorEventListener {
+
+        boolean mRegistered;
+        Boolean mCurrentlyFar;
+
+        void setRegistered(boolean register) {
+            if (mRegistered == register) {
+                // Send an update even if we don't re-register.
+                mHandler.post(() -> {
+                    if (mCurrentlyFar != null) {
+                        mProxCallback.accept(mCurrentlyFar);
+                    }
+                });
+                return;
+            }
+            if (register) {
+                mRegistered = mSensorManager.registerListener(this,
+                        mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
+                        SensorManager.SENSOR_DELAY_NORMAL, mHandler);
+            } else {
+                mSensorManager.unregisterListener(this);
+                mRegistered = false;
+                mCurrentlyFar = null;
+            }
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
+            mProxCallback.accept(mCurrentlyFar);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     }
 
