@@ -24,15 +24,12 @@
 
 namespace android {
 
-// place the attributes into a java Bundle object
-// decide whether this is appropriately scoped here.
-// if we do it somewhere else, we have to figure a "give me all the attrs"
-// access to the inside of MediaAnalyticsItem
+// place the attributes into a java PersistableBundle object
 jobject MediaMetricsJNI::writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *item, jobject mybundle) {
 
-    jclass clazzBundle = env->FindClass("android/os/Bundle");
+    jclass clazzBundle = env->FindClass("android/os/PersistableBundle");
     if (clazzBundle==NULL) {
-        ALOGD("can't find android/os/Bundle");
+        ALOGD("can't find android/os/PersistableBundle");
         return NULL;
     }
     // sometimes the caller provides one for us to fill
@@ -58,7 +55,7 @@ jobject MediaMetricsJNI::writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *i
     // -- get name, get type, get value
     // -- insert appropriately into the bundle
     for (size_t i = 0 ; i < item->mPropCount; i++ ) {
-	    MediaAnalyticsItem::Prop *prop = &item->mProps[i];
+            MediaAnalyticsItem::Prop *prop = &item->mProps[i];
             // build the key parameter from prop->mName
             jstring keyName = env->NewStringUTF(prop->mName);
             // invoke the appropriate method to insert

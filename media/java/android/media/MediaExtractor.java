@@ -25,10 +25,10 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaHTTPService;
-import android.media.MediaMetricsSet;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 
 import com.android.internal.util.Preconditions;
 
@@ -689,22 +689,21 @@ final public class MediaExtractor {
     /**
      *  Return Metrics data about the current media container.
      *
-     * @return a MediaMetricsSet containing the set of attributes and values
+     * @return a {@link PersistableBundle} containing the set of attributes and values
      * available for the media container being handled by this instance
      * of MediaExtractor.
-     * The attributes are descibed in {@link MediaMetricsSet.MediaExtractor}.
+     * The attributes are descibed in {@link MetricsConstants}.
      *
      *  Additional vendor-specific fields may also be present in
      *  the return value.
      */
 
-    public MediaMetricsSet getMetrics() {
-        Bundle bundle = native_getMetrics();
-	MediaMetricsSet mSet = new MediaMetricsSet(bundle);
-	return mSet;
+    public PersistableBundle getMetrics() {
+        PersistableBundle bundle = native_getMetrics();
+        return bundle;
     }
 
-    private native Bundle native_getMetrics();
+    private native PersistableBundle native_getMetrics();
 
     private static native final void native_init();
     private native final void native_setup();
@@ -718,4 +717,32 @@ final public class MediaExtractor {
     private MediaCas mMediaCas;
 
     private long mNativeContext;
+
+    public final static class MetricsConstants
+    {
+        private MetricsConstants() {}
+
+        /**
+         * Key to extract the container format
+         * from the {@link MediaExtractor#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String FORMAT = "android.media.mediaextractor.fmt";
+
+        /**
+         * Key to extract the container MIME type
+         * from the {@link MediaExtractor#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String MIME_TYPE = "android.media.mediaextractor.mime";
+
+        /**
+         * Key to extract the number of tracks in the container
+         * from the {@link MediaExtractor#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String TRACKS = "android.media.mediaextractor.ntrk";
+
+    }
+
 }
