@@ -40,6 +40,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.defcontainer">
         <permission name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
+        <permission name="android.permission.ALLOCATE_AGGRESSIVE"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
     </privapp-permissions>
