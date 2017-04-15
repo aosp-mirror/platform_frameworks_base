@@ -109,7 +109,6 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
-import com.android.internal.util.Preconditions;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -953,41 +952,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int VISIBILITY_MASK = 0x0000000C;
 
     private static final int[] VISIBILITY_FLAGS = {VISIBLE, INVISIBLE, GONE};
-
-    /** @hide */
-    @IntDef({
-            AUTOFILL_MODE_INHERIT,
-            AUTOFILL_MODE_AUTO,
-            AUTOFILL_MODE_MANUAL
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface AutofillMode {}
-
-    /**
-     * This view inherits the autofill state from it's parent. If there is no parent it is
-     * {@link #AUTOFILL_MODE_AUTO}.
-     * Use with {@link #setAutofillMode(int)} and <a href="#attr_android:autofillMode">
-     * {@code android:autofillMode}.
-     */
-    public static final int AUTOFILL_MODE_INHERIT = 0;
-
-    /**
-     * Allows this view to automatically trigger an autofill request when it get focus.
-     * Use with {@link #setAutofillMode(int)} and <a href="#attr_android:autofillMode">
-     * {@code android:autofillMode}.
-     */
-    public static final int AUTOFILL_MODE_AUTO = 1;
-
-    /**
-     * Do not trigger an autofill request if this view is focused. The user can still force
-     * an autofill request.
-     * <p>This does not prevent this field from being autofilled if an autofill operation is
-     * triggered from a different view.</p>
-     *
-     * Use with {@link #setAutofillMode(int)} and <a href="#attr_android:autofillMode">{@code
-     * android:autofillMode}.
-     */
-    public static final int AUTOFILL_MODE_MANUAL = 2;
 
     /**
      * This view contains an email address.
@@ -2762,7 +2726,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                 1                 PFLAG3_IS_AUTOFILLED
      *                1                  PFLAG3_FINGER_DOWN
      *               1                   PFLAG3_FOCUSED_BY_DEFAULT
-     *             11                    PFLAG3_AUTO_FILL_MODE_MASK
+     *             __                    unused
      *           11                      PFLAG3_IMPORTANT_FOR_AUTOFILL
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
@@ -2990,23 +2954,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setFocusedByDefault(boolean)
      */
     private static final int PFLAG3_FOCUSED_BY_DEFAULT = 0x40000;
-
-    /**
-     * Shift for the place where the autofill mode is stored in the pflags
-     *
-     * @see #getAutofillMode()
-     * @see #setAutofillMode(int)
-     */
-    private static final int PFLAG3_AUTOFILL_MODE_SHIFT = 19;
-
-    /**
-     * Mask for autofill modes
-     *
-     * @see #getAutofillMode()
-     * @see #setAutofillMode(int)
-     */
-    private static final int PFLAG3_AUTOFILL_MODE_MASK = (AUTOFILL_MODE_INHERIT
-            | AUTOFILL_MODE_AUTO | AUTOFILL_MODE_MANUAL) << PFLAG3_AUTOFILL_MODE_SHIFT;
 
     /**
      * Shift for the bits in {@link #mPrivateFlags3} related to the
@@ -5055,11 +5002,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         setFocusedByDefault(a.getBoolean(attr, true));
                     }
                     break;
-                case R.styleable.View_autofillMode:
-                    if (a.peekValue(attr) != null) {
-                        setAutofillMode(a.getInt(attr, AUTOFILL_MODE_INHERIT));
-                    }
-                    break;
                 case R.styleable.View_autofillHints:
                     if (a.peekValue(attr) != null) {
                         CharSequence[] rawHints = null;
@@ -6849,8 +6791,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void notifyEnterOrExitForAutoFillIfNeeded(boolean enter) {
-        if (isAutofillable() && isAttachedToWindow()
-                && getResolvedAutofillMode() == AUTOFILL_MODE_AUTO) {
+        if (isAutofillable() && isAttachedToWindow()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
                 if (enter && hasWindowFocus() && isFocused()) {
@@ -9159,21 +9100,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Set autofill mode for the view.
-     *
-     * @param autofillMode One of {@link #AUTOFILL_MODE_INHERIT}, {@link #AUTOFILL_MODE_AUTO},
-     *                     or {@link #AUTOFILL_MODE_MANUAL}.
-     * @attr ref android.R.styleable#View_autofillMode
-     */
-    public void setAutofillMode(@AutofillMode int autofillMode) {
-        Preconditions.checkArgumentInRange(autofillMode, AUTOFILL_MODE_INHERIT,
-                AUTOFILL_MODE_MANUAL, "autofillMode");
-
-        mPrivateFlags3 &= ~PFLAG3_AUTOFILL_MODE_MASK;
-        mPrivateFlags3 |= autofillMode << PFLAG3_AUTOFILL_MODE_SHIFT;
-    }
-
-    /**
      * Sets the hints that helps the autofill service to select the appropriate data to fill the
      * view.
      *
@@ -9807,48 +9733,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty
     public final boolean isFocusableInTouchMode() {
         return FOCUSABLE_IN_TOUCH_MODE == (mViewFlags & FOCUSABLE_IN_TOUCH_MODE);
-    }
-
-    /**
-     * Returns the autofill mode for this view.
-     *
-     * @return One of {@link #AUTOFILL_MODE_INHERIT}, {@link #AUTOFILL_MODE_AUTO}, or
-     * {@link #AUTOFILL_MODE_MANUAL}.
-     * @attr ref android.R.styleable#View_autofillMode
-     */
-    @ViewDebug.ExportedProperty(mapping = {
-            @ViewDebug.IntToString(from = AUTOFILL_MODE_INHERIT, to = "AUTOFILL_MODE_INHERIT"),
-            @ViewDebug.IntToString(from = AUTOFILL_MODE_AUTO, to = "AUTOFILL_MODE_AUTO"),
-            @ViewDebug.IntToString(from = AUTOFILL_MODE_MANUAL, to = "AUTOFILL_MODE_MANUAL")
-            })
-    @AutofillMode
-    public int getAutofillMode() {
-        return (mPrivateFlags3 & PFLAG3_AUTOFILL_MODE_MASK) >> PFLAG3_AUTOFILL_MODE_SHIFT;
-    }
-
-    /**
-     * Returns the resolved autofill mode for this view.
-     *
-     * This is the same as {@link #getAutofillMode()} but if the mode is
-     * {@link #AUTOFILL_MODE_INHERIT} the parents autofill mode will be returned.
-     *
-     * @return One of {@link #AUTOFILL_MODE_AUTO}, or {@link #AUTOFILL_MODE_MANUAL}. If the auto-
-     *         fill mode can not be resolved e.g. {@link #getAutofillMode()} is
-     *         {@link #AUTOFILL_MODE_INHERIT} and the {@link View} is detached
-     *         {@link #AUTOFILL_MODE_AUTO} is returned.
-     */
-    public @AutofillMode int getResolvedAutofillMode() {
-        @AutofillMode int autofillMode = getAutofillMode();
-
-        if (autofillMode == AUTOFILL_MODE_INHERIT) {
-            if (mParent == null) {
-                return AUTOFILL_MODE_AUTO;
-            } else {
-                return mParent.getResolvedAutofillMode();
-            }
-        } else {
-            return autofillMode;
-        }
     }
 
     /**
