@@ -23,12 +23,12 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo.CodecCapabilities;
-import android.media.MediaMetricsSet;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.view.Surface;
 
 import java.io.IOException;
@@ -3188,20 +3188,19 @@ final public class MediaCodec {
     /**
      *  Return Metrics data about the current codec instance.
      *
-     * @return a MediaMetricsSet containing the set of attributes and values
+     * @return a {@link PersistableBundle} containing the set of attributes and values
      * available for the media being handled by this instance of MediaCodec
-     * The attributes are descibed in {@link MediaMetricsSet.MediaCodec}.
+     * The attributes are descibed in {@link MetricsConstants}.
      *
-     *  Additional vendor-specific fields may also be present in
-     *  the return value.
+     * Additional vendor-specific fields may also be present in
+     * the return value.
      */
-    public MediaMetricsSet getMetrics() {
-        Bundle bundle = native_getMetrics();
-	MediaMetricsSet mSet = new MediaMetricsSet(bundle);
-	return mSet;
+    public PersistableBundle getMetrics() {
+        PersistableBundle bundle = native_getMetrics();
+        return bundle;
     }
 
-    private native Bundle native_getMetrics();
+    private native PersistableBundle native_getMetrics();
 
     /**
      * Change a video encoder's target bitrate on the fly. The value is an
@@ -3659,5 +3658,81 @@ final public class MediaCodec {
             private final int mColInc;
             private final ByteBuffer mData;
         }
+    }
+
+    public final static class MetricsConstants
+    {
+        private MetricsConstants() {}
+
+        /**
+         * Key to extract the codec being used
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String CODEC = "android.media.mediacodec.codec";
+
+        /**
+         * Key to extract the MIME type
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String MIME_TYPE = "android.media.mediacodec.mime";
+
+        /**
+         * Key to extract what the codec mode
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is a String. Values will be one of the constants
+         * {@link #MODE_AUDIO} or {@link #MODE_VIDEO}.
+         */
+        public static final String MODE = "android.media.mediacodec.mode";
+
+        /**
+         * The value returned for the key {@link #MODE} when the
+         * codec is a audio codec.
+         */
+        public static final String MODE_AUDIO = "audio";
+
+        /**
+         * The value returned for the key {@link #MODE} when the
+         * codec is a video codec.
+         */
+        public static final String MODE_VIDEO = "video";
+
+        /**
+         * Key to extract the flag indicating whether the codec is running
+         * as an encoder or decoder from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         * A 0 indicates decoder; 1 indicates encoder.
+         */
+        public static final String ENCODER = "android.media.mediacodec.encoder";
+
+        /**
+         * Key to extract the flag indicating whether the codec is running
+         * in secure (DRM) mode from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String SECURE = "android.media.mediacodec.secure";
+
+        /**
+         * Key to extract the width (in pixels) of the video track
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String WIDTH = "android.media.mediacodec.width";
+
+        /**
+         * Key to extract the height (in pixels) of the video track
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String HEIGHT = "android.media.mediacodec.height";
+
+        /**
+         * Key to extract the rotation (in degrees) to properly orient the video
+         * from the {@link MediaCodec#getMetrics} return.
+         * The value is a integer.
+         */
+        public static final String ROTATION = "android.media.mediacodec.rotation";
+
     }
 }
