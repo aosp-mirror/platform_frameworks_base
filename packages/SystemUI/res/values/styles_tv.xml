@@ -21,5 +21,6 @@
     <style name="PipTheme" parent="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowDisablePreview">true</item>
      </style>
 </resources>
