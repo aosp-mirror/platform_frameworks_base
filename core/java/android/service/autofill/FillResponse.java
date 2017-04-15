@@ -132,25 +132,25 @@ import java.util.ArrayList;
  */
 public final class FillResponse implements Parcelable {
 
-    private final ArrayList<Dataset> mDatasets;
-    private final SaveInfo mSaveInfo;
-    private final Bundle mExtras;
-    private final RemoteViews mPresentation;
-    private final IntentSender mAuthentication;
-    private AutofillId[] mAuthenticationIds;
+    private final @Nullable ArrayList<Dataset> mDatasets;
+    private final @Nullable SaveInfo mSaveInfo;
+    private final @Nullable Bundle mClientState;
+    private final @Nullable RemoteViews mPresentation;
+    private final @Nullable IntentSender mAuthentication;
+    private final @Nullable AutofillId[] mAuthenticationIds;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
         mSaveInfo = builder.mSaveInfo;
-        mExtras = builder.mExtras;
+        mClientState = builder.mCLientState;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
         mAuthenticationIds = builder.mAuthenticationIds;
     }
 
     /** @hide */
-    public @Nullable Bundle getExtras() {
-        return mExtras;
+    public @Nullable Bundle getClientState() {
+        return mClientState;
     }
 
     /** @hide */
@@ -185,7 +185,7 @@ public final class FillResponse implements Parcelable {
     public static final class Builder {
         private ArrayList<Dataset> mDatasets;
         private SaveInfo mSaveInfo;
-        private Bundle mExtras;
+        private Bundle mCLientState;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private AutofillId[] mAuthenticationIds;
@@ -289,23 +289,35 @@ public final class FillResponse implements Parcelable {
             return this;
         }
 
+        @Deprecated
+        public Builder setExtras(@Nullable Bundle extras) {
+            throwIfDestroyed();
+            mCLientState = extras;
+            return this;
+        }
+
         /**
-         * Sets a {@link Bundle} that will be passed to subsequent APIs that
+         * Sets a {@link Bundle state} that will be passed to subsequent APIs that
          * manipulate this response. For example, they are passed to subsequent
          * calls to {@link AutofillService#onFillRequest(
          * android.app.assist.AssistStructure, Bundle, int,
          * android.os.CancellationSignal, FillCallback)} and {@link AutofillService#onSaveRequest(
-         * android.app.assist.AssistStructure, Bundle, SaveCallback)}.
+         * android.app.assist.AssistStructure, Bundle, SaveCallback)}. You can use
+         * this to store intermediate state that is persistent across multiple
+         * fill requests and the subsequent save request.
          *
          * <p>If this method is called on multiple {@link FillResponse} objects for the same
          * activity, just the latest bundle is passed back to the service.
          *
-         * @param extras The response extras.
+         * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
+         * save request} is made the client state is cleared.
+         *
+         * @param clientState The custom client state.
          * @return This builder.
          */
-        public Builder setExtras(Bundle extras) {
+        public Builder setClientState(@Nullable Bundle clientState) {
             throwIfDestroyed();
-            mExtras = extras;
+            mCLientState = clientState;
             return this;
         }
 
@@ -344,7 +356,7 @@ public final class FillResponse implements Parcelable {
         return new StringBuilder(
                 "FillResponse: [datasets=").append(mDatasets)
                 .append(", saveInfo=").append(mSaveInfo)
-                .append(", hasExtras=").append(mExtras != null)
+                .append(", clientState=").append(mClientState != null)
                 .append(", hasPresentation=").append(mPresentation != null)
                 .append(", hasAuthentication=").append(mAuthentication != null)
                 .append(", authenticationSize=").append(mAuthenticationIds != null
@@ -365,7 +377,7 @@ public final class FillResponse implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeTypedArrayList(mDatasets, flags);
         parcel.writeParcelable(mSaveInfo, flags);
-        parcel.writeParcelable(mExtras, flags);
+        parcel.writeParcelable(mClientState, flags);
         parcel.writeParcelableArray(mAuthenticationIds, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
