@@ -32,6 +32,7 @@ import android.hardware.SystemSensorManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.hardware.power.V1_0.PowerHint;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
@@ -75,6 +76,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -187,6 +190,11 @@ public final class PowerManagerService extends SystemService
 
     // System property indicating that the screen should remain off until an explicit user action
     private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
+
+    private static final String TRACE_SCREEN_ON = "Screen turning on";
+
+    /** If turning screen on takes more than this long, we show a warning on logcat. */
+    private static final int SCREEN_ON_LATENCY_WARNING_MS = 200;
 
     /** Constants for {@link #shutdownOrRebootInternal} */
     @Retention(RetentionPolicy.SOURCE)
@@ -1369,6 +1377,8 @@ public final class PowerManagerService extends SystemService
             return false;
         }
 
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, 0);
+
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "wakeUp");
         try {
             switch (mWakefulness) {
@@ -1551,6 +1561,23 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private void logScreenOn() {
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, 0);
+
+        final int latencyMs = (int) (SystemClock.uptimeMillis() - mLastWakeTime);
+
+        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
+        log.setType(MetricsEvent.TYPE_OPEN);
+        log.setSubtype(0); // not user initiated
+        log.setLatency(latencyMs); // How long it took.
+        MetricsLogger.action(log);
+        EventLogTags.writePowerScreenState(1, 0, 0, 0, latencyMs);
+
+        if (latencyMs >= SCREEN_ON_LATENCY_WARNING_MS) {
+            Slog.w(TAG, "Screen on took " + latencyMs+ " ms");
+        }
+    }
+
     private void finishWakefulnessChangeIfNeededLocked() {
         if (mWakefulnessChanging && mDisplayReady) {
             if (mWakefulness == WAKEFULNESS_DOZING
@@ -1559,6 +1586,9 @@ public final class PowerManagerService extends SystemService
             }
             if (mWakefulness == WAKEFULNESS_DOZING || mWakefulness == WAKEFULNESS_ASLEEP) {
                 logSleepTimeoutRecapturedLocked();
+            }
+            if (mWakefulness == WAKEFULNESS_AWAKE) {
+                logScreenOn();
             }
             mWakefulnessChanging = false;
             mNotifier.onWakefulnessChangeFinished();
