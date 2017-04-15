@@ -36,6 +36,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     public abstract boolean handleFailedAttempt();
     public abstract void resetFailedAttempts();
+    private boolean mAlreadyCancelled;
 
     public AuthenticationClient(Context context, long halDeviceId, IBinder token,
             IFingerprintServiceReceiver receiver, int targetUserId, int groupId, long opId,
@@ -129,6 +130,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     @Override
     public int stop(boolean initiatedByClient) {
+        if (mAlreadyCancelled) {
+            Slog.w(TAG, "stopAuthentication: already cancelled!");
+            return 0;
+        }
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "stopAuthentication: no fingerprint HAL!");
@@ -145,6 +150,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             Slog.e(TAG, "stopAuthentication failed", e);
             return ERROR_ESRCH;
         }
+        mAlreadyCancelled = true;
         return 0; // success
     }
 
