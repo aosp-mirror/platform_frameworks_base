@@ -155,8 +155,6 @@ public final class BroadcastQueue {
 
     static final int BROADCAST_INTENT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG;
     static final int BROADCAST_TIMEOUT_MSG = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 1;
-    static final int SCHEDULE_TEMP_WHITELIST_MSG
-            = ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 2;
 
     final BroadcastHandler mHandler;
 
@@ -176,13 +174,6 @@ public final class BroadcastQueue {
                 case BROADCAST_TIMEOUT_MSG: {
                     synchronized (mService) {
                         broadcastTimeoutLocked(true);
-                    }
-                } break;
-                case SCHEDULE_TEMP_WHITELIST_MSG: {
-                    DeviceIdleController.LocalService dic = mService.mLocalDeviceIdleController;
-                    if (dic != null) {
-                        dic.addPowerSaveTempWhitelistAppDirect(UserHandle.getAppId(msg.arg1),
-                                msg.arg2, true, (String)msg.obj);
                     }
                 } break;
             }
@@ -789,12 +780,11 @@ public final class BroadcastQueue {
         if (r.intent.getAction() != null) {
             b.append(r.intent.getAction());
         } else if (r.intent.getComponent() != null) {
-            b.append(r.intent.getComponent().flattenToShortString());
+            r.intent.getComponent().appendShortString(b);
         } else if (r.intent.getData() != null) {
             b.append(r.intent.getData());
         }
-        mHandler.obtainMessage(SCHEDULE_TEMP_WHITELIST_MSG, uid, (int)duration, b.toString())
-                .sendToTarget();
+        mService.tempWhitelistUidLocked(uid, duration, b.toString());
     }
 
     /**
