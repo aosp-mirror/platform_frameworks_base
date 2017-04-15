@@ -908,7 +908,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	ext \
 	icu4j \
 	framework \
-	telephony-common \
 	voip-common
 
 framework_docs_LOCAL_JAVA_LIBRARIES := \
