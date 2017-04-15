@@ -44,11 +44,15 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
+import android.service.autofill.FillContext;
+import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
+import android.service.autofill.SaveRequest;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -125,7 +129,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     RemoteFillService mRemoteFillService;
 
     @GuardedBy("mLock")
-    private ArrayList<FillResponse> mResponses;
+    private SparseArray<FillResponse> mResponses;
 
     /**
      * Response that requires a service authentitcation request.
@@ -156,7 +160,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * and used on subsequent {@code onFillRequest()} and {@code onSaveRequest()} calls.
      */
     @GuardedBy("mLock")
-    private Bundle mExtras;
+    private Bundle mClientState;
 
     /**
      * Flags used to start the session.
@@ -222,7 +226,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // FillServiceCallbacks
     @Override
     public void onFillRequestSuccess(@Nullable FillResponse response,
-            @NonNull String servicePackageName) {
+            @NonNull String servicePackageName, int requestId) {
         if (response == null) {
             if ((mFlags & FLAG_MANUAL_REQUEST) != 0) {
                 getUiForShowing().showError(R.string.autofill_error_cannot_autofill);
@@ -243,7 +247,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // TODO(b/33197203 , b/35707731): make sure it's ignored if there is one already
                 mResponseWaitingAuth = response;
             }
-            processResponseLocked(response);
+            processResponseLocked(response, requestId);
         }
 
         final LogMaker log = (new LogMaker(MetricsEvent.AUTOFILL_REQUEST))
@@ -394,12 +398,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     AutofillManager.EXTRA_AUTHENTICATION_RESULT);
             if (result instanceof FillResponse) {
                 mMetricsLogger.action(MetricsEvent.AUTOFILL_AUTHENTICATED, mPackageName);
+                final int requestIndex = mResponses.indexOfValue(mResponseWaitingAuth);
                 mResponseWaitingAuth = null;
-                processResponseLocked((FillResponse) result);
+                if (requestIndex >= 0) {
+                    final int requestId = mResponses.keyAt(requestIndex);
+                    processResponseLocked((FillResponse) result, requestId);
+                } else {
+                    Slog.e(TAG, "Error cannot find id for auth response");
+                }
             } else if (result instanceof Dataset) {
                 final Dataset dataset = (Dataset) result;
                 for (int i = 0; i < mResponses.size(); i++) {
-                    final FillResponse response = mResponses.get(i);
+                    final FillResponse response = mResponses.valueAt(i);
                     final int index = response.getDatasets().indexOf(mDatasetWaitingAuth);
                     if (index >= 0) {
                         response.getDatasets().set(index, dataset);
@@ -440,12 +450,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return true;
         }
 
-        final FillResponse response = mResponses.get(mResponses.size() - 1);
+        final int lastResponseIdx = getLastResponseIndex();
+        if (lastResponseIdx < 0) {
+            Slog.d(TAG, "showSaveLocked(): mResponses=" + mResponses
+                    + ", mViewStates=" + mViewStates);
+            return true;
+        }
 
+        final FillResponse response = mResponses.valueAt(lastResponseIdx);
         final SaveInfo saveInfo = response.getSaveInfo();
         if (DEBUG) {
-            Slog.d(TAG,
-                    "showSaveLocked(): mResponses=" + mResponses + ", mViewStates=" + mViewStates);
+            Slog.d(TAG, "showSaveLocked(): mResponses=" + mResponses
+                    + ", mViewStates=" + mViewStates);
         }
 
         /*
@@ -572,7 +588,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mStructure.dump();
         }
 
-        mRemoteFillService.onSaveRequest(mStructure, mExtras);
+        // TODO(b/33197203): Implement partitioning properly
+        final int lastResponseIdx = getLastResponseIndex();
+        final int requestId = mResponses.keyAt(lastResponseIdx);
+        final FillContext fillContext = new FillContext(requestId, mStructure);
+        final ArrayList fillContexts = new ArrayList(1);
+        fillContexts.add(fillContext);
+
+        final SaveRequest saveRequest = new SaveRequest(fillContexts, mClientState);
+        mRemoteFillService.onSaveRequest(saveRequest);
     }
 
     void updateLocked(AutofillId id, Rect virtualBounds, AutofillValue value, int flags) {
@@ -686,7 +710,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             overlay.focused = id.equals(viewState.id);
             node.setAutofillOverlay(overlay);
         }
-        mRemoteFillService.onFillRequest(mStructure, mExtras, 0);
+
+        FillRequest request = new FillRequest(mStructure, mClientState, 0);
+        mRemoteFillService.onFillRequest(request);
 
         return newViewState;
     }
@@ -723,17 +749,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private void processResponseLocked(FillResponse response) {
+    private void processResponseLocked(FillResponse response, int requestId) {
         if (DEBUG) {
             Slog.d(TAG, "processResponseLocked(mCurrentViewId=" + mCurrentViewId + "):" + response);
         }
 
         if (mResponses == null) {
-            mResponses = new ArrayList<>(4);
+            mResponses = new SparseArray<>(4);
         }
-        mResponses.add(response);
+        mResponses.put(requestId, response);
         if (response != null) {
-            mExtras = response.getExtras();
+            mClientState = response.getClientState();
         }
 
         setViewStatesLocked(response, ViewState.STATE_FILLABLE);
@@ -884,7 +910,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         pw.print(prefix); pw.print("mHasCallback: "); pw.println(mHasCallback);
-        pw.print(prefix); pw.print("mExtras: "); pw.println(Helper.bundleToString(mExtras));
+        pw.print(prefix); pw.print("mClientState: "); pw.println(
+                Helper.bundleToString(mClientState));
         mRemoteFillService.dump(prefix, pw);
     }
 
@@ -960,5 +987,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         destroyLocked();
         mService.removeSessionLocked(id);
+    }
+
+    private int getLastResponseIndex() {
+        // The response ids are monotonically increasing so
+        // we just find the largest id which is the last. We
+        // do not rely on the internal ordering in sparse
+        // array to avoid - wow this stopped working!?
+        int lastResponseIdx = -1;
+        int lastResponseId = -1;
+        final int responseCount = mResponses.size();
+        for (int i = 0; i < responseCount; i++) {
+            if (mResponses.keyAt(i) > lastResponseId) {
+                lastResponseIdx = i;
+            }
+        }
+        return lastResponseIdx;
     }
 }
