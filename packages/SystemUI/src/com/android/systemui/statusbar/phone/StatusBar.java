@@ -4562,7 +4562,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // TODO: Figure out way to remove these.
     public NavigationBarView getNavigationBarView() {
-        return (NavigationBarView) mNavigationBar.getView();
+        return (mNavigationBar != null ? (NavigationBarView) mNavigationBar.getView() : null);
     }
 
     public KeyguardBottomAreaView getKeyguardBottomAreaView() {
