@@ -659,17 +659,4 @@ public interface ViewParent {
      * @return true if the action was consumed by this ViewParent
      */
     public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle arguments);
-
-    /**
-     * Return the resolved autofill mode.
-     *
-     * @return One of {@link View#AUTOFILL_MODE_AUTO}, {@link View#AUTOFILL_MODE_MANUAL} if the
-     *         autofill mode can be resolved. If the autofill mode cannot be resolved
-     *         {@link View#AUTOFILL_MODE_AUTO}.
-     *
-     * @see View#getResolvedAutofillMode()
-     */
-    default @View.AutofillMode int getResolvedAutofillMode() {
-        return View.AUTOFILL_MODE_AUTO;
-    }
 }

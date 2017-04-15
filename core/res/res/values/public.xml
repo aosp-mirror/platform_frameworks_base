@@ -2797,7 +2797,7 @@
         <public name="numericModifiers" />
         <public name="fontProviderAuthority" />
         <public name="fontProviderQuery" />
-        <public name="autofillMode" />
+        <public name="__removed3" />
         <public name="primaryContentAlpha" />
         <public name="secondaryContentAlpha" />
         <public name="requiredFeature" />
