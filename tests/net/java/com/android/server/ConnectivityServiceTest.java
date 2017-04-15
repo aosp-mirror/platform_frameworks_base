@@ -42,6 +42,7 @@ import android.net.INetworkStatsService;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.MatchAllNetworkSpecifier;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
@@ -51,7 +52,9 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
 import android.net.NetworkRequest;
+import android.net.NetworkSpecifier;
 import android.net.RouteInfo;
+import android.net.StringNetworkSpecifier;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.MultinetworkPolicyTracker;
 import android.os.ConditionVariable;
@@ -64,12 +67,15 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Messenger;
 import android.os.MessageQueue.IdleHandler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.LogPrinter;
 
@@ -316,6 +322,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         public void setSignalStrength(int signalStrength) {
             mNetworkCapabilities.setSignalStrength(signalStrength);
+            mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+        }
+
+        public void setNetworkSpecifier(NetworkSpecifier networkSpecifier) {
+            mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
             mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
         }
 
@@ -1819,34 +1830,130 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         captivePortalCallback.assertNoCallback();
     }
 
-    @SmallTest
-    public void testInvalidNetworkSpecifier() {
-        boolean execptionCalled = true;
+    private NetworkRequest.Builder newWifiRequestBuilder() {
+        return new NetworkRequest.Builder().addTransportType(TRANSPORT_WIFI);
+    }
 
-        try {
-            NetworkRequest.Builder builder = new NetworkRequest.Builder();
-            builder.setNetworkSpecifier(MATCH_ALL_REQUESTS_NETWORK_SPECIFIER);
-            execptionCalled = false;
-        } catch (IllegalArgumentException e) {
-            // do nothing - should get here
+    @SmallTest
+    public void testNetworkSpecifier() {
+        NetworkRequest rEmpty1 = newWifiRequestBuilder().build();
+        NetworkRequest rEmpty2 = newWifiRequestBuilder().setNetworkSpecifier((String) null).build();
+        NetworkRequest rEmpty3 = newWifiRequestBuilder().setNetworkSpecifier("").build();
+        NetworkRequest rEmpty4 = newWifiRequestBuilder().setNetworkSpecifier(
+            (NetworkSpecifier) null).build();
+        NetworkRequest rFoo = newWifiRequestBuilder().setNetworkSpecifier("foo").build();
+        NetworkRequest rBar = newWifiRequestBuilder().setNetworkSpecifier(
+                new StringNetworkSpecifier("bar")).build();
+
+        TestNetworkCallback cEmpty1 = new TestNetworkCallback();
+        TestNetworkCallback cEmpty2 = new TestNetworkCallback();
+        TestNetworkCallback cEmpty3 = new TestNetworkCallback();
+        TestNetworkCallback cEmpty4 = new TestNetworkCallback();
+        TestNetworkCallback cFoo = new TestNetworkCallback();
+        TestNetworkCallback cBar = new TestNetworkCallback();
+        TestNetworkCallback[] emptyCallbacks = new TestNetworkCallback[] {
+                cEmpty1, cEmpty2, cEmpty3 };
+
+        mCm.registerNetworkCallback(rEmpty1, cEmpty1);
+        mCm.registerNetworkCallback(rEmpty2, cEmpty2);
+        mCm.registerNetworkCallback(rEmpty3, cEmpty3);
+        mCm.registerNetworkCallback(rEmpty4, cEmpty4);
+        mCm.registerNetworkCallback(rFoo, cFoo);
+        mCm.registerNetworkCallback(rBar, cBar);
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        cEmpty1.expectAvailableCallbacks(mWiFiNetworkAgent);
+        cEmpty2.expectAvailableCallbacks(mWiFiNetworkAgent);
+        cEmpty3.expectAvailableCallbacks(mWiFiNetworkAgent);
+        cEmpty4.expectAvailableCallbacks(mWiFiNetworkAgent);
+        assertNoCallbacks(cFoo, cBar);
+
+        mWiFiNetworkAgent.setNetworkSpecifier(new StringNetworkSpecifier("foo"));
+        cFoo.expectAvailableCallbacks(mWiFiNetworkAgent);
+        for (TestNetworkCallback c: emptyCallbacks) {
+            c.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+        }
+        cFoo.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+        cFoo.assertNoCallback();
+
+        mWiFiNetworkAgent.setNetworkSpecifier(new StringNetworkSpecifier("bar"));
+        cFoo.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        cBar.expectAvailableCallbacks(mWiFiNetworkAgent);
+        for (TestNetworkCallback c: emptyCallbacks) {
+            c.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+        }
+        cBar.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
+        cBar.assertNoCallback();
+
+        mWiFiNetworkAgent.setNetworkSpecifier(null);
+        cBar.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        for (TestNetworkCallback c: emptyCallbacks) {
+            c.expectCallback(CallbackState.NETWORK_CAPABILITIES, mWiFiNetworkAgent);
         }
 
-        assertTrue("NetworkRequest builder with MATCH_ALL_REQUESTS_NETWORK_SPECIFIER",
-                execptionCalled);
+        assertNoCallbacks(cEmpty1, cEmpty2, cEmpty3, cFoo, cBar);
+    }
+
+    @SmallTest
+    public void testInvalidNetworkSpecifier() {
+        try {
+            NetworkRequest.Builder builder = new NetworkRequest.Builder();
+            builder.setNetworkSpecifier(new MatchAllNetworkSpecifier());
+            fail("NetworkRequest builder with MatchAllNetworkSpecifier");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
 
         try {
             NetworkCapabilities networkCapabilities = new NetworkCapabilities();
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
-                    .setNetworkSpecifier(NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER);
+                    .setNetworkSpecifier(new MatchAllNetworkSpecifier());
             mService.requestNetwork(networkCapabilities, null, 0, null,
                     ConnectivityManager.TYPE_WIFI);
-            execptionCalled = false;
-        } catch (IllegalArgumentException e) {
-            // do nothing - should get here
+            fail("ConnectivityService requestNetwork with MatchAllNetworkSpecifier");
+        } catch (IllegalArgumentException expected) {
+            // expected
         }
 
-        assertTrue("ConnectivityService requestNetwork with MATCH_ALL_REQUESTS_NETWORK_SPECIFIER",
-                execptionCalled);
+        class NonParcelableSpecifier extends NetworkSpecifier {
+            public boolean satisfiedBy(NetworkSpecifier other) { return false; }
+        };
+        class ParcelableSpecifier extends NonParcelableSpecifier implements Parcelable {
+            @Override public int describeContents() { return 0; }
+            @Override public void writeToParcel(Parcel p, int flags) {}
+        }
+        NetworkRequest.Builder builder;
+
+        builder = new NetworkRequest.Builder().addTransportType(TRANSPORT_ETHERNET);
+        try {
+            builder.setNetworkSpecifier(new NonParcelableSpecifier());
+            Parcel parcelW = Parcel.obtain();
+            builder.build().writeToParcel(parcelW, 0);
+            fail("Parceling a non-parcelable specifier did not throw an exception");
+        } catch (Exception e) {
+            // expected
+        }
+
+        builder = new NetworkRequest.Builder().addTransportType(TRANSPORT_ETHERNET);
+        builder.setNetworkSpecifier(new ParcelableSpecifier());
+        NetworkRequest nr = builder.build();
+        assertNotNull(nr);
+
+        try {
+            Parcel parcelW = Parcel.obtain();
+            nr.writeToParcel(parcelW, 0);
+            byte[] bytes = parcelW.marshall();
+            parcelW.recycle();
+
+            Parcel parcelR = Parcel.obtain();
+            parcelR.unmarshall(bytes, 0, bytes.length);
+            parcelR.setDataPosition(0);
+            NetworkRequest rereadNr = NetworkRequest.CREATOR.createFromParcel(parcelR);
+            fail("Unparceling a non-framework NetworkSpecifier did not throw an exception");
+        } catch (Exception e) {
+            // expected
+        }
     }
 
     @SmallTest

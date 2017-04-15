@@ -55,6 +55,7 @@ import android.net.LinkProperties.CompareResult;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
+import android.net.MatchAllNetworkSpecifier;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -4044,11 +4045,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throw new IllegalArgumentException("Bad timeout specified");
         }
 
-        if (NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER
-                .equals(networkCapabilities.getNetworkSpecifier())) {
-            throw new IllegalArgumentException("Invalid network specifier - must not be '"
-                    + NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER + "'");
-        }
+        MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(
+                networkCapabilities.getNetworkSpecifier());
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId(), type);
@@ -4117,6 +4115,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
 
+        MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(
+                networkCapabilities.getNetworkSpecifier());
+
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId(), NetworkRequest.Type.REQUEST);
         NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation);
@@ -4178,6 +4179,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nc.addCapability(NET_CAPABILITY_FOREGROUND);
         }
 
+        MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(
+                networkCapabilities.getNetworkSpecifier());
+
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder);
@@ -4194,6 +4198,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!hasWifiNetworkListenPermission(networkCapabilities)) {
             enforceAccessPermission();
         }
+
+        MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(
+                networkCapabilities.getNetworkSpecifier());
 
         NetworkRequest networkRequest = new NetworkRequest(
                 new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId(),
