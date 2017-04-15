@@ -59,7 +59,7 @@ static jint android_os_VintfObject_verify(JNIEnv *env, jclass clazz, jobjectArra
         cPackageInfo[i] = cString;
         env->ReleaseStringUTFChars(element, cString);
     }
-    int32_t status = VintfObject::CheckCompatibility(cPackageInfo, false /* mount */);
+    int32_t status = VintfObject::CheckCompatibility(cPackageInfo);
     return status;
 }
 
