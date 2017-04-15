@@ -725,8 +725,14 @@ public abstract class PanelView extends FrameLayout {
             }
         } else {
             if (shouldUseDismissingAnimation()) {
-                mFlingAnimationUtilsDismissing.apply(animator, mExpandedHeight, target, vel,
-                        getHeight());
+                if (vel == 0) {
+                    animator.setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED);
+                    long duration = (long) (200 + mExpandedHeight / getHeight() * 100);
+                    animator.setDuration(duration);
+                } else {
+                    mFlingAnimationUtilsDismissing.apply(animator, mExpandedHeight, target, vel,
+                            getHeight());
+                }
             } else {
                 mFlingAnimationUtilsClosing
                         .apply(animator, mExpandedHeight, target, vel, getHeight());
