@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import static com.android.internal.util.ArrayUtils.isEmpty;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
@@ -64,10 +66,34 @@ public class CollectionUtils {
      */
     public static @NonNull <I, O> List<O> map(@Nullable List<I> cur,
             Function<? super I, ? extends O> f) {
-        if (cur == null || cur.isEmpty()) return Collections.emptyList();
+        if (isEmpty(cur)) return Collections.emptyList();
         final ArrayList<O> result = new ArrayList<>();
         for (int i = 0; i < cur.size(); i++) {
             result.add(f.apply(cur.get(i)));
+        }
+        return result;
+    }
+
+    /**
+     * {@link #map(List, Function)} + {@link #filter(List, java.util.function.Predicate)}
+     *
+     * Calling this is equivalent (but more memory efficient) to:
+     *
+     * {@code
+     *      filter(
+     *          map(cur, f),
+     *          i -> { i != null })
+     * }
+     */
+    public static @NonNull <I, O> List<O> mapNotNull(@Nullable List<I> cur,
+            Function<? super I, ? extends O> f) {
+        if (isEmpty(cur)) return Collections.emptyList();
+        final ArrayList<O> result = new ArrayList<>();
+        for (int i = 0; i < cur.size(); i++) {
+            O transformed = f.apply(cur.get(i));
+            if (transformed != null) {
+                result.add(transformed);
+            }
         }
         return result;
     }
@@ -94,7 +120,7 @@ public class CollectionUtils {
      * Returns the elements of the given list that are of type {@code c}
      */
     public static @NonNull <T> List<T> filter(@Nullable List<?> list, Class<T> c) {
-        if (ArrayUtils.isEmpty(list)) return Collections.emptyList();
+        if (isEmpty(list)) return Collections.emptyList();
         ArrayList<T> result = null;
         for (int i = 0; i < list.size(); i++) {
             final Object item = list.get(i);
@@ -120,7 +146,7 @@ public class CollectionUtils {
      */
     public static @Nullable <T> T find(@Nullable List<T> items,
             java.util.function.Predicate<T> predicate) {
-        if (ArrayUtils.isEmpty(items)) return null;
+        if (isEmpty(items)) return null;
         for (int i = 0; i < items.size(); i++) {
             final T item = items.get(i);
             if (predicate.test(item)) return item;
@@ -145,11 +171,17 @@ public class CollectionUtils {
      * {@link Collections#emptyList}
      */
     public static @NonNull <T> List<T> remove(@Nullable List<T> cur, T val) {
-        if (cur == null || cur == Collections.emptyList()) {
-            return Collections.emptyList();
+        if (isEmpty(cur)) {
+            return emptyIfNull(cur);
         }
         cur.remove(val);
         return cur;
     }
 
+    /**
+     * @return a list that will not be affected by mutations to the given original list.
+     */
+    public static @NonNull <T> List<T> copyOf(@Nullable List<T> cur) {
+        return isEmpty(cur) ? Collections.emptyList() : new ArrayList<>(cur);
+    }
 }
