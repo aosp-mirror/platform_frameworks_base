@@ -27,11 +27,13 @@ import android.os.RemoteException;
  */
 public final class FillCallback {
     private final IFillCallback mCallback;
+    private final int mRequestId;
     private boolean mCalled;
 
     /** @hide */
-    public FillCallback(IFillCallback callback) {
+    public FillCallback(IFillCallback callback, int requestId) {
         mCallback = callback;
+        mRequestId = requestId;
     }
 
     /**
@@ -47,7 +49,7 @@ public final class FillCallback {
         assertNotCalled();
         mCalled = true;
         try {
-            mCallback.onSuccess(response);
+            mCallback.onSuccess(response, mRequestId);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }

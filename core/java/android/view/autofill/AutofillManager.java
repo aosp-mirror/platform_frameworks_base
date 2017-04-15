@@ -101,7 +101,10 @@ public final class AutofillManager {
     // Public flags start from the lowest bit
     /**
      * Indicates autofill was explicitly requested by the user.
+     *
+     * @deprecated Use {@link android.service.autofill.FillRequest#FLAG_MANUAL_REQUEST}
      */
+    @Deprecated
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
     // Private flags start from the highest bit
