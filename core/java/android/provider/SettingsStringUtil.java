@@ -23,6 +23,7 @@ import android.text.TextUtils;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.function.Function;
@@ -78,6 +79,12 @@ public class SettingsStringUtil {
             @Override
             protected String itemFromString(String s) {
                 return s;
+            }
+
+            public static String addAll(String delimitedElements, Collection<String> elements) {
+                final ColonDelimitedSet<String> set
+                        = new ColonDelimitedSet.OfStrings(delimitedElements);
+                return set.addAll(elements) ? set.toString() : delimitedElements;
             }
 
             public static String add(String delimitedElements, String element) {
