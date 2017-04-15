@@ -71,17 +71,17 @@ public class PackageManagerServiceTest extends AndroidTestCase {
           "primaryCpuAbiString", "secondaryCpuAbiString",
           "cpuAbiOverrideString", 0, 0, 0, "parentPackageName", null, 0,
           null, null);
-      pri.removedUsers = new int[] {1, 2, 3, 4, 5};
-      pri.populateUsers(pri.removedUsers, setting);
+      pri.populateUsers(new int[] {1, 2, 3, 4, 5}, setting);
       assertNotNull(pri.broadcastUsers);
-      assertEquals(pri.removedUsers.length, pri.broadcastUsers.length);
+      assertEquals(5, pri.broadcastUsers.length);
 
       // Exclude a user
       pri.broadcastUsers = null;
-      setting.setInstantApp(true, 4);
-      pri.populateUsers(pri.removedUsers, setting);
+      final int EXCLUDED_USER_ID = 4;
+      setting.setInstantApp(true, EXCLUDED_USER_ID);
+      pri.populateUsers(new int[] {1, 2, 3, EXCLUDED_USER_ID, 5}, setting);
       assertNotNull(pri.broadcastUsers);
-      assertEquals(pri.removedUsers.length - 1, pri.broadcastUsers.length);
+      assertEquals(5 - 1, pri.broadcastUsers.length);
 
       // TODO: test that sendApplicationHiddenForUser() actually fills in
       // broadcastUsers
