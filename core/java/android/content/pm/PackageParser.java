@@ -66,6 +66,7 @@ import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.system.StructStat;
@@ -116,6 +117,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 
@@ -5741,11 +5743,14 @@ public class PackageParser {
         }
 
         public void setApplicationVolumeUuid(String volumeUuid) {
+            final UUID storageUuid = StorageManager.convert(volumeUuid);
             this.applicationInfo.volumeUuid = volumeUuid;
+            this.applicationInfo.storageUuid = storageUuid;
             if (childPackages != null) {
                 final int packageCount = childPackages.size();
                 for (int i = 0; i < packageCount; i++) {
                     childPackages.get(i).applicationInfo.volumeUuid = volumeUuid;
+                    childPackages.get(i).applicationInfo.storageUuid = storageUuid;
                 }
             }
         }

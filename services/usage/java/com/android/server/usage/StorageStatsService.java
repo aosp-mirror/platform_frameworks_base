@@ -35,6 +35,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelableException;
 import android.os.StatFs;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -150,7 +151,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         try {
             return mInstaller.isQuotaSupported(volumeUuid);
         } catch (InstallerException e) {
-            throw new IllegalStateException(e);
+            throw new ParcelableException(new IOException(e.getMessage()));
         }
     }
 
@@ -163,7 +164,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             if (vol == null) {
-                throw new IllegalStateException("Volume was unexpected null");
+                throw new ParcelableException(
+                        new IOException("Failed to find storage device for UUID " + volumeUuid));
             }
             return FileUtils.roundStorageSize(vol.disk.size);
         }
@@ -189,7 +191,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             if (vol == null) {
-                throw new IllegalStateException("Volume was unexpected null");
+                throw new ParcelableException(
+                        new IOException("Failed to find storage device for UUID " + volumeUuid));
             }
             return vol.getPath().getUsableSpace() + cacheBytes;
         }
@@ -221,7 +224,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             appInfo = mPackage.getApplicationInfoAsUser(packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
         } catch (NameNotFoundException e) {
-            throw new IllegalStateException(e);
+            throw new ParcelableException(e);
         }
 
         if (mPackage.getPackagesForUid(appInfo.uid).length == 1) {
@@ -239,7 +242,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 mInstaller.getAppSize(volumeUuid, packageNames, userId, 0,
                         appId, ceDataInodes, codePaths, stats);
             } catch (InstallerException e) {
-                throw new IllegalStateException(e);
+                throw new ParcelableException(new IOException(e.getMessage()));
             }
             return translate(stats);
         }
@@ -265,7 +268,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 codePaths[i] = mPackage.getApplicationInfoAsUser(packageNames[i],
                         PackageManager.MATCH_UNINSTALLED_PACKAGES, userId).getCodePath();
             } catch (NameNotFoundException e) {
-                throw new IllegalStateException(e);
+                throw new ParcelableException(e);
             }
         }
 
@@ -281,7 +284,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 checkEquals("UID " + uid, manualStats, stats);
             }
         } catch (InstallerException e) {
-            throw new IllegalStateException(e);
+            throw new ParcelableException(new IOException(e.getMessage()));
         }
         return translate(stats);
     }
@@ -313,7 +316,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 checkEquals("User " + userId, manualStats, stats);
             }
         } catch (InstallerException e) {
-            throw new IllegalStateException(e);
+            throw new ParcelableException(new IOException(e.getMessage()));
         }
         return translate(stats);
     }
@@ -336,7 +339,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 checkEquals("External " + userId, manualStats, stats);
             }
         } catch (InstallerException e) {
-            throw new IllegalStateException(e);
+            throw new ParcelableException(new IOException(e.getMessage()));
         }
 
         final ExternalStorageStats res = new ExternalStorageStats();

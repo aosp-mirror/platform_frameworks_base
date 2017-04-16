@@ -19,8 +19,11 @@ package com.android.settingslib.applications;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
+
+import java.io.IOException;
 
 /**
  * StorageStatsSource wraps the StorageStatsManager for testability purposes.
@@ -32,17 +35,21 @@ public class StorageStatsSource {
         mStorageStatsManager = context.getSystemService(StorageStatsManager.class);
     }
 
-    public StorageStatsSource.ExternalStorageStats getExternalStorageStats(String volumeUuid, UserHandle user) {
+    public StorageStatsSource.ExternalStorageStats getExternalStorageStats(String volumeUuid,
+            UserHandle user) throws IOException {
         return new StorageStatsSource.ExternalStorageStats(
                 mStorageStatsManager.queryExternalStatsForUser(volumeUuid, user));
     }
 
-    public StorageStatsSource.AppStorageStats getStatsForUid(String volumeUuid, int uid) {
-        return new StorageStatsSource.AppStorageStatsImpl(mStorageStatsManager.queryStatsForUid(volumeUuid, uid));
+    public StorageStatsSource.AppStorageStats getStatsForUid(String volumeUuid, int uid)
+            throws IOException {
+        return new StorageStatsSource.AppStorageStatsImpl(
+                mStorageStatsManager.queryStatsForUid(volumeUuid, uid));
     }
 
     public StorageStatsSource.AppStorageStats getStatsForPackage(
-            String volumeUuid, String packageName, UserHandle user) {
+            String volumeUuid, String packageName, UserHandle user)
+            throws PackageManager.NameNotFoundException, IOException {
         return new StorageStatsSource.AppStorageStatsImpl(
                 mStorageStatsManager.queryStatsForPackage(volumeUuid, packageName, user));
     }
