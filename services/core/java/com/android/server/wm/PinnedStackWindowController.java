@@ -17,6 +17,10 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
+import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
+import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
+import static com.android.server.wm.BoundsAnimationController.SchedulePipModeChangedState;
 
 import android.app.RemoteAction;
 import android.graphics.Rect;
@@ -40,36 +44,53 @@ public class PinnedStackWindowController extends StackWindowController {
     /**
      * Animates the pinned stack.
      */
-    public void animateResizePinnedStack(Rect sourceBounds, Rect destBounds,
-            int animationDuration) {
+    public void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds,
+            int animationDuration, boolean schedulePipModeChangedOnAnimationEnd) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("Pinned stack container not found :(");
             }
 
-            // Get non-null fullscreen bounds if the bounds are null
-            final boolean moveToFullscreen = destBounds == null;
-            destBounds = getPinnedStackAnimationBounds(destBounds);
+            // Get the from-bounds
+            final Rect fromBounds = new Rect();
+            mContainer.getBounds(fromBounds);
 
-            // If the bounds are truly null, then there was no fullscreen stack at this time, so
-            // animate this to the full display bounds
-            final Rect toBounds;
-            if (destBounds == null) {
-                toBounds = new Rect();
-                mContainer.getDisplayContent().getLogicalDisplayRect(toBounds);
-            } else {
-                toBounds = destBounds;
+            // Get non-null fullscreen to-bounds for animating if the bounds are null
+            @SchedulePipModeChangedState int schedulePipModeChangedState =
+                NO_PIP_MODE_CHANGED_CALLBACKS;
+            final boolean toFullscreen = toBounds == null;
+            if (toFullscreen) {
+                if (schedulePipModeChangedOnAnimationEnd) {
+                    throw new IllegalArgumentException("Should not defer scheduling PiP mode"
+                            + " change on animation to fullscreen.");
+                }
+                schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_START;
+
+                mService.getStackBounds(FULLSCREEN_WORKSPACE_STACK_ID, mTmpBoundsRect);
+                if (!mTmpBoundsRect.isEmpty()) {
+                    // If there is a fullscreen bounds, use that
+                    toBounds = new Rect(mTmpBoundsRect);
+                } else {
+                    // Otherwise, use the display bounds
+                    toBounds = new Rect();
+                    mContainer.getDisplayContent().getLogicalDisplayRect(toBounds);
+                }
+            } else if (schedulePipModeChangedOnAnimationEnd) {
+                schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
             }
 
-            final Rect originalBounds = new Rect();
-            mContainer.getBounds(originalBounds);
-            mContainer.setAnimationFinalBounds(sourceBounds, toBounds);
+            mContainer.setAnimationFinalBounds(sourceHintBounds, toBounds, toFullscreen);
+
+            final Rect finalToBounds = toBounds;
+            final @SchedulePipModeChangedState int finalSchedulePipModeChangedState =
+                schedulePipModeChangedState;
             UiThread.getHandler().post(() -> {
                 if (mContainer == null) {
                     return;
                 }
-                mService.mBoundsAnimationController.animateBounds(mContainer, originalBounds,
-                        toBounds, animationDuration, moveToFullscreen);
+                mService.mBoundsAnimationController.animateBounds(mContainer, fromBounds,
+                        finalToBounds, animationDuration, finalSchedulePipModeChangedState,
+                        toFullscreen);
             });
         }
     }
@@ -93,7 +114,8 @@ public class PinnedStackWindowController extends StackWindowController {
 
             if (Float.compare(aspectRatio, pinnedStackController.getAspectRatio()) != 0) {
                 if (!toBounds.equals(targetBounds)) {
-                    animateResizePinnedStack(null /* sourceBounds */, toBounds, -1 /* duration */);
+                    animateResizePinnedStack(toBounds, null /* sourceHintBounds */,
+                            -1 /* duration */, false /* schedulePipModeChangedOnAnimationEnd */);
                 }
                 pinnedStackController.setAspectRatio(
                         pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)
@@ -116,26 +138,31 @@ public class PinnedStackWindowController extends StackWindowController {
     }
 
     /**
-     * @return whether the bounds are currently animating to fullscreen.
+     * @return whether the multi-window mode change should be deferred as a part of a transition
+     * from fullscreen to non-fullscreen bounds.
      */
-    public boolean isAnimatingBoundsToFullscreen() {
-        return mContainer.isAnimatingBoundsToFullscreen();
-    }
-
-    public boolean pinnedStackResizeAllowed() {
-        return mContainer.pinnedStackResizeAllowed();
+    public boolean deferScheduleMultiWindowModeChanged() {
+        synchronized(mWindowMap) {
+            return mContainer.deferScheduleMultiWindowModeChanged();
+        }
     }
 
     /**
-     * Checks the {@param bounds} and retirms non-null fullscreen bounds for the pinned stack
-     * animation if necessary.
+     * @return whether the bounds are currently animating to fullscreen.
      */
-    private Rect getPinnedStackAnimationBounds(Rect bounds) {
-        mService.getStackBounds(FULLSCREEN_WORKSPACE_STACK_ID, mTmpBoundsRect);
-        if (bounds == null && !mTmpBoundsRect.isEmpty()) {
-            bounds = new Rect(mTmpBoundsRect);
+    public boolean isAnimatingBoundsToFullscreen() {
+        synchronized (mWindowMap) {
+            return mContainer.isAnimatingBoundsToFullscreen();
         }
-        return bounds;
+    }
+
+    /**
+     * @return whether the stack can be resized from the bounds animation.
+     */
+    public boolean pinnedStackResizeDisallowed() {
+        synchronized (mWindowMap) {
+            return mContainer.pinnedStackResizeDisallowed();
+        }
     }
 
     /**

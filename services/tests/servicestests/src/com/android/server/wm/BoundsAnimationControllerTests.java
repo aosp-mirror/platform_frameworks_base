@@ -16,6 +16,11 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
+import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
+import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
+import static com.android.server.wm.BoundsAnimationController.SchedulePipModeChangedState;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
@@ -46,6 +51,12 @@ import com.android.server.wm.BoundsAnimationController.BoundsAnimator;
 /**
  * Test class for {@link BoundsAnimationController} to ensure that it sends the right callbacks
  * depending on the various interactions.
+ *
+ * We are really concerned about only three of the transition states [F = fullscreen, !F = floating]
+ * F->!F, !F->!F, and !F->F. Each animation can only be cancelled from the target mid-transition,
+ * or if a new animation starts on the same target.  The tests below verifies that the target is
+ * notified of all the cases where it is animating and cancelled so that it can respond
+ * appropriately.
  *
  * Build/Install/Run:
  *  bit FrameworksServicesTests:com.android.server.wm.BoundsAnimationControllerTests
@@ -109,47 +120,46 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
     /**
      * A test animate bounds user to track callbacks from the bounds animation.
      */
-    private class TestAnimateBoundsUser implements BoundsAnimationController.AnimateBoundsUser {
+    private class TestBoundsAnimationTarget implements BoundsAnimationTarget {
 
+        boolean mAwaitingAnimationStart;
         boolean mMovedToFullscreen;
         boolean mAnimationStarted;
-        boolean mAnimationStartedToFullscreen;
+        boolean mSchedulePipModeChangedOnStart;
         boolean mAnimationEnded;
-        boolean mUpdatedPictureInPictureModeWithBounds;
+        Rect mAnimationEndFinalStackBounds;
+        boolean mSchedulePipModeChangedOnEnd;
         boolean mBoundsUpdated;
+        boolean mCancelRequested;
         Rect mStackBounds;
         Rect mTaskBounds;
 
-        boolean mRequestCancelAnimation = false;
-
-        void reinitialize(Rect stackBounds, Rect taskBounds) {
+        void initialize(Rect from) {
+            mAwaitingAnimationStart = true;
             mMovedToFullscreen = false;
             mAnimationStarted = false;
-            mAnimationStartedToFullscreen = false;
             mAnimationEnded = false;
-            mUpdatedPictureInPictureModeWithBounds = false;
-            mStackBounds = stackBounds;
-            mTaskBounds = taskBounds;
+            mAnimationEndFinalStackBounds = null;
+            mSchedulePipModeChangedOnStart = false;
+            mSchedulePipModeChangedOnEnd = false;
+            mStackBounds = from;
+            mTaskBounds = null;
             mBoundsUpdated = false;
-            mRequestCancelAnimation = false;
         }
 
         @Override
-        public void onAnimationStart(boolean toFullscreen) {
+        public void onAnimationStart(boolean schedulePipModeChangedCallback) {
+            mAwaitingAnimationStart = false;
             mAnimationStarted = true;
-            mAnimationStartedToFullscreen = toFullscreen;
-        }
-
-        @Override
-        public void updatePictureInPictureMode(Rect targetStackBounds) {
-            mUpdatedPictureInPictureModeWithBounds = true;
+            mSchedulePipModeChangedOnStart = schedulePipModeChangedCallback;
         }
 
         @Override
         public boolean setPinnedStackSize(Rect stackBounds, Rect taskBounds) {
             // TODO: Once we break the runs apart, we should fail() here if this is called outside
             //       of onAnimationStart() and onAnimationEnd()
-            if (mRequestCancelAnimation) {
+            if (mCancelRequested) {
+                mCancelRequested = false;
                 return false;
             } else {
                 mBoundsUpdated = true;
@@ -160,32 +170,206 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationEnd() {
+        public void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackBounds,
+                boolean moveToFullscreen) {
             mAnimationEnded = true;
+            mAnimationEndFinalStackBounds = finalStackBounds;
+            mSchedulePipModeChangedOnEnd = schedulePipModeChangedCallback;
+            mMovedToFullscreen = moveToFullscreen;
+            mTaskBounds = null;
+        }
+    }
+
+    /**
+     * Drives the animations, makes common assertions along the way.
+     */
+    private class BoundsAnimationDriver {
+
+        private BoundsAnimationController mController;
+        private TestBoundsAnimationTarget mTarget;
+        private BoundsAnimator mAnimator;
+
+        private Rect mFrom;
+        private Rect mTo;
+        private Rect mLargerBounds;
+        private Rect mExpectedFinalBounds;
+
+        BoundsAnimationDriver(BoundsAnimationController controller,
+                TestBoundsAnimationTarget target) {
+            mController = controller;
+            mTarget = target;
         }
 
-        @Override
-        public void moveToFullscreen() {
-            mMovedToFullscreen = true;
+        BoundsAnimationDriver start(Rect from, Rect to) {
+            if (mAnimator != null) {
+                throw new IllegalArgumentException("Call restart() to restart an animation");
+            }
+
+            mTarget.initialize(from);
+
+            // Started, not running
+            assertTrue(mTarget.mAwaitingAnimationStart);
+            assertTrue(!mTarget.mAnimationStarted);
+
+            startImpl(from, to);
+
+            // Started and running
+            assertTrue(!mTarget.mAwaitingAnimationStart);
+            assertTrue(mTarget.mAnimationStarted);
+
+            return this;
+        }
+
+        BoundsAnimationDriver restart(Rect to) {
+            if (mAnimator == null) {
+                throw new IllegalArgumentException("Call start() to start a new animation");
+            }
+
+            BoundsAnimator oldAnimator = mAnimator;
+            boolean toSameBounds = mAnimator.isStarted() && to.equals(mTo);
+
+            // Reset the animation start state
+            mTarget.mAnimationStarted = false;
+
+            // Start animation
+            startImpl(mTarget.mStackBounds, to);
+
+            if (toSameBounds) {
+                // Same animator if same final bounds
+                assertSame(oldAnimator, mAnimator);
+            }
+
+            // No animation start for replacing animation
+            assertTrue(!mTarget.mAnimationStarted);
+            mTarget.mAnimationStarted = true;
+            return this;
+        }
+
+        private BoundsAnimationDriver startImpl(Rect from, Rect to) {
+            boolean fromFullscreen = from.equals(BOUNDS_FULL);
+            boolean toFullscreen = to.equals(BOUNDS_FULL);
+            mFrom = new Rect(from);
+            mTo = new Rect(to);
+            mExpectedFinalBounds = new Rect(to);
+            mLargerBounds = getLargerBounds(mFrom, mTo);
+
+            // Start animation
+            final @SchedulePipModeChangedState int schedulePipModeChangedState = toFullscreen
+                    ? SCHEDULE_PIP_MODE_CHANGED_ON_START
+                    : fromFullscreen
+                            ? SCHEDULE_PIP_MODE_CHANGED_ON_END
+                            : NO_PIP_MODE_CHANGED_CALLBACKS;
+            mAnimator = mController.animateBoundsImpl(mTarget, from, to, DURATION,
+                    schedulePipModeChangedState, toFullscreen);
+
+            // Original stack bounds, frozen task bounds
+            assertEquals(mFrom, mTarget.mStackBounds);
+            assertEqualSizeAtOffset(mLargerBounds, mTarget.mTaskBounds);
+
+            // Animating to larger size
+            if (mFrom.equals(mLargerBounds)) {
+                assertTrue(!mAnimator.animatingToLargerSize());
+            } else if (mTo.equals(mLargerBounds)) {
+                assertTrue(mAnimator.animatingToLargerSize());
+            }
+
+            return this;
+        }
+
+        BoundsAnimationDriver expectStarted(boolean schedulePipModeChanged) {
+            // Callback made
+            assertTrue(mTarget.mAnimationStarted);
+
+            assertEquals(schedulePipModeChanged, mTarget.mSchedulePipModeChangedOnStart);
+            return this;
+        }
+
+        BoundsAnimationDriver update(float t) {
+            mAnimator.onAnimationUpdate(mMockAnimator.getWithValue(t));
+
+            // Temporary stack bounds, frozen task bounds
+            if (t == 0f) {
+                assertEquals(mFrom, mTarget.mStackBounds);
+            } else if (t == 1f) {
+                assertEquals(mTo, mTarget.mStackBounds);
+            } else {
+                assertNotEquals(mFrom, mTarget.mStackBounds);
+                assertNotEquals(mTo, mTarget.mStackBounds);
+            }
+            assertEqualSizeAtOffset(mLargerBounds, mTarget.mTaskBounds);
+            return this;
+        }
+
+        BoundsAnimationDriver cancel() {
+            // Cancel
+            mTarget.mCancelRequested = true;
+            mTarget.mBoundsUpdated = false;
+            mExpectedFinalBounds = null;
+
+            // Update
+            mAnimator.onAnimationUpdate(mMockAnimator.getWithValue(0.5f));
+
+            // Not started, not running, cancel reset
+            assertTrue(!mTarget.mCancelRequested);
+
+            // Stack/task bounds not updated
+            assertTrue(!mTarget.mBoundsUpdated);
+
+            // Callback made
+            assertTrue(mTarget.mAnimationEnded);
+            assertNull(mTarget.mAnimationEndFinalStackBounds);
+
+            return this;
+        }
+
+        BoundsAnimationDriver end() {
+            mAnimator.end();
+
+            // Final stack bounds
+            assertEquals(mTo, mTarget.mStackBounds);
+            assertEquals(mExpectedFinalBounds, mTarget.mAnimationEndFinalStackBounds);
+            assertNull(mTarget.mTaskBounds);
+
+            return this;
+        }
+
+        BoundsAnimationDriver expectEnded(boolean schedulePipModeChanged,
+                boolean moveToFullscreen) {
+            // Callback made
+            assertTrue(mTarget.mAnimationEnded);
+
+            assertEquals(schedulePipModeChanged, mTarget.mSchedulePipModeChangedOnEnd);
+            assertEquals(moveToFullscreen, mTarget.mMovedToFullscreen);
+            return this;
+        }
+
+        private Rect getLargerBounds(Rect r1, Rect r2) {
+            int r1Area = r1.width() * r1.height();
+            int r2Area = r2.width() * r2.height();
+            if (r1Area <= r2Area) {
+                return r2;
+            } else {
+                return r1;
+            }
         }
     }
 
     // Constants
+    private static final boolean SCHEDULE_PIP_MODE_CHANGED = true;
     private static final boolean MOVE_TO_FULLSCREEN = true;
+    private static final int DURATION = 100;
 
     // Some dummy bounds to represent fullscreen and floating bounds
     private static final Rect BOUNDS_FULL = new Rect(0, 0, 100, 100);
-    private static final Rect BOUNDS_FLOATING = new Rect(80, 80, 95, 95);
-    private static final Rect BOUNDS_ALT_FLOATING = new Rect(60, 60, 95, 95);
-
-    // Some dummy duration
-    private static final int DURATION = 100;
+    private static final Rect BOUNDS_FLOATING = new Rect(60, 60, 95, 95);
+    private static final Rect BOUNDS_SMALLER_FLOATING = new Rect(80, 80, 95, 95);
 
     // Common
-    private MockAppTransition mAppTransition;
-    private MockValueAnimator mAnimator;
-    private TestAnimateBoundsUser mTarget;
+    private MockAppTransition mMockAppTransition;
+    private MockValueAnimator mMockAnimator;
+    private TestBoundsAnimationTarget mTarget;
     private BoundsAnimationController mController;
+    private BoundsAnimationDriver mDriver;
 
     // Temp
     private Rect mTmpRect = new Rect();
@@ -196,153 +380,184 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
         final Context context = InstrumentationRegistry.getTargetContext();
         final Handler handler = new Handler(Looper.getMainLooper());
-        mAppTransition = new MockAppTransition(context);
-        mAnimator = new MockValueAnimator();
-        mTarget = new TestAnimateBoundsUser();
-        mController = new BoundsAnimationController(context, mAppTransition, handler);
+        mMockAppTransition = new MockAppTransition(context);
+        mMockAnimator = new MockValueAnimator();
+        mTarget = new TestBoundsAnimationTarget();
+        mController = new BoundsAnimationController(context, mMockAppTransition, handler);
+        mDriver = new BoundsAnimationDriver(mController, mTarget);
     }
+
+    /** BASE TRANSITIONS **/
 
     @UiThreadTest
     @Test
     public void testFullscreenToFloatingTransition() throws Exception {
-        // Create and start the animation
-        mTarget.reinitialize(BOUNDS_FULL, null);
-        final BoundsAnimator boundsAnimator = mController.animateBoundsImpl(mTarget, BOUNDS_FULL,
-                BOUNDS_FLOATING, DURATION, !MOVE_TO_FULLSCREEN);
-
-        // Assert that when we are started, and that we are not going to fullscreen
-        assertTrue(mTarget.mAnimationStarted);
-        assertFalse(mTarget.mAnimationStartedToFullscreen);
-        // Ensure we are not triggering a PiP mode change
-        assertFalse(mTarget.mUpdatedPictureInPictureModeWithBounds);
-        // Ensure that the task stack bounds are already frozen to the larger source stack bounds
-        assertEquals(BOUNDS_FULL, mTarget.mStackBounds);
-        assertEquals(BOUNDS_FULL, offsetToZero(mTarget.mTaskBounds));
-
-        // Drive some animation updates, ensure that only the stack bounds change and the task
-        // bounds are frozen to the original stack bounds (adjusted for the offset)
-        boundsAnimator.onAnimationUpdate(mAnimator.getWithValue(0.5f));
-        assertNotEquals(BOUNDS_FULL, mTarget.mStackBounds);
-        assertEquals(BOUNDS_FULL, offsetToZero(mTarget.mTaskBounds));
-        boundsAnimator.onAnimationUpdate(mAnimator.getWithValue(1f));
-        assertNotEquals(BOUNDS_FULL, mTarget.mStackBounds);
-        assertEquals(BOUNDS_FULL, offsetToZero(mTarget.mTaskBounds));
-
-        // Finish the animation, ensure that it reaches the final bounds with the given state
-        boundsAnimator.end();
-        assertTrue(mTarget.mAnimationEnded);
-        assertEquals(BOUNDS_FLOATING, mTarget.mStackBounds);
-        assertNull(mTarget.mTaskBounds);
+        mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0f)
+                .update(0.5f)
+                .update(1f)
+                .end()
+                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
     }
 
     @UiThreadTest
     @Test
     public void testFloatingToFullscreenTransition() throws Exception {
-        // Create and start the animation
-        mTarget.reinitialize(BOUNDS_FULL, null);
-        final BoundsAnimator boundsAnimator = mController.animateBoundsImpl(mTarget, BOUNDS_FLOATING,
-                BOUNDS_FULL, DURATION, MOVE_TO_FULLSCREEN);
-
-        // Assert that when we are started, and that we are going to fullscreen
-        assertTrue(mTarget.mAnimationStarted);
-        assertTrue(mTarget.mAnimationStartedToFullscreen);
-        // Ensure that we update the PiP mode change with the new fullscreen bounds
-        assertTrue(mTarget.mUpdatedPictureInPictureModeWithBounds);
-        // Ensure that the task stack bounds are already frozen to the larger target stack bounds
-        assertEquals(BOUNDS_FLOATING, mTarget.mStackBounds);
-        assertEquals(BOUNDS_FULL, offsetToZero(mTarget.mTaskBounds));
-
-        // Drive some animation updates, ensure that only the stack bounds change and the task
-        // bounds are frozen to the original stack bounds (adjusted for the offset)
-        boundsAnimator.onAnimationUpdate(mAnimator.getWithValue(0.5f));
-        assertNotEquals(BOUNDS_FLOATING, mTarget.mStackBounds);
-        assertEquals(BOUNDS_FULL, offsetToZero(mTarget.mTaskBounds));
-        boundsAnimator.onAnimationUpdate(mAnimator.getWithValue(1f));
-        assertNotEquals(BOUNDS_FLOATING, mTarget.mStackBounds);
-        assertEquals(BOUNDS_FULL, offsetToZero(mTarget.mTaskBounds));
-
-        // Finish the animation, ensure that it reaches the final bounds with the given state
-        boundsAnimator.end();
-        assertTrue(mTarget.mAnimationEnded);
-        assertEquals(BOUNDS_FULL, mTarget.mStackBounds);
-        assertNull(mTarget.mTaskBounds);
+        mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
+                .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
+                .update(0f)
+                .update(0.5f)
+                .update(1f)
+                .end()
+                .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, MOVE_TO_FULLSCREEN);
     }
 
     @UiThreadTest
     @Test
-    public void testInterruptAnimationFromUser() throws Exception {
-        // Create and start the animation
-        mTarget.reinitialize(BOUNDS_FULL, null);
-        final BoundsAnimator boundsAnimator = mController.animateBoundsImpl(mTarget, BOUNDS_FULL,
-                BOUNDS_FLOATING, DURATION, !MOVE_TO_FULLSCREEN);
-
-        // Cancel the animation on the next update from the user
-        mTarget.mRequestCancelAnimation = true;
-        mTarget.mBoundsUpdated = false;
-        boundsAnimator.onAnimationUpdate(mAnimator.getWithValue(0.5f));
-        // Ensure that we got no more updates after returning false and the bounds are not updated
-        // to the end value
-        assertFalse(mTarget.mBoundsUpdated);
-        assertNotEquals(BOUNDS_FLOATING, mTarget.mStackBounds);
-        assertNotEquals(BOUNDS_FLOATING, mTarget.mTaskBounds);
-        // Ensure that we received the animation end call
-        assertTrue(mTarget.mAnimationEnded);
+    public void testFloatingToSmallerFloatingTransition() throws Exception {
+        mDriver.start(BOUNDS_FLOATING, BOUNDS_SMALLER_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0f)
+                .update(0.5f)
+                .update(1f)
+                .end()
+                .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
     }
 
     @UiThreadTest
     @Test
-    public void testCancelAnimationFromNewAnimationToExistingBounds() throws Exception {
-        // Create and start the animation
-        mTarget.reinitialize(BOUNDS_FULL, null);
-        final BoundsAnimator boundsAnimator = mController.animateBoundsImpl(mTarget, BOUNDS_FULL,
-                BOUNDS_FLOATING, DURATION, !MOVE_TO_FULLSCREEN);
+    public void testFloatingToLargerFloatingTransition() throws Exception {
+        mDriver.start(BOUNDS_SMALLER_FLOATING, BOUNDS_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0f)
+                .update(0.5f)
+                .update(1f)
+                .end()
+                .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+    }
 
-        // Drive some animation updates
-        boundsAnimator.onAnimationUpdate(mAnimator.getWithValue(0.5f));
+    /** F->!F w/ CANCEL **/
 
-        // Cancel the animation as a restart to the same bounds
-        mTarget.reinitialize(null, null);
-        final BoundsAnimator altBoundsAnimator = mController.animateBoundsImpl(mTarget, BOUNDS_FULL,
-                BOUNDS_FLOATING, DURATION, !MOVE_TO_FULLSCREEN);
-        // Ensure the animator is the same
-        assertSame(boundsAnimator, altBoundsAnimator);
-        // Ensure we haven't restarted or finished the animation
-        assertFalse(mTarget.mAnimationStarted);
-        assertFalse(mTarget.mAnimationEnded);
-        // Ensure that we haven't tried to update the PiP mode
-        assertFalse(mTarget.mUpdatedPictureInPictureModeWithBounds);
+    @UiThreadTest
+    @Test
+    public void testFullscreenToFloatingCancelFromTarget() throws Exception {
+        mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .cancel()
+                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
     }
 
     @UiThreadTest
     @Test
-    public void testCancelAnimationFromNewAnimationToNewBounds() throws Exception {
-        // Create and start the animation
-        mTarget.reinitialize(BOUNDS_FULL, null);
-        final BoundsAnimator boundsAnimator = mController.animateBoundsImpl(mTarget, BOUNDS_FULL,
-                BOUNDS_FLOATING, DURATION, !MOVE_TO_FULLSCREEN);
+    public void testFullscreenToFloatingCancelFromAnimationToSameBounds() throws Exception {
+        mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .restart(BOUNDS_FLOATING)
+                .end()
+                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+    }
 
-        // Drive some animation updates
-        boundsAnimator.onAnimationUpdate(mAnimator.getWithValue(0.5f));
+    @UiThreadTest
+    @Test
+    public void testFullscreenToFloatingCancelFromAnimationToFloatingBounds() throws Exception {
+        mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .restart(BOUNDS_SMALLER_FLOATING)
+                .end()
+                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+    }
 
-        // Cancel the animation as a restart to new bounds
-        mTarget.reinitialize(null, null);
-        final BoundsAnimator altBoundsAnimator = mController.animateBoundsImpl(mTarget, BOUNDS_FULL,
-                BOUNDS_ALT_FLOATING, DURATION, !MOVE_TO_FULLSCREEN);
-        // Ensure the animator is not the same
-        assertNotSame(boundsAnimator, altBoundsAnimator);
-        // Ensure that we did not get an animation start/end callback
-        assertFalse(mTarget.mAnimationStarted);
-        assertFalse(mTarget.mAnimationEnded);
-        // Ensure that we haven't tried to update the PiP mode
-        assertFalse(mTarget.mUpdatedPictureInPictureModeWithBounds);
+    @UiThreadTest
+    @Test
+    public void testFullscreenToFloatingCancelFromAnimationToFullscreenBounds() throws Exception {
+        mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .restart(BOUNDS_FULL)
+                .end()
+                .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, MOVE_TO_FULLSCREEN);
+    }
+
+    /** !F->F w/ CANCEL **/
+
+    @UiThreadTest
+    @Test
+    public void testFloatingToFullscreenCancelFromTarget() throws Exception {
+        mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
+                .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .cancel()
+                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testFloatingToFullscreenCancelFromAnimationToSameBounds() throws Exception {
+        mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
+                .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .restart(BOUNDS_FULL)
+                .end()
+                .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, MOVE_TO_FULLSCREEN);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testFloatingToFullscreenCancelFromAnimationToFloatingBounds() throws Exception {
+        mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
+                .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .restart(BOUNDS_SMALLER_FLOATING)
+                .end()
+                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+    }
+
+    /** !F->!F w/ CANCEL **/
+
+    @UiThreadTest
+    @Test
+    public void testFloatingToSmallerFloatingCancelFromTarget() throws Exception {
+        mDriver.start(BOUNDS_FLOATING, BOUNDS_SMALLER_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .cancel()
+                .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testFloatingToLargerFloatingCancelFromTarget() throws Exception {
+        mDriver.start(BOUNDS_SMALLER_FLOATING, BOUNDS_FLOATING)
+                .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
+                .update(0.25f)
+                .cancel()
+                .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+    }
+
+    /** MISC **/
+
+    @UiThreadTest
+    @Test
+    public void testBoundsAreCopied() throws Exception {
+        Rect from = new Rect(0, 0, 100, 100);
+        Rect to = new Rect(25, 25, 75, 75);
+        mDriver.start(from, to)
+                .update(0.25f)
+                .end();
+        assertEquals(new Rect(0, 0, 100, 100), from);
+        assertEquals(new Rect(25, 25, 75, 75), to);
     }
 
     /**
-     * @return the bounds offset to zero/zero.
+     * @return whether the task and stack bounds would be the same if they were at the same offset.
      */
-    private Rect offsetToZero(Rect bounds) {
-        mTmpRect.set(bounds);
-        mTmpRect.offsetTo(0, 0);
-        return mTmpRect;
+    private boolean assertEqualSizeAtOffset(Rect stackBounds, Rect taskBounds) {
+        mTmpRect.set(taskBounds);
+        mTmpRect.offsetTo(stackBounds.left, stackBounds.top);
+        return stackBounds.equals(mTmpRect);
     }
 }
