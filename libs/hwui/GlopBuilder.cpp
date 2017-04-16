@@ -600,12 +600,12 @@ void verify(const ProgramDescription& description, const Glop& glop) {
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
     if (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-        if (mOutGlop->fill.texture.texture->target() == GL_TEXTURE_2D) {
+        Texture* texture = mOutGlop->fill.texture.texture;
+        if (texture->target() == GL_TEXTURE_2D) {
             mDescription.hasTexture = true;
         } else {
             mDescription.hasExternalTexture = true;
         }
-        Texture* texture = mOutGlop->fill.texture.texture;
         mDescription.hasLinearTexture = texture->isLinear();
         mDescription.hasColorSpaceConversion = texture->hasColorSpaceConversion();
         mDescription.transferFunction = texture->getTransferFunctionType();
