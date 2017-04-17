@@ -56,16 +56,12 @@ import java.util.List;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.systemui.Prefs.Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN;
-
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
 public class PipManager implements BasePipManager {
     private static final String TAG = "PipManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final boolean DEBUG_FORCE_ONBOARDING =
-            SystemProperties.getBoolean("debug.tv.pip_force_onboarding", false);
     private static final String SETTINGS_PACKAGE_AND_CLASS_DELIMITER = "/";
 
     private static PipManager sPipManager;
@@ -76,10 +72,9 @@ public class PipManager implements BasePipManager {
      */
     public static final int STATE_NO_PIP = 0;
     /**
-     * State when PIP is shown with an overlay message on top of it.
-     * This is used as default PIP state.
+     * State when PIP is shown. This is used as default PIP state.
      */
-    public static final int STATE_PIP_OVERLAY = 1;
+    public static final int STATE_PIP = 1;
     /**
      * State when PIP menu dialog is shown.
      */
@@ -126,7 +121,6 @@ public class PipManager implements BasePipManager {
     private int mPipTaskId = TASK_ID_NO_PIP;
     private ComponentName mPipComponentName;
     private MediaController mPipMediaController;
-    private boolean mOnboardingShown;
     private String[] mLastPackagesResourceGranted;
 
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
@@ -212,8 +206,6 @@ public class PipManager implements BasePipManager {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
-        mOnboardingShown = Prefs.getBoolean(
-                mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, false);
 
         if (sSettingsPackageAndClassNamePairList == null) {
             String[] settings = mContext.getResources().getStringArray(
@@ -267,7 +259,7 @@ public class PipManager implements BasePipManager {
         //   1. Configuration changed due to the language change (RTL <-> RTL)
         //   2. SystemUI restarts after the crash
         mPipBounds = isSettingsShown() ? mSettingsPipBounds : mDefaultPipBounds;
-        resizePinnedStack(getPinnedStackInfo() == null ? STATE_NO_PIP : STATE_PIP_OVERLAY);
+        resizePinnedStack(getPinnedStackInfo() == null ? STATE_NO_PIP : STATE_PIP);
     }
 
     /**
@@ -281,7 +273,7 @@ public class PipManager implements BasePipManager {
      * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
     public void showPictureInPictureMenu() {
-        if (mState == STATE_PIP_OVERLAY) {
+        if (mState == STATE_PIP) {
             resizePinnedStack(STATE_PIP_MENU);
         }
     }
@@ -322,16 +314,6 @@ public class PipManager implements BasePipManager {
         }
         resizePinnedStack(STATE_NO_PIP);
         updatePipVisibility(false);
-    }
-
-    /**
-     * Shows PIP overlay UI by launching {@link PipOverlayActivity}. It also locates the pinned
-     * stack to the default PIP bound {@link com.android.internal.R.string
-     * .config_defaultPictureInPictureBounds}.
-     */
-    private void showPipOverlay() {
-        if (DEBUG) Log.d(TAG, "showPipOverlay()");
-        PipOverlayActivity.showPipOverlay(mContext);
     }
 
     /**
@@ -388,7 +370,7 @@ public class PipManager implements BasePipManager {
             case STATE_PIP_MENU:
                 mCurrentPipBounds = mMenuModePipBounds;
                 break;
-            case STATE_PIP_OVERLAY:
+            case STATE_PIP:
                 mCurrentPipBounds = mPipBounds;
                 break;
             default:
@@ -452,17 +434,6 @@ public class PipManager implements BasePipManager {
      */
     public void removeMediaListener(MediaListener listener) {
         mMediaListeners.remove(listener);
-    }
-
-    private void launchPipOnboardingActivityIfNeeded() {
-        if (DEBUG_FORCE_ONBOARDING || !mOnboardingShown) {
-            mOnboardingShown = true;
-            Prefs.putBoolean(mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, true);
-
-            Intent intent = new Intent(mContext, PipOnboardingActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
-        }
     }
 
     /**
@@ -617,11 +588,11 @@ public class PipManager implements BasePipManager {
                     return;
                 }
             }
-            if (mState == STATE_PIP_OVERLAY) {
+            if (mState == STATE_PIP) {
                 Rect bounds = isSettingsShown() ? mSettingsPipBounds : mDefaultPipBounds;
                 if (mPipBounds != bounds) {
                     mPipBounds = bounds;
-                    resizePinnedStack(STATE_PIP_OVERLAY);
+                    resizePinnedStack(STATE_PIP);
                 }
             }
         }
@@ -641,10 +612,9 @@ public class PipManager implements BasePipManager {
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
             mPipComponentName = ComponentName.unflattenFromString(
                     stackInfo.taskNames[stackInfo.taskNames.length - 1]);
-            // Set state to overlay so we show it when the pinned stack animation ends.
-            mState = STATE_PIP_OVERLAY;
+            // Set state to STATE_PIP so we show it when the pinned stack animation ends.
+            mState = STATE_PIP;
             mCurrentPipBounds = mPipBounds;
-            launchPipOnboardingActivityIfNeeded();
             mMediaSessionManager.addOnActiveSessionsChangedListener(
                     mActiveMediaSessionListener, null);
             updateMediaController(mMediaSessionManager.getActiveSessions(null));
@@ -671,9 +641,6 @@ public class PipManager implements BasePipManager {
                 return;
             }
             switch (mState) {
-                case STATE_PIP_OVERLAY:
-                    showPipOverlay();
-                    break;
                 case STATE_PIP_MENU:
                     showPipMenu();
                     break;

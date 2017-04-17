@@ -41,7 +41,6 @@ public final class Prefs {
         Key.DND_FAVORITE_BUCKET_INDEX,
         Key.DND_NONE_SELECTED,
         Key.DND_FAVORITE_ZEN,
-        Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN,
         Key.QS_HOTSPOT_ADDED,
         Key.QS_DATA_SAVER_ADDED,
         Key.QS_DATA_SAVER_DIALOG_SHOWN,
@@ -62,7 +61,6 @@ public final class Prefs {
         String DND_FAVORITE_BUCKET_INDEX = "DndCountdownMinuteIndex";
         String DND_NONE_SELECTED = "DndNoneSelected";
         String DND_FAVORITE_ZEN = "DndFavoriteZen";
-        String TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN = "TvPictureInPictureOnboardingShown";
         String QS_HOTSPOT_ADDED = "QsHotspotAdded";
         String QS_DATA_SAVER_ADDED = "QsDataSaverAdded";
         String QS_DATA_SAVER_DIALOG_SHOWN = "QsDataSaverDialogShown";
