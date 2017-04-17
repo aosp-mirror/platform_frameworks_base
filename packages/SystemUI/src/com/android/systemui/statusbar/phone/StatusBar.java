@@ -48,10 +48,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -139,7 +137,6 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.PluginFragmentListener;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.pip.phone.PipManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
@@ -1809,6 +1806,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 updatePublicContentView(ent, ent.notification);
             }
             ent.row.setSensitive(sensitive, deviceSensitive);
+            ent.row.setNeedsRedaction(needsRedaction(ent));
             if (mGroupManager.isChildInGroupWithSummary(ent.row.getStatusBarNotification())) {
                 ExpandableNotificationRow summary = mGroupManager.getGroupSummary(
                         ent.row.getStatusBarNotification());
@@ -1895,6 +1893,21 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Let's also update the icons
         mNotificationIconAreaController.updateNotificationIcons(mNotificationData);
+    }
+
+    /** @return true if the entry needs redaction when on the lockscreen. */
+    private boolean needsRedaction(Entry ent) {
+        int userId = ent.notification.getUserId();
+
+        boolean currentUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
+        boolean notiUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(userId);
+        boolean redactedLockscreen = currentUserWantsRedaction || notiUserWantsRedaction;
+
+        boolean notificationRequestsRedaction =
+                ent.notification.getNotification().visibility == Notification.VISIBILITY_PRIVATE;
+        boolean userForcesRedaction = packageHasVisibilityOverride(ent.notification.getKey());
+
+        return userForcesRedaction || notificationRequestsRedaction && redactedLockscreen;
     }
 
     /**
@@ -6154,6 +6167,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
+        row.setNeedsRedaction(needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
         row.setIsLowPriority(isLowPriority);
         // bind the click event to the content area
@@ -6518,7 +6532,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
         Dependency.get(LeakDetector.class).trackInstance(entry);
         entry.createIcons(mContext, sbn);
-
         // Construct the expanded view.
         inflateViews(entry, mStackScroller);
         return entry;
