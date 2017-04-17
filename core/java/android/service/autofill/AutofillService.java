@@ -285,4 +285,22 @@ public abstract class AutofillService extends Service {
         // TODO(b/33197203): Remove when GCore has migrated off this API
         getSystemService(AutofillManager.class).disableOwnedAutofillServices();
     }
+
+    /**
+     * Returns the {@link FillEventHistory.Event events} since the last {@link FillResponse} was
+     * returned.
+     *
+     * <p>The history is not persisted over reboots.
+     *
+     * @return The history or {@code null} if there are not events.
+     */
+    @Nullable public final FillEventHistory getFillEventHistory() {
+        AutofillManager afm = getSystemService(AutofillManager.class);
+
+        if (afm == null) {
+            return null;
+        } else {
+            return afm.getFillEventHistory();
+        }
+    }
 }

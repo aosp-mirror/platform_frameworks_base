@@ -48,6 +48,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.service.autofill.FillEventHistory;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
@@ -395,6 +396,21 @@ public final class AutofillManagerService extends SystemService {
                 return service.startSessionLocked(activityToken, getCallingUid(), windowToken,
                         appCallback, autofillId, bounds, value, hasCallback, flags, packageName);
             }
+        }
+
+        @Override
+        public FillEventHistory getFillEventHistory() throws RemoteException {
+            UserHandle user = getCallingUserHandle();
+            int uid = getCallingUid();
+
+            synchronized (mLock) {
+                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                if (service != null) {
+                    return service.getFillEventHistory(uid);
+                }
+            }
+
+            return null;
         }
 
         @Override
