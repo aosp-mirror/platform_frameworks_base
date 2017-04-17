@@ -15,6 +15,7 @@
  */
 package com.android.keyguard;
 
+import android.R.style;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
@@ -23,6 +24,7 @@ import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -73,7 +75,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+        super(new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault), attrs,
+                defStyle);
         mSecurityModel = new KeyguardSecurityModel(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
