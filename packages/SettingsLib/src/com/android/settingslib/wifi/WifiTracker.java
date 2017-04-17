@@ -234,10 +234,19 @@ public class WifiTracker {
     }
 
     /**
-     * Forces an update of the wifi networks when not scanning.
+     * Synchronously update the list of access points with the latest information.
      */
     public void forceUpdate() {
+        mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
+
+        mLastInfo = mWifiManager.getConnectionInfo();
+        mLastNetworkInfo = mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
         updateAccessPoints();
+
+        // Synchronously copy access points
+        mMainHandler.removeMessages(MainHandler.MSG_ACCESS_POINT_CHANGED);
+        mMainHandler.handleMessage(
+                Message.obtain(mMainHandler, MainHandler.MSG_ACCESS_POINT_CHANGED));
     }
 
     /**
