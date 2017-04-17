@@ -56,8 +56,6 @@ public final class DownloadableSubscription implements Parcelable {
     // see getCarrierName and setCarrierName
     @Nullable
     private String carrierName;
-    // see isConsentGranted and setConsentGranted
-    private boolean consentGranted;
     // see getAccessRules and setAccessRules
     private UiccAccessRule[] accessRules;
 
@@ -69,7 +67,6 @@ public final class DownloadableSubscription implements Parcelable {
     private DownloadableSubscription(Parcel in) {
         encodedActivationCode = in.readString();
         carrierName = in.readString();
-        consentGranted = in.readInt() == 1;
         accessRules = in.createTypedArray(UiccAccessRule.CREATOR);
     }
 
@@ -110,28 +107,6 @@ public final class DownloadableSubscription implements Parcelable {
         return carrierName;
     }
 
-
-    /**
-     * Mark this download as being consented to by the user.
-     * @hide
-     */
-    public void setConsentGranted() {
-        consentGranted = true;
-    }
-
-    /**
-     * Returns whether the user has granted consent to download this subscription.
-     *
-     * <p>The {@link android.service.euicc.EuiccService} implementation should permit a subscription
-     * download if this is set, even if the calling app doesn't have permission to download it.
-     * @hide
-     *
-     * TODO(b/35851809): Make this a SystemApi.
-     */
-    public boolean isConsentGranted() {
-        return consentGranted;
-    }
-
     /**
      * Returns the {@link UiccAccessRule}s dictating access to this subscription.
      *
@@ -156,22 +131,10 @@ public final class DownloadableSubscription implements Parcelable {
         this.accessRules = accessRules;
     }
 
-    /**
-     * Unset any untrusted fields.
-     *
-     * <p>Should be called by the platform whenever an instance is received from an untrusted
-     * source to reset any secure fields that may only be set by the platform.
-     * @hide
-     */
-    public final void clearUntrustedFields() {
-        this.consentGranted = false;
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(encodedActivationCode);
         dest.writeString(carrierName);
-        dest.writeInt(consentGranted ? 1 : 0);
         dest.writeTypedArray(accessRules, flags);
     }
 

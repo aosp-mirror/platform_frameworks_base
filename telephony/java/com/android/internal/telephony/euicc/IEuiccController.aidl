@@ -17,10 +17,13 @@
 package com.android.internal.telephony.euicc;
 
 import android.app.PendingIntent;
+import android.content.Intent;
+import android.os.Bundle;
 import android.telephony.euicc.DownloadableSubscription;
 
 /** @hide */
 interface IEuiccController {
+    oneway void continueOperation(in Intent resolutionIntent, in Bundle resolutionExtras);
     oneway void getDownloadableSubscriptionMetadata(in DownloadableSubscription subscription,
         in PendingIntent callbackIntent);
     String getEid();

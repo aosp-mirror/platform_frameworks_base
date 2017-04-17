@@ -46,14 +46,14 @@ public final class DownloadResult implements Parcelable {
     @IntDef({
             RESULT_OK,
             RESULT_GENERIC_ERROR,
-            RESULT_MUST_DEACTIVATE_REMOVABLE_SIM,
+            RESULT_MUST_DEACTIVATE_SIM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
 
     public static final int RESULT_OK = 0;
     public static final int RESULT_GENERIC_ERROR = 1;
-    public static final int RESULT_MUST_DEACTIVATE_REMOVABLE_SIM = 2;
+    public static final int RESULT_MUST_DEACTIVATE_SIM = 2;
 
     /** Result of the operation - one of the RESULT_* constants. */
     public final @ResultCode int result;
@@ -83,11 +83,10 @@ public final class DownloadResult implements Parcelable {
     }
 
     /**
-     * Return a result indicating that the removable SIM must be deactivated to perform the
-     * operation.
+     * Return a result indicating that an active SIM must be deactivated to perform the operation.
      */
-    public static DownloadResult mustDeactivateRemovableSim() {
-        return new DownloadResult(RESULT_MUST_DEACTIVATE_REMOVABLE_SIM, 0);
+    public static DownloadResult mustDeactivateSim() {
+        return new DownloadResult(RESULT_MUST_DEACTIVATE_SIM, 0);
     }
 
     /**

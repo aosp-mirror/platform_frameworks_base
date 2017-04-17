@@ -22,7 +22,9 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
@@ -71,6 +73,13 @@ public class EuiccManager {
             "android.telephony.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
 
     /**
+     * Intent action to handle a resolvable error.
+     * @hide
+     */
+    public static final String ACTION_RESOLVE_ERROR =
+            "android.telephony.euicc.action.RESOLVE_ERROR";
+
+    /**
      * Result code for an operation indicating that the operation succeeded.
      */
     public static final int EMBEDDED_SUBSCRIPTION_RESULT_OK = 0;
@@ -105,7 +114,7 @@ public class EuiccManager {
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DETAILED_CODE";
 
     /**
-     * The key for an extra set on {@link #getDownloadableSubscriptionMetadata} PendingIntent result
+     * Key for an extra set on {@link #getDownloadableSubscriptionMetadata} PendingIntent result
      * callbacks providing the downloadable subscription metadata.
      * @hide
      *
@@ -113,6 +122,30 @@ public class EuiccManager {
      */
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTION =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTION";
+
+    /**
+     * Key for an extra set on {@link PendingIntent} result callbacks providing the resolution
+     * pending intent for {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR}s.
+     * @hide
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT";
+
+    /**
+     * Key for an extra set on the {@link #EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT} intent
+     * containing the EuiccService action to launch for resolution.
+     * @hide
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_ACTION =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_RESOLUTION_ACTION";
+
+    /**
+     * Key for an extra set on the {@link #EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT} intent
+     * providing the callback to execute after resolution is completed.
+     * @hide
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT";
 
     private final Context mContext;
     private final IEuiccController mController;
@@ -191,6 +224,8 @@ public class EuiccManager {
      * <p>If an operation returns {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR}, this
      * method may be called to prompt the user to resolve the issue.
      *
+     * <p>This method may only be called once for a particular error.
+     *
      * @param activity the calling activity (which should be in the foreground).
      * @param requestCode an application-specific request code which will be provided to
      *     {@link Activity#onActivityResult} upon completion. Note that the operation may still be
@@ -200,11 +235,49 @@ public class EuiccManager {
      *     {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR}.
      * @param callbackIntent a PendingIntent to launch when the operation completes. This is
      *     trigered upon completion of the original operation that required user resolution.
+     * @throws android.content.IntentSender.SendIntentException if called more than once.
      */
     public void startResolutionActivity(Activity activity, int requestCode, Intent resultIntent,
-            PendingIntent callbackIntent) {
-        // TODO(b/33075886): Implement this API.
-        throw new UnsupportedOperationException("Not implemented");
+            PendingIntent callbackIntent) throws IntentSender.SendIntentException {
+        PendingIntent resolutionIntent =
+                resultIntent.getParcelableExtra(EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT);
+        if (resolutionIntent == null) {
+            throw new IllegalArgumentException("Invalid result intent");
+        }
+        Intent fillInIntent = new Intent();
+        fillInIntent.putExtra(EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT,
+                callbackIntent);
+        activity.startIntentSenderForResult(resolutionIntent.getIntentSender(), requestCode,
+                fillInIntent, 0 /* flagsMask */, 0 /* flagsValues */, 0 /* extraFlags */);
+    }
+
+    /**
+     * Continue an operation after the user resolves an error.
+     *
+     * <p>To be called by the LUI upon completion of a resolvable error flow.
+     *
+     * @param resolutionIntent The original intent used to start the LUI.
+     * @param resolutionExtras Resolution-specific extras depending on the result of the resolution.
+     *     For example, this may indicate whether the user has consented or may include the input
+     *     they provided.
+     * @hide
+     */
+    @SystemApi
+    public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
+        if (!isEnabled()) {
+            PendingIntent callbackIntent =
+                    resolutionIntent.getParcelableExtra(
+                            EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
+            if (callbackIntent != null) {
+                sendUnavailableError(callbackIntent);
+            }
+            return;
+        }
+        try {
+            mController.continueOperation(resolutionIntent, resolutionExtras);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.euicc.DownloadableSubscription;
+import android.util.ArraySet;
 
 /**
  * Service interface linking the system with an eUICC local profile assistant (LPA) application.
@@ -74,6 +75,33 @@ public abstract class EuiccService extends Service {
     public static final String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION =
             "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
 
+    // LUI resolution actions. These are called by the platform to resolve errors in situations that
+    // require user interaction.
+    // TODO(b/33075886): Define extras for any input parameters to these dialogs once they are
+    // more scoped out.
+    /** Alert the user that this action will result in an active SIM being deactivated. */
+    public static final String ACTION_RESOLVE_DEACTIVATE_SIM =
+            "android.service.euicc.action.RESOLVE_DEACTIVATE_SIM";
+    /**
+     * Alert the user about a download/switch being done for an app that doesn't currently have
+     * carrier privileges.
+     */
+    public static final String ACTION_RESOLVE_NO_PRIVILEGES =
+            "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
+    /**
+     * List of all valid resolution actions for validation purposes.
+     * @hide
+     */
+    public static final ArraySet<String> RESOLUTION_ACTIONS;
+    static {
+        RESOLUTION_ACTIONS = new ArraySet<>();
+        RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_DEACTIVATE_SIM);
+        RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_NO_PRIVILEGES);
+    }
+
+    /** Boolean extra for resolution actions indicating whether the user granted consent. */
+    public static final String RESOLUTION_EXTRA_CONSENT = "consent";
+
     private final IEuiccService.Stub mStubWrapper;
 
     public EuiccService() {
@@ -107,11 +135,15 @@ public abstract class EuiccService extends Service {
      * @param slotId ID of the SIM slot to use when starting the download. This is currently not
      *     populated but is here to future-proof the APIs.
      * @param subscription A subscription whose metadata needs to be populated.
+     * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
+     *     eUICC, perform this action automatically. Otherwise,
+     *     {@link GetDownloadableSubscriptionMetadataResult#mustDeactivateSim()} should be returned
+     *     to allow the user to consent to this operation first.
      * @return The result of the operation.
      * @see android.telephony.euicc.EuiccManager#getDownloadableSubscriptionMetadata
      */
     public abstract GetDownloadableSubscriptionMetadataResult getDownloadableSubscriptionMetadata(
-            int slotId, DownloadableSubscription subscription);
+            int slotId, DownloadableSubscription subscription, boolean forceDeactivateSim);
 
     /**
      * Download the given subscription.
@@ -121,11 +153,16 @@ public abstract class EuiccService extends Service {
      * @param subscription The subscription to download.
      * @param switchAfterDownload If true, the subscription should be enabled upon successful
      *     download.
+     * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
+     *     eUICC, perform this action automatically. Otherwise,
+     *     {@link DownloadResult#mustDeactivateSim()} should be returned to allow the user to
+     *     consent to this operation first.
      * @return the result of the download operation.
      * @see android.telephony.euicc.EuiccManager#downloadSubscription
      */
     public abstract DownloadResult downloadSubscription(int slotId,
-            DownloadableSubscription subscription, boolean switchAfterDownload);
+            DownloadableSubscription subscription, boolean switchAfterDownload,
+            boolean forceDeactivateSim);
 
     /**
      * Wrapper around IEuiccService that forwards calls to implementations of {@link EuiccService}.
@@ -133,9 +170,10 @@ public abstract class EuiccService extends Service {
     private class IEuiccServiceWrapper extends IEuiccService.Stub {
         @Override
         public void downloadSubscription(int slotId, DownloadableSubscription subscription,
-                boolean switchAfterDownload, IDownloadSubscriptionCallback callback) {
+                boolean switchAfterDownload, boolean forceDeactivateSim,
+                IDownloadSubscriptionCallback callback) {
             DownloadResult result = EuiccService.this.downloadSubscription(
-                    slotId, subscription, switchAfterDownload);
+                    slotId, subscription, switchAfterDownload, forceDeactivateSim);
             try {
                 callback.onComplete(result);
             } catch (RemoteException e) {
@@ -156,9 +194,11 @@ public abstract class EuiccService extends Service {
         @Override
         public void getDownloadableSubscriptionMetadata(int slotId,
                 DownloadableSubscription subscription,
+                boolean forceDeactivateSim,
                 IGetDownloadableSubscriptionMetadataCallback callback) {
             GetDownloadableSubscriptionMetadataResult result =
-                    EuiccService.this.getDownloadableSubscriptionMetadata(slotId, subscription);
+                    EuiccService.this.getDownloadableSubscriptionMetadata(
+                            slotId, subscription, forceDeactivateSim);
             try {
                 callback.onComplete(result);
             } catch (RemoteException e) {

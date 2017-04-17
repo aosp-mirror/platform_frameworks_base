@@ -49,13 +49,13 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
     @IntDef({
             RESULT_OK,
             RESULT_GENERIC_ERROR,
-            RESULT_MUST_DEACTIVATE_REMOVABLE_SIM,
+            RESULT_MUST_DEACTIVATE_SIM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
 
     public static final int RESULT_OK = 0;
-    public static final int RESULT_MUST_DEACTIVATE_REMOVABLE_SIM = 1;
+    public static final int RESULT_MUST_DEACTIVATE_SIM = 1;
     public static final int RESULT_GENERIC_ERROR = 2;
 
     /** Result of the operation - one of the RESULT_* constants. */
@@ -100,11 +100,10 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
     }
 
     /**
-     * Return a result indicating that the removable SIM must be deactivated to perform the
-     * operation.
+     * Return a result indicating that an active SIM must be deactivated to perform the operation.
      */
-    public static GetDownloadableSubscriptionMetadataResult mustDeactivateRemovableSim() {
-        return new GetDownloadableSubscriptionMetadataResult(RESULT_MUST_DEACTIVATE_REMOVABLE_SIM,
+    public static GetDownloadableSubscriptionMetadataResult mustDeactivateSim() {
+        return new GetDownloadableSubscriptionMetadataResult(RESULT_MUST_DEACTIVATE_SIM,
                 null /* subscription */, 0 /* detailedCode */);
     }
 

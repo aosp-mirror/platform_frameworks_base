@@ -24,8 +24,9 @@ import android.telephony.euicc.DownloadableSubscription;
 /** @hide */
 oneway interface IEuiccService {
     void downloadSubscription(int slotId, in DownloadableSubscription subscription,
-            boolean switchAfterDownload, in IDownloadSubscriptionCallback callback);
+            boolean switchAfterDownload, boolean forceDeactivateSim,
+            in IDownloadSubscriptionCallback callback);
     void getDownloadableSubscriptionMetadata(int slotId, in DownloadableSubscription subscription,
-            in IGetDownloadableSubscriptionMetadataCallback callback);
+            boolean forceDeactivateSim, in IGetDownloadableSubscriptionMetadataCallback callback);
     void getEid(int slotId, in IGetEidCallback callback);
 }
