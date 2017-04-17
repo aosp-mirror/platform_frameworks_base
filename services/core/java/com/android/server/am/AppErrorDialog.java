@@ -148,18 +148,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
 
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
-            final int result = msg.what;
-
-            synchronized (mService) {
-                if (mProc != null && mProc.crashDialog == AppErrorDialog.this) {
-                    mProc.crashDialog = null;
-                }
-            }
-            mResult.set(result);
-
-            // Make sure we don't have time timeout still hanging around.
-            removeMessages(TIMEOUT);
-
+            setResult(msg.what);
             dismiss();
         }
     };
@@ -168,9 +157,21 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     public void dismiss() {
         if (!mResult.mHasResult) {
             // We are dismissing and the result has not been set...go ahead and set.
-            mResult.set(FORCE_QUIT);
+            setResult(FORCE_QUIT);
         }
         super.dismiss();
+    }
+
+    private void setResult(int result) {
+        synchronized (mService) {
+            if (mProc != null && mProc.crashDialog == AppErrorDialog.this) {
+                mProc.crashDialog = null;
+            }
+        }
+        mResult.set(result);
+
+        // Make sure we don't have time timeout still hanging around.
+        mHandler.removeMessages(TIMEOUT);
     }
 
     @Override
