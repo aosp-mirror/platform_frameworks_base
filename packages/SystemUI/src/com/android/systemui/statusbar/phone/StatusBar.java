@@ -5855,6 +5855,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
 
                 final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                if (row.isDark()) {
+                    return false;
+                }
                 bindGuts(row, item);
                 NotificationGuts guts = row.getGuts();
 
