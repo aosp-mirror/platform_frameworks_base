@@ -33,16 +33,23 @@
 #include <ui/DisplayInfo.h>
 #include <ui/PixelFormat.h>
 
+#include <system/graphics.h>
+
 // TODO: Fix Skia.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkImageEncoder.h>
 #include <SkData.h>
+#include <SkColorSpace.h>
 #pragma GCC diagnostic pop
 
 using namespace android;
 
 static uint32_t DEFAULT_DISPLAY_ID = ISurfaceComposer::eDisplayIdMain;
+
+#define COLORSPACE_UNKNOWN    0
+#define COLORSPACE_SRGB       1
+#define COLORSPACE_DISPLAY_P3 2
 
 static void usage(const char* pname)
 {
@@ -64,6 +71,31 @@ static SkColorType flinger2skia(PixelFormat f)
             return kRGB_565_SkColorType;
         default:
             return kN32_SkColorType;
+    }
+}
+
+static sk_sp<SkColorSpace> dataSpaceToColorSpace(android_dataspace d)
+{
+    switch (d) {
+        case HAL_DATASPACE_V0_SRGB:
+            return SkColorSpace::MakeSRGB();
+        case HAL_DATASPACE_DISPLAY_P3:
+            return SkColorSpace::MakeRGB(
+                    SkColorSpace::kSRGB_RenderTargetGamma, SkColorSpace::kDCIP3_D65_Gamut);
+        default:
+            return nullptr;
+    }
+}
+
+static uint32_t dataSpaceToInt(android_dataspace d)
+{
+    switch (d) {
+        case HAL_DATASPACE_V0_SRGB:
+            return COLORSPACE_SRGB;
+        case HAL_DATASPACE_DISPLAY_P3:
+            return COLORSPACE_DISPLAY_P3;
+        default:
+            return COLORSPACE_UNKNOWN;
     }
 }
 
@@ -139,6 +171,7 @@ int main(int argc, char** argv)
 
     void const* base = NULL;
     uint32_t w, s, h, f;
+    android_dataspace d;
     size_t size = 0;
 
     // Maps orientations from DisplayInfo to ISurfaceComposer
@@ -177,13 +210,15 @@ int main(int argc, char** argv)
         h = screenshot.getHeight();
         s = screenshot.getStride();
         f = screenshot.getFormat();
+        d = screenshot.getDataSpace();
         size = screenshot.getSize();
     }
 
     if (base != NULL) {
         if (png) {
             const SkImageInfo info =
-                SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType);
+                SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType,
+                    dataSpaceToColorSpace(d));
             SkPixmap pixmap(info, base, s * bytesPerPixel(f));
             struct FDWStream final : public SkWStream {
               size_t fBytesWritten = 0;
@@ -200,9 +235,11 @@ int main(int argc, char** argv)
                 notifyMediaScanner(fn);
             }
         } else {
+            uint32_t c = dataSpaceToInt(d);
             write(fd, &w, 4);
             write(fd, &h, 4);
             write(fd, &f, 4);
+            write(fd, &c, 4);
             size_t Bpp = bytesPerPixel(f);
             for (size_t y=0 ; y<h ; y++) {
                 write(fd, base, w*Bpp);

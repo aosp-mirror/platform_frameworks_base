@@ -155,7 +155,8 @@ void SkiaOpenGLPipeline::onStop() {
     }
 }
 
-bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior) {
+bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
+        ColorMode colorMode) {
 
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
@@ -163,7 +164,8 @@ bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior)
     }
 
     if (surface) {
-        mEglSurface = mEglManager.createSurface(surface);
+        const bool wideColorGamut = colorMode == ColorMode::WideColorGamut;
+        mEglSurface = mEglManager.createSurface(surface, wideColorGamut);
     }
 
     if (mEglSurface != EGL_NO_SURFACE) {
