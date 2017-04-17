@@ -56,7 +56,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     private void restorePipAndFinish() {
         if (mRestorePipSizeWhenClose) {
             // When PIP menu activity is closed, restore to the default position.
-            mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
+            mPipManager.resizePinnedStack(PipManager.STATE_PIP);
         }
         finish();
     }

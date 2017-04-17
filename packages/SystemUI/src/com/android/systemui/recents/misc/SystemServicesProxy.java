@@ -82,7 +82,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.pip.tv.PipMenuActivity;
-import com.android.systemui.pip.tv.PipOnboardingActivity;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
@@ -113,7 +112,6 @@ public class SystemServicesProxy {
     final static List<String> sRecentsBlacklist;
     static {
         sRecentsBlacklist = new ArrayList<>();
-        sRecentsBlacklist.add(PipOnboardingActivity.class.getName());
         sRecentsBlacklist.add(PipMenuActivity.class.getName());
     }
 
