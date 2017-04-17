@@ -172,7 +172,7 @@ public final class NotificationRecord {
             final boolean useDefaultSound = (n.defaults & Notification.DEFAULT_SOUND) != 0;
             if (useDefaultSound) {
                 sound = Settings.System.DEFAULT_NOTIFICATION_URI;
-            } else if (n.sound != null) {
+            } else {
                 sound = n.sound;
             }
         }

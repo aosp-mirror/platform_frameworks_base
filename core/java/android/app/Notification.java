@@ -2339,7 +2339,9 @@ public class Notification implements Parcelable
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Notification(pri=");
+        sb.append("Notification(channel=");
+        sb.append(getChannel());
+        sb.append(" pri=");
         sb.append(priority);
         sb.append(" contentView=");
         if (contentView != null) {
