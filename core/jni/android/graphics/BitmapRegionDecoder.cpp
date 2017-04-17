@@ -218,6 +218,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     // If we may have reused a bitmap, we need to indicate that the pixels have changed.
     if (javaBitmap) {
         recycleAlloc.copyIfNecessary();
+        bitmap::reinitBitmap(env, javaBitmap, recycledBitmap->info(), !requireUnpremul);
         return javaBitmap;
     }
 

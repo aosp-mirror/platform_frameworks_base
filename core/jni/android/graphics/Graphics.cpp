@@ -658,7 +658,11 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
         // mRecycledBitmap->info() for the SkImageInfo.  According to the
         // specification for BitmapRegionDecoder, we are not allowed to change
         // the SkImageInfo.
-        mRecycledBitmap->reconfigure(mRecycledBitmap->info(), rowBytes, ctable);
+        // We can (must) preserve the color space since it doesn't affect the
+        // storage needs
+        mRecycledBitmap->reconfigure(
+                mRecycledBitmap->info().makeColorSpace(bitmap->refColorSpace()),
+                rowBytes, ctable);
 
         // Give the bitmap the same pixelRef as mRecycledBitmap.
         // skbug.com/4538: We also need to make sure that the rowBytes on the pixel ref
