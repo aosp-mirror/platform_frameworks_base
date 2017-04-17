@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -287,6 +288,24 @@ public class DisplayContentTests extends WindowTestsBase {
         // Verify that setting the max width to a greater value than the base width has no effect
         sDisplayContent.setMaxUiWidth(maxWidth);
         verifySizes(sDisplayContent, smallerWidth, smallerHeight, smallerDensity);
+    }
+
+    /**
+     * This test enforces that the pinned stack is always kept as the top stack.
+     */
+    @Test
+    public void testPinnedStackLocation() {
+        createStackControllerOnStackOnDisplay(PINNED_STACK_ID, sDisplayContent);
+        final int initialStackCount = sDisplayContent.getStackCount();
+        // Ensure that the pinned stack was placed at the end
+        assertEquals(initialStackCount - 1, sDisplayContent.getStaskPosById(PINNED_STACK_ID));
+        // By default, this should try to create a new stack on top
+        createTaskStackOnDisplay(sDisplayContent);
+        final int afterStackCount = sDisplayContent.getStackCount();
+        // Make sure the stack count has increased
+        assertEquals(initialStackCount + 1, afterStackCount);
+        // Ensure that the pinned stack is still on top
+        assertEquals(afterStackCount - 1, sDisplayContent.getStaskPosById(PINNED_STACK_ID));
     }
 
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
