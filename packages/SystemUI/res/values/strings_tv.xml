@@ -27,14 +27,4 @@
     <string name="pip_play">Play</string>
     <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
     <string name="pip_pause">Pause</string>
-    <!-- Overlay text on picture-in-picture (PIP) to indicate that longpress HOME key to control PIP [CHAR LIMIT=52] -->
-    <string name="pip_hold_home">Hold <b>HOME</b> to control PIP</string>
-    <!-- Picture-in-Picture (PIP) onboarding screen -->
-    <eat-comment />
-    <!-- Title for picture-in-picture (PIP) onboarding screen to indicate that an user is in PIP mode. [CHAR LIMIT=NONE] -->
-    <string name="pip_onboarding_title">Picture-in-picture</string>
-    <!-- Description for picture-in-picture (PIP) onboarding screen to indicate that longpress HOME key to control PIP. [CHAR LIMIT=NONE] -->
-    <string name="pip_onboarding_description">This keeps your video in view until you play another one. Press and hold <b>HOME</b> to control it.</string>
-    <!-- Button to close picture-in-picture (PIP) onboarding screen. -->
-    <string name="pip_onboarding_button">Got it</string>
 </resources>
