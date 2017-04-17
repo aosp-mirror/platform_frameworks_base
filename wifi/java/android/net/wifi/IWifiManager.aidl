@@ -125,6 +125,10 @@ interface IWifiManager
 
     void setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
 
+    boolean startSoftAp(in WifiConfiguration wifiConfig);
+
+    boolean stopSoftAp();
+
     int getWifiApEnabledState();
 
     WifiConfiguration getWifiApConfiguration();
