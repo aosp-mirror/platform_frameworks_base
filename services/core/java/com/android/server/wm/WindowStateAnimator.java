@@ -1360,7 +1360,7 @@ class WindowStateAnimator {
             int posX = mTmpSize.left;
             int posY = mTmpSize.top;
             task.mStack.getDimBounds(mTmpStackBounds);
-            task.mStack.getFinalAnimationSourceBounds(mTmpSourceBounds);
+            task.mStack.getFinalAnimationSourceHintBounds(mTmpSourceBounds);
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
                 // current stack bounds

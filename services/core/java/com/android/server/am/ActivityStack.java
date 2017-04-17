@@ -589,6 +589,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /**
+     * Returns whether to defer the scheduling of the multi-window mode.
+     */
+    boolean deferScheduleMultiWindowModeChanged() {
+        return false;
+    }
+
+    /**
      * Defers updating the bounds of the stack. If the stack was resized/repositioned while
      * deferring, the bounds will update in {@link #continueUpdateBounds()}.
      */
