@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
@@ -36,6 +37,7 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -55,6 +57,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private StatusBar mStatusBarComponent;
     private DarkIconManager mDarkIconManager;
     private SignalClusterView mSignalClusterView;
+
+    private SignalCallback mSignalCallback = new SignalCallback() {
+        @Override
+        public void setIsAirplaneMode(NetworkController.IconState icon) {
+            mStatusBarComponent.recomputeDisableFlags(true /* animate */);
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,6 +93,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
         // Default to showing until we know otherwise.
         showSystemIconArea(false);
+        initEmergencyCryptkeeperText();
     }
 
     @Override
@@ -109,6 +119,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onDestroyView();
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mSignalClusterView);
         Dependency.get(StatusBarIconController.class).removeIconGroup(mDarkIconManager);
+        if (mNetworkController.hasEmergencyCryptKeeperText()) {
+            mNetworkController.removeCallback(mSignalCallback);
+        }
     }
 
     public void initNotificationIconArea(NotificationIconAreaController
@@ -231,6 +244,19 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                     .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
                     .start();
+        }
+    }
+
+    private void initEmergencyCryptkeeperText() {
+        View emergencyViewStub = mStatusBar.findViewById(R.id.emergency_cryptkeeper_text);
+        if (mNetworkController.hasEmergencyCryptKeeperText()) {
+            if (emergencyViewStub != null) {
+                ((ViewStub) emergencyViewStub).inflate();
+            }
+            mNetworkController.addCallback(mSignalCallback);
+        } else if (emergencyViewStub != null) {
+            ViewGroup parent = (ViewGroup) emergencyViewStub.getParent();
+            parent.removeView(emergencyViewStub);
         }
     }
 }
