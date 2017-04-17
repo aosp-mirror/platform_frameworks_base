@@ -49,6 +49,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -231,25 +232,25 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Channel or group modification reason provided to
-     * {@link #onNotificationChannelModified(String, NotificationChannel, int)} or
-     * {@link #onNotificationChannelGroupModified(String, NotificationChannelGroup, int)}- the
-     * provided object was created.
+     * {@link #onNotificationChannelModified(String, UserHandle,NotificationChannel, int)} or
+     * {@link #onNotificationChannelGroupModified(String, UserHandle, NotificationChannelGroup,
+     * int)}- the provided object was created.
      */
     public static final int NOTIFICATION_CHANNEL_OR_GROUP_ADDED = 1;
 
     /**
      * Channel or group modification reason provided to
-     * {@link #onNotificationChannelModified(String, NotificationChannel, int)} or
-     * {@link #onNotificationChannelGroupModified(String, NotificationChannelGroup, int)}- the
-     * provided object was updated.
+     * {@link #onNotificationChannelModified(String, UserHandle, NotificationChannel, int)} or
+     * {@link #onNotificationChannelGroupModified(String, UserHandle,NotificationChannelGroup, int)}
+     * - the provided object was updated.
      */
     public static final int NOTIFICATION_CHANNEL_OR_GROUP_UPDATED = 2;
 
     /**
      * Channel or group modification reason provided to
-     * {@link #onNotificationChannelModified(String, NotificationChannel, int)} or
-     * {@link #onNotificationChannelGroupModified(String, NotificationChannelGroup, int)}- the
-     * provided object was deleted.
+     * {@link #onNotificationChannelModified(String, UserHandle, NotificationChannel, int)} or
+     * {@link #onNotificationChannelGroupModified(String, UserHandle, NotificationChannelGroup,
+     * int)}- the provided object was deleted.
      */
     public static final int NOTIFICATION_CHANNEL_OR_GROUP_DELETED = 3;
 
@@ -432,13 +433,14 @@ public abstract class NotificationListenerService extends Service {
      * device} in order to receive this callback.
      *
      * @param pkg The package the channel belongs to.
+     * @param user The user on which the change was made.
      * @param channel The channel that has changed.
      * @param modificationType One of {@link #NOTIFICATION_CHANNEL_OR_GROUP_ADDED},
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_UPDATED},
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_DELETED}.
      */
-    public void onNotificationChannelModified(String pkg, NotificationChannel channel,
-            @ChannelOrGroupModificationTypes int modificationType) {
+    public void onNotificationChannelModified(String pkg, UserHandle user,
+            NotificationChannel channel, @ChannelOrGroupModificationTypes int modificationType) {
         // optional
     }
 
@@ -449,13 +451,14 @@ public abstract class NotificationListenerService extends Service {
      * device} in order to receive this callback.
      *
      * @param pkg The package the group belongs to.
+     * @param user The user on which the change was made.
      * @param group The group that has changed.
      * @param modificationType One of {@link #NOTIFICATION_CHANNEL_OR_GROUP_ADDED},
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_UPDATED},
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_DELETED}.
      */
-    public void onNotificationChannelGroupModified(String pkg, NotificationChannelGroup group,
-            @ChannelOrGroupModificationTypes int modificationType) {
+    public void onNotificationChannelGroupModified(String pkg, UserHandle user,
+            NotificationChannelGroup group, @ChannelOrGroupModificationTypes int modificationType) {
         // optional
     }
 
@@ -661,21 +664,24 @@ public abstract class NotificationListenerService extends Service {
 
 
     /**
-     * Updates a notification channel for a given package. This should only be used to reflect
-     * changes a user has made to the channel via the listener's user interface.
+     * Updates a notification channel for a given package for a given user. This should only be used
+     * to reflect changes a user has made to the channel via the listener's user interface.
      *
+     * <p>This method will throw a security exception if you don't have access to notifications
+     * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
      * device} in order to use this method.
      *
      * @param pkg The package the channel belongs to.
+     * @param user The user the channel belongs to.
      * @param channel the channel to update.
      */
-    public final void updateNotificationChannel(@NonNull String pkg,
+    public final void updateNotificationChannel(@NonNull String pkg, @NonNull UserHandle user,
             @NonNull NotificationChannel channel) {
         if (!isBound()) return;
         try {
             getNotificationInterface().updateNotificationChannelFromPrivilegedListener(
-                    mWrapper, pkg, channel);
+                    mWrapper, pkg, user, channel);
         } catch (RemoteException e) {
             Log.v(TAG, "Unable to contact notification manager", e);
             throw e.rethrowFromSystemServer();
@@ -683,19 +689,22 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Returns all notification channels belonging to the given package.
+     * Returns all notification channels belonging to the given package for a given user.
      *
+     * <p>This method will throw a security exception if you don't have access to notifications
+     * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
      * device} in order to use this method.
      *
      * @param pkg The package to retrieve channels for.
      */
-    public final List<NotificationChannel> getNotificationChannels(@NonNull String pkg) {
+    public final List<NotificationChannel> getNotificationChannels(@NonNull String pkg,
+            @NonNull UserHandle user) {
         if (!isBound()) return null;
         try {
 
             return getNotificationInterface().getNotificationChannelsFromPrivilegedListener(
-                    mWrapper, pkg).getList();
+                    mWrapper, pkg, user).getList();
         } catch (RemoteException e) {
             Log.v(TAG, "Unable to contact notification manager", e);
             throw e.rethrowFromSystemServer();
@@ -703,19 +712,22 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Returns all notification channel groups belonging to the given package.
+     * Returns all notification channel groups belonging to the given package for a given user.
      *
+     * <p>This method will throw a security exception if you don't have access to notifications
+     * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
      * device} in order to use this method.
      *
      * @param pkg The package to retrieve channel groups for.
      */
-    public final List<NotificationChannelGroup> getNotificationChannelGroups(@NonNull String pkg) {
+    public final List<NotificationChannelGroup> getNotificationChannelGroups(@NonNull String pkg,
+            @NonNull UserHandle user) {
         if (!isBound()) return null;
         try {
 
             return getNotificationInterface().getNotificationChannelGroupsFromPrivilegedListener(
-                    mWrapper, pkg).getList();
+                    mWrapper, pkg, user).getList();
         } catch (RemoteException e) {
             Log.v(TAG, "Unable to contact notification manager", e);
             throw e.rethrowFromSystemServer();
@@ -1252,24 +1264,27 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
-        public void onNotificationChannelModification(String pkgName, NotificationChannel channel,
+        public void onNotificationChannelModification(String pkgName, UserHandle user,
+                NotificationChannel channel,
                 @ChannelOrGroupModificationTypes int modificationType) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = pkgName;
-            args.arg2 = channel;
-            args.arg3 = modificationType;
+            args.arg2 = user;
+            args.arg3 = channel;
+            args.arg4 = modificationType;
             mHandler.obtainMessage(
                     MyHandler.MSG_ON_NOTIFICATION_CHANNEL_MODIFIED, args).sendToTarget();
         }
 
         @Override
-        public void onNotificationChannelGroupModification(String pkgName,
+        public void onNotificationChannelGroupModification(String pkgName, UserHandle user,
                 NotificationChannelGroup group,
                 @ChannelOrGroupModificationTypes int modificationType) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = pkgName;
-            args.arg2 = group;
-            args.arg3 = modificationType;
+            args.arg2 = user;
+            args.arg3 = group;
+            args.arg4 = modificationType;
             mHandler.obtainMessage(
                     MyHandler.MSG_ON_NOTIFICATION_CHANNEL_GROUP_MODIFIED, args).sendToTarget();
         }
@@ -1841,17 +1856,19 @@ public abstract class NotificationListenerService extends Service {
                 case MSG_ON_NOTIFICATION_CHANNEL_MODIFIED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     String pkgName = (String) args.arg1;
-                    NotificationChannel channel = (NotificationChannel) args.arg2;
-                    int modificationType = (int) args.arg3;
-                    onNotificationChannelModified(pkgName, channel, modificationType);
+                    UserHandle user= (UserHandle) args.arg2;
+                    NotificationChannel channel = (NotificationChannel) args.arg3;
+                    int modificationType = (int) args.arg4;
+                    onNotificationChannelModified(pkgName, user, channel, modificationType);
                 } break;
 
                 case MSG_ON_NOTIFICATION_CHANNEL_GROUP_MODIFIED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     String pkgName = (String) args.arg1;
-                    NotificationChannelGroup group = (NotificationChannelGroup) args.arg2;
-                    int modificationType = (int) args.arg3;
-                    onNotificationChannelGroupModified(pkgName, group, modificationType);
+                    UserHandle user = (UserHandle) args.arg2;
+                    NotificationChannelGroup group = (NotificationChannelGroup) args.arg3;
+                    int modificationType = (int) args.arg4;
+                    onNotificationChannelGroupModified(pkgName, user, group, modificationType);
                 } break;
             }
         }
