@@ -2439,6 +2439,14 @@
         <!-- Whether the given RRO is static or not. -->
         <attr name="isStatic" format="boolean" />
 
+        <!-- Required property name/value pair used to enable this overlay.
+             e.g. name=ro.oem.sku value=MKT210.
+             Overlay will be ignored unless system property exists and is
+             set to specified value -->
+        <!-- @hide @SystemApi This shouldn't be public. -->
+        <attr name="requiredSystemPropertyName" format="string" />
+        <!-- @hide @SystemApi This shouldn't be public. -->
+        <attr name="requiredSystemPropertyValue" format="string" />
     </declare-styleable>
 
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May
