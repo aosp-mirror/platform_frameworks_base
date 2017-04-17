@@ -2504,7 +2504,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // incorrect if AMS.resizeStackWithBoundsFromWindowManager() is already called while waiting
         // for the AMS lock to be freed. So check and make sure these bounds are still good.
         final PinnedStackWindowController stackController = stack.getWindowContainerController();
-        if (stackController.pinnedStackResizeAllowed()) {
+        if (stackController.pinnedStackResizeDisallowed()) {
             return;
         }
 
@@ -2873,7 +2873,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return true;
     }
 
-    void moveActivityToPinnedStackLocked(ActivityRecord r, Rect sourceBounds, float aspectRatio,
+    void moveActivityToPinnedStackLocked(ActivityRecord r, Rect sourceHintBounds, float aspectRatio,
             boolean moveHomeStackToFront, String reason) {
 
         mWindowManager.deferSurfaceLayout();
@@ -2948,11 +2948,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final Rect destBounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
                 aspectRatio, false /* useExistingStackBounds */);
 
-        // TODO(b/36099777): Schedule the PiP mode change here immediately until we can defer all
-        // callbacks until after the bounds animation
-        scheduleUpdatePictureInPictureModeIfNeeded(r.getTask(), destBounds, true /* immediate */);
-
-        stack.animateResizePinnedStack(sourceBounds, destBounds, -1 /* animationDuration */);
+        stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
+                true /* schedulePipModeChangedOnAnimationEnd */);
         mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName);
     }
 
@@ -4179,6 +4176,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void scheduleUpdateMultiWindowMode(TaskRecord task) {
+        // If the stack is animating in a way where we will be forcing a multi-mode change at the
+        // end, then ensure that we defer all in between multi-window mode changes
+        if (task.getStack().deferScheduleMultiWindowModeChanged()) {
+            return;
+        }
+
         for (int i = task.mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = task.mActivities.get(i);
             if (r.app != null && r.app.thread != null) {

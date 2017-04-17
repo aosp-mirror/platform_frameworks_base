@@ -4365,9 +4365,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // When we change the Surface size, in scenarios which may require changing
         // the surface position in sync with the resize, we use a preserved surface
         // so we can freeze it while waiting for the client to report draw on the newly
-        // sized surface.
+        // sized surface.  Don't preserve surfaces if the insets change while animating the pinned
+        // stack since it can lead to issues if a new surface is created while calculating the
+        // scale for the animation using the source hint rect
+        // (see WindowStateAnimator#setSurfaceBoundariesLocked()).
         if (isDragResizeChanged() || isResizedWhileNotDragResizing()
-                || surfaceInsetsChanging()) {
+                || (surfaceInsetsChanging() && !inPinnedWorkspace())) {
             mLastSurfaceInsets.set(mAttrs.surfaceInsets);
 
             setDragResizing();
