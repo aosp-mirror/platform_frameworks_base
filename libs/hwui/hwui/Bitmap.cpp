@@ -51,9 +51,9 @@ static bool computeAllocationSize(size_t rowBytes, int height, size_t* size) {
 }
 
 typedef sk_sp<Bitmap> (*AllocPixeRef)(size_t allocSize, const SkImageInfo& info, size_t rowBytes,
-        SkColorTable* ctable);
+        sk_sp<SkColorTable> ctable);
 
-static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, SkColorTable* ctable, AllocPixeRef alloc) {
+static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable, AllocPixeRef alloc) {
     const SkImageInfo& info = bitmap->info();
     if (info.colorType() == kUnknown_SkColorType) {
         LOG_ALWAYS_FATAL("unknown bitmap configuration");
@@ -69,7 +69,7 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, SkColorTable* ctable, Allo
         return nullptr;
     }
 
-    auto wrapper = alloc(size, info, rowBytes, ctable);
+    auto wrapper = alloc(size, info, rowBytes, std::move(ctable));
     if (wrapper) {
         wrapper->getSkBitmap(bitmap);
         // since we're already allocated, we lockPixels right away
@@ -79,17 +79,17 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, SkColorTable* ctable, Allo
     return wrapper;
 }
 
-sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
-   return allocateBitmap(bitmap, ctable, &Bitmap::allocateAshmemBitmap);
+sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable) {
+   return allocateBitmap(bitmap, std::move(ctable), &Bitmap::allocateAshmemBitmap);
 }
 
 static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& info, size_t rowBytes,
-        SkColorTable* ctable) {
+        sk_sp<SkColorTable> ctable) {
     void* addr = calloc(size, 1);
     if (!addr) {
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes, ctable));
+    return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes, std::move(ctable)));
 }
 
 #define FENCE_TIMEOUT 2000000000
@@ -262,8 +262,8 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(SkBitmap& bitmap) {
     return uirenderer::renderthread::RenderProxy::allocateHardwareBitmap(bitmap);
 }
 
-sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
-   return allocateBitmap(bitmap, ctable, &android::allocateHeapBitmap);
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable) {
+   return allocateBitmap(bitmap, std::move(ctable), &android::allocateHeapBitmap);
 }
 
 sk_sp<Bitmap> Bitmap::allocateHeapBitmap(const SkImageInfo& info) {
@@ -276,7 +276,7 @@ sk_sp<Bitmap> Bitmap::allocateHeapBitmap(const SkImageInfo& info) {
 }
 
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
-        size_t rowBytes, SkColorTable* ctable) {
+        size_t rowBytes, sk_sp<SkColorTable> ctable) {
     // Create new ashmem region with read/write priv
     int fd = ashmem_create_region("bitmap", size);
     if (fd < 0) {
@@ -294,7 +294,7 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
         close(fd);
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes, ctable));
+    return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes, std::move(ctable)));
 }
 
 void FreePixelRef(void* addr, void* context) {
@@ -307,7 +307,7 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) 
     pixelRef.ref();
     pixelRef.lockPixels();
     return sk_sp<Bitmap>(new Bitmap((void*) pixelRef.pixels(), (void*) &pixelRef, FreePixelRef,
-            info, pixelRef.rowBytes(), pixelRef.colorTable()));
+            info, pixelRef.rowBytes(), sk_ref_sp(pixelRef.colorTable())));
 }
 
 sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
@@ -323,10 +323,10 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
 }
 
 void Bitmap::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
-    reconfigure(info().makeColorSpace(std::move(colorSpace)), rowBytes(), colorTable());
+    reconfigure(info().makeColorSpace(std::move(colorSpace)), rowBytes(), sk_ref_sp(colorTable()));
 }
 
-void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
+void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, sk_sp<SkColorTable> ctable) {
     if (kIndex_8_SkColorType != newInfo.colorType()) {
         ctable = nullptr;
     }
@@ -343,26 +343,26 @@ void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTab
     // really hard to work with. Skia really, really wants immutable objects,
     // but with the nested-ref-count hackery going on that's just not
     // feasible without going insane trying to figure it out
-    this->android_only_reset(newInfo.makeAlphaType(alphaType), rowBytes, sk_ref_sp(ctable));
+    this->android_only_reset(newInfo.makeAlphaType(alphaType), rowBytes, std::move(ctable));
 }
 
-static sk_sp<SkColorTable> sanitize(const SkImageInfo& info, SkColorTable* ctable) {
+static sk_sp<SkColorTable> sanitize(const SkImageInfo& info, sk_sp<SkColorTable> ctable) {
     if (info.colorType() == kIndex_8_SkColorType) {
         SkASSERT(ctable);
-        return sk_ref_sp(ctable);
+        return ctable;
     }
     return nullptr; // drop the ctable if we're not indexed
 }
-Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-            : SkPixelRef(info, address, rowBytes, sanitize(info, ctable))
+Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable)
+            : SkPixelRef(info, address, rowBytes, sanitize(info, std::move(ctable)))
             , mPixelStorageType(PixelStorageType::Heap) {
     mPixelStorage.heap.address = address;
     mPixelStorage.heap.size = size;
 }
 
 Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
-                const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-            : SkPixelRef(info, address, rowBytes, sanitize(info, ctable))
+                const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable)
+            : SkPixelRef(info, address, rowBytes, sanitize(info, std::move(ctable)))
             , mPixelStorageType(PixelStorageType::External) {
     mPixelStorage.external.address = address;
     mPixelStorage.external.context = context;
@@ -370,8 +370,8 @@ Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
 }
 
 Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
-                const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-            : SkPixelRef(info, address, rowBytes, sanitize(info, ctable))
+                const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable)
+            : SkPixelRef(info, address, rowBytes, sanitize(info, std::move(ctable)))
             , mPixelStorageType(PixelStorageType::Ashmem) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;

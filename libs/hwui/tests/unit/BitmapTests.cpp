@@ -34,7 +34,7 @@ TEST(Bitmap, colorTableRefCounting) {
     SkBitmap* bm = new SkBitmap();
     bm->allocPixels(SkImageInfo::Make(1, 1, kIndex_8_SkColorType, kPremul_SkAlphaType),
             ctable);
-    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(bm, ctable.get());
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(bm, ctable);
     EXPECT_FALSE(ctable->unique());
     delete bm;
     bitmap.reset();
