@@ -1122,8 +1122,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Other icons
         mVolumeComponent = getComponent(VolumeComponent.class);
 
-        initEmergencyCryptkeeperText();
-
         mKeyguardBottomArea.setStatusBar(this);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetup);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
@@ -1231,24 +1229,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             mNavigationBar.setCurrentSysuiVisibility(mSystemUiVisibility);
         });
-    }
-
-    private void initEmergencyCryptkeeperText() {
-        View emergencyViewStub = mStatusBarWindow.findViewById(R.id.emergency_cryptkeeper_text);
-        if (mNetworkController.hasEmergencyCryptKeeperText()) {
-            if (emergencyViewStub != null) {
-                ((ViewStub) emergencyViewStub).inflate();
-            }
-            mNetworkController.addCallback(new NetworkController.SignalCallback() {
-                @Override
-                public void setIsAirplaneMode(NetworkController.IconState icon) {
-                    recomputeDisableFlags(true /* animate */);
-                }
-            });
-        } else if (emergencyViewStub != null) {
-            ViewGroup parent = (ViewGroup) emergencyViewStub.getParent();
-            parent.removeView(emergencyViewStub);
-        }
     }
 
     /**
