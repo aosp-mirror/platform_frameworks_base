@@ -16,8 +16,6 @@
 
 package android.os;
 
-import android.annotation.IntegerRes;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -28,6 +26,9 @@ import android.util.SizeF;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+
+import dalvik.annotation.optimization.FastNative;
+import dalvik.system.VMRuntime;
 
 import libcore.util.SneakyThrow;
 
@@ -49,9 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import dalvik.annotation.optimization.FastNative;
-import dalvik.system.VMRuntime;
+import java.util.UUID;
 
 /**
  * Container for a message (data and object references) that can
@@ -243,6 +242,7 @@ public final class Parcel {
     private static final int VAL_SIZE = 26;
     private static final int VAL_SIZEF = 27;
     private static final int VAL_DOUBLEARRAY = 28;
+    private static final int VAL_UUID = 29;
 
     // The initial int32 in a Binder call's reply Parcel header:
     // Keep these in sync with libbinder's binder/Status.h.
@@ -828,6 +828,15 @@ public final class Parcel {
     public final void writeSizeF(SizeF val) {
         writeFloat(val.getWidth());
         writeFloat(val.getHeight());
+    }
+
+    /**
+     * Flatten a UUID into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.
+     */
+    public final void writeUuid(UUID val) {
+        writeLong(val.getMostSignificantBits());
+        writeLong(val.getLeastSignificantBits());
     }
 
     /**
@@ -1678,6 +1687,9 @@ public final class Parcel {
         } else if (v instanceof double[]) {
             writeInt(VAL_DOUBLEARRAY);
             writeDoubleArray((double[]) v);
+        } else if (v instanceof UUID) {
+            writeInt(VAL_UUID);
+            writeUuid((UUID) v);
         } else {
             Class<?> clazz = v.getClass();
             if (clazz.isArray() && clazz.getComponentType() == Object.class) {
@@ -2179,6 +2191,13 @@ public final class Parcel {
         final float width = readFloat();
         final float height = readFloat();
         return new SizeF(width, height);
+    }
+
+    /**
+     * Read a UUID from the parcel at the current dataPosition().
+     */
+    public final UUID readUuid() {
+        return new UUID(readLong(), readLong());
     }
 
     /**
@@ -2730,6 +2749,9 @@ public final class Parcel {
 
         case VAL_DOUBLEARRAY:
             return createDoubleArray();
+
+        case VAL_UUID:
+            return readUuid();
 
         default:
             int off = dataPosition() - 4;

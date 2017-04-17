@@ -20,6 +20,7 @@ import android.app.usage.StorageStatsManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -49,12 +50,12 @@ public class StorageManagerVolumeProvider implements StorageVolumeProvider {
     }
 
     @Override
-    public long getTotalBytes(StorageStatsManager stats, VolumeInfo volume) {
+    public long getTotalBytes(StorageStatsManager stats, VolumeInfo volume) throws IOException {
         return stats.getTotalBytes(volume.getFsUuid());
     }
 
     @Override
-    public long getFreeBytes(StorageStatsManager stats, VolumeInfo volume) {
+    public long getFreeBytes(StorageStatsManager stats, VolumeInfo volume) throws IOException {
         return stats.getFreeBytes(volume.getFsUuid());
     }
 }
