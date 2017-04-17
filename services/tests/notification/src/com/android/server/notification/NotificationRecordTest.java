@@ -124,6 +124,9 @@ public class NotificationRecordTest {
                 builder.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
                 channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
             }
+        } else {
+            channel.setSound(null, null);
+            builder.setSound(null, null);
         }
         if (buzzy) {
             if (defaultVibration) {
@@ -203,6 +206,18 @@ public class NotificationRecordTest {
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(CUSTOM_SOUND, record.getSound());
         assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
+    }
+
+    @Test
+    public void testSound_noSound_preUpgrade() throws Exception {
+        // pre upgrade, default sound.
+        StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
+                false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /*defaultLights */);
+
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+        assertEquals(null, record.getSound());
+        assertEquals(Notification.AUDIO_ATTRIBUTES_DEFAULT, record.getAudioAttributes());
     }
 
     @Test
