@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -1725,6 +1726,39 @@ public class WifiManager {
         try {
             mService.setWifiApEnabled(wifiConfig, enabled);
             return true;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start SoftAp mode with the specified configuration.
+     * Note that starting in access point mode disables station
+     * mode operation
+     * @param wifiConfig SSID, security and channel details as
+     *        part of WifiConfiguration
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     *
+     * @hide
+     */
+    public boolean startSoftAp(@Nullable WifiConfiguration wifiConfig) {
+        try {
+            return mService.startSoftAp(wifiConfig);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stop SoftAp mode.
+     * Note that stopping softap mode will restore the previous wifi mode.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     *
+     * @hide
+     */
+    public boolean stopSoftAp() {
+        try {
+            return mService.stopSoftAp();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
