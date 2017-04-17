@@ -49,6 +49,13 @@ public final class PictureInPictureArgs implements Parcelable {
     @Nullable
     private Rect mSourceRectHint;
 
+    /**
+     * The content insets that are used with the source hint rect for the transition into PiP where
+     * the insets are removed at the beginning of the transition.
+     */
+    @Nullable
+    private Rect mSourceRectHintInsets;
+
     PictureInPictureArgs(Parcel in) {
         if (in.readInt() != 0) {
             mAspectRatio = in.readFloat();
@@ -59,6 +66,9 @@ public final class PictureInPictureArgs implements Parcelable {
         }
         if (in.readInt() != 0) {
             mSourceRectHint = Rect.CREATOR.createFromParcel(in);
+        }
+        if (in.readInt() != 0) {
+            mSourceRectHintInsets = Rect.CREATOR.createFromParcel(in);
         }
     }
 
@@ -93,6 +103,9 @@ public final class PictureInPictureArgs implements Parcelable {
         }
         if (otherArgs.hasSourceBoundsHint()) {
             mSourceRectHint = new Rect(otherArgs.getSourceRectHint());
+        }
+        if (otherArgs.hasSourceBoundsHintInsets()) {
+            mSourceRectHintInsets = new Rect(otherArgs.getSourceRectHintInsets());
         }
     }
 
@@ -167,11 +180,31 @@ public final class PictureInPictureArgs implements Parcelable {
     }
 
     /**
-     * @return the launch bounds
+     * Sets the insets to be used with the source rect hint bounds.
+     * @hide
+     */
+    public void setSourceRectHintInsets(Rect insets) {
+        if (insets == null) {
+            mSourceRectHintInsets = null;
+        } else {
+            mSourceRectHintInsets = new Rect(insets);
+        }
+    }
+
+    /**
+     * @return the source rect hint
      * @hide
      */
     public Rect getSourceRectHint() {
         return mSourceRectHint;
+    }
+
+    /**
+     * @return the source rect hint insets.
+     * @hide
+     */
+    public Rect getSourceRectHintInsets() {
+        return mSourceRectHintInsets;
     }
 
     /**
@@ -182,11 +215,22 @@ public final class PictureInPictureArgs implements Parcelable {
         return mSourceRectHint != null && !mSourceRectHint.isEmpty();
     }
 
+    /**
+     * @return whether there are source rect hint insets set
+     * @hide
+     */
+    public boolean hasSourceBoundsHintInsets() {
+        return mSourceRectHintInsets != null;
+    }
+
     @Override
     public PictureInPictureArgs clone() {
         PictureInPictureArgs args = new PictureInPictureArgs(mAspectRatio, mUserActions);
         if (mSourceRectHint != null) {
             args.setSourceRectHint(mSourceRectHint);
+        }
+        if (mSourceRectHintInsets != null) {
+            args.setSourceRectHintInsets(mSourceRectHintInsets);
         }
         return args;
     }
@@ -213,6 +257,12 @@ public final class PictureInPictureArgs implements Parcelable {
         if (mSourceRectHint != null) {
             out.writeInt(1);
             mSourceRectHint.writeToParcel(out, 0);
+        } else {
+            out.writeInt(0);
+        }
+        if (mSourceRectHintInsets != null) {
+            out.writeInt(1);
+            mSourceRectHintInsets.writeToParcel(out, 0);
         } else {
             out.writeInt(0);
         }

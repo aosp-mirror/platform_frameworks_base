@@ -1561,6 +1561,16 @@ public final class ViewRootImpl implements ViewParent,
         host.dispatchApplyWindowInsets(getWindowInsets(true /* forceConstruct */));
     }
 
+    /**
+     * @return the last content insets for use in adjusting the source hint rect for the
+     * picture-in-picture transition.
+     *
+     * @hide
+     */
+    public Rect getLastContentInsets() {
+        return mAttachInfo.mContentInsets;
+    }
+
     private static boolean shouldUseDisplaySize(final WindowManager.LayoutParams lp) {
         return lp.type == TYPE_STATUS_BAR_PANEL
                 || lp.type == TYPE_INPUT_METHOD
