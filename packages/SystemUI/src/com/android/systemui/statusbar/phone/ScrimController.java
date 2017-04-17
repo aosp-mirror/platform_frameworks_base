@@ -57,6 +57,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private static final int TAG_KEY_ANIM_TARGET = R.id.scrim_target;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
     private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
+    private static final float NOT_INITIALIZED = -1;
 
     private final LightBarController mLightBarController;
     protected final ScrimView mScrimBehind;
@@ -87,9 +88,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mDozing;
     private float mDozeInFrontAlpha;
     private float mDozeBehindAlpha;
-    private float mCurrentInFrontAlpha;
-    private float mCurrentBehindAlpha;
-    private float mCurrentHeadsUpAlpha = 1;
+    private float mCurrentInFrontAlpha  = NOT_INITIALIZED;
+    private float mCurrentBehindAlpha = NOT_INITIALIZED;
+    private float mCurrentHeadsUpAlpha = NOT_INITIALIZED;
     private int mPinnedHeadsUpCount;
     private float mTopHeadsUpDragAmount;
     private View mDraggedHeadsUpView;
@@ -111,6 +112,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mScrimBehindAlpha = context.getResources().getFloat(R.dimen.scrim_behind_alpha);
 
         updateHeadsUpScrim(false);
+        updateScrims();
     }
 
     public void setKeyguardShowing(boolean showing) {
