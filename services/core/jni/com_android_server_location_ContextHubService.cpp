@@ -1129,6 +1129,8 @@ jint nativeSendMessage(JNIEnv *env,
         if (appInstanceHandle == OS_APP_ID) {
             if (msgType == CONTEXT_HUB_LOAD_APP) {
                 result = sendLoadNanoAppRequest(hubId, data, dataBufferLength);
+            } else if (msgType == CONTEXT_HUB_QUERY_APPS) {
+                result = db.hubInfo.contextHub->queryApps(hubId);
             } else {
                 ALOGD("Dropping OS addresses message of type - %" PRIu32, msgType);
                 result = Result::BAD_PARAMS;
