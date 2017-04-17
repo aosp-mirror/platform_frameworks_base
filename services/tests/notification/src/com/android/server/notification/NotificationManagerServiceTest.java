@@ -53,9 +53,10 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.InstrumentationRegistry;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +64,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -70,6 +72,8 @@ import org.mockito.MockitoAnnotations;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 public class NotificationManagerServiceTest {
     private static final long WAIT_FOR_IDLE_TIMEOUT = 2;
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
@@ -109,7 +113,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Before
-    @UiThreadTest
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mNotificationManagerService = new TestableNotificationManagerService(mContext);
@@ -124,7 +127,7 @@ public class NotificationManagerServiceTest {
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
         // Use this testable looper.
-        mTestableLooper = new TestableLooper(false);
+        mTestableLooper = TestableLooper.get(this);
 
         mListener = mNotificationListeners.new ManagedServiceInfo(
                 null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
@@ -165,7 +168,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCreateNotificationChannels_SingleChannel() throws Exception {
         final NotificationChannel channel =
                 new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
@@ -177,7 +179,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCreateNotificationChannels_NullChannelThrowsException() throws Exception {
         try {
             mBinderService.createNotificationChannels("test_pkg",
@@ -189,7 +190,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCreateNotificationChannels_TwoChannels() throws Exception {
         final NotificationChannel channel1 =
                 new NotificationChannel("id1", "name", NotificationManager.IMPORTANCE_DEFAULT);
@@ -202,7 +202,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCreateNotificationChannels_SecondCreateDoesNotChangeImportance()
             throws Exception {
         final NotificationChannel channel =
@@ -221,7 +220,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCreateNotificationChannels_IdenticalChannelsInListIgnoresSecond()
             throws Exception {
         final NotificationChannel channel1 =
@@ -236,7 +234,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testBlockedNotifications_suspended() throws Exception {
         NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(true);
@@ -249,7 +246,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testBlockedNotifications_blockedChannel() throws Exception {
         NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
@@ -263,7 +259,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testBlockedNotifications_blockedApp() throws Exception {
         NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
@@ -277,7 +272,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testEnqueueNotificationWithTag_PopulatesGetActiveNotifications() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), 0);
@@ -288,7 +282,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelNotificationImmediatelyAfterEnqueue() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), 0);
@@ -300,7 +293,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelNotificationWhilePostedAndEnqueued() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), 0);
@@ -315,7 +307,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelNotificationsFromListenerImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
@@ -328,7 +319,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelAllNotificationsImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
@@ -341,7 +331,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelAllNotifications_IgnoreForegroundService() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
@@ -355,7 +344,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelAllNotifications_IgnoreOtherPackages() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
@@ -369,7 +357,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelAllNotifications_NullPkgRemovesAll() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
@@ -382,7 +369,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCancelAllNotifications_NullPkgIgnoresUserAllNotifications() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
@@ -396,7 +382,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testRemoveForegroundServiceFlag_ImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
@@ -411,7 +396,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testTvExtenderChannelOverride_onTv() throws Exception {
         mNotificationManagerService.setIsTelevision(true);
         mNotificationManagerService.setRankingHelper(mRankingHelper);
@@ -427,7 +411,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testTvExtenderChannelOverride_notOnTv() throws Exception {
         mNotificationManagerService.setIsTelevision(false);
         mNotificationManagerService.setRankingHelper(mRankingHelper);
@@ -443,7 +426,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCreateChannelNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
@@ -469,7 +451,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCreateChannelGroupNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
@@ -490,7 +471,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testUpdateChannelNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
@@ -509,7 +489,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testDeleteChannelNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
@@ -526,7 +505,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testDeleteChannelGroupNotifyListener() throws Exception {
         List<String> associations = new ArrayList<>();
         associations.add("a");
@@ -543,7 +521,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testUpdateNotificationChannelFromPrivilegedListener_success() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -561,7 +538,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testUpdateNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -583,7 +559,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testUpdateNotificationChannelFromPrivilegedListener_badUser() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -609,7 +584,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testGetNotificationChannelFromPrivilegedListener_success() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -624,7 +598,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testGetNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -643,7 +616,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testGetNotificationChannelFromPrivilegedListener_badUser() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -666,7 +638,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testGetNotificationChannelGroupsFromPrivilegedListener_success() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -680,7 +651,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testGetNotificationChannelGroupsFromPrivilegedListener_noAccess() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -698,7 +668,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testGetNotificationChannelGroupsFromPrivilegedListener_badUser() throws Exception {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
@@ -719,7 +688,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHasCompanionDevice_failure() throws Exception {
         when(mCompanionMgr.getAssociations(anyString(), anyInt())).thenThrow(
                 new IllegalArgumentException());
@@ -727,7 +695,6 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHasCompanionDevice_noService() throws Exception {
         mNotificationManagerService = new TestableNotificationManagerService(mContext);
 
