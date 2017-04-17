@@ -37,10 +37,12 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.animation.Interpolator;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.policy.PipSnapAlgorithm;
+import com.android.internal.view.SurfaceFlingerVsyncChoreographer;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
@@ -72,6 +74,7 @@ public class PipMotionHelper {
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private SurfaceFlingerVsyncChoreographer mVsyncChoreographer;
     private Handler mHandler;
 
     private PipSnapAlgorithm mSnapAlgorithm;
@@ -96,6 +99,8 @@ public class PipMotionHelper {
         mActivityManager = activityManager;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
+        mVsyncChoreographer = new SurfaceFlingerVsyncChoreographer(mHandler, mContext.getDisplay(),
+                Choreographer.getInstance());
         onConfigurationChanged();
     }
 
@@ -394,7 +399,7 @@ public class PipMotionHelper {
      */
     private void resizePipUnchecked(Rect toBounds) {
         if (!toBounds.equals(mBounds)) {
-            mHandler.post(() -> {
+            mVsyncChoreographer.scheduleAtSfVsync(() -> {
                 try {
                     mActivityManager.resizePinnedStack(toBounds, null /* tempPinnedTaskBounds */);
                     mBounds.set(toBounds);
