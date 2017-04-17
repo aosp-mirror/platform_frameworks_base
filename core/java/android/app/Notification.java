@@ -2729,21 +2729,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @removed
-         * Sets which icon to display as a badge for this notification.
-         *
-         * Must be one of {@link #BADGE_ICON_NONE}, {@link #BADGE_ICON_SMALL},
-         * {@link #BADGE_ICON_LARGE}.
-         *
-         * Note: This value might be ignored, for launchers that don't support badge icons.
-         */
-        @Deprecated
-        public Builder chooseBadgeIcon(int icon) {
-            mN.mBadgeIcon = icon;
-            return this;
-        }
-
-        /**
          * Sets which icon to display as a badge for this notification.
          *
          * Must be one of {@link #BADGE_ICON_NONE}, {@link #BADGE_ICON_SMALL},
