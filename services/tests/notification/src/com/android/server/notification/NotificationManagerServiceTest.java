@@ -49,6 +49,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
 import android.os.Binder;
+import android.os.Process;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -460,10 +461,10 @@ public class NotificationManagerServiceTest {
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(mTestNotificationChannel, channel2)));
         verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
-                eq(mTestNotificationChannel),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
         verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
-                eq(channel2),
+                eq(Process.myUserHandle()), eq(channel2),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
     }
 
@@ -481,10 +482,10 @@ public class NotificationManagerServiceTest {
         mBinderService.createNotificationChannelGroups(PKG,
                 new ParceledListSlice(Arrays.asList(group1, group2)));
         verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
-                eq(group1),
+                eq(Process.myUserHandle()), eq(group1),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
         verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
-                eq(group2),
+                eq(Process.myUserHandle()), eq(group2),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
     }
 
@@ -503,7 +504,7 @@ public class NotificationManagerServiceTest {
         reset(mNotificationListeners);
         mBinderService.updateNotificationChannelForPackage(PKG, 0, mTestNotificationChannel);
         verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
-                eq(mTestNotificationChannel),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
 
@@ -520,7 +521,7 @@ public class NotificationManagerServiceTest {
         reset(mNotificationListeners);
         mBinderService.deleteNotificationChannel(PKG, mTestNotificationChannel.getId());
         verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
-                eq(mTestNotificationChannel),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
     }
 
@@ -537,7 +538,7 @@ public class NotificationManagerServiceTest {
         reset(mNotificationListeners);
         mBinderService.deleteNotificationChannelGroup(PKG, ncg.getId());
         verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
-                eq(ncg),
+                eq(Process.myUserHandle()), eq(ncg),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
     }
 
@@ -550,12 +551,12 @@ public class NotificationManagerServiceTest {
         when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
 
         mBinderService.updateNotificationChannelFromPrivilegedListener(
-                null, PKG, mTestNotificationChannel);
+                null, PKG, Process.myUserHandle(), mTestNotificationChannel);
 
         verify(mRankingHelper, times(1)).updateNotificationChannel(anyString(), anyInt(), any());
 
         verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
-                eq(mTestNotificationChannel),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
 
@@ -568,7 +569,7 @@ public class NotificationManagerServiceTest {
 
         try {
             mBinderService.updateNotificationChannelFromPrivilegedListener(
-                    null, PKG, mTestNotificationChannel);
+                    null, PKG, Process.myUserHandle(), mTestNotificationChannel);
             fail("listeners that don't have a companion device shouldn't be able to call this");
         } catch (SecurityException e) {
             // pass
@@ -577,7 +578,33 @@ public class NotificationManagerServiceTest {
         verify(mRankingHelper, never()).updateNotificationChannel(anyString(), anyInt(), any());
 
         verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
-                eq(mTestNotificationChannel),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testUpdateNotificationChannelFromPrivilegedListener_badUser() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
+        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+
+        try {
+            mBinderService.updateNotificationChannelFromPrivilegedListener(
+                    null, PKG, UserHandle.ALL, mTestNotificationChannel);
+            fail("incorrectly allowed a change to a user listener cannot see");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        verify(mRankingHelper, never()).updateNotificationChannel(anyString(), anyInt(), any());
+
+        verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
 
@@ -589,7 +616,8 @@ public class NotificationManagerServiceTest {
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
 
-        mBinderService.getNotificationChannelsFromPrivilegedListener(null, PKG);
+        mBinderService.getNotificationChannelsFromPrivilegedListener(
+                null, PKG, Process.myUserHandle());
 
         verify(mRankingHelper, times(1)).getNotificationChannels(
                 anyString(), anyInt(), anyBoolean());
@@ -603,8 +631,32 @@ public class NotificationManagerServiceTest {
         when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
 
         try {
-            mBinderService.getNotificationChannelsFromPrivilegedListener(null, PKG);
+            mBinderService.getNotificationChannelsFromPrivilegedListener(
+                    null, PKG, Process.myUserHandle());
             fail("listeners that don't have a companion device shouldn't be able to call this");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        verify(mRankingHelper, never()).getNotificationChannels(
+                anyString(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testGetNotificationChannelFromPrivilegedListener_badUser() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        associations.add("a");
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
+        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+
+        try {
+            mBinderService.getNotificationChannelsFromPrivilegedListener(
+                    null, PKG, Process.myUserHandle());
+            fail("listener getting channels from a user they cannot see");
         } catch (SecurityException e) {
             // pass
         }
@@ -621,7 +673,8 @@ public class NotificationManagerServiceTest {
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
 
-        mBinderService.getNotificationChannelGroupsFromPrivilegedListener(null, PKG);
+        mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
+                null, PKG, Process.myUserHandle());
 
         verify(mRankingHelper, times(1)).getNotificationChannelGroups(anyString(), anyInt());
     }
@@ -634,7 +687,29 @@ public class NotificationManagerServiceTest {
         when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
 
         try {
-            mBinderService.getNotificationChannelGroupsFromPrivilegedListener(null, PKG);
+            mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
+                    null, PKG, Process.myUserHandle());
+            fail("listeners that don't have a companion device shouldn't be able to call this");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        verify(mRankingHelper, never()).getNotificationChannelGroups(anyString(), anyInt());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testGetNotificationChannelGroupsFromPrivilegedListener_badUser() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        List<String> associations = new ArrayList<>();
+        when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
+        mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
+        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+
+        try {
+            mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
+                    null, PKG, Process.myUserHandle());
             fail("listeners that don't have a companion device shouldn't be able to call this");
         } catch (SecurityException e) {
             // pass
