@@ -17,7 +17,6 @@
 #define LOG_TAG "sensor"
 #include <utils/Log.h>
 
-#include <android/hardware_buffer.h>
 #include <android/looper.h>
 #include <android/sensor.h>
 #include <android/sharedmem.h>
@@ -28,6 +27,7 @@
 #include <utils/Looper.h>
 #include <utils/RefBase.h>
 #include <utils/Timers.h>
+#include <vndk/hardware_buffer.h>
 
 #include <poll.h>
 

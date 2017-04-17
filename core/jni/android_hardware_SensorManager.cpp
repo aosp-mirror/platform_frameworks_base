@@ -24,6 +24,7 @@
 #include <ScopedLocalRef.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
+#include <vndk/hardware_buffer.h>
 #include <sensor/Sensor.h>
 #include <sensor/SensorEventQueue.h>
 #include <sensor/SensorManager.h>
