@@ -66,6 +66,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -77,6 +78,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -117,19 +119,66 @@ public class StorageManager {
     public static final String UUID_PRIVATE_INTERNAL = null;
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
+    /** {@hide} */
+    public static final String UUID_SYSTEM = "system";
 
+    // NOTE: UUID constants below are namespaced
+    // uuid -v5 ad99aa3d-308e-4191-a200-ebcab371c0ad default
+    // uuid -v5 ad99aa3d-308e-4191-a200-ebcab371c0ad primary_physical
+    // uuid -v5 ad99aa3d-308e-4191-a200-ebcab371c0ad system
 
     /**
-     * Activity Action: Allows the user to manage their storage. This activity provides the ability
-     * to free up space on the device by deleting data such as apps.
+     * UUID representing the default internal storage of this device which
+     * provides {@link Environment#getDataDirectory()}.
      * <p>
-     * Input: Nothing.
+     * This value is constant across all devices and it will never change, and
+     * thus it cannot be used to uniquely identify a particular physical device.
+     *
+     * @see #getUuidForPath(File)
+     */
+    public static final UUID UUID_DEFAULT = UUID
+            .fromString("41217664-9172-527a-b3d5-edabb50a7d69");
+
+    /** {@hide} */
+    public static final UUID UUID_PRIMARY_PHYSICAL_ = UUID
+            .fromString("0f95a519-dae7-5abf-9519-fbd6209e05fd");
+
+    /** {@hide} */
+    public static final UUID UUID_SYSTEM_ = UUID
+            .fromString("5d258386-e60d-59e3-826d-0089cdd42cc0");
+
+    /**
+     * Activity Action: Allows the user to manage their storage. This activity
+     * provides the ability to free up space on the device by deleting data such
+     * as apps.
      * <p>
-     * Output: Nothing.
+     * If the sending application has a specific storage device or allocation
+     * size in mind, they can optionally define {@link #EXTRA_UUID} or
+     * {@link #EXTRA_REQUESTED_BYTES}, respectively.
      */
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_STORAGE
-            = "android.os.storage.action.MANAGE_STORAGE";
+    public static final String ACTION_MANAGE_STORAGE = "android.os.storage.action.MANAGE_STORAGE";
+
+    /**
+     * Extra {@link UUID} used to indicate the storage volume where an
+     * application is interested in allocating or managing disk space.
+     *
+     * @see #ACTION_MANAGE_STORAGE
+     * @see #UUID_DEFAULT
+     * @see #getUuidForPath(File)
+     */
+    public static final String EXTRA_UUID = "android.os.storage.extra.UUID";
+
+    /**
+     * Extra used to indicate the total size (in bytes) that an application is
+     * interested in allocating.
+     * <p>
+     * When defined, the management UI will help guide the user to free up
+     * enough disk space to reach this requested value.
+     *
+     * @see #ACTION_MANAGE_STORAGE
+     */
+    public static final String EXTRA_REQUESTED_BYTES = "android.os.storage.extra.REQUESTED_BYTES";
 
     /** {@hide} */
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
@@ -668,34 +717,44 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
-    public @Nullable String findUuidForPath(File path) {
+    /**
+     * Return a UUID identifying the storage volume that hosts the given
+     * filesystem path.
+     * <p>
+     * If this path is hosted by the default internal storage of the device at
+     * {@link Environment#getDataDirectory()}, the returned value will be
+     * {@link #UUID_DEFAULT}.
+     *
+     * @throws IOException when the storage device at the given path isn't
+     *             present, or when it doesn't have a valid UUID.
+     */
+    public @NonNull UUID getUuidForPath(@NonNull File path) throws IOException {
         Preconditions.checkNotNull(path);
         final String pathString = path.getAbsolutePath();
         if (FileUtils.contains(Environment.getDataDirectory().getAbsolutePath(), pathString)) {
-            return StorageManager.UUID_PRIVATE_INTERNAL;
+            return UUID_DEFAULT;
         }
         try {
             for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
                 if (vol.path != null && FileUtils.contains(vol.path, pathString)) {
                     // TODO: verify that emulated adopted devices have UUID of
                     // underlying volume
-                    return vol.fsUuid;
+                    return convert(vol.fsUuid);
                 }
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        throw new IllegalStateException("Failed to find a storage device for " + path);
+        throw new FileNotFoundException("Failed to find a storage device for " + path);
     }
 
     /** {@hide} */
-    public @Nullable File findPathForUuid(String volumeUuid) {
+    public @NonNull File findPathForUuid(String volumeUuid) throws FileNotFoundException {
         final VolumeInfo vol = findVolumeByQualifiedUuid(volumeUuid);
         if (vol != null) {
             return vol.getPath();
         }
-        throw new IllegalStateException("Failed to find a storage device for " + volumeUuid);
+        throw new FileNotFoundException("Failed to find a storage device for " + volumeUuid);
     }
 
     /** {@hide} */
@@ -1451,7 +1510,7 @@ public class StorageManager {
 
     /**
      * Return quota size in bytes for all cached data belonging to the calling
-     * app on the filesystem that hosts the given path.
+     * app on the given storage volume.
      * <p>
      * If your app goes above this quota, your cached files will be some of the
      * first to be deleted when additional disk space is needed. Conversely, if
@@ -1466,21 +1525,34 @@ public class StorageManager {
      * as a single unit.
      * </p>
      *
-     * @see #getCacheSizeBytes(File)
+     * @param storageUuid the UUID of the storage volume that you're interested
+     *            in. The UUID for a specific path can be obtained using
+     *            {@link #getUuidForPath(File)}.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support cache quotas.
+     * @see #getCacheSizeBytes(UUID)
      */
-    public long getCacheQuotaBytes(File path) {
+    public long getCacheQuotaBytes(@NonNull UUID storageUuid) throws IOException {
         try {
-            final String volumeUuid = findUuidForPath(path);
             final ApplicationInfo app = mContext.getApplicationInfo();
-            return mStorageManager.getCacheQuotaBytes(volumeUuid, app.uid);
+            return mStorageManager.getCacheQuotaBytes(convert(storageUuid), app.uid);
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /** @removed */
+    @Deprecated
+    public long getCacheQuotaBytes(@NonNull File path) throws IOException {
+        return getCacheQuotaBytes(getUuidForPath(path));
+    }
+
     /**
      * Return total size in bytes of all cached data belonging to the calling
-     * app on the filesystem that hosts the given path.
+     * app on the given storage volume.
      * <p>
      * Cached data tracked by this method always includes
      * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}, and
@@ -1493,13 +1565,20 @@ public class StorageManager {
      * as a single unit.
      * </p>
      *
-     * @see #getCacheQuotaBytes()
+     * @param storageUuid the UUID of the storage volume that you're interested
+     *            in. The UUID for a specific path can be obtained using
+     *            {@link #getUuidForPath(File)}.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support cache quotas.
+     * @see #getCacheQuotaBytes(UUID)
      */
-    public long getCacheSizeBytes(File path) {
+    public long getCacheSizeBytes(@NonNull UUID storageUuid) throws IOException {
         try {
-            final String volumeUuid = findUuidForPath(path);
             final ApplicationInfo app = mContext.getApplicationInfo();
-            return mStorageManager.getCacheSizeBytes(volumeUuid, app.uid);
+            return mStorageManager.getCacheSizeBytes(convert(storageUuid), app.uid);
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1507,25 +1586,31 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
-    public long getCacheQuotaBytes() {
+    public long getCacheSizeBytes(@NonNull File path) throws IOException {
+        return getCacheSizeBytes(getUuidForPath(path));
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getCacheQuotaBytes() throws IOException {
         return getCacheQuotaBytes(mContext.getCacheDir());
     }
 
     /** @removed */
     @Deprecated
-    public long getCacheSizeBytes() {
+    public long getCacheSizeBytes() throws IOException {
         return getCacheSizeBytes(mContext.getCacheDir());
     }
 
     /** @removed */
     @Deprecated
-    public long getExternalCacheQuotaBytes() {
+    public long getExternalCacheQuotaBytes() throws IOException {
         return getCacheQuotaBytes(mContext.getExternalCacheDir());
     }
 
     /** @removed */
     @Deprecated
-    public long getExternalCacheSizeBytes() {
+    public long getExternalCacheSizeBytes() throws IOException {
         return getCacheSizeBytes(mContext.getExternalCacheDir());
     }
 
@@ -1542,8 +1627,8 @@ public class StorageManager {
      * this flag to take effect.
      * </p>
      *
-     * @see #getAllocatableBytes(File, int)
-     * @see #allocateBytes(File, long, int)
+     * @see #getAllocatableBytes(UUID, int)
+     * @see #allocateBytes(UUID, long, int)
      * @see #allocateBytes(FileDescriptor, long, int)
      */
     @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE)
@@ -1558,32 +1643,43 @@ public class StorageManager {
 
     /**
      * Return the maximum number of new bytes that your app can allocate for
-     * itself using {@link #allocateBytes(File, long, int)} at the given path.
-     * This value is typically larger than {@link File#getUsableSpace()}, since
-     * the system may be willing to delete cached files to satisfy an allocation
-     * request.
+     * itself on the given storage volume. This value is typically larger than
+     * {@link File#getUsableSpace()}, since the system may be willing to delete
+     * cached files to satisfy an allocation request. You can then allocate
+     * space for yourself using {@link #allocateBytes(UUID, long, int)} or
+     * {@link #allocateBytes(FileDescriptor, long, int)}.
      * <p>
      * This method is best used as a pre-flight check, such as deciding if there
      * is enough space to store an entire music album before you allocate space
      * for each audio file in the album. Attempts to allocate disk space beyond
      * the returned value will fail.
+     * <p>
+     * If the returned value is not large enough for the data you'd like to
+     * store, you can launch {@link #ACTION_MANAGE_STORAGE} with the
+     * {@link #EXTRA_UUID} and {@link #EXTRA_REQUESTED_BYTES} options to help
+     * involve the user in freeing up disk space.
      * <p class="note">
      * Note: if your app uses the {@code android:sharedUserId} manifest feature,
      * then allocatable space for all packages in your shared UID is tracked
      * together as a single unit.
      * </p>
      *
-     * @param path the path where you're considering allocating disk space,
-     *            since allocatable space can vary widely depending on the
-     *            underlying storage device.
+     * @param storageUuid the UUID of the storage volume where you're
+     *            considering allocating disk space, since allocatable space can
+     *            vary widely depending on the underlying storage device. The
+     *            UUID for a specific path can be obtained using
+     *            {@link #getUuidForPath(File)}.
      * @param flags to apply to the request.
      * @return the maximum number of new bytes that the calling app can allocate
-     *         using {@link #allocateBytes(File, long, int)}.
+     *         using {@link #allocateBytes(UUID, long, int)} or
+     *         {@link #allocateBytes(FileDescriptor, long, int)}.
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support allocating space.
      */
-    public long getAllocatableBytes(File path, @AllocateFlags int flags) throws IOException {
+    public long getAllocatableBytes(@NonNull UUID storageUuid, @AllocateFlags int flags)
+            throws IOException {
         try {
-            final String volumeUuid = findUuidForPath(path);
-            return mStorageManager.getAllocatableBytes(volumeUuid, flags);
+            return mStorageManager.getAllocatableBytes(convert(storageUuid), flags);
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -1592,33 +1688,52 @@ public class StorageManager {
         }
     }
 
+    /** @removed */
+    @Deprecated
+    public long getAllocatableBytes(@NonNull File path, @AllocateFlags int flags)
+            throws IOException {
+        return getAllocatableBytes(getUuidForPath(path), flags);
+    }
+
     /**
-     * Allocate the requested number of bytes for your application to use at the
-     * given path. This will cause the system to delete any cached files
-     * necessary to satisfy your request.
+     * Allocate the requested number of bytes for your application to use on the
+     * given storage volume. This will cause the system to delete any cached
+     * files necessary to satisfy your request.
      * <p>
      * Attempts to allocate disk space beyond the value returned by
-     * {@link #getAllocatableBytes(File, int)} will fail.
+     * {@link #getAllocatableBytes(UUID, int)} will fail.
      * <p>
      * Since multiple apps can be running simultaneously, this method may be
      * subject to race conditions. If possible, consider using
      * {@link #allocateBytes(FileDescriptor, long, int)} which will guarantee
      * that bytes are allocated to an opened file.
      *
-     * @param path the path where you'd like to allocate disk space.
+     * @param storageUuid the UUID of the storage volume where you'd like to
+     *            allocate disk space. The UUID for a specific path can be
+     *            obtained using {@link #getUuidForPath(File)}.
      * @param bytes the number of bytes to allocate.
      * @param flags to apply to the request.
-     * @see #getAllocatableBytes(File, int)
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support allocating space, or if the device had
+     *             trouble allocating the requested space.
+     * @see #getAllocatableBytes(UUID, int)
      */
-    public void allocateBytes(File path, long bytes, @AllocateFlags int flags) throws IOException {
+    public void allocateBytes(@NonNull UUID storageUuid, long bytes, @AllocateFlags int flags)
+            throws IOException {
         try {
-            final String volumeUuid = findUuidForPath(path);
-            mStorageManager.allocateBytes(volumeUuid, bytes, flags);
+            mStorageManager.allocateBytes(convert(storageUuid), bytes, flags);
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** @removed */
+    @Deprecated
+    public void allocateBytes(@NonNull File path, long bytes, @AllocateFlags int flags)
+            throws IOException {
+        allocateBytes(getUuidForPath(path), bytes, flags);
     }
 
     /**
@@ -1627,7 +1742,7 @@ public class StorageManager {
      * necessary to satisfy your request.
      * <p>
      * Attempts to allocate disk space beyond the value returned by
-     * {@link #getAllocatableBytes(File, int)} will fail.
+     * {@link #getAllocatableBytes(UUID, int)} will fail.
      * <p>
      * This method guarantees that bytes have been allocated to the opened file,
      * otherwise it will throw if fast allocation is not possible. Fast
@@ -1636,9 +1751,15 @@ public class StorageManager {
      *
      * @param fd the open file that you'd like to allocate disk space for.
      * @param bytes the number of bytes to allocate. This is the desired final
-     *            size of the open file.
+     *            size of the open file. If the open file is smaller than this
+     *            requested size, it will be extended without modifying any
+     *            existing contents. If the open file is larger than this
+     *            requested size, it will be truncated.
      * @param flags to apply to the request.
-     * @see #getAllocatableBytes(File, int)
+     * @throws IOException when the storage device isn't present, or when it
+     *             doesn't support allocating space, or if the device had
+     *             trouble allocating the requested space.
+     * @see #getAllocatableBytes(UUID, int)
      * @see Environment#isExternalStorageEmulated(File)
      */
     public void allocateBytes(FileDescriptor fd, long bytes, @AllocateFlags int flags)
@@ -1775,6 +1896,32 @@ public class StorageManager {
      */
     public boolean isCacheBehaviorTombstone(File path) throws IOException {
         return isCacheBehavior(path, XATTR_CACHE_TOMBSTONE);
+    }
+
+    /** {@hide} */
+    public static UUID convert(String uuid) {
+        if (Objects.equals(uuid, UUID_PRIVATE_INTERNAL)) {
+            return UUID_DEFAULT;
+        } else if (Objects.equals(uuid, UUID_PRIMARY_PHYSICAL)) {
+            return UUID_PRIMARY_PHYSICAL_;
+        } else if (Objects.equals(uuid, UUID_SYSTEM)) {
+            return UUID_SYSTEM_;
+        } else {
+            return UUID.fromString(uuid);
+        }
+    }
+
+    /** {@hide} */
+    public static String convert(UUID storageUuid) {
+        if (UUID_DEFAULT.equals(storageUuid)) {
+            return UUID_PRIVATE_INTERNAL;
+        } else if (UUID_PRIMARY_PHYSICAL_.equals(storageUuid)) {
+            return UUID_PRIMARY_PHYSICAL;
+        } else if (UUID_SYSTEM_.equals(storageUuid)) {
+            return UUID_SYSTEM;
+        } else {
+            return storageUuid.toString();
+        }
     }
 
     private final Object mFuseAppLoopLock = new Object();

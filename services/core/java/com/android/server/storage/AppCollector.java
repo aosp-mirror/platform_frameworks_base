@@ -21,22 +21,21 @@ import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageStats;
 import android.content.pm.UserInfo;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.storage.VolumeInfo;
 import android.util.Log;
+
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +43,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * AppCollector asynchronously collects package sizes.
@@ -132,7 +130,7 @@ public class AppCollector {
 
                             try {
                                 StorageStats storageStats =
-                                        mStorageStatsManager.queryStatsForPackage(app.volumeUuid,
+                                        mStorageStatsManager.queryStatsForPackage(app.storageUuid,
                                                 app.packageName, user.getUserHandle());
                                 PackageStats packageStats = new PackageStats(app.packageName,
                                         user.id);
@@ -140,7 +138,7 @@ public class AppCollector {
                                 packageStats.codeSize = storageStats.getCodeBytes();
                                 packageStats.dataSize = storageStats.getDataBytes();
                                 stats.add(packageStats);
-                            } catch (IllegalStateException e) {
+                            } catch (NameNotFoundException | IOException e) {
                                 Log.e(TAG, "An exception occurred while fetching app size", e);
                             }
                         }

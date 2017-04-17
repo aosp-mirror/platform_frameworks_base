@@ -20,11 +20,16 @@ import android.app.AppGlobals;
 import android.app.usage.StorageStatsManager;
 import android.content.Context;
 import android.os.storage.VolumeInfo;
+import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * PrivateStorageInfo provides information about the total and free storage on the device.
  */
 public class PrivateStorageInfo {
+    private static final String TAG = "PrivateStorageInfo";
+
     public final long freeBytes;
     public final long totalBytes;
 
@@ -41,8 +46,12 @@ public class PrivateStorageInfo {
         long privateTotalBytes = 0;
         for (VolumeInfo info : sm.getVolumes()) {
             if (info.getType() == VolumeInfo.TYPE_PRIVATE && info.isMountedReadable()) {
-                privateTotalBytes += sm.getTotalBytes(stats, info);
-                privateFreeBytes += sm.getFreeBytes(stats, info);
+                try {
+                    privateTotalBytes += sm.getTotalBytes(stats, info);
+                    privateFreeBytes += sm.getFreeBytes(stats, info);
+                } catch (IOException e) {
+                    Log.w(TAG, e);
+                }
             }
         }
         return new PrivateStorageInfo(privateFreeBytes, privateTotalBytes);
@@ -51,6 +60,11 @@ public class PrivateStorageInfo {
     public static long getTotalSize(VolumeInfo info, long totalInternalStorage) {
         final Context context = AppGlobals.getInitialApplication();
         final StorageStatsManager stats = context.getSystemService(StorageStatsManager.class);
-        return stats.getTotalBytes(info.getFsUuid());
+        try {
+            return stats.getTotalBytes(info.getFsUuid());
+        } catch (IOException e) {
+            Log.w(TAG, e);
+            return 0;
+        }
     }
 }
