@@ -112,13 +112,6 @@ public class ResourcesManager {
     private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>>
             mAdjustedDisplays = new ArrayMap<>();
 
-    /**
-     * A cache of DisplayId, Resources to Display. These display adjustments associated with these
-     * {@link Display}s will change as the resources change.
-     */
-    private final ArrayMap<Pair<Integer, ResourcesKey>, WeakReference<Display>> mResourceDisplays =
-        new ArrayMap<>();
-
     public static ResourcesManager getInstance() {
         synchronized (ResourcesManager.class) {
             if (sResourcesManager == null) {
@@ -251,51 +244,16 @@ public class ResourcesManager {
      */
     public Display getAdjustedDisplay(final int displayId, Resources resources) {
         synchronized (this) {
-            // Note that the ResourcesKey might be {@code null} in the case that the
-            // {@link Resources} is actually from {@link Resources#getSystem}. In this case, it is
-            // not managed by {@link ResourcesManager}, but we still want to cache the display
-            // object.
-            final Pair<Integer, ResourcesKey> key = Pair.create(displayId,
-                    findKeyForResourceImplLocked(resources.getImpl()));
-
-            WeakReference<Display> wd = mResourceDisplays.get(key);
-            if (wd != null) {
-                final Display display = wd.get();
-                if (display != null) {
-                    return display;
-                }
-            }
             final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
             if (dm == null) {
                 // may be null early in system startup
                 return null;
             }
-            final Display display = dm.getCompatibleDisplay(displayId, resources);
-            if (display != null) {
-                mResourceDisplays.put(key, new WeakReference<>(display));
-            }
-            return display;
+            return dm.getCompatibleDisplay(displayId, resources);
         }
     }
 
     private void cleanupResourceImpl(ResourcesKey removedKey) {
-        // Remove any resource to display mapping based on this key.
-        final Iterator<Map.Entry<Pair<Integer, ResourcesKey>, WeakReference<Display>>> iter =
-                mResourceDisplays.entrySet().iterator();
-        while (iter.hasNext()) {
-            final Map.Entry<Pair<Integer, ResourcesKey>, WeakReference<Display>> entry =
-                    iter.next();
-            final ResourcesKey key = entry.getKey().second;
-
-            // Do not touch system resource displays (indicated by a {@code null} key) or
-            // non-matching keys.
-            if (key == null || !key.equals(removedKey)) {
-                continue;
-            }
-
-            iter.remove();
-        }
-
         // Remove resource key to resource impl mapping and flush cache
         final ResourcesImpl res = mResourceImpls.remove(removedKey).get();
 
@@ -887,7 +845,6 @@ public class ResourcesManager {
             int changes = mResConfiguration.updateFrom(config);
             // Things might have changed in display manager, so clear the cached displays.
             mAdjustedDisplays.clear();
-            mResourceDisplays.clear();
 
             DisplayMetrics defaultDisplayMetrics = getDisplayMetrics();
 
