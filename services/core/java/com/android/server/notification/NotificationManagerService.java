@@ -97,6 +97,7 @@ import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -3185,16 +3186,16 @@ public class NotificationManagerService extends SystemService {
             // STOPSHIP TODO: should throw instead of logging or toasting.
             // throw new IllegalArgumentException(noChannelStr);
             Log.e(TAG, noChannelStr);
-
-            final String noChannelToastStr =
-                    "Developer warning for package \"" + pkg + "\"\n" +
+            doDebugOnlyToast("Developer warning for package \"" + pkg + "\"\n" +
                     "Failed to post notification on channel \"" + channelId + "\"\n" +
-                    "See log for more details";
-            Toast noChannelToast =
-                    Toast.makeText(getContext(), noChannelToastStr, Toast.LENGTH_LONG);
-            noChannelToast.show();
+                    "See log for more details");
             return;
+        } else if (channelId == null && shouldWarnUseChannels(pkg, notificationUid)) {
+            // STOPSHIP TODO: remove once default channel is removed for all apps that target O.
+            doDebugOnlyToast("Developer warning for package \"" + pkg + "\"\n" +
+                    "Posted notification should specify a channel");
         }
+
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
@@ -3224,6 +3225,26 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
         idOut[0] = id;
+    }
+
+    private void doDebugOnlyToast(CharSequence toastText) {
+        if (Build.IS_DEBUGGABLE) {
+            Toast toast = Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+
+    // STOPSHIP - Remove once RankingHelper deletes default channel for all apps targeting O.
+    private boolean shouldWarnUseChannels(String pkg, int uid) {
+        try {
+            final int userId = UserHandle.getUserId(uid);
+            final ApplicationInfo applicationInfo =
+                    mPackageManagerClient.getApplicationInfoAsUser(pkg, 0, userId);
+            return applicationInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1;
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, e.toString());
+            return false;
+        }
     }
 
     private int resolveNotificationUid(String opPackageName, int callingUid, int userId) {
