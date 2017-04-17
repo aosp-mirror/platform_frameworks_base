@@ -299,13 +299,13 @@
 
     <style name="TextAppearance.Volume">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffffff</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="TextAppearance.Volume.Header">
         <item name="android:textSize">12sp</item>
-        <item name="android:textColor">@color/volume_slider_inactive</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Volume.ZenSummary">
@@ -316,7 +316,7 @@
     <style name="TextAppearance.Volume.ZenDetail">
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">@*android:color/quaternary_device_default_settings</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
