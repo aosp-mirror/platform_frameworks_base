@@ -54,6 +54,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.util.AndroidException;
 import android.util.Log;
 
@@ -3983,6 +3984,8 @@ public abstract class PackageManager {
      * <p>If no packages have been changed, returns <code>null</code>.
      * <p>The sequence number starts at <code>0</code> and is
      * reset every boot.
+     * @param sequenceNumber The first sequence number for which to retrieve package changes.
+     * @see Settings.Global#BOOT_COUNT
      */
     public abstract @Nullable ChangedPackages getChangedPackages(
             @IntRange(from=0) int sequenceNumber);
