@@ -2817,6 +2817,10 @@
         <public name="defaultFocusHighlightEnabled" />
         <public name="persistentFeature"/>
         <public name="windowSplashscreenContent" />
+        <!-- @hide @SystemApi -->
+        <public name="requiredSystemPropertyName" />
+        <!-- @hide @SystemApi -->
+        <public name="requiredSystemPropertyValue" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
