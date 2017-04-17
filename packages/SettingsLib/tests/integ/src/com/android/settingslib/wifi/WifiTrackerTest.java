@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeast;
@@ -33,12 +32,13 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkBadging;
 import android.net.NetworkInfo;
 import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
-import android.net.ScoredNetwork;
 import android.net.RssiCurve;
+import android.net.ScoredNetwork;
 import android.net.WifiKey;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
@@ -47,10 +47,10 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiSsid;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -62,8 +62,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.mockito.Captor;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -665,5 +665,30 @@ public class WifiTrackerTest {
 
         verify(mockWifiManager, atLeast(2)).getConnectionInfo();
         assertThat(tracker.getAccessPoints().get(0).getRssi()).isEqualTo(newRssi);
+    }
+
+    @Test
+    public void forceUpdateShouldSynchronouslyFetchLatestInformation() throws Exception {
+        when(mockWifiManager.getConnectionInfo()).thenReturn(CONNECTED_AP_1_INFO);
+
+        WifiConfiguration configuration = new WifiConfiguration();
+        configuration.SSID = SSID_1;
+        configuration.BSSID = BSSID_1;
+        configuration.networkId = CONNECTED_NETWORK_ID;
+        when(mockWifiManager.getConfiguredNetworks()).thenReturn(Arrays.asList(configuration));
+
+        NetworkInfo networkInfo = new NetworkInfo(
+                ConnectivityManager.TYPE_WIFI, 0, "Type Wifi", "subtype");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "connected", "test");
+        when(mockConnectivityManager.getNetworkInfo(any(Network.class))).thenReturn(networkInfo);
+
+
+        WifiTracker tracker = createMockedWifiTracker();
+        startTracking(tracker);
+        tracker.forceUpdate();
+
+        verify(mockWifiListener).onAccessPointsChanged();
+        assertThat(tracker.getAccessPoints().size()).isEqualTo(2);
+        assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
     }
 }
