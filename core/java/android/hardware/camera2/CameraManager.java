@@ -290,7 +290,8 @@ public final class CameraManager {
                         cameraId,
                         callback,
                         handler,
-                        characteristics);
+                        characteristics,
+                        mContext.getApplicationInfo().targetSdkVersion);
 
             ICameraDeviceCallbacks callbacks = deviceImpl.getCallbacks();
 

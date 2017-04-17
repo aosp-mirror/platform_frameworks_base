@@ -36,6 +36,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.hardware.ICameraService;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -117,6 +118,8 @@ public class CameraDeviceImpl extends CameraDevice
 
     private CameraCaptureSessionCore mCurrentSession;
     private int mNextSessionId = 0;
+
+    private final int mAppTargetSdkVersion;
 
     // Runnables for all state transitions, except error, which needs the
     // error code argument
@@ -234,7 +237,7 @@ public class CameraDeviceImpl extends CameraDevice
     };
 
     public CameraDeviceImpl(String cameraId, StateCallback callback, Handler handler,
-                        CameraCharacteristics characteristics) {
+                        CameraCharacteristics characteristics, int appTargetSdkVersion) {
         if (cameraId == null || callback == null || handler == null || characteristics == null) {
             throw new IllegalArgumentException("Null argument given");
         }
@@ -242,6 +245,7 @@ public class CameraDeviceImpl extends CameraDevice
         mDeviceCallback = callback;
         mDeviceHandler = handler;
         mCharacteristics = characteristics;
+        mAppTargetSdkVersion = appTargetSdkVersion;
 
         final int MAX_TAG_LEN = 23;
         String tag = String.format("CameraDevice-JV-%s", mCameraId);
@@ -671,6 +675,16 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
+    private void overrideEnableZsl(CameraMetadataNative request, boolean newValue) {
+        Boolean enableZsl = request.get(CaptureRequest.CONTROL_ENABLE_ZSL);
+        if (enableZsl == null) {
+            // If enableZsl is not available, don't override.
+            return;
+        }
+
+        request.set(CaptureRequest.CONTROL_ENABLE_ZSL, newValue);
+    }
+
     @Override
     public CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException {
@@ -680,6 +694,13 @@ public class CameraDeviceImpl extends CameraDevice
             CameraMetadataNative templatedRequest = null;
 
             templatedRequest = mRemoteDevice.createDefaultRequest(templateType);
+
+            // If app target SDK is older than O, or it's not a still capture template, enableZsl
+            // must be false in the default request.
+            if (mAppTargetSdkVersion < Build.VERSION_CODES.O ||
+                    templateType != TEMPLATE_STILL_CAPTURE) {
+                overrideEnableZsl(templatedRequest, false);
+            }
 
             CaptureRequest.Builder builder = new CaptureRequest.Builder(
                     templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
