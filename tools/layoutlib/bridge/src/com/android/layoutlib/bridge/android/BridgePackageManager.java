@@ -923,4 +923,9 @@ public class BridgePackageManager extends PackageManager {
     public ComponentName getInstantAppResolverSettingsComponent() {
         return null;
     }
+
+    @Override
+    public ComponentName getInstantAppInstallerComponent() {
+        return null;
+    }
 }

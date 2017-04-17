@@ -6275,9 +6275,19 @@ public abstract class PackageManager {
      * Return the {@link ComponentName} of the activity providing Settings for the Instant App
      * resolver.
      *
-     * @see {@link android.content.intent#ACTION_INSTANT_APP_RESOLVER_SETTINGS}
+     * @see {@link android.content.Intent#ACTION_INSTANT_APP_RESOLVER_SETTINGS}
      * @hide
      */
     @SystemApi
     public abstract ComponentName getInstantAppResolverSettingsComponent();
+
+    /**
+     * Return the {@link ComponentName} of the activity responsible for installing instant
+     * applications.
+     *
+     * @see {@link android.content.Intent#ACTION_INSTALL_INSTANT_APP_PACKAGE}
+     * @hide
+     */
+    @SystemApi
+    public abstract ComponentName getInstantAppInstallerComponent();
 }
