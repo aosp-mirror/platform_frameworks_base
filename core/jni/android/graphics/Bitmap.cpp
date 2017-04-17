@@ -278,9 +278,7 @@ void* lockPixels(JNIEnv* env, jobject bitmap) {
     if (!localBitmap->valid()) return nullptr;
 
     SkPixelRef& pixelRef = localBitmap->bitmap();
-    pixelRef.lockPixels();
     if (!pixelRef.pixels()) {
-        pixelRef.unlockPixels();
         return nullptr;
     }
     pixelRef.ref();
@@ -298,7 +296,6 @@ bool unlockPixels(JNIEnv* env, jobject bitmap) {
 
     SkPixelRef& pixelRef = localBitmap->bitmap();
     pixelRef.notifyPixelsChanged();
-    pixelRef.unlockPixels();
     pixelRef.unref();
     return true;
 }
@@ -438,7 +435,6 @@ static FromColorProc ChooseFromColorProc(const SkBitmap& bitmap) {
 
 bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int srcStride,
         int x, int y, int width, int height, const SkBitmap& dstBitmap) {
-    SkAutoLockPixels alp(dstBitmap);
     void* dst = dstBitmap.getPixels();
     FromColorProc proc = ChooseFromColorProc(dstBitmap);
 
@@ -758,11 +754,10 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
     // Skia does not support copying from kAlpha8 to types that are not alpha only.
     // We will handle this case here.
     if (kAlpha_8_SkColorType == src.colorType() && kAlpha_8_SkColorType != dstCT) {
-        SkAutoPixmapUnlock srcUnlocker;
-        if (!src.requestLock(&srcUnlocker)) {
+        SkPixmap srcPixmap;
+        if (!src.peekPixels(&srcPixmap)) {
             return false;
         }
-        SkPixmap srcPixmap = srcUnlocker.pixmap();
 
         SkImageInfo dstInfo = src.info().makeColorType(dstCT);
         if (dstCT == kRGBA_F16_SkColorType) {
@@ -1138,9 +1133,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
             doThrowRE(env, "Could not allocate java pixel ref.");
             return NULL;
         }
-        bitmap->lockPixels();
         memcpy(bitmap->getPixels(), blob.data(), size);
-        bitmap->unlockPixels();
 
         // Release the blob handle.
         blob.release();
@@ -1186,7 +1179,6 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 
     if (bitmap.colorType() == kIndex_8_SkColorType) {
         // The bitmap needs to be locked to access its color table.
-        SkAutoLockPixels alp(bitmap);
         SkColorTable* ctable = bitmap.getColorTable();
         if (ctable != NULL) {
             int count = ctable->count();
@@ -1233,14 +1225,12 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         return JNI_FALSE;
     }
 
-    bitmap.lockPixels();
     const void* pSrc =  bitmap.getPixels();
     if (pSrc == NULL) {
         memset(blob.data(), 0, size);
     } else {
         memcpy(blob.data(), pSrc, size);
     }
-    bitmap.unlockPixels();
 
     blob.release();
     return JNI_TRUE;
@@ -1330,7 +1320,6 @@ static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
         jint x, jint y) {
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
-    SkAutoLockPixels alp(bitmap);
 
     ToColorProc proc = ChooseToColorProc(bitmap);
     if (NULL == proc) {
@@ -1362,7 +1351,6 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
         jint x, jint y, jint width, jint height) {
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
-    SkAutoLockPixels alp(bitmap);
 
     ToColorProc proc = ChooseToColorProc(bitmap);
     if (NULL == proc) {
@@ -1411,7 +1399,6 @@ static void Bitmap_setPixel(JNIEnv* env, jobject, jlong bitmapHandle,
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkColor color = static_cast<SkColor>(colorHandle);
-    SkAutoLockPixels alp(bitmap);
     if (NULL == bitmap.getPixels()) {
         return;
     }
@@ -1448,7 +1435,6 @@ static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
                                       jlong bitmapHandle, jobject jbuffer) {
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
-    SkAutoLockPixels alp(bitmap);
     const void* src = bitmap.getPixels();
 
     if (NULL != src) {
@@ -1463,7 +1449,6 @@ static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
                                         jlong bitmapHandle, jobject jbuffer) {
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
-    SkAutoLockPixels alp(bitmap);
     void* dst = bitmap.getPixels();
 
     if (NULL != dst) {
@@ -1497,9 +1482,6 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle, jlong bm1Ha
             || !SkColorSpace::Equals(bm0.colorSpace(), bm1.colorSpace())) {
         return JNI_FALSE;
     }
-
-    SkAutoLockPixels alp0(bm0);
-    SkAutoLockPixels alp1(bm1);
 
     // if we can't load the pixels, return false
     if (NULL == bm0.getPixels() || NULL == bm1.getPixels()) {

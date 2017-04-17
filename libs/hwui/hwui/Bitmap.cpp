@@ -72,9 +72,6 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable
     auto wrapper = alloc(size, info, rowBytes, std::move(ctable));
     if (wrapper) {
         wrapper->getSkBitmap(bitmap);
-        // since we're already allocated, we lockPixels right away
-        // HeapAllocator behaves this way too
-        bitmap->lockPixels();
     }
     return wrapper;
 }
@@ -170,7 +167,6 @@ private:
 
 static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bitmap,
         GraphicBuffer& buffer, GLint format, GLint type) {
-    SkAutoLockPixels alp(bitmap);
     EGLDisplay display = eglGetCurrentDisplay();
     LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY,
                 "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
@@ -299,13 +295,11 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
 
 void FreePixelRef(void* addr, void* context) {
     auto pixelRef = (SkPixelRef*) context;
-    pixelRef->unlockPixels();
     pixelRef->unref();
 }
 
 sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) {
     pixelRef.ref();
-    pixelRef.lockPixels();
     return sk_sp<Bitmap>(new Bitmap((void*) pixelRef.pixels(), (void*) &pixelRef, FreePixelRef,
             info, pixelRef.rowBytes(), sk_ref_sp(pixelRef.colorTable())));
 }

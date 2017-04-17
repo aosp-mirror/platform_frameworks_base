@@ -403,7 +403,6 @@ static jboolean jni_eglDestroySurface(JNIEnv *_env, jobject _this, jobject displ
         SkPixelRef* ref = (SkPixelRef*)(_env->GetLongField(surface,
                 gSurface_NativePixelRefFieldID));
         if (ref) {
-            ref->unlockPixels();
             SkSafeUnref(ref);
         }
     }

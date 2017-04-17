@@ -461,10 +461,6 @@ android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
     if (readOnly) {
         bitmap->pixelRef()->setImmutable();
     }
-    // since we're already allocated, we lockPixels right away
-    // HeapAllocator behaves this way too
-    bitmap->lockPixels();
-
     return wrapper;
 }
 
@@ -670,7 +666,6 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
         mRecycledBitmap->setAlphaType(bitmap->alphaType());
 
         bitmap->notifyPixelsChanged();
-        bitmap->lockPixels();
         mNeedsCopy = false;
 
         // TODO: If the dimensions of the SkBitmap are smaller than those of

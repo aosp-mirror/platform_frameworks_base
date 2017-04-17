@@ -739,7 +739,6 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     int err = checkFormat(colorType, internalformat, type);
     if (err)
         return err;
-    bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
     const void* p = bitmap.getPixels();
@@ -766,7 +765,6 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
         glTexImage2D(target, level, internalformat, w, h, border, internalformat, type, p);
     }
 error:
-    bitmap.unlockPixels();
     return err;
 }
 
@@ -785,12 +783,10 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     int err = checkFormat(colorType, format, type);
     if (err)
         return err;
-    bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
     const void* p = bitmap.getPixels();
     glTexSubImage2D(target, level, xoffset, yoffset, w, h, format, type, p);
-    bitmap.unlockPixels();
     return 0;
 }
 
