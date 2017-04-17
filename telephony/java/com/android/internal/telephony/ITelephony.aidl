@@ -498,6 +498,8 @@ interface ITelephony {
       */
     boolean isConcurrentVoiceAndDataAllowed(int subId);
 
+    Bundle getVisualVoicemailSettings(String callingPackage, int subId);
+
     String getVisualVoicemailPackageName(String callingPackage, int subId);
 
     // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
