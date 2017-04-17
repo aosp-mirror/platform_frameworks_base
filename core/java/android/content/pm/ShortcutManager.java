@@ -17,8 +17,6 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -26,15 +24,12 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.os.Binder;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Build.VERSION_CODES;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.util.List;
 
@@ -289,6 +284,12 @@ import java.util.List;
  *   <p><b>Note:</b> If the user doesn't allow the shortcut to be pinned to the launcher, the
  *   pinning process fails, and the {@link Intent} object that is passed into this
  *   {@link android.app.PendingIntent} object isn't executed.
+ *   <div class="note"><p><b>Note:</b> Due to background execution limits introduced in Android
+ *   {@link VERSION_CODES#O}, it's best to use a
+ *   <a href="{@docRoot}guide/components/broadcasts.html#manifest-declared_receivers">
+ *   manifest-declared receiver</a> to receive a callback.
+ *   <p>Also, to prevent other apps from invoking the receiver, add the attribute assignment
+ *   <code>android:exported="false"</code> to the receiver's manifest entry.</p></div>
  * </ul>
  *
  * The following code snippet shows how to pin a single shortcut that already exists and is enabled:
@@ -313,10 +314,8 @@ import java.util.List;
  *    // needs to be notified that the user allowed the shortcut to be pinned.
  *    // Use a boolean value, such as "appNeedsNotifying", to define this behavior.
  *    if (appNeedsNotifying) {
- *        // We assume here that the app has implemented a method called
- *        // createShortcutResultIntent() that returns a broadcast intent.
- *        Intent pinnedShortcutCallbackIntent =
- *                createShortcutResultIntent(pinShortcutInfo);
+ *        // We assume here the app has a manifest-declared receiver "MyReceiver".
+ *        Intent pinnedShortcutCallbackIntent = new Intent(context, MyReceiver.class);
  *
  *        // Configure the intent so that your app's broadcast receiver gets
  *        // the callback successfully.
@@ -921,6 +920,9 @@ public class ShortcutManager {
     /**
      * Return {@code TRUE} if the app is running on a device whose default launcher supports
      * {@link #requestPinShortcut(ShortcutInfo, IntentSender)}.
+     *
+     * <p><b>Note:</b> The return value may change in subsequent calls, if the user changes
+     * the default launcher app.
      */
     public boolean isRequestPinShortcutSupported() {
         try {
@@ -952,6 +954,8 @@ public class ShortcutManager {
      *     set.
      * @param resultIntent If not null, this intent will be sent when the shortcut is pinned.
      *    Use {@link android.app.PendingIntent#getIntentSender()} to create an {@link IntentSender}.
+     *    To avoid background execution limits, use an unexported, manifest-declared receiver.
+     *    For more details, see the overview documentation for the {@link ShortcutManager} class.
      *
      * @return {@code TRUE} if the launcher supports this feature.  Note the API will return without
      *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
