@@ -509,6 +509,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // True if mHidden has been changed and the animation should be scheduled.
     boolean mHiddenChanged;
 
+    // The cached value from onGetLayoutInflater(Bundle) that will be returned from
+    // getLayoutInflater()
+    LayoutInflater mLayoutInflater;
+
     /**
      * State information that has been retrieved from a fragment instance
      * through {@link FragmentManager#saveFragmentInstanceState(Fragment)
@@ -1386,6 +1390,38 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             result.setPrivateFactory(mChildFragmentManager.getLayoutInflaterFactory());
         }
         return result;
+    }
+
+    /**
+     * Returns the cached LayoutInflater used to inflate Views of this Fragment. If
+     * {@link #onGetLayoutInflater(Bundle)} has not been called {@link #onGetLayoutInflater(Bundle)}
+     * will be called with a {@code null} argument and that value will be cached.
+     * <p>
+     * The cached LayoutInflater will be replaced immediately prior to
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)} and cleared immediately after
+     * {@link #onDetach()}.
+     *
+     * @return The LayoutInflater used to inflate Views of this Fragment.
+     */
+    public final LayoutInflater getLayoutInflater() {
+        if (mLayoutInflater == null) {
+            return performGetLayoutInflater(null);
+        }
+        return mLayoutInflater;
+    }
+
+    /**
+     * Calls {@link #onGetLayoutInflater(Bundle)} and caches the result for use by
+     * {@link #getLayoutInflater()}.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     * @return The LayoutInflater used to inflate Views of this Fragment.
+     */
+    LayoutInflater performGetLayoutInflater(Bundle savedInstanceState) {
+        LayoutInflater layoutInflater = onGetLayoutInflater(savedInstanceState);
+        mLayoutInflater = layoutInflater;
+        return mLayoutInflater;
     }
 
     /**
@@ -2835,6 +2871,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     void performDetach() {
         mCalled = false;
         onDetach();
+        mLayoutInflater = null;
         if (!mCalled) {
             throw new SuperNotCalledException("Fragment " + this
                     + " did not call through to super.onDetach()");
