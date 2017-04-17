@@ -41,9 +41,13 @@ oneway interface IPinnedStackListener {
      * current state with the aspect ratio applied.  The {@param animatingBounds} are provided
      * to indicate the current target bounds of the pinned stack (the final bounds if animating,
      * the current bounds if not), which may be helpful in calculating dependent animation bounds.
+     *
+     * The {@param displayRotation} is provided so that the client can verify when making certain
+     * calls that it will not provide stale information based on an old display rotation (ie. if
+     * the WM has changed in the mean time but the client has not received onMovementBoundsChanged).
      */
     void onMovementBoundsChanged(in Rect insetBounds, in Rect normalBounds, in Rect animatingBounds,
-            boolean fromImeAdjustement);
+            boolean fromImeAdjustement, int displayRotation);
 
     /**
      * Called when window manager decides to adjust the pinned stack bounds because of the IME, or

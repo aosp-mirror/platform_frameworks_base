@@ -26,7 +26,6 @@ import android.app.RemoteAction;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
@@ -122,6 +121,13 @@ class PinnedStackController {
                 mIsMinimized = isMinimized;
                 mSnapAlgorithm.setMinimized(isMinimized);
             });
+        }
+
+        @Override
+        public int getDisplayRotation() {
+            synchronized (mService.mWindowMap) {
+                return mDisplayInfo.rotation;
+            }
         }
     }
 
@@ -221,22 +227,26 @@ class PinnedStackController {
      * @return the size of the PIP based on the given {@param aspectRatio}.
      */
     Size getSize(float aspectRatio) {
-        return mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, mMinSize,
-                mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        synchronized (mService.mWindowMap) {
+            return mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, mMinSize,
+                    mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        }
     }
 
     /**
      * @return the default bounds to show the PIP when there is no active PIP.
      */
     Rect getDefaultBounds() {
-        final Rect insetBounds = new Rect();
-        getInsetBounds(insetBounds);
+        synchronized (mService.mWindowMap) {
+            final Rect insetBounds = new Rect();
+            getInsetBounds(insetBounds);
 
-        final Rect defaultBounds = new Rect();
-        final Size size = getSize(mDefaultAspectRatio);
-        Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
-                0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
-        return defaultBounds;
+            final Rect defaultBounds = new Rect();
+            final Size size = getSize(mDefaultAspectRatio);
+            Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
+                    0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
+            return defaultBounds;
+        }
     }
 
     /**
@@ -254,42 +264,44 @@ class PinnedStackController {
      * new orientation of the device if necessary.
      */
     boolean onTaskStackBoundsChanged(Rect targetBounds, Rect outBounds) {
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-        if (mDisplayInfo.equals(displayInfo)) {
-            // We are already in the right orientation, ignore
-            outBounds.setEmpty();
-            return false;
-        } else if (targetBounds.isEmpty()) {
-            // The stack is null, we are just initializing the stack, so just store the display info
-            // and ignore
+        synchronized (mService.mWindowMap) {
+            final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+            if (mDisplayInfo.equals(displayInfo)) {
+                // We are already in the right orientation, ignore
+                outBounds.setEmpty();
+                return false;
+            } else if (targetBounds.isEmpty()) {
+                // The stack is null, we are just initializing the stack, so just store the display
+                // info and ignore
+                mDisplayInfo.copyFrom(displayInfo);
+                outBounds.setEmpty();
+                return false;
+            }
+
+            mTmpRect.set(targetBounds);
+            final Rect postChangeStackBounds = mTmpRect;
+
+            // Calculate the snap fraction of the current stack along the old movement bounds
+            final Rect preChangeMovementBounds = getMovementBounds(postChangeStackBounds);
+            final float snapFraction = mSnapAlgorithm.getSnapFraction(postChangeStackBounds,
+                    preChangeMovementBounds);
             mDisplayInfo.copyFrom(displayInfo);
-            outBounds.setEmpty();
-            return false;
+
+            // Calculate the stack bounds in the new orientation to the same same fraction along the
+            // rotated movement bounds.
+            final Rect postChangeMovementBounds = getMovementBounds(postChangeStackBounds,
+                    false /* adjustForIme */);
+            mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
+                    snapFraction);
+            if (mIsMinimized) {
+                applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
+            }
+
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+
+            outBounds.set(postChangeStackBounds);
+            return true;
         }
-
-        mTmpRect.set(targetBounds);
-        final Rect postChangeStackBounds = mTmpRect;
-
-        // Calculate the snap fraction of the current stack along the old movement bounds
-        final Rect preChangeMovementBounds = getMovementBounds(postChangeStackBounds);
-        final float snapFraction = mSnapAlgorithm.getSnapFraction(postChangeStackBounds,
-                preChangeMovementBounds);
-        mDisplayInfo.copyFrom(displayInfo);
-
-        // Calculate the stack bounds in the new orientation to the same same fraction along the
-        // rotated movement bounds.
-        final Rect postChangeMovementBounds = getMovementBounds(postChangeStackBounds,
-                false /* adjustForIme */);
-        mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
-                snapFraction);
-        if (mIsMinimized) {
-            applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
-        }
-
-        notifyMovementBoundsChanged(false /* fromImeAdjustment */);
-
-        outBounds.set(postChangeStackBounds);
-        return true;
     }
 
     /**
@@ -378,25 +390,27 @@ class PinnedStackController {
      * Notifies listeners that the PIP movement bounds have changed.
      */
     private void notifyMovementBoundsChanged(boolean fromImeAdjustement) {
-        if (mPinnedStackListener != null) {
-            try {
-                final Rect insetBounds = new Rect();
-                getInsetBounds(insetBounds);
-                final Rect normalBounds = getDefaultBounds();
-                if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
-                    transformBoundsToAspectRatio(normalBounds, mAspectRatio);
+        synchronized (mService.mWindowMap) {
+            if (mPinnedStackListener != null) {
+                try {
+                    final Rect insetBounds = new Rect();
+                    getInsetBounds(insetBounds);
+                    final Rect normalBounds = getDefaultBounds();
+                    if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
+                        transformBoundsToAspectRatio(normalBounds, mAspectRatio);
+                    }
+                    final Rect animatingBounds = mTmpAnimatingBoundsRect;
+                    final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
+                    if (pinnedStack != null) {
+                        pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
+                    } else {
+                        animatingBounds.set(normalBounds);
+                    }
+                    mPinnedStackListener.onMovementBoundsChanged(insetBounds, normalBounds,
+                            animatingBounds, fromImeAdjustement, mDisplayInfo.rotation);
+                } catch (RemoteException e) {
+                    Slog.e(TAG_WM, "Error delivering actions changed event.", e);
                 }
-                final Rect animatingBounds = mTmpAnimatingBoundsRect;
-                final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
-                if (pinnedStack != null) {
-                    pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
-                } else {
-                    animatingBounds.set(normalBounds);
-                }
-                mPinnedStackListener.onMovementBoundsChanged(insetBounds, normalBounds,
-                        animatingBounds, fromImeAdjustement);
-            } catch (RemoteException e) {
-                Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
         }
     }
@@ -405,11 +419,13 @@ class PinnedStackController {
      * @return the bounds on the screen that the PIP can be visible in.
      */
     private void getInsetBounds(Rect outRect) {
-        mService.mPolicy.getStableInsetsLw(mDisplayInfo.rotation, mDisplayInfo.logicalWidth,
-                mDisplayInfo.logicalHeight, mTmpInsets);
-        outRect.set(mTmpInsets.left + mScreenEdgeInsets.x, mTmpInsets.top + mScreenEdgeInsets.y,
-                mDisplayInfo.logicalWidth - mTmpInsets.right - mScreenEdgeInsets.x,
-                mDisplayInfo.logicalHeight - mTmpInsets.bottom - mScreenEdgeInsets.y);
+        synchronized (mService.mWindowMap) {
+            mService.mPolicy.getStableInsetsLw(mDisplayInfo.rotation, mDisplayInfo.logicalWidth,
+                    mDisplayInfo.logicalHeight, mTmpInsets);
+            outRect.set(mTmpInsets.left + mScreenEdgeInsets.x, mTmpInsets.top + mScreenEdgeInsets.y,
+                    mDisplayInfo.logicalWidth - mTmpInsets.right - mScreenEdgeInsets.x,
+                    mDisplayInfo.logicalHeight - mTmpInsets.bottom - mScreenEdgeInsets.y);
+        }
     }
 
     /**
@@ -417,7 +433,9 @@ class PinnedStackController {
      *         controller.
      */
     private Rect getMovementBounds(Rect stackBounds) {
-        return getMovementBounds(stackBounds, true /* adjustForIme */);
+        synchronized (mService.mWindowMap) {
+            return getMovementBounds(stackBounds, true /* adjustForIme */);
+        }
     }
 
     /**
@@ -425,23 +443,27 @@ class PinnedStackController {
      *         controller.
      */
     private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
-        final Rect movementBounds = new Rect();
-        getInsetBounds(movementBounds);
+        synchronized (mService.mWindowMap) {
+            final Rect movementBounds = new Rect();
+            getInsetBounds(movementBounds);
 
-        // Apply the movement bounds adjustments based on the current state
-        mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
-                (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
-        return movementBounds;
+            // Apply the movement bounds adjustments based on the current state
+            mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
+                    (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
+            return movementBounds;
+        }
     }
 
     /**
      * Applies the minimized offsets to the given stack bounds.
      */
     private void applyMinimizedOffset(Rect stackBounds, Rect movementBounds) {
-        mTmpDisplaySize.set(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
-        mService.getStableInsetsLocked(mDisplayContent.getDisplayId(), mStableInsets);
-        mSnapAlgorithm.applyMinimizedOffset(stackBounds, movementBounds, mTmpDisplaySize,
-                mStableInsets);
+        synchronized (mService.mWindowMap) {
+            mTmpDisplaySize.set(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+            mService.getStableInsetsLocked(mDisplayContent.getDisplayId(), mStableInsets);
+            mSnapAlgorithm.applyMinimizedOffset(stackBounds, movementBounds, mTmpDisplaySize,
+                    mStableInsets);
+        }
     }
 
     /**
