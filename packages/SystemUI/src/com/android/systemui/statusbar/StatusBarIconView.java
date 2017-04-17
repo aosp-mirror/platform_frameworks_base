@@ -499,12 +499,18 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     private void setColorInternal(int color) {
-        if (color != NO_COLOR) {
-            setImageTintList(ColorStateList.valueOf(color));
+        mCurrentSetColor = color;
+        updateIconColor();
+    }
+
+    private void updateIconColor() {
+        if (mCurrentSetColor != NO_COLOR) {
+            setImageTintList(ColorStateList.valueOf(NotificationUtils.interpolateColors(
+                    mCurrentSetColor, Color.WHITE, mDarkAmount)));
         } else {
             setImageTintList(null);
+            mDozer.updateGrayscale(this, mDarkAmount);
         }
-        mCurrentSetColor = color;
     }
 
     public void setIconColor(int iconColor, boolean animate) {
@@ -669,10 +675,10 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void setDark(boolean dark, boolean fade, long delay) {
-        mDozer.setImageDark(this, dark, fade, delay, mIconColor == NO_COLOR);
         mDozer.setIntensityDark(f -> {
             mDarkAmount = f;
             updateDecorColor();
+            updateIconColor();
         }, dark, fade, delay);
     }
 
