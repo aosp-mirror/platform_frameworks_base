@@ -16,21 +16,16 @@
 
 package android.app;
 
-import android.metrics.LogMaker;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.view.ViewRootImpl.ActivityConfigCallback;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillPopupWindow;
-import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.PhoneWindow;
 
 import android.annotation.CallSuper;
@@ -1234,6 +1229,13 @@ public class Activity extends ContextThemeWrapper
         mFragments.doLoaderStart();
 
         getApplication().dispatchActivityStarted(this);
+
+        if (mAutoFillResetNeeded) {
+            AutofillManager afm = getAutofillManager();
+            if (afm != null) {
+                afm.onVisibleForAutofill();
+            }
+        }
     }
 
     /**
@@ -7405,6 +7407,54 @@ public class Activity extends ContextThemeWrapper
         mAutofillPopupWindow.dismiss();
         mAutofillPopupWindow = null;
         return true;
+    }
+
+    /** @hide */
+    @Override
+    public boolean getViewVisibility(int viewId) {
+        Window window = getWindow();
+        if (window == null) {
+            Log.i(TAG, "no window");
+            return false;
+        }
+
+        View decorView = window.peekDecorView();
+        if (decorView == null) {
+            Log.i(TAG, "no decorView");
+            return false;
+        }
+
+        View view = decorView.findViewByAccessibilityIdTraversal(viewId);
+        if (view == null) {
+            Log.i(TAG, "cannot find view");
+            return false;
+        }
+
+        // Check if the view is visible by checking all parents
+        while (view != null) {
+            if (view == decorView) {
+                break;
+            }
+
+            if (view.getVisibility() != View.VISIBLE) {
+                Log.i(TAG, view + " is not visible");
+                return false;
+            }
+
+            if (view.getParent() instanceof View) {
+                view = (View) view.getParent();
+            } else {
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    /** @hide */
+    @Override
+    public boolean isVisibleForAutofill() {
+        return !mStopped;
     }
 
     /**

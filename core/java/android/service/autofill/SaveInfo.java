@@ -21,6 +21,7 @@ import static android.view.autofill.Helper.DEBUG;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.assist.AssistStructure;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -158,6 +159,7 @@ public final class SaveInfo implements Parcelable {
     private final AutofillId[] mRequiredIds;
     private final AutofillId[] mOptionalIds;
     private final CharSequence mDescription;
+    private final boolean mSaveOnAllViewsInvisible;
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
@@ -166,6 +168,7 @@ public final class SaveInfo implements Parcelable {
         mRequiredIds = builder.mRequiredIds;
         mOptionalIds = builder.mOptionalIds;
         mDescription = builder.mDescription;
+        mSaveOnAllViewsInvisible = builder.mSaveOnAllViewsInvisible;
     }
 
     /** @hide */
@@ -194,6 +197,11 @@ public final class SaveInfo implements Parcelable {
     }
 
     /** @hide */
+    public boolean saveOnAllViewsInvisible() {
+        return mSaveOnAllViewsInvisible;
+    }
+
+    /** @hide */
     public CharSequence getDescription() {
         return mDescription;
     }
@@ -211,6 +219,7 @@ public final class SaveInfo implements Parcelable {
         private AutofillId[] mOptionalIds;
         private CharSequence mDescription;
         private boolean mDestroyed;
+        private boolean mSaveOnAllViewsInvisible;
 
         /**
          * Creates a new builder.
@@ -255,6 +264,21 @@ public final class SaveInfo implements Parcelable {
         public @NonNull Builder addSavableIds(@Nullable AutofillId... ids) {
             throwIfDestroyed();
             mRequiredIds = ids;
+            return this;
+        }
+
+        /**
+         * Usually {@link AutofillService#onSaveRequest(AssistStructure, Bundle, SaveCallback)}
+         * is called once the activity finishes. If this property is set it is called once all
+         * autofillable or saved views become invisible.
+         *
+         * @param saveOnAllViewsInvisible Set to {@code true} if the data should be saved once
+         *                                all the views become invisible.
+         * @return This builder.
+         */
+        public @NonNull Builder setSaveOnAllViewsInvisible(boolean saveOnAllViewsInvisible) {
+            throwIfDestroyed();
+            mSaveOnAllViewsInvisible = saveOnAllViewsInvisible;
             return this;
         }
 
@@ -354,6 +378,7 @@ public final class SaveInfo implements Parcelable {
                 .append(", requiredIds=").append(Arrays.toString(mRequiredIds))
                 .append(", optionalIds=").append(Arrays.toString(mOptionalIds))
                 .append(", description=").append(mDescription)
+                .append(", saveOnNoVisibleTrackedViews=").append(mSaveOnAllViewsInvisible)
                 .append("]").toString();
     }
 
@@ -374,6 +399,7 @@ public final class SaveInfo implements Parcelable {
         parcel.writeParcelable(mNegativeActionListener, flags);
         parcel.writeParcelableArray(mOptionalIds, flags);
         parcel.writeCharSequence(mDescription);
+        parcel.writeBoolean(mSaveOnAllViewsInvisible);
     }
 
     public static final Parcelable.Creator<SaveInfo> CREATOR = new Parcelable.Creator<SaveInfo>() {
@@ -387,6 +413,7 @@ public final class SaveInfo implements Parcelable {
             builder.setNegativeAction(parcel.readCharSequence(), parcel.readParcelable(null));
             builder.setOptionalIds(parcel.readParcelableArray(null, AutofillId.class));
             builder.setDescription(parcel.readCharSequence());
+            builder.setSaveOnAllViewsInvisible(parcel.readBoolean());
             return builder.build();
         }
 
