@@ -852,6 +852,8 @@
             1 - Go to sleep (doze)
             2 - Really go to sleep (don't doze)
             3 - Really go to sleep and go home (don't doze)
+            4 - Go to home
+            5 - Dismiss IME if shown. Otherwise go to home
     -->
     <integer name="config_shortPressOnPowerBehavior">1</integer>
 

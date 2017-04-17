@@ -7267,13 +7267,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
-                boolean imeWindowVisible, @Nullable IBinder targetWindowToken) {
+                boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed,
+                @Nullable IBinder targetWindowToken) {
             // TODO (b/34628091): Use this method to address the window animation issue.
             if (DEBUG_INPUT_METHOD) {
                 Slog.w(TAG_WM, "updateInputMethodWindowStatus: imeToken=" + imeToken
+                        + " dismissImeOnBackKeyPressed=" + dismissImeOnBackKeyPressed
                         + " imeWindowVisible=" + imeWindowVisible
                         + " targetWindowToken=" + targetWindowToken);
             }
+            mPolicy.setDismissImeOnBackKeyPressed(dismissImeOnBackKeyPressed);
         }
 
         @Override
