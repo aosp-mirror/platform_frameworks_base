@@ -39,6 +39,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -255,12 +256,20 @@ public class NotificationGuts extends FrameLayout {
     }
 
     public void setExposed(boolean exposed, boolean needsFalsingProtection) {
+        final boolean wasExposed = mExposed;
         mExposed = exposed;
         mNeedsFalsingProtection = needsFalsingProtection;
         if (mExposed && mNeedsFalsingProtection) {
             resetFalsingCheck();
         } else {
             mHandler.removeCallbacks(mFalsingCheck);
+        }
+        if (wasExposed != mExposed && mGutsContent != null) {
+            final View contentView = mGutsContent.getContentView();
+            contentView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            if (mExposed) {
+                contentView.requestAccessibilityFocus();
+            }
         }
     }
 
