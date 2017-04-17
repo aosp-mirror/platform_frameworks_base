@@ -68,6 +68,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -220,6 +221,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         synchronized (mLock) {
             mActivityToken = newActivity;
             mClient = IAutoFillManagerClient.Stub.asInterface(newClient);
+
+            // The tracked id are not persisted in the client, hence update them
+            updateTrackedIdsLocked();
         }
     }
 
@@ -749,6 +753,38 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    private void updateTrackedIdsLocked() {
+        if (mResponses == null || mResponses.size() == 0) {
+            return;
+        }
+
+        // Only track the views of the last response as only those are reported back to the
+        // service, see #showSaveLocked
+        ArrayList<AutofillId> trackedViews = new ArrayList<>();
+        boolean saveOnAllViewsInvisible = false;
+        SaveInfo saveInfo = mResponses.valueAt(getLastResponseIndex()).getSaveInfo();
+        if (saveInfo != null) {
+            saveOnAllViewsInvisible = saveInfo.saveOnAllViewsInvisible();
+
+            // We only need to track views if we want to save once they become invisible.
+            if (saveOnAllViewsInvisible) {
+                if (saveInfo.getRequiredIds() != null) {
+                    Collections.addAll(trackedViews, saveInfo.getRequiredIds());
+                }
+
+                if (saveInfo.getOptionalIds() != null) {
+                    Collections.addAll(trackedViews, saveInfo.getOptionalIds());
+                }
+            }
+        }
+
+        try {
+            mClient.setTrackedViews(id, trackedViews, saveOnAllViewsInvisible);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Cannot set tracked ids", e);
+        }
+    }
+
     private void processResponseLocked(FillResponse response, int requestId) {
         if (DEBUG) {
             Slog.d(TAG, "processResponseLocked(mCurrentViewId=" + mCurrentViewId + "):" + response);
@@ -763,6 +799,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         setViewStatesLocked(response, ViewState.STATE_FILLABLE);
+        updateTrackedIdsLocked();
 
         if (mCurrentViewId == null) {
             return;
