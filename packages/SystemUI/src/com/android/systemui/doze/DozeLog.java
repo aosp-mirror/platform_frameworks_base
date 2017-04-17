@@ -145,6 +145,11 @@ public class DozeLog {
         log("screenOff why=" + why);
     }
 
+    public static void traceMissedTick(String delay) {
+        if (!ENABLED) return;
+        log("missedTick by=" + delay);
+    }
+
     public static void traceKeyguard(boolean showing) {
         if (!ENABLED) return;
         log("keyguard " + showing);
