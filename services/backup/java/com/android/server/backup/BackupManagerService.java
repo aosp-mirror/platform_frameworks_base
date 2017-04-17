@@ -798,6 +798,19 @@ public class BackupManagerService {
         return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);
     }
 
+    // We also avoid backups of 'disabled' apps
+    private static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
+        switch (pm.getApplicationEnabledSetting(app.packageName)) {
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
     /* does *not* check overall backup eligibility policy! */
     private static boolean appGetsFullBackup(PackageInfo pkg) {
         if (pkg.applicationInfo.backupAgentName != null) {
@@ -10774,7 +10787,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                     PackageManager.GET_SIGNATURES);
             if (!appIsEligibleForBackup(packageInfo.applicationInfo) ||
-                    appIsStopped(packageInfo.applicationInfo)) {
+                    appIsStopped(packageInfo.applicationInfo) ||
+                    appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
                 return false;
             }
             IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
