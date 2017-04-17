@@ -19,18 +19,21 @@ package android.provider;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
+import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.ContentObserver;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
+import android.telephony.Rlog;
+import android.telephony.ServiceState;
 import android.telephony.SmsMessage;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
-import android.telephony.Rlog;
 import android.util.Patterns;
 
 import com.android.internal.telephony.PhoneConstants;
@@ -44,7 +47,7 @@ import java.util.regex.Pattern;
 
 /**
  * The Telephony provider contains data related to phone operation, specifically SMS and MMS
- * messages and access to the APN list, including the MMSC to use.
+ * messages, access to the APN list, including the MMSC to use, and the service state.
  *
  * <p class="note"><strong>Note:</strong> These APIs are not available on all Android-powered
  * devices. If your app depends on telephony features such as for managing SMS messages, include
@@ -2971,5 +2974,273 @@ public final class Telephony {
                 CMAS_URGENCY,
                 CMAS_CERTAINTY
         };
+    }
+
+    /**
+     * Constants for interfacing with the ServiceStateProvider and the different fields of the
+     * {@link ServiceState} class accessible through the provider.
+     */
+    public static final class ServiceStateTable {
+
+        /**
+         * Not instantiable.
+         * @hide
+         */
+        private ServiceStateTable() {}
+
+        /**
+         * The authority string for the ServiceStateProvider
+         */
+        public static final String AUTHORITY = "service-state";
+
+        /**
+         * The {@code content://} style URL for the ServiceStateProvider
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://service-state/");
+
+        /**
+         * Generates a content {@link Uri} used to receive updates on a specific field in the
+         * ServiceState provider.
+         * <p>
+         * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+         * {@link ServiceState} while your app is running.  You can also use a {@link JobService} to
+         * ensure your app is notified of changes to the {@link Uri} even when it is not running.
+         * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+         * updates to the {@link Uri}.
+         *
+         * @param subId the subId to receive updates on
+         * @param field the ServiceState field to receive updates on
+         * @return the Uri used to observe {@link ServiceState} changes
+         */
+        public static Uri getUriForSubIdAndField(int subId, String field) {
+            return CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(subId))
+                    .appendEncodedPath(field).build();
+        }
+
+        /**
+         * Generates a content {@link Uri} used to receive updates on every field in the
+         * ServiceState provider.
+         * <p>
+         * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+         * {@link ServiceState} while your app is running.  You can also use a {@link JobService} to
+         * ensure your app is notified of changes to the {@link Uri} even when it is not running.
+         * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+         * updates to the {@link Uri}.
+         *
+         * @param subId the subId to receive updates on
+         * @return the Uri used to observe {@link ServiceState} changes
+         */
+        public static Uri getUriForSubId(int subId) {
+            return CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(subId)).build();
+        }
+
+        /**
+         * Used to insert a ServiceState into the ServiceStateProvider as a ContentValues instance.
+         *
+         * @param state the ServiceState to convert into ContentValues
+         * @return the convertedContentValues instance
+         * @hide
+         */
+        public static ContentValues getContentValuesForServiceState(ServiceState state) {
+            ContentValues values = new ContentValues();
+            values.put(VOICE_REG_STATE, state.getVoiceRegState());
+            values.put(DATA_REG_STATE, state.getDataRegState());
+            values.put(VOICE_ROAMING_TYPE, state.getVoiceRoamingType());
+            values.put(DATA_ROAMING_TYPE, state.getDataRoamingType());
+            values.put(VOICE_OPERATOR_ALPHA_LONG, state.getVoiceOperatorAlphaLong());
+            values.put(VOICE_OPERATOR_ALPHA_SHORT, state.getVoiceOperatorAlphaShort());
+            values.put(VOICE_OPERATOR_NUMERIC, state.getVoiceOperatorNumeric());
+            values.put(DATA_OPERATOR_ALPHA_LONG, state.getDataOperatorAlphaLong());
+            values.put(DATA_OPERATOR_ALPHA_SHORT, state.getDataOperatorAlphaShort());
+            values.put(DATA_OPERATOR_NUMERIC, state.getDataOperatorNumeric());
+            values.put(IS_MANUAL_NETWORK_SELECTION, state.getIsManualSelection());
+            values.put(RIL_VOICE_RADIO_TECHNOLOGY, state.getRilVoiceRadioTechnology());
+            values.put(RIL_DATA_RADIO_TECHNOLOGY, state.getRilDataRadioTechnology());
+            values.put(CSS_INDICATOR, state.getCssIndicator());
+            values.put(NETWORK_ID, state.getNetworkId());
+            values.put(SYSTEM_ID, state.getSystemId());
+            values.put(CDMA_ROAMING_INDICATOR, state.getCdmaRoamingIndicator());
+            values.put(CDMA_DEFAULT_ROAMING_INDICATOR, state.getCdmaDefaultRoamingIndicator());
+            values.put(CDMA_ERI_ICON_INDEX, state.getCdmaEriIconIndex());
+            values.put(CDMA_ERI_ICON_MODE, state.getCdmaEriIconMode());
+            values.put(IS_EMERGENCY_ONLY, state.isEmergencyOnly());
+            values.put(IS_DATA_ROAMING_FROM_REGISTRATION, state.getDataRoamingFromRegistration());
+            values.put(IS_USING_CARRIER_AGGREGATION, state.isUsingCarrierAggregation());
+            return values;
+        }
+
+        /**
+         * An integer value indicating the current voice service state.
+         * <p>
+         * Valid values: {@link ServiceState#STATE_IN_SERVICE},
+         * {@link ServiceState#STATE_OUT_OF_SERVICE}, {@link ServiceState#STATE_EMERGENCY_ONLY},
+         * {@link ServiceState#STATE_POWER_OFF}.
+         * <p>
+         * This is the same as {@link ServiceState#getState()}.
+         */
+        public static final String VOICE_REG_STATE = "voice_reg_state";
+
+        /**
+         * An integer value indicating the current data service state.
+         * <p>
+         * Valid values: {@link ServiceState#STATE_IN_SERVICE},
+         * {@link ServiceState#STATE_OUT_OF_SERVICE}, {@link ServiceState#STATE_EMERGENCY_ONLY},
+         * {@link ServiceState#STATE_POWER_OFF}.
+         * <p>
+         * This is the same as {@link ServiceState#getDataRegState()}.
+         * @hide
+         */
+        public static final String DATA_REG_STATE = "data_reg_state";
+
+        /**
+         * An integer value indicating the current voice roaming type.
+         * <p>
+         * This is the same as {@link ServiceState#getVoiceRoamingType()}.
+         * @hide
+         */
+        public static final String VOICE_ROAMING_TYPE = "voice_roaming_type";
+
+        /**
+         * An integer value indicating the current data roaming type.
+         * <p>
+         * This is the same as {@link ServiceState#getDataRoamingType()}.
+         * @hide
+         */
+        public static final String DATA_ROAMING_TYPE = "data_roaming_type";
+
+        /**
+         * The current registered voice network operator name in long alphanumeric format.
+         * <p>
+         * This is the same as {@link ServiceState#getVoiceOperatorAlphaLong()}.
+         * @hide
+         */
+        public static final String VOICE_OPERATOR_ALPHA_LONG = "voice_operator_alpha_long";
+
+        /**
+         * The current registered operator name in short alphanumeric format.
+         * <p>
+         * In GSM/UMTS, short format can be up to 8 characters long. The current registered voice
+         * network operator name in long alphanumeric format.
+         * <p>
+         * This is the same as {@link ServiceState#getVoiceOperatorAlphaShort()}.
+         * @hide
+         */
+        public static final String VOICE_OPERATOR_ALPHA_SHORT = "voice_operator_alpha_short";
+
+
+        /**
+         * The current registered operator numeric id.
+         * <p>
+         * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
+         * network code.
+         * <p>
+         * This is the same as {@link ServiceState#getOperatorNumeric()}.
+         */
+        public static final String VOICE_OPERATOR_NUMERIC = "voice_operator_numeric";
+
+        /**
+         * The current registered data network operator name in long alphanumeric format.
+         * <p>
+         * This is the same as {@link ServiceState#getDataOperatorAlphaLong()}.
+         * @hide
+         */
+        public static final String DATA_OPERATOR_ALPHA_LONG = "data_operator_alpha_long";
+
+        /**
+         * The current registered data network operator name in short alphanumeric format.
+         * <p>
+         * This is the same as {@link ServiceState#getDataOperatorAlphaShort()}.
+         * @hide
+         */
+        public static final String DATA_OPERATOR_ALPHA_SHORT = "data_operator_alpha_short";
+
+        /**
+         * The current registered data network operator numeric id.
+         * <p>
+         * This is the same as {@link ServiceState#getDataOperatorNumeric()}.
+         * @hide
+         */
+        public static final String DATA_OPERATOR_NUMERIC = "data_operator_numeric";
+
+        /**
+         * The current network selection mode.
+         * <p>
+         * This is the same as {@link ServiceState#getIsManualSelection()}.
+         */
+        public static final String IS_MANUAL_NETWORK_SELECTION = "is_manual_network_selection";
+
+        /**
+         * This is the same as {@link ServiceState#getRilVoiceRadioTechnology()}.
+         * @hide
+         */
+        public static final String RIL_VOICE_RADIO_TECHNOLOGY = "ril_voice_radio_technology";
+
+        /**
+         * This is the same as {@link ServiceState#getRilDataRadioTechnology()}.
+         * @hide
+         */
+        public static final String RIL_DATA_RADIO_TECHNOLOGY = "ril_data_radio_technology";
+
+        /**
+         * This is the same as {@link ServiceState#getCssIndicator()}.
+         * @hide
+         */
+        public static final String CSS_INDICATOR = "css_indicator";
+
+        /**
+         * This is the same as {@link ServiceState#getNetworkId()}.
+         * @hide
+         */
+        public static final String NETWORK_ID = "network_id";
+
+        /**
+         * This is the same as {@link ServiceState#getSystemId()}.
+         * @hide
+         */
+        public static final String SYSTEM_ID = "system_id";
+
+        /**
+         * This is the same as {@link ServiceState#getCdmaRoamingIndicator()}.
+         * @hide
+         */
+        public static final String CDMA_ROAMING_INDICATOR = "cdma_roaming_indicator";
+
+        /**
+         * This is the same as {@link ServiceState#getCdmaDefaultRoamingIndicator()}.
+         * @hide
+         */
+        public static final String CDMA_DEFAULT_ROAMING_INDICATOR =
+                "cdma_default_roaming_indicator";
+
+        /**
+         * This is the same as {@link ServiceState#getCdmaEriIconIndex()}.
+         * @hide
+         */
+        public static final String CDMA_ERI_ICON_INDEX = "cdma_eri_icon_index";
+
+        /**
+         * This is the same as {@link ServiceState#getCdmaEriIconMode()}.
+         * @hide
+         */
+        public static final String CDMA_ERI_ICON_MODE = "cdma_eri_icon_mode";
+
+        /**
+         * This is the same as {@link ServiceState#isEmergencyOnly()}.
+         * @hide
+         */
+        public static final String IS_EMERGENCY_ONLY = "is_emergency_only";
+
+        /**
+         * This is the same as {@link ServiceState#getDataRoamingFromRegistration()}.
+         * @hide
+         */
+        public static final String IS_DATA_ROAMING_FROM_REGISTRATION =
+                "is_data_roaming_from_registration";
+
+        /**
+         * This is the same as {@link ServiceState#isUsingCarrierAggregation()}.
+         * @hide
+         */
+        public static final String IS_USING_CARRIER_AGGREGATION = "is_using_carrier_aggregation";
     }
 }
