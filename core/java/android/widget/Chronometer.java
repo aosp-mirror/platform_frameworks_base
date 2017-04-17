@@ -17,11 +17,13 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.icu.text.MeasureFormat;
 import android.icu.text.MeasureFormat.FormatWidth;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -145,6 +147,22 @@ public class Chronometer extends TextView {
      */
     public boolean isCountDown() {
         return mCountDown;
+    }
+
+    /**
+     * @return whether this is the final countdown
+     */
+    public boolean isTheFinalCountDown() {
+        try {
+            getContext().startActivity(
+                    new Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/9jK-NcRmVcw"))
+                            .addCategory(Intent.CATEGORY_BROWSABLE)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                                    | Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
