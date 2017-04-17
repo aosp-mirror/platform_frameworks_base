@@ -2639,4 +2639,13 @@ public class ApplicationPackageManager extends PackageManager {
             throw e.rethrowAsRuntimeException();
         }
     }
+
+    @Override
+    public ComponentName getInstantAppInstallerComponent() {
+        try {
+            return mPM.getInstantAppInstallerComponent();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }
