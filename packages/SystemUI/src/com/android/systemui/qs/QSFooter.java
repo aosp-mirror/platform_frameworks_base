@@ -167,6 +167,9 @@ public class QSFooter extends LinearLayout implements
         if (mAlarmShowing) {
             builder.addFloat(mDate, "alpha", 1, 0)
                     .addFloat(mDateTimeGroup, "translationX", 0, -mDate.getWidth());
+        } else {
+            mDate.setAlpha(1);
+            mDateTimeGroup.setTranslationX(0);
         }
         mAnimator = builder.build();
         setExpansion(mExpansionAmount);
