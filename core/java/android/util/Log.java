@@ -89,8 +89,9 @@ public final class Log {
 
     /**
      * Exception class used to capture a stack trace in {@link #wtf}.
+     * @hide
      */
-    private static class TerribleFailure extends Exception {
+    public static class TerribleFailure extends Exception {
         TerribleFailure(String msg, Throwable cause) { super(msg, cause); }
     }
 
