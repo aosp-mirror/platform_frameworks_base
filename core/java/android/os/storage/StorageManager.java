@@ -730,7 +730,7 @@ public class StorageManager {
      */
     public @NonNull UUID getUuidForPath(@NonNull File path) throws IOException {
         Preconditions.checkNotNull(path);
-        final String pathString = path.getAbsolutePath();
+        final String pathString = path.getCanonicalPath();
         if (FileUtils.contains(Environment.getDataDirectory().getAbsolutePath(), pathString)) {
             return UUID_DEFAULT;
         }

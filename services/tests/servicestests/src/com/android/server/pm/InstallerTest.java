@@ -120,15 +120,7 @@ public class InstallerTest extends AndroidTestCase {
     }
 
     public void testGetUserSize() throws Exception {
-        int[] appIds = null;
-
-        final PackageManager pm = getContext().getPackageManager();
-        for (ApplicationInfo app : pm.getInstalledApplications(0)) {
-            final int appId = UserHandle.getAppId(app.uid);
-            if (!ArrayUtils.contains(appIds, appId)) {
-                appIds = ArrayUtils.appendInt(appIds, appId);
-            }
-        }
+        final int[] appIds = getAppIds(UserHandle.USER_SYSTEM);
 
         final PackageStats stats = new PackageStats("android");
         final PackageStats quotaStats = new PackageStats("android");
@@ -147,18 +139,32 @@ public class InstallerTest extends AndroidTestCase {
     }
 
     public void testGetExternalSize() throws Exception {
+        final int[] appIds = getAppIds(UserHandle.USER_SYSTEM);
+
         mManual.start();
-        final long[] stats = mInstaller.getExternalSize(null, UserHandle.USER_SYSTEM, 0);
+        final long[] stats = mInstaller.getExternalSize(null, UserHandle.USER_SYSTEM, 0, appIds);
         mManual.stop();
 
         mQuota.start();
         final long[] quotaStats = mInstaller.getExternalSize(null, UserHandle.USER_SYSTEM,
-                Installer.FLAG_USE_QUOTA);
+                Installer.FLAG_USE_QUOTA, appIds);
         mQuota.stop();
 
         for (int i = 0; i < stats.length; i++) {
             checkEquals("#" + i, stats[i], quotaStats[i]);
         }
+    }
+
+    private int[] getAppIds(int userId) {
+        int[] appIds = null;
+        for (ApplicationInfo app : getContext().getPackageManager().getInstalledApplicationsAsUser(
+                PackageManager.MATCH_UNINSTALLED_PACKAGES, userId)) {
+            final int appId = UserHandle.getAppId(app.uid);
+            if (!ArrayUtils.contains(appIds, appId)) {
+                appIds = ArrayUtils.appendInt(appIds, appId);
+            }
+        }
+        return appIds;
     }
 
     private static void checkEquals(String msg, PackageStats a, PackageStats b) {

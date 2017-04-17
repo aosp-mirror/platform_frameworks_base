@@ -22,12 +22,8 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 
 /**
- * Storage statistics for a UID or {@link UserHandle} on a single storage
- * volume.
- * <p class="note">
- * Note: multiple packages using the same {@code sharedUserId} in their manifest
- * will be merged into a single UID.
- * </p>
+ * Storage statistics for a UID, package, or {@link UserHandle} on a single
+ * storage volume.
  *
  * @see StorageStatsManager
  */
@@ -40,6 +36,9 @@ public final class StorageStats implements Parcelable {
      * Return the size of all code. This includes {@code APK} files and
      * optimized compiler output.
      * <p>
+     * If the primary external/shared storage is hosted on this storage device,
+     * then this includes files stored under {@link Context#getObbDir()}.
+     * <p>
      * Code is shared between all users on a multiuser device.
      */
     public long getCodeBytes() {
@@ -51,6 +50,12 @@ public final class StorageStats implements Parcelable {
      * {@link Context#getDataDir()}, {@link Context#getCacheDir()},
      * {@link Context#getCodeCacheDir()}.
      * <p>
+     * If the primary external/shared storage is hosted on this storage device,
+     * then this includes files stored under
+     * {@link Context#getExternalFilesDir(String)},
+     * {@link Context#getExternalCacheDir()}, and
+     * {@link Context#getExternalMediaDirs()}.
+     * <p>
      * Data is isolated for each user on a multiuser device.
      */
     public long getDataBytes() {
@@ -60,6 +65,10 @@ public final class StorageStats implements Parcelable {
     /**
      * Return the size of all cached data. This includes files stored under
      * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}.
+     * <p>
+     * If the primary external/shared storage is hosted on this storage device,
+     * then this includes files stored under
+     * {@link Context#getExternalCacheDir()}.
      * <p>
      * Cached data is isolated for each user on a multiuser device.
      */

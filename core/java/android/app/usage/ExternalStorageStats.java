@@ -31,6 +31,7 @@ public final class ExternalStorageStats implements Parcelable {
     /** {@hide} */ public long audioBytes;
     /** {@hide} */ public long videoBytes;
     /** {@hide} */ public long imageBytes;
+    /** {@hide} */ public long appBytes;
 
     /**
      * Return the total bytes used by all files in the shared/external storage
@@ -64,6 +65,17 @@ public final class ExternalStorageStats implements Parcelable {
         return imageBytes;
     }
 
+    /**
+     * Return the total bytes used by app files in the shared/external storage
+     * hosted on this volume.
+     * <p>
+     * This data is already accounted against individual apps as returned
+     * through {@link StorageStats}.
+     */
+    public long getAppBytes() {
+        return appBytes;
+    }
+
     /** {@hide} */
     public ExternalStorageStats() {
     }
@@ -74,6 +86,7 @@ public final class ExternalStorageStats implements Parcelable {
         this.audioBytes = in.readLong();
         this.videoBytes = in.readLong();
         this.imageBytes = in.readLong();
+        this.appBytes = in.readLong();
     }
 
     @Override
@@ -87,6 +100,7 @@ public final class ExternalStorageStats implements Parcelable {
         dest.writeLong(audioBytes);
         dest.writeLong(videoBytes);
         dest.writeLong(imageBytes);
+        dest.writeLong(appBytes);
     }
 
     public static final Creator<ExternalStorageStats> CREATOR = new Creator<ExternalStorageStats>() {

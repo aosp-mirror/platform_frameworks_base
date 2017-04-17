@@ -235,7 +235,14 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             final int appId = UserHandle.getUserId(appInfo.uid);
             final String[] packageNames = new String[] { packageName };
             final long[] ceDataInodes = new long[1];
-            final String[] codePaths = new String[] { appInfo.getCodePath() };
+            String[] codePaths = new String[0];
+
+            if (appInfo.isSystemApp() && !appInfo.isUpdatedSystemApp()) {
+                // We don't count code baked into system image
+            } else {
+                codePaths = ArrayUtils.appendElement(String.class, codePaths,
+                        appInfo.getCodePath());
+            }
 
             final PackageStats stats = new PackageStats(TAG);
             try {
@@ -261,12 +268,18 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
         final String[] packageNames = mPackage.getPackagesForUid(uid);
         final long[] ceDataInodes = new long[packageNames.length];
-        final String[] codePaths = new String[packageNames.length];
+        String[] codePaths = new String[0];
 
         for (int i = 0; i < packageNames.length; i++) {
             try {
-                codePaths[i] = mPackage.getApplicationInfoAsUser(packageNames[i],
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId).getCodePath();
+                final ApplicationInfo appInfo = mPackage.getApplicationInfoAsUser(packageNames[i],
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+                if (appInfo.isSystemApp() && !appInfo.isUpdatedSystemApp()) {
+                    // We don't count code baked into system image
+                } else {
+                    codePaths = ArrayUtils.appendElement(String.class, codePaths,
+                            appInfo.getCodePath());
+                }
             } catch (NameNotFoundException e) {
                 throw new ParcelableException(e);
             }
@@ -297,15 +310,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
         }
 
-        int[] appIds = null;
-        for (ApplicationInfo app : mPackage.getInstalledApplicationsAsUser(
-                PackageManager.MATCH_UNINSTALLED_PACKAGES, userId)) {
-            final int appId = UserHandle.getAppId(app.uid);
-            if (!ArrayUtils.contains(appIds, appId)) {
-                appIds = ArrayUtils.appendInt(appIds, appId);
-            }
-        }
-
+        final int[] appIds = getAppIds(userId);
         final PackageStats stats = new PackageStats(TAG);
         try {
             mInstaller.getUserSize(volumeUuid, userId, getDefaultFlags(), appIds, stats);
@@ -330,12 +335,14 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
         }
 
+        final int[] appIds = getAppIds(userId);
         final long[] stats;
         try {
-            stats = mInstaller.getExternalSize(volumeUuid, userId, getDefaultFlags());
+            stats = mInstaller.getExternalSize(volumeUuid, userId, getDefaultFlags(), appIds);
 
             if (SystemProperties.getBoolean(PROP_VERIFY_STORAGE, false)) {
-                final long[] manualStats = mInstaller.getExternalSize(volumeUuid, userId, 0);
+                final long[] manualStats = mInstaller.getExternalSize(volumeUuid, userId, 0,
+                        appIds);
                 checkEquals("External " + userId, manualStats, stats);
             }
         } catch (InstallerException e) {
@@ -347,7 +354,20 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.audioBytes = stats[1];
         res.videoBytes = stats[2];
         res.imageBytes = stats[3];
+        res.appBytes = stats[4];
         return res;
+    }
+
+    private int[] getAppIds(int userId) {
+        int[] appIds = null;
+        for (ApplicationInfo app : mPackage.getInstalledApplicationsAsUser(
+                PackageManager.MATCH_UNINSTALLED_PACKAGES, userId)) {
+            final int appId = UserHandle.getAppId(app.uid);
+            if (!ArrayUtils.contains(appIds, appId)) {
+                appIds = ArrayUtils.appendInt(appIds, appId);
+            }
+        }
+        return appIds;
     }
 
     private static int getDefaultFlags() {
