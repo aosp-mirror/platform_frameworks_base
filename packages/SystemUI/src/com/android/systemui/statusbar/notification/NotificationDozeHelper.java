@@ -35,8 +35,7 @@ public class NotificationDozeHelper {
         startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                updateGrayscaleMatrix((float) animation.getAnimatedValue());
-                target.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
+                updateGrayscale(target, (float) animation.getAnimatedValue());
             }
         }, dark, delay, new AnimatorListenerAdapter() {
             @Override
@@ -49,8 +48,12 @@ public class NotificationDozeHelper {
     }
 
     public void updateGrayscale(ImageView target, boolean dark) {
-        if (dark) {
-            updateGrayscaleMatrix(1f);
+        updateGrayscale(target, dark ? 1 : 0);
+    }
+
+    public void updateGrayscale(ImageView target, float darkAmount) {
+        if (darkAmount > 0) {
+            updateGrayscaleMatrix(darkAmount);
             target.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
         } else {
             target.setColorFilter(null);
