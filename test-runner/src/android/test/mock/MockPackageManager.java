@@ -1126,4 +1126,12 @@ public class MockPackageManager extends PackageManager {
     public ComponentName getInstantAppResolverSettingsComponent() {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public ComponentName getInstantAppInstallerComponent() {
+        throw new UnsupportedOperationException();
+    }
 }
