@@ -4665,7 +4665,8 @@ public final class ViewRootImpl implements ViewParent,
             if (focused == null && mView.restoreDefaultFocus()) {
                 return true;
             }
-            View cluster = focused.keyboardNavigationClusterSearch(null, direction);
+            View cluster = focused == null ? keyboardNavigationClusterSearch(null, direction)
+                    : focused.keyboardNavigationClusterSearch(null, direction);
 
             // Since requestFocus only takes "real" focus directions (and therefore also
             // restoreFocusInCluster), convert forward/backward focus into FOCUS_DOWN.
