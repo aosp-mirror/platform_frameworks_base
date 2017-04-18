@@ -222,9 +222,10 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManagerInternal;
 import android.widget.ImageView;
-
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -279,6 +280,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP = 2;
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME = 3;
     static final int SHORT_PRESS_POWER_GO_HOME = 4;
+    static final int SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME = 5;
 
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
@@ -407,6 +409,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager mPowerManager;
     ActivityManagerInternal mActivityManagerInternal;
     InputManagerInternal mInputManagerInternal;
+    InputMethodManagerInternal mInputMethodManagerInternal;
     DreamManagerInternal mDreamManagerInternal;
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
@@ -493,6 +496,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Handler mHandler;
     WindowState mLastInputMethodWindow = null;
     WindowState mLastInputMethodTargetWindow = null;
+
+    @GuardedBy("mLock")
+    private boolean mDismissImeOnBackKeyPressed;
 
     // FIXME This state is shared between the input reader and handler thread.
     // Technically it's broken and buggy but it has been like this for many years
@@ -1396,6 +1402,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case SHORT_PRESS_POWER_GO_HOME:
                     launchHomeFromHotKey(true /* awakenFromDreams */, false /*respectKeyguard*/);
                     break;
+                case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME: {
+                    final boolean dismissImeOnBackKeyPressed;
+                    // We can be here on both the main thread (via mHandler) and native callback
+                    // thread (from interceptPowerKeyUp via WindowManagerCallbacks).
+                    synchronized (mLock) {
+                        dismissImeOnBackKeyPressed = mDismissImeOnBackKeyPressed;
+                    }
+                    if (dismissImeOnBackKeyPressed) {
+                        if (mInputMethodManagerInternal == null) {
+                            mInputMethodManagerInternal =
+                                    LocalServices.getService(InputMethodManagerInternal.class);
+                        }
+                        if (mInputMethodManagerInternal != null) {
+                            mInputMethodManagerInternal.hideCurrentInputMethod();
+                        }
+                    } else {
+                        launchHomeFromHotKey(true /* awakenFromDreams */,
+                                false /*respectKeyguard*/);
+                    }
+                    break;
+                }
             }
         }
     }
@@ -7955,6 +7982,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public void setDismissImeOnBackKeyPressed(boolean newValue) {
+        synchronized (mLock) {
+            mDismissImeOnBackKeyPressed = newValue;
+        }
+    }
+
+    @Override
     public int getInputMethodWindowVisibleHeightLw() {
         return mDockBottom - mCurBottom;
     }
@@ -8170,6 +8204,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pw.print(prefix); pw.print("mLastInputMethodTargetWindow=");
                     pw.println(mLastInputMethodTargetWindow);
         }
+        pw.print(prefix); pw.print("mDismissImeOnBackKeyPressed=");
+                pw.println(mDismissImeOnBackKeyPressed);
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar=");
                     pw.print(mStatusBar); pw.print(" isStatusBarKeyguard=");

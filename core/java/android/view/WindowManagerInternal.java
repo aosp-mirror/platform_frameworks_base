@@ -303,13 +303,16 @@ public abstract class WindowManagerInternal {
      *                         hidden, no matter how WindowManagerService will react / has reacted
      *                         to corresponding API calls.  Note that this state is not guaranteed
      *                         to be synchronized with state in WindowManagerService.
+     * @param dismissImeOnBackKeyPressed {@code true} if the software keyboard is shown and the back
+     *                                   key is expected to dismiss the software keyboard.
      * @param targetWindowToken token to identify the target window that the IME is associated with.
      *                          {@code null} when application, system, or the IME itself decided to
      *                          change its window visibility before being associated with any target
      *                          window.
      */
     public abstract void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
-            boolean imeWindowVisible, @Nullable IBinder targetWindowToken);
+            boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed,
+            @Nullable IBinder targetWindowToken);
 
     /**
       * Returns true when the hardware keyboard is available.
