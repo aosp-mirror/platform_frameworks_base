@@ -3960,6 +3960,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "Not allowed to modify non-dynamic permission "
                     + info.name);
         } else {
+            if ((bp.perm == null) || (tree.perm == null)) {
+                Slog.w(TAG, "Base or tree permission is null: " + bp.perm + ", " + tree.perm);
+                return false;
+            }
             if (bp.protectionLevel == fixedLevel
                     && bp.perm.owner.equals(tree.perm.owner)
                     && bp.uid == tree.uid
