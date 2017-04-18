@@ -17,6 +17,6 @@
 
       <corners android:radius="@dimen/borderless_button_radius" />
 
-      <solid android:color="@color/segmented_buttons_background" />
+      <solid android:color="?android:attr/colorPrimaryDark" />
 
 </shape>

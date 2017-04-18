@@ -31,6 +31,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 
+import android.R.style;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
@@ -95,6 +96,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -1344,7 +1346,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
-        mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
+        // Always inflate with a dark theme, since this sits on the scrim.
+        ContextThemeWrapper themedContext = new ContextThemeWrapper(mContext,
+                style.Theme_DeviceDefault);
+        mDismissView = (DismissView) LayoutInflater.from(themedContext).inflate(
                 R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
         mDismissView.setOnButtonClickListener(new View.OnClickListener() {
             @Override
