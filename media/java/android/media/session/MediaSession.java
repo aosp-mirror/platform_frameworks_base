@@ -486,41 +486,6 @@ public final class MediaSession {
     }
 
     /**
-     * Set the repeat mode for this session.
-     * <p>
-     * Note that if this method is not called before, {@link MediaController#getRepeatMode}
-     * will return {@link PlaybackState#REPEAT_MODE_NONE}.
-     *
-     * @param repeatMode The repeat mode. Must be one of the followings:
-     *                   {@link PlaybackState#REPEAT_MODE_NONE},
-     *                   {@link PlaybackState#REPEAT_MODE_ONE},
-     *                   {@link PlaybackState#REPEAT_MODE_ALL}
-     */
-    public void setRepeatMode(@PlaybackState.RepeatMode int repeatMode) {
-        try {
-            mBinder.setRepeatMode(repeatMode);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error in setRepeatMode.", e);
-        }
-    }
-
-    /**
-     * Set the shuffle mode for this session.
-     * <p>
-     * Note that if this method is not called before, {@link MediaController#isShuffleModeEnabled}
-     * will return {@code false}.
-     *
-     * @param enabled {@code true} to enable the shuffle mode, {@code false} to disable.
-     */
-    public void setShuffleModeEnabled(boolean enabled) {
-        try {
-            mBinder.setShuffleModeEnabled(enabled);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error in setShuffleModeEnabled.", e);
-        }
-    }
-
-    /**
      * Set some extras that can be associated with the {@link MediaSession}. No assumptions should
      * be made as to how a {@link MediaController} will handle these extras.
      * Keys should be fully qualified (e.g. com.example.MY_EXTRA) to avoid conflicts.
@@ -637,14 +602,6 @@ public final class MediaSession {
 
     private void dispatchRate(Rating rating) {
         postToCallback(CallbackMessageHandler.MSG_RATE, rating);
-    }
-
-    private void dispatchRepeatMode(int repeatMode) {
-        postToCallback(CallbackMessageHandler.MSG_REPEAT_MODE, repeatMode);
-    }
-
-    private void dispatchShuffleMode(boolean enabled) {
-        postToCallback(CallbackMessageHandler.MSG_SHUFFLE_MODE, enabled);
     }
 
     private void dispatchCustomAction(String action, Bundle args) {
@@ -1013,33 +970,6 @@ public final class MediaSession {
         }
 
         /**
-         * Override to handle the setting of the repeat mode.
-         * <p>
-         * You should call {@link #setRepeatMode} before end of this method in order to notify
-         * the change to the {@link MediaController}, or {@link MediaController#getRepeatMode}
-         * could return an invalid value.
-         *
-         * @param repeatMode The repeat mode which is one of followings:
-         *                   {@link PlaybackState#REPEAT_MODE_NONE},
-         *                   {@link PlaybackState#REPEAT_MODE_ONE},
-         *                   {@link PlaybackState#REPEAT_MODE_ALL}
-         */
-        public void onSetRepeatMode(@PlaybackState.RepeatMode int repeatMode) {
-        }
-
-        /**
-         * Override to handle the setting of the shuffle mode.
-         * <p>
-         * You should call {@link #setShuffleModeEnabled} before the end of this method in order to
-         * notify the change to the {@link MediaController}, or
-         * {@link MediaController#isShuffleModeEnabled} could return an invalid value.
-         *
-         * @param enabled true when the shuffle mode is enabled, false otherwise.
-         */
-        public void onSetShuffleModeEnabled(boolean enabled) {
-        }
-
-        /**
          * Called when a {@link MediaController} wants a {@link PlaybackState.CustomAction} to be
          * performed.
          *
@@ -1221,22 +1151,6 @@ public final class MediaSession {
         }
 
         @Override
-        public void onRepeatMode(int repeatMode) {
-            MediaSession session = mMediaSession.get();
-            if (session != null) {
-                session.dispatchRepeatMode(repeatMode);
-            }
-        }
-
-        @Override
-        public void onShuffleMode(boolean enabled) {
-            MediaSession session = mMediaSession.get();
-            if (session != null) {
-                session.dispatchShuffleMode(enabled);
-            }
-        }
-
-        @Override
         public void onCustomAction(String action, Bundle args) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -1268,7 +1182,7 @@ public final class MediaSession {
      */
     public static final class QueueItem implements Parcelable {
         /**
-         * This id is reserved. No items can be explicitly asigned this id.
+         * This id is reserved. No items can be explicitly assigned this id.
          */
         public static final int UNKNOWN_ID = -1;
 
@@ -1377,11 +1291,9 @@ public final class MediaSession {
         private static final int MSG_REWIND = 17;
         private static final int MSG_SEEK_TO = 18;
         private static final int MSG_RATE = 19;
-        private static final int MSG_REPEAT_MODE = 20;
-        private static final int MSG_SHUFFLE_MODE = 21;
-        private static final int MSG_CUSTOM_ACTION = 22;
-        private static final int MSG_ADJUST_VOLUME = 23;
-        private static final int MSG_SET_VOLUME = 24;
+        private static final int MSG_CUSTOM_ACTION = 20;
+        private static final int MSG_ADJUST_VOLUME = 21;
+        private static final int MSG_SET_VOLUME = 22;
 
         private MediaSession.Callback mCallback;
 
@@ -1469,12 +1381,6 @@ public final class MediaSession {
                     break;
                 case MSG_RATE:
                     mCallback.onSetRating((Rating) msg.obj);
-                    break;
-                case MSG_REPEAT_MODE:
-                    mCallback.onSetRepeatMode((int) msg.obj);
-                    break;
-                case MSG_SHUFFLE_MODE:
-                    mCallback.onSetShuffleModeEnabled((boolean) msg.obj);
                     break;
                 case MSG_CUSTOM_ACTION:
                     mCallback.onCustomAction((String) msg.obj, msg.getData());

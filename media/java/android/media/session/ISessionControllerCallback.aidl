@@ -36,6 +36,4 @@ oneway interface ISessionControllerCallback {
     void onQueueTitleChanged(CharSequence title);
     void onExtrasChanged(in Bundle extras);
     void onVolumeInfoChanged(in ParcelableVolumeInfo info);
-    void onRepeatModeChanged(int repeatMode);
-    void onShuffleModeChanged(boolean shuffleMode);
 }

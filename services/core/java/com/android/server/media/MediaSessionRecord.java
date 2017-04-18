@@ -101,8 +101,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private ParceledListSlice mQueue;
     private CharSequence mQueueTitle;
     private int mRatingType;
-    private int mRepeatMode;
-    private boolean mShuffleModeEnabled;
     // End TransportPerformer fields
 
     // Volume handling fields
@@ -622,47 +620,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
-    private void pushRepeatModeUpdate() {
-        synchronized (mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
-                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
-                try {
-                    holder.mCallback.onRepeatModeChanged(mRepeatMode);
-                } catch (DeadObjectException e) {
-                    mControllerCallbackHolders.remove(i);
-                    logCallbackException("Removed dead callback in pushRepeatModeUpdate",
-                            holder, e);
-                } catch (RemoteException e) {
-                    logCallbackException("unexpected exception in pushRepeatModeUpdate", holder, e);
-                }
-            }
-        }
-    }
-
-    private void pushShuffleModeUpdate() {
-        synchronized (mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
-                ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
-                try {
-                    holder.mCallback.onShuffleModeChanged(mShuffleModeEnabled);
-                } catch (DeadObjectException e) {
-                    mControllerCallbackHolders.remove(i);
-                    logCallbackException("Removed dead callback in pushShuffleModeUpdate",
-                            holder, e);
-                } catch (RemoteException e) {
-                    logCallbackException("unexpected exception in pushShuffleModeUpdate",
-                            holder, e);
-                }
-            }
-        }
-    }
-
     private void pushSessionDestroyed() {
         synchronized (mLock) {
             // This is the only method that may be (and can only be) called
@@ -887,30 +844,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setRepeatMode(int repeatMode) {
-            boolean changed;
-            synchronized (mLock) {
-                changed = mRepeatMode != repeatMode;
-                mRepeatMode = repeatMode;
-            }
-            if (changed) {
-                mHandler.post(MessageHandler.MSG_UPDATE_REPEAT_MODE);
-            }
-        }
-
-        @Override
-        public void setShuffleModeEnabled(boolean enabled) {
-            boolean changed;
-            synchronized (mLock) {
-                changed = mShuffleModeEnabled != enabled;
-                mShuffleModeEnabled = enabled;
-            }
-            if (changed) {
-                mHandler.post(MessageHandler.MSG_UPDATE_SHUFFLE_MODE);
-            }
-        }
-
-        @Override
         public void setCurrentVolume(int volume) {
             mCurrentVolume = volume;
             mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
@@ -1123,22 +1056,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mCb.onRate(rating);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rate.", e);
-            }
-        }
-
-        public void repeatMode(int repeatMode) {
-            try {
-                mCb.onRepeatMode(repeatMode);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in repeatMode.", e);
-            }
-        }
-
-        public void shuffleMode(boolean enabled) {
-            try {
-                mCb.onShuffleMode(enabled);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in shuffleMode.", e);
             }
         }
 
@@ -1378,24 +1295,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void repeatMode(int repeatMode) {
-            updateCallingPackage();
-            mSessionCb.repeatMode(repeatMode);
-        }
-
-        @Override
-        public void shuffleMode(boolean enabled) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.shuffleMode(enabled);
-        }
-
-
-        @Override
         public void sendCustomAction(String action, Bundle args)
                 throws RemoteException {
             updateCallingPackage();
             mSessionCb.sendCustomAction(action, args);
         }
+
 
         @Override
         public MediaMetadata getMetadata() {
@@ -1434,16 +1339,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public int getRepeatMode() {
-            return mRepeatMode;
-        }
-
-        @Override
-        public boolean isShuffleModeEnabled() {
-            return mShuffleModeEnabled;
-        }
-
-        @Override
         public boolean isTransportControlEnabled() {
             return MediaSessionRecord.this.isTransportControlEnabled();
         }
@@ -1468,9 +1363,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         private static final int MSG_SEND_EVENT = 6;
         private static final int MSG_UPDATE_SESSION_STATE = 7;
         private static final int MSG_UPDATE_VOLUME = 8;
-        private static final int MSG_UPDATE_REPEAT_MODE = 9;
-        private static final int MSG_UPDATE_SHUFFLE_MODE = 10;
-        private static final int MSG_DESTROYED = 11;
+        private static final int MSG_DESTROYED = 9;
 
         public MessageHandler(Looper looper) {
             super(looper);
@@ -1501,12 +1394,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     break;
                 case MSG_UPDATE_VOLUME:
                     pushVolumeUpdate();
-                    break;
-                case MSG_UPDATE_REPEAT_MODE:
-                    pushRepeatModeUpdate();
-                    break;
-                case MSG_UPDATE_SHUFFLE_MODE:
-                    pushShuffleModeUpdate();
                     break;
                 case MSG_DESTROYED:
                     pushSessionDestroyed();
