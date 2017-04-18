@@ -5926,8 +5926,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                             }
                         });
                         a.start();
-                        guts.setExposed(true /* exposed */,
-                                mState == StatusBarState.KEYGUARD /* needsFalsingProtection */);
+                        final boolean needsFalsingProtection =
+                                (mState == StatusBarState.KEYGUARD &&
+                                !mAccessibilityManager.isTouchExplorationEnabled());
+                        guts.setExposed(true /* exposed */, needsFalsingProtection);
                         row.closeRemoteInput();
                         mStackScroller.onHeightChanged(row, true /* needsAnimation */);
                         mNotificationGutsExposed = guts;
