@@ -48,6 +48,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
 
@@ -445,10 +446,23 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
         final Configuration overrideConfig = getOverrideConfiguration();
-        mWindowContainerController = new TaskWindowContainerController(taskId, this,
+        setWindowContainerController(new TaskWindowContainerController(taskId, this,
                 getStack().getWindowContainerController(), userId, bounds, overrideConfig,
                 mResizeMode, mSupportsPictureInPicture, isHomeTask(), onTop, showForAllUsers,
-                lastTaskDescription);
+                lastTaskDescription));
+    }
+
+    /**
+     * Should only be invoked from {@link #createWindowContainer(boolean, boolean)}.
+     */
+    @VisibleForTesting
+    protected void setWindowContainerController(TaskWindowContainerController controller) {
+        if (mWindowContainerController != null) {
+            throw new IllegalArgumentException("Window container=" + mWindowContainerController
+                    + " already created for task=" + this);
+        }
+
+        mWindowContainerController = controller;
     }
 
     void removeWindowContainer() {

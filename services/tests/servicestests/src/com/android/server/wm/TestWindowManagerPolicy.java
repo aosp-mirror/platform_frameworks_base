@@ -90,6 +90,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
                     return null;
                 }).when(am).notifyKeyguardFlagsChanged(any());
             }
+
             sWm = WindowManagerService.main(context, mock(InputManagerService.class), true, false,
                     false, new TestWindowManagerPolicy());
         }

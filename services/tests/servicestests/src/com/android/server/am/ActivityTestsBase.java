@@ -17,6 +17,11 @@
 package com.android.server.am;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+
+import org.mockito.invocation.InvocationOnMock;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -33,6 +38,7 @@ import com.android.server.AttributeCache;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.StackWindowController;
 
+import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowTestUtils;
 import org.junit.After;
@@ -64,16 +70,15 @@ public class ActivityTestsBase {
 
     protected ActivityManagerService createActivityManagerService() {
         final ActivityManagerService service = new TestActivityManagerService(mContext);
-        service.mWindowManager = WindowTestUtils.getWindowManagerService(mContext);
+        service.mWindowManager = WindowTestUtils.getMockWindowManagerService();
         return service;
     }
 
-    protected static TestActivityStack createActivityStack(ActivityManagerService service,
+    protected static ActivityStack createActivityStack(ActivityManagerService service,
             int stackId, int displayId, boolean onTop) {
         if (service.mStackSupervisor instanceof TestActivityStackSupervisor) {
-            final TestActivityStack stack = ((TestActivityStackSupervisor) service.mStackSupervisor)
+            return ((TestActivityStackSupervisor) service.mStackSupervisor)
                     .createTestStack(service, stackId, onTop);
-            return stack;
         }
 
         return null;
@@ -103,7 +108,7 @@ public class ActivityTestsBase {
     }
 
     protected static TaskRecord createTask(ActivityManagerService service,
-            ComponentName component, ActivityStack stack) {
+            ComponentName component, int stackId) {
         final ActivityInfo aInfo = new ActivityInfo();
         aInfo.applicationInfo = new ApplicationInfo();
         aInfo.applicationInfo.packageName = component.getPackageName();
@@ -113,12 +118,15 @@ public class ActivityTestsBase {
 
         final TaskRecord task = new TaskRecord(service, 0, aInfo, intent /*intent*/,
                 null /*_taskDescription*/, new ActivityManager.TaskThumbnailInfo());
+        final ActivityStack stack = service.mStackSupervisor.getStack(stackId,
+                true /*createStaticStackIfNeeded*/, true /*onTop*/);
         stack.addTask(task, true, "creating test task");
         task.setStack(stack);
-        task.createWindowContainer(true, true);
+        task.setWindowContainerController(mock(TaskWindowContainerController.class));
 
         return task;
     }
+
 
     /**
      * An {@link ActivityManagerService} subclass which provides a test
@@ -127,6 +135,9 @@ public class ActivityTestsBase {
     protected static class TestActivityManagerService extends ActivityManagerService {
         public TestActivityManagerService(Context context) {
             super(context);
+            mSupportsMultiWindow = true;
+            mSupportsMultiDisplay = true;
+            mWindowManager = WindowTestUtils.getWindowManagerService(context);
         }
 
         @Override
@@ -142,6 +153,12 @@ public class ActivityTestsBase {
     protected static class TestActivityStackSupervisor extends ActivityStackSupervisor {
         public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
             super(service, looper);
+            mWindowManager = prepareMockWindowManager();
+        }
+
+        // No home stack is set.
+        @Override
+        void moveHomeStackToFront(String reason) {
         }
 
         // Invoked during {@link ActivityStack} creation.
@@ -149,18 +166,45 @@ public class ActivityTestsBase {
         void updateUIDsPresentOnDisplay() {
         }
 
-        public TestActivityStack createTestStack(ActivityManagerService service, int stackId,
-                boolean onTop) {
+        // Just return the current front task.
+        @Override
+        ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus) {
+            return mFocusedStack;
+        }
+
+        // Called when moving activity to pinned stack.
+        @Override
+        void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+                boolean preserveWindows) {
+        }
+
+        public <T extends ActivityStack> T createTestStack(ActivityManagerService service,
+                int stackId, boolean onTop) {
             final ActivityDisplay display = new ActivityDisplay();
             final TestActivityContainer container =
                     new TestActivityContainer(service, stackId, display, onTop);
-            return container.getStack();
+            mActivityContainers.put(stackId, container);
+            return (T) container.getStack();
+        }
+
+        @Override
+        protected <T extends ActivityStack> T getStack(int stackId,
+                boolean createStaticStackIfNeeded, boolean createOnTop) {
+            final T stack = super.getStack(stackId, createStaticStackIfNeeded, createOnTop);
+
+            if (stack != null || !createStaticStackIfNeeded) {
+                return stack;
+            }
+
+            return createTestStack(mService, stackId, createOnTop);
         }
 
         private class TestActivityContainer extends ActivityContainer {
-            private ActivityManagerService mService;
-            private TestActivityStack mStack;
+            private final ActivityManagerService mService;
+
             private boolean mOnTop;
+            private int mStackId;
+            private ActivityStack mStack;
 
             TestActivityContainer(ActivityManagerService service, int stackId,
                     ActivityDisplay activityDisplay, boolean onTop) {
@@ -174,17 +218,39 @@ public class ActivityTestsBase {
                 // we cannot set {@link mService} by the time the super constructor calling this
                 // method is invoked.
                 mOnTop = onTop;
+                mStackId = stackId;
             }
 
-            public TestActivityStack getStack() {
+            public ActivityStack getStack() {
                 if (mStack == null) {
-                    mStack = new TestActivityStack(this,
-                            new RecentTasks(mService, mService.mStackSupervisor), mOnTop);
+                    final RecentTasks recents =
+                            new RecentTasks(mService, mService.mStackSupervisor);
+                    mStack = mStackId == ActivityManager.StackId.PINNED_STACK_ID
+                    ? new PinnedActivityStack(this, recents, mOnTop)
+                    : new TestActivityStack(this, recents, mOnTop);
                 }
 
                 return mStack;
             }
         }
+    }
+
+    private static WindowManagerService prepareMockWindowManager() {
+        final WindowManagerService service = mock(WindowManagerService.class);
+
+        doAnswer((InvocationOnMock invocationOnMock) -> {
+            final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);
+            if (runnable != null) {
+                runnable.run();
+            }
+            return null;
+        }).when(service).inSurfaceTransaction(any());
+
+        return service;
+    }
+
+    protected interface ActivityStackReporter {
+        int onActivityRemovedFromStackInvocationCount();
     }
 
     /**
@@ -193,7 +259,7 @@ public class ActivityTestsBase {
      * construction arguments.
      */
     protected static class TestActivityStack<T extends StackWindowController>
-            extends ActivityStack<T> {
+            extends ActivityStack<T> implements ActivityStackReporter {
         private int mOnActivityRemovedFromStackCount = 0;
         private T mContainerController;
         TestActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer,
@@ -208,6 +274,7 @@ public class ActivityTestsBase {
         }
 
         // Returns the number of times {@link #onActivityRemovedFromStack} has been called
+        @Override
         public int onActivityRemovedFromStackInvocationCount() {
             return mOnActivityRemovedFromStackCount;
         }
@@ -224,6 +291,7 @@ public class ActivityTestsBase {
             return mContainerController;
         }
     }
+
 
     protected static class ActivityStackBuilder {
         private boolean mOnTop = true;
@@ -251,7 +319,7 @@ public class ActivityTestsBase {
             return this;
         }
 
-        public TestActivityStack build() {
+        public ActivityStack build() {
             return createActivityStack(mService, mStackId, mDisplayId, mOnTop);
         }
     }
