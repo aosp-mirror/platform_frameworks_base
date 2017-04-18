@@ -70,6 +70,7 @@ class WebViewZygoteInit {
         @Override
         protected boolean handlePreloadPackage(String packagePath, String libsPath,
                                                String cacheKey) {
+            Log.i(TAG, "Beginning package preload");
             // Ask ApplicationLoaders to create and cache a classloader for the WebView APK so that
             // our children will reuse the same classloader instead of creating their own.
             // This enables us to preload Java and native code in the webview zygote process and
@@ -97,6 +98,7 @@ class WebViewZygoteInit {
                      IllegalAccessException | InvocationTargetException e) {
                 Log.e(TAG, "Exception while preloading package", e);
             }
+            Log.i(TAG, "Package preload done");
             return false;
         }
     }
