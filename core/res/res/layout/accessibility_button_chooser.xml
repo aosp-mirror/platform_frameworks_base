@@ -19,7 +19,7 @@
 <com.android.internal.widget.ResolverDrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:maxWidth="@dimen/resolver_max_width"
     android:maxCollapsedHeight="256dp"
     android:maxCollapsedHeightSmall="56dp"
@@ -27,11 +27,14 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alwaysShow="true"
         android:orientation="vertical"
         android:background="?attr/colorBackground"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:paddingBottom="8dp"
+        android:paddingStart="?attr/dialogPreferredPadding"
+        android:paddingEnd="?attr/dialogPreferredPadding">
 
         <TextView
             android:layout_width="match_parent"
@@ -41,8 +44,6 @@
             android:text="@string/accessibility_button_prompt_text"
             android:gravity="start|center_vertical"
             android:layout_alignParentStart="true"
-            android:paddingStart="?attr/dialogPreferredPadding"
-            android:paddingEnd="?attr/dialogPreferredPadding"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"/>
 
@@ -55,20 +56,15 @@
             android:verticalSpacing="10dp"
             android:horizontalSpacing="10dp"
             android:stretchMode="columnWidth"
-            android:paddingStart="?attr/dialogPreferredPadding"
-            android:paddingEnd="?attr/dialogPreferredPadding"
             android:gravity="center"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/accessibility_button_prompt"
-            android:layout_alwaysShow="true"
             android:textAppearance="?attr/textAppearanceMedium"
             android:text="@string/accessibility_button_instructional_text"
             android:gravity="start|center_vertical"
-            android:paddingStart="?attr/dialogPreferredPadding"
-            android:paddingEnd="?attr/dialogPreferredPadding"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:visibility="gone"/>
