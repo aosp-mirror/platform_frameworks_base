@@ -49,6 +49,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.BinderThread;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2146,6 +2147,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
     }
 
+    @BinderThread
     @SuppressWarnings("deprecation")
     @Override
     public void setImeWindowStatus(IBinder token, IBinder startInputToken, int vis,
@@ -2161,9 +2163,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mBackDisposition = backDisposition;
             updateSystemUiLocked(token, vis, backDisposition);
         }
+
+        final boolean dismissImeOnBackKeyPressed;
+        switch (backDisposition) {
+            case InputMethodService.BACK_DISPOSITION_WILL_DISMISS:
+                dismissImeOnBackKeyPressed = true;
+                break;
+            case InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS:
+                dismissImeOnBackKeyPressed = false;
+                break;
+            default:
+            case InputMethodService.BACK_DISPOSITION_DEFAULT:
+                dismissImeOnBackKeyPressed = ((vis & InputMethodService.IME_VISIBLE) != 0);
+                break;
+        }
         mWindowManagerInternal.updateInputMethodWindowStatus(token,
                 (vis & InputMethodService.IME_VISIBLE) != 0,
-                info != null ? info.mTargetWindow : null);
+                dismissImeOnBackKeyPressed, info != null ? info.mTargetWindow : null);
     }
 
     private void updateSystemUi(IBinder token, int vis, int backDisposition) {
