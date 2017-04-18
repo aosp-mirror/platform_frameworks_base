@@ -929,11 +929,8 @@ public class AudioService extends IAudioService.Stub
         synchronized (VolumeStreamState.class) {
             int numStreamTypes = AudioSystem.getNumStreamTypes();
             for (int streamType = 0; streamType < numStreamTypes; streamType++) {
-                if (streamType != mStreamVolumeAlias[streamType]) {
-                    mStreamStates[streamType].
-                                    setAllIndexes(mStreamStates[mStreamVolumeAlias[streamType]],
-                                            TAG);
-                }
+                mStreamStates[streamType]
+                        .setAllIndexes(mStreamStates[mStreamVolumeAlias[streamType]], TAG);
                 // apply stream volume
                 if (!mStreamStates[streamType].mIsMuted) {
                     mStreamStates[streamType].applyAllVolumes();
@@ -1022,20 +1019,21 @@ public class AudioService extends IAudioService.Stub
         }
 
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
-        final int oldStreamA11yAlias = mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY];
-        if (oldStreamA11yAlias != a11yStreamAlias) {
-            mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY] = a11yStreamAlias;
-            mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].mVolumeIndexSettingName =
-                    System.VOLUME_SETTINGS_INT[a11yStreamAlias];
-            // restore the value from the settings when the alias changes
-            mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].readSettings();
-        }
+        mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY] = a11yStreamAlias;
 
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias],
                     caller);
+
+            mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].mVolumeIndexSettingName =
+                    System.VOLUME_SETTINGS_INT[a11yStreamAlias];
             mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].setAllIndexes(
                     mStreamStates[a11yStreamAlias], caller);
+            if (sIndependentA11yVolume) {
+                // restore the a11y values from the settings
+                mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].readSettings();
+            }
+
             // apply stream mute states according to new value of mRingerModeAffectedStreams
             setRingerModeInt(getRingerModeInternal(), false);
             sendMsg(mAudioHandler,
@@ -4228,7 +4226,17 @@ public class AudioService extends IAudioService.Stub
             return mIndexMin;
         }
 
+        /**
+         * Copies all device/index pairs from the given VolumeStreamState after initializing
+         * them with the volume for DEVICE_OUT_DEFAULT. No-op if the source VolumeStreamState
+         * has the same stream type as this instance.
+         * @param srcStream
+         * @param caller
+         */
         public void setAllIndexes(VolumeStreamState srcStream, String caller) {
+            if (mStreamType == srcStream.mStreamType) {
+                return;
+            }
             synchronized (VolumeStreamState.class) {
                 int srcStreamType = srcStream.getStreamType();
                 // apply default device volume from source stream to all devices first in case
