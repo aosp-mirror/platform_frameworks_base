@@ -857,13 +857,16 @@ public class UsbDeviceManager {
                     break;
                 case MSG_UPDATE_HOST_STATE:
                     SomeArgs args = (SomeArgs) msg.obj;
+                    boolean prevHostConnected = mHostConnected;
                     mHostConnected = (args.argi1 == 1);
                     mSourcePower = (args.argi2 == 1);
                     mSinkPower = (args.argi3 == 1);
                     args.recycle();
                     updateUsbNotification();
                     if (mBootCompleted) {
-                        updateUsbStateBroadcastIfNeeded(false);
+                        if (mHostConnected || prevHostConnected) {
+                            updateUsbStateBroadcastIfNeeded(false);
+                        }
                     } else {
                         mPendingBootBroadcast = true;
                     }
