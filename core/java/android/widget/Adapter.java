@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.Nullable;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
@@ -146,4 +147,22 @@ public interface Adapter {
       * adapters might want a different behavior.
       */
      boolean isEmpty();
+
+    /**
+     * Gets a string representation of the adapter data that can help
+     * {@link android.service.autofill.AutofillService} autofill the view backed by the adapter.
+     *
+     * <p>
+     * It should only be set (i.e., non-{@code null} if the values do not represent PII
+     * (Personally Identifiable Information - sensitive data such as email addresses,
+     * credit card numbers, passwords, etc...). For
+     * example, it's ok to return a list of month names, but not a list of usernames. A good rule of
+     * thumb is that if the adapter data comes from static resources, such data is not PII - see
+     * {@link android.view.ViewStructure#setDataIsSensitive(boolean)} for more info.
+     *
+     * @return {@code null} by default, unless implementations override it.
+     */
+    default @Nullable CharSequence[] getAutofillOptions() {
+        return null;
+    }
 }

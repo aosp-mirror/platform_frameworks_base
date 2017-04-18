@@ -314,7 +314,7 @@ public abstract class ViewStructure {
      * <p>Typically used by nodes whose {@link View#getAutofillType()} is a list to indicate the
      * meaning of each possible value in the list.
      */
-    public abstract void setAutofillOptions(String[] options);
+    public abstract void setAutofillOptions(CharSequence[] options);
 
     /**
      * Sets the {@link android.text.InputType} bits of this node.
@@ -326,8 +326,8 @@ public abstract class ViewStructure {
     /**
      * Sets whether the data on this node is sensitive; if it is, then its content (text, autofill
      * value, etc..) is striped before calls to {@link
-     * android.service.autofill.AutofillService#onFillRequest(android.app.assist.AssistStructure,
-     * Bundle, int, android.os.CancellationSignal, android.service.autofill.FillCallback)}.
+     * android.service.autofill.AutofillService#onFillRequest(android.service.autofill.FillRequest,
+     * android.os.CancellationSignal, android.service.autofill.FillCallback)}.
      *
      * <p>By default, all nodes are assumed to be sensitive, and only nodes that does not have PII
      * (Personally Identifiable Information - sensitive data such as email addresses, credit card
@@ -336,8 +336,8 @@ public abstract class ViewStructure {
      *
      * <p>Notice that the content of even sensitive nodes are sent to the service (through the
      * {@link
-     * android.service.autofill.AutofillService#onSaveRequest(android.app.assist.AssistStructure,
-     * Bundle, android.service.autofill.SaveCallback)} call) when the user consented to save
+     * android.service.autofill.AutofillService#onSaveRequest(android.service.autofill.SaveRequest,
+     * android.service.autofill.SaveCallback)} call) when the user consented to save
      * thedata, so it is important to set the content of sensitive nodes as well, but mark them as
      * sensitive.
      *
