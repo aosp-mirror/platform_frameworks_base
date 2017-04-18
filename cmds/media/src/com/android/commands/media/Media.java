@@ -228,16 +228,6 @@ public class Media extends BaseCommand {
             System.out.println("onVolumeInfoChanged " + info);
         }
 
-        @Override
-        public void onRepeatModeChanged(int repeatMode) throws RemoteException {
-            System.out.println("onRepeatModeChanged " + repeatMode);
-        }
-
-        @Override
-        public void onShuffleModeChanged(boolean enabled) throws RemoteException {
-            System.out.println("onShuffleModeChanged " + enabled);
-        }
-
         void printUsageMessage() {
             try {
                 System.out.println("V2Monitoring session " + mController.getTag()
