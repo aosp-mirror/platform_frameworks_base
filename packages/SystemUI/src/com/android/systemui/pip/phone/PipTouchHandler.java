@@ -78,6 +78,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final PipDismissViewController mDismissViewController;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final AccessibilityManager mAccessibilityManager;
+    private boolean mShowPipMenuOnAnimationEnd = false;
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
@@ -221,13 +222,18 @@ public class PipTouchHandler implements TunerService.Tunable {
             setMinimizedStateInternal(false);
         }
         mDismissViewController.destroyDismissTarget();
-        mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),
-                mMovementBounds, true /* allowMenuTimeout */);
+        mShowPipMenuOnAnimationEnd = true;
     }
 
     public void onPinnedStackAnimationEnded() {
         // Always synchronize the motion helper bounds once PiP animations finish
         mMotionHelper.synchronizePinnedStackBounds();
+
+        if (mShowPipMenuOnAnimationEnd) {
+            mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),
+                    mMovementBounds, true /* allowMenuTimeout */);
+            mShowPipMenuOnAnimationEnd = false;
+        }
     }
 
     @Override
