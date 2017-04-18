@@ -26,7 +26,6 @@ import android.content.ContentProvider;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -34,6 +33,8 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
+
+import com.android.server.job.GrantedUriPermissions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -103,7 +104,7 @@ public final class JobStatus {
 
     final String tag;
 
-    private IBinder permissionOwner;
+    private GrantedUriPermissions uriPerms;
     private boolean prepared;
 
     /**
@@ -284,12 +285,17 @@ public final class JobStatus {
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
     }
 
-    public void enqueueWorkLocked(JobWorkItem work) {
+    public void enqueueWorkLocked(IActivityManager am, JobWorkItem work) {
         if (pendingWork == null) {
             pendingWork = new ArrayList<>();
         }
         work.setWorkId(nextPendingWorkId);
         nextPendingWorkId++;
+        if (work.getIntent() != null
+                && GrantedUriPermissions.checkGrantFlags(work.getIntent().getFlags())) {
+            work.setGrants(GrantedUriPermissions.createFromIntent(am, work.getIntent(), sourceUid,
+                    sourcePackageName, sourceUserId, toShortString()));
+        }
         pendingWork.add(work);
     }
 
@@ -311,12 +317,20 @@ public final class JobStatus {
         return executingWork != null && executingWork.size() > 0;
     }
 
-    public boolean completeWorkLocked(int workId) {
+    private static void ungrantWorkItem(IActivityManager am, JobWorkItem work) {
+        if (work.getGrants() != null) {
+            ((GrantedUriPermissions)work.getGrants()).revoke(am);
+        }
+    }
+
+    public boolean completeWorkLocked(IActivityManager am, int workId) {
         if (executingWork != null) {
             final int N = executingWork.size();
             for (int i = 0; i < N; i++) {
-                if (executingWork.get(i).getWorkId() == workId) {
+                JobWorkItem work = executingWork.get(i);
+                if (work.getWorkId() == workId) {
                     executingWork.remove(i);
+                    ungrantWorkItem(am, work);
                     return true;
                 }
             }
@@ -324,7 +338,16 @@ public final class JobStatus {
         return false;
     }
 
-    public void stopTrackingJobLocked(JobStatus incomingJob) {
+    private static void ungrantWorkList(IActivityManager am, ArrayList<JobWorkItem> list) {
+        if (list != null) {
+            final int N = list.size();
+            for (int i = 0; i < N; i++) {
+                ungrantWorkItem(am, list.get(i));
+            }
+        }
+    }
+
+    public void stopTrackingJobLocked(IActivityManager am, JobStatus incomingJob) {
         if (incomingJob != null) {
             // We are replacing with a new job -- transfer the work!  We do any executing
             // work first, since that was originally at the front of the pending work.
@@ -341,7 +364,10 @@ public final class JobStatus {
             incomingJob.nextPendingWorkId = nextPendingWorkId;
         } else {
             // We are completely stopping the job...  need to clean up work.
-            // XXX remove perms when that is impl.
+            ungrantWorkList(am, pendingWork);
+            pendingWork = null;
+            ungrantWorkList(am, executingWork);
+            executingWork = null;
         }
     }
 
@@ -353,10 +379,8 @@ public final class JobStatus {
         prepared = true;
         final ClipData clip = job.getClipData();
         if (clip != null) {
-            final int N = clip.getItemCount();
-            for (int i = 0; i < N; i++) {
-                grantItemLocked(am, clip.getItemAt(i), sourceUid, sourcePackageName, sourceUserId);
-            }
+            uriPerms = GrantedUriPermissions.createFromClip(am, clip, sourceUid, sourcePackageName,
+                    sourceUserId, job.getClipGrantFlags(), toShortString());
         }
     }
 
@@ -366,70 +390,14 @@ public final class JobStatus {
             return;
         }
         prepared = false;
-        if (permissionOwner != null) {
-            final ClipData clip = job.getClipData();
-            if (clip != null) {
-                final int N = clip.getItemCount();
-                for (int i = 0; i < N; i++) {
-                    revokeItemLocked(am, clip.getItemAt(i));
-                }
-            }
+        if (uriPerms != null) {
+            uriPerms.revoke(am);
+            uriPerms = null;
         }
     }
 
     public boolean isPreparedLocked() {
         return prepared;
-    }
-
-    private final void grantUriLocked(IActivityManager am, Uri uri, int sourceUid,
-            String targetPackage, int targetUserId) {
-        try {
-            int sourceUserId = ContentProvider.getUserIdFromUri(uri,
-                    UserHandle.getUserId(sourceUid));
-            uri = ContentProvider.getUriWithoutUserId(uri);
-            if (permissionOwner == null) {
-                permissionOwner = am.newUriPermissionOwner("job: " + toShortString());
-            }
-            am.grantUriPermissionFromOwner(permissionOwner, sourceUid, targetPackage,
-                    uri, job.getClipGrantFlags(), sourceUserId, targetUserId);
-        } catch (RemoteException e) {
-            Slog.e("JobScheduler", "AM dead");
-        }
-    }
-
-    private final void grantItemLocked(IActivityManager am, ClipData.Item item, int sourceUid,
-            String targetPackage, int targetUserId) {
-        if (item.getUri() != null) {
-            grantUriLocked(am, item.getUri(), sourceUid, targetPackage, targetUserId);
-        }
-        Intent intent = item.getIntent();
-        if (intent != null && intent.getData() != null) {
-            grantUriLocked(am, intent.getData(), sourceUid, targetPackage, targetUserId);
-        }
-    }
-
-    private final void revokeUriLocked(IActivityManager am, Uri uri) {
-        int userId = ContentProvider.getUserIdFromUri(uri,
-                UserHandle.getUserId(Binder.getCallingUid()));
-        long ident = Binder.clearCallingIdentity();
-        try {
-            uri = ContentProvider.getUriWithoutUserId(uri);
-            am.revokeUriPermissionFromOwner(permissionOwner, uri,
-                    job.getClipGrantFlags(), userId);
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    private final void revokeItemLocked(IActivityManager am, ClipData.Item item) {
-        if (item.getUri() != null) {
-            revokeUriLocked(am, item.getUri());
-        }
-        Intent intent = item.getIntent();
-        if (intent != null && intent.getData() != null) {
-            revokeUriLocked(am, intent.getData());
-        }
     }
 
     public JobInfo getJob() {
@@ -842,6 +810,15 @@ public final class JobStatus {
         }
     }
 
+    private void dumpJobWorkItem(PrintWriter pw, String prefix, JobWorkItem work, int index) {
+        pw.print(prefix); pw.print("  #"); pw.print(index); pw.print(": #");
+        pw.print(work.getWorkId()); pw.print(" "); pw.println(work.getIntent());
+        if (work.getGrants() != null) {
+            pw.print(prefix); pw.println("  URI grants:");
+            ((GrantedUriPermissions)work.getGrants()).dump(pw, prefix + "    ");
+        }
+    }
+
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix, boolean full) {
         pw.print(prefix); UserHandle.formatUid(pw, callingUid);
@@ -907,6 +884,10 @@ public final class JobStatus {
                 job.getClipData().toShortString(b);
                 pw.println(b);
             }
+            if (uriPerms != null) {
+                pw.print(prefix); pw.println("  Granted URI permissions:");
+                uriPerms.dump(pw, prefix + "  ");
+            }
             if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
                 pw.print(prefix); pw.print("  Network type: "); pw.println(job.getNetworkType());
             }
@@ -959,17 +940,13 @@ public final class JobStatus {
         if (pendingWork != null && pendingWork.size() > 0) {
             pw.print(prefix); pw.println("Pending work:");
             for (int i = 0; i < pendingWork.size(); i++) {
-                JobWorkItem work = pendingWork.get(i);
-                pw.print(prefix); pw.print("  #"); pw.print(i); pw.print(": #");
-                pw.print(work.getWorkId()); pw.print(" "); pw.println(work.getIntent());
+                dumpJobWorkItem(pw, prefix, pendingWork.get(i), i);
             }
         }
         if (executingWork != null && executingWork.size() > 0) {
             pw.print(prefix); pw.println("Executing work:");
             for (int i = 0; i < executingWork.size(); i++) {
-                JobWorkItem work = executingWork.get(i);
-                pw.print(prefix); pw.print("  #"); pw.print(i); pw.print(": #");
-                pw.print(work.getWorkId()); pw.print(" "); pw.println(work.getIntent());
+                dumpJobWorkItem(pw, prefix, executingWork.get(i), i);
             }
         }
         pw.print(prefix); pw.print("Earliest run time: ");

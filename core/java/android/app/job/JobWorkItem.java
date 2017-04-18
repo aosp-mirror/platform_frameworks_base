@@ -27,6 +27,7 @@ import android.os.Parcelable;
 final public class JobWorkItem implements Parcelable {
     final Intent mIntent;
     int mWorkId;
+    Object mGrants;
 
     /**
      * Create a new piece of work.
@@ -55,6 +56,20 @@ final public class JobWorkItem implements Parcelable {
      */
     public int getWorkId() {
         return mWorkId;
+    }
+
+    /**
+     * @hide
+     */
+    public void setGrants(Object grants) {
+        mGrants = grants;
+    }
+
+    /**
+     * @hide
+     */
+    public Object getGrants() {
+        return mGrants;
     }
 
     public String toString() {
