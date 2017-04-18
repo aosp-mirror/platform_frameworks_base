@@ -1155,40 +1155,4 @@ public class NotificationManager
         }
     }
 
-    /**
-     * Start a service directly into the "foreground service" state.  Unlike
-     * {@link android.content.Context#startService(Intent)}, this method
-     * can be used from within background operations like broadcast receivers
-     * or scheduled jobs.
-     *
-     * @param service Description of the service to be started.  The Intent must be either
-     *      fully explicit (supplying a component name) or specify a specific package
-     *      name it is targeted to.
-     * @param id The identifier for this notification as per
-     *      {@link #notify(int, Notification) NotificationManager.notify(int, Notification)};
-     *      must not be 0.
-     * @param notification The Notification to be displayed.
-     * @return If the service is being started or is already running, the
-     *      {@link ComponentName} of the actual service that was started is
-     *      returned; else if the service does not exist null is returned.
-     *
-     * @deprecated STOPSHIP transition away from this for O
-     */
-    @Nullable
-    @Deprecated
-    public ComponentName startServiceInForeground(Intent service,
-            int id, Notification notification) {
-        return mContext.startServiceInForeground(service, id, notification);
-    }
-
-    /**
-     * @hide like {@link #startServiceInForeground(Intent, int, Notification)}
-     * but for a specific user.
-     */
-    @Nullable
-    public ComponentName startServiceInForegroundAsUser(Intent service,
-            int id, Notification notification, UserHandle user) {
-        return mContext.startServiceInForegroundAsUser(service, id, notification, user);
-    }
-
 }
