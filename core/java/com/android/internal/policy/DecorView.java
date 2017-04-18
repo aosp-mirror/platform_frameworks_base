@@ -82,6 +82,7 @@ import android.widget.PopupWindow;
 
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -2182,18 +2183,21 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final boolean wasAdjustedForStack = mElevationAdjustedForStack;
         // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)
         // since the shadow is bound to the content size and not the target size.
-        if (StackId.hasWindowShadow(mStackId) && !isResizing()) {
+        if ((mStackId == FREEFORM_WORKSPACE_STACK_ID) && !isResizing()) {
             elevation = hasWindowFocus() ?
                     DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
             // Add a maximum shadow height value to the top level view.
             // Note that pinned stack doesn't have focus
             // so maximum shadow height adjustment isn't needed.
             // TODO(skuhne): Remove this if clause once b/22668382 got fixed.
-            if (!mAllowUpdateElevation && mStackId != PINNED_STACK_ID) {
+            if (!mAllowUpdateElevation) {
                 elevation = DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
             }
             // Convert the DP elevation into physical pixels.
             elevation = dipToPx(elevation);
+            mElevationAdjustedForStack = true;
+        } else if (mStackId == PINNED_STACK_ID) {
+            elevation = dipToPx(DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP);
             mElevationAdjustedForStack = true;
         } else {
             mElevationAdjustedForStack = false;
