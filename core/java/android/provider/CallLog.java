@@ -333,6 +333,13 @@ public class CallLog {
         public static final String TRANSCRIPTION = "transcription";
 
         /**
+         * State of voicemail transcription entry. This will only be populated for call log
+         * entries of type {@link #VOICEMAIL_TYPE}.
+         * @hide
+         */
+        public static final String TRANSCRIPTION_STATE = "transcription_state";
+
+        /**
          * Whether this item has been read or otherwise consumed by the user.
          * <p>
          * Unlike the {@link #NEW} field, which requires the user to have acknowledged the
