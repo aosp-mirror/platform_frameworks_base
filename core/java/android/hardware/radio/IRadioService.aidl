@@ -24,5 +24,5 @@ import android.hardware.radio.ITuner;
  * {@hide}
  */
 interface IRadioService {
-    ITuner openTuner();
+    ITuner openTuner(boolean withAudio);
 }

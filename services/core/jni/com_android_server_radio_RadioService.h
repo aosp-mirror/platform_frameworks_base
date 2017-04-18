@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package android.hardware.radio;
+#ifndef _ANDROID_SERVER_RADIO_RADIOSERVICE_H
+#define _ANDROID_SERVER_RADIO_RADIOSERVICE_H
 
-import android.hardware.radio.RadioManager;
+#include "jni.h"
 
-/** {@hide} */
-interface ITuner {
-    void close();
+namespace android {
 
-    int getProgramInformation(out RadioManager.ProgramInfo[] infoOut);
-}
+void register_android_server_radio_RadioService(JNIEnv *env);
+
+} // namespace android
+
+#endif // _ANDROID_SERVER_RADIO_RADIOSERVICE_H
