@@ -3229,8 +3229,12 @@ public class NotificationManagerService extends SystemService {
 
     private void doDebugOnlyToast(CharSequence toastText) {
         if (Build.IS_DEBUGGABLE) {
-            Toast toast = Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG);
-            toast.show();
+            try {
+                Toast toast = Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG);
+                toast.show();
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Unable to toast with text: " + toastText, e);
+            }
         }
     }
 
