@@ -18,6 +18,7 @@ package android.media.session;
 import android.content.ComponentName;
 import android.media.IRemoteVolumeController;
 import android.media.session.IActiveSessionsListener;
+import android.media.session.ICallback;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.os.Bundle;
@@ -41,4 +42,6 @@ interface ISessionManager {
 
     // For PhoneWindowManager to precheck media keys
     boolean isGlobalPriorityActive();
+
+    void setCallback(in ICallback callback);
 }
