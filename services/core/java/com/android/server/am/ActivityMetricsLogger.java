@@ -314,7 +314,8 @@ class ActivityMetricsLogger {
             builder.setPackageName(info.launchedActivity.packageName);
             builder.setType(type);
             builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivity.info.name);
-            if (info.launchedActivity.launchedFromPackage != null) {
+            final boolean isInstantApp = info.launchedActivity.info.applicationInfo.isInstantApp();
+            if (isInstantApp && info.launchedActivity.launchedFromPackage != null) {
                 builder.addTaggedData(APP_TRANSITION_CALLING_PACKAGE_NAME,
                         info.launchedActivity.launchedFromPackage);
             }
@@ -323,8 +324,7 @@ class ActivityMetricsLogger {
                         info.launchedActivity.info.launchToken);
                 info.launchedActivity.info.launchToken = null;
             }
-            builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL,
-                    info.launchedActivity.info.applicationInfo.isInstantApp() ? 1 : 0);
+            builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL, isInstantApp ? 1 : 0);
             builder.addTaggedData(APP_TRANSITION_DEVICE_UPTIME_SECONDS,
                     mCurrentTransitionDeviceUptime);
             builder.addTaggedData(APP_TRANSITION_DELAY_MS, mCurrentTransitionDelayMs);
