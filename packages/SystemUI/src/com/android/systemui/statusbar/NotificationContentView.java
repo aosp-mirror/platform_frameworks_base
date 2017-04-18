@@ -428,6 +428,9 @@ public class NotificationContentView extends FrameLayout {
             mAmbientChild.animate().cancel();
             removeView(mAmbientChild);
         }
+        if (child == null) {
+            return;
+        }
         addView(child);
         mAmbientChild = child;
         mAmbientWrapper = NotificationViewWrapper.wrap(getContext(), child,

@@ -1115,6 +1115,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mNotificationInflater.setInflateExceptionHandler(inflateExceptionHandler);
     }
 
+    public void setNeedsRedaction(boolean needsRedaction) {
+        mNotificationInflater.setRedactAmbient(needsRedaction);
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }

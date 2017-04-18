@@ -4202,9 +4202,22 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews makePublicContentView() {
+            return makePublicView(false /* ambient */);
+        }
+
+        /**
+         * Construct a RemoteViews for the display in public contexts like on the lockscreen.
+         *
+         * @hide
+         */
+        public RemoteViews makePublicAmbientNotification() {
+            return makePublicView(true /* ambient */);
+        }
+
+        private RemoteViews makePublicView(boolean ambient) {
             if (mN.publicVersion != null) {
                 final Builder builder = recoverBuilder(mContext, mN.publicVersion);
-                return builder.createContentView();
+                return ambient ? builder.makeAmbientNotification() : builder.createContentView();
             }
             Bundle savedBundle = mN.extras;
             Style style = mStyle;
@@ -4221,14 +4234,15 @@ public class Notification implements Parcelable
             publicExtras.putBoolean(EXTRA_CHRONOMETER_COUNT_DOWN,
                     savedBundle.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN));
             publicExtras.putCharSequence(EXTRA_TITLE,
-                    mContext.getString(R.string.notification_hidden_text));
+                    mContext.getString(com.android.internal.R.string.notification_hidden_text));
             mN.extras = publicExtras;
-            final RemoteViews publicView = applyStandardTemplate(getBaseLayoutResource());
+            final RemoteViews view = ambient ? makeAmbientNotification()
+                    : applyStandardTemplate(getBaseLayoutResource());
             mN.extras = savedBundle;
             mN.mLargeIcon = largeIcon;
             mN.largeIcon = largeIconLegacy;
             mStyle = style;
-            return publicView;
+            return view;
         }
 
         /**
