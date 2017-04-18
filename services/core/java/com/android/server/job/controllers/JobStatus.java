@@ -326,9 +326,18 @@ public final class JobStatus {
 
     public void stopTrackingJobLocked(JobStatus incomingJob) {
         if (incomingJob != null) {
-            // We are replacing with a new job -- transfer the work!
-            incomingJob.pendingWork = pendingWork;
+            // We are replacing with a new job -- transfer the work!  We do any executing
+            // work first, since that was originally at the front of the pending work.
+            if (executingWork != null && executingWork.size() > 0) {
+                incomingJob.pendingWork = executingWork;
+            }
+            if (incomingJob.pendingWork == null) {
+                incomingJob.pendingWork = pendingWork;
+            } else if (pendingWork != null && pendingWork.size() > 0) {
+                incomingJob.pendingWork.addAll(pendingWork);
+            }
             pendingWork = null;
+            executingWork = null;
             incomingJob.nextPendingWorkId = nextPendingWorkId;
         } else {
             // We are completely stopping the job...  need to clean up work.

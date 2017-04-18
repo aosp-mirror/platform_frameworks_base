@@ -1071,9 +1071,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.d(TAG, "Completed " + jobStatus + ", reschedule=" + needsReschedule);
         }
+
+        // If the job wants to be rescheduled, we first need to make the next upcoming
+        // job so we can transfer any appropriate state over from the previous job when
+        // we stop it.
+        final JobStatus rescheduledJob = needsReschedule
+                ? getRescheduleJobForFailureLocked(jobStatus) : null;
+
         // Do not write back immediately if this is a periodic job. The job may get lost if system
         // shuts down before it is added back.
-        if (!stopTrackingJobLocked(jobStatus, null, !jobStatus.getJob().isPeriodic())) {
+        if (!stopTrackingJobLocked(jobStatus, rescheduledJob, !jobStatus.getJob().isPeriodic())) {
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
@@ -1082,18 +1089,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
             mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
             return;
         }
-        // Note: there is a small window of time in here where, when rescheduling a job,
-        // we will stop monitoring its content providers.  This should be fixed by stopping
-        // the old job after scheduling the new one, but since we have no lock held here
-        // that may cause ordering problems if the app removes jobStatus while in here.
-        if (needsReschedule) {
-            JobStatus rescheduled = getRescheduleJobForFailureLocked(jobStatus);
+
+        if (rescheduledJob != null) {
             try {
-                rescheduled.prepareLocked(ActivityManager.getService());
+                rescheduledJob.prepareLocked(ActivityManager.getService());
             } catch (SecurityException e) {
-                Slog.w(TAG, "Unable to regrant job permissions for " + rescheduled);
+                Slog.w(TAG, "Unable to regrant job permissions for " + rescheduledJob);
             }
-            startTrackingJobLocked(rescheduled, jobStatus);
+            startTrackingJobLocked(rescheduledJob, jobStatus);
         } else if (jobStatus.getJob().isPeriodic()) {
             JobStatus rescheduledPeriodic = getRescheduleJobForPeriodic(jobStatus);
             try {
