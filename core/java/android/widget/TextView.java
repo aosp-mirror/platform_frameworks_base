@@ -8196,9 +8196,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTempTextPaint.set(getPaint());
         mTempTextPaint.setTextSize(suggestedSizeInPx);
 
+        final int availableWidth = mHorizontallyScrolling
+                ? VERY_WIDE
+                : getMeasuredWidth() - getTotalPaddingLeft() - getTotalPaddingRight();
         final StaticLayout.Builder layoutBuilder = StaticLayout.Builder.obtain(
-                text, 0, text.length(),  mTempTextPaint,
-                getMeasuredWidth() - getTotalPaddingLeft() - getTotalPaddingRight());
+                text, 0, text.length(),  mTempTextPaint, availableWidth);
 
         layoutBuilder.setAlignment(getLayoutAlignment())
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
