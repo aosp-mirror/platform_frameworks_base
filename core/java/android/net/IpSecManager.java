@@ -245,6 +245,7 @@ public final class IpSecManager {
      *
      * @param socket a stream socket
      * @param transform an {@link IpSecTransform}, which must be an active Transport Mode transform.
+     * @hide
      */
     public void applyTransportModeTransform(Socket socket, IpSecTransform transform)
             throws IOException {
@@ -262,6 +263,7 @@ public final class IpSecManager {
      *
      * @param socket a datagram socket
      * @param transform an {@link IpSecTransform}, which must be an active Transport Mode transform.
+     * @hide
      */
     public void applyTransportModeTransform(DatagramSocket socket, IpSecTransform transform)
             throws IOException {
@@ -284,7 +286,7 @@ public final class IpSecManager {
      * address associated with that transform will throw an IOException. In addition, if the
      * IpSecTransform is later deactivated, the socket will throw an IOException on any calls to
      * send() or receive() until the transform is removed from the socket by calling {@link
-     * #removeTransportModeTransform(Socket, IpSecTransform)};
+     * #removeTransportModeTransform(FileDescriptor, IpSecTransform)};
      *
      * @param socket a socket file descriptor
      * @param transform an {@link IpSecTransform}, which must be an active Transport Mode transform.
@@ -316,6 +318,7 @@ public final class IpSecManager {
      *
      * @param socket a socket that previously had a transform applied to it.
      * @param transform the IPsec Transform that was previously applied to the given socket
+     * @hide
      */
     public void removeTransportModeTransform(Socket socket, IpSecTransform transform)
             throws IOException {
@@ -331,6 +334,7 @@ public final class IpSecManager {
      *
      * @param socket a socket that previously had a transform applied to it.
      * @param transform the IPsec Transform that was previously applied to the given socket
+     * @hide
      */
     public void removeTransportModeTransform(DatagramSocket socket, IpSecTransform transform)
             throws IOException {
