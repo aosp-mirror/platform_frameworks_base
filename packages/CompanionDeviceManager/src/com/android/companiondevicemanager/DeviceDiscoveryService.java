@@ -314,8 +314,8 @@ public class DeviceDiscoveryService extends Service {
     }
 
     class DevicesAdapter extends ArrayAdapter<DeviceFilterPair> {
-        //TODO wifi icon
         private Drawable BLUETOOTH_ICON = icon(android.R.drawable.stat_sys_data_bluetooth);
+        private Drawable WIFI_ICON = icon(com.android.internal.R.drawable.ic_wifi_signal_3);
 
         private Drawable icon(int drawableRes) {
             Drawable icon = getResources().getDrawable(drawableRes, null);
@@ -345,6 +345,11 @@ public class DeviceDiscoveryService extends Service {
                     device.equals(mSelectedDevice)
                             ? Color.GRAY
                             : Color.TRANSPARENT);
+            textView.setCompoundDrawablesWithIntrinsicBounds(
+                    device.device instanceof android.net.wifi.ScanResult
+                        ? WIFI_ICON
+                        : BLUETOOTH_ICON,
+                    null, null, null);
             textView.setOnClickListener((view) -> {
                 mSelectedDevice = device;
                 notifyDataSetChanged();
@@ -357,8 +362,6 @@ public class DeviceDiscoveryService extends Service {
             textView.setTextColor(Color.BLACK);
             final int padding = DeviceChooserActivity.getPadding(getResources());
             textView.setPadding(padding, padding, padding, padding);
-            textView.setCompoundDrawablesWithIntrinsicBounds(
-                    BLUETOOTH_ICON, null, null, null);
             textView.setCompoundDrawablePadding(padding);
             return textView;
         }
