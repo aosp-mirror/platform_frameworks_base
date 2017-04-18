@@ -48,6 +48,13 @@ public class WindowTestUtils {
     }
 
     /**
+     * Retrieves an instance of a mock {@link WindowManagerService}.
+     */
+    public static WindowManagerService getMockWindowManagerService() {
+        return mock(WindowManagerService.class);
+    }
+
+    /**
      * Creates a mock instance of {@link StackWindowController}.
      */
     public static StackWindowController createMockStackWindowContainerController() {
