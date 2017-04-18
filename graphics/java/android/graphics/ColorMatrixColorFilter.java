@@ -73,6 +73,8 @@ public class ColorMatrixColorFilter extends ColorFilter {
      * @see #getColorMatrix(ColorMatrix)
      * @see #setColorMatrixArray(float[])
      * @see ColorMatrix#reset()
+     *
+     * @hide
      */
     public void setColorMatrix(@Nullable ColorMatrix matrix) {
         discardNativeInstance();
@@ -99,6 +101,8 @@ public class ColorMatrixColorFilter extends ColorFilter {
      *
      * @throws ArrayIndexOutOfBoundsException if the specified array's
      *         length is < 20
+     *
+     * @hide
      */
     public void setColorMatrixArray(@Nullable float[] array) {
         // called '...Array' so that passing null isn't ambiguous
