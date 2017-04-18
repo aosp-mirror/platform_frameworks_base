@@ -964,6 +964,16 @@ public class AssistStructure implements Parcelable {
          *
          * @return The hints for this view
          */
+        @Nullable public String[] getAutofillHints() {
+            return mAutofillHints;
+        }
+
+        /**
+         * @hide
+         * @deprecated use getAutofillHints() instead.
+         */
+        // TODO(b/33197203): remove once clients don't use it anymore...
+        @Deprecated
         @Nullable public String[] getAutoFillHints() {
             return mAutofillHints;
         }
