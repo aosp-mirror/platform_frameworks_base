@@ -916,17 +916,20 @@ public final class Bitmap implements Parcelable {
      * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
      *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
-     * @param colorSpace The color space of the bitmap. If null or if the config is not
-     *                   {@link Config#ARGB_8888}, {@link ColorSpace.Named#SRGB sRGB} is assumed.
+     * @param colorSpace The color space of the bitmap. If the config is {@link Config#RGBA_F16},
+     *                   {@link ColorSpace.Named#EXTENDED_SRGB scRGB} is assumed, and if the
+     *                   config is not {@link Config#ARGB_8888}, {@link ColorSpace.Named#SRGB sRGB}
+     *                   is assumed.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, if
      *         Config is Config.HARDWARE (because hardware bitmaps are always
      *         immutable), if the specified color space is not {@link ColorSpace.Model#RGB RGB},
-     *         or if the specified color space's transfer function is not an
-     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
+     *         if the specified color space's transfer function is not an
+     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}, or if
+     *         the color space is null
      */
     public static Bitmap createBitmap(int width, int height, @NonNull Config config,
-            boolean hasAlpha, @Nullable ColorSpace colorSpace) {
+            boolean hasAlpha, @NonNull ColorSpace colorSpace) {
         return createBitmap(null, width, height, config, hasAlpha, colorSpace);
     }
 
@@ -950,7 +953,8 @@ public final class Bitmap implements Parcelable {
      */
     public static Bitmap createBitmap(@Nullable DisplayMetrics display, int width, int height,
             @NonNull Config config, boolean hasAlpha) {
-        return createBitmap(display, width, height, config, hasAlpha, null);
+        return createBitmap(display, width, height, config, hasAlpha,
+                ColorSpace.get(ColorSpace.Named.SRGB));
     }
 
     /**
@@ -967,26 +971,32 @@ public final class Bitmap implements Parcelable {
      * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
      *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
-     * @param colorSpace The color space of the bitmap. If null or if the config is not
-     *                   {@link Config#ARGB_8888}, {@link ColorSpace.Named#SRGB sRGB} is assumed.
+     * @param colorSpace The color space of the bitmap. If the config is {@link Config#RGBA_F16},
+     *                   {@link ColorSpace.Named#EXTENDED_SRGB scRGB} is assumed, and if the
+     *                   config is not {@link Config#ARGB_8888}, {@link ColorSpace.Named#SRGB sRGB}
+     *                   is assumed.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, if
      *         Config is Config.HARDWARE (because hardware bitmaps are always
      *         immutable), if the specified color space is not {@link ColorSpace.Model#RGB RGB},
-     *         or if the specified color space's transfer function is not an
-     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
+     *         if the specified color space's transfer function is not an
+     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}, or if
+     *         the color space is null
      */
     public static Bitmap createBitmap(@Nullable DisplayMetrics display, int width, int height,
-            @NonNull Config config, boolean hasAlpha, @Nullable ColorSpace colorSpace) {
+            @NonNull Config config, boolean hasAlpha, @NonNull ColorSpace colorSpace) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("width and height must be > 0");
         }
         if (config == Config.HARDWARE) {
             throw new IllegalArgumentException("can't create mutable bitmap with Config.HARDWARE");
         }
+        if (colorSpace == null) {
+            throw new IllegalArgumentException("can't create bitmap without a color space");
+        }
 
         Bitmap bm;
-        if (colorSpace == null || config != Config.ARGB_8888) {
+        if (config != Config.ARGB_8888) {
             bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true, null, null);
         } else {
             if (!(colorSpace instanceof ColorSpace.Rgb)) {
