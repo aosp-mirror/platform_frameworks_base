@@ -144,8 +144,6 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
         return CopyResult::UnknownError;
     }
 
-    SkAutoLockPixels alp(*bitmap);
-
     GLuint texture;
 
     GLenum format;

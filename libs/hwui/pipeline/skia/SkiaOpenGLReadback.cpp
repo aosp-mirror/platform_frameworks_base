@@ -63,8 +63,6 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     CopyResult copyResult = CopyResult::UnknownError;
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), textureDescription));
     if (image) {
-        SkAutoLockPixels alp(*bitmap);
-
         // convert to Skia data structures
         const SkRect bufferRect = SkRect::MakeIWH(imgWidth, imgHeight);
         SkRect skiaSrcRect = srcRect.toSkRect();

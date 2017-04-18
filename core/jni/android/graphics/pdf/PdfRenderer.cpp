@@ -83,8 +83,6 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
     SkBitmap skBitmap;
     GraphicsJNI::getSkBitmap(env, jbitmap, &skBitmap);
 
-    SkAutoLockPixels alp(skBitmap);
-
     const int stride = skBitmap.width() * 4;
 
     FPDF_BITMAP bitmap = FPDFBitmap_CreateEx(skBitmap.width(), skBitmap.height(),

@@ -89,7 +89,6 @@ TEST(SkiaCanvas, colorSpaceXform) {
     sk_sp<Bitmap> adobeBitmap = Bitmap::allocateHeapBitmap(adobeInfo);
     SkBitmap adobeSkBitmap;
     adobeBitmap->getSkBitmap(&adobeSkBitmap);
-    adobeSkBitmap.lockPixels();
     *adobeSkBitmap.getAddr32(0, 0) = 0xFF0000F0; // Opaque, almost fully-red
 
     SkImageInfo info = adobeInfo.makeColorSpace(nullptr);
@@ -101,7 +100,6 @@ TEST(SkiaCanvas, colorSpaceXform) {
     SkiaCanvas canvas(skBitmap);
     canvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     // The result should be fully red, since we convert to sRGB at draw time.
-    skBitmap.lockPixels();
     ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
 
     // Create a software canvas with an Adobe color space.
@@ -116,7 +114,6 @@ TEST(SkiaCanvas, colorSpaceXform) {
     SkiaCanvas deferCanvas(&skCanvas, Canvas::XformToSRGB::kDefer);
     deferCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     // The result should be as before, since we deferred the conversion to sRGB.
-    skBitmap.lockPixels();
     ASSERT_EQ(0xFF0000DC, *skBitmap.getAddr32(0, 0));
 
     // Test picture recording.  We will kDefer the xform at recording time, but handle it when

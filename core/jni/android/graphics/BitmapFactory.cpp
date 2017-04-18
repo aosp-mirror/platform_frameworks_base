@@ -197,10 +197,6 @@ public:
 
         mBitmap->reconfigure(info, bitmap->rowBytes(), sk_ref_sp(ctable));
         bitmap->setPixelRef(sk_ref_sp(mBitmap), 0, 0);
-
-        // since we're already allocated, we lockPixels right away
-        // HeapAllocator behaves this way too
-        bitmap->lockPixels();
         return true;
     }
 
