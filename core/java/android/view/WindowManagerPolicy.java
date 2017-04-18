@@ -1537,6 +1537,18 @@ public interface WindowManagerPolicy {
     public void setLastInputMethodWindowLw(WindowState ime, WindowState target);
 
     /**
+     * An internal callback (from InputMethodManagerService) to notify a state change regarding
+     * whether the back key should dismiss the software keyboard (IME) or not.
+     *
+     * @param newValue {@code true} if the software keyboard is shown and the back key is expected
+     *                 to dismiss the software keyboard.
+     * @hide
+     */
+    default void setDismissImeOnBackKeyPressed(boolean newValue) {
+        // Default implementation does nothing.
+    }
+
+    /**
      * Show the recents task list app.
      * @hide
      */
