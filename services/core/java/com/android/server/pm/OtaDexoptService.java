@@ -274,23 +274,56 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         // Intercept and collect dexopt requests
         final List<String> commands = new ArrayList<String>();
         final Installer collectingInstaller = new Installer(mContext, true) {
+            /**
+             * Encode the dexopt command into a string.
+             *
+             * Note: If you have to change the signature of this function, increase the version
+             *       number, and update the counterpart in
+             *       frameworks/native/cmds/installd/otapreopt.cpp.
+             */
             @Override
             public void dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
                     @Nullable String sharedLibraries, @Nullable String seInfo) throws InstallerException {
-                commands.add(buildCommand("dexopt",
-                        apkPath,
-                        uid,
-                        pkgName,
-                        instructionSet,
-                        dexoptNeeded,
-                        outputPath,
-                        dexFlags,
-                        compilerFilter,
-                        volumeUuid,
-                        sharedLibraries,
-                        seInfo));
+                final StringBuilder builder = new StringBuilder();
+
+                // The version. Right now it's 2.
+                builder.append("2 ");
+
+                builder.append("dexopt");
+
+                encodeParameter(builder, apkPath);
+                encodeParameter(builder, uid);
+                encodeParameter(builder, pkgName);
+                encodeParameter(builder, instructionSet);
+                encodeParameter(builder, dexoptNeeded);
+                encodeParameter(builder, outputPath);
+                encodeParameter(builder, dexFlags);
+                encodeParameter(builder, compilerFilter);
+                encodeParameter(builder, volumeUuid);
+                encodeParameter(builder, sharedLibraries);
+                encodeParameter(builder, seInfo);
+
+                commands.add(builder.toString());
+            }
+
+            /**
+             * Encode a parameter as necessary for the commands string.
+             */
+            private void encodeParameter(StringBuilder builder, Object arg) {
+                builder.append(' ');
+
+                if (arg == null) {
+                    builder.append('!');
+                }
+
+                String txt = String.valueOf(arg);
+                if (txt.indexOf('\0') != -1 || txt.indexOf(' ') != -1 || "!".equals(txt)) {
+                    throw new IllegalArgumentException(
+                            "Invalid argument while executing " + arg);
+                }
+                builder.append(txt);
             }
         };
 
@@ -429,29 +462,5 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 Context context) {
             super(installer, installLock, context, "*otadexopt*");
         }
-    }
-
-    /**
-     * Cook up argument list in the format that {@code installd} expects.
-     */
-    private static String buildCommand(Object... args) {
-        final StringBuilder builder = new StringBuilder();
-        for (Object arg : args) {
-            String escaped;
-            if (arg == null) {
-                escaped = "";
-            } else {
-                escaped = String.valueOf(arg);
-            }
-            if (escaped.indexOf('\0') != -1 || escaped.indexOf(' ') != -1 || "!".equals(escaped)) {
-                throw new IllegalArgumentException(
-                        "Invalid argument while executing " + Arrays.toString(args));
-            }
-            if (TextUtils.isEmpty(escaped)) {
-                escaped = "!";
-            }
-            builder.append(' ').append(escaped);
-        }
-        return builder.toString();
     }
 }
