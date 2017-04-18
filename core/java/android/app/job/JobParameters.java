@@ -164,6 +164,20 @@ public class JobParameters implements Parcelable {
      * you should not call {@link JobService#jobFinished(JobParameters, boolean)} yourself
      * (otherwise you risk losing an upcoming JobWorkItem that is being enqueued at the same time).
      *
+     * <p>Once you are done with the {@link JobWorkItem} returned by this method, you must call
+     * {@link #completeWork(JobWorkItem)} with it to inform the system that you are done
+     * executing the work.  The job will not be finished until all dequeued work has been
+     * completed.  You do not, however, have to complete each returned work item before deqeueing
+     * the next one -- you can use {@link #dequeueWork()} multiple times before completing
+     * previous work if you want to process work in parallel, and you can complete the work
+     * in whatever order you want.</p>
+     *
+     * <p>If the job runs to the end of its available time period before all work has been
+     * completed, it will stop as normal.  You should return true from
+     * {@link JobService#onStopJob(JobParameters)} in order to have the job rescheduled, and by
+     * doing so any pending as well as remaining uncompleted work will be re-queued
+     * for the next time the job runs.</p>
+     *
      * @return Returns a new {@link JobWorkItem} if there is one pending, otherwise null.
      * If null is returned, the system will also stop the job if all work has also been completed.
      * (This means that for correct operation, you must always call dequeueWork() after you have
