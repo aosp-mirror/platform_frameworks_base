@@ -95,6 +95,18 @@ public final class PhoneAccount implements Parcelable {
     public static final String EXTRA_SUPPORTS_HANDOVER_FROM =
             "android.telecom.extra.SUPPORTS_HANDOVER_FROM";
 
+
+    /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
+     * indicates whether a Self-Managed {@link PhoneAccount} should log its calls to the call log.
+     * <p>
+     * By default, Self-Managed {@link PhoneAccount}s do not log their calls to the call log.
+     * Setting this extra to {@code true} provides a means for them to log their calls.
+     * @hide
+     */
+    public static final String EXTRA_LOG_SELF_MANAGED_CALLS =
+            "android.telecom.extra.LOG_SELF_MANAGED_CALLS";
+
     /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}

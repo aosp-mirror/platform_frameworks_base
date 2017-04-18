@@ -344,14 +344,33 @@ public class TelecomManager {
             "android.telecom.extra.NEW_OUTGOING_CALL_CANCEL_TIMEOUT";
 
     /**
-     * Boolean extra specified when calling {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)}
-     * to indicate to Telecom that the purpose of adding a new incoming call is to handover an
+     * Boolean extra specified to indicate that the intention of adding a call is to handover an
      * existing call from the user's device to a different {@link PhoneAccount}.
+     * <p>
+     * Used when calling {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)}
+     * to indicate to Telecom that the purpose of adding a new incoming call is to handover an
+     * existing call from the user's device to a different {@link PhoneAccount}.  This occurs on
+     * the receiving side of a handover.
+     * <p>
+     * Used when Telecom calls
+     * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * to indicate that the purpose of Telecom requesting a new outgoing connection it to request
+     * a handover to this {@link ConnectionService} from an ongoing call on the user's device.  This
+     * occurs on the initiating side of a handover.
      * <p>
      * The phone number of the call used by Telecom to determine which call should be handed over.
      * @hide
      */
     public static final String EXTRA_IS_HANDOVER = "android.telecom.extra.IS_HANDOVER";
+
+    /**
+     * Extra key specified in the {@link ConnectionRequest#getExtras()} when Telecom calls
+     * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * to inform the {@link ConnectionService} what the initial {@link CallAudioState} of the
+     * {@link Connection} will be.
+     * @hide
+     */
+    public static final String EXTRA_CALL_AUDIO_STATE = "android.telecom.extra.CALL_AUDIO_STATE";
 
     /**
      * A boolean extra, which when set on the {@link Intent#ACTION_CALL} intent or on the bundle
