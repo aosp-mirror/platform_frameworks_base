@@ -2564,6 +2564,10 @@ public class ActivityManager {
      * <p><b>Note: this method is only intended for debugging or implementing
      * service management type user interfaces.</b></p>
      *
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#O}, this method
+     * is no longer available to third party applications.  For backwards compatibility,
+     * it will still return the caller's own services.
+     *
      * @param maxNum The maximum number of entries to return in the list.  The
      * actual number returned may be smaller, depending on how many services
      * are running.
@@ -2571,6 +2575,7 @@ public class ActivityManager {
      * @return Returns a list of RunningServiceInfo records describing each of
      * the running tasks.
      */
+    @Deprecated
     public List<RunningServiceInfo> getRunningServices(int maxNum)
             throws SecurityException {
         try {
