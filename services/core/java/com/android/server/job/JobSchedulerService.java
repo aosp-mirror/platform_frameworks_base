@@ -601,7 +601,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 // Fast path: we are adding work to an existing job, and the JobInfo is not
                 // changing.  We can just directly enqueue this work in to the job.
                 if (toCancel.getJob().equals(job)) {
-                    toCancel.enqueueWorkLocked(work);
+                    toCancel.enqueueWorkLocked(ActivityManager.getService(), work);
                     return JobScheduler.RESULT_SUCCESS;
                 }
             }
@@ -625,7 +625,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
             if (work != null) {
                 // If work has been supplied, enqueue it into the new job.
-                jobStatus.enqueueWorkLocked(work);
+                jobStatus.enqueueWorkLocked(ActivityManager.getService(), work);
             }
             startTrackingJobLocked(jobStatus, toCancel);
             mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
@@ -758,7 +758,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     final JobStatus executing = jsc.getRunningJob();
                     if (executing != null
                             && (executing.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0) {
-                        jsc.cancelExecutingJob(JobParameters.REASON_DEVICE_IDLE);
+                        jsc.cancelExecutingJobLocked(JobParameters.REASON_DEVICE_IDLE);
                     }
                 }
             } else {
@@ -921,7 +921,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     private boolean stopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean writeBack) {
         // Deal with any remaining work items in the old job.
-        jobStatus.stopTrackingJobLocked(incomingJob);
+        jobStatus.stopTrackingJobLocked(ActivityManager.getService(), incomingJob);
 
         // Remove from store as well as controllers.
         final boolean removed = mJobs.remove(jobStatus, writeBack);
@@ -939,7 +939,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus executing = jsc.getRunningJob();
             if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
-                jsc.cancelExecutingJob(reason);
+                jsc.cancelExecutingJobLocked(reason);
                 return true;
             }
         }
@@ -1564,7 +1564,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         Slog.d(TAG, "preempting job: " + mActiveServices.get(i).getRunningJob());
                     }
                     // preferredUid will be set to uid of currently running job.
-                    mActiveServices.get(i).preemptExecutingJob();
+                    mActiveServices.get(i).preemptExecutingJobLocked();
                     preservePreferredUid = true;
                 } else {
                     final JobStatus pendingJob = contextIdToJobMap[i];
