@@ -152,6 +152,8 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             mAwaitingAnimationStart = false;
             mAnimationStarted = true;
             mSchedulePipModeChangedOnStart = schedulePipModeChangedCallback;
+
+            mController.onAllWindowsDrawn();
         }
 
         @Override

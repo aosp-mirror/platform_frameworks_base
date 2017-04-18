@@ -1280,6 +1280,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // WindowStateAnimator#commitFinishDrawingLocked() will call performShowLocked().
                 dc.setLayoutNeeded();
                 mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
+
+                final TaskStack s = getStack();
+                if (s != null) {
+                    s.onAllWindowsDrawn();
+                }
             }
         }
 
