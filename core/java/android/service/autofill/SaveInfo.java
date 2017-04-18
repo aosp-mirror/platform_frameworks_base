@@ -153,13 +153,27 @@ public final class SaveInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @interface SaveDataType{}
 
+    /**
+     * Usually {@link AutofillService#onSaveRequest(AssistStructure, Bundle, SaveCallback)}
+     * is called once the activity finishes. If this flag is set it is called once all saved views
+     * become invisible.
+     */
+    public static final int FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE = 0x1;
+
+    /** @hide */
+    @IntDef(
+            flag = true,
+            value = {FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface SaveInfoFlags{}
+
     private final @SaveDataType int mType;
     private final CharSequence mNegativeActionTitle;
     private final IntentSender mNegativeActionListener;
     private final AutofillId[] mRequiredIds;
     private final AutofillId[] mOptionalIds;
     private final CharSequence mDescription;
-    private final boolean mSaveOnAllViewsInvisible;
+    private final int mFlags;
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
@@ -168,7 +182,7 @@ public final class SaveInfo implements Parcelable {
         mRequiredIds = builder.mRequiredIds;
         mOptionalIds = builder.mOptionalIds;
         mDescription = builder.mDescription;
-        mSaveOnAllViewsInvisible = builder.mSaveOnAllViewsInvisible;
+        mFlags = builder.mFlags;
     }
 
     /** @hide */
@@ -197,8 +211,8 @@ public final class SaveInfo implements Parcelable {
     }
 
     /** @hide */
-    public boolean saveOnAllViewsInvisible() {
-        return mSaveOnAllViewsInvisible;
+    public @SaveInfoFlags int getFlags() {
+        return mFlags;
     }
 
     /** @hide */
@@ -219,7 +233,7 @@ public final class SaveInfo implements Parcelable {
         private AutofillId[] mOptionalIds;
         private CharSequence mDescription;
         private boolean mDestroyed;
-        private boolean mSaveOnAllViewsInvisible;
+        private int mFlags;
 
         /**
          * Creates a new builder.
@@ -268,17 +282,15 @@ public final class SaveInfo implements Parcelable {
         }
 
         /**
-         * Usually {@link AutofillService#onSaveRequest(AssistStructure, Bundle, SaveCallback)}
-         * is called once the activity finishes. If this property is set it is called once all
-         * autofillable or saved views become invisible.
+         * Set flags changing the save behavior.
          *
-         * @param saveOnAllViewsInvisible Set to {@code true} if the data should be saved once
-         *                                all the views become invisible.
+         * @param flags {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} or 0.
          * @return This builder.
          */
-        public @NonNull Builder setSaveOnAllViewsInvisible(boolean saveOnAllViewsInvisible) {
+        public @NonNull Builder setFlags(@SaveInfoFlags int flags) {
             throwIfDestroyed();
-            mSaveOnAllViewsInvisible = saveOnAllViewsInvisible;
+
+            mFlags = Preconditions.checkFlagsArgument(flags, FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE);
             return this;
         }
 
@@ -378,7 +390,7 @@ public final class SaveInfo implements Parcelable {
                 .append(", requiredIds=").append(Arrays.toString(mRequiredIds))
                 .append(", optionalIds=").append(Arrays.toString(mOptionalIds))
                 .append(", description=").append(mDescription)
-                .append(", saveOnNoVisibleTrackedViews=").append(mSaveOnAllViewsInvisible)
+                .append(", mFlags=").append(mFlags)
                 .append("]").toString();
     }
 
@@ -399,7 +411,7 @@ public final class SaveInfo implements Parcelable {
         parcel.writeParcelable(mNegativeActionListener, flags);
         parcel.writeParcelableArray(mOptionalIds, flags);
         parcel.writeCharSequence(mDescription);
-        parcel.writeBoolean(mSaveOnAllViewsInvisible);
+        parcel.writeInt(mFlags);
     }
 
     public static final Parcelable.Creator<SaveInfo> CREATOR = new Parcelable.Creator<SaveInfo>() {
@@ -413,7 +425,7 @@ public final class SaveInfo implements Parcelable {
             builder.setNegativeAction(parcel.readCharSequence(), parcel.readParcelable(null));
             builder.setOptionalIds(parcel.readParcelableArray(null, AutofillId.class));
             builder.setDescription(parcel.readCharSequence());
-            builder.setSaveOnAllViewsInvisible(parcel.readBoolean());
+            builder.setFlags(parcel.readInt());
             return builder.build();
         }
 

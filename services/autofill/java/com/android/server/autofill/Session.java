@@ -764,7 +764,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         boolean saveOnAllViewsInvisible = false;
         SaveInfo saveInfo = mResponses.valueAt(getLastResponseIndex()).getSaveInfo();
         if (saveInfo != null) {
-            saveOnAllViewsInvisible = saveInfo.saveOnAllViewsInvisible();
+            saveOnAllViewsInvisible =
+                    (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
             if (saveOnAllViewsInvisible) {
