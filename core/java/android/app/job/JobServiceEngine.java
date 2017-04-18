@@ -54,7 +54,7 @@ public abstract class JobServiceEngine {
     /**
      * Context we are running in.
      */
-    private final Context mContext;
+    private final Service mService;
 
     private final IJobService mBinder;
 
@@ -182,12 +182,12 @@ public abstract class JobServiceEngine {
     /**
      * Create a new engine, ready for use.
      *
-     * @param context The {@link Service} that is creating this engine.
+     * @param service The {@link Service} that is creating this engine and in which it will run.
      */
-    public JobServiceEngine(Context context) {
-        mContext = context;
+    public JobServiceEngine(Service service) {
+        mService = service;
         mBinder = new JobInterface(this);
-        mHandler = new JobHandler(mContext.getMainLooper());
+        mHandler = new JobHandler(mService.getMainLooper());
     }
 
     /**
