@@ -89,15 +89,8 @@ public abstract class MediaBrowserService extends Service {
      */
     public static final String KEY_MEDIA_ITEM = "media_item";
 
-    /**
-     * A key for passing the list of MediaItems to the ResultReceiver in search.
-     * @hide
-     */
-    public static final String KEY_SEARCH_RESULTS = "search_results";
-
     private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 1 << 0;
     private static final int RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED = 1 << 1;
-    private static final int RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED = 1 << 2;
 
     private static final int RESULT_ERROR = -1;
     private static final int RESULT_OK = 0;
@@ -105,7 +98,7 @@ public abstract class MediaBrowserService extends Service {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag=true, value = { RESULT_FLAG_OPTION_NOT_HANDLED,
-            RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED, RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED })
+            RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED })
     private @interface ResultFlags { }
 
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
@@ -137,7 +130,6 @@ public abstract class MediaBrowserService extends Service {
      *
      * @see #onLoadChildren
      * @see #onLoadItem
-     * @see #onSearch
      */
     public class Result<T> {
         private Object mDebug;
@@ -330,23 +322,6 @@ public abstract class MediaBrowserService extends Service {
                 }
             });
         }
-
-        @Override
-        public void search(final String query, Bundle extras, ResultReceiver receiver,
-                final IMediaBrowserServiceCallbacks callbacks) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    final IBinder b = callbacks.asBinder();
-                    ConnectionRecord connection = mConnections.get(b);
-                    if (connection == null) {
-                        Log.w(TAG, "search for callback that isn't registered query=" + query);
-                        return;
-                    }
-                    performSearch(query, extras, connection, receiver);
-                }
-            });
-        }
     }
 
     @Override
@@ -472,32 +447,6 @@ public abstract class MediaBrowserService extends Service {
     }
 
     /**
-     * Called to get the search result.
-     * <p>
-     * Implementations must call {@link Result#sendResult result.sendResult}. If
-     * the search will be an expensive operation {@link Result#detach result.detach}
-     * may be called before returning from this function, and then {@link Result#sendResult
-     * result.sendResult} called when the search has been completed.
-     * </p><p>
-     * In case there are no search results, call {@link Result#sendResult} with an empty list.
-     * In case there are some errors happened, call {@link Result#sendResult result.sendResult}
-     * with {@code null}, which will invoke {@link MediaBrowser.SearchCallback#onError}.
-     * </p><p>
-     * The default implementation will invoke {@link MediaBrowser.SearchCallback#onError}.
-     * </p>
-     *
-     * @param query The search query sent from the media browser. It contains keywords separated
-     *            by space.
-     * @param extras The bundle of service-specific arguments sent from the media browser.
-     * @param result The {@link Result} to send the search result.
-     */
-    public void onSearch(@NonNull String query, Bundle extras,
-            Result<List<MediaBrowser.MediaItem>> result) {
-        result.setFlags(RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED);
-        result.sendResult(null);
-    }
-
-    /**
      * Call to set the media session.
      * <p>
      * This should be called as soon as possible during the service's startup.
@@ -545,16 +494,16 @@ public abstract class MediaBrowserService extends Service {
      * media browser service when connecting and retrieving the root id for browsing, or null if
      * none. The contents of this bundle may affect the information returned when browsing.
      *
-     * @throws IllegalStateException If this method is called outside of {@link #onLoadChildren},
-     *             {@link #onLoadItem} or {@link #onSearch}.
+     * @throws IllegalStateException If this method is called outside of {@link #onLoadChildren} or
+     *             {@link #onLoadItem}.
      * @see MediaBrowserService.BrowserRoot#EXTRA_RECENT
      * @see MediaBrowserService.BrowserRoot#EXTRA_OFFLINE
      * @see MediaBrowserService.BrowserRoot#EXTRA_SUGGESTED
      */
     public final Bundle getBrowserRootHints() {
         if (mCurConnection == null) {
-            throw new IllegalStateException("This should be called inside of onLoadChildren,"
-                    + " onLoadItem or onSearch methods");
+            throw new IllegalStateException("This should be called inside of onLoadChildren or"
+                    + " onLoadItem methods");
         }
         return mCurConnection.rootHints == null ? null : new Bundle(mCurConnection.rootHints);
     }
@@ -768,34 +717,6 @@ public abstract class MediaBrowserService extends Service {
         if (!result.isDone()) {
             throw new IllegalStateException("onLoadItem must call detach() or sendResult()"
                     + " before returning for id=" + itemId);
-        }
-    }
-
-    private void performSearch(String query, Bundle extras, final ConnectionRecord connection,
-            final ResultReceiver receiver) {
-        final Result<List<MediaBrowser.MediaItem>> result =
-                new Result<List<MediaBrowser.MediaItem>>(query) {
-            @Override
-            void onResultSent(List<MediaBrowser.MediaItem> items, @ResultFlags int flag) {
-                if ((flag & RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED) != 0
-                        || items == null) {
-                    receiver.send(RESULT_ERROR, null);
-                    return;
-                }
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArray(KEY_SEARCH_RESULTS,
-                        items.toArray(new MediaBrowser.MediaItem[0]));
-                receiver.send(RESULT_OK, bundle);
-            }
-        };
-
-        mCurConnection = connection;
-        onSearch(query, extras, result);
-        mCurConnection = null;
-
-        if (!result.isDone()) {
-            throw new IllegalStateException("onSearch must call detach() or sendResult()"
-                    + " before returning for query=" + query);
         }
     }
 
