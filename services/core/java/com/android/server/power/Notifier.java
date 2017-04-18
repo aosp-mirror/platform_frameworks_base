@@ -406,11 +406,7 @@ final class Notifier {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
-                        log.setType(MetricsEvent.TYPE_OPEN);
-                        log.setSubtype(0); // not user initiated
-                        MetricsLogger.action(log);
-                        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
+                        // Note a SCREEN tron event is logged in PowerManagerService.
                         mPolicy.startedWakingUp();
                     }
                 });
@@ -470,7 +466,7 @@ final class Notifier {
                         log.setType(MetricsEvent.TYPE_CLOSE);
                         log.setSubtype(why);
                         MetricsLogger.action(log);
-                        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, why, 0, 0);
+                        EventLogTags.writePowerScreenState(0, why, 0, 0, 0);
                         mPolicy.finishedGoingToSleep(why);
                     }
                 });
