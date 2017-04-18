@@ -24,6 +24,10 @@
 
     <protected-broadcast android:name="com.android.systemui.action.PLUGIN_CHANGED" />
 
+    <!-- SysUI must be the one to define this permission; its name is
+         referenced by the core OS. -->
+    <permission android:name="android.permission.systemui.IDENTITY"
+        android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

@@ -31,7 +31,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PermissionInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -152,6 +156,20 @@ class AlarmManagerService extends SystemService {
     long mLastTimeChangeRealtime;
     long mAllowWhileIdleMinTime;
     int mNumTimeChanged;
+
+    // Bookkeeping about the identity of the "System UI" package, determined at runtime.
+
+    /**
+     * This permission must be defined by the canonical System UI package,
+     * with protection level "signature".
+     */
+    private static final String SYSTEM_UI_SELF_PERMISSION =
+            "android.permission.systemui.IDENTITY";
+
+    /**
+     * At boot we use SYSTEM_UI_SELF_PERMISSION to look up the definer's uid.
+     */
+    int mSystemUiUid;
 
     /**
      * The current set of user whitelisted apps for device idle mode, meaning these are allowed
@@ -960,6 +978,25 @@ class AlarmManagerService extends SystemService {
             }
         }
 
+        // Determine SysUI's uid
+        final PackageManager packMan = getContext().getPackageManager();
+        try {
+            PermissionInfo sysUiPerm = packMan.getPermissionInfo(SYSTEM_UI_SELF_PERMISSION, 0);
+            ApplicationInfo sysUi = packMan.getApplicationInfo(sysUiPerm.packageName, 0);
+            if ((sysUi.privateFlags&ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
+                mSystemUiUid = sysUi.uid;
+            } else {
+                Slog.e(TAG, "SysUI permission " + SYSTEM_UI_SELF_PERMISSION
+                        + " defined by non-privileged app " + sysUi.packageName
+                        + " - ignoring");
+            }
+        } catch (NameNotFoundException e) {
+        }
+
+        if (mSystemUiUid <= 0) {
+            Slog.wtf(TAG, "SysUI package not found!");
+        }
+
         PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*alarm*");
 
@@ -1328,6 +1365,7 @@ class AlarmManagerService extends SystemService {
             // This means we will allow these alarms to go off as normal even while idle, with no
             // timing restrictions.
             } else if (workSource == null && (callingUid < Process.FIRST_APPLICATION_UID
+                    || callingUid == mSystemUiUid
                     || Arrays.binarySearch(mDeviceIdleUserWhitelist,
                             UserHandle.getAppId(callingUid)) >= 0)) {
                 flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
