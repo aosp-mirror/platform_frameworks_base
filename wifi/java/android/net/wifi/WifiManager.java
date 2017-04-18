@@ -1428,19 +1428,15 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded, i.e., the scan was initiated
      */
     public boolean startScan() {
-        try {
-            mService.startScan(null, null);
-            return true;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return startScan(null);
     }
 
     /** @hide */
     @SystemApi
     public boolean startScan(WorkSource workSource) {
         try {
-            mService.startScan(null, workSource);
+            String packageName = mContext.getOpPackageName();
+            mService.startScan(null, workSource, packageName);
             return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
