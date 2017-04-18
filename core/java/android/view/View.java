@@ -9768,6 +9768,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Searches up the view hierarchy to find the top-most cluster. All deeper/nested clusters
+     * will be ignored.
+     *
+     * @return the keyboard navigation cluster that this view is in (can be this view)
+     *         or {@code null} if not in one
+     */
+    View findKeyboardNavigationCluster() {
+        if (mParent instanceof View) {
+            View cluster = ((View) mParent).findKeyboardNavigationCluster();
+            if (cluster != null) {
+                return cluster;
+            } else if (isKeyboardNavigationCluster()) {
+                return this;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Set whether this view is a root of a keyboard navigation cluster.
      *
      * @param isCluster If true, this view is a root of a cluster.
@@ -9789,9 +9808,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void setFocusedInCluster() {
-        if (mParent instanceof ViewGroup) {
-            ((ViewGroup) mParent).setFocusInCluster(this);
+    public final void setFocusedInCluster() {
+        View top = findKeyboardNavigationCluster();
+        if (top == this) {
+            return;
+        }
+        ViewParent parent = mParent;
+        View child = this;
+        while (parent instanceof ViewGroup) {
+            ((ViewGroup) parent).setFocusedInCluster(child);
+            if (parent == top) {
+                return;
+            }
+            child = (View) parent;
+            parent = parent.getParent();
         }
     }
 
