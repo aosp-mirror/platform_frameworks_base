@@ -6073,9 +6073,7 @@ public class AudioService extends IAudioService.Stub
 
     // implementation of AccessibilityServicesStateChangeListener
     @Override
-    public void onAccessibilityServicesStateChanged() {
-        final AccessibilityManager accessibilityManager =
-                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+    public void onAccessibilityServicesStateChanged(AccessibilityManager accessibilityManager) {
         updateA11yVolumeAlias(accessibilityManager.isAccessibilityVolumeStreamActive());
     }
 
