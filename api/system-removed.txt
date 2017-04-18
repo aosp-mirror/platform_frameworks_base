@@ -124,6 +124,16 @@ package android.hardware {
 
 }
 
+package android.location {
+
+  public class Location implements android.os.Parcelable {
+    method public deprecated void removeBearingAccuracy();
+    method public deprecated void removeSpeedAccuracy();
+    method public deprecated void removeVerticalAccuracy();
+  }
+
+}
+
 package android.media {
 
   public final class AudioFormat implements android.os.Parcelable {
