@@ -127,20 +127,23 @@ public class FocusFinder {
         if (focused == null || focused == root) {
             return root;
         }
-        ViewParent effective = focused.getParent();
+        ViewGroup effective = null;
+        ViewParent nextParent = focused.getParent();
         do {
-            if (effective == root) {
-                return root;
+            if (nextParent == root) {
+                return effective != null ? effective : root;
             }
-            ViewGroup vg = (ViewGroup) effective;
+            ViewGroup vg = (ViewGroup) nextParent;
             if (vg.getTouchscreenBlocksFocus()
                     && focused.getContext().getPackageManager().hasSystemFeature(
                             PackageManager.FEATURE_TOUCHSCREEN)
                     && vg.isKeyboardNavigationCluster()) {
-                return vg;
+                // Don't stop and return here because the cluster could be nested and we only
+                // care about the top-most one.
+                effective = vg;
             }
-            effective = effective.getParent();
-        } while (effective != null);
+            nextParent = nextParent.getParent();
+        } while (nextParent instanceof ViewGroup);
         return root;
     }
 
