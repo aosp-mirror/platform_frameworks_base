@@ -317,7 +317,8 @@ public final class IpSecManager {
      * @param socket a socket that previously had a transform applied to it.
      * @param transform the IPsec Transform that was previously applied to the given socket
      */
-    public void removeTransportModeTransform(Socket socket, IpSecTransform transform) {
+    public void removeTransportModeTransform(Socket socket, IpSecTransform transform)
+            throws IOException {
         removeTransportModeTransform(ParcelFileDescriptor.fromSocket(socket), transform);
     }
 
@@ -331,7 +332,8 @@ public final class IpSecManager {
      * @param socket a socket that previously had a transform applied to it.
      * @param transform the IPsec Transform that was previously applied to the given socket
      */
-    public void removeTransportModeTransform(DatagramSocket socket, IpSecTransform transform) {
+    public void removeTransportModeTransform(DatagramSocket socket, IpSecTransform transform)
+            throws IOException {
         removeTransportModeTransform(ParcelFileDescriptor.fromDatagramSocket(socket), transform);
     }
 
@@ -345,7 +347,8 @@ public final class IpSecManager {
      * @param socket a socket file descriptor that previously had a transform applied to it.
      * @param transform the IPsec Transform that was previously applied to the given socket
      */
-    public void removeTransportModeTransform(FileDescriptor socket, IpSecTransform transform) {
+    public void removeTransportModeTransform(FileDescriptor socket, IpSecTransform transform)
+            throws IOException {
         removeTransportModeTransform(new ParcelFileDescriptor(socket), transform);
     }
 
@@ -419,7 +422,7 @@ public final class IpSecManager {
          *
          * @param fd a file descriptor previously returned as a UDP Encapsulation socket.
          */
-        public void close() {
+        public void close() throws IOException {
             // TODO: Go close the socket
             mCloseGuard.close();
         }
