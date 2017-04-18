@@ -574,7 +574,7 @@ static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
     size_t parentHandle;
 
     const hidl_string *s;
-    status_t err = parcel->readBuffer(&parentHandle,
+    status_t err = parcel->readBuffer(sizeof(*s), &parentHandle,
             reinterpret_cast<const void**>(&s));
 
     if (err != OK) {
@@ -583,7 +583,7 @@ static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
     }
 
     err = ::android::hardware::readEmbeddedFromParcel(
-            const_cast<hidl_string *>(s),
+            const_cast<hidl_string &>(*s),
             *parcel, parentHandle, 0 /* parentOffset */);
 
     if (err != OK) {
@@ -602,7 +602,7 @@ static Type ## Array JHwParcel_native_read ## Suffix ## Vector(                \
     size_t parentHandle;                                                       \
                                                                                \
     const hidl_vec<Type> *vec;                                                 \
-    status_t err = parcel->readBuffer(&parentHandle,                           \
+    status_t err = parcel->readBuffer(sizeof(*vec), &parentHandle,             \
             reinterpret_cast<const void**>(&vec));                             \
                                                                                \
     if (err != OK) {                                                           \
@@ -613,7 +613,7 @@ static Type ## Array JHwParcel_native_read ## Suffix ## Vector(                \
     size_t childHandle;                                                        \
                                                                                \
     err = ::android::hardware::readEmbeddedFromParcel(                         \
-                const_cast<hidl_vec<Type> *>(vec),                             \
+                const_cast<hidl_vec<Type> &>(*vec),                            \
                 *parcel,                                                       \
                 parentHandle,                                                  \
                 0 /* parentOffset */,                                          \
@@ -645,7 +645,7 @@ static jbooleanArray JHwParcel_native_readBoolVector(
     size_t parentHandle;
 
     const hidl_vec<bool> *vec;
-    status_t err = parcel->readBuffer(&parentHandle,
+    status_t err = parcel->readBuffer(sizeof(*vec), &parentHandle,
             reinterpret_cast<const void**>(&vec));
 
     if (err != OK) {
@@ -656,7 +656,7 @@ static jbooleanArray JHwParcel_native_readBoolVector(
     size_t childHandle;
 
     err = ::android::hardware::readEmbeddedFromParcel(
-                const_cast<hidl_vec<bool> *>(vec),
+                const_cast<hidl_vec<bool> &>(*vec),
                 *parcel,
                 parentHandle,
                 0 /* parentOffset */,
@@ -709,7 +709,7 @@ static jobjectArray JHwParcel_native_readStringVector(
     size_t parentHandle;
 
     const string_vec *vec;
-    status_t err = parcel->readBuffer(&parentHandle,
+    status_t err = parcel->readBuffer(sizeof(*vec), &parentHandle,
             reinterpret_cast<const void **>(&vec));
 
     if (err != OK) {
@@ -719,16 +719,15 @@ static jobjectArray JHwParcel_native_readStringVector(
 
     size_t childHandle;
     err = ::android::hardware::readEmbeddedFromParcel(
-            const_cast<string_vec *>(vec),
+            const_cast<string_vec &>(*vec),
             *parcel, parentHandle, 0 /* parentOffset */, &childHandle);
 
     for (size_t i = 0; (err == OK) && (i < vec->size()); ++i) {
         err = android::hardware::readEmbeddedFromParcel(
-                    const_cast<hidl_vec<hidl_string> *>(vec),
+                    const_cast<hidl_string &>((*vec)[i]),
                     *parcel,
                     childHandle,
-                    i * sizeof(hidl_string),
-                    nullptr /* childHandle */);
+                    i * sizeof(hidl_string) /* parentOffset */);
     }
 
     if (err != OK) {
@@ -810,13 +809,20 @@ static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
     return JHwRemoteBinder::NewObject(env, binder);
 }
 
-static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz) {
+static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz,
+                                           jlong expectedSize) {
     hardware::Parcel *parcel =
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     size_t handle;
     const void *ptr;
-    status_t status = parcel->readBuffer(&handle, &ptr);
+
+    if (expectedSize < 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return nullptr;
+    }
+
+    status_t status = parcel->readBuffer(expectedSize, &handle, &ptr);
 
     if (status != OK) {
         jniThrowException(env, "java/util/NoSuchElementException", NULL);
@@ -827,8 +833,8 @@ static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz) {
 }
 
 static jobject JHwParcel_native_readEmbeddedBuffer(
-        JNIEnv *env, jobject thiz, jlong parentHandle, jlong offset,
-        jboolean nullable) {
+        JNIEnv *env, jobject thiz, jlong expectedSize,
+        jlong parentHandle, jlong offset, jboolean nullable) {
     hardware::Parcel *parcel =
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
@@ -836,8 +842,13 @@ static jobject JHwParcel_native_readEmbeddedBuffer(
 
     const void *ptr;
     status_t status =
-        parcel->readNullableEmbeddedBuffer(&childHandle, parentHandle, offset,
-                &ptr);
+        parcel->readNullableEmbeddedBuffer(expectedSize,
+                &childHandle, parentHandle, offset, &ptr);
+
+    if (expectedSize < 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return nullptr;
+    }
 
     if (status != OK) {
         jniThrowException(env, "java/util/NoSuchElementException", NULL);
@@ -952,10 +963,10 @@ static JNINativeMethod gMethods[] = {
 
     { "send", "()V", (void *)JHwParcel_native_send },
 
-    { "readBuffer", "()L" PACKAGE_PATH "/HwBlob;",
+    { "readBuffer", "(J)L" PACKAGE_PATH "/HwBlob;",
         (void *)JHwParcel_native_readBuffer },
 
-    { "readEmbeddedBuffer", "(JJZ)L" PACKAGE_PATH "/HwBlob;",
+    { "readEmbeddedBuffer", "(JJJZ)L" PACKAGE_PATH "/HwBlob;",
         (void *)JHwParcel_native_readEmbeddedBuffer },
 
     { "writeBuffer", "(L" PACKAGE_PATH "/HwBlob;)V",
