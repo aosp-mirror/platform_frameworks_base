@@ -1230,6 +1230,20 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     int[] mDeviceIdleTempWhitelist = new int[0];
 
+    static final class PendingTempWhitelist {
+        final int targetUid;
+        final long duration;
+        final String tag;
+
+        PendingTempWhitelist(int _targetUid, long _duration, String _tag) {
+            targetUid = _targetUid;
+            duration = _duration;
+            tag = _tag;
+        }
+    }
+
+    final SparseArray<PendingTempWhitelist> mPendingTempWhitelist = new SparseArray<>();
+
     /**
      * Information about and control over application operations
      */
@@ -1688,6 +1702,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int NOTIFY_VR_SLEEPING_MSG = 65;
     static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
     static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
+    static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -1920,6 +1935,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             case DISPATCH_UIDS_CHANGED_UI_MSG: {
                 dispatchUidsChanged();
+            } break;
+            case PUSH_TEMP_WHITELIST_UI_MSG: {
+                pushTempWhitelist();
             } break;
             }
         }
@@ -6493,7 +6511,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // This is the first appearance of the uid, report it now!
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
-            if (Arrays.binarySearch(mDeviceIdleTempWhitelist, UserHandle.getAppId(proc.uid)) >= 0) {
+            if (Arrays.binarySearch(mDeviceIdleTempWhitelist, UserHandle.getAppId(proc.uid)) >= 0
+                    || mPendingTempWhitelist.indexOfKey(proc.uid) >= 0) {
                 uidRec.setWhitelist = uidRec.curWhitelist = true;
             }
             uidRec.updateHasInternetPermission();
@@ -7487,43 +7506,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
-     */
-    void tempWhitelistAppForPowerSave(int callerPid, int callerUid, int targetUid, long duration) {
-        if (DEBUG_WHITELISTS) {
-            Slog.d(TAG, "tempWhitelistAppForPowerSave(" + callerPid + ", " + callerUid + ", "
-                    + targetUid + ", " + duration + ")");
-        }
-
-        if (checkPermission(CHANGE_DEVICE_IDLE_TEMP_WHITELIST, callerPid, callerUid)
-                != PackageManager.PERMISSION_GRANTED) {
-            synchronized (mPidsSelfLocked) {
-                final ProcessRecord pr = mPidsSelfLocked.get(callerPid);
-                if (pr == null) {
-                    Slog.w(TAG, "tempWhitelistAppForPowerSave() no ProcessRecord for pid "
-                            + callerPid);
-                    return;
-                }
-                if (!pr.whitelistManager) {
-                    if (DEBUG_WHITELISTS) {
-                        Slog.d(TAG, "tempWhitelistAppForPowerSave() for target " + targetUid
-                                + ": pid " + callerPid + " is not allowed");
-                    }
-                    return;
-                }
-            }
-        }
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(targetUid, duration,
-                    true, "pe from uid:" + callerUid);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     @Override
     public void cancelIntentSender(IIntentSender sender) {
         if (!(sender instanceof PendingIntentRecord)) {
@@ -8412,7 +8394,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean isOnDeviceIdleWhitelistLocked(int uid) {
         final int appId = UserHandle.getAppId(uid);
         return Arrays.binarySearch(mDeviceIdleWhitelist, appId) >= 0
-                || Arrays.binarySearch(mDeviceIdleTempWhitelist, appId) >= 0;
+                || Arrays.binarySearch(mDeviceIdleTempWhitelist, appId) >= 0
+                || mPendingTempWhitelist.indexOfKey(uid) >= 0;
     }
 
     private ProviderInfo getProviderInfoLocked(String authority, int userHandle, int pmFlags) {
@@ -15589,6 +15572,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
             pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
+            if (mPendingTempWhitelist.size() > 0) {
+                pw.println("  mPendingTempWhitelist:");
+                for (int i = 0; i < mPendingTempWhitelist.size(); i++) {
+                    PendingTempWhitelist ptw = mPendingTempWhitelist.valueAt(i);
+                    pw.print("    ");
+                    UserHandle.formatUid(pw, ptw.targetUid);
+                    pw.print(": ");
+                    TimeUtils.formatDuration(ptw.duration, pw);
+                    pw.print(" ");
+                    pw.println(ptw.tag);
+                }
+            }
         }
         if (dumpPackage == null) {
             pw.println("  mWakefulness="
@@ -22701,6 +22696,80 @@ public class ActivityManagerService extends IActivityManager.Stub
         enqueueUidChangeLocked(uidRec, uid, UidRecord.CHANGE_IDLE);
     }
 
+    /**
+     * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
+     */
+    void tempWhitelistForPendingIntentLocked(int callerPid, int callerUid, int targetUid,
+            long duration, String tag) {
+        if (DEBUG_WHITELISTS) {
+            Slog.d(TAG, "tempWhitelistForPendingIntentLocked(" + callerPid + ", " + callerUid + ", "
+                    + targetUid + ", " + duration + ")");
+        }
+
+        synchronized (mPidsSelfLocked) {
+            final ProcessRecord pr = mPidsSelfLocked.get(callerPid);
+            if (pr == null) {
+                Slog.w(TAG, "tempWhitelistForPendingIntentLocked() no ProcessRecord for pid "
+                        + callerPid);
+                return;
+            }
+            if (!pr.whitelistManager) {
+                if (checkPermission(CHANGE_DEVICE_IDLE_TEMP_WHITELIST, callerPid, callerUid)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    if (DEBUG_WHITELISTS) {
+                        Slog.d(TAG, "tempWhitelistForPendingIntentLocked() for target " + targetUid
+                                + ": pid " + callerPid + " is not allowed");
+                    }
+                    return;
+                }
+            }
+        }
+
+        tempWhitelistUidLocked(targetUid, duration, tag);
+    }
+
+    /**
+     * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
+     */
+    void tempWhitelistUidLocked(int targetUid, long duration, String tag) {
+        mPendingTempWhitelist.put(targetUid, new PendingTempWhitelist(targetUid, duration, tag));
+        setUidTempWhitelistStateLocked(targetUid, true);
+        mUiHandler.obtainMessage(PUSH_TEMP_WHITELIST_UI_MSG).sendToTarget();
+    }
+
+    void pushTempWhitelist() {
+        final int N;
+        final PendingTempWhitelist[] list;
+
+        // First copy out the pending changes...  we need to leave them in the map for now,
+        // in case someone needs to check what is coming up while we don't have the lock held.
+        synchronized(this) {
+            N = mPendingTempWhitelist.size();
+            list = new PendingTempWhitelist[N];
+            for (int i = 0; i < N; i++) {
+                list[i] = mPendingTempWhitelist.valueAt(i);
+            }
+        }
+
+        // Now safely dispatch changes to device idle controller.
+        for (int i = 0; i < N; i++) {
+            PendingTempWhitelist ptw = list[i];
+            mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
+                    ptw.duration, true, ptw.tag);
+        }
+
+        // And now we can safely remove them from the map.
+        synchronized(this) {
+            for (int i = 0; i < N; i++) {
+                PendingTempWhitelist ptw = list[i];
+                int index = mPendingTempWhitelist.indexOfKey(ptw.targetUid);
+                if (index >= 0 && mPendingTempWhitelist.valueAt(index) == ptw) {
+                    mPendingTempWhitelist.removeAt(index);
+                }
+            }
+        }
+    }
+
     final void setAppIdTempWhitelistStateLocked(int appId, boolean onWhitelist) {
         boolean changed = false;
         for (int i=mActiveUids.size()-1; i>=0; i--) {
@@ -22711,6 +22780,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         if (changed) {
+            updateOomAdjLocked();
+        }
+    }
+
+    final void setUidTempWhitelistStateLocked(int uid, boolean onWhitelist) {
+        boolean changed = false;
+        final UidRecord uidRec = mActiveUids.get(uid);
+        if (uidRec != null && uidRec.curWhitelist != onWhitelist) {
+            uidRec.curWhitelist = onWhitelist;
             updateOomAdjLocked();
         }
     }
