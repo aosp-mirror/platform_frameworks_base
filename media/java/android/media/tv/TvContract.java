@@ -436,6 +436,14 @@ public final class TvContract {
     public static final String PARAM_CANONICAL_GENRE = "canonical_genre";
 
     /**
+     * A query, update or delete URI parameter that allows the caller to operate only on preview or
+     * non-preview channels. If set to "true", the operation affects the rows for preview channels
+     * only. If set to "false", the operation affects the rows for non-preview channels only.
+     * @hide
+     */
+    public static final String PARAM_PREVIEW = "preview";
+
+    /**
      * Builds an ID that uniquely identifies a TV input service.
      *
      * @param name The {@link ComponentName} of the TV input service to build ID for.
