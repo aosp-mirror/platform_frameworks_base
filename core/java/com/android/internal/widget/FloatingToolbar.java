@@ -233,6 +233,7 @@ public final class FloatingToolbar {
 
     private void doShow() {
         List<MenuItem> menuItems = getVisibleAndEnabledMenuItems(mMenu);
+        tidy(menuItems);
         if (!isCurrentlyShowing(menuItems) || mWidthChanged) {
             mPopup.dismiss();
             mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
@@ -272,6 +273,36 @@ public final class FloatingToolbar {
             }
         }
         return menuItems;
+    }
+
+    /**
+     * Update the list of menu items to conform to certain requirements.
+     */
+    private void tidy(List<MenuItem> menuItems) {
+        int assistItemIndex = -1;
+        Drawable assistItemDrawable = null;
+
+        final int size = menuItems.size();
+        for (int i = 0; i < size; i++) {
+            final MenuItem menuItem = menuItems.get(i);
+
+            if (menuItem.getItemId() == android.R.id.textAssist) {
+                assistItemIndex = i;
+                assistItemDrawable = menuItem.getIcon();
+            }
+
+            // Remove icons for all menu items with text.
+            if (!TextUtils.isEmpty(menuItem.getTitle())) {
+                menuItem.setIcon(null);
+            }
+        }
+        if (assistItemIndex > -1) {
+            final MenuItem assistMenuItem = menuItems.remove(assistItemIndex);
+            // Ensure the assist menu item preserves its icon.
+            assistMenuItem.setIcon(assistItemDrawable);
+            // Ensure the assist menu item is always the first item.
+            menuItems.add(0, assistMenuItem);
+        }
     }
 
     private List<Object> getShowingMenuItemsReferences(List<MenuItem> menuItems) {

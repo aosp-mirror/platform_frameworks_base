@@ -29,7 +29,13 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 
+import android.view.MenuItem;
+import android.view.ViewGroup;
+import java.util.ArrayList;
+import java.util.List;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 
 import android.support.test.espresso.NoMatchingRootException;
 import android.support.test.espresso.NoMatchingViewException;
@@ -120,6 +126,39 @@ public class FloatingToolbarEspressoUtils {
                 toggleOverflow();
             }
         }
+    }
+
+    /**
+     * Asserts that the floating toolbar contains a specified item at a specified index.
+     *
+     * @param menuItemId id of the menu item
+     * @param index expected index of the menu item in the floating toolbar
+     * @throws AssertionError if the assertion fails
+     */
+    public static void assertFloatingToolbarItemIndex(final int menuItemId, final int index) {
+        onFloatingToolBar().check(matches(new TypeSafeMatcher<View>() {
+            private List<Integer> menuItemIds = new ArrayList<>();
+
+            @Override
+            public boolean matchesSafely(View view) {
+                collectMenuItemIds(view);
+                return menuItemIds.size() > index && menuItemIds.get(index) == menuItemId;
+            }
+
+            @Override
+            public void describeTo(Description description) {}
+
+            private void collectMenuItemIds(View view) {
+                if (view.getTag() instanceof MenuItem) {
+                    menuItemIds.add(((MenuItem) view.getTag()).getItemId());
+                } else if (view instanceof ViewGroup) {
+                    ViewGroup viewGroup = (ViewGroup) view;
+                    for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                        collectMenuItemIds(viewGroup.getChildAt(i));
+                    }
+                }
+            }
+        }));
     }
 
     /**
