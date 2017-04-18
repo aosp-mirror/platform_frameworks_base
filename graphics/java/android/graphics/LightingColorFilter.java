@@ -57,8 +57,6 @@ public class LightingColorFilter extends ColorFilter {
     /**
      * Returns the RGB color used to multiply the source color when the
      * color filter is applied.
-     *
-     * @see #setColorMultiply(int)
      */
     @ColorInt
     public int getColorMultiply() {
@@ -71,6 +69,8 @@ public class LightingColorFilter extends ColorFilter {
      * The alpha channel of this color is ignored.
      *
      * @see #getColorMultiply()
+     *
+     * @hide
      */
     public void setColorMultiply(@ColorInt int mul) {
         if (mMul != mul) {
@@ -82,8 +82,6 @@ public class LightingColorFilter extends ColorFilter {
     /**
      * Returns the RGB color that will be added to the source color
      * when the color filter is applied.
-     *
-     * @see #setColorAdd(int)
      */
     @ColorInt
     public int getColorAdd() {
@@ -96,6 +94,8 @@ public class LightingColorFilter extends ColorFilter {
      * The alpha channel of this color is ignored.
      *
      * @see #getColorAdd()
+     *
+     * @hide
      */
     public void setColorAdd(@ColorInt int add) {
         if (mAdd != add) {

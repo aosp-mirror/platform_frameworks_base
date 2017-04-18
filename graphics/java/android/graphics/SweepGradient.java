@@ -54,7 +54,18 @@ public class SweepGradient extends Shader {
      */
     public SweepGradient(float cx, float cy,
             @NonNull @ColorInt int colors[], @Nullable float positions[]) {
-        set(cx, cy, colors, positions);
+        if (colors.length < 2) {
+            throw new IllegalArgumentException("needs >= 2 number of colors");
+        }
+        if (positions != null && colors.length != positions.length) {
+            throw new IllegalArgumentException(
+                    "color and position arrays must be of equal length");
+        }
+        mType = TYPE_COLORS_AND_POSITIONS;
+        mCx = cx;
+        mCy = cy;
+        mColors = colors.clone();
+        mPositions = positions != null ? positions.clone() : null;
     }
 
     /**
@@ -66,50 +77,6 @@ public class SweepGradient extends Shader {
      * @param color1   The color to use at the end of the sweep
      */
     public SweepGradient(float cx, float cy, @ColorInt int color0, @ColorInt int color1) {
-        set(cx, cy, color0, color1);
-    }
-
-    /**
-     * Reinitialize the shader.
-     *
-     * @param cx       The x-coordinate of the center
-     * @param cy       The y-coordinate of the center
-     * @param colors   The colors to be distributed between around the center.
-     *                 There must be at least 2 colors in the array.
-     * @param positions May be NULL. The relative position of
-     *                 each corresponding color in the colors array, beginning
-     *                 with 0 and ending with 1.0. If the values are not
-     *                 monotonic, the drawing may produce unexpected results.
-     *                 If positions is NULL, then the colors are automatically
-     *                 spaced evenly.
-     */
-    public void set(float cx, float cy,
-            @NonNull @ColorInt int colors[], @Nullable float positions[]) {
-        if (colors.length < 2) {
-            throw new IllegalArgumentException("needs >= 2 number of colors");
-        }
-        if (positions != null && colors.length != positions.length) {
-            throw new IllegalArgumentException(
-                    "color and position arrays must be of equal length");
-        }
-        discardNativeInstance();
-        mType = TYPE_COLORS_AND_POSITIONS;
-        mCx = cx;
-        mCy = cy;
-        mColors = colors.clone();
-        mPositions = positions != null ? positions.clone() : null;
-    }
-
-    /**
-     * Reinitialize the shader.
-     *
-     * @param cx       The x-coordinate of the center
-     * @param cy       The y-coordinate of the center
-     * @param color0   The color to use at the start of the sweep
-     * @param color1   The color to use at the end of the sweep
-     */
-    public void set(float cx, float cy, @ColorInt int color0, @ColorInt int color1) {
-        discardNativeInstance();
         mType = TYPE_COLOR_START_AND_COLOR_END;
         mCx = cx;
         mCy = cy;
