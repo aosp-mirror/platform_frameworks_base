@@ -404,6 +404,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \
 	media/java/android/media/projection/IMediaProjectionWatcherCallback.aidl \
 	media/java/android/media/session/IActiveSessionsListener.aidl \
+	media/java/android/media/session/ICallback.aidl \
 	media/java/android/media/session/ISessionController.aidl \
 	media/java/android/media/session/ISessionControllerCallback.aidl \
 	media/java/android/media/session/ISession.aidl \
