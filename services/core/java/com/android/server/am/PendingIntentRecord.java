@@ -237,14 +237,6 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         if (intent != null) intent.setDefusable(true);
         if (options != null) options.setDefusable(true);
 
-        if (whitelistDuration > 0 && !canceled) {
-            // Must call before acquiring the lock. It's possible the method return before sending
-            // the intent due to some validations inside the lock, in which case the UID shouldn't
-            // be whitelisted, but since the whitelist is temporary, that would be ok.
-            owner.tempWhitelistAppForPowerSave(Binder.getCallingPid(), Binder.getCallingUid(), uid,
-                    whitelistDuration);
-        }
-
         synchronized (owner) {
             final ActivityContainer activityContainer = (ActivityContainer)container;
             if (activityContainer != null && activityContainer.mParentActivity != null &&
@@ -277,6 +269,22 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                     finalIntent.setFlags((finalIntent.getFlags() & ~flagsMask) | flagsValues);
                 } else {
                     resolvedType = key.requestResolvedType;
+                }
+
+                if (whitelistDuration > 0) {
+                    StringBuilder tag = new StringBuilder(64);
+                    tag.append("pendingintent:");
+                    UserHandle.formatUid(tag, Binder.getCallingUid());
+                    tag.append(":");
+                    if (finalIntent.getAction() != null) {
+                        tag.append(finalIntent.getAction());
+                    } else if (finalIntent.getComponent() != null) {
+                        finalIntent.getComponent().appendShortString(tag);
+                    } else if (finalIntent.getData() != null) {
+                        tag.append(finalIntent.getData());
+                    }
+                    owner.tempWhitelistForPendingIntentLocked(Binder.getCallingPid(),
+                            Binder.getCallingUid(), uid, whitelistDuration, tag.toString());
                 }
 
                 final long origId = Binder.clearCallingIdentity();
