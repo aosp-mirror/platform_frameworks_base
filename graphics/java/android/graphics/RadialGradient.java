@@ -57,7 +57,22 @@ public class RadialGradient extends Shader {
     public RadialGradient(float centerX, float centerY, float radius,
             @NonNull @ColorInt int colors[], @Nullable float stops[],
             @NonNull TileMode tileMode) {
-        set(centerX, centerY, radius, colors, stops, tileMode);
+        if (radius <= 0) {
+            throw new IllegalArgumentException("radius must be > 0");
+        }
+        if (colors.length < 2) {
+            throw new IllegalArgumentException("needs >= 2 number of colors");
+        }
+        if (stops != null && colors.length != stops.length) {
+            throw new IllegalArgumentException("color and position arrays must be of equal length");
+        }
+        mType = TYPE_COLORS_AND_POSITIONS;
+        mX = centerX;
+        mY = centerY;
+        mRadius = radius;
+        mColors = colors.clone();
+        mPositions = stops != null ? stops.clone() : null;
+        mTileMode = tileMode;
     }
 
     /**
@@ -72,59 +87,9 @@ public class RadialGradient extends Shader {
      */
     public RadialGradient(float centerX, float centerY, float radius,
             @ColorInt int centerColor, @ColorInt int edgeColor, @NonNull TileMode tileMode) {
-        set(centerX, centerY, radius, centerColor, edgeColor, tileMode);
-    }
-
-    /**
-     * Reinitialize the shader.
-     *
-     * @param centerX  The x-coordinate of the center of the radius
-     * @param centerY  The y-coordinate of the center of the radius
-     * @param radius   Must be positive. The radius of the circle for this gradient.
-     * @param colors   The colors to be distributed between the center and edge of the circle
-     * @param stops    May be <code>null</code>. Valid values are between <code>0.0f</code> and
-     *                 <code>1.0f</code>. The relative position of each corresponding color in
-     *                 the colors array. If <code>null</code>, colors are distributed evenly
-     *                 between the center and edge of the circle.
-     * @param tileMode The Shader tiling mode
-     */
-    public void set(float centerX, float centerY, float radius,
-            @NonNull @ColorInt int colors[], @Nullable float stops[], @NonNull TileMode tileMode) {
         if (radius <= 0) {
             throw new IllegalArgumentException("radius must be > 0");
         }
-        if (colors.length < 2) {
-            throw new IllegalArgumentException("needs >= 2 number of colors");
-        }
-        if (stops != null && colors.length != stops.length) {
-            throw new IllegalArgumentException("color and position arrays must be of equal length");
-        }
-        discardNativeInstance();
-        mType = TYPE_COLORS_AND_POSITIONS;
-        mX = centerX;
-        mY = centerY;
-        mRadius = radius;
-        mColors = colors.clone();
-        mPositions = stops != null ? stops.clone() : null;
-        mTileMode = tileMode;
-    }
-
-    /**
-     * Reinitialize the shader.
-     *
-     * @param centerX     The x-coordinate of the center of the radius
-     * @param centerY     The y-coordinate of the center of the radius
-     * @param radius      Must be positive. The radius of the circle for this gradient
-     * @param centerColor The color at the center of the circle.
-     * @param edgeColor   The color at the edge of the circle.
-     * @param tileMode    The Shader tiling mode
-     */
-    public void set(float centerX, float centerY, float radius,
-            @ColorInt int centerColor, @ColorInt int edgeColor, @NonNull TileMode tileMode) {
-        if (radius <= 0) {
-            throw new IllegalArgumentException("radius must be > 0");
-        }
-        discardNativeInstance();
         mType = TYPE_COLOR_CENTER_AND_COLOR_EDGE;
         mX = centerX;
         mY = centerY;

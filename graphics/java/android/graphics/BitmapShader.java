@@ -41,35 +41,16 @@ public class BitmapShader extends Shader {
      * @param tileY The tiling mode for y to draw the bitmap in.
      */
     public BitmapShader(@NonNull Bitmap bitmap, @NonNull TileMode tileX, @NonNull TileMode tileY) {
-        set(bitmap, tileX, tileY);
+        this(bitmap, tileX.nativeInt, tileY.nativeInt);
     }
 
     private BitmapShader(Bitmap bitmap, int tileX, int tileY) {
-        setInternal(bitmap, tileX, tileY);
-    }
-
-    /**
-     * Reinitialize the BitmapShader's Bitmap and tile modes.
-     *
-     * @param bitmap The bitmap to use inside the shader
-     * @param tileX The tiling mode for x to draw the bitmap in.
-     * @param tileY The tiling mode for y to draw the bitmap in.
-     */
-    public void set(@NonNull Bitmap bitmap, @NonNull TileMode tileX, @NonNull TileMode tileY) {
-        if (tileX == null || tileY == null) {
-            throw new IllegalArgumentException();
-        }
-        setInternal(bitmap, tileX.nativeInt, tileY.nativeInt);
-    }
-
-    private void setInternal(Bitmap bitmap, int tileX, int tileY) {
         if (bitmap == null) {
             throw new IllegalArgumentException("Bitmap must be non-null");
         }
         if (bitmap == mBitmap && tileX == mTileX && tileY == mTileY) {
             return;
         }
-        discardNativeInstance();
         mBitmap = bitmap;
         mTileX = tileX;
         mTileY = tileY;
