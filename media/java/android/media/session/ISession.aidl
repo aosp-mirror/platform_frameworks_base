@@ -45,8 +45,6 @@ interface ISession {
     void setQueueTitle(CharSequence title);
     void setExtras(in Bundle extras);
     void setRatingType(int type);
-    void setRepeatMode(int repeatMode);
-    void setShuffleModeEnabled(boolean enabled);
 
     // These commands relate to volume handling
     void setPlaybackToLocal(in AudioAttributes attributes);
