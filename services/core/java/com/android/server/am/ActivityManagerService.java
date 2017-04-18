@@ -7845,7 +7845,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     r.pictureInPictureArgs.copyOnlySet(args);
                     final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                     final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                    final Rect sourceBounds = r.pictureInPictureArgs.getSourceRectHint();
+                    // Adjust the source bounds by the insets for the transition down
+                    final Rect sourceBounds = new Rect(r.pictureInPictureArgs.getSourceRectHint());
+                    final Rect insets = r.pictureInPictureArgs.getSourceRectHintInsets();
+                    if (insets != null) {
+                        sourceBounds.offsetTo(Math.max(0, sourceBounds.left - insets.left),
+                                Math.max(0, sourceBounds.top - insets.top));
+                    }
+
                     mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, aspectRatio,
                             true /* moveHomeStackToFront */, "enterPictureInPictureMode");
                     final PinnedActivityStack stack = mStackSupervisor.getStack(PINNED_STACK_ID);
