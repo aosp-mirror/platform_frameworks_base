@@ -442,7 +442,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     public boolean showSaveLocked() {
         if (mStructure == null) {
-            Slog.wtf(TAG, "showSaveLocked(): no mStructure");
+            Slog.d(TAG, "showSaveLocked(): no mStructure");
             return true;
         }
         if (mResponses == null) {
