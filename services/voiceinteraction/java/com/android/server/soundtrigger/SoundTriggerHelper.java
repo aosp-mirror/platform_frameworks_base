@@ -300,7 +300,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             // Load the model if it is not loaded.
             if (!modelData.isModelLoaded()) {
-                // Load the model
+                // Before we try and load this model, we should first make sure that any other
+                // models that don't have an active recognition/dead callback are unloaded. Since
+                // there is a finite limit on the number of models that the hardware may be able to
+                // have loaded, we want to make sure there's room for our model.
+                stopAndUnloadDeadModelsLocked();
                 int[] handle = new int[] { INVALID_VALUE };
                 int status = mModule.loadSoundModel(soundModel, handle);
                 if (status != SoundTrigger.STATUS_OK) {
@@ -899,7 +903,29 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
+    /**
+     * Stops and unloads a sound model, and removes any reference to the model if successful.
+     *
+     * @param modelData The model data to remove.
+     * @param exception Optional exception to print in logcat. May be null.
+     */
     private void forceStopAndUnloadModel(ModelData modelData, Exception exception) {
+      forceStopAndUnloadModel(modelData, exception, null /* modelDataIterator */);
+    }
+
+    /**
+     * Stops and unloads a sound model, and removes any reference to the model if successful.
+     *
+     * @param modelData The model data to remove.
+     * @param exception Optional exception to print in logcat. May be null.
+     * @param modelDataIterator If this function is to be used while iterating over the
+     *        mModelDataMap, you can provide the iterator for the current model data to be used to
+     *        remove the modelData from the map. This avoids generating a
+     *        ConcurrentModificationException, since this function will try and remove the model
+     *        data from the mModelDataMap when it can successfully unload the model.
+     */
+    private void forceStopAndUnloadModel(ModelData modelData, Exception exception,
+            Iterator modelDataIterator) {
         if (exception != null) {
           Slog.e(TAG, "forceStopAndUnloadModel", exception);
         }
@@ -916,7 +942,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             Slog.d(TAG, "Unloading previously loaded dangling model " + modelData.getHandle());
             if (mModule.unloadSoundModel(modelData.getHandle()) == STATUS_OK) {
                 // Remove the model data from existence.
-                mModelDataMap.remove(modelData.getModelId());
+                if (modelDataIterator != null) {
+                    modelDataIterator.remove();
+                } else {
+                    mModelDataMap.remove(modelData.getModelId());
+                }
                 Iterator it = mKeyphraseUuidMap.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry) it.next();
@@ -927,6 +957,23 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 modelData.clearState();
             } else {
                 Slog.e(TAG, "Failed to unload model " + modelData.getHandle());
+            }
+        }
+    }
+
+    private void stopAndUnloadDeadModelsLocked() {
+        Iterator it = mModelDataMap.entrySet().iterator();
+        while (it.hasNext()) {
+            ModelData modelData = (ModelData) ((Map.Entry) it.next()).getValue();
+            if (!modelData.isModelLoaded()) {
+                continue;
+            }
+            if (modelData.getCallback() == null
+                    || (modelData.getCallback().asBinder() != null
+                        && !modelData.getCallback().asBinder().pingBinder())) {
+                // No one is listening on this model, so we might as well evict it.
+                Slog.w(TAG, "Removing model " + modelData.getHandle() + " that has no clients");
+                forceStopAndUnloadModel(modelData, null /* exception */, it);
             }
         }
     }
