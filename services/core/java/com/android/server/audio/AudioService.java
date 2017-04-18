@@ -520,7 +520,11 @@ public class AudioService extends IAudioService.Stub
     private int mPrevVolDirection = AudioManager.ADJUST_SAME;
     // mVolumeControlStream is set by VolumePanel to temporarily force the stream type which volume
     // is controlled by Vol keys.
-    private int  mVolumeControlStream = -1;
+    private int mVolumeControlStream = -1;
+    // interpretation of whether the volume stream has been selected by the user by clicking on a
+    // volume slider to change which volume is controlled by the volume keys. Is false
+    // when mVolumeControlStream is -1.
+    private boolean mUserSelectedVolumeControlStream = false;
     private final Object mForceControlStreamLock = new Object();
     // VolumePanel is currently the only client of forceVolumeControlStream() and runs in system
     // server process so in theory it is not necessary to monitor the client death.
@@ -1224,14 +1228,29 @@ public class AudioService extends IAudioService.Stub
     private void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller, int uid) {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream=" + suggestedStreamType
-                + ", flags=" + flags + ", caller=" + caller);
-        int streamType;
-        boolean isMute = isMuteAdjust(direction);
-        if (mVolumeControlStream != -1) {
+                + ", flags=" + flags + ", caller=" + caller
+                + ", volControlStream=" + mVolumeControlStream
+                + ", userSelect=" + mUserSelectedVolumeControlStream);
+        final int streamType;
+        if (mUserSelectedVolumeControlStream) { // implies mVolumeControlStream != -1
             streamType = mVolumeControlStream;
         } else {
-            streamType = getActiveStreamType(suggestedStreamType);
+            final int maybeActiveStreamType = getActiveStreamType(suggestedStreamType);
+            final boolean activeForReal;
+            if (maybeActiveStreamType == AudioSystem.STREAM_MUSIC) {
+                activeForReal = isAfMusicActiveRecently(0);
+            } else {
+                activeForReal = AudioSystem.isStreamActive(maybeActiveStreamType, 0);
+            }
+            if (activeForReal || mVolumeControlStream == -1) {
+                streamType = maybeActiveStreamType;
+            } else {
+                streamType = mVolumeControlStream;
+            }
         }
+
+        final boolean isMute = isMuteAdjust(direction);
+
         ensureValidStreamType(streamType);
         final int resolvedStream = mStreamVolumeAlias[streamType];
 
@@ -1707,13 +1726,18 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#forceVolumeControlStream(int) */
     public void forceVolumeControlStream(int streamType, IBinder cb) {
+        if (DEBUG_VOL) { Log.d(TAG, String.format("forceVolumeControlStream(%d)", streamType)); }
         synchronized(mForceControlStreamLock) {
+            if (mVolumeControlStream != -1 && streamType != -1) {
+                mUserSelectedVolumeControlStream = true;
+            }
             mVolumeControlStream = streamType;
             if (mVolumeControlStream == -1) {
                 if (mForceControlStreamClient != null) {
                     mForceControlStreamClient.release();
                     mForceControlStreamClient = null;
                 }
+                mUserSelectedVolumeControlStream = false;
             } else {
                 mForceControlStreamClient = new ForceControlStreamClient(cb);
             }
@@ -1744,6 +1768,7 @@ public class AudioService extends IAudioService.Stub
                 } else {
                     mForceControlStreamClient = null;
                     mVolumeControlStream = -1;
+                    mUserSelectedVolumeControlStream = false;
                 }
             }
         }
