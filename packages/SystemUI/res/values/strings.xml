@@ -1897,6 +1897,18 @@
     <!-- PiP minimize description. [CHAR LIMIT=NONE] -->
     <string name="pip_minimize_description" translatable="false">Drag or fling the PIP to the edges of the screen to minimize it.</string>
 
+    <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
+    <string name="pip_play">Play</string>
+
+    <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
+    <string name="pip_pause">Pause</string>
+
+    <!-- Button to skip to the next media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
+    <string name="pip_skip_to_next">Skip to next</string>
+
+    <!-- Button to skip to the prev media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
+    <string name="pip_skip_to_prev">Skip to previous</string>
+
     <!-- Tuner string -->
     <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->
