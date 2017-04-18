@@ -448,6 +448,30 @@ public final class BluetoothAdapter {
         "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
 
     /**
+     * Intent used to broadcast the change in the Bluetooth address
+     * of the local Bluetooth adapter.
+     * <p>Always contains the extra field {@link
+     * #EXTRA_BLUETOOTH_ADDRESS} containing the Bluetooth address.
+     *
+     * Note: only system level processes are allowed to send this
+     * defined broadcast.
+     *
+     * @hide
+     */
+    public static final String ACTION_BLUETOOTH_ADDRESS_CHANGED =
+        "android.bluetooth.adapter.action.BLUETOOTH_ADDRESS_CHANGED";
+
+    /**
+     * Used as a String extra field in {@link
+     * #ACTION_BLUETOOTH_ADDRESS_CHANGED} intent to store the local
+     * Bluetooth address.
+     *
+     * @hide
+     */
+    public static final String EXTRA_BLUETOOTH_ADDRESS =
+          "android.bluetooth.adapter.extra.BLUETOOTH_ADDRESS";
+
+    /**
      * Broadcast Action: The notifys Bluetooth ACL connected event. This will be
      * by BLE Always on enabled application to know the ACL_CONNECTED event
      * when Bluetooth state in STATE_BLE_ON. This denotes GATT connection
