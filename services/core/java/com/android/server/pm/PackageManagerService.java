@@ -13202,7 +13202,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (dcsUid > 0) {
                     am.backgroundWhitelistUid(dcsUid);
                 }
-                am.startService(null, intent, null, -1, null, false, mContext.getOpPackageName(),
+                am.startService(null, intent, null, false, mContext.getOpPackageName(),
                         UserHandle.USER_SYSTEM);
             } catch (RemoteException e) {
             }
