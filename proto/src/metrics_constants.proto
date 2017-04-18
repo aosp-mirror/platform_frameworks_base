@@ -3913,6 +3913,9 @@ message MetricsEvent {
 
     // ---- End O Constants, all O constants go above this line ----
 
+    // OPEN: Settings > System > Languages & input > Advanced > Lift to open camera
+    SETTINGS_GESTURE_CAMERA_LIFT_TRIGGER = 986;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
