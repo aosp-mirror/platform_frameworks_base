@@ -49,6 +49,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @see Color
      * @see #setColor(int)
+     *
+     * @hide
      */
     @ColorInt
     public int getColor() {
@@ -64,6 +66,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @see Color
      * @see #getColor()
      * @see #getMode()
+     *
+     * @hide
      */
     public void setColor(@ColorInt int color) {
         if (mColor != color) {
@@ -78,6 +82,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @see PorterDuff
      * @see #setMode(android.graphics.PorterDuff.Mode)
+     *
+     * @hide
      */
     public PorterDuff.Mode getMode() {
         return mMode;
@@ -90,6 +96,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @see PorterDuff
      * @see #getMode()
      * @see #getColor()
+     *
+     * @hide
      */
     public void setMode(@NonNull PorterDuff.Mode mode) {
         if (mode == null) {
