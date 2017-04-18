@@ -34,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.internal.widget.ResolverDrawerLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,6 +56,11 @@ public class AccessibilityButtonChooserActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.accessibility_button_chooser);
+
+        final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
+        if (rdl != null) {
+            rdl.setOnDismissedListener(this::finish);
+        }
 
         String component = Settings.Secure.getString(getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT);
