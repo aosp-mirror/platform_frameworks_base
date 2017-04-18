@@ -376,13 +376,13 @@
     <string name="accessibility_no_sim">No SIM.</string>
 
     <!-- Content description of the cell data. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_cell_data">Cellular Data</string>
+    <string name="accessibility_cell_data">Mobile Data</string>
 
     <!-- Content description of the cell data being enabled. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_cell_data_on">Cellular Data On</string>
+    <string name="accessibility_cell_data_on">Mobile Data On</string>
 
     <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_cell_data_off">Cellular Data Off</string>
+    <string name="accessibility_cell_data_off">Mobile Data Off</string>
 
     <!-- Content description of the bluetooth tethering icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_tether">Bluetooth tethering.</string>
@@ -574,11 +574,11 @@
     <!-- Title of dialog shown when 4G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_4g_title">4G data is paused</string>
     <!-- Title of dialog shown when mobile data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_mobile_title">Cellular data is paused</string>
+    <string name="data_usage_disabled_dialog_mobile_title">Mobile data is paused</string>
     <!-- Title of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_title">Data is paused</string>
     <!-- Body of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=NONE] -->
-    <string name="data_usage_disabled_dialog">The data limit you set has been reached. You are no longer using cellular data.\n\nIf you resume, charges may apply for data usage.</string>
+    <string name="data_usage_disabled_dialog">The data limit you set has been reached. You are no longer using mobile data.\n\nIf you resume, charges may apply for data usage.</string>
     <!-- Dialog button indicating that data connection should be re-enabled. [CHAR LIMIT=28] -->
     <string name="data_usage_disabled_dialog_enable">Resume</string>
 
@@ -749,7 +749,7 @@
     <!-- QuickSettings: Flashlight [CHAR LIMIT=NONE] -->
     <string name="quick_settings_flashlight_label">Flashlight</string>
     <!-- QuickSettings: Cellular detail panel title [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_cellular_detail_title">Cellular data</string>
+    <string name="quick_settings_cellular_detail_title">Mobile data</string>
     <!-- QuickSettings: Cellular detail panel, data usage title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_data_usage">Data usage</string>
     <!-- QuickSettings: Cellular detail panel, remaining data title [CHAR LIMIT=NONE] -->
