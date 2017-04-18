@@ -1178,6 +1178,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      *         the activity is not currently visible and {@param noThrow} is not set.
      */
     boolean checkEnterPictureInPictureState(String caller, boolean noThrow, boolean beforeStopping) {
+        if (!supportsPictureInPicture()) {
+            return false;
+        }
+
         // Check app-ops and see if PiP is supported for this package
         if (!checkEnterPictureInPictureAppOpsState()) {
             return false;
