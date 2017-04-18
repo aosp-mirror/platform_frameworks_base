@@ -390,14 +390,8 @@ bool SkiaCanvas::clipRect(float left, float top, float right, float bottom, SkCl
 }
 
 bool SkiaCanvas::clipPath(const SkPath* path, SkClipOp op) {
-    SkRRect roundRect;
-    if (path->isRRect(&roundRect)) {
-        this->recordClip(roundRect, op);
-        mCanvas->clipRRect(roundRect, op);
-    } else {
-        this->recordClip(*path, op);
-        mCanvas->clipPath(*path, op);
-    }
+    this->recordClip(*path, op);
+    mCanvas->clipPath(*path, op);
     return !mCanvas->isClipEmpty();
 }
 
