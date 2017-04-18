@@ -54,7 +54,11 @@ public class LogMaker {
 
     /* Deserialize from the eventlog */
     public LogMaker(Object[] items) {
-      deserialize(items);
+        if (items != null) {
+            deserialize(items);
+        } else {
+            setCategory(MetricsEvent.VIEW_UNKNOWN);
+        }
     }
 
     /** @param category to replace the existing setting. */
@@ -373,13 +377,13 @@ public class LogMaker {
      */
     public void deserialize(Object[] items) {
         int i = 0;
-        while (i < items.length) {
+        while (items != null && i < items.length) {
             Object key = items[i++];
             Object value = i < items.length ? items[i++] : null;
             if (key instanceof Integer) {
                 entries.put((Integer) key, value);
             } else {
-                Log.i(TAG, "Invalid key " + key.toString());
+                Log.i(TAG, "Invalid key " + (key == null ? "null" : key.toString()));
             }
         }
     }

@@ -263,4 +263,32 @@ public class LogMakerTest extends TestCase {
         assertFalse(a.isSubsetOf(b));
         assertFalse(b.isSubsetOf(a));
     }
+
+    public void testConstructFromNull() {
+        new LogMaker(null);
+        // no promises, just don't throw
+    }
+
+    public void testConstructFromNullKey() {
+        Object[] items = new Object[2];
+        items[0] = null;
+        items[1] = "foo";
+        new LogMaker(items);
+        // no promises, just don't throw
+    }
+
+    public void testConstructFromNullField() {
+        Object[] items = new Object[2];
+        items[0] = 10;
+        items[1] = null;
+        new LogMaker(items);
+        // no promises, just don't throw
+    }
+
+    public void testConstructFromTruncatedArray() {
+        Object[] items = new Object[1];
+        items[0] = 10;
+        new LogMaker(items);
+        // no promises, just don't throw
+    }
 }
