@@ -2725,7 +2725,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final AppWindowToken atoken = mTmpUpdateAllDrawn.removeLast();
             // See if any windows have been drawn, so they (and others associated with them)
             // can now be shown.
-            atoken.updateAllDrawn(this);
+            atoken.updateAllDrawn();
         }
 
         return mTmpApplySurfaceChangesTransactionState.focusDisplayed;
