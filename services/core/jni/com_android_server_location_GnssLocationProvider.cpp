@@ -68,12 +68,15 @@ static JavaVM* sJvm;
 
 using android::OK;
 using android::sp;
+using android::wp;
 using android::status_t;
 using android::String16;
 
 using android::hardware::Return;
 using android::hardware::Void;
 using android::hardware::hidl_vec;
+using android::hardware::hidl_death_recipient;
+using android::hidl::base::V1_0::IBase;
 
 using android::hardware::gnss::V1_0::IAGnss;
 using android::hardware::gnss::V1_0::IAGnssCallback;
@@ -97,7 +100,18 @@ using android::hardware::gnss::V1_0::IGnssNiCallback;
 using android::hardware::gnss::V1_0::IGnssXtra;
 using android::hardware::gnss::V1_0::IGnssXtraCallback;
 
+struct GnssDeathRecipient : virtual public hidl_death_recipient
+{
+    // hidl_death_recipient interface
+    virtual void serviceDied(uint64_t cookie, const wp<IBase>& who) override {
+      // TODO(gomo): implement a better death recovery mechanism without
+      // crashing system server process as described in go//treble-gnss-death
+      LOG_ALWAYS_FATAL("Abort due to IGNSS hidl service failure,"
+            " restarting system server");
+    }
+};
 
+sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
 sp<IGnss> gnssHal = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil> agnssRilIface = nullptr;
@@ -1038,6 +1052,18 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     // TODO(b/31632518)
     gnssHal = IGnss::getService();
     if (gnssHal != nullptr) {
+      gnssHalDeathRecipient = new GnssDeathRecipient();
+      hardware::Return<bool> linked = gnssHal->linkToDeath(
+          gnssHalDeathRecipient, /*cookie*/ 0);
+        if (!linked.isOk()) {
+            ALOGE("Transaction error in linking to GnssHAL death: %s",
+                    linked.description().c_str());
+        } else if (!linked) {
+            ALOGW("Unable to link to GnssHal death notifications");
+        } else {
+            ALOGD("Link to death notification successful");
+        }
+
         auto gnssXtra = gnssHal->getExtensionXtra();
         if (!gnssXtra.isOk()) {
             ALOGD("Unable to get a handle to Xtra");
