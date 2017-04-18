@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -328,8 +329,23 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public int getInstantAppCookieMaxBytes() {
+        return 0;
+    }
+
+    @Override
     public int getInstantAppCookieMaxSize() {
         return 0;
+    }
+
+    @Override
+    public void clearInstantAppCookie() {;
+
+    }
+
+    @Override
+    public void updateInstantAppCookie(@Nullable byte[] cookie) {
+
     }
 
     @Override
