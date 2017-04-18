@@ -94,6 +94,16 @@ public class LogMaker {
     }
 
     /**
+     * Set event latency.
+     *
+     * @hide // TODO Expose in the future?  Too late for O.
+     */
+    public LogMaker setLatency(long milliseconds) {
+        entries.put(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, milliseconds);
+        return this;
+    }
+
+    /**
      * This will be set by the system when the log is persisted.
      * Client-supplied values will be ignored.
      *
