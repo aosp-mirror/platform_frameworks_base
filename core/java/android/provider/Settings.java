@@ -6778,6 +6778,14 @@ public final class Settings {
                 "camera_double_twist_to_flip_enabled";
 
         /**
+         * Whether or not the smart camera lift trigger that launches the camera when the user moves
+         * the phone into a position for taking photos should be enabled.
+         *
+         * @hide
+         */
+        public static final String CAMERA_LIFT_TRIGGER_ENABLED = "camera_lift_trigger_enabled";
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
