@@ -1874,10 +1874,9 @@ public class NotificationManagerService extends SystemService {
             int userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), incomingUserId, true, false,
                     "getAppActiveNotifications", pkg);
-            final ArrayMap<String, StatusBarNotification> map
-                    = new ArrayMap<>(mNotificationList.size() + mEnqueuedNotifications.size());
-
             synchronized (mNotificationLock) {
+                final ArrayMap<String, StatusBarNotification> map
+                        = new ArrayMap<>(mNotificationList.size() + mEnqueuedNotifications.size());
                 final int N = mNotificationList.size();
                 for (int i = 0; i < N; i++) {
                     StatusBarNotification sbn = sanitizeSbn(pkg, userId,
@@ -1900,11 +1899,10 @@ public class NotificationManagerService extends SystemService {
                         map.put(sbn.getKey(), sbn); // pending update overwrites existing post here
                     }
                 }
+                final ArrayList<StatusBarNotification> list = new ArrayList<>(map.size());
+                list.addAll(map.values());
+                return new ParceledListSlice<StatusBarNotification>(list);
             }
-
-            final ArrayList<StatusBarNotification> list = new ArrayList<>(map.size());
-            list.addAll(map.values());
-            return new ParceledListSlice<StatusBarNotification>(list);
         }
 
         private StatusBarNotification sanitizeSbn(String pkg, int userId,
@@ -2036,8 +2034,10 @@ public class NotificationManagerService extends SystemService {
             long identity = Binder.clearCallingIdentity();
             try {
                 // allow bound services to disable themselves
-                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                info.getOwner().setComponentState(info.component, false);
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    info.getOwner().setComponentState(info.component, false);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2101,8 +2101,10 @@ public class NotificationManagerService extends SystemService {
                 String key, String snoozeCriterionId) {
             long identity = Binder.clearCallingIdentity();
             try {
-                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                snoozeNotificationInt(key, SNOOZE_UNTIL_UNSPECIFIED, snoozeCriterionId, info);
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    snoozeNotificationInt(key, SNOOZE_UNTIL_UNSPECIFIED, snoozeCriterionId, info);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2118,8 +2120,10 @@ public class NotificationManagerService extends SystemService {
                 long duration) {
             long identity = Binder.clearCallingIdentity();
             try {
-                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                snoozeNotificationInt(key, duration, null, info);
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    snoozeNotificationInt(key, duration, null, info);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2134,9 +2138,11 @@ public class NotificationManagerService extends SystemService {
         public void unsnoozeNotificationFromAssistant(INotificationListener token, String key) {
             long identity = Binder.clearCallingIdentity();
             try {
-                final ManagedServiceInfo info =
-                        mNotificationAssistants.checkServiceTokenLocked(token);
-                unsnoozeNotificationInt(key, info);
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info =
+                            mNotificationAssistants.checkServiceTokenLocked(token);
+                    unsnoozeNotificationInt(key, info);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2734,7 +2740,10 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void verifyPrivilegedListener(INotificationListener token, UserHandle user) {
-            ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+            ManagedServiceInfo info;
+            synchronized (mNotificationLock) {
+                info = mListeners.checkServiceTokenLocked(token);
+            }
             if (!hasCompanionDevice(info)) {
                 throw new SecurityException(info + " does not have access");
             }
@@ -3099,8 +3108,10 @@ public class NotificationManagerService extends SystemService {
                 @Override
                 public void run() {
                     synchronized (mNotificationLock) {
-                        removeForegroundServiceFlagByListLocked(mEnqueuedNotifications, pkg, notificationId, userId);
-                        removeForegroundServiceFlagByListLocked(mNotificationList, pkg, notificationId, userId);
+                        removeForegroundServiceFlagByListLocked(
+                                mEnqueuedNotifications, pkg, notificationId, userId);
+                        removeForegroundServiceFlagByListLocked(
+                                mNotificationList, pkg, notificationId, userId);
                     }
                 }
             });
