@@ -21,6 +21,8 @@ import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -49,6 +51,7 @@ public class NotificationInflater {
     private RemoteViews.OnClickHandler mRemoteViewClickHandler;
     private boolean mIsChildInGroup;
     private InflationExceptionHandler mInflateExceptionHandler;
+    private boolean mRedactAmbient;
 
     public NotificationInflater(ExpandableNotificationRow row) {
         mRow = row;
@@ -92,6 +95,21 @@ public class NotificationInflater {
         mRemoteViewClickHandler = remoteViewClickHandler;
     }
 
+    public void setRedactAmbient(boolean redactAmbient) {
+        if (mRedactAmbient != redactAmbient) {
+            mRedactAmbient = redactAmbient;
+            if (mRow.getEntry() == null) {
+                return;
+            }
+            try {
+                inflateNotificationViews(FLAG_REINFLATE_AMBIENT_VIEW);
+            } catch (InflationException e) {
+                mInflateExceptionHandler.handleInflationException(
+                        mRow.getStatusBarNotification(), e);
+            }
+        }
+    }
+
     public void inflateNotificationViews() throws InflationException {
         inflateNotificationViews(FLAG_REINFLATE_ALL);
     }
@@ -123,6 +141,8 @@ public class NotificationInflater {
             Notification.Builder builder, Context packageContext) {
         NotificationData.Entry entry = mRow.getEntry();
         NotificationContentView privateLayout = mRow.getPrivateLayout();
+        NotificationContentView publicLayout = mRow.getPublicLayout();
+
         boolean isLowPriority = mIsLowPriority && !mIsChildInGroup;
         if ((reInflateFlags & FLAG_REINFLATE_CONTENT_VIEW) != 0) {
             final RemoteViews newContentView = createContentView(builder,
@@ -190,7 +210,6 @@ public class NotificationInflater {
         }
 
         if ((reInflateFlags & FLAG_REINFLATE_PUBLIC_VIEW) != 0) {
-            NotificationContentView publicLayout = mRow.getPublicLayout();
             final RemoteViews newPublicNotification
                     = builder.makePublicContentView();
             if (!compareRemoteViews(newPublicNotification, entry.cachedPublicContentView)) {
@@ -209,18 +228,24 @@ public class NotificationInflater {
         }
 
         if ((reInflateFlags & FLAG_REINFLATE_AMBIENT_VIEW) != 0) {
-            final RemoteViews newAmbientNotification
-                    = builder.makeAmbientNotification();
-            if (!compareRemoteViews(newAmbientNotification, entry.cachedAmbientContentView)) {
+            final RemoteViews newAmbientNotification = mRedactAmbient
+                    ? builder.makePublicAmbientNotification()
+                    : builder.makeAmbientNotification();
+            NotificationContentView newParent = mRedactAmbient ? publicLayout : privateLayout;
+            NotificationContentView otherParent = !mRedactAmbient ? publicLayout : privateLayout;
+
+            if (newParent.getAmbientChild() == null ||
+                    !compareRemoteViews(newAmbientNotification, entry.cachedAmbientContentView)) {
                 View ambientContentView = newAmbientNotification.apply(
                         packageContext,
-                        privateLayout,
+                        newParent,
                         mRemoteViewClickHandler);
                 ambientContentView.setIsRootNamespace(true);
-                privateLayout.setAmbientChild(ambientContentView);
+                newParent.setAmbientChild(ambientContentView);
+                otherParent.setAmbientChild(null);
             } else {
                 newAmbientNotification.reapply(packageContext,
-                        privateLayout.getAmbientChild(),
+                        newParent.getAmbientChild(),
                         mRemoteViewClickHandler);
             }
             entry.cachedAmbientContentView = newAmbientNotification;
