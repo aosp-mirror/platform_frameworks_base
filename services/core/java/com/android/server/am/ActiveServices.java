@@ -312,8 +312,7 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
-            int id, Notification notification, int callingPid, int callingUid,
-            boolean fgRequired, String callingPackage, final int userId)
+            int callingPid, int callingUid, boolean fgRequired, String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
@@ -464,10 +463,6 @@ public final class ActiveServices {
         }
 
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
-        // STOPSHIP deprecated; remove when NotificationManager.startServiceInForeground is retired
-        if (notification != null) {
-            setServiceForegroundInnerLocked(r, id, notification, 0);
-        }
         return cmp;
     }
 

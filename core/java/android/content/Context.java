@@ -2647,18 +2647,6 @@ public abstract class Context {
     public abstract ComponentName startForegroundServiceAsUser(Intent service, UserHandle user);
 
     /**
-     * Start a service directly into the "foreground service" state.  Unlike {@link #startService},
-     * this method can be used from within background operations like broadcast receivers
-     * or scheduled jobs.  The API entry point for this is in NotificationManager in order to
-     * preserve appropriate public package layering.
-     * @hide
-     * @deprecated STOPSHIP remove in favor of two-step startForegroundService() + startForeground()
-     */
-    @Nullable
-    public abstract ComponentName startServiceInForeground(Intent service,
-            int id, Notification notification);
-
-    /**
      * Request that a given application service be stopped.  If the service is
      * not running, nothing happens.  Otherwise it is stopped.  Note that calls
      * to startService() are not counted -- this stops the service no matter
@@ -2694,16 +2682,6 @@ public abstract class Context {
      */
     @Nullable
     public abstract ComponentName startServiceAsUser(Intent service, UserHandle user);
-
-    /**
-     * @hide like {@link #startServiceInForeground(Intent, int, Notification)}
-     * but for a specific user.
-     * @deprecated STOPSHIP remove when trial API is turned off
-     */
-    @Deprecated
-    @Nullable
-    public abstract ComponentName startServiceInForegroundAsUser(Intent service,
-            int id, Notification notification, UserHandle user);
 
     /**
      * @hide like {@link #stopService(Intent)} but for a specific user.

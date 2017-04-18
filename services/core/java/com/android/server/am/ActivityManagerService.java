@@ -17932,8 +17932,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, int id, Notification notification, boolean requireForeground,
-            String callingPackage, int userId)
+            String resolvedType, boolean requireForeground, String callingPackage, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         // Refuse possible leaked file descriptors
@@ -17954,7 +17953,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ComponentName res;
             try {
                 res = mServices.startServiceLocked(caller, service,
-                        resolvedType, id, notification, callingPid, callingUid,
+                        resolvedType, callingPid, callingUid,
                         requireForeground, callingPackage, userId);
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -17973,7 +17972,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ComponentName res;
             try {
                 res = mServices.startServiceLocked(null, service,
-                        resolvedType, 0, null, -1, uid, fgRequired, callingPackage, userId);
+                        resolvedType, -1, uid, fgRequired, callingPackage, userId);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
