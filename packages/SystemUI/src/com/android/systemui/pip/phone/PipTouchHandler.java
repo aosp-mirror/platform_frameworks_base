@@ -63,7 +63,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
     private static final int METRIC_VALUE_DISMISSED_BY_DRAG = 1;
 
-    private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 200;
+    private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 225;
 
     // Allow dragging the PIP to a location to close it
     private static final boolean ENABLE_DISMISS_DRAG_TO_EDGE = true;

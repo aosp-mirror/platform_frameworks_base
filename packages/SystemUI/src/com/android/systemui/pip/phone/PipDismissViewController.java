@@ -39,7 +39,8 @@ public class PipDismissViewController {
     // This delay controls how long to wait before we show the target when the user first moves
     // the PIP, to prevent the target from animating if the user just wants to fling the PIP
     private static final int SHOW_TARGET_DELAY = 100;
-    private static final int SHOW_TARGET_DURATION = 200;
+    private static final int SHOW_TARGET_DURATION = 350;
+    private static final int HIDE_TARGET_DURATION = 225;
 
     private Context mContext;
     private WindowManager mWindowManager;
@@ -96,7 +97,7 @@ public class PipDismissViewController {
     public void showDismissTarget() {
         mDismissView.animate()
                 .alpha(1f)
-                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
+                .setInterpolator(Interpolators.LINEAR)
                 .setStartDelay(SHOW_TARGET_DELAY)
                 .setDuration(SHOW_TARGET_DURATION)
                 .start();
@@ -109,9 +110,9 @@ public class PipDismissViewController {
         if (mDismissView != null) {
             mDismissView.animate()
                     .alpha(0f)
-                    .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
+                    .setInterpolator(Interpolators.LINEAR)
                     .setStartDelay(0)
-                    .setDuration(SHOW_TARGET_DURATION)
+                    .setDuration(HIDE_TARGET_DURATION)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
