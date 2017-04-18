@@ -39,6 +39,7 @@ import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -58,7 +59,7 @@ public class GestureLauncherService extends SystemService {
      * Time in milliseconds in which the power button must be pressed twice so it will be considered
      * as a camera launch.
      */
-    private static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
+    @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
@@ -155,7 +156,8 @@ public class GestureLauncherService extends SystemService {
         }
     }
 
-    private void updateCameraDoubleTapPowerEnabled() {
+    @VisibleForTesting
+    void updateCameraDoubleTapPowerEnabled() {
         boolean enabled = isCameraDoubleTapPowerSettingEnabled(mContext, mUserId);
         synchronized (this) {
             mCameraDoubleTapPowerEnabled = enabled;
@@ -284,7 +286,8 @@ public class GestureLauncherService extends SystemService {
     /**
      * @return true if camera was launched, false otherwise.
      */
-    private boolean handleCameraLaunchGesture(boolean useWakelock, int source) {
+    @VisibleForTesting
+    boolean handleCameraLaunchGesture(boolean useWakelock, int source) {
         boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
         if (!userSetupComplete) {
