@@ -211,6 +211,7 @@ public class NotificationPanelView extends PanelView implements
     private NotificationGroupManager mGroupManager;
     private boolean mShowIconsWhenExpanded;
     private int mIndicationBottomPadding;
+    private int mAmbientIndicationBottomPadding;
     private boolean mIsFullWidth;
     private boolean mDark;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
@@ -425,7 +426,7 @@ public class NotificationPanelView extends PanelView implements
         float shelfSize = mNotificationStackScroller.getNotificationShelf().getIntrinsicHeight()
                 + notificationPadding;
         float availableSpace = mNotificationStackScroller.getHeight() - minPadding - shelfSize
-                - mIndicationBottomPadding;
+                - Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
         int count = 0;
         for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);
@@ -2475,5 +2476,12 @@ public class NotificationPanelView extends PanelView implements
 
     public void setPulsing(boolean pulsing) {
         mKeyguardStatusView.setPulsing(pulsing);
+    }
+
+    public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
+        if (mAmbientIndicationBottomPadding != ambientIndicationBottomPadding) {
+            mAmbientIndicationBottomPadding = ambientIndicationBottomPadding;
+            mStatusBar.updateKeyguardMaxNotifications();
+        }
     }
 }
