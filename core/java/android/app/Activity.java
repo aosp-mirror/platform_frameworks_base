@@ -2070,6 +2070,7 @@ public class Activity extends ContextThemeWrapper
             if (args == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture args");
             }
+            updatePictureInPictureArgsForContentInsets(args);
             return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, args);
         } catch (RemoteException e) {
             return false;
@@ -2087,8 +2088,24 @@ public class Activity extends ContextThemeWrapper
             if (args == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture args");
             }
+            updatePictureInPictureArgsForContentInsets(args);
             ActivityManagerNative.getDefault().setPictureInPictureArgs(mToken, args);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Updates the provided {@param args} with the last known content insets for this activity, to
+     * be used with the source hint rect for the transition into PiP.
+     */
+    private void updatePictureInPictureArgsForContentInsets(PictureInPictureArgs args) {
+        if (args != null && args.hasSourceBoundsHint() && getWindow() != null &&
+                getWindow().peekDecorView() != null &&
+                getWindow().peekDecorView().getViewRootImpl() != null) {
+            args.setSourceRectHintInsets(
+                    getWindow().peekDecorView().getViewRootImpl().getLastContentInsets());
+        } else {
+            args.setSourceRectHintInsets(null);
         }
     }
 
