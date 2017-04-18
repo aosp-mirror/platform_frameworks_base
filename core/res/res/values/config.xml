@@ -2833,4 +2833,7 @@
           specified name exists on the device, autofill will be disabled by default.
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
+
+    <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
+    <bool name="config_useDefaultFocusHighlight">true</bool>
 </resources>
