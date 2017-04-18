@@ -883,16 +883,24 @@ public class TelephonyManager {
 
     /**
      * USSD return code success.
+     * @hide
      */
     public static final int USSD_RETURN_SUCCESS = 100;
 
     /**
-     * USSD return code for failure case.
+     * Failed code returned when the mobile network has failed to complete a USSD request.
+     * <p>
+     * Returned via {@link TelephonyManager.UssdResponseCallback#onReceiveUssdResponseFailed(
+     * TelephonyManager, String, int)}.
      */
     public static final int USSD_RETURN_FAILURE = -1;
 
     /**
-     * USSD return code for failure case.
+     * Failure code returned when a USSD request has failed to execute because the Telephony
+     * service is unavailable.
+     * <p>
+     * Returned via {@link TelephonyManager.UssdResponseCallback#onReceiveUssdResponseFailed(
+     * TelephonyManager, String, int)}.
      */
     public static final int USSD_ERROR_SERVICE_UNAVAIL = -2;
 
@@ -5098,27 +5106,39 @@ public class TelephonyManager {
         return new int[0];
     }
 
-    /* The caller of {@link #sendUssdRequest(String, UssdResponseCallback, Handler} provides
-     * once the network returns a USSD message or if there is failure.
-     * Either {@link #onReceiveUssdResponse(TelephonyManager, String, CharSequence} or
-     * {@link #onReceiveUssdResponseFailed(TelephonyManager, String, int} will be called.
+    /**
+     * Used to notify callers of
+     * {@link TelephonyManager#sendUssdRequest(String, UssdResponseCallback, Handler)} when the
+     * network either successfully executes a USSD request, or if there was a failure while
+     * executing the request.
+     * <p>
+     * {@link #onReceiveUssdResponse(TelephonyManager, String, CharSequence)} will be called if the
+     * USSD request has succeeded.
+     * {@link #onReceiveUssdResponseFailed(TelephonyManager, String, int)} will be called if the
+     * USSD request has failed.
      */
     public static abstract class UssdResponseCallback {
        /**
-        * Called when USSD has succeeded. The calling app can choose to either display the message
-        * or interpret the message.
+        * Called when a USSD request has succeeded.  The {@code response} contains the USSD
+        * response received from the network.  The calling app can choose to either display the
+        * response to the user or perform some operation based on the response.
+        * <p>
+        * USSD responses are unstructured text and their content is determined by the mobile network
+        * operator.
+        *
         * @param telephonyManager the TelephonyManager the callback is registered to.
-        * @param request the ussd code sent to the network.
-        * @param response the response from the network.
+        * @param request the USSD request sent to the mobile network.
+        * @param response the response to the USSD request provided by the mobile network.
         **/
        public void onReceiveUssdResponse(final TelephonyManager telephonyManager,
                                          String request, CharSequence response) {};
 
        /**
-        * Called when USSD has failed.
-        * @param telephonyManager the TelephonyManager the callback is registered to
-        * @param request the ussd code.
-        * @param failureCode failure code, should be either of
+        * Called when a USSD request has failed to complete.
+        *
+        * @param telephonyManager the TelephonyManager the callback is registered to.
+        * @param request the USSD request sent to the mobile network.
+        * @param failureCode failure code indicating why the request failed.  Will be either
         *        {@link TelephonyManager#USSD_RETURN_FAILURE} or
         *        {@link TelephonyManager#USSD_ERROR_SERVICE_UNAVAIL}.
         **/
@@ -5127,8 +5147,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Sends an Unstructured Supplementary Service Data (USSD) request to the cellular network and
-     * informs the caller of the response via {@code callback}.
+     * Sends an Unstructured Supplementary Service Data (USSD) request to the mobile network and
+     * informs the caller of the response via the supplied {@code callback}.
      * <p>Carriers define USSD codes which can be sent by the user to request information such as
      * the user's current data balance or minutes balance.
      * <p>Requires permission:
