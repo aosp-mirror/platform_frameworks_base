@@ -28,6 +28,7 @@ import static android.widget.espresso.TextViewActions.longPressAndDragOnText;
 import static android.widget.espresso.TextViewActions.longPressOnTextAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarItemIndex;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsDisplayed;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsNotDisplayed;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarContainsItem;
@@ -46,6 +47,11 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.textclassifier.TextClassificationManager;
+import android.view.textclassifier.TextClassifier;
 import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
 
 import android.support.test.espresso.action.EspressoKey;
@@ -71,7 +77,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        getActivity();
+        getActivity().getSystemService(TextClassificationManager.class)
+                .setTextClassifier(TextClassifier.NO_OP);
     }
 
     public void testTypedTextIsOnScreen() throws Exception {
@@ -675,5 +682,39 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         getInstrumentation().waitForIdleSync();
         // hasTransientState should return false when selection is created by API.
         assertFalse(textView.hasTransientState());
+    }
+
+    public void testAssistItemIsAtIndexZero() throws Exception {
+        getActivity().getSystemService(TextClassificationManager.class).setTextClassifier(null);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
+        textView.post(() -> textView.setCustomSelectionActionModeCallback(
+                new ActionMode.Callback() {
+                    @Override
+                    public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                        // Create another item at order position 0 to confirm that it will never be
+                        // placed before the textAssist item.
+                        menu.add(Menu.NONE, 0 /* id */, 0 /* order */, "Test");
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                        return false;
+                    }
+
+                    @Override
+                    public void onDestroyActionMode(ActionMode actionMode) {}
+                }));
+        final String text = "droid@android.com";
+
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('@')));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarItemIndex(android.R.id.textAssist, 0);
     }
 }
