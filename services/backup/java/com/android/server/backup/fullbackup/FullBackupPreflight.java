@@ -25,14 +25,14 @@ import android.content.pm.PackageInfo;
  */
 public interface FullBackupPreflight {
 
-  /**
-   * Perform the preflight operation necessary for the given package.
-   *
-   * @param pkg The name of the package being proposed for full-data backup
-   * @param agent Live BackupAgent binding to the target app's agent
-   * @return BackupTransport.TRANSPORT_OK to proceed with the backup operation, or one of the
-   * other BackupTransport.* error codes as appropriate
-   */
+    /**
+     * Perform the preflight operation necessary for the given package.
+     *
+     * @param pkg The name of the package being proposed for full-data backup
+     * @param agent Live BackupAgent binding to the target app's agent
+     * @return BackupTransport.TRANSPORT_OK to proceed with the backup operation, or one of the
+     * other BackupTransport.* error codes as appropriate
+     */
     int preflightFullBackup(PackageInfo pkg, IBackupAgent agent);
 
     long getExpectedSizeOrErrorCode();

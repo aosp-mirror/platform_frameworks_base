@@ -30,9 +30,11 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 import android.util.StringBuilderPrinter;
+
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.RefactoredBackupManagerService;
+
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -57,7 +59,7 @@ public class FullBackupEngine {
 
     class FullBackupRunner implements Runnable {
 
-      PackageInfo mPackage;
+        PackageInfo mPackage;
         byte[] mWidgetData;
         IBackupAgent mAgent;
         ParcelFileDescriptor mPipe;
@@ -66,8 +68,8 @@ public class FullBackupEngine {
         boolean mWriteManifest;
 
         FullBackupRunner(PackageInfo pack, IBackupAgent agent, ParcelFileDescriptor pipe,
-            int token, boolean sendApk, boolean writeManifest, byte[] widgetData)
-            throws IOException {
+                int token, boolean sendApk, boolean writeManifest, byte[] widgetData)
+                throws IOException {
             mPackage = pack;
             mWidgetData = widgetData;
             mAgent = agent;
@@ -85,24 +87,26 @@ public class FullBackupEngine {
                 if (mWriteManifest) {
                     final boolean writeWidgetData = mWidgetData != null;
                     if (RefactoredBackupManagerService.MORE_DEBUG) {
-                      Slog.d(RefactoredBackupManagerService.TAG, "Writing manifest for " + mPackage.packageName);
+                        Slog.d(RefactoredBackupManagerService.TAG,
+                                "Writing manifest for " + mPackage.packageName);
                     }
                     RefactoredBackupManagerService
-                        .writeAppManifest(mPackage, backupManagerService.mPackageManager, mManifestFile, mSendApk,
-                            writeWidgetData);
+                            .writeAppManifest(mPackage, backupManagerService.mPackageManager,
+                                    mManifestFile, mSendApk,
+                                    writeWidgetData);
                     FullBackup.backupToTar(mPackage.packageName, null, null,
-                        mFilesDir.getAbsolutePath(),
-                        mManifestFile.getAbsolutePath(),
-                        output);
+                            mFilesDir.getAbsolutePath(),
+                            mManifestFile.getAbsolutePath(),
+                            output);
                     mManifestFile.delete();
 
                     // We only need to write a metadata file if we have widget data to stash
                     if (writeWidgetData) {
                         writeMetadata(mPackage, mMetadataFile, mWidgetData);
                         FullBackup.backupToTar(mPackage.packageName, null, null,
-                            mFilesDir.getAbsolutePath(),
-                            mMetadataFile.getAbsolutePath(),
-                            output);
+                                mFilesDir.getAbsolutePath(),
+                                mMetadataFile.getAbsolutePath(),
+                                output);
                         mMetadataFile.delete();
                     }
                 }
@@ -112,17 +116,23 @@ public class FullBackupEngine {
                 }
 
                 if (RefactoredBackupManagerService.DEBUG) {
-                  Slog.d(RefactoredBackupManagerService.TAG, "Calling doFullBackup() on " + mPackage.packageName);
+                    Slog.d(RefactoredBackupManagerService.TAG,
+                            "Calling doFullBackup() on " + mPackage.packageName);
                 }
                 backupManagerService
-                    .prepareOperationTimeout(mToken, RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                        mTimeoutMonitor /* in parent class */, RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
-                mAgent.doFullBackup(mPipe, mQuota, mToken, backupManagerService.mBackupManagerBinder);
+                        .prepareOperationTimeout(mToken,
+                                RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
+                                mTimeoutMonitor /* in parent class */,
+                                RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
+                mAgent.doFullBackup(mPipe, mQuota, mToken,
+                        backupManagerService.mBackupManagerBinder);
             } catch (IOException e) {
-                Slog.e(RefactoredBackupManagerService.TAG, "Error running full backup for " + mPackage.packageName);
+                Slog.e(RefactoredBackupManagerService.TAG,
+                        "Error running full backup for " + mPackage.packageName);
             } catch (RemoteException e) {
-                Slog.e(RefactoredBackupManagerService.TAG, "Remote agent vanished during full backup of "
-                    + mPackage.packageName);
+                Slog.e(RefactoredBackupManagerService.TAG,
+                        "Remote agent vanished during full backup of "
+                                + mPackage.packageName);
             } finally {
                 try {
                     mPipe.close();
@@ -133,9 +143,9 @@ public class FullBackupEngine {
     }
 
     public FullBackupEngine(RefactoredBackupManagerService backupManagerService,
-        OutputStream output,
-        FullBackupPreflight preflightHook, PackageInfo pkg,
-        boolean alsoApks, BackupRestoreTask timeoutMonitor, long quota, int opToken) {
+            OutputStream output,
+            FullBackupPreflight preflightHook, PackageInfo pkg,
+            boolean alsoApks, BackupRestoreTask timeoutMonitor, long quota, int opToken) {
         this.backupManagerService = backupManagerService;
         mOutput = output;
         mPreflightHook = preflightHook;
@@ -143,8 +153,10 @@ public class FullBackupEngine {
         mIncludeApks = alsoApks;
         mTimeoutMonitor = timeoutMonitor;
         mFilesDir = new File("/data/system");
-        mManifestFile = new File(mFilesDir, RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME);
-        mMetadataFile = new File(mFilesDir, RefactoredBackupManagerService.BACKUP_METADATA_FILENAME);
+        mManifestFile = new File(mFilesDir,
+                RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME);
+        mMetadataFile = new File(mFilesDir,
+                RefactoredBackupManagerService.BACKUP_METADATA_FILENAME);
         mQuota = quota;
         mOpToken = opToken;
     }
@@ -163,7 +175,8 @@ public class FullBackupEngine {
             }
             return result;
         } else {
-            Slog.w(RefactoredBackupManagerService.TAG, "Unable to bind to full agent for " + mPkg.packageName);
+            Slog.w(RefactoredBackupManagerService.TAG,
+                    "Unable to bind to full agent for " + mPkg.packageName);
             return BackupTransport.AGENT_ERROR;
         }
     }
@@ -178,20 +191,20 @@ public class FullBackupEngine {
 
                 ApplicationInfo app = mPkg.applicationInfo;
                 final boolean isSharedStorage =
-                    mPkg.packageName.equals(
-                        RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE);
+                        mPkg.packageName.equals(
+                                RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE);
                 final boolean sendApk = mIncludeApks
-                    && !isSharedStorage
-                    && ((app.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) == 0)
-                    && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
-                    (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+                        && !isSharedStorage
+                        && ((app.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) == 0)
+                        && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
+                        (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
 
                 // TODO: http://b/22388012
                 byte[] widgetBlob = AppWidgetBackupBridge.getWidgetState(mPkg.packageName,
-                    UserHandle.USER_SYSTEM);
+                        UserHandle.USER_SYSTEM);
 
                 FullBackupRunner runner = new FullBackupRunner(mPkg, mAgent, pipes[1],
-                    mOpToken, sendApk, !isSharedStorage, widgetBlob);
+                        mOpToken, sendApk, !isSharedStorage, widgetBlob);
                 pipes[1].close();   // the runner has dup'd it
                 pipes[1] = null;
                 Thread t = new Thread(runner, "app-data-runner");
@@ -201,15 +214,18 @@ public class FullBackupEngine {
                 RefactoredBackupManagerService.routeSocketDataToOutput(pipes[0], mOutput);
 
                 if (!backupManagerService.waitUntilOperationComplete(mOpToken)) {
-                    Slog.e(RefactoredBackupManagerService.TAG, "Full backup failed on package " + mPkg.packageName);
+                    Slog.e(RefactoredBackupManagerService.TAG,
+                            "Full backup failed on package " + mPkg.packageName);
                 } else {
                     if (RefactoredBackupManagerService.MORE_DEBUG) {
-                        Slog.d(RefactoredBackupManagerService.TAG, "Full package backup success: " + mPkg.packageName);
+                        Slog.d(RefactoredBackupManagerService.TAG,
+                                "Full package backup success: " + mPkg.packageName);
                     }
                     result = BackupTransport.TRANSPORT_OK;
                 }
             } catch (IOException e) {
-                Slog.e(RefactoredBackupManagerService.TAG, "Error backing up " + mPkg.packageName + ": " + e.getMessage());
+                Slog.e(RefactoredBackupManagerService.TAG,
+                        "Error backing up " + mPkg.packageName + ": " + e.getMessage());
                 result = BackupTransport.AGENT_ERROR;
             } finally {
                 try {
@@ -217,10 +233,10 @@ public class FullBackupEngine {
                     mOutput.flush();
                     if (pipes != null) {
                         if (pipes[0] != null) {
-                          pipes[0].close();
+                            pipes[0].close();
                         }
                         if (pipes[1] != null) {
-                          pipes[1].close();
+                            pipes[1].close();
                         }
                     }
                 } catch (IOException e) {
@@ -229,7 +245,8 @@ public class FullBackupEngine {
                 }
             }
         } else {
-            Slog.w(RefactoredBackupManagerService.TAG, "Unable to bind to full agent for " + mPkg.packageName);
+            Slog.w(RefactoredBackupManagerService.TAG,
+                    "Unable to bind to full agent for " + mPkg.packageName);
         }
         tearDown();
         return result;
@@ -240,7 +257,8 @@ public class FullBackupEngine {
             try {
                 mAgent.doQuotaExceeded(backupDataBytes, quotaBytes);
             } catch (RemoteException e) {
-                Slog.e(RefactoredBackupManagerService.TAG, "Remote exception while telling agent about quota exceeded");
+                Slog.e(RefactoredBackupManagerService.TAG,
+                        "Remote exception while telling agent about quota exceeded");
             }
         }
     }
@@ -248,10 +266,11 @@ public class FullBackupEngine {
     private boolean initializeAgent() {
         if (mAgent == null) {
             if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.d(RefactoredBackupManagerService.TAG, "Binding to full backup agent : " + mPkg.packageName);
+                Slog.d(RefactoredBackupManagerService.TAG,
+                        "Binding to full backup agent : " + mPkg.packageName);
             }
             mAgent = backupManagerService.bindToAgentSynchronous(mPkg.applicationInfo,
-                ApplicationThreadConstants.BACKUP_MODE_FULL);
+                    ApplicationThreadConstants.BACKUP_MODE_FULL);
         }
         return mAgent != null;
     }
@@ -262,7 +281,7 @@ public class FullBackupEngine {
         final String appSourceDir = pkg.applicationInfo.getBaseCodePath();
         final String apkDir = new File(appSourceDir).getParent();
         FullBackup.backupToTar(pkg.packageName, FullBackup.APK_TREE_TOKEN, null,
-            apkDir, appSourceDir, output);
+                apkDir, appSourceDir, output);
 
         // TODO: migrate this to SharedStorageBackup, since AID_SYSTEM
         // doesn't have access to external storage.
@@ -274,14 +293,14 @@ public class FullBackupEngine {
         final File obbDir = userEnv.buildExternalStorageAppObbDirs(pkg.packageName)[0];
         if (obbDir != null) {
             if (RefactoredBackupManagerService.MORE_DEBUG) {
-              Log.i(RefactoredBackupManagerService.TAG, "obb dir: " + obbDir.getAbsolutePath());
+                Log.i(RefactoredBackupManagerService.TAG, "obb dir: " + obbDir.getAbsolutePath());
             }
             File[] obbFiles = obbDir.listFiles();
             if (obbFiles != null) {
                 final String obbDirName = obbDir.getAbsolutePath();
                 for (File obb : obbFiles) {
                     FullBackup.backupToTar(pkg.packageName, FullBackup.OBB_TREE_TOKEN, null,
-                        obbDirName, obb.getAbsolutePath(), output);
+                            obbDirName, obb.getAbsolutePath(), output);
                 }
             }
         }
@@ -304,7 +323,7 @@ public class FullBackupEngine {
     //
     // Unrecognized blobs are *ignored*, not errors.
     private void writeMetadata(PackageInfo pkg, File destination, byte[] widgetData)
-        throws IOException {
+            throws IOException {
         StringBuilder b = new StringBuilder(512);
         StringBuilderPrinter printer = new StringBuilderPrinter(b);
         printer.println(Integer.toString(RefactoredBackupManagerService.BACKUP_METADATA_VERSION));

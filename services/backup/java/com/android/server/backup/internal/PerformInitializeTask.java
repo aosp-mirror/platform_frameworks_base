@@ -21,9 +21,11 @@ import android.app.backup.BackupTransport;
 import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.Slog;
+
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.RefactoredBackupManagerService;
+
 import java.io.File;
 import java.util.HashSet;
 
@@ -33,7 +35,7 @@ public class PerformInitializeTask implements Runnable {
     HashSet<String> mQueue;
 
     PerformInitializeTask(RefactoredBackupManagerService backupManagerService,
-        HashSet<String> transportNames) {
+            HashSet<String> transportNames) {
         this.backupManagerService = backupManagerService;
         mQueue = transportNames;
     }
@@ -42,14 +44,16 @@ public class PerformInitializeTask implements Runnable {
         try {
             for (String transportName : mQueue) {
                 IBackupTransport transport =
-                    backupManagerService.mTransportManager.getTransportBinder(transportName);
+                        backupManagerService.mTransportManager.getTransportBinder(transportName);
                 if (transport == null) {
                     Slog.e(
-                        RefactoredBackupManagerService.TAG, "Requested init for " + transportName + " but not found");
+                            RefactoredBackupManagerService.TAG,
+                            "Requested init for " + transportName + " but not found");
                     continue;
                 }
 
-                Slog.i(RefactoredBackupManagerService.TAG, "Initializing (wiping) backup transport storage: " + transportName);
+                Slog.i(RefactoredBackupManagerService.TAG,
+                        "Initializing (wiping) backup transport storage: " + transportName);
                 EventLog.writeEvent(EventLogTags.BACKUP_START, transport.transportDirName());
                 long startRealtime = SystemClock.elapsedRealtime();
                 int status = transport.initializeDevice();
@@ -64,7 +68,8 @@ public class PerformInitializeTask implements Runnable {
                     int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
                     EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                     backupManagerService
-                        .resetBackupState(new File(backupManagerService.mBaseStateDir, transport.transportDirName()));
+                            .resetBackupState(new File(backupManagerService.mBaseStateDir,
+                                    transport.transportDirName()));
                     EventLog.writeEvent(EventLogTags.BACKUP_SUCCESS, 0, millis);
                     synchronized (backupManagerService.mQueueLock) {
                         backupManagerService.recordInitPendingLocked(false, transportName);
@@ -72,16 +77,19 @@ public class PerformInitializeTask implements Runnable {
                 } else {
                     // If this didn't work, requeue this one and try again
                     // after a suitable interval
-                    Slog.e(RefactoredBackupManagerService.TAG, "Transport error in initializeDevice()");
+                    Slog.e(RefactoredBackupManagerService.TAG,
+                            "Transport error in initializeDevice()");
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
                     synchronized (backupManagerService.mQueueLock) {
                         backupManagerService.recordInitPendingLocked(true, transportName);
                     }
                     // do this via another alarm to make sure of the wakelock states
                     long delay = transport.requestBackupTime();
-                    Slog.w(RefactoredBackupManagerService.TAG, "Init failed on " + transportName + " resched in " + delay);
+                    Slog.w(RefactoredBackupManagerService.TAG,
+                            "Init failed on " + transportName + " resched in " + delay);
                     backupManagerService.mAlarmManager.set(AlarmManager.RTC_WAKEUP,
-                        System.currentTimeMillis() + delay, backupManagerService.mRunInitIntent);
+                            System.currentTimeMillis() + delay,
+                            backupManagerService.mRunInitIntent);
                 }
             }
         } catch (Exception e) {

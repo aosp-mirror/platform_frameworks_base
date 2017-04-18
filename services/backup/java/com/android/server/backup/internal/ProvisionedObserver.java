@@ -19,6 +19,7 @@ package com.android.server.backup.internal;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.util.Slog;
+
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.RefactoredBackupManagerService;
 
@@ -27,7 +28,7 @@ public class ProvisionedObserver extends ContentObserver {
     private RefactoredBackupManagerService backupManagerService;
 
     public ProvisionedObserver(
-        RefactoredBackupManagerService backupManagerService, Handler handler) {
+            RefactoredBackupManagerService backupManagerService, Handler handler) {
         super(handler);
         this.backupManagerService = backupManagerService;
     }
@@ -39,14 +40,16 @@ public class ProvisionedObserver extends ContentObserver {
         backupManagerService.mProvisioned = wasProvisioned || isProvisioned;
         if (RefactoredBackupManagerService.MORE_DEBUG) {
             Slog.d(RefactoredBackupManagerService.TAG, "Provisioning change: was=" + wasProvisioned
-                + " is=" + isProvisioned + " now=" + backupManagerService.mProvisioned);
+                    + " is=" + isProvisioned + " now=" + backupManagerService.mProvisioned);
         }
 
         synchronized (backupManagerService.mQueueLock) {
-            if (backupManagerService.mProvisioned && !wasProvisioned && backupManagerService.mEnabled) {
+            if (backupManagerService.mProvisioned && !wasProvisioned
+                    && backupManagerService.mEnabled) {
                 // we're now good to go, so start the backup alarms
                 if (RefactoredBackupManagerService.MORE_DEBUG) {
-                  Slog.d(RefactoredBackupManagerService.TAG, "Now provisioned, so starting backups");
+                    Slog.d(RefactoredBackupManagerService.TAG,
+                            "Now provisioned, so starting backups");
                 }
                 KeyValueBackupJob.schedule(backupManagerService.mContext);
                 backupManagerService.scheduleNextFullBackupJob(0);

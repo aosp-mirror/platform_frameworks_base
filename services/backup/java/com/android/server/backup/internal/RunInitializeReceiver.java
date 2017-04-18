@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Message;
 import android.util.Slog;
+
 import com.android.server.backup.RefactoredBackupManagerService;
 
 public class RunInitializeReceiver extends BroadcastReceiver {
@@ -35,7 +36,7 @@ public class RunInitializeReceiver extends BroadcastReceiver {
         if (RefactoredBackupManagerService.RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
             synchronized (backupManagerService.mQueueLock) {
                 if (RefactoredBackupManagerService.DEBUG) {
-                  Slog.v(RefactoredBackupManagerService.TAG, "Running a device init");
+                    Slog.v(RefactoredBackupManagerService.TAG, "Running a device init");
                 }
 
                 // Acquire the wakelock and pass it to the init thread.  it will
@@ -43,7 +44,7 @@ public class RunInitializeReceiver extends BroadcastReceiver {
                 backupManagerService.mWakelock.acquire();
 
                 Message msg = backupManagerService.mBackupHandler.obtainMessage(
-                    RefactoredBackupManagerService.MSG_RUN_INITIALIZE);
+                        RefactoredBackupManagerService.MSG_RUN_INITIALIZE);
                 backupManagerService.mBackupHandler.sendMessage(msg);
             }
         }

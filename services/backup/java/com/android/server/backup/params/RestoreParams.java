@@ -19,6 +19,7 @@ package com.android.server.backup.params;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.content.pm.PackageInfo;
+
 import com.android.internal.backup.IBackupTransport;
 
 public class RestoreParams {
@@ -37,7 +38,7 @@ public class RestoreParams {
      * Restore a single package; no kill after restore
      */
     public RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-        IBackupManagerMonitor _monitor, long _token, PackageInfo _pkg) {
+            IBackupManagerMonitor _monitor, long _token, PackageInfo _pkg) {
         transport = _transport;
         dirName = _dirName;
         observer = _obs;
@@ -53,7 +54,7 @@ public class RestoreParams {
      * Restore at install: PM token needed, kill after restore
      */
     public RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-        IBackupManagerMonitor _monitor, long _token, String _pkgName, int _pmToken) {
+            IBackupManagerMonitor _monitor, long _token, String _pkgName, int _pmToken) {
         transport = _transport;
         dirName = _dirName;
         observer = _obs;
@@ -70,7 +71,7 @@ public class RestoreParams {
      * restore UXes use.
      */
     public RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-        IBackupManagerMonitor _monitor, long _token) {
+            IBackupManagerMonitor _monitor, long _token) {
         transport = _transport;
         dirName = _dirName;
         observer = _obs;
@@ -87,8 +88,8 @@ public class RestoreParams {
      * whether it's to be considered a system-level restore.
      */
     public RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-        IBackupManagerMonitor _monitor, long _token,
-        String[] _filterSet, boolean _isSystemRestore) {
+            IBackupManagerMonitor _monitor, long _token,
+            String[] _filterSet, boolean _isSystemRestore) {
         transport = _transport;
         dirName = _dirName;
         observer = _obs;

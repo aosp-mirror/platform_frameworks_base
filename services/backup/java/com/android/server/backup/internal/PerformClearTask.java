@@ -18,8 +18,10 @@ package com.android.server.backup.internal;
 
 import android.content.pm.PackageInfo;
 import android.util.Slog;
+
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.RefactoredBackupManagerService;
+
 import java.io.File;
 
 public class PerformClearTask implements Runnable {
@@ -29,7 +31,7 @@ public class PerformClearTask implements Runnable {
     PackageInfo mPackage;
 
     PerformClearTask(RefactoredBackupManagerService backupManagerService,
-        IBackupTransport transport, PackageInfo packageInfo) {
+            IBackupTransport transport, PackageInfo packageInfo) {
         this.backupManagerService = backupManagerService;
         mTransport = transport;
         mPackage = packageInfo;
@@ -38,7 +40,8 @@ public class PerformClearTask implements Runnable {
     public void run() {
         try {
             // Clear the on-device backup state to ensure a full backup next time
-            File stateDir = new File(backupManagerService.mBaseStateDir, mTransport.transportDirName());
+            File stateDir = new File(backupManagerService.mBaseStateDir,
+                    mTransport.transportDirName());
             File stateFile = new File(stateDir, mPackage.packageName);
             stateFile.delete();
 
@@ -47,14 +50,15 @@ public class PerformClearTask implements Runnable {
             mTransport.clearBackupData(mPackage);
         } catch (Exception e) {
             Slog.e(RefactoredBackupManagerService.TAG,
-                "Transport threw clearing data for " + mPackage + ": " + e.getMessage());
+                    "Transport threw clearing data for " + mPackage + ": " + e.getMessage());
         } finally {
             try {
                 // TODO - need to handle failures
                 mTransport.finishBackup();
             } catch (Exception e) {
                 // Nothing we can do here, alas
-                Slog.e(RefactoredBackupManagerService.TAG, "Unable to mark clear operation finished: " + e.getMessage());
+                Slog.e(RefactoredBackupManagerService.TAG,
+                        "Unable to mark clear operation finished: " + e.getMessage());
             }
 
             // Last but not least, release the cpu

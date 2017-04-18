@@ -25,10 +25,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
+
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueAdbBackupEngine;
 import com.android.server.backup.RefactoredBackupManagerService;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -43,6 +45,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.SecretKey;
@@ -74,10 +77,10 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
     private final int mCurrentOpToken;
 
     public PerformAdbBackupTask(RefactoredBackupManagerService backupManagerService,
-        ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
-        boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
-        String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,
-        boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch) {
+            ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
+            boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
+            String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,
+            boolean doCompress, boolean doKeyValue, String[] packages, AtomicBoolean latch) {
         super(observer);
         this.backupManagerService = backupManagerService;
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
@@ -91,8 +94,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         mAllApps = doAllApps;
         mIncludeSystem = doSystem;
         mPackages = (packages == null)
-            ? new ArrayList<String>()
-            : new ArrayList<>(Arrays.asList(packages));
+                ? new ArrayList<String>()
+                : new ArrayList<>(Arrays.asList(packages));
         mCurrentPassword = curPassword;
         // when backing up, if there is a current backup password, we require that
         // the user use a nonempty encryption password as well.  if one is supplied
@@ -104,7 +107,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             mEncryptPassword = encryptPassword;
         }
         if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Encrypting backup with passphrase=" + mEncryptPassword);
+            Slog.w(RefactoredBackupManagerService.TAG,
+                    "Encrypting backup with passphrase=" + mEncryptPassword);
         }
         mCompress = doCompress;
         mKeyValue = doKeyValue;
@@ -115,29 +119,31 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             if (!set.containsKey(pkgName)) {
                 try {
                     PackageInfo info = backupManagerService.mPackageManager.getPackageInfo(pkgName,
-                        PackageManager.GET_SIGNATURES);
+                            PackageManager.GET_SIGNATURES);
                     set.put(pkgName, info);
                 } catch (NameNotFoundException e) {
-                    Slog.w(RefactoredBackupManagerService.TAG, "Unknown package " + pkgName + ", skipping");
+                    Slog.w(RefactoredBackupManagerService.TAG,
+                            "Unknown package " + pkgName + ", skipping");
                 }
             }
         }
     }
 
     private OutputStream emitAesBackupHeader(StringBuilder headerbuf,
-        OutputStream ofstream) throws Exception {
+            OutputStream ofstream) throws Exception {
         // User key will be used to encrypt the master key.
         byte[] newUserSalt = backupManagerService
-            .randomBytes(RefactoredBackupManagerService.PBKDF2_SALT_SIZE);
+                .randomBytes(RefactoredBackupManagerService.PBKDF2_SALT_SIZE);
         SecretKey userKey = backupManagerService
-            .buildPasswordKey(RefactoredBackupManagerService.PBKDF_CURRENT, mEncryptPassword, newUserSalt,
-                RefactoredBackupManagerService.PBKDF2_HASH_ROUNDS);
+                .buildPasswordKey(RefactoredBackupManagerService.PBKDF_CURRENT, mEncryptPassword,
+                        newUserSalt,
+                        RefactoredBackupManagerService.PBKDF2_HASH_ROUNDS);
 
         // the master key is random for each backup
         byte[] masterPw = new byte[256 / 8];
         backupManagerService.mRng.nextBytes(masterPw);
         byte[] checksumSalt = backupManagerService
-            .randomBytes(RefactoredBackupManagerService.PBKDF2_SALT_SIZE);
+                .randomBytes(RefactoredBackupManagerService.PBKDF2_SALT_SIZE);
 
         // primary encryption of the datastream with the random key
         Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -179,11 +185,12 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         IV = c.getIV();
         byte[] mk = masterKeySpec.getEncoded();
         byte[] checksum = backupManagerService
-            .makeKeyChecksum(RefactoredBackupManagerService.PBKDF_CURRENT, masterKeySpec.getEncoded(),
-                checksumSalt, RefactoredBackupManagerService.PBKDF2_HASH_ROUNDS);
+                .makeKeyChecksum(RefactoredBackupManagerService.PBKDF_CURRENT,
+                        masterKeySpec.getEncoded(),
+                        checksumSalt, RefactoredBackupManagerService.PBKDF2_HASH_ROUNDS);
 
         ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
-            + checksum.length + 3);
+                + checksum.length + 3);
         DataOutputStream mkOut = new DataOutputStream(blob);
         mkOut.writeByte(IV.length);
         mkOut.write(IV);
@@ -205,31 +212,34 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             byte[] eof = new byte[512 * 2]; // newly allocated == zero filled
             out.write(eof);
         } catch (IOException e) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Error attempting to finalize backup stream");
+            Slog.w(RefactoredBackupManagerService.TAG,
+                    "Error attempting to finalize backup stream");
         }
     }
 
     @Override
     public void run() {
         String includeKeyValue = mKeyValue ? ", including key-value backups" : "";
-        Slog.i(RefactoredBackupManagerService.TAG, "--- Performing adb backup" + includeKeyValue + " ---");
+        Slog.i(RefactoredBackupManagerService.TAG,
+                "--- Performing adb backup" + includeKeyValue + " ---");
 
         TreeMap<String, PackageInfo> packagesToBackup = new TreeMap<>();
         FullBackupObbConnection obbConnection = new FullBackupObbConnection(
-            backupManagerService);
+                backupManagerService);
         obbConnection.establish();  // we'll want this later
 
         sendStartBackup();
 
         // doAllApps supersedes the package set if any
         if (mAllApps) {
-            List<PackageInfo> allPackages = backupManagerService.mPackageManager.getInstalledPackages(
-                PackageManager.GET_SIGNATURES);
+            List<PackageInfo> allPackages =
+                    backupManagerService.mPackageManager.getInstalledPackages(
+                            PackageManager.GET_SIGNATURES);
             for (int i = 0; i < allPackages.size(); i++) {
                 PackageInfo pkg = allPackages.get(i);
                 // Exclude system apps if we've been asked to do so
                 if (mIncludeSystem == true
-                    || ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)) {
+                        || ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)) {
                     packagesToBackup.put(pkg.packageName, pkg);
                 }
             }
@@ -240,10 +250,11 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         if (mDoWidgets) {
             // TODO: http://b/22388012
             List<String> pkgs =
-                AppWidgetBackupBridge.getWidgetParticipants(UserHandle.USER_SYSTEM);
+                    AppWidgetBackupBridge.getWidgetParticipants(UserHandle.USER_SYSTEM);
             if (pkgs != null) {
                 if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.i(RefactoredBackupManagerService.TAG, "Adding widget participants to backup set:");
+                    Slog.i(RefactoredBackupManagerService.TAG,
+                            "Adding widget participants to backup set:");
                     StringBuilder sb = new StringBuilder(128);
                     sb.append("   ");
                     for (String s : pkgs) {
@@ -272,17 +283,17 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         while (iter.hasNext()) {
             PackageInfo pkg = iter.next().getValue();
             if (!RefactoredBackupManagerService.appIsEligibleForBackup(pkg.applicationInfo)
-                || RefactoredBackupManagerService.appIsStopped(pkg.applicationInfo)) {
+                    || RefactoredBackupManagerService.appIsStopped(pkg.applicationInfo)) {
                 iter.remove();
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(RefactoredBackupManagerService.TAG, "Package " + pkg.packageName
-                        + " is not eligible for backup, removing.");
+                            + " is not eligible for backup, removing.");
                 }
             } else if (RefactoredBackupManagerService.appIsKeyValueOnly(pkg)) {
                 iter.remove();
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(RefactoredBackupManagerService.TAG, "Package " + pkg.packageName
-                        + " is key-value.");
+                            + " is key-value.");
                 }
                 keyValueBackupQueue.add(pkg);
             }
@@ -290,7 +301,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
 
         // flatten the set of packages now so we can explicitly control the ordering
         ArrayList<PackageInfo> backupQueue =
-            new ArrayList<>(packagesToBackup.values());
+                new ArrayList<>(packagesToBackup.values());
         FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
         OutputStream out = null;
 
@@ -300,7 +311,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
 
             // Only allow encrypted backups of encrypted devices
             if (backupManagerService.deviceIsEncrypted() && !encrypting) {
-                Slog.e(RefactoredBackupManagerService.TAG, "Unencrypted backup of encrypted device; aborting");
+                Slog.e(RefactoredBackupManagerService.TAG,
+                        "Unencrypted backup of encrypted device; aborting");
                 return;
             }
 
@@ -310,7 +322,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             // backup password, if any
             if (!backupManagerService.backupPasswordMatches(mCurrentPassword)) {
                 if (RefactoredBackupManagerService.DEBUG) {
-                  Slog.w(RefactoredBackupManagerService.TAG, "Backup password mismatch; aborting");
+                    Slog.w(RefactoredBackupManagerService.TAG,
+                            "Backup password mismatch; aborting");
                 }
                 return;
             }
@@ -343,7 +356,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             StringBuilder headerbuf = new StringBuilder(1024);
 
             headerbuf.append(RefactoredBackupManagerService.BACKUP_FILE_HEADER_MAGIC);
-            headerbuf.append(RefactoredBackupManagerService.BACKUP_FILE_VERSION); // integer, no trailing \n
+            headerbuf.append(
+                    RefactoredBackupManagerService.BACKUP_FILE_VERSION); // integer, no trailing \n
             headerbuf.append(mCompress ? "\n1\n" : "\n0\n");
 
             try {
@@ -374,10 +388,11 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             if (mIncludeShared) {
                 try {
                     pkg = backupManagerService.mPackageManager.getPackageInfo(
-                        RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE, 0);
+                            RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE, 0);
                     backupQueue.add(pkg);
                 } catch (NameNotFoundException e) {
-                    Slog.e(RefactoredBackupManagerService.TAG, "Unable to find shared-storage backup handler");
+                    Slog.e(RefactoredBackupManagerService.TAG,
+                            "Unable to find shared-storage backup handler");
                 }
             }
 
@@ -387,15 +402,15 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                 pkg = backupQueue.get(i);
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(RefactoredBackupManagerService.TAG,
-                        "--- Performing full backup for package " + pkg.packageName
-                            + " ---");
+                            "--- Performing full backup for package " + pkg.packageName
+                                    + " ---");
                 }
                 final boolean isSharedStorage =
-                    pkg.packageName.equals(
-                        RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE);
+                        pkg.packageName.equals(
+                                RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE);
 
                 mBackupEngine = new FullBackupEngine(backupManagerService, out,
-                    null, pkg, mIncludeApks, this, Long.MAX_VALUE, mCurrentOpToken);
+                        null, pkg, mIncludeApks, this, Long.MAX_VALUE, mCurrentOpToken);
                 sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
 
                 // Don't need to check preflight result as there is no preflight hook.
@@ -415,13 +430,16 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             if (mKeyValue) {
                 for (PackageInfo keyValuePackage : keyValueBackupQueue) {
                     if (RefactoredBackupManagerService.DEBUG) {
-                        Slog.i(RefactoredBackupManagerService.TAG, "--- Performing key-value backup for package "
-                            + keyValuePackage.packageName + " ---");
+                        Slog.i(RefactoredBackupManagerService.TAG,
+                                "--- Performing key-value backup for package "
+                                        + keyValuePackage.packageName + " ---");
                     }
                     KeyValueAdbBackupEngine kvBackupEngine =
-                        new KeyValueAdbBackupEngine(out, keyValuePackage,
-                            backupManagerService,
-                            backupManagerService.mPackageManager, backupManagerService.mBaseStateDir, backupManagerService.mDataDir);
+                            new KeyValueAdbBackupEngine(out, keyValuePackage,
+                                    backupManagerService,
+                                    backupManagerService.mPackageManager,
+                                    backupManagerService.mBaseStateDir,
+                                    backupManagerService.mDataDir);
                     sendOnBackupPackage(keyValuePackage.packageName);
                     kvBackupEngine.backupOnePackage();
                 }
@@ -450,7 +468,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             sendEndBackup();
             obbConnection.tearDown();
             if (RefactoredBackupManagerService.DEBUG) {
-              Slog.d(RefactoredBackupManagerService.TAG, "Full backup pass complete.");
+                Slog.d(RefactoredBackupManagerService.TAG, "Full backup pass complete.");
             }
             backupManagerService.mWakelock.release();
         }
