@@ -3742,6 +3742,11 @@ public class Notification implements Parcelable
             return mActionBarColor;
         }
 
+        private int getActionBarColorDeEmphasized() {
+            int backgroundColor = getBackgroundColor();
+            return NotificationColorUtil.getShiftedColor(backgroundColor, 12);
+        }
+
         private void setTextViewColorSecondary(RemoteViews contentView, int id) {
             ensureColors();
             contentView.setTextColor(id, mSecondaryTextColor);
@@ -4302,8 +4307,13 @@ public class Notification implements Parcelable
             // TODO: handle emphasized mode / actions right
             if (emphazisedMode) {
                 // change the background bgColor
-                int bgColor = mContext.getColor(oddAction ? R.color.notification_action_list
-                        : R.color.notification_action_list_dark);
+                int bgColor;
+                if (isColorized()) {
+                    bgColor = oddAction ? getActionBarColor() : getActionBarColorDeEmphasized();
+                } else {
+                    bgColor = mContext.getColor(oddAction ? R.color.notification_action_list
+                            : R.color.notification_action_list_dark);
+                }
                 button.setDrawableParameters(R.id.button_holder, true, -1, bgColor,
                         PorterDuff.Mode.SRC_ATOP, -1);
                 CharSequence title = action.title;
