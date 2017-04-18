@@ -19,6 +19,7 @@ package android.net.wifi.aware;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.NetworkSpecifier;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -184,8 +185,8 @@ public class WifiAwareSession {
     }
 
     /**
-     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for an
-     * unencrypted WiFi Aware connection (link) to the specified peer. The
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} for
+     * an unencrypted WiFi Aware connection (link) to the specified peer. The
      * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
      * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
      * <p>
@@ -205,29 +206,29 @@ public class WifiAwareSession {
      *              peer. A RESPONDER may specify a {@code null} - indicating that it will accept
      *              connection requests from any device.
      *
-     * @return A string to be used to construct
-     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
+     * @return A {@link NetworkSpecifier} to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass to
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public String createNetworkSpecifierOpen(@WifiAwareManager.DataPathRole int role,
-            @Nullable byte[] peer) {
+    public NetworkSpecifier createNetworkSpecifierOpen(
+            @WifiAwareManager.DataPathRole int role, @Nullable byte[] peer) {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.e(TAG, "createNetworkSpecifierOpen: called post GC on WifiAwareManager");
-            return "";
+            return null;
         }
         if (mTerminated) {
             Log.e(TAG, "createNetworkSpecifierOpen: called after termination");
-            return "";
+            return null;
         }
         return mgr.createNetworkSpecifier(mClientId, role, peer, null, null);
     }
 
     /**
-     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for an
-     * encrypted WiFi Aware connection (link) to the specified peer. The
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} for
+     * an encrypted WiFi Aware connection (link) to the specified peer. The
      * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
      * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
      * <p>
@@ -247,22 +248,23 @@ public class WifiAwareSession {
      *                   the passphrase. Use {@link #createNetworkSpecifierOpen(int, byte[])} to
      *                   specify an open (unencrypted) link.
      *
-     * @return A string to be used to construct
-     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
+     * @return A {@link NetworkSpecifier} to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass to
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public String createNetworkSpecifierPassphrase(@WifiAwareManager.DataPathRole int role,
-            @Nullable byte[] peer, @NonNull String passphrase) {
+    public NetworkSpecifier createNetworkSpecifierPassphrase(
+            @WifiAwareManager.DataPathRole int role, @Nullable byte[] peer,
+            @NonNull String passphrase) {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.e(TAG, "createNetworkSpecifierPassphrase: called post GC on WifiAwareManager");
-            return "";
+            return null;
         }
         if (mTerminated) {
             Log.e(TAG, "createNetworkSpecifierPassphrase: called after termination");
-            return "";
+            return null;
         }
         if (passphrase == null || passphrase.length() == 0) {
             throw new IllegalArgumentException("Passphrase must not be null or empty");
@@ -271,8 +273,8 @@ public class WifiAwareSession {
     }
 
     /**
-     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for an
-     * encrypted WiFi Aware connection (link) to the specified peer. The
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} for
+     * an encrypted WiFi Aware connection (link) to the specified peer. The
      * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
      * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
      * <p>
@@ -294,8 +296,8 @@ public class WifiAwareSession {
      *            Passphrase or {@link #createNetworkSpecifierOpen(int, byte[])} to specify an
      *            open (unencrypted) link.
      *
-     * @return A string to be used to construct
-     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
+     * @return A {@link NetworkSpecifier} to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass to
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
@@ -303,16 +305,16 @@ public class WifiAwareSession {
      * @hide
      */
     @SystemApi
-    public String createNetworkSpecifierPmk(@WifiAwareManager.DataPathRole int role,
-            @Nullable byte[] peer, @NonNull byte[] pmk) {
+    public NetworkSpecifier createNetworkSpecifierPmk(
+            @WifiAwareManager.DataPathRole int role, @Nullable byte[] peer, @NonNull byte[] pmk) {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.e(TAG, "createNetworkSpecifierPmk: called post GC on WifiAwareManager");
-            return "";
+            return null;
         }
         if (mTerminated) {
             Log.e(TAG, "createNetworkSpecifierPmk: called after termination");
-            return "";
+            return null;
         }
         if (pmk == null || pmk.length == 0) {
             throw new IllegalArgumentException("PMK must not be null or empty");
