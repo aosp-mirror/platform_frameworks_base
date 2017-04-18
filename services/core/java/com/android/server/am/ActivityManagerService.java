@@ -18368,10 +18368,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission, int userId,
-            boolean visibleToInstantApps) {
+            int flags) {
         enforceNotIsolatedCaller("registerReceiver");
         ArrayList<Intent> stickyIntents = null;
         ProcessRecord callerApp = null;
+        final boolean visibleToInstantApps
+                = (flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
         int callingUid;
         int callingPid;
         boolean instantApp;

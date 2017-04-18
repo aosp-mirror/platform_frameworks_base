@@ -365,6 +365,19 @@ public abstract class Context {
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                RECEIVER_VISIBLE_TO_INSTANT_APPS
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RegisterReceiverFlags {}
+
+    /**
+     * Flag for {@link #registerReceiver}: The receiver can receive broadcasts from Instant Apps.
+     */
+    public static final int RECEIVER_VISIBLE_TO_INSTANT_APPS = 0x1;
+
     /**
      * Returns an AssetManager instance for the application's package.
      * <p>
@@ -2424,7 +2437,8 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
-     * @param visibleToInstantApps If the receiver accepts broadcasts from Instant Apps.
+     * @param flags Additional options for the receiver. May be 0 or
+     *      {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
@@ -2436,7 +2450,7 @@ public abstract class Context {
     @Nullable
     public abstract Intent registerReceiver(@Nullable BroadcastReceiver receiver,
                                             IntentFilter filter,
-                                            boolean visibleToInstantApps);
+                                            @RegisterReceiverFlags int flags);
 
     /**
      * Register to receive intent broadcasts, to run in the context of
@@ -2475,9 +2489,9 @@ public abstract class Context {
             @Nullable Handler scheduler);
 
     /**
-     * Register to receive intent broadcasts, with the receiver optionally being
-     * exposed to Instant Apps. See
-     * {@link #registerReceiver(BroadcastReceiver, IntentFilter, boolean)} and
+     * Register to receive intent broadcasts, to run in the context of
+     * <var>scheduler</var>. See
+     * {@link #registerReceiver(BroadcastReceiver, IntentFilter, int)} and
      * {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)}
      * for more information.
      *
@@ -2496,12 +2510,13 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param visibleToInstantApps If the receiver accepts broadcasts from Instant Apps.
+     * @param flags Additional options for the receiver. May be 0 or
+     *      {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
      *
-     * @see #registerReceiver(BroadcastReceiver, IntentFilter, boolean)
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, int)
      * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
      * @see #sendBroadcast
      * @see #unregisterReceiver
@@ -2509,7 +2524,7 @@ public abstract class Context {
     @Nullable
     public abstract Intent registerReceiver(BroadcastReceiver receiver,
             IntentFilter filter, @Nullable String broadcastPermission,
-            @Nullable Handler scheduler, boolean visibleToInstantApps);
+            @Nullable Handler scheduler, @RegisterReceiverFlags int flags);
 
     /**
      * @hide
