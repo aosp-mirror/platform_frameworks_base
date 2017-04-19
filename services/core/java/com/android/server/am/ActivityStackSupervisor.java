@@ -2397,10 +2397,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             } else {
                 for (int i = 0; i < size; i++) {
                     final TaskRecord task = tasks.get(i);
-                    final int position = fullscreenStack != null
-                            ? Math.max(fullscreenStack.getAllTasks().size() - 1, 0) : 0;
-                    // Defer resume until all the tasks have been moved to the fullscreen stack
-                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, position,
+                    // Position the tasks in the fullscreen stack in order at the bottom of the
+                    // stack. Also defer resume until all the tasks have been moved to the
+                    // fullscreen stack.
+                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, i /* position */,
                             REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE, DEFER_RESUME,
                             schedulePictureInPictureModeChange,
                             "moveTasksToFullscreenStack - NOT_onTop");
