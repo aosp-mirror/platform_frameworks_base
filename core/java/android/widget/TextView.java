@@ -125,6 +125,7 @@ import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -368,6 +369,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mPreDrawListenerDetached;
 
     private TextClassifier mTextClassifier;
+
+    // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
+    // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
+    // the view hierarchy. On the other hand, if the user is using the movement key to traverse
+    // views (i.e. the first movement was to traverse out of this view, or this view was traversed
+    // into by the user holding the movement key down) then we shouldn't prevent the focus from
+    // changing.
+    private boolean mPreventDefaultMovement;
 
     private TextUtils.TruncateAt mEllipsize;
 
@@ -7090,6 +7099,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return KEY_EVENT_NOT_HANDLED;
         }
 
+        // If this is the initial keydown, we don't want to prevent a movement away from this view.
+        // While this shouldn't be necessary because any time we're preventing default movement we
+        // should be restricting the focus to remain within this view, thus we'll also receive
+        // the key up event, occasionally key up events will get dropped and we don't want to
+        // prevent the user from traversing out of this on the next key down.
+        if (event.getRepeatCount() == 0 && !KeyEvent.isModifierKey(keyCode)) {
+            mPreventDefaultMovement = false;
+        }
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
                 if (event.hasNoModifiers()) {
@@ -7221,16 +7239,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             if (doDown) {
                 if (mMovement.onKeyDown(this, (Spannable) mText, keyCode, event)) {
+                    if (event.getRepeatCount() == 0 && !KeyEvent.isModifierKey(keyCode)) {
+                        mPreventDefaultMovement = true;
+                    }
                     return KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD;
                 }
             }
-            // Consume arrows to prevent focus leaving the editor.
-            if (isDirectionalNavigationKey(keyCode)) {
+            // Consume arrows from keyboard devices to prevent focus leaving the editor.
+            // DPAD/JOY devices (Gamepads, TV remotes) often lack a TAB key so allow those
+            // to move focus with arrows.
+            if (event.getSource() == InputDevice.SOURCE_KEYBOARD
+                    && isDirectionalNavigationKey(keyCode)) {
                 return KEY_EVENT_HANDLED;
             }
         }
 
-        return KEY_EVENT_NOT_HANDLED;
+        return mPreventDefaultMovement && !KeyEvent.isModifierKey(keyCode)
+                ? KEY_EVENT_HANDLED : KEY_EVENT_NOT_HANDLED;
     }
 
     /**
@@ -7261,6 +7286,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (!isEnabled()) {
             return super.onKeyUp(keyCode, event);
+        }
+
+        if (!KeyEvent.isModifierKey(keyCode)) {
+            mPreventDefaultMovement = false;
         }
 
         switch (keyCode) {
