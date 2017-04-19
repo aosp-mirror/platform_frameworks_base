@@ -1518,7 +1518,8 @@ public class StorageManager {
      * last to be deleted when additional disk space is needed.
      * <p>
      * This quota will change over time depending on how frequently the user
-     * interacts with your app, and depending on how much disk space is used.
+     * interacts with your app, and depending on how much system-wide disk space
+     * is used.
      * <p class="note">
      * Note: if your app uses the {@code android:sharedUserId} manifest feature,
      * then cached data for all packages in your shared UID is tracked together
