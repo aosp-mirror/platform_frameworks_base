@@ -20,13 +20,15 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -60,7 +62,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Matchers;
@@ -129,7 +130,7 @@ public class WifiTrackerTest {
     private Handler mScannerHandler;
     private HandlerThread mMainThread;
     private HandlerThread mWorkerThread;
-    private Looper mLooper;
+    private Looper mWorkerLooper;
     private Looper mMainLooper;
     private int mOriginalScoringUiSettingValue;
 
@@ -141,7 +142,7 @@ public class WifiTrackerTest {
 
         mWorkerThread = new HandlerThread("TestHandlerWorkerThread");
         mWorkerThread.start();
-        mLooper = mWorkerThread.getLooper();
+        mWorkerLooper = mWorkerThread.getLooper();
         mMainThread = new HandlerThread("TestHandlerThread");
         mMainThread.start();
         mMainLooper = mMainThread.getLooper();
@@ -264,7 +265,7 @@ public class WifiTrackerTest {
                 new WifiTracker(
                         mContext,
                         mockWifiListener,
-                        mLooper,
+                        mWorkerLooper,
                         true,
                         true,
                         true,
@@ -349,7 +350,7 @@ public class WifiTrackerTest {
         scanResult.capabilities = "";
 
         WifiTracker tracker = new WifiTracker(
-                InstrumentationRegistry.getTargetContext(), null, mLooper, true, true);
+                InstrumentationRegistry.getTargetContext(), null, mWorkerLooper, true, true);
 
         AccessPoint result = tracker.getCachedOrCreate(scanResult, new ArrayList<AccessPoint>());
         assertTrue(result.mAccessPointListener != null);
@@ -365,7 +366,7 @@ public class WifiTrackerTest {
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
 
         WifiTracker tracker = new WifiTracker(
-                InstrumentationRegistry.getTargetContext(), null, mLooper, true, true);
+                InstrumentationRegistry.getTargetContext(), null, mWorkerLooper, true, true);
 
         AccessPoint result = tracker.getCachedOrCreate(configuration, new ArrayList<AccessPoint>());
         assertTrue(result.mAccessPointListener != null);
@@ -433,7 +434,8 @@ public class WifiTrackerTest {
     }
 
     @Test
-    public void startTrackingShouldRequestScoresForCurrentAccessPoints() throws InterruptedException {
+    public void startTrackingAfterStopTracking_shouldRequestNewScores()
+            throws InterruptedException {
         // Start the tracker and inject the initial scan results and then stop tracking
         WifiTracker tracker =  createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
 
@@ -442,6 +444,7 @@ public class WifiTrackerTest {
 
         mRequestScoresLatch = new CountDownLatch(1);
         startTracking(tracker);
+        tracker.forceUpdate();
         assertTrue("Latch timed out",
                 mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
@@ -657,18 +660,29 @@ public class WifiTrackerTest {
         int newRssi = CONNECTED_RSSI + 10;
         WifiInfo info = new WifiInfo(CONNECTED_AP_1_INFO);
         info.setRssi(newRssi);
-        when(mockWifiManager.getConnectionInfo()).thenReturn(info);
 
-        mAccessPointsChangedLatch = new CountDownLatch(1);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        // Once the new info has been fetched, we need to wait for the access points to be copied
+        doAnswer(invocation -> {
+                    latch.countDown();
+                    mAccessPointsChangedLatch = new CountDownLatch(1);
+                    return info;
+                }).when(mockWifiManager).getConnectionInfo();
+
         tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.RSSI_CHANGED_ACTION));
-        assertTrue(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        assertTrue("New connection info never retrieved",
+                latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        assertTrue("onAccessPointsChanged never called",
+                mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
-        verify(mockWifiManager, atLeast(2)).getConnectionInfo();
         assertThat(tracker.getAccessPoints().get(0).getRssi()).isEqualTo(newRssi);
     }
 
     @Test
     public void forceUpdateShouldSynchronouslyFetchLatestInformation() throws Exception {
+        // TODO(sghuman): Fix flakiness of this test
+
         when(mockWifiManager.getConnectionInfo()).thenReturn(CONNECTED_AP_1_INFO);
 
         WifiConfiguration configuration = new WifiConfiguration();
@@ -682,7 +696,6 @@ public class WifiTrackerTest {
         networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "connected", "test");
         when(mockConnectivityManager.getNetworkInfo(any(Network.class))).thenReturn(networkInfo);
 
-
         WifiTracker tracker = createMockedWifiTracker();
         startTracking(tracker);
         tracker.forceUpdate();
@@ -690,5 +703,48 @@ public class WifiTrackerTest {
         verify(mockWifiListener).onAccessPointsChanged();
         assertThat(tracker.getAccessPoints().size()).isEqualTo(2);
         assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
+    }
+
+    @Test
+    public void stopTrackingShouldRemoveWifiListenerCallbacks() throws Exception {
+        WifiTracker tracker = createMockedWifiTracker();
+        startTracking(tracker);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch lock = new CountDownLatch(1);
+        tracker.mMainHandler.post(() -> {
+            try {
+                lock.await();
+                latch.countDown();
+            } catch (InterruptedException e) {
+                fail("Interrupted Exception while awaiting lock release: " + e);
+            }
+        });
+
+        // Enqueue messages
+        tracker.mMainHandler.sendEmptyMessage(
+                WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED);
+        tracker.mMainHandler.sendEmptyMessage(
+                WifiTracker.MainHandler.MSG_CONNECTED_CHANGED);
+        tracker.mMainHandler.sendEmptyMessage(
+                WifiTracker.MainHandler.MSG_WIFI_STATE_CHANGED);
+
+        tracker.stopTracking();
+
+        verify(mockWifiListener, atMost(1)).onAccessPointsChanged();
+        verify(mockWifiListener, atMost(1)).onConnectedChanged();
+        verify(mockWifiListener, atMost(1)).onWifiStateChanged(anyInt());
+
+        lock.countDown();
+        assertTrue(latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+
+        assertThat(tracker.mMainHandler.hasMessages(
+                WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED)).isFalse();
+        assertThat(tracker.mMainHandler.hasMessages(
+                WifiTracker.MainHandler.MSG_CONNECTED_CHANGED)).isFalse();
+        assertThat(tracker.mMainHandler.hasMessages(
+                WifiTracker.MainHandler.MSG_WIFI_STATE_CHANGED)).isFalse();
+
+        verifyNoMoreInteractions(mockWifiListener);
     }
 }

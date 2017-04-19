@@ -16,7 +16,6 @@
 package com.android.settingslib.wifi;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -91,7 +90,7 @@ public class WifiTracker {
     private final boolean mIncludeSaved;
     private final boolean mIncludeScans;
     private final boolean mIncludePasspoints;
-    private final MainHandler mMainHandler;
+    @VisibleForTesting final MainHandler mMainHandler;
     private final WorkHandler mWorkHandler;
 
     private WifiTrackerNetworkCallback mNetworkCallback;
@@ -335,13 +334,13 @@ public class WifiTracker {
      */
     public void stopTracking() {
         if (mRegistered) {
-            mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
-            mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_NETWORK_INFO);
-            mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_NETWORK_SCORES);
             mContext.unregisterReceiver(mReceiver);
             mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
             mRegistered = false;
         }
+        mWorkHandler.removePendingMessages();
+        mMainHandler.removePendingMessages();
+
         pauseScanning();
 
         unregisterAndClearScoreCache();
@@ -749,10 +748,11 @@ public class WifiTracker {
         }
     }
 
-    private final class MainHandler extends Handler {
-        private static final int MSG_CONNECTED_CHANGED = 0;
-        private static final int MSG_WIFI_STATE_CHANGED = 1;
-        private static final int MSG_ACCESS_POINT_CHANGED = 2;
+    @VisibleForTesting
+    final class MainHandler extends Handler {
+        @VisibleForTesting static final int MSG_CONNECTED_CHANGED = 0;
+        @VisibleForTesting static final int MSG_WIFI_STATE_CHANGED = 1;
+        @VisibleForTesting static final int MSG_ACCESS_POINT_CHANGED = 2;
         private static final int MSG_RESUME_SCANNING = 3;
         private static final int MSG_PAUSE_SCANNING = 4;
 
@@ -793,6 +793,19 @@ public class WifiTracker {
             //prevent worker thread from modifying mInternalAccessPoints
             mInternalAccessPointsWriteLock.close();
             sendEmptyMessage(MSG_ACCESS_POINT_CHANGED);
+        }
+
+        void removePendingMessages() {
+            // Only release the lock if there was a pending message which would have done the same
+            if (mMainHandler.hasMessages(MSG_ACCESS_POINT_CHANGED)) {
+                mMainHandler.removeMessages(MSG_ACCESS_POINT_CHANGED);
+                mInternalAccessPointsWriteLock.open();
+            }
+
+            removeMessages(MSG_CONNECTED_CHANGED);
+            removeMessages(MSG_WIFI_STATE_CHANGED);
+            removeMessages(MSG_PAUSE_SCANNING);
+            removeMessages(MSG_RESUME_SCANNING);
         }
     }
 
@@ -840,6 +853,14 @@ public class WifiTracker {
                     updateNetworkScores();
                     break;
             }
+        }
+
+        private void removePendingMessages() {
+            removeMessages(MSG_UPDATE_ACCESS_POINTS);
+            removeMessages(MSG_UPDATE_NETWORK_INFO);
+            removeMessages(MSG_RESUME);
+            removeMessages(MSG_UPDATE_WIFI_STATE);
+            removeMessages(MSG_UPDATE_NETWORK_SCORES);
         }
     }
 
