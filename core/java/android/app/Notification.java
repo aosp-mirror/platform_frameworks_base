@@ -3251,7 +3251,6 @@ public class Notification implements Parcelable
          * However, for {@link MediaStyle} and {@link DecoratedMediaCustomViewStyle} notifications
          * that have a media session attached there is no such requirement.
          *
-         * @see Builder#setOngoing(boolean)
          * @see Builder#setColor(int)
          * @see MediaStyle#setMediaSession(MediaSession.Token)
          */
