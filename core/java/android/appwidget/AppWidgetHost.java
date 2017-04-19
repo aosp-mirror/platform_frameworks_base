@@ -276,8 +276,6 @@ public class AppWidgetHost {
 
     /**
      * Gets a list of all the appWidgetIds that are bound to the current host
-     *
-     * @hide
      */
     public int[] getAppWidgetIds() {
         try {
