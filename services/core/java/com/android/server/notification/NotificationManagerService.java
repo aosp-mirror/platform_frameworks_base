@@ -3203,6 +3203,8 @@ public class NotificationManagerService extends SystemService {
             return;
         } else if (channelId == null && shouldWarnUseChannels(pkg, notificationUid)) {
             // STOPSHIP TODO: remove once default channel is removed for all apps that target O.
+            Log.e(TAG, "Developer Warning for package " + pkg
+                    + ", no channel specified for posted notification: " + notification);
             doDebugOnlyToast("Developer warning for package \"" + pkg + "\"\n" +
                     "Posted notification should specify a channel");
         }
