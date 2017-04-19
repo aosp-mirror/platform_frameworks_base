@@ -83,6 +83,7 @@ import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
+import com.android.server.oemlock.OemLockService;
 import com.android.server.om.OverlayManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
@@ -982,12 +983,15 @@ public final class SystemServer {
                 }
                 traceEnd();
 
-                if (!SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP).equals("")) {
+                final boolean hasPdb = !SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP).equals("");
+                if (hasPdb) {
                     traceBeginAndSlog("StartPersistentDataBlock");
                     mSystemServiceManager.startService(PersistentDataBlockService.class);
                     traceEnd();
+                }
 
-                    // Implementation depends on persistent data block
+                if (hasPdb || OemLockService.isHalPresent()) {
+                    // Implementation depends on pdb or the OemLock HAL
                     traceBeginAndSlog("StartOemLockService");
                     mSystemServiceManager.startService(OemLockService.class);
                     traceEnd();
