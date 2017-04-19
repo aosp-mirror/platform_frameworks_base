@@ -955,6 +955,11 @@ public class PackageManagerService extends IPackageManager.Stub
             verificationIntent.setComponent(mIntentFilterVerifierComponent);
             verificationIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
+            DeviceIdleController.LocalService idleController = getDeviceIdleController();
+            idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
+                    mIntentFilterVerifierComponent.getPackageName(), getVerificationTimeout(),
+                    userId, false, "intent filter verifier");
+
             UserHandle user = new UserHandle(userId);
             mContext.sendBroadcastAsUser(verificationIntent, user);
             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
@@ -13975,7 +13980,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Get the verification agent timeout.
+     * Get the verification agent timeout.  Used for both the APK verifier and the
+     * intent filter verifier.
      *
      * @return verification timeout in milliseconds
      */
