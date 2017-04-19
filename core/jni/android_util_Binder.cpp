@@ -193,10 +193,10 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
     if (env->IsInstanceOf(excep, gErrorOffsets.mClass)) {
         /*
          * It's an Error: Reraise the exception and ask the runtime to abort.
-         * This will dump the pending exception as well as all thread traces
-         * to the log.
          */
         env->Throw(excep);
+        ALOGE("java.lang.Error thrown during binder transaction (stack trace follows) : ");
+        env->ExceptionDescribe();
         env->FatalError("java.lang.Error thrown during binder transaction.");
     }
 
