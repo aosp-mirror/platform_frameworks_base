@@ -10685,6 +10685,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
+        // When a task is locked, dismiss the pinned stack if it exists
+        final PinnedActivityStack pinnedStack = mStackSupervisor.getStack(
+                PINNED_STACK_ID);
+        if (pinnedStack != null) {
+            mStackSupervisor.removeStackLocked(PINNED_STACK_ID);
+        }
+
         // isSystemInitiated is used to distinguish between locked and pinned mode, as pinned mode
         // is initiated by system after the pinning request was shown and locked mode is initiated
         // by an authorized app directly
