@@ -223,9 +223,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManagerInternal;
-import android.widget.ImageView;
+
 import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -497,9 +496,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mLastInputMethodWindow = null;
     WindowState mLastInputMethodTargetWindow = null;
 
-    @GuardedBy("mLock")
-    private boolean mDismissImeOnBackKeyPressed;
-
     // FIXME This state is shared between the input reader and handler thread.
     // Technically it's broken and buggy but it has been like this for many years
     // and we have not yet seen any problems.  Someday we'll rewrite this logic
@@ -519,6 +515,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mPictureInPictureVisible;
     // Written by vr manager thread, only read in this class
     volatile boolean mPersistentVrModeEnabled;
+    volatile private boolean mDismissImeOnBackKeyPressed;
 
     // Used to hold the last user key used to wake the device.  This helps us prevent up events
     // from being passed to the foregrounded app without a corresponding down event
@@ -1403,13 +1400,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchHomeFromHotKey(true /* awakenFromDreams */, false /*respectKeyguard*/);
                     break;
                 case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME: {
-                    final boolean dismissImeOnBackKeyPressed;
-                    // We can be here on both the main thread (via mHandler) and native callback
-                    // thread (from interceptPowerKeyUp via WindowManagerCallbacks).
-                    synchronized (mLock) {
-                        dismissImeOnBackKeyPressed = mDismissImeOnBackKeyPressed;
-                    }
-                    if (dismissImeOnBackKeyPressed) {
+                    if (mDismissImeOnBackKeyPressed) {
                         if (mInputMethodManagerInternal == null) {
                             mInputMethodManagerInternal =
                                     LocalServices.getService(InputMethodManagerInternal.class);
@@ -7983,9 +7974,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void setDismissImeOnBackKeyPressed(boolean newValue) {
-        synchronized (mLock) {
-            mDismissImeOnBackKeyPressed = newValue;
-        }
+        mDismissImeOnBackKeyPressed = newValue;
     }
 
     @Override
