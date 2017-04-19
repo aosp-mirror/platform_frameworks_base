@@ -247,7 +247,7 @@ public abstract class AutofillService extends Service {
      * @param callback object used to notify the result of the request.
      */
     public void onSaveRequest(@NonNull SaveRequest request, @NonNull SaveCallback callback) {
-        List<FillContext> contexts = request.getFillContexts();
+        final List<FillContext> contexts = request.getFillContexts();
         onSaveRequest(contexts.get(contexts.size() - 1).getStructure(),
                 request.getClientState(), callback);
     }
