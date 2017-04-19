@@ -73,7 +73,7 @@ public class AccessibilityURLSpan extends URLSpan implements Parcelable {
      * Delegated to AccessibilityClickableSpan
      * @param accessibilityNodeInfo
      */
-    public void setAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-        mAccessibilityClickableSpan.setAccessibilityNodeInfo(accessibilityNodeInfo);
+    public void copyConnectionDataFrom(AccessibilityNodeInfo accessibilityNodeInfo) {
+        mAccessibilityClickableSpan.copyConnectionDataFrom(accessibilityNodeInfo);
     }
 }
