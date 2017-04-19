@@ -14,38 +14,24 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fitsSystemWindows="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone">
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:fitsSystemWindows="true"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:visibility="gone">
-    <LinearLayout
+    <com.android.systemui.statusbar.car.UserGridView
+        android:id="@+id/user_grid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/car_lockscreen_disclaimer_title"
-            android:textSize="@dimen/car_lockscreen_disclaimer_title_size"
-            android:paddingStart="@dimen/car_lockscreen_disclaimer_title_padding_start"
-            android:paddingTop="@dimen/car_lockscreen_disclaimer_title_padding_top" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:text="@string/car_lockscreen_disclaimer_text"
-            android:textSize="@dimen/car_lockscreen_disclaimer_text_size"
-            android:paddingStart="@dimen/car_lockscreen_disclaimer_text_padding_start"
-            android:paddingEnd="@dimen/car_lockscreen_disclaimer_text_padding_end"
-            android:paddingTop="@dimen/car_lockscreen_disclaimer_text_padding_top" />
-        <com.android.systemui.statusbar.car.UserGridView
-            android:id="@+id/user_grid"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:stretchMode="columnWidth">
-        </com.android.systemui.statusbar.car.UserGridView>
-    </LinearLayout>
-</FrameLayout>
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/car_margin"
+        android:layout_marginRight="@dimen/car_margin"
+        android:layout_centerInParent="true" />
+
+    <com.android.systemui.statusbar.car.PageIndicator
+        android:id="@+id/user_switcher_page_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/car_page_indicator_dot_diameter"
+        android:layout_marginTop="@dimen/car_page_indicator_margin_top"
+        android:layout_below="@+id/user_grid" />
+</RelativeLayout>

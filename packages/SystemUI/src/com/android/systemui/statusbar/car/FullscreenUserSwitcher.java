@@ -37,8 +37,11 @@ public class FullscreenUserSwitcher {
             ViewStub containerStub) {
         mUserSwitcherController = userSwitcherController;
         mContainer = containerStub.inflate();
-        mUserGridView = (UserGridView) mContainer.findViewById(R.id.user_grid);
+        mUserGridView = mContainer.findViewById(R.id.user_grid);
         mUserGridView.init(statusBar, mUserSwitcherController);
+
+        PageIndicator pageIndicator = mContainer.findViewById(R.id.user_switcher_page_indicator);
+        pageIndicator.setupWithViewPager(mUserGridView);
     }
 
     public void onUserSwitched(int newUserId) {

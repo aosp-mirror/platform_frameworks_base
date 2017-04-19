@@ -16,18 +16,17 @@
 */
 -->
 <resources>
-    <dimen name="car_lockscreen_disclaimer_title_size">48sp</dimen>
-    <dimen name="car_lockscreen_disclaimer_title_padding_start">96dp</dimen>
-    <dimen name="car_lockscreen_disclaimer_title_padding_top">82dp</dimen>
-    <dimen name="car_lockscreen_disclaimer_text_size">28sp</dimen>
-    <dimen name="car_lockscreen_disclaimer_text_padding_start">96dp</dimen>
-    <dimen name="car_lockscreen_disclaimer_text_padding_end">96dp</dimen>
-    <dimen name="car_lockscreen_disclaimer_text_padding_top">8dp</dimen>
-    <dimen name="car_lockscreen_user_grid_view_padding_start">10dp</dimen>
-    <dimen name="car_lockscreen_user_grid_view_padding_end">10dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_width">128dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_height">128dp</dimen>
-    <dimen name="car_fullscreen_user_pod_text_size">24sp</dimen>
+    <dimen name="car_margin">148dp</dimen>
+
+    <dimen name="car_fullscreen_user_pod_margin_side">44dp</dimen>
+    <dimen name="car_fullscreen_user_pod_margin_above_text">24dp</dimen>
+    <dimen name="car_fullscreen_user_pod_image_avatar_width">192dp</dimen>
+    <dimen name="car_fullscreen_user_pod_image_avatar_height">192dp</dimen>
+    <dimen name="car_fullscreen_user_pod_text_size">40sp</dimen>
+
     <dimen name="car_navigation_button_width">64dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>
+
+    <dimen name="car_page_indicator_dot_diameter">12dp</dimen>
+    <dimen name="car_page_indicator_margin_top">32dp</dimen>
 </resources>
