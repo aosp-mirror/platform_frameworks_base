@@ -590,9 +590,10 @@ public:
                        const String16& comment,
                        bool appendComment);
 
+    sp<Package> getPackage(const String16& package);
+
 private:
     void writePublicDefinitions(const String16& package, FILE* fp, bool pub);
-    sp<Package> getPackage(const String16& package);
     sp<Type> getType(const String16& package,
                      const String16& type,
                      const SourcePos& pos,

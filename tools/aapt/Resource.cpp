@@ -782,7 +782,79 @@ static void fullyQualifyClassName(const String8& package, const sp<XMLNode>& nod
     }
 }
 
-status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
+static sp<ResourceTable::ConfigList> findEntry(const String16& packageStr, const String16& typeStr,
+                                               const String16& nameStr, ResourceTable* table) {
+  sp<ResourceTable::Package> pkg = table->getPackage(packageStr);
+  if (pkg != NULL) {
+      sp<ResourceTable::Type> type = pkg->getTypes().valueFor(typeStr);
+      if (type != NULL) {
+          return type->getConfigs().valueFor(nameStr);
+      }
+  }
+  return NULL;
+}
+
+static uint16_t getMaxSdkVersion(const sp<ResourceTable::ConfigList>& configList) {
+  const DefaultKeyedVector<ConfigDescription, sp<ResourceTable::Entry>>& entries =
+          configList->getEntries();
+  uint16_t maxSdkVersion = 0u;
+  for (size_t i = 0; i < entries.size(); i++) {
+    maxSdkVersion = std::max(maxSdkVersion, entries.keyAt(i).sdkVersion);
+  }
+  return maxSdkVersion;
+}
+
+static void massageRoundIconSupport(const String16& iconRef, const String16& roundIconRef,
+                                    ResourceTable* table) {
+  bool publicOnly = false;
+  const char* err;
+
+  String16 iconPackage, iconType, iconName;
+  if (!ResTable::expandResourceRef(iconRef.string(), iconRef.size(), &iconPackage, &iconType,
+                                   &iconName, NULL, &table->getAssetsPackage(), &err,
+                                   &publicOnly)) {
+      // Errors will be raised in later XML compilation.
+      return;
+  }
+
+  sp<ResourceTable::ConfigList> iconEntry = findEntry(iconPackage, iconType, iconName, table);
+  if (iconEntry == NULL || getMaxSdkVersion(iconEntry) < SDK_O) {
+      // The icon is not adaptive, so nothing to massage.
+      return;
+  }
+
+  String16 roundIconPackage, roundIconType, roundIconName;
+  if (!ResTable::expandResourceRef(roundIconRef.string(), roundIconRef.size(), &roundIconPackage,
+                                   &roundIconType, &roundIconName, NULL, &table->getAssetsPackage(),
+                                   &err, &publicOnly)) {
+      // Errors will be raised in later XML compilation.
+      return;
+  }
+
+  sp<ResourceTable::ConfigList> roundIconEntry = findEntry(roundIconPackage, roundIconType,
+                                                           roundIconName, table);
+  if (roundIconEntry == NULL || getMaxSdkVersion(roundIconEntry) >= SDK_O) {
+      // The developer explicitly used a v26 compatible drawable as the roundIcon, meaning we should
+      // not generate an alias to the icon drawable.
+      return;
+  }
+
+  String16 aliasValue = String16(String8::format("@%s:%s/%s", String8(iconPackage).string(),
+                                                 String8(iconType).string(),
+                                                 String8(iconName).string()));
+
+  // Add an equivalent v26 entry to the roundIcon for each v26 variant of the regular icon.
+  const DefaultKeyedVector<ConfigDescription, sp<ResourceTable::Entry>>& configList =
+          iconEntry->getEntries();
+  for (size_t i = 0; i < configList.size(); i++) {
+      if (configList.keyAt(i).sdkVersion >= SDK_O) {
+          table->addEntry(SourcePos(), roundIconPackage, roundIconType, roundIconName, aliasValue,
+                          NULL, &configList.keyAt(i));
+      }
+  }
+}
+
+status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
 {
     root = root->searchElement(String16(), String16("manifest"));
     if (root == NULL) {
@@ -916,7 +988,7 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
             String8 tag(child->getElementName());
             if (tag == "instrumentation") {
                 XMLNode::attribute_entry* attr = child->editAttribute(
-                        String16("http://schemas.android.com/apk/res/android"), String16("targetPackage"));
+                        String16(RESOURCES_ANDROID_NAMESPACE), String16("targetPackage"));
                 if (attr != NULL) {
                     attr->string.setTo(String16(instrumentationPackageNameOverride));
                 }
@@ -924,6 +996,19 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         }
     }
     
+    sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
+    if (application != NULL) {
+        XMLNode::attribute_entry* icon_attr = application->editAttribute(
+                String16(RESOURCES_ANDROID_NAMESPACE), String16("icon"));
+        if (icon_attr != NULL) {
+            XMLNode::attribute_entry* round_icon_attr = application->editAttribute(
+                    String16(RESOURCES_ANDROID_NAMESPACE), String16("roundIcon"));
+            if (round_icon_attr != NULL) {
+                massageRoundIconSupport(icon_attr->string, round_icon_attr->string, table);
+            }
+        }
+    }
+
     // Generate split name if feature is present.
     const XMLNode::attribute_entry* attr = root->getAttribute(String16(), String16("featureName"));
     if (attr != NULL) {
@@ -1638,7 +1723,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     if (manifestTree == NULL) {
         return UNKNOWN_ERROR;
     }
-    err = massageManifest(bundle, manifestTree);
+    err = massageManifest(bundle, &table, manifestTree);
     if (err < NO_ERROR) {
         return err;
     }
