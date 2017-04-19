@@ -1080,7 +1080,7 @@ public class NotificationManagerService extends SystemService {
                     }
                     enqueueNotificationInternal(r.sbn.getPackageName(), r.sbn.getOpPkg(),
                             r.sbn.getUid(), r.sbn.getInitialPid(), r.sbn.getTag(), r.sbn.getId(),
-                            r.sbn.getNotification(), new int[1], userId);
+                            r.sbn.getNotification(), userId);
                 } catch (Exception e) {
                     Slog.e(TAG, "Cannot un-snooze notification", e);
                 }
@@ -1558,9 +1558,9 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
-                Notification notification, int[] idOut, int userId) throws RemoteException {
+                Notification notification, int userId) throws RemoteException {
             enqueueNotificationInternal(pkg, opPkg, Binder.getCallingUid(),
-                    Binder.getCallingPid(), tag, id, notification, idOut, userId);
+                    Binder.getCallingPid(), tag, id, notification, userId);
         }
 
         @Override
@@ -3095,9 +3095,9 @@ public class NotificationManagerService extends SystemService {
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
         @Override
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
-                String tag, int id, Notification notification, int[] idReceived, int userId) {
+                String tag, int id, Notification notification, int userId) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                    idReceived, userId);
+                    userId);
         }
 
         @Override
@@ -3139,7 +3139,7 @@ public class NotificationManagerService extends SystemService {
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
-            int[] idOut, int incomingUserId) {
+            int incomingUserId) {
         if (DBG) {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
@@ -3236,8 +3236,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
-
-        idOut[0] = id;
     }
 
     private void doDebugOnlyToast(CharSequence toastText) {
