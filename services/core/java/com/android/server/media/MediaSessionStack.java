@@ -121,9 +121,12 @@ class MediaSessionStack {
     public void removeSession(MediaSessionRecord record) {
         mSessions.remove(record);
         if (mMediaButtonSession == record) {
-            // When the media button session is gone, try to find the alternative media session
-            // in the media button session app.
-            onMediaSessionChangeInMediaButtonSessionApp();
+            // When the media button session is removed, nullify the media button session and do not
+            // search for the alternative media session within the app. It's because the alternative
+            // media session might be a dummy which isn't able to handle the media key events.
+            mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
+                    mMediaButtonSession, null);
+            mMediaButtonSession = null;
         }
         clearCache(record.getUserId());
     }
@@ -157,7 +160,13 @@ class MediaSessionStack {
         // In that case, we pick the media session whose PlaybackState matches
         // the audio playback configuration.
         if (mMediaButtonSession != null && mMediaButtonSession.getUid() == record.getUid()) {
-            onMediaSessionChangeInMediaButtonSessionApp();
+            MediaSessionRecord newMediaButtonSession =
+                    findMediaButtonSession(mMediaButtonSession.getUid());
+            if (newMediaButtonSession != mMediaButtonSession) {
+                mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
+                        mMediaButtonSession, newMediaButtonSession);
+                mMediaButtonSession = newMediaButtonSession;
+            }
         }
     }
 
@@ -196,22 +205,6 @@ class MediaSessionStack {
                 }
                 return;
             }
-        }
-    }
-
-    /**
-     * Handle the change in a media session in the media button session app.
-     * <p>If the app has multiple media sessions, change in a media sesion in the app may change
-     * the media button session.
-     * @see #findMediaButtonSession
-     */
-    private void onMediaSessionChangeInMediaButtonSessionApp() {
-        MediaSessionRecord newMediaButtonSession =
-                findMediaButtonSession(mMediaButtonSession.getUid());
-        if (newMediaButtonSession != mMediaButtonSession) {
-            mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(mMediaButtonSession,
-                    newMediaButtonSession);
-            mMediaButtonSession = newMediaButtonSession;
         }
     }
 
