@@ -449,7 +449,8 @@ public class RecentsTaskLoader {
      * Returns the cached task content description if the task key is not expired, updating the
      * cache if it is.
      */
-    String getAndUpdateContentDescription(Task.TaskKey taskKey, Resources res) {
+    String getAndUpdateContentDescription(Task.TaskKey taskKey, ActivityManager.TaskDescription td,
+            Resources res) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Return the cached content description if it exists
@@ -461,8 +462,15 @@ public class RecentsTaskLoader {
         // All short paths failed, load the label from the activity info and cache it
         ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
         if (activityInfo != null) {
-            label = ssp.getBadgedContentDescription(activityInfo, taskKey.userId, res);
-            mContentDescriptionCache.put(taskKey, label);
+            label = ssp.getBadgedContentDescription(activityInfo, taskKey.userId, td, res);
+            if (td == null) {
+                // Only add to the cache if the task description is null, otherwise, it is possible
+                // for the task description to change between calls without the last active time
+                // changing (ie. between preloading and Overview starting) which would lead to stale
+                // content descriptions
+                // TODO: Investigate improving this
+                mContentDescriptionCache.put(taskKey, label);
+            }
             return label;
         }
         // If the content description does not exist, return an empty label for now, but do not

@@ -182,7 +182,8 @@ public class RecentsTaskLoadPlan {
             // Load the title, icon, and color
             ActivityInfo info = loader.getAndUpdateActivityInfo(taskKey);
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
-            String titleDescription = loader.getAndUpdateContentDescription(taskKey, res);
+            String titleDescription = loader.getAndUpdateContentDescription(taskKey,
+                    t.taskDescription, res);
             String dismissDescription = String.format(dismissDescFormat, titleDescription);
             String appInfoDescription = String.format(appInfoDescFormat, titleDescription);
             Drawable icon = isStackTask

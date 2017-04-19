@@ -808,13 +808,19 @@ public class SystemServicesProxy {
      * Returns the content description for a given task, badging it if necessary.  The content
      * description joins the app and activity labels.
      */
-    public String getBadgedContentDescription(ActivityInfo info, int userId, Resources res) {
+    public String getBadgedContentDescription(ActivityInfo info, int userId,
+            ActivityManager.TaskDescription td, Resources res) {
         // If we are mocking, then return a mock label
         if (RecentsDebugFlags.Static.EnableMockTasks) {
             return "Recent Task Content Description: " + userId;
         }
 
-        String activityLabel = info.loadLabel(mPm).toString();
+        String activityLabel;
+        if (td != null && td.getLabel() != null) {
+            activityLabel = td.getLabel();
+        } else {
+            activityLabel = info.loadLabel(mPm).toString();
+        }
         String applicationLabel = info.applicationInfo.loadLabel(mPm).toString();
         String badgedApplicationLabel = getBadgedLabel(applicationLabel, userId);
         return applicationLabel.equals(activityLabel) ? badgedApplicationLabel
