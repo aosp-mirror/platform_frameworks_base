@@ -1134,4 +1134,11 @@ public class MockPackageManager extends PackageManager {
     public ComponentName getInstantAppInstallerComponent() {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    public String getInstantAppAndroidId(String packageName, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
 }

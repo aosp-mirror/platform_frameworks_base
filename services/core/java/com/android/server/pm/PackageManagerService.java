@@ -23654,6 +23654,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         return mInstantAppInstallerActivity == null
                 ? null : mInstantAppInstallerActivity.getComponentName();
     }
+
+    @Override
+    public String getInstantAppAndroidId(String packageName, int userId) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_INSTANT_APPS,
+                "getInstantAppAndroidId");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId,
+                true /* requireFullPermission */, false /* checkShell */,
+                "getInstantAppAndroidId");
+        // Make sure the target is an Instant App.
+        if (!isInstantApp(packageName, userId)) {
+            return null;
+        }
+        synchronized (mPackages) {
+            return mInstantAppRegistry.getInstantAppAndroidIdLPw(packageName, userId);
+        }
+    }
 }
 
 interface PackageSender {
