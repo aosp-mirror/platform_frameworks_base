@@ -996,7 +996,9 @@ public final class Bitmap implements Parcelable {
         }
 
         Bitmap bm;
-        if (config != Config.ARGB_8888) {
+        // nullptr color spaces have a particular meaning in native and are interpreted as sRGB
+        // (we also avoid the unnecessary extra work of the else branch)
+        if (config != Config.ARGB_8888 || colorSpace == ColorSpace.get(ColorSpace.Named.SRGB)) {
             bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true, null, null);
         } else {
             if (!(colorSpace instanceof ColorSpace.Rgb)) {
