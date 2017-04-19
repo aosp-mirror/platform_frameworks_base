@@ -47,10 +47,10 @@ import java.util.regex.Pattern;
  *
  * @see ScanFilter
  */
-public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
+public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "BluetoothLEDeviceFilter";
+    private static final String LOG_TAG = "BluetoothLeDeviceFilter";
 
     private static final int RENAME_PREFIX_LENGTH_LIMIT = 10;
 
@@ -66,7 +66,7 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
     private final int mRenameNameTo;
     private final boolean mRenameBytesReverseOrder;
 
-    private BluetoothLEDeviceFilter(Pattern namePattern, ScanFilter scanFilter,
+    private BluetoothLeDeviceFilter(Pattern namePattern, ScanFilter scanFilter,
             byte[] rawDataFilter, byte[] rawDataFilterMask, String renamePrefix,
             String renameSuffix, int renameBytesFrom, int renameBytesTo,
             int renameNameFrom, int renameNameTo, boolean renameBytesReverseOrder) {
@@ -186,7 +186,7 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BluetoothLEDeviceFilter that = (BluetoothLEDeviceFilter) o;
+        BluetoothLeDeviceFilter that = (BluetoothLeDeviceFilter) o;
         return mRenameBytesFrom == that.mRenameBytesFrom &&
                 mRenameBytesTo == that.mRenameBytesTo &&
                 mRenameBytesReverseOrder == that.mRenameBytesReverseOrder &&
@@ -242,10 +242,10 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
                 '}';
     }
 
-    public static final Creator<BluetoothLEDeviceFilter> CREATOR
-            = new Creator<BluetoothLEDeviceFilter>() {
+    public static final Creator<BluetoothLeDeviceFilter> CREATOR
+            = new Creator<BluetoothLeDeviceFilter>() {
         @Override
-        public BluetoothLEDeviceFilter createFromParcel(Parcel in) {
+        public BluetoothLeDeviceFilter createFromParcel(Parcel in) {
             Builder builder = new Builder()
                     .setNamePattern(patternFromString(in.readString()))
                     .setScanFilter(in.readParcelable(null));
@@ -273,8 +273,8 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
         }
 
         @Override
-        public BluetoothLEDeviceFilter[] newArray(int size) {
-            return new BluetoothLEDeviceFilter[size];
+        public BluetoothLeDeviceFilter[] newArray(int size) {
+            return new BluetoothLeDeviceFilter[size];
         }
     };
 
@@ -283,9 +283,9 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
     }
 
     /**
-     * Builder for {@link BluetoothLEDeviceFilter}
+     * Builder for {@link BluetoothLeDeviceFilter}
      */
-    public static final class Builder extends OneTimeUseBuilder<BluetoothLEDeviceFilter> {
+    public static final class Builder extends OneTimeUseBuilder<BluetoothLeDeviceFilter> {
         private ScanFilter mScanFilter;
         private Pattern mNamePattern;
         private byte[] mRawDataFilter;
@@ -418,9 +418,9 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
         /** @inheritDoc */
         @Override
         @NonNull
-        public BluetoothLEDeviceFilter build() {
+        public BluetoothLeDeviceFilter build() {
             markUsed();
-            return new BluetoothLEDeviceFilter(mNamePattern, mScanFilter,
+            return new BluetoothLeDeviceFilter(mNamePattern, mScanFilter,
                     mRawDataFilter, mRawDataFilterMask,
                     mRenamePrefix, mRenameSuffix,
                     mRenameBytesFrom, mRenameBytesTo,
