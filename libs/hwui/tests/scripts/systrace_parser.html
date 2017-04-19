@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<script>
+'use strict';
+
+const RENDER_THREAD_NAME = "RenderThread";
+const UI_THREAD_NAME = "UI Thread";
+const DRAW_FRAME_SLICE_TITLE = "DrawFrame";
+const BINDER_SLICE_TITLE = "binder transaction";
+const RECORD_SLICE_TITLE = "Record View#draw()";
+const DEQUEUE_BUFFER_SLICE_TITLE = "dequeueBuffer";
+
+function getTimeInBinder(slice) {
+    if (slice.title === BINDER_SLICE_TITLE) {
+        return slice.duration;
+    }
+    let result = 0.0;
+    for (let subslice of slice.subSlices) {
+        result += getTimeInBinder(subslice);
+    }
+    return result;
+}
+
+function getTimeInDequeueBuffer(slice) {
+    if (slice.title === DEQUEUE_BUFFER_SLICE_TITLE) {
+        return slice.duration;
+    }
+    let result = 0.0;
+    for (let subslice of slice.subSlices) {
+        result += getTimeInDequeueBuffer(subslice);
+    }
+    return result;
+}
+
+tr.mre.FunctionRegistry.register(
+    function AvgDrawFrame(result, model) {
+        let canonicalUrl = model.canonicalUrl;
+
+        for (let p of model.getAllProcesses()) {
+            //calc stats for processes that have UI and render threads and at least 10 frames
+            let renderThread = p.findAtMostOneThreadNamed(RENDER_THREAD_NAME);
+            let UIThread = p.findAtMostOneThreadNamed(UI_THREAD_NAME);
+            if (renderThread && UIThread)
+            {
+                let numDrawFrames = 0;
+                let drawFramesWallDuration = 0.0;
+                let binderDuration = 0.0;
+                let dequeueBufferDuration = 0.0;
+
+                let numRecordViewDraw = 0;
+                let recordViewDrawWallDuration = 0.0;
+
+                renderThread.sliceGroup.slices.forEach(function(slice) {
+                    if (slice.title === DRAW_FRAME_SLICE_TITLE) {
+                        drawFramesWallDuration += slice.duration;
+                        numDrawFrames++;
+                        binderDuration += getTimeInBinder(slice);
+                        dequeueBufferDuration += getTimeInDequeueBuffer(slice);
+                    }
+                });
+                if (numDrawFrames < 10) continue;
+                UIThread.sliceGroup.slices.forEach(function(slice) {
+                    if (slice.title === RECORD_SLICE_TITLE) {
+                        recordViewDrawWallDuration += slice.duration;
+                        numRecordViewDraw++;
+                    }
+                });
+
+                let avgDrawFrameDuration = undefined;
+                if (numDrawFrames > 0) {
+                    avgDrawFrameDuration = (drawFramesWallDuration-dequeueBufferDuration)/numDrawFrames;
+                }
+                let avgRecordViewDrawDuration = undefined;
+                if (numRecordViewDraw > 0) {
+                    avgRecordViewDrawDuration = recordViewDrawWallDuration/numRecordViewDraw;
+                }
+
+                result.addPair('result', {
+                    canonicalUrl: canonicalUrl,
+                    processName: p.name,
+                    avgDrawFrameDuration: Number(avgDrawFrameDuration).toFixed(3),
+                    avgRecordViewDrawDuration: Number(avgRecordViewDrawDuration).toFixed(3),
+                    avgRecordAndPlay: Number(avgDrawFrameDuration+avgRecordViewDrawDuration).toFixed(3)
+                });
+            }
+        }
+    });
+
+</script>
