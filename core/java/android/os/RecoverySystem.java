@@ -353,9 +353,7 @@ public class RecoverySystem {
         if (list.isEmpty()) {
             throw new IOException("no entries found in the compatibility file");
         }
-        // TODO(b/36814503): Enable the actual verification when VintfObject APIs are ready.
-        // return (VintfObject.verify(list.toArray(new String[list.size()])) == 0);
-        return true;
+        return (VintfObject.verify(list.toArray(new String[list.size()])) == 0);
     }
 
     /**
