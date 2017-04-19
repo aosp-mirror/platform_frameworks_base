@@ -2804,8 +2804,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mRequiredInstallerPackage = getRequiredInstallerLPr();
                 mRequiredUninstallerPackage = getRequiredUninstallerLPr();
                 mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
-                mIntentFilterVerifier = new IntentVerifierProxy(mContext,
-                        mIntentFilterVerifierComponent);
+                if (mIntentFilterVerifierComponent != null) {
+                    mIntentFilterVerifier = new IntentVerifierProxy(mContext,
+                            mIntentFilterVerifierComponent);
+                } else {
+                    mIntentFilterVerifier = null;
+                }
                 mServicesSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SERVICES,
                         SharedLibraryInfo.VERSION_UNDEFINED);
@@ -3045,9 +3049,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (best != null) {
             return best.getComponentInfo().getComponentName();
-        } else {
-            throw new RuntimeException("There must be at least one intent filter verifier");
         }
+        Slog.w(TAG, "Intent filter verifier not found");
+        return null;
     }
 
     private @Nullable Pair<ComponentName, String> getInstantAppResolverLPr() {
