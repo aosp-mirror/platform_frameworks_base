@@ -19,6 +19,7 @@ package android.view.autofill;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.service.autofill.FillEventHistory;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
@@ -33,6 +34,7 @@ interface IAutoFillManager {
     int startSession(IBinder activityToken, IBinder windowToken, in IBinder appCallback,
             in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
             boolean hasCallback, int flags, String packageName);
+    FillEventHistory getFillEventHistory();
     boolean restoreSession(int sessionId, in IBinder activityToken, in IBinder appCallback);
     void setWindow(int sessionId, in IBinder windowToken);
     void updateSession(int sessionId, in AutofillId id, in Rect bounds,
