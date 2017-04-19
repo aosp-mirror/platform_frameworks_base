@@ -21,35 +21,47 @@ import java.util.List;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.graphics.Typeface;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 public class NotificationSnooze extends LinearLayout
         implements NotificationGuts.GutsContent, View.OnClickListener {
 
-    private static final int MAX_ASSISTANT_SUGGESTIONS = 2;
+    private static final int MAX_ASSISTANT_SUGGESTIONS = 1;
     private NotificationGuts mGutsContainer;
     private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
 
     private TextView mSelectedOptionText;
     private TextView mUndoButton;
-    private ViewGroup mSnoozeOptionView;
+    private ImageView mExpandButton;
+    private View mDivider;
+    private ViewGroup mSnoozeOptionContainer;
     private List<SnoozeOption> mSnoozeOptions;
-    private boolean mSnoozing;
+    private int mCollapsedHeight;
 
     private SnoozeOption mSelectedOption;
+    private boolean mSnoozing;
+    private boolean mExpanded;
+    private AnimatorSet mExpandAnimation;
 
     public NotificationSnooze(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,15 +70,20 @@ public class NotificationSnooze extends LinearLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mCollapsedHeight = getResources().getDimensionPixelSize(R.dimen.snooze_snackbar_min_height);
+        findViewById(R.id.notification_snooze).setOnClickListener(this);
+        mSelectedOptionText = (TextView) findViewById(R.id.snooze_option_default);
+        mUndoButton = (TextView) findViewById(R.id.undo);
+        mUndoButton.setOnClickListener(this);
+        mExpandButton = (ImageView) findViewById(R.id.expand_button);
+        mDivider = findViewById(R.id.divider);
+        mDivider.setAlpha(0f);
+        mSnoozeOptionContainer = (ViewGroup) findViewById(R.id.snooze_options);
+        mSnoozeOptionContainer.setAlpha(0f);
+
         // Create the different options based on list
         mSnoozeOptions = getDefaultSnoozeOptions();
         createOptionViews();
-
-        // Snackbar
-        mSelectedOptionText = findViewById(R.id.snooze_option_default);
-        mSelectedOptionText.setOnClickListener(this);
-        mUndoButton = findViewById(R.id.undo);
-        mUndoButton.setOnClickListener(this);
 
         // Default to first option in list
         setSelected(mSnoozeOptions.get(0));
@@ -96,52 +113,68 @@ public class NotificationSnooze extends LinearLayout
 
     private SnoozeOption createOption(int descriptionResId, int minutes) {
         Resources res = getResources();
-        String resultText = String.format(
-                res.getString(R.string.snoozed_for_time), res.getString(descriptionResId));
-        return new SnoozeOption(null, minutes, res.getString(descriptionResId), resultText);
+        final String description = res.getString(descriptionResId);
+        String resultText = String.format(res.getString(R.string.snoozed_for_time), description);
+        SpannableString string = new SpannableString(resultText);
+        string.setSpan(new StyleSpan(Typeface.BOLD),
+                resultText.length() - description.length(), resultText.length(), 0 /* flags */);
+        return new SnoozeOption(null, minutes, res.getString(descriptionResId), string);
     }
 
     private void createOptionViews() {
-        mSnoozeOptionView = findViewById(R.id.snooze_options);
-        mSnoozeOptionView.removeAllViews();
-        mSnoozeOptionView.setVisibility(View.GONE);
-        final Resources res = getResources();
-        final int textSize = res.getDimensionPixelSize(R.dimen.snooze_option_text_size);
-        final int p = res.getDimensionPixelSize(R.dimen.snooze_option_padding);
-
-        // Add all the options
+        mSnoozeOptionContainer.removeAllViews();
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
         for (int i = 0; i < mSnoozeOptions.size(); i++) {
             SnoozeOption option = mSnoozeOptions.get(i);
-            TextView tv = new TextView(getContext());
-            tv.setTextColor(Color.WHITE);
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-            tv.setPadding(p, p, p, p);
-            mSnoozeOptionView.addView(tv);
+            TextView tv = (TextView) inflater.inflate(R.layout.notification_snooze_option,
+                    mSnoozeOptionContainer, false);
+            mSnoozeOptionContainer.addView(tv);
             tv.setText(option.description);
             tv.setTag(option);
             tv.setOnClickListener(this);
         }
+    }
 
-        // Add the undo option as final item
-        TextView tv = new TextView(getContext());
-        tv.setTextColor(Color.WHITE);
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-        tv.setPadding(p, p, p, p);
-        mSnoozeOptionView.addView(tv);
-        tv.setText(R.string.snooze_option_dont_snooze);
-        tv.setOnClickListener(this);
+    private void hideSelectedOption() {
+        final int childCount = mSnoozeOptionContainer.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = mSnoozeOptionContainer.getChildAt(i);
+            child.setVisibility(child.getTag() == mSelectedOption ? View.GONE : View.VISIBLE);
+        }
     }
 
     private void showSnoozeOptions(boolean show) {
-        mSelectedOptionText.setVisibility(show ? View.GONE : View.VISIBLE);
-        mUndoButton.setVisibility(show ? View.GONE : View.VISIBLE);
-        mSnoozeOptionView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mExpanded = show;
+        animateSnoozeOptions(show);
+        int drawableId = show ? com.android.internal.R.drawable.ic_collapse_notification
+                : com.android.internal.R.drawable.ic_expand_notification;
+        mExpandButton.setImageResource(drawableId);
+        if (mGutsContainer != null) {
+            mGutsContainer.onHeightChanged();
+        }
+    }
+
+    private void animateSnoozeOptions(boolean show) {
+        if (mExpandAnimation != null) {
+            mExpandAnimation.cancel();
+        }
+        ObjectAnimator dividerAnim = ObjectAnimator.ofFloat(mDivider, View.ALPHA,
+                mDivider.getAlpha(), show ? 1f : 0f);
+        ObjectAnimator optionAnim = ObjectAnimator.ofFloat(mSnoozeOptionContainer, View.ALPHA,
+                mSnoozeOptionContainer.getAlpha(), show ? 1f : 0f);
+        mExpandAnimation = new AnimatorSet();
+        mExpandAnimation.playTogether(dividerAnim, optionAnim);
+        mExpandAnimation.setDuration(150);
+        mExpandAnimation.setInterpolator(show ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
+        mExpandAnimation.start();
     }
 
     private void setSelected(SnoozeOption option) {
         mSelectedOption = option;
         mSelectedOptionText.setText(option.confirmation);
         showSnoozeOptions(false);
+        hideSelectedOption();
     }
 
     @Override
@@ -153,17 +186,28 @@ public class NotificationSnooze extends LinearLayout
         final SnoozeOption tag = (SnoozeOption) v.getTag();
         if (tag != null) {
             setSelected(tag);
-        } else if (id == R.id.snooze_option_default) {
-            // Show more snooze options
-            showSnoozeOptions(true);
+        } else if (id == R.id.notification_snooze) {
+            // Toggle snooze options
+            showSnoozeOptions(!mExpanded);
         } else {
-            undoSnooze();
+            // Undo snooze was selected
+            mSelectedOption = null;
+            int[] parentLoc = new int[2];
+            int[] targetLoc = new int[2];
+            mGutsContainer.getLocationOnScreen(parentLoc);
+            v.getLocationOnScreen(targetLoc);
+            final int centerX = v.getWidth() / 2;
+            final int centerY = v.getHeight() / 2;
+            final int x = targetLoc[0] - parentLoc[0] + centerX;
+            final int y = targetLoc[1] - parentLoc[1] + centerY;
+            showSnoozeOptions(false);
+            mGutsContainer.closeControls(x, y, false /* save */);
         }
     }
 
-    private void undoSnooze() {
-        mSelectedOption = null;
-        mGutsContainer.closeControls(-1 /* x */, -1 /* y */, true /* notify */);
+    @Override
+    public int getActualHeight() {
+        return mExpanded ? getHeight() : mCollapsedHeight;
     }
 
     @Override
@@ -173,6 +217,8 @@ public class NotificationSnooze extends LinearLayout
 
     @Override
     public View getContentView() {
+        // Reset the view before use
+        setSelected(mSnoozeOptions.get(0));
         return this;
     }
 
@@ -197,11 +243,8 @@ public class NotificationSnooze extends LinearLayout
             mSnoozing = true;
             mSnoozeListener.snooze(mSbn, mSelectedOption);
             return true;
-        } else {
-            // Reset the view once it's closed
-            setSelected(mSnoozeOptions.get(0));
-            showSnoozeOptions(false);
         }
+        // The view should be closed
         return false;
     }
 }
