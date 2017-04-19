@@ -24,6 +24,7 @@ import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
@@ -50,6 +51,7 @@ public final class Dataset implements Parcelable {
     private final ArrayList<RemoteViews> mFieldPresentations;
     private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
+    @Nullable String mId;
 
     private Dataset(Builder builder) {
         mFieldIds = builder.mFieldIds;
@@ -57,6 +59,7 @@ public final class Dataset implements Parcelable {
         mFieldPresentations = builder.mFieldPresentations;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
+        mId = builder.mId;
     }
 
     /** @hide */
@@ -89,7 +92,7 @@ public final class Dataset implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        return new StringBuilder("Dataset [")
+        return new StringBuilder("Dataset " + mId + " [")
                 .append("fieldIds=").append(mFieldIds)
                 .append(", fieldValues=").append(mFieldValues)
                 .append(", fieldPresentations=")
@@ -97,6 +100,17 @@ public final class Dataset implements Parcelable {
                 .append(", hasPresentation=").append(mPresentation != null)
                 .append(", hasAuthentication=").append(mAuthentication != null)
                 .append(']').toString();
+    }
+
+    /**
+     * Gets the id of this dataset.
+     *
+     * @return The id of this dataset or {@code null} if not set
+     *
+     * @hide
+     */
+    public String getId() {
+        return mId;
     }
 
     /**
@@ -110,6 +124,7 @@ public final class Dataset implements Parcelable {
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
+        @Nullable private String mId;
 
         /**
          * Creates a new builder.
@@ -169,6 +184,25 @@ public final class Dataset implements Parcelable {
         public @NonNull Builder setAuthentication(@Nullable IntentSender authentication) {
             throwIfDestroyed();
             mAuthentication = authentication;
+            return this;
+        }
+
+        /**
+         * Sets the id for the dataset.
+         *
+         * <p>The id of the last selected dataset can be read from
+         * {@link AutofillService#getFillEventHistory()}. If the id is not set it will not be clear
+         * if a dataset was selected as {@link AutofillService#getFillEventHistory()} uses
+         * {@code null} to indicate that no dataset was selected.
+         *
+         * @param id id for this dataset or {@code null} to unset.
+
+         * @return This builder.
+         */
+        public @NonNull Builder setId(@Nullable String id) {
+            throwIfDestroyed();
+
+            mId = id;
             return this;
         }
 
@@ -269,6 +303,7 @@ public final class Dataset implements Parcelable {
         parcel.writeTypedArrayList(mFieldValues, flags);
         parcel.writeParcelableList(mFieldPresentations, flags);
         parcel.writeParcelable(mAuthentication, flags);
+        parcel.writeString(mId);
     }
 
     public static final Creator<Dataset> CREATOR = new Creator<Dataset>() {
@@ -295,6 +330,7 @@ public final class Dataset implements Parcelable {
                 builder.setValueAndPresentation(id, value, fieldPresentation);
             }
             builder.setAuthentication(parcel.readParcelable(null));
+            builder.setId(parcel.readString());
             return builder.build();
         }
 

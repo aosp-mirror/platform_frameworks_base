@@ -229,7 +229,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void onFillRequestSuccess(@Nullable FillResponse response,
+    public void onFillRequestSuccess(@Nullable FillResponse response, int serviceUid,
             @NonNull String servicePackageName, int requestId) {
         if (response == null) {
             if ((mFlags & FLAG_MANUAL_REQUEST) != 0) {
@@ -240,6 +240,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             removeSelf();
             return;
         }
+
+        mService.setLastResponse(serviceUid, response);
 
         if ((response.getDatasets() == null || response.getDatasets().isEmpty())
                         && response.getAuthentication() == null) {
@@ -314,6 +316,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         synchronized (mLock) {
             fillInIntent = createAuthFillInIntent(mStructure, extras);
         }
+
+        mService.setAuthenticationSelected();
+
         mHandlerCaller.getHandler().post(() -> startAuthentication(intent, fillInIntent));
     }
 
@@ -542,6 +547,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
             if (atLeastOneChanged) {
+                mService.setSaveShown();
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName);
                 return false;
             }
@@ -882,12 +888,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         synchronized (mLock) {
             // Autofill it directly...
             if (dataset.getAuthentication() == null) {
+                mService.setDatasetSelected(dataset.getId());
+
                 autoFillApp(dataset);
                 return;
             }
 
             // ...or handle authentication.
             // TODO(b/33197203 , b/35707731): make sure it's ignored if there is one already
+            mService.setDatasetAuthenticationSelected(dataset.getId());
             mDatasetWaitingAuth = dataset;
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH);
             final Intent fillInIntent = createAuthFillInIntent(mStructure, null);

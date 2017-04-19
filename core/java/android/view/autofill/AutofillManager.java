@@ -31,6 +31,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.service.autofill.AutofillService;
+import android.service.autofill.FillEventHistory;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -330,6 +332,20 @@ public final class AutofillManager {
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
             return mEnabled;
+        }
+    }
+
+    /**
+     * Should always be called from {@link AutofillService#getFillEventHistory()}.
+     *
+     * @hide
+     */
+    @Nullable public FillEventHistory getFillEventHistory() {
+        try {
+            return mService.getFillEventHistory();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
         }
     }
 
