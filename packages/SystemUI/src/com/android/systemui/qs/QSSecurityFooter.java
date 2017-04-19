@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *
@@ -51,24 +50,21 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private final View mRootView;
     private final TextView mFooterText;
     private final ImageView mFooterIcon;
-    private final ImageView mFooterIcon2;
     private final Context mContext;
     private final Callback mCallback = new Callback();
     private final SecurityController mSecurityController;
     private final ActivityStarter mActivityStarter;
     private final Handler mMainHandler;
+    private final View mDivider;
 
     private AlertDialog mDialog;
     private QSTileHost mHost;
     protected H mHandler;
 
     private boolean mIsVisible;
-    private boolean mIsIconVisible;
-    private boolean mIsIcon2Visible;
     private CharSequence mFooterTextContent = null;
     private int mFooterTextId;
     private int mFooterIconId;
-    private int mFooterIcon2Id;
 
     public QSSecurityFooter(QSPanel qsPanel, Context context) {
         mRootView = LayoutInflater.from(context)
@@ -76,14 +72,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mRootView.setOnClickListener(this);
         mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);
         mFooterIcon = (ImageView) mRootView.findViewById(R.id.footer_icon);
-        mFooterIcon2 = (ImageView) mRootView.findViewById(R.id.footer_icon2);
-        mFooterIconId = R.drawable.ic_qs_vpn;
-        mFooterIcon2Id = R.drawable.ic_qs_network_logging;
+        mFooterIconId = R.drawable.ic_info_outline;
         mContext = context;
         mMainHandler = new Handler(Looper.getMainLooper());
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mSecurityController = Dependency.get(SecurityController.class);
         mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
+        mDivider = qsPanel == null ? null : qsPanel.getDivider();
     }
 
     public void setHostEnvironment(QSTileHost host) {
@@ -130,43 +125,100 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     }
 
     private void handleRefreshState() {
-        boolean isVpnEnabled = mSecurityController.isVpnEnabled();
-        boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
-        mIsIconVisible = isVpnEnabled || isNetworkLoggingEnabled;
-        mIsIcon2Visible = isVpnEnabled && isNetworkLoggingEnabled;
-        if (mSecurityController.isDeviceManaged()) {
-            final CharSequence organizationName =
-                    mSecurityController.getDeviceOwnerOrganizationName();
-            if (organizationName != null) {
-                mFooterTextContent = mContext.getResources().getString(
-                        R.string.do_disclosure_with_name, organizationName);
-            } else {
-                mFooterTextContent =
-                        mContext.getResources().getString(R.string.do_disclosure_generic);
-            }
-            mIsVisible = true;
-            int footerIconId = isVpnEnabled
-                    ? R.drawable.ic_qs_vpn
-                    : R.drawable.ic_qs_network_logging;
-            if (mFooterIconId != footerIconId) {
-                mFooterIconId = footerIconId;
-                mMainHandler.post(mUpdateIcon);
-            }
-        } else {
-            boolean isBranded = mSecurityController.isVpnBranded();
-            mFooterTextContent = mContext.getResources().getText(
-                    isBranded ? R.string.branded_vpn_footer : R.string.vpn_footer);
-            // Update the VPN footer icon, if needed.
-            int footerIconId = isVpnEnabled
-                    ? (isBranded ? R.drawable.ic_qs_branded_vpn : R.drawable.ic_qs_vpn)
-                    : R.drawable.ic_qs_network_logging;
-            if (mFooterIconId != footerIconId) {
-                mFooterIconId = footerIconId;
-                mMainHandler.post(mUpdateIcon);
-            }
-            mIsVisible = mIsIconVisible;
+        final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
+        final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
+        final boolean hasCACerts = mSecurityController.hasCACertInCurrentUser();
+        final boolean hasCACertsInWorkProfile = mSecurityController.hasCACertInWorkProfile();
+        final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
+        final String vpnName = mSecurityController.getPrimaryVpnName();
+        final String vpnNameWorkProfile = mSecurityController.getWorkProfileVpnName();
+        final CharSequence organizationName = mSecurityController.getDeviceOwnerOrganizationName();
+        final CharSequence workProfileName = mSecurityController.getWorkProfileOrganizationName();
+        // Update visibility of footer
+        mIsVisible = isDeviceManaged || hasCACerts || hasCACertsInWorkProfile ||
+            vpnName != null || vpnNameWorkProfile != null;
+        // Update the string
+        mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
+                hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
+                vpnNameWorkProfile, organizationName, workProfileName);
+        // Update the icon
+        int footerIconId = vpnName != null || vpnNameWorkProfile != null
+                ? R.drawable.ic_qs_vpn
+                : R.drawable.ic_info_outline;
+        if (mFooterIconId != footerIconId) {
+            mFooterIconId = footerIconId;
+            mMainHandler.post(mUpdateIcon);
         }
         mMainHandler.post(mUpdateDisplayState);
+    }
+
+    protected CharSequence getFooterText(boolean isDeviceManaged, boolean hasWorkProfile,
+            boolean hasCACerts, boolean hasCACertsInWorkProfile, boolean isNetworkLoggingEnabled,
+            String vpnName, String vpnNameWorkProfile, CharSequence organizationName,
+            CharSequence workProfileName) {
+        if (isDeviceManaged) {
+            if (hasCACerts || hasCACertsInWorkProfile || isNetworkLoggingEnabled) {
+                if (organizationName == null) {
+                    return mContext.getString(
+                            R.string.quick_settings_disclosure_management_monitoring);
+                }
+                return mContext.getString(
+                        R.string.quick_settings_disclosure_named_management_monitoring,
+                        organizationName);
+            }
+            if (vpnName != null && vpnNameWorkProfile != null) {
+                if (organizationName == null) {
+                    return mContext.getString(R.string.quick_settings_disclosure_management_vpns);
+                }
+                return mContext.getString(R.string.quick_settings_disclosure_named_management_vpns,
+                        organizationName);
+            }
+            if (vpnName != null || vpnNameWorkProfile != null) {
+                if (organizationName == null) {
+                    return mContext.getString(
+                            R.string.quick_settings_disclosure_management_named_vpn,
+                            vpnName != null ? vpnName : vpnNameWorkProfile);
+                }
+                return mContext.getString(
+                        R.string.quick_settings_disclosure_named_management_named_vpn,
+                        organizationName,
+                        vpnName != null ? vpnName : vpnNameWorkProfile);
+            }
+            if (organizationName == null) {
+                return mContext.getString(R.string.quick_settings_disclosure_management);
+            }
+            return mContext.getString(R.string.quick_settings_disclosure_named_management,
+                    organizationName);
+        } // end if(isDeviceManaged)
+        if (hasCACertsInWorkProfile) {
+            if (workProfileName == null) {
+                return mContext.getString(
+                        R.string.quick_settings_disclosure_managed_profile_monitoring);
+            }
+            return mContext.getString(
+                    R.string.quick_settings_disclosure_named_managed_profile_monitoring,
+                    workProfileName);
+        }
+        if (hasCACerts) {
+            return mContext.getString(R.string.quick_settings_disclosure_monitoring);
+        }
+        if (vpnName != null && vpnNameWorkProfile != null) {
+            return mContext.getString(R.string.quick_settings_disclosure_vpns);
+        }
+        if (vpnNameWorkProfile != null) {
+            return mContext.getString(R.string.quick_settings_disclosure_managed_profile_named_vpn,
+                    vpnNameWorkProfile);
+        }
+        if (vpnName != null) {
+            if (hasWorkProfile) {
+                return mContext.getString(
+                        R.string.quick_settings_disclosure_personal_profile_named_vpn,
+                        vpnName);
+            }
+            return mContext.getString(R.string.quick_settings_disclosure_named_vpn,
+                    vpnName);
+        }
+        return null;
     }
 
     @Override
@@ -182,18 +234,15 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         final String profileOwnerPackage = mSecurityController.getProfileOwnerName();
         final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
         final String primaryVpn = mSecurityController.getPrimaryVpnName();
-        final String profileVpn = mSecurityController.getProfileVpnName();
+        final String profileVpn = mSecurityController.getWorkProfileVpnName();
         final CharSequence deviceOwnerOrganization =
                 mSecurityController.getDeviceOwnerOrganizationName();
         boolean hasProfileOwner = mSecurityController.hasProfileOwner();
-        boolean isBranded = deviceOwnerPackage == null && mSecurityController.isVpnBranded();
 
         mDialog = new SystemUIDialog(mContext);
-        if (!isBranded) {
-            mDialog.setTitle(getTitle(deviceOwnerPackage));
-        }
+        mDialog.setTitle(getTitle(deviceOwnerPackage));
         CharSequence msg = getMessage(deviceOwnerPackage, profileOwnerPackage, primaryVpn,
-                profileVpn, deviceOwnerOrganization, hasProfileOwner, isBranded);
+                profileVpn, deviceOwnerOrganization, hasProfileOwner);
         if (deviceOwnerPackage == null) {
             mDialog.setMessage(msg);
             if (mSecurityController.isVpnEnabled() && !mSecurityController.isVpnRestricted()) {
@@ -235,7 +284,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             }
         }
 
-        mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(isBranded), this);
+        mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
         mDialog.show();
         mDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
@@ -244,13 +293,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         return mContext.getString(R.string.status_bar_settings_settings_button);
     }
 
-    private String getPositiveButton(boolean isBranded) {
-        return mContext.getString(isBranded ? android.R.string.ok : R.string.quick_settings_done);
+    private String getPositiveButton() {
+        return mContext.getString(R.string.quick_settings_done);
     }
 
     protected CharSequence getMessage(String deviceOwnerPackage, String profileOwnerPackage,
             String primaryVpn, String profileVpn, CharSequence deviceOwnerOrganization,
-            boolean hasProfileOwner, boolean isBranded) {
+            boolean hasProfileOwner) {
         if (deviceOwnerPackage != null) {
             final SpannableStringBuilder message = new SpannableStringBuilder();
             if (deviceOwnerOrganization != null) {
@@ -273,13 +322,8 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
                 return mContext.getString(R.string.monitoring_description_app_personal_work,
                         profileOwnerPackage, profileVpn, primaryVpn);
             } else {
-                if (isBranded) {
-                    return mContext.getString(R.string.branded_monitoring_description_app_personal,
-                            primaryVpn);
-                } else {
-                    return mContext.getString(R.string.monitoring_description_app_personal,
-                            primaryVpn);
-                }
+                return mContext.getString(R.string.monitoring_description_app_personal,
+                        primaryVpn);
             }
         } else if (profileVpn != null) {
             return mContext.getString(R.string.monitoring_description_app_work,
@@ -305,7 +349,6 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         @Override
         public void run() {
             mFooterIcon.setImageResource(mFooterIconId);
-            mFooterIcon2.setImageResource(mFooterIcon2Id);
         }
     };
 
@@ -316,8 +359,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
                 mFooterText.setText(mFooterTextContent);
             }
             mRootView.setVisibility(mIsVisible ? View.VISIBLE : View.GONE);
-            mFooterIcon.setVisibility(mIsIconVisible ? View.VISIBLE : View.INVISIBLE);
-            mFooterIcon2.setVisibility(mIsIcon2Visible ? View.VISIBLE : View.INVISIBLE);
+            if (mDivider != null) mDivider.setVisibility(mIsVisible ? View.GONE : View.VISIBLE);
         }
     };
 
