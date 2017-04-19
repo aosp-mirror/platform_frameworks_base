@@ -3611,7 +3611,7 @@ public class NotificationManagerService extends SystemService {
         final boolean aboveThreshold =
                 record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT;
         final boolean canInterrupt = aboveThreshold && !record.isIntercepted();
-        if (DBG || record.isIntercepted())
+        if (DBG)
             Slog.v(TAG,
                     "pkg=" + record.sbn.getPackageName() + " canInterrupt=" + canInterrupt +
                             " intercept=" + record.isIntercepted()

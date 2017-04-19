@@ -433,7 +433,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 return false;
             }
         });
-        row.icon = (ImageButton) row.view.findViewById(R.id.volume_row_icon);
+        row.icon = row.view.findViewById(R.id.volume_row_icon);
         row.icon.setImageResource(iconRes);
         if (row.stream != AudioSystem.STREAM_ACCESSIBILITY) {
             row.icon.setOnClickListener(new OnClickListener() {
@@ -465,6 +465,8 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                     row.userAttempt = 0;  // reset the grace period, slider updates immediately
                 }
             });
+        } else {
+            row.icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         }
     }
 
