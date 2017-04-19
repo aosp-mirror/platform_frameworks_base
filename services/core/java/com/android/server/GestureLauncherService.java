@@ -66,6 +66,7 @@ public class GestureLauncherService extends SystemService {
 
     private Sensor mCameraLaunchSensor;
     private Context mContext;
+    private final MetricsLogger mMetricsLogger;
 
     /** The wake lock held when a gesture is detected. */
     private WakeLock mWakeLock;
@@ -109,8 +110,14 @@ public class GestureLauncherService extends SystemService {
     private long mLastPowerDown;
 
     public GestureLauncherService(Context context) {
+        this(context, new MetricsLogger());
+    }
+
+    @VisibleForTesting
+    GestureLauncherService(Context context, MetricsLogger metricsLogger) {
         super(context);
         mContext = context;
+        mMetricsLogger = metricsLogger;
     }
 
     public void onStart() {
@@ -274,11 +281,11 @@ public class GestureLauncherService extends SystemService {
             launched = handleCameraLaunchGesture(false /* useWakelock */,
                     StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
             if (launched) {
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
+                mMetricsLogger.action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
                         (int) doubleTapInterval);
             }
         }
-        MetricsLogger.histogram(mContext, "power_double_tap_interval", (int) doubleTapInterval);
+        mMetricsLogger.histogram("power_double_tap_interval", (int) doubleTapInterval);
         outLaunched.value = launched;
         return intercept && launched;
     }
@@ -347,7 +354,7 @@ public class GestureLauncherService extends SystemService {
                 }
                 if (handleCameraLaunchGesture(true /* useWakelock */,
                         StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)) {
-                    MetricsLogger.action(mContext, MetricsEvent.ACTION_WIGGLE_CAMERA_GESTURE);
+                    mMetricsLogger.action(MetricsEvent.ACTION_WIGGLE_CAMERA_GESTURE);
                     trackCameraLaunchEvent(event);
                 }
                 return;

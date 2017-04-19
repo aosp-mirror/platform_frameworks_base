@@ -19,6 +19,8 @@ package com.android.server;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,8 @@ import android.test.mock.MockContentResolver;
 import android.view.KeyEvent;
 import android.util.MutableBoolean;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -68,6 +72,7 @@ public class GestureLauncherServiceTest {
     private @Mock Context mContext;
     private @Mock Resources mResources;
     private @Mock StatusBarManagerInternal mStatusBarManagerInternal;
+    private @Mock MetricsLogger mMetricsLogger;
     private MockContentResolver mContentResolver;
     private GestureLauncherService mGestureLauncherService;
 
@@ -92,7 +97,7 @@ public class GestureLauncherServiceTest {
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
 
-        mGestureLauncherService = new GestureLauncherService(mContext);
+        mGestureLauncherService = new GestureLauncherService(mContext, mMetricsLogger);
     }
 
     @Test
@@ -190,7 +195,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -198,6 +204,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -216,7 +225,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -224,6 +234,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -244,7 +257,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = false;
@@ -254,6 +268,8 @@ public class GestureLauncherServiceTest {
         assertTrue(outLaunched.value);
         verify(mStatusBarManagerInternal).onCameraLaunchGestureDetected(
                 StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
+        verify(mMetricsLogger)
+            .action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE, (int) interval);
     }
 
     @Test
@@ -274,7 +290,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -282,6 +299,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -300,7 +320,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -308,6 +329,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -326,7 +350,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -334,6 +359,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -352,7 +380,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -360,6 +389,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -380,7 +412,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
@@ -389,6 +422,9 @@ public class GestureLauncherServiceTest {
         assertTrue(outLaunched.value);
         verify(mStatusBarManagerInternal).onCameraLaunchGestureDetected(
                 StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
+        verify(mMetricsLogger)
+            .action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE, (int) interval);
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -409,7 +445,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -417,6 +454,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     @Test
@@ -435,7 +475,8 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        eventTime += GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         outLaunched.value = true;
@@ -443,6 +484,9 @@ public class GestureLauncherServiceTest {
                 outLaunched);
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
+        verify(mMetricsLogger, never())
+            .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+        verify(mMetricsLogger).histogram("power_double_tap_interval", (int) interval);
     }
 
     private void withCameraDoubleTapPowerEnableConfigValue(boolean enableConfigValue) {
