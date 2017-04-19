@@ -56,6 +56,7 @@ interface IBluetoothGatt {
                                 in IAdvertisingSetCallback callback);
     void stopAdvertisingSet(in IAdvertisingSetCallback callback);
 
+    void getOwnAddress(in int advertiserId);
     void enableAdvertisingSet(in int advertiserId, in boolean enable, in int duration, in int maxExtAdvEvents);
     void setAdvertisingData(in int advertiserId, in AdvertiseData data);
     void setScanResponseData(in int advertiserId, in AdvertiseData data);
