@@ -16,11 +16,14 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,28 +34,37 @@ import java.util.List;
  * static - updatable non backwards-compatible emulating static linking.
  */
 public final class SharedLibraryInfo implements Parcelable {
+
+    /** @hide */
+    @IntDef(
+        flag = true,
+        value = {
+                TYPE_BUILTIN,
+                TYPE_DYNAMIC,
+                TYPE_STATIC,
+        })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Type{}
+
     /**
      * Shared library type: this library is a part of the OS
      * and cannot be updated or uninstalled.
-     * @hide
      */
-    public static final int TYPE_BUILTIN = 0x1<<0;
+    public static final int TYPE_BUILTIN = 0;
 
     /**
      * Shared library type: this library is backwards-compatible, can
      * be updated, and updates can be uninstalled. Clients link against
      * the latest version of the library.
-     * @hide
      */
-    public static final int TYPE_DYNAMIC = 0x1<<1;
+    public static final int TYPE_DYNAMIC = 1;
 
     /**
      * Shared library type: this library is <strong>not</strong> backwards
      * -compatible, can be updated and updates can be uninstalled. Clients
      * link against a specific version of the library.
-     * @hide
      */
-    public static final int TYPE_STATIC = 0x1<<2;
+    public static final int TYPE_STATIC = 2;
 
     /**
      * Constant for referring to an undefined version.
@@ -60,8 +72,10 @@ public final class SharedLibraryInfo implements Parcelable {
     public static final int VERSION_UNDEFINED = -1;
 
     private final String mName;
+
+    // TODO: Make long when we change the paltform to use longs
     private final int mVersion;
-    private final int mType;
+    private final @Type int mType;
     private final VersionedPackage mDeclaringPackage;
     private final List<VersionedPackage> mDependentPackages;
 
@@ -90,13 +104,18 @@ public final class SharedLibraryInfo implements Parcelable {
                 parcel.readParcelable(null), parcel.readArrayList(null));
     }
 
-    /** @hide */
-    public int getType() {
+    /**
+     * Gets the type of this library.
+     *
+     * @return The library type.
+     */
+    public @Type int getType() {
         return mType;
     }
 
     /**
-     * Gets the library name.
+     * Gets the library name an app defines in its manifest
+     * to depend on the library.
      *
      * @return The name.
      */
@@ -105,40 +124,36 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
-     * Gets the version of the library. For {@link #isStatic()}  static} libraries
-     * this is the declared version and for {@link #isDynamic()} dynamic} and
-     * {@link #isBuiltin()} builtin} it is {@link #VERSION_UNDEFINED} as these
+     * Gets the version of the library. For {@link #TYPE_STATIC static} libraries
+     * this is the declared version and for {@link #TYPE_DYNAMIC dynamic} and
+     * {@link #TYPE_BUILTIN builtin} it is {@link #VERSION_UNDEFINED} as these
      * are not versioned.
      *
      * @return The version.
      */
-    public @IntRange(from = -1) int getVersion() {
+    public @IntRange(from = -1) long getVersion() {
         return mVersion;
     }
 
     /**
-     * @return whether this library is builtin which means that it
-     * is a part of the OS and cannot be updated or uninstalled.
+     * @hide
+     * @removed
      */
     public boolean isBuiltin() {
         return mType == TYPE_BUILTIN;
     }
 
     /**
-     * @return whether this library is dynamic which means that it
-     * is backwards-compatible, can be updated, and updates can be
-     * uninstalled. Clients link against the latest version of the
-     * library.
+     * @hide
+     * @removed
      */
     public boolean isDynamic() {
         return mType == TYPE_DYNAMIC;
     }
 
     /**
-     * @return whether this library is dynamic which means that it
-     * is <strong>not</strong> backwards-compatible, can be updated
-     * and updates can be uninstalled. Clients link against a specific
-     * version of the library.
+     * @hide
+     * @removed
      */
     public boolean isStatic() {
         return mType == TYPE_STATIC;
