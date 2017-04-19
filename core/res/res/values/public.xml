@@ -2834,6 +2834,7 @@
 
     <public-group type="drawable" first-id="0x010800b4">
         <public name="autofilled_highlight" />
+        <public name="ic_picture_in_picture" />
     </public-group>
 
     <public-group type="string" first-id="0x01040019">
