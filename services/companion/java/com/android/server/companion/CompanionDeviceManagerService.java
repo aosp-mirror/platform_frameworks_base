@@ -15,7 +15,7 @@
  */
 
 
-package com.android.server.print;
+package com.android.server.companion;
 
 import static com.android.internal.util.CollectionUtils.size;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -81,7 +81,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-//TODO move to own package!
 //TODO onStop schedule unbind in 5 seconds
 //TODO make sure APIs are only callable from currently focused app
 //TODO schedule stopScan on activity destroy(except if configuration change)
