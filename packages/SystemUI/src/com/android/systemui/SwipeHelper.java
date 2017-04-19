@@ -462,11 +462,20 @@ public class SwipeHelper implements Gefingerpoken {
         int duration = SNAP_ANIM_LEN;
         anim.setDuration(duration);
         anim.addListener(new AnimatorListenerAdapter() {
+            boolean wasCancelled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                wasCancelled = true;
+            }
+
             @Override
             public void onAnimationEnd(Animator animator) {
                 mSnappingChild = false;
-                updateSwipeProgressFromOffset(animView, canBeDismissed);
-                mCallback.onChildSnappedBack(animView, targetLeft);
+                if (!wasCancelled) {
+                    updateSwipeProgressFromOffset(animView, canBeDismissed);
+                    mCallback.onChildSnappedBack(animView, targetLeft);
+                }
             }
         });
         prepareSnapBackAnimation(animView, anim);
