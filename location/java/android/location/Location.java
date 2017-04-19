@@ -646,7 +646,10 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasAltitude} will return false,
      * and {@link #getAltitude} will return 0.0.
+     *
+     * @deprecated use a new Location object for location updates.
      */
+    @Deprecated
     public void removeAltitude() {
         mAltitude = 0.0f;
         mFieldsMask &= ~HAS_ALTITUDE_MASK;
@@ -683,7 +686,10 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasSpeed} will return false,
      * and {@link #getSpeed} will return 0.0.
+     *
+     * @deprecated use a new Location object for location updates.
      */
+    @Deprecated
     public void removeSpeed() {
         mSpeed = 0.0f;
         mFieldsMask &= ~HAS_SPEED_MASK;
@@ -733,7 +739,10 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasBearing} will return false,
      * and {@link #getBearing} will return 0.0.
+     *
+     * @deprecated use a new Location object for location updates.
      */
+    @Deprecated
     public void removeBearing() {
         mBearing = 0.0f;
         mFieldsMask &= ~HAS_BEARING_MASK;
@@ -790,7 +799,10 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasAccuracy} will return false, and
      * {@link #getAccuracy} will return 0.0.
+     *
+     * @deprecated use a new Location object for location updates.
      */
+    @Deprecated
     public void removeAccuracy() {
         mHorizontalAccuracyMeters = 0.0f;
         mFieldsMask &= ~HAS_HORIZONTAL_ACCURACY_MASK;
@@ -839,7 +851,11 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasVerticalAccuracy} will return false, and
      * {@link #getVerticalAccuracyMeters} will return 0.0.
+     *
+     * @deprecated use a new Location object for location updates.
+     * @removed
      */
+    @Deprecated
     public void removeVerticalAccuracy() {
         mVerticalAccuracyMeters = 0.0f;
         mFieldsMask &= ~HAS_VERTICAL_ACCURACY_MASK;
@@ -883,7 +899,11 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasSpeedAccuracy} will return false, and
      * {@link #getSpeedAccuracyMetersPerSecond} will return 0.0.
+     *
+     * @deprecated use a new Location object for location updates.
+     * @removed
      */
+    @Deprecated
     public void removeSpeedAccuracy() {
         mSpeedAccuracyMetersPerSecond = 0.0f;
         mFieldsMask &= ~HAS_SPEED_ACCURACY_MASK;
@@ -927,7 +947,11 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasBearingAccuracy} will return false, and
      * {@link #getBearingAccuracyDegrees} will return 0.0.
+     *
+     * @deprecated use a new Location object for location updates.
+     * @removed
      */
+    @Deprecated
     public void removeBearingAccuracy() {
         mBearingAccuracyDegrees = 0.0f;
         mFieldsMask &= ~HAS_BEARING_ACCURACY_MASK;
