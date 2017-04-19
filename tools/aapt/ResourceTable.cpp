@@ -4832,8 +4832,7 @@ bool ResourceTable::versionForCompat(const Bundle* bundle, const String16& resou
     item.resPath = resPath;
     item.file = newFile;
     item.xmlRoot = root->clone();
-    item.needsCompiling = false;    // This step occurs after we parse/assign, so we don't need
-                                    // to do it again.
+    item.needsCompiling = true;
     mWorkQueue.push(item);
 
     // Now mark the old entry as deleted.
