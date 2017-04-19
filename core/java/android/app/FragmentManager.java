@@ -1259,7 +1259,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                 }
                             }
                             f.mContainer = container;
-                            f.mView = f.performCreateView(f.onGetLayoutInflater(
+                            f.mView = f.performCreateView(f.performGetLayoutInflater(
                                     f.mSavedFragmentState), container, f.mSavedFragmentState);
                             if (f.mView != null) {
                                 f.mView.setSaveFromParentEnabled(false);
@@ -1431,7 +1431,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
     void ensureInflatedFragmentView(Fragment f) {
         if (f.mFromLayout && !f.mPerformedCreateView) {
-            f.mView = f.performCreateView(f.onGetLayoutInflater(
+            f.mView = f.performCreateView(f.performGetLayoutInflater(
                     f.mSavedFragmentState), null, f.mSavedFragmentState);
             if (f.mView != null) {
                 f.mView.setSaveFromParentEnabled(false);
