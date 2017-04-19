@@ -1598,7 +1598,7 @@ public final class LoadedApk {
                 mConnection.onServiceDisconnected(name);
             }
             if (dead) {
-                mConnection.onBindingDead(name);
+                mConnection.onBindingDied(name);
             }
             // If there is a new service, it is now connected.
             if (service != null) {
