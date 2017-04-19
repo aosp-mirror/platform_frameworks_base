@@ -2276,15 +2276,21 @@ public class SettingsProvider extends ContentProvider {
                                     SettingsState.SYSTEM_PACKAGE_NAME);
                         }
                     }
-                    currentVersion = 123;
-                }
 
-                if (currentVersion == 123) {
+                    // Those content is moved from version 123, only for F, ref: b/37338202.
                     final SettingsState globalSettings = getGlobalSettingsLocked();
                     String defaultDisabledProfiles = (getContext().getResources().getString(
                             R.string.def_bluetooth_disabled_profiles));
                     globalSettings.insertSettingLocked(Settings.Global.BLUETOOTH_DISABLED_PROFILES,
                             defaultDisabledProfiles, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                    currentVersion = 124;
+                }
+
+                if (currentVersion == 123) {
+                    // Due to merge resolution, the version 123's content on Emerald is in version 
+                    // 122. If keep the content in version 123, OTA from E to F would reset the HFP
+                    // config, ref: b/37338202. So we need skip version 123 on F, and only on F.
                     currentVersion = 124;
                 }
 
