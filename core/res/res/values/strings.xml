@@ -3155,6 +3155,11 @@
     <string name="usb_accessory_notification_title">Connected to a USB accessory</string>
     <!-- See USB_PREFERENCES. This is the message. -->
     <string name="usb_notification_message">Tap for more options.</string>
+    <!-- USB_PREFERENCES: Notification for when a type-c USB audio accessory is attached but not supported.  This is the title -->
+    <string name="usb_unsupported_audio_accessory_title">Audio accessory not supported</string>
+    <!-- Message of notification shown when a type-c USB audio accessory is attached but not supported. -->
+    <string name="usb_unsupported_audio_accessory_message">Tap for more info</string>
+
 
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_title">USB debugging connected</string>
