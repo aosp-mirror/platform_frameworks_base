@@ -5156,7 +5156,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     // Devices which removal triggers intent ACTION_AUDIO_BECOMING_NOISY. The intent is only
-    // sent if none of these devices is connected.
+    // sent if:
+    // - none of these devices are connected anymore after one is disconnected AND
+    // - the device being disconnected is actually used for music.
     // Access synchronized on mConnectedDevices
     int mBecomingNoisyIntentDevices =
             AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
@@ -5177,7 +5179,8 @@ public class AudioService extends IAudioService.Stub
                     devices |= dev;
                 }
             }
-            if (devices == device) {
+            int musicDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
+            if ((device == musicDevice) && (device == devices)) {
                 sendMsg(mAudioHandler,
                         MSG_BROADCAST_AUDIO_BECOMING_NOISY,
                         SENDMSG_REPLACE,
@@ -5796,25 +5799,9 @@ public class AudioService extends IAudioService.Stub
 
     // Must be called synchronized on mConnectedDevices
     private void setForceUseInt_SyncDevices(int usage, int config) {
-        switch (usage) {
-            case AudioSystem.FOR_MEDIA:
-                if (config == AudioSystem.FORCE_NO_BT_A2DP) {
-                    mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ALL_A2DP;
-                } else { // config == AudioSystem.FORCE_NONE
-                    mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ALL_A2DP;
-                }
-                sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
-                        SENDMSG_NOOP, 0, 0, null, 0);
-                break;
-            case AudioSystem.FOR_DOCK:
-                if (config == AudioSystem.FORCE_ANALOG_DOCK) {
-                    mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
-                } else { // config == AudioSystem.FORCE_NONE
-                    mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
-                }
-                break;
-            default:
-                // usage doesn't affect the broadcast of ACTION_AUDIO_BECOMING_NOISY
+        if (usage == AudioSystem.FOR_MEDIA) {
+            sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
+                    SENDMSG_NOOP, 0, 0, null, 0);
         }
         AudioSystem.setForceUse(usage, config);
     }
