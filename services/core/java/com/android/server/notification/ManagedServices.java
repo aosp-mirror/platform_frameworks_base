@@ -356,7 +356,6 @@ abstract public class ManagedServices {
 
     private void rebuildRestoredPackages() {
         mRestoredPackages.clear();
-        mSnoozingForCurrentProfiles.clear();
         String secureSettingName = restoredSettingName(mConfig.secureSettingName);
         String secondarySettingName = mConfig.secondarySettingName == null
                 ? null : restoredSettingName(mConfig.secondarySettingName);
