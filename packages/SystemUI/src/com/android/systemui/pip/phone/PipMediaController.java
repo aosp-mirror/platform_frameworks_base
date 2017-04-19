@@ -48,6 +48,8 @@ public class PipMediaController {
 
     private static final String ACTION_PLAY = "com.android.systemui.pip.phone.PLAY";
     private static final String ACTION_PAUSE = "com.android.systemui.pip.phone.PAUSE";
+    private static final String ACTION_NEXT = "com.android.systemui.pip.phone.NEXT";
+    private static final String ACTION_PREV = "com.android.systemui.pip.phone.PREV";
 
     /**
      * A listener interface to receive notification on changes to the media actions.
@@ -67,6 +69,8 @@ public class PipMediaController {
 
     private RemoteAction mPauseAction;
     private RemoteAction mPlayAction;
+    private RemoteAction mNextAction;
+    private RemoteAction mPrevAction;
 
     private BroadcastReceiver mPlayPauseActionReceiver = new BroadcastReceiver() {
         @Override
@@ -76,6 +80,10 @@ public class PipMediaController {
                 mMediaController.getTransportControls().play();
             } else if (action.equals(ACTION_PAUSE)) {
                 mMediaController.getTransportControls().pause();
+            } else if (action.equals(ACTION_NEXT)) {
+                mMediaController.getTransportControls().skipToNext();
+            } else if (action.equals(ACTION_PREV)) {
+                mMediaController.getTransportControls().skipToPrevious();
             }
         }
     };
@@ -95,6 +103,8 @@ public class PipMediaController {
         IntentFilter mediaControlFilter = new IntentFilter();
         mediaControlFilter.addAction(ACTION_PLAY);
         mediaControlFilter.addAction(ACTION_PAUSE);
+        mediaControlFilter.addAction(ACTION_NEXT);
+        mediaControlFilter.addAction(ACTION_PREV);
         mContext.registerReceiver(mPlayPauseActionReceiver, mediaControlFilter);
 
         createMediaActions();
@@ -143,11 +153,21 @@ public class PipMediaController {
         int state = mMediaController.getPlaybackState().getState();
         boolean isPlaying = MediaSession.isActiveState(state);
         long actions = mMediaController.getPlaybackState().getActions();
+
+        // Prev action
+        mPrevAction.setEnabled((actions & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0);
+        mediaActions.add(mPrevAction);
+
+        // Play/pause action
         if (!isPlaying && ((actions & PlaybackState.ACTION_PLAY) != 0)) {
             mediaActions.add(mPlayAction);
         } else if (isPlaying && ((actions & PlaybackState.ACTION_PAUSE) != 0)) {
             mediaActions.add(mPauseAction);
         }
+
+        // Next action
+        mNextAction.setEnabled((actions & PlaybackState.ACTION_SKIP_TO_NEXT) != 0);
+        mediaActions.add(mNextAction);
         return mediaActions;
     }
 
@@ -157,14 +177,26 @@ public class PipMediaController {
     private void createMediaActions() {
         String pauseDescription = mContext.getString(R.string.pip_pause);
         mPauseAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.ic_pause_white_24dp), pauseDescription, pauseDescription,
+                R.drawable.ic_pause_white), pauseDescription, pauseDescription,
                         PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PAUSE),
                                 FLAG_UPDATE_CURRENT));
 
         String playDescription = mContext.getString(R.string.pip_play);
         mPlayAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.ic_play_arrow_white_24dp), playDescription, playDescription,
+                R.drawable.ic_play_arrow_white), playDescription, playDescription,
                         PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PLAY),
+                                FLAG_UPDATE_CURRENT));
+
+        String nextDescription = mContext.getString(R.string.pip_skip_to_next);
+        mNextAction = new RemoteAction(Icon.createWithResource(mContext,
+                R.drawable.ic_skip_next_white), nextDescription, nextDescription,
+                        PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_NEXT),
+                                FLAG_UPDATE_CURRENT));
+
+        String prevDescription = mContext.getString(R.string.pip_skip_to_prev);
+        mPrevAction = new RemoteAction(Icon.createWithResource(mContext,
+                R.drawable.ic_skip_previous_white), prevDescription, prevDescription,
+                        PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PREV),
                                 FLAG_UPDATE_CURRENT));
     }
 

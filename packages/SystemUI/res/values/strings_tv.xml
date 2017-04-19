@@ -23,8 +23,4 @@
     <string name="pip_close">Close PIP</string>
     <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=30] -->
     <string name="pip_fullscreen">Full screen</string>
-    <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
-    <string name="pip_play">Play</string>
-    <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
-    <string name="pip_pause">Pause</string>
 </resources>
