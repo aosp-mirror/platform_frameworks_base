@@ -27,6 +27,7 @@ import android.os.UserManagerInternal;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.IconDrawableFactory;
 
 import com.android.server.LocalServices;
 
@@ -155,9 +156,9 @@ public class UserManagerServiceCreateProfileTest {
     public void testNumberOfBadges() {
         assertTrue("Max profiles greater than number of badges",
                 UserManagerService.MAX_MANAGED_PROFILES
-                <= ApplicationPackageManager.CORP_BADGE_COLORS.length);
+                <= IconDrawableFactory.CORP_BADGE_COLORS.length);
         assertEquals("Num colors doesn't match number of badge labels",
-                ApplicationPackageManager.CORP_BADGE_COLORS.length,
+                IconDrawableFactory.CORP_BADGE_COLORS.length,
                 ApplicationPackageManager.CORP_BADGE_LABEL_RES_ID.length);
     }
 
