@@ -56,12 +56,13 @@ public class TypedArray {
         // Reset the assets, which may have changed due to configuration changes
         // or further resource loading.
         attrs.mAssets = res.getAssets();
+        attrs.mMetrics = res.getDisplayMetrics();
         attrs.resize(len);
         return attrs;
     }
 
     private final Resources mResources;
-    private final DisplayMetrics mMetrics;
+    private DisplayMetrics mMetrics;
     private AssetManager mAssets;
 
     private boolean mRecycled;
