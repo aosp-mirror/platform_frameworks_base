@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 #include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
+#include <hwbinder/IPCThreadState.h>
 #include <utils/Log.h>
 #include <cutils/memory.h>
 #include <cutils/properties.h>
@@ -85,6 +85,7 @@ public:
         ar->callMain(mClassName, mClass, mArgs);
 
         IPCThreadState::self()->stopProcess();
+        hardware::IPCThreadState::self()->stopProcess();
     }
 
     virtual void onZygoteInit()
@@ -99,6 +100,7 @@ public:
         if (mClassName.isEmpty()) {
             // if zygote
             IPCThreadState::self()->stopProcess();
+            hardware::IPCThreadState::self()->stopProcess();
         }
 
         AndroidRuntime::onExit(code);
