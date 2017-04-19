@@ -3887,6 +3887,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Drawable mDefaultFocusHighlight;
     private Drawable mDefaultFocusHighlightCache;
     private boolean mDefaultFocusHighlightSizeChanged;
+    /**
+     * True if the default focus highlight is needed on the target device.
+     */
+    private static boolean sUseDefaultFocusHighlight;
 
     private String mTransitionName;
 
@@ -4463,6 +4467,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sHasFocusableExcludeAutoFocusable = targetSdkVersion < Build.VERSION_CODES.O;
 
             sAutoFocusableOffUIThreadWontNotifyParents = targetSdkVersion < Build.VERSION_CODES.O;
+
+            sUseDefaultFocusHighlight = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_useDefaultFocusHighlight);
 
             sCompatibilityDone = true;
         }
@@ -19677,7 +19684,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final boolean hasFocusStateSpecified = background == null || !background.isStateful()
                 || !background.hasFocusStateSpecified();
         return !isInTouchMode() && getDefaultFocusHighlightEnabled() && hasFocusStateSpecified
-                && isAttachedToWindow();
+                && isAttachedToWindow() && sUseDefaultFocusHighlight;
     }
 
     /**
