@@ -541,6 +541,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         migrateOldData();
         try {
             getGateKeeperService();
+            mSpManager.initWeaverService();
         } catch (RemoteException e) {
             Slog.e(TAG, "Failure retrieving IGateKeeperService", e);
         }
@@ -1662,6 +1663,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void removeUser(int userId, boolean unknownUser) {
+        mSpManager.removeUser(userId);
         mStorage.removeUser(userId);
         mStrongAuth.removeUser(userId);
 

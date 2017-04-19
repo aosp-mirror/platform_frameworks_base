@@ -15,6 +15,8 @@
  */
 package com.android.server;
 
+import android.hardware.weaver.V1_0.IWeaver;
+import android.os.RemoteException;
 import android.util.ArrayMap;
 
 import junit.framework.AssertionFailedError;
@@ -30,6 +32,7 @@ import javax.crypto.spec.PBEKeySpec;
 public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
 
     private MockGateKeeperService mGateKeeper;
+    private IWeaver mWeaverService;
 
     public MockSyntheticPasswordManager(LockSettingsStorage storage,
             MockGateKeeperService gatekeeper) {
@@ -97,6 +100,16 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    protected IWeaver getWeaverService() throws RemoteException {
+        return mWeaverService;
+    }
+
+    public void enableWeaver() {
+        mWeaverService = new MockWeaverService();
+        initWeaverService();
     }
 
 }
