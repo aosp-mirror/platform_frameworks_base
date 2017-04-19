@@ -48,7 +48,9 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
+import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillRequest;
+import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
 import android.util.LocalLog;
@@ -121,6 +123,10 @@ final class AutofillManagerServiceImpl {
     // use WeakReference
     @GuardedBy("mLock")
     private final SparseArray<Session> mSessions = new SparseArray<>();
+
+    /** The last selection */
+    @GuardedBy("mLock")
+    private FillEventHistory mEventHistory;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -500,6 +506,72 @@ final class AutofillManagerServiceImpl {
         return mInfo.getServiceInfo().loadLabel(mContext.getPackageManager());
     }
 
+    /**
+     * Initializes the last fill selection after an autofill service returned a new
+     * {@link FillResponse}.
+     */
+    void setLastResponse(int serviceUid, @NonNull FillResponse response) {
+        synchronized (mLock) {
+            mEventHistory = new FillEventHistory(serviceUid, response.getClientState());
+        }
+    }
+
+    /**
+     * Updates the last fill selection when an authentication was selected.
+     */
+    void setAuthenticationSelected() {
+        synchronized (mLock) {
+            mEventHistory.addEvent(
+                    new FillEventHistory.Event(FillEventHistory.Event.TYPE_AUTHENTICATION_SELECTED, null));
+        }
+    }
+
+    /**
+     * Updates the last fill selection when an dataset authentication was selected.
+     */
+    void setDatasetAuthenticationSelected(@Nullable String selectedDataset) {
+        synchronized (mLock) {
+            mEventHistory.addEvent(new FillEventHistory.Event(
+                    FillEventHistory.Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
+        }
+    }
+
+    /**
+     * Updates the last fill selection when an save Ui is shown.
+     */
+    void setSaveShown() {
+        synchronized (mLock) {
+            mEventHistory.addEvent(new FillEventHistory.Event(FillEventHistory.Event.TYPE_SAVE_SHOWN, null));
+        }
+    }
+
+    /**
+     * Updates the last fill response when a dataset was selected.
+     */
+    void setDatasetSelected(@Nullable String selectedDataset) {
+        synchronized (mLock) {
+            mEventHistory.addEvent(
+                    new FillEventHistory.Event(FillEventHistory.Event.TYPE_DATASET_SELECTED, selectedDataset));
+        }
+    }
+
+    /**
+     * Gets the fill event history.
+     *
+     * @param callingUid The calling uid
+     *
+     * @return The history or {@code null} if there is none.
+     */
+    FillEventHistory getFillEventHistory(int callingUid) {
+        synchronized (mLock) {
+            if (mEventHistory != null && mEventHistory.getServiceUid() == callingUid) {
+                return mEventHistory;
+            }
+        }
+
+        return null;
+    }
+
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
 
@@ -526,6 +598,20 @@ final class AutofillManagerServiceImpl {
             for (int i = 0; i < size; i++) {
                 pw.print(prefix); pw.print("#"); pw.println(i + 1);
                 mSessions.valueAt(i).dumpLocked(prefix2, pw);
+            }
+        }
+
+        if (mEventHistory == null || mEventHistory.getEvents().size() == 0) {
+            pw.print(prefix); pw.println("No event on last fill response");
+        } else {
+            pw.print(prefix); pw.println("Events of last fill response:");
+            pw.print(prefix);
+
+            int numEvents = mEventHistory.getEvents().size();
+            for (int i = 0; i < numEvents; i++) {
+                FillEventHistory.Event event = mEventHistory.getEvents().get(i);
+                pw.println("  " + i + ": eventType=" + event.getType() + " datasetId="
+                        + event.getDatasetId());
             }
         }
     }
