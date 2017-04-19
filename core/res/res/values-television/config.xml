@@ -36,4 +36,7 @@
     <!-- The default gravity for the picture-in-picture window.
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
     <integer name="config_defaultPictureInPictureGravity">0x55</integer>
+
+    <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
+    <bool name="config_useDefaultFocusHighlight">false</bool>
 </resources>
