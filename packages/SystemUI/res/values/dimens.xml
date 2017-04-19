@@ -119,7 +119,7 @@
     <dimen name="notification_menu_icon_padding">20dp</dimen>
 
     <!-- The minimum height for the snackbar shown after the snooze option has been chosen. -->
-    <dimen name="snooze_snackbar_min_height">48dp</dimen>
+    <dimen name="snooze_snackbar_min_height">56dp</dimen>
 
     <!-- The text size of options in the snooze menu. -->
     <dimen name="snooze_option_text_size">14sp</dimen>
