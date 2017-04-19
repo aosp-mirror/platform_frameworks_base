@@ -43,6 +43,8 @@ public class DozeLog {
     public static final int PULSE_REASON_SENSOR_PICKUP = 3;
     public static final int PULSE_REASON_SENSOR_DOUBLE_TAP = 4;
 
+    private static boolean sRegisterKeyguardCallback = true;
+
     private static long[] sTimes;
     private static String[] sMessages;
     private static int sPosition;
@@ -103,7 +105,9 @@ public class DozeLog {
                     sProxStats[i][1] = new SummaryStats();
                 }
                 log("init");
-                KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
+                if (sRegisterKeyguardCallback) {
+                    KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
+                }
             }
         }
     }
@@ -211,6 +215,31 @@ public class DozeLog {
             sCount = Math.min(sCount + 1, SIZE);
         }
         if (DEBUG) Log.d(TAG, msg);
+    }
+
+    public static void tracePulseDropped(Context context, boolean pulsePending,
+            DozeMachine.State state, boolean blocked) {
+        if (!ENABLED) return;
+        init(context);
+        log("pulseDropped pulsePending=" + pulsePending + " state="
+                + state + " blocked=" + blocked);
+    }
+
+    public static void tracePulseCanceledByProx(Context context) {
+        if (!ENABLED) return;
+        init(context);
+        log("pulseCanceledByProx");
+    }
+
+    public static void setRegisterKeyguardCallback(boolean registerKeyguardCallback) {
+        if (!ENABLED) return;
+        synchronized (DozeLog.class) {
+            if (sRegisterKeyguardCallback != registerKeyguardCallback && sMessages != null) {
+                throw new IllegalStateException("Cannot change setRegisterKeyguardCallback "
+                        + "after init()");
+            }
+            sRegisterKeyguardCallback = registerKeyguardCallback;
+        }
     }
 
     private static class SummaryStats {
