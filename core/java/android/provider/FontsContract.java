@@ -44,6 +44,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.util.LruCache;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -180,6 +181,8 @@ public class FontsContract {
     private Handler mHandler;
     @GuardedBy("mLock")
     private HandlerThread mThread;
+
+    private static final LruCache<String, Typeface> sTypefaceCache = new LruCache<>(16);
 
     /** @hide */
     public FontsContract(Context context) {
@@ -476,6 +479,11 @@ public class FontsContract {
      * therefore the result is delivered to the given callback. See {@link FontRequest}.
      * Only one of the methods in callback will be invoked, depending on whether the request
      * succeeds or fails. These calls will happen on the caller thread.
+     *
+     * Note that the result Typeface may be cached internally and the same instance will be returned
+     * the next time you call this method with the same request. If you want to bypass this cache,
+     * use {@link #fetchFonts} and {@link #buildTypeface} instead.
+     *
      * @param context A context to be used for fetching from font provider.
      * @param request A {@link FontRequest} object that identifies the provider and query for the
      *                request. May not be null.
@@ -486,14 +494,26 @@ public class FontsContract {
             @NonNull FontRequestCallback callback, @NonNull Handler handler) {
 
         final Handler callerThreadHandler = new Handler();
+        final Typeface cachedTypeface = sTypefaceCache.get(request.getIdentifier());
+        if (cachedTypeface != null) {
+            callerThreadHandler.post(() -> callback.onTypefaceRetrieved(cachedTypeface));
+            return;
+        }
+
         handler.post(() -> {
-            // TODO: Cache the result.
             FontFamilyResult result;
             try {
                 result = fetchFonts(context, null /* cancellation signal */, request);
             } catch (NameNotFoundException e) {
                 callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
                         FontRequestCallback.FAIL_REASON_PROVIDER_NOT_FOUND));
+                return;
+            }
+
+            // Same request might be dispatched during fetchFonts. Check the cache again.
+            final Typeface anotherCachedTypeface = sTypefaceCache.get(request.getIdentifier());
+            if (anotherCachedTypeface != null) {
+                callerThreadHandler.post(() -> callback.onTypefaceRetrieved(anotherCachedTypeface));
                 return;
             }
 
@@ -547,6 +567,7 @@ public class FontsContract {
                 return;
             }
 
+            sTypefaceCache.put(request.getIdentifier(), typeface);
             callerThreadHandler.post(() -> callback.onTypefaceRetrieved(typeface));
         });
     }
