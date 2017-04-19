@@ -23,7 +23,7 @@
     android:paddingStart="@dimen/qs_footer_padding_start"
     android:paddingEnd="@dimen/qs_footer_padding_end"
     android:gravity="center_vertical"
-    android:background="?android:attr/colorPrimaryDark" >
+    android:background="?android:attr/colorPrimary" >
 
     <TextView
         android:id="@+id/footer_text"
@@ -39,6 +39,7 @@
         android:layout_width="@dimen/qs_footer_icon_size"
         android:layout_height="@dimen/qs_footer_icon_size"
         android:contentDescription="@null"
-        android:src="@drawable/ic_info_outline" />
+        android:src="@drawable/ic_info_outline"
+        android:tint="?android:attr/textColorSecondary"/>
 
 </LinearLayout>
