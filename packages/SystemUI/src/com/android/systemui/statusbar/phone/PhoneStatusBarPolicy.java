@@ -16,17 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManager;
+import android.app.*;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
-import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
-import android.app.AppGlobals;
-import android.app.Notification;
 import android.app.Notification.Action;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -55,6 +49,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.Dependency;
+import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.tiles.DndTile;
@@ -132,6 +127,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private boolean mZenVisible;
     private boolean mVolumeVisible;
     private boolean mCurrentUserSetup;
+    private boolean mDockedStackExists;
 
     private boolean mManagedProfileIconVisible = false;
     private boolean mManagedProfileInQuietMode = false;
@@ -248,6 +244,10 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                 noMan.cancel(notification.getTag(), notification.getId());
             }
         }
+        DockedStackExistsListener.register(exists -> {
+            mDockedStackExists = exists;
+            updateForegroundInstantApps();
+        });
     }
 
     public void destroy() {
@@ -495,23 +495,18 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         IPackageManager pm = AppGlobals.getPackageManager();
         mCurrentNotifs.clear();
         try {
+            ArraySet<Integer> stacksToCheck = new ArraySet<>();
             int[] STACKS_TO_CHECK = new int[]{
                     StackId.FULLSCREEN_WORKSPACE_STACK_ID,
                     StackId.DOCKED_STACK_ID,
             };
-            for (int i = 0; i < STACKS_TO_CHECK.length; i++) {
-                StackInfo info = ActivityManager.getService().getStackInfo(STACKS_TO_CHECK[i]);
-                if (info == null || info.topActivity == null) continue;
-                String pkg = info.topActivity.getPackageName();
-                if (!hasNotif(notifs, pkg, info.userId)) {
-                    // TODO: Optimize by not always needing to get application info.
-                    // Maybe cache non-ephemeral packages?
-                    ApplicationInfo appInfo = pm.getApplicationInfo(pkg,
-                            PackageManager.MATCH_UNINSTALLED_PACKAGES, info.userId);
-                    if (appInfo.isInstantApp()) {
-                        postEphemeralNotif(pkg, info.userId, appInfo, noMan);
-                    }
-                }
+            int focusedId = ActivityManager.getService().getFocusedStackId();
+            if (focusedId == StackId.FULLSCREEN_WORKSPACE_STACK_ID
+                    || focusedId == StackId.FULLSCREEN_WORKSPACE_STACK_ID) {
+                checkStack(StackId.FULLSCREEN_WORKSPACE_STACK_ID, notifs, noMan, pm);
+            }
+            if (mDockedStackExists) {
+                checkStack(StackId.DOCKED_STACK_ID, notifs, noMan, pm);
             }
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -519,6 +514,26 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         // Cancel all the leftover notifications that don't have a foreground process anymore.
         notifs.forEach(v -> noMan.cancelAsUser(v.first, SystemMessage.NOTE_INSTANT_APPS,
                 new UserHandle(v.second)));
+    }
+
+    private void checkStack(int stackId, ArraySet<Pair<String, Integer>> notifs,
+            NotificationManager noMan, IPackageManager pm) {
+        try {
+            StackInfo info = ActivityManager.getService().getStackInfo(stackId);
+            if (info == null || info.topActivity == null) return;
+            String pkg = info.topActivity.getPackageName();
+            if (!hasNotif(notifs, pkg, info.userId)) {
+                // TODO: Optimize by not always needing to get application info.
+                // Maybe cache non-ephemeral packages?
+                ApplicationInfo appInfo = pm.getApplicationInfo(pkg,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, info.userId);
+                if (appInfo.isInstantApp()) {
+                    postEphemeralNotif(pkg, info.userId, appInfo, noMan);
+                }
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     private void postEphemeralNotif(String pkg, int userId, ApplicationInfo appInfo,

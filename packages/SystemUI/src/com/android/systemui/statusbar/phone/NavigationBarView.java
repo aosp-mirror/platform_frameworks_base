@@ -47,6 +47,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.plugins.PluginListener;
@@ -566,40 +567,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
-        try {
-            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(new Stub() {
-                @Override
-                public void onDividerVisibilityChanged(boolean visible) throws RemoteException {
-                }
-
-                @Override
-                public void onDockedStackExistsChanged(final boolean exists) throws RemoteException {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mDockedStackExists = exists;
-                            updateRecentsIcon();
-                        }
-                    });
-                }
-
-                @Override
-                public void onDockedStackMinimizedChanged(boolean minimized, long animDuration,
-                        boolean isHomeStackResizable) throws RemoteException {
-                }
-
-                @Override
-                public void onAdjustedForImeChanged(boolean adjustedForIme, long animDuration)
-                        throws RemoteException {
-                }
-
-                @Override
-                public void onDockSideChanged(int newDockSide) throws RemoteException {
-                }
-            });
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed registering docked stack exists listener", e);
-        }
+        DockedStackExistsListener.register(exists -> mHandler.post(() -> {
+            mDockedStackExists = exists;
+            updateRecentsIcon();
+        }));
     }
 
     void updateRotatedViews() {
