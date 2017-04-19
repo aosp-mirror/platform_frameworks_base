@@ -295,7 +295,15 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     @Override
     protected void onDetachedFromWindow() {
-        getViewRootImpl().removeWindowStoppedCallback(this);
+        ViewRootImpl viewRoot = getViewRootImpl();
+        // It's possible to create a SurfaceView using the default constructor and never
+        // attach it to a view hierarchy, this is a common use case when dealing with
+        // OpenGL. A developer will probably create a new GLSurfaceView, and let it manage
+        // the lifecycle. Instead of attaching it to a view, he/she can just pass
+        // the SurfaceHolder forward, most live wallpapers do it.
+        if (viewRoot != null) {
+            viewRoot.removeWindowStoppedCallback(this);
+        }
 
         mAttachedToWindow = false;
         if (mGlobalListenersAdded) {
