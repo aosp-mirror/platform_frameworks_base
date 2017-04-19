@@ -11256,6 +11256,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     holder.provider = null;
                     return holder;
                 }
+                // Don't expose instant app providers
+                if (cpr.appInfo.isInstantApp()) {
+                    return null;
+                }
 
                 final long origId = Binder.clearCallingIdentity();
 
