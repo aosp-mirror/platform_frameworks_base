@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import android.annotation.SystemApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,9 +26,12 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import libcore.io.Streams;
+
 import java.io.ByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -39,6 +44,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import com.android.internal.logging.MetricsLogger;
 
@@ -316,6 +323,72 @@ public class RecoverySystem {
             }
         } finally {
             raf.close();
+        }
+
+        // Additionally verify the package compatibility.
+        if (!readAndVerifyPackageCompatibilityEntry(packageFile)) {
+            throw new SignatureException("package compatibility verification failed");
+        }
+    }
+
+    /**
+     * Verifies the compatibility entry from an {@link InputStream}.
+     *
+     * @return the verification result.
+     */
+    private static boolean verifyPackageCompatibility(InputStream inputStream) throws IOException {
+        ArrayList<String> list = new ArrayList<>();
+        ZipInputStream zis = new ZipInputStream(inputStream);
+        ZipEntry entry;
+        while ((entry = zis.getNextEntry()) != null) {
+            long entrySize = entry.getSize();
+            if (entrySize > Integer.MAX_VALUE || entrySize < 0) {
+                throw new IOException(
+                        "invalid entry size (" + entrySize + ") in the compatibility file");
+            }
+            byte[] bytes = new byte[(int) entrySize];
+            Streams.readFully(zis, bytes);
+            list.add(new String(bytes, UTF_8));
+        }
+        if (list.isEmpty()) {
+            throw new IOException("no entries found in the compatibility file");
+        }
+        // TODO(b/36814503): Enable the actual verification when VintfObject APIs are ready.
+        // return (VintfObject.verify(list.toArray(new String[list.size()])) == 0);
+        return true;
+    }
+
+    /**
+     * Reads and verifies the compatibility entry in an OTA zip package. The compatibility entry is
+     * a zip file (inside the OTA package zip).
+     *
+     * @return {@code true} if the entry doesn't exist or verification passes.
+     */
+    private static boolean readAndVerifyPackageCompatibilityEntry(File packageFile)
+            throws IOException {
+        try (ZipFile zip = new ZipFile(packageFile)) {
+            ZipEntry entry = zip.getEntry("compatibility.zip");
+            if (entry == null) {
+                return true;
+            }
+            InputStream inputStream = zip.getInputStream(entry);
+            return verifyPackageCompatibility(inputStream);
+        }
+    }
+
+    /**
+     * Verifies the package compatibility info against the current system.
+     *
+     * @param compatibilityFile the {@link File} that contains the package compatibility info.
+     * @throws IOException if there were any errors reading the compatibility file.
+     * @return the compatibility verification result.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static boolean verifyPackageCompatibility(File compatibilityFile) throws IOException {
+        try (InputStream inputStream = new FileInputStream(compatibilityFile)) {
+            return verifyPackageCompatibility(inputStream);
         }
     }
 
