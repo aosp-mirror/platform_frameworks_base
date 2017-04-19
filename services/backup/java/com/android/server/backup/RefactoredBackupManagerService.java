@@ -3422,6 +3422,19 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
+    // We also avoid backups of 'disabled' apps
+    private static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
+        switch (pm.getApplicationEnabledSetting(app.packageName)) {
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
     @Override
     public boolean isAppEligibleForBackup(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -3430,7 +3443,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                     PackageManager.GET_SIGNATURES);
             if (!appIsEligibleForBackup(packageInfo.applicationInfo) ||
-                    appIsStopped(packageInfo.applicationInfo)) {
+                    appIsStopped(packageInfo.applicationInfo) ||
+                    appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
                 return false;
             }
             IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
