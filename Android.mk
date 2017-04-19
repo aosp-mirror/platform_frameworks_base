@@ -143,7 +143,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothGatt.aidl \
 	core/java/android/bluetooth/IBluetoothGattCallback.aidl \
 	core/java/android/bluetooth/IBluetoothGattServerCallback.aidl \
-	core/java/android/bluetooth/le/IAdvertiserCallback.aidl \
 	core/java/android/bluetooth/le/IAdvertisingSetCallback.aidl \
 	core/java/android/bluetooth/le/IPeriodicAdvertisingCallback.aidl \
 	core/java/android/bluetooth/le/IScannerCallback.aidl \
