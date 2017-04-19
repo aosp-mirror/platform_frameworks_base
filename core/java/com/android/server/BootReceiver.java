@@ -35,6 +35,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -89,6 +90,11 @@ public class BootReceiver extends BroadcastReceiver {
 
     // example: fs_stat,/dev/block/platform/soc/by-name/userdata,0x5
     private static final String FS_STAT_PATTERN = "fs_stat,[^,]*/([^/,]+),(0x[0-9a-fA-F]+)";
+    private static final int FS_STAT_FS_FIXED = 0x400; // should match with fs_mgr.cpp:FsStatFlags
+    private static final String FSCK_PASS_PATTERN = "Pass ([1-9]E?):";
+    private static final String FSCK_TREE_OPTIMIZATION_PATTERN =
+            "Inode [0-9]+ extent tree.*could be shorter";
+    private static final String FSCK_FS_MODIFIED = "FILE SYSTEM WAS MODIFIED";
     // ro.boottime.init.mount_all. + postfix for mount_all duration
     private static final String[] MOUNT_DURATION_PROPS_POSTFIX =
             new String[] { "early", "default", "late" };
@@ -334,17 +340,22 @@ public class BootReceiver extends BroadcastReceiver {
 
         String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
         Pattern pattern = Pattern.compile(FS_STAT_PATTERN);
-        for (String line : log.split("\n")) { // should check all lines
-            if (line.contains("FILE SYSTEM WAS MODIFIED")) {
+        String lines[] = log.split("\n");
+        int lineNumber = 0;
+        int lastFsStatLineNumber = 0;
+        for (String line : lines) { // should check all lines
+            if (line.contains(FSCK_FS_MODIFIED)) {
                 uploadNeeded = true;
             } else if (line.contains("fs_stat")){
                 Matcher matcher = pattern.matcher(line);
                 if (matcher.find()) {
-                    handleFsckFsStat(matcher);
+                    handleFsckFsStat(matcher, lines, lastFsStatLineNumber, lineNumber);
+                    lastFsStatLineNumber = lineNumber;
                 } else {
                     Slog.w(TAG, "cannot parse fs_stat:" + line);
                 }
             }
+            lineNumber++;
         }
 
         if (uploadEnabled && uploadNeeded ) {
@@ -403,7 +414,88 @@ public class BootReceiver extends BroadcastReceiver {
         }
     }
 
-    private static void handleFsckFsStat(Matcher match) {
+    /**
+     * Fix fs_stat from e2fsck.
+     * For now, only handle the case of quota warning caused by tree optimization. Clear fs fix
+     * flag (=0x400) caused by that.
+     *
+     * @param partition partition name
+     * @param statOrg original stat reported from e2fsck log
+     * @param lines e2fsck logs broken down into lines
+     * @param startLineNumber start line to parse
+     * @param endLineNumber end line. exclusive.
+     * @return updated fs_stat. For tree optimization, will clear bit 0x400.
+     */
+    @VisibleForTesting
+    public static int fixFsckFsStat(String partition, int statOrg, String[] lines,
+            int startLineNumber, int endLineNumber) {
+        int stat = statOrg;
+        if ((stat & FS_STAT_FS_FIXED) != 0) {
+            // fs was fixed. should check if quota warning was caused by tree optimization.
+            // This is not a real fix but optimization, so should not be counted as a fs fix.
+            Pattern passPattern = Pattern.compile(FSCK_PASS_PATTERN);
+            Pattern treeOptPattern = Pattern.compile(FSCK_TREE_OPTIMIZATION_PATTERN);
+            String currentPass = "";
+            boolean foundTreeOptimization = false;
+            boolean foundQuotaFix = false;
+            boolean foundOtherFix = false;
+            String otherFixLine = null;
+            for (int i = startLineNumber; i < endLineNumber; i++) {
+                String line = lines[i];
+                if (line.contains(FSCK_FS_MODIFIED)) { // no need to parse above this
+                    break;
+                } else if (line.startsWith("Pass ")) {
+                    Matcher matcher = passPattern.matcher(line);
+                    if (matcher.find()) {
+                        currentPass = matcher.group(1);
+                    }
+                } else if (line.startsWith("Inode ")) {
+                    Matcher matcher = treeOptPattern.matcher(line);
+                    if (matcher.find() && currentPass.equals("1")) {
+                        foundTreeOptimization = true;
+                        Slog.i(TAG, "fs_stat, partition:" + partition + " found tree optimization:"
+                                + line);
+                    } else {
+                        foundOtherFix = true;
+                        otherFixLine = line;
+                        break;
+                    }
+                } else if (line.startsWith("[QUOTA WARNING]") && currentPass.equals("5")) {
+                    Slog.i(TAG, "fs_stat, partition:" + partition + " found quota warning:"
+                            + line);
+                    foundQuotaFix = true;
+                    if (!foundTreeOptimization) { // only quota warning, this is real fix.
+                        otherFixLine = line;
+                        break;
+                    }
+                } else if (line.startsWith("Update quota info") && currentPass.equals("5")) {
+                    // follows "[QUOTA WARNING]", ignore
+                } else {
+                    line = line.trim();
+                    // ignore empty msg or any msg before Pass 1
+                    if (!line.isEmpty() && !currentPass.isEmpty()) {
+                        foundOtherFix = true;
+                        otherFixLine = line;
+                        break;
+                    }
+                }
+            }
+            if (!foundOtherFix && foundTreeOptimization && foundQuotaFix) {
+                // not a real fix, so clear it.
+                Slog.i(TAG, "fs_stat, partition:" + partition +
+                        " quota fix due to tree optimization");
+                stat &= ~FS_STAT_FS_FIXED;
+            } else {
+                if (otherFixLine != null) {
+                    Slog.i(TAG, "fs_stat, partition:" + partition + " fix:" + otherFixLine);
+                }
+            }
+        }
+        return stat;
+    }
+
+    private static void handleFsckFsStat(Matcher match, String[] lines, int startLineNumber,
+            int endLineNumber) {
         String partition = match.group(1);
         int stat;
         try {
@@ -412,9 +504,9 @@ public class BootReceiver extends BroadcastReceiver {
             Slog.w(TAG, "cannot parse fs_stat: partition:" + partition + " stat:" + match.group(2));
             return;
         }
-
+        stat = fixFsckFsStat(partition, stat, lines, startLineNumber, endLineNumber);
         MetricsLogger.histogram(null, "boot_fs_stat_" + partition, stat);
-        Slog.i(TAG, "fs_stat, partition:" + partition + " stat:" + match.group(2));
+        Slog.i(TAG, "fs_stat, partition:" + partition + " stat:0x" + Integer.toHexString(stat));
     }
 
     private static HashMap<String, Long> readTimestamps() {
