@@ -2630,4 +2630,13 @@ public class ApplicationPackageManager extends PackageManager {
             throw e.rethrowAsRuntimeException();
         }
     }
+
+    @Override
+    public String getInstantAppAndroidId(String packageName, UserHandle user) {
+        try {
+            return mPM.getInstantAppAndroidId(packageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }
