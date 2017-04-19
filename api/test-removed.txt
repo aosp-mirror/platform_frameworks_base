@@ -63,6 +63,12 @@ package android.content.pm {
     field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
   }
 
+  public final class SharedLibraryInfo implements android.os.Parcelable {
+    method public boolean isBuiltin();
+    method public boolean isDynamic();
+    method public boolean isStatic();
+  }
+
 }
 
 package android.database {
