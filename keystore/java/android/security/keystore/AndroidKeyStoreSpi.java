@@ -89,18 +89,14 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     @Override
     public Key engineGetKey(String alias, char[] password) throws NoSuchAlgorithmException,
             UnrecoverableKeyException {
-        if (isPrivateKeyEntry(alias)) {
-            String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
-            return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
-                    mKeyStore, privateKeyAlias, mUid);
-        } else if (isSecretKeyEntry(alias)) {
-            String secretKeyAlias = Credentials.USER_SECRET_KEY + alias;
-            return AndroidKeyStoreProvider.loadAndroidKeyStoreSecretKeyFromKeystore(
-                    mKeyStore, secretKeyAlias, mUid);
-        } else {
-            // Key not found
-            return null;
+        String userKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
+        if (!mKeyStore.contains(userKeyAlias, mUid)) {
+            // try legacy prefix for backward compatibility
+            userKeyAlias = Credentials.USER_SECRET_KEY + alias;
+            if (!mKeyStore.contains(userKeyAlias, mUid)) return null;
         }
+        return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(mKeyStore, userKeyAlias,
+                mUid);
     }
 
     @Override
@@ -540,7 +536,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             } else {
                 // Keep the stored private key around -- delete all other entry types
                 Credentials.deleteCertificateTypesForAlias(mKeyStore, alias, mUid);
-                Credentials.deleteSecretKeyTypeForAlias(mKeyStore, alias, mUid);
+                Credentials.deleteLegacyKeyForAlias(mKeyStore, alias, mUid);
             }
 
             // Store the leaf certificate
@@ -565,7 +561,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     Credentials.deleteAllTypesForAlias(mKeyStore, alias, mUid);
                 } else {
                     Credentials.deleteCertificateTypesForAlias(mKeyStore, alias, mUid);
-                    Credentials.deleteSecretKeyTypeForAlias(mKeyStore, alias, mUid);
+                    Credentials.deleteLegacyKeyForAlias(mKeyStore, alias, mUid);
                 }
             }
         }
@@ -588,12 +584,17 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             if (keyAliasInKeystore == null) {
                 throw new KeyStoreException("KeyStore-backed secret key does not have an alias");
             }
-            if (!keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
-                throw new KeyStoreException("KeyStore-backed secret key has invalid alias: "
-                        + keyAliasInKeystore);
+            String keyAliasPrefix = Credentials.USER_PRIVATE_KEY;
+            if (!keyAliasInKeystore.startsWith(keyAliasPrefix)) {
+                // try legacy prefix
+                keyAliasPrefix = Credentials.USER_SECRET_KEY;
+                if (!keyAliasInKeystore.startsWith(keyAliasPrefix)) {
+                    throw new KeyStoreException("KeyStore-backed secret key has invalid alias: "
+                            + keyAliasInKeystore);
+                }
             }
             String keyEntryAlias =
-                    keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
+                    keyAliasInKeystore.substring(keyAliasPrefix.length());
             if (!entryAlias.equals(keyEntryAlias)) {
                 throw new KeyStoreException("Can only replace KeyStore-backed keys with same"
                         + " alias: " + entryAlias + " != " + keyEntryAlias);
@@ -728,7 +729,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         Credentials.deleteAllTypesForAlias(mKeyStore, entryAlias, mUid);
-        String keyAliasInKeystore = Credentials.USER_SECRET_KEY + entryAlias;
+        String keyAliasInKeystore = Credentials.USER_PRIVATE_KEY + entryAlias;
         int errorCode = mKeyStore.importKey(
                 keyAliasInKeystore,
                 args,
@@ -827,24 +828,10 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     }
 
     private boolean isKeyEntry(String alias) {
-        return isPrivateKeyEntry(alias) || isSecretKeyEntry(alias);
+        return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias, mUid) ||
+                mKeyStore.contains(Credentials.USER_SECRET_KEY + alias, mUid);
     }
 
-    private boolean isPrivateKeyEntry(String alias) {
-        if (alias == null) {
-            throw new NullPointerException("alias == null");
-        }
-
-        return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias, mUid);
-    }
-
-    private boolean isSecretKeyEntry(String alias) {
-        if (alias == null) {
-            throw new NullPointerException("alias == null");
-        }
-
-        return mKeyStore.contains(Credentials.USER_SECRET_KEY + alias, mUid);
-    }
 
     private boolean isCertificateEntry(String alias) {
         if (alias == null) {

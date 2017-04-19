@@ -64,7 +64,10 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         AndroidKeyStoreKey keystoreKey = (AndroidKeyStoreKey) key;
         String keyAliasInKeystore = keystoreKey.getAlias();
         String entryAlias;
-        if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
+        if (keyAliasInKeystore.startsWith(Credentials.USER_PRIVATE_KEY)) {
+            entryAlias = keyAliasInKeystore.substring(Credentials.USER_PRIVATE_KEY.length());
+        } else if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)){
+            // key has legacy prefix
             entryAlias = keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
         } else {
             throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
