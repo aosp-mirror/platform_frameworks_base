@@ -2072,13 +2072,13 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
     /**
-     * Broadcast Action: An application package has been installed or updated on the
+     * Broadcast Action: A new application package has been installed on the
      * device. The data contains the name of the package.  Note that the
      * newly installed package does <em>not</em> receive this broadcast.
      * <p>May include the following extras:
      * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to this package.
-     * <li> {@link #EXTRA_REPLACING} is set to {@code true} if this is following
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
+     * <li> {@link #EXTRA_REPLACING} is set to true if this is following
      * an {@link #ACTION_PACKAGE_REMOVED} broadcast for the same package.
      * </ul>
      *
@@ -2087,22 +2087,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_ADDED = "android.intent.action.PACKAGE_ADDED";
-    /**
-     * Broadcast Action: A new application package has been installed on the
-     * device. The data contains the name of the package.  Note that the
-     * newly installed package does <em>not</em> receive this broadcast.
-     * <p class="note">Unlike {@link #ACTION_PACKAGE_ADDED}, this broadcast is delivered
-     * to manifest receivers as well as those registered at runtime.
-     * <p>May include the following extras:
-     * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
-     * </ul>
-     *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_FIRST_ADDED = "android.intent.action.PACKAGE_FIRST_ADDED";
     /**
      * Broadcast Action: A new version of an application package has been
      * installed, replacing an existing version that was previously installed.
