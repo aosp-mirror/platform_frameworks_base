@@ -1978,6 +1978,9 @@
     <!-- Action label for launching app info on the specified app [CHAR LIMIT=20] -->
     <string name="app_info">App info</string>
 
+    <!-- Action label for switching to web for an instant app [CHAR LIMIT=20] -->
+    <string name="go_to_web">Go to web</string>
+
     <!-- Quick settings tile for toggling mobile data [CHAR LIMIT=20] -->
     <string name="mobile_data">Mobile data</string>
 
