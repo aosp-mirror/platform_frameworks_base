@@ -412,16 +412,26 @@ public class PipMenuActivity extends Activity {
         } else {
             actionsContainer.setVisibility(View.VISIBLE);
             if (mActionsGroup != null) {
-                mActionsGroup.removeAllViews();
+                // Hide extra views
+                for (int i = mActions.size(); i < mActionsGroup.getChildCount(); i++) {
+                    mActionsGroup.getChildAt(i).setVisibility(View.GONE);
+                }
+                // Add needed views
+                final LayoutInflater inflater = LayoutInflater.from(this);
+                while (mActionsGroup.getChildCount() < mActions.size()) {
+                    final ImageView actionView = (ImageView) inflater.inflate(
+                            R.layout.pip_menu_action, mActionsGroup, false);
+                    mActionsGroup.addView(actionView);
+                }
 
                 // Recreate the layout
                 final boolean isLandscapePip = stackBounds != null &&
                         (stackBounds.width() > stackBounds.height());
-                final LayoutInflater inflater = LayoutInflater.from(this);
                 for (int i = 0; i < mActions.size(); i++) {
                     final RemoteAction action = mActions.get(i);
-                    final ImageView actionView = (ImageView) inflater.inflate(
-                            R.layout.pip_menu_action, mActionsGroup, false);
+                    final ImageView actionView = (ImageView) mActionsGroup.getChildAt(i);
+
+                    // TODO: Check if the action drawable has changed before we reload it
                     action.getIcon().loadDrawableAsync(this, d -> {
                         d.setTint(Color.WHITE);
                         actionView.setImageDrawable(d);
@@ -439,12 +449,11 @@ public class PipMenuActivity extends Activity {
                         actionView.setAlpha(DISABLED_ACTION_ALPHA);
                         actionView.setEnabled(false);
                     }
-                    if (isLandscapePip && i > 0) {
-                        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
-                                actionView.getLayoutParams();
-                        lp.leftMargin = mBetweenActionPaddingLand;
-                    }
-                    mActionsGroup.addView(actionView);
+
+                    // Update the margin between actions
+                    LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
+                            actionView.getLayoutParams();
+                    lp.leftMargin = (isLandscapePip && i > 0) ? mBetweenActionPaddingLand : 0;
                 }
             }
 

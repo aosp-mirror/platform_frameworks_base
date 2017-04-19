@@ -186,10 +186,10 @@ public class PipControlsView extends LinearLayout {
         } else {
             mPlayPauseButtonView.setVisibility(View.VISIBLE);
             if (state == PipManager.PLAYBACK_STATE_PLAYING) {
-                mPlayPauseButtonView.setImageResource(R.drawable.ic_pause_white_24dp);
+                mPlayPauseButtonView.setImageResource(R.drawable.ic_pause_white);
                 mPlayPauseButtonView.setText(R.string.pip_pause);
             } else {
-                mPlayPauseButtonView.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                mPlayPauseButtonView.setImageResource(R.drawable.ic_play_arrow_white);
                 mPlayPauseButtonView.setText(R.string.pip_play);
             }
         }
