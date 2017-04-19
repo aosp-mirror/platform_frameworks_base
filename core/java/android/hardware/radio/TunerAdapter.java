@@ -31,6 +31,7 @@ class TunerAdapter extends RadioTuner {
     private static final String TAG = "radio.TunerAdapter";
 
     @NonNull private final ITuner mTuner;
+    private boolean mIsClosed = false;
 
     TunerAdapter(ITuner tuner) {
         if (tuner == null) {
@@ -41,8 +42,18 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public void close() {
-        // TODO(b/36863239): forward to mTuner
-        Log.w(TAG, "Close call not implemented");
+        synchronized (mTuner) {
+            if (mIsClosed) {
+                Log.d(TAG, "Tuner is already closed");
+                return;
+            }
+            mIsClosed = true;
+        }
+        try {
+            mTuner.close();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception trying to close tuner", e);
+        }
     }
 
     @Override

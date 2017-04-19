@@ -94,4 +94,12 @@ public class RadioTest {
     public void testOpenTuner() {
         openTuner(new RadioTuner.Callback() {});
     }
+
+    @Test
+    public void testReopenTuner() {
+        openTuner(new RadioTuner.Callback() {});
+        mRadioTuner.close();
+        mRadioTuner = null;
+        openTuner(new RadioTuner.Callback() {});
+    }
 }

@@ -1448,9 +1448,13 @@ public class RadioManager {
         if (mService != null) {
             ITuner tuner;
             try {
-                tuner = mService.openTuner();
+                tuner = mService.openTuner(withAudio);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            }
+            if (tuner == null) {
+                Log.e(TAG, "Failed to open tuner");
+                return null;
             }
             return new TunerAdapter(tuner);
         }

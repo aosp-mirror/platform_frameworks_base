@@ -16,28 +16,18 @@
 
 package com.android.server.radio;
 
-import android.content.Context;
-import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.RadioManager;
 import android.util.Slog;
 
-import com.android.server.SystemService;
-
-public class RadioService extends SystemService {
-    // TODO(b/36863239): rename to RadioService when native service goes away
-    private static final String TAG = "RadioServiceJava";
-
-    private final RadioServiceImpl mServiceImpl = new RadioServiceImpl();
+class Tuner extends ITuner.Stub {
+    // TODO(b/36863239): rename to RadioService.Tuner when native service goes away
+    private static final String TAG = "RadioServiceJava.Tuner";
 
     /**
      * This field is used by native code, do not access or modify.
      */
     private final long mNativeContext = nativeInit();
-
-    public RadioService(Context context) {
-        super(context);
-    }
 
     @Override
     protected void finalize() throws Throwable {
@@ -47,18 +37,13 @@ public class RadioService extends SystemService {
 
     private native long nativeInit();
     private native void nativeFinalize(long nativeContext);
-    private native Tuner openTunerNative(long nativeContext, boolean withAudio);
 
     @Override
-    public void onStart() {
-        publishBinderService(Context.RADIO_SERVICE, mServiceImpl);
-        Slog.v(TAG, "RadioService started");
-    }
+    public native void close();
 
-    private class RadioServiceImpl extends IRadioService.Stub {
-        @Override
-        public ITuner openTuner(boolean withAudio) {
-            return openTunerNative(mNativeContext, withAudio);
-        }
+    @Override
+    public int getProgramInformation(RadioManager.ProgramInfo[] infoOut) {
+        Slog.d(TAG, "getProgramInformation()");
+        return RadioManager.STATUS_INVALID_OPERATION;
     }
 }

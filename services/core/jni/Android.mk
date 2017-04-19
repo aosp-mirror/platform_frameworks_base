@@ -18,6 +18,8 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_location_ContextHubService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_location_GnssLocationProvider.cpp \
     $(LOCAL_REL_DIR)/com_android_server_power_PowerManagerService.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_radio_RadioService.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_radio_Tuner.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SerialService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SyntheticPasswordManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_storage_AppFuseBridge.cpp \
@@ -80,6 +82,8 @@ LOCAL_SHARED_LIBRARIES += \
     libutils \
     libhwui \
     android.hardware.audio.common@2.0 \
+    android.hardware.broadcastradio@1.0 \
+    android.hardware.broadcastradio@1.1 \
     android.hardware.contexthub@1.0 \
     android.hardware.gnss@1.0 \
     android.hardware.ir@1.0 \
