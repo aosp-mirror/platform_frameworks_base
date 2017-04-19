@@ -252,9 +252,7 @@ public class RemoteViews implements Parcelable, Filter {
                 if (mEnterAnimationId != 0) {
                     opts = ActivityOptions.makeCustomAnimation(context, mEnterAnimationId, 0);
                 } else {
-                    opts = ActivityOptions.makeScaleUpAnimation(view,
-                            0, 0,
-                            view.getMeasuredWidth(), view.getMeasuredHeight());
+                    opts = ActivityOptions.makeBasic();
                 }
 
                 if (launchStackId != StackId.INVALID_STACK_ID) {
