@@ -19,8 +19,10 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Objects;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
+
+import java.util.Objects;
 
 /**
  * This class represents the capabilities of a network.  This is used both to specify
@@ -229,7 +231,8 @@ public final class NetworkCapabilities implements Parcelable {
      * Capabilities that suggest that a network is restricted.
      * {@see #maybeMarkCapabilitiesRestricted}.
      */
-    private static final long RESTRICTED_CAPABILITIES =
+    @VisibleForTesting
+    /* package */ static final long RESTRICTED_CAPABILITIES =
             (1 << NET_CAPABILITY_CBS) |
             (1 << NET_CAPABILITY_DUN) |
             (1 << NET_CAPABILITY_EIMS) |
@@ -238,6 +241,17 @@ public final class NetworkCapabilities implements Parcelable {
             (1 << NET_CAPABILITY_IMS) |
             (1 << NET_CAPABILITY_RCS) |
             (1 << NET_CAPABILITY_XCAP);
+
+    /**
+     * Capabilities that suggest that a network is unrestricted.
+     * {@see #maybeMarkCapabilitiesRestricted}.
+     */
+    @VisibleForTesting
+    /* package */ static final long UNRESTRICTED_CAPABILITIES =
+            (1 << NET_CAPABILITY_INTERNET) |
+            (1 << NET_CAPABILITY_MMS) |
+            (1 << NET_CAPABILITY_SUPL) |
+            (1 << NET_CAPABILITY_WIFI_P2P);
 
     /**
      * Adds the given capability to this {@code NetworkCapability} instance.
@@ -352,12 +366,16 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public void maybeMarkCapabilitiesRestricted() {
-        // If all the capabilities are typically provided by restricted networks, conclude that this
-        // network is restricted.
-        if ((mNetworkCapabilities & ~(DEFAULT_CAPABILITIES | RESTRICTED_CAPABILITIES)) == 0 &&
-                // Must have at least some restricted capabilities, otherwise a request for an
-                // internet-less network will get marked restricted.
-                (mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0) {
+        // Verify there aren't any unrestricted capabilities.  If there are we say
+        // the whole thing is unrestricted.
+        final boolean hasUnrestrictedCapabilities =
+                ((mNetworkCapabilities & UNRESTRICTED_CAPABILITIES) != 0);
+
+        // Must have at least some restricted capabilities.
+        final boolean hasRestrictedCapabilities =
+                ((mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0);
+
+        if (hasRestrictedCapabilities && !hasUnrestrictedCapabilities) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
     }
