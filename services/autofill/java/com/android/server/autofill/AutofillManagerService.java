@@ -184,7 +184,7 @@ public final class AutofillManagerService extends SystemService {
     }
 
     @Override
-    public void onStopUser(int userId) {
+    public void onCleanupUser(int userId) {
         synchronized (mLock) {
             removeCachedServiceLocked(userId);
         }
@@ -211,7 +211,7 @@ public final class AutofillManagerService extends SystemService {
     /**
      * Peeks the service instance for a user.
      *
-     * @return service instance or null if not already present
+     * @return service instance or {@code null} if not already present
      */
     @Nullable
     AutofillManagerServiceImpl peekServiceForUserLocked(int userId) {
