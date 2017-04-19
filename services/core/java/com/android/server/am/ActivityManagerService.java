@@ -23809,15 +23809,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    @Override
-    public long getActivityStartInitiatedTime(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        if (r != null) {
-            return r.mStartInitiatedTimeMs;
-        }
-        return 0;
-    }
-
     void updateApplicationInfoLocked(@NonNull List<String> packagesToUpdate, int userId) {
         final PackageManagerInternal packageManager = getPackageManagerInternalLocked();
         final boolean updateFrameworkRes = packagesToUpdate.contains("android");

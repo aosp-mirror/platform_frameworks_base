@@ -341,12 +341,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private final Rect mBounds = new Rect();
 
     /**
-     * Denotes the timestamp at which this activity start was last initiated in the
-     * {@link SystemClock#uptimeMillis()} time base.
-     */
-    long mStartInitiatedTimeMs;
-
-    /**
      * Temp configs used in {@link #ensureActivityConfigurationLocked(int, boolean)}
      */
     private final Configuration mTmpConfig1 = new Configuration();
@@ -504,8 +498,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         pw.print(prefix); pw.print("mActivityType=");
                 pw.println(activityTypeToString(mActivityType));
-        pw.print(prefix); pw.print("mStartInitiatedTimeMs=");
-                TimeUtils.formatDuration(mStartInitiatedTimeMs, now, pw);
         if (requestedVrComponent != null) {
             pw.print(prefix);
             pw.print("requestedVrComponent=");

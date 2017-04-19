@@ -18,7 +18,6 @@ package android.app;
 
 import android.metrics.LogMaker;
 import android.graphics.Rect;
-import android.os.SystemClock;
 import android.view.ViewRootImpl.ActivityConfigCallback;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
@@ -7414,25 +7413,6 @@ public class Activity extends ContextThemeWrapper
             ActivityManager.getService().setDisablePreviewScreenshots(mToken, disable);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call setDisablePreviewScreenshots", e);
-        }
-    }
-
-    /**
-     * Return the timestamp at which this activity start was last initiated by the system in the
-     * {@link SystemClock#uptimeMillis()} time base.
-     *
-     * This can be used to understand how much time is taken for an activity to be started and
-     * displayed to the user.
-     *
-     * @return timestamp at which this activity start was initiated by the system
-     *         or {@code 0} if for any reason the timestamp could not be retrieved.
-     */
-    public long getStartInitiatedTime() {
-        try {
-            return ActivityManager.getService().getActivityStartInitiatedTime(mToken);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call getActivityStartTime", e);
-            return 0;
         }
     }
 

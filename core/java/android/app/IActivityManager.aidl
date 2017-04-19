@@ -640,8 +640,6 @@ interface IActivityManager {
      */
      void backgroundWhitelistUid(int uid);
 
-     long getActivityStartInitiatedTime(IBinder token);
-
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it

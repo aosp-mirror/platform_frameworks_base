@@ -244,7 +244,6 @@ class ActivityStarter {
             ActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
             ActivityRecord[] outActivity, ActivityStackSupervisor.ActivityContainer container,
             TaskRecord inTask) {
-        final long activityStartTime = SystemClock.uptimeMillis();
         int err = ActivityManager.START_SUCCESS;
 
         ProcessRecord callerApp = null;
@@ -479,7 +478,6 @@ class ActivityStarter {
                 callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
                 resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
                 mSupervisor, container, options, sourceRecord);
-        r.mStartInitiatedTimeMs = activityStartTime;
         if (outActivity != null) {
             outActivity[0] = r;
         }
@@ -1031,7 +1029,6 @@ class ActivityStarter {
                         // so make sure the task now has the identity of the new intent.
                         top.getTask().setIntent(mStartActivity);
                     }
-                    top.mStartInitiatedTimeMs = mStartActivity.mStartInitiatedTimeMs;
                     ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, top.getTask());
                     top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
                             mStartActivity.launchedFromPackage);
@@ -1055,7 +1052,6 @@ class ActivityStarter {
             setTaskFromIntentActivity(reusedActivity);
 
             if (!mAddingToTask && mReuseTask == null) {
-                reusedActivity.mStartInitiatedTimeMs = mStartActivity.mStartInitiatedTimeMs;
                 // We didn't do anything...  but it was needed (a.k.a., client don't use that
                 // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
                 resumeTargetStackIfNeeded();
@@ -1088,7 +1084,6 @@ class ActivityStarter {
                 || mLaunchSingleTop || mLaunchSingleTask);
         if (dontStart) {
             ActivityStack.logStartActivity(AM_NEW_INTENT, top, top.getTask());
-            top.mStartInitiatedTimeMs = mStartActivity.mStartInitiatedTimeMs;
             // For paranoia, make sure we have correctly resumed the top activity.
             topStack.mLastPausedActivity = null;
             if (mDoResume) {
@@ -1669,7 +1664,6 @@ class ActivityStarter {
             // desires.
             if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0 || mLaunchSingleTop)
                     && intentActivity.realActivity.equals(mStartActivity.realActivity)) {
-                intentActivity.mStartInitiatedTimeMs = mStartActivity.mStartInitiatedTimeMs;
                 ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity,
                         intentActivity.getTask());
                 if (intentActivity.frontOfTask) {
