@@ -23,8 +23,6 @@ import android.support.annotation.Keep;
  * Factory method used to inject WifiTracker instances.
  */
 public class WifiTrackerFactory {
-    private static boolean sTestingMode = false;
-
     private static WifiTracker sTestingWifiTracker;
 
     @Keep // Keep proguard from stripping this method since it is only used in tests
@@ -35,7 +33,7 @@ public class WifiTrackerFactory {
     public static WifiTracker create(
             Context context, WifiTracker.WifiListener wifiListener, Looper workerLooper,
             boolean includeSaved, boolean includeScans, boolean includePasspoints) {
-        if(sTestingMode) {
+        if(sTestingWifiTracker != null) {
             return sTestingWifiTracker;
         }
         return new WifiTracker(

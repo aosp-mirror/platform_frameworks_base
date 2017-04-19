@@ -27,6 +27,8 @@ import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -253,9 +255,7 @@ public class WifiTrackerTest {
             tracker.mReceiver.onReceive(mContext, intent);
         }
 
-        mAccessPointsChangedLatch = new CountDownLatch(1);
         sendScanResultsAndProcess(tracker);
-        assertTrue(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
         return tracker;
     }
@@ -465,9 +465,10 @@ public class WifiTrackerTest {
     private void updateScoresAndWaitForAccessPointsChangedCallback() throws InterruptedException {
         // Updating scores can happen together or one after the other, so the latch countdown is set
         // to 2.
-        mAccessPointsChangedLatch = new CountDownLatch(2);
+        mAccessPointsChangedLatch = new CountDownLatch(3);
         updateScores();
-        mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue("onAccessPointChanged was not called three times",
+            mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     @Test
@@ -651,12 +652,6 @@ public class WifiTrackerTest {
         WifiTracker tracker =  createTrackerWithScanResultsAndAccessPoint1Connected();
         assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
 
-        WifiConfiguration configuration = new WifiConfiguration();
-        configuration.SSID = SSID_1;
-        configuration.BSSID = BSSID_1;
-        configuration.networkId = CONNECTED_NETWORK_ID;
-        when(mockWifiManager.getConfiguredNetworks()).thenReturn(Arrays.asList(configuration));
-
         int newRssi = CONNECTED_RSSI + 10;
         WifiInfo info = new WifiInfo(CONNECTED_AP_1_INFO);
         info.setRssi(newRssi);
@@ -681,7 +676,8 @@ public class WifiTrackerTest {
 
     @Test
     public void forceUpdateShouldSynchronouslyFetchLatestInformation() throws Exception {
-        // TODO(sghuman): Fix flakiness of this test
+        Network mockNetwork = mock(Network.class);
+        when(mockWifiManager.getCurrentNetwork()).thenReturn(mockNetwork);
 
         when(mockWifiManager.getConnectionInfo()).thenReturn(CONNECTED_AP_1_INFO);
 
@@ -697,8 +693,11 @@ public class WifiTrackerTest {
         when(mockConnectivityManager.getNetworkInfo(any(Network.class))).thenReturn(networkInfo);
 
         WifiTracker tracker = createMockedWifiTracker();
-        startTracking(tracker);
         tracker.forceUpdate();
+
+        verify(mockWifiManager).getConnectionInfo();
+        verify(mockWifiManager, times(2)).getConfiguredNetworks();
+        verify(mockConnectivityManager).getNetworkInfo(any(Network.class));
 
         verify(mockWifiListener).onAccessPointsChanged();
         assertThat(tracker.getAccessPoints().size()).isEqualTo(2);
@@ -736,7 +735,7 @@ public class WifiTrackerTest {
         verify(mockWifiListener, atMost(1)).onWifiStateChanged(anyInt());
 
         lock.countDown();
-        assertTrue(latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        assertTrue("Latch timed out", latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
         assertThat(tracker.mMainHandler.hasMessages(
                 WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED)).isFalse();
