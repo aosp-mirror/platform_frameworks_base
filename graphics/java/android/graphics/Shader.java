@@ -105,11 +105,18 @@ public class Shader {
         return 0;
     }
 
-    private void discardNativeInstance() {
+    void discardNativeInstance() {
         if (mNativeInstance != 0) {
             nativeSafeUnref(mNativeInstance);
             mNativeInstance = 0;
         }
+    }
+
+    /**
+     * Callback for subclasses to call {@link #discardNativeInstance()} if the most recently
+     * constructed native instance is no longer valid.
+     */
+    void verifyNativeInstance() {
     }
 
     @Override
@@ -147,6 +154,9 @@ public class Shader {
         if (mNativeInstance == -1) {
             throw new IllegalStateException("attempting to use a finalized Shader");
         }
+
+        // verify mNativeInstance is valid
+        verifyNativeInstance();
 
         if (mNativeInstance == 0) {
             mNativeInstance = createNativeInstance(mLocalMatrix == null
