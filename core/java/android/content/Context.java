@@ -3722,6 +3722,7 @@ public abstract class Context {
     public static final String PRINT_SERVICE = "print";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.companion.CompanionDeviceManager} for managing companion devices
      *
      * @see #getSystemService
