@@ -32,8 +32,7 @@ import java.util.ArrayList;
 
 /**
  * Response for a {@link
- * AutofillService#onFillRequest(android.app.assist.AssistStructure,
- * Bundle, int, android.os.CancellationSignal, FillCallback)}.
+ * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}.
  *
  * <p>The response typically contains one or more {@link Dataset}s, each representing a set of
  * fields that can be autofilled together, and the Android system displays a dataset picker UI
@@ -258,6 +257,19 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * Specifies views that should not trigger new
+         * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
+         * FillCallback)} requests.
+         *
+         * <p>This is typically used when the service cannot autofill the view; for example, an
+         * {@code EditText} representing a captcha.
+         */
+        public Builder setIgnoredIds(AutofillId...ids) {
+            // TODO: implement
+            return this;
+        }
+
+        /**
          * Adds a new {@link Dataset} to this response.
          *
          * @return This builder.
@@ -289,6 +301,9 @@ public final class FillResponse implements Parcelable {
             return this;
         }
 
+        /**
+         * @deprecated Use {@link #setClientState(Bundle)} instead.
+         */
         @Deprecated
         public Builder setExtras(@Nullable Bundle extras) {
             throwIfDestroyed();
@@ -299,11 +314,9 @@ public final class FillResponse implements Parcelable {
         /**
          * Sets a {@link Bundle state} that will be passed to subsequent APIs that
          * manipulate this response. For example, they are passed to subsequent
-         * calls to {@link AutofillService#onFillRequest(
-         * android.app.assist.AssistStructure, Bundle, int,
-         * android.os.CancellationSignal, FillCallback)} and {@link AutofillService#onSaveRequest(
-         * android.app.assist.AssistStructure, Bundle, SaveCallback)}. You can use
-         * this to store intermediate state that is persistent across multiple
+         * calls to {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
+         * FillCallback)} and {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}.
+         * You can use this to store intermediate state that is persistent across multiple
          * fill requests and the subsequent save request.
          *
          * <p>If this method is called on multiple {@link FillResponse} objects for the same

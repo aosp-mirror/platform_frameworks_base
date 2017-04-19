@@ -107,6 +107,7 @@ public final class AutofillManager {
      *
      * @deprecated Use {@link android.service.autofill.FillRequest#FLAG_MANUAL_REQUEST}
      */
+    // TODO(b/33197203): remove
     @Deprecated
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 

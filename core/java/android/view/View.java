@@ -1135,25 +1135,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @IntDef({
             IMPORTANT_FOR_AUTOFILL_AUTO,
             IMPORTANT_FOR_AUTOFILL_YES,
-            IMPORTANT_FOR_AUTOFILL_NO
+            IMPORTANT_FOR_AUTOFILL_NO,
+            IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS,
+            IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutofillImportance {}
 
     /**
-     * Automatically determine whether a view is important for auto-fill.
+     * Automatically determine whether a view is important for autofill.
      */
     public static final int IMPORTANT_FOR_AUTOFILL_AUTO = 0x0;
 
     /**
-     * The view is important for important for auto-fill.
+     * The view is important for autofill, and its children (if any) will be traversed.
      */
     public static final int IMPORTANT_FOR_AUTOFILL_YES = 0x1;
 
     /**
-     * The view is not important for auto-fill.
+     * The view is not important for autofill, and its children (if any) will be traversed.
      */
     public static final int IMPORTANT_FOR_AUTOFILL_NO = 0x2;
+
+    /**
+     * The view is important for autofill, but its children (if any) will not be traversed.
+     */
+    public static final int IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS = 0x4;
+
+    /**
+     * The view is not important for autofill, and its children (if any) will not be traversed.
+     */
+    public static final int IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS = 0x8;
 
     /**
      * This view is enabled. Interpretation varies by subclass.
@@ -7568,7 +7580,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * should use {@link #setImportantForAutofill(int)} instead.
      *
      * <p><strong>Note:</strong> returning {@code false} does not guarantee the view will be
-     * excluded from the structure; for example, if the user explicitly requested auto-fill, the
+     * excluded from the structure; for example, if the user explicitly requested autofill, the
      * View might be always included.
      *
      * <p>This decision applies just for the view, not its children - if the view children are not

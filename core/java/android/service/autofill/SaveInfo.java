@@ -40,7 +40,7 @@ import java.util.Arrays;
 /**
  * Information used to indicate that an {@link AutofillService} is interested on saving the
  * user-inputed data for future use, through a
- * {@link AutofillService#onSaveRequest(android.app.assist.AssistStructure, Bundle, SaveCallback)}
+ * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}
  * call.
  *
  * <p>A {@link SaveInfo} is always associated with a {@link FillResponse}, and it contains at least
@@ -94,7 +94,7 @@ import java.util.Arrays;
  * </pre>
  *
  * The
- * {@link AutofillService#onSaveRequest(android.app.assist.AssistStructure, Bundle, SaveCallback)}
+ * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}
  * is triggered after a call to {@link AutofillManager#commit()}, but only when all conditions
  * below are met:
  *
