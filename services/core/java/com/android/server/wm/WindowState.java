@@ -4329,7 +4329,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     int relayoutVisibleWindow(MergedConfiguration mergedConfiguration, int result, int attrChanges,
             int oldVisibility) {
-        result |= !isVisibleLw() ? RELAYOUT_RES_FIRST_TIME : 0;
+        final boolean wasVisible = isVisibleLw();
+
+        result |= (!wasVisible || !isDrawnLw()) ? RELAYOUT_RES_FIRST_TIME : 0;
         if (mAnimatingExit) {
             Slog.d(TAG, "relayoutVisibleWindow: " + this + " mAnimatingExit=true, mRemoveOnExit="
                     + mRemoveOnExit + ", mDestroying=" + mDestroying);
@@ -4348,7 +4350,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastVisibleLayoutRotation = getDisplayContent().getRotation();
 
         mWinAnimator.mEnteringAnimation = true;
-        if ((result & RELAYOUT_RES_FIRST_TIME) != 0) {
+        if (!wasVisible) {
             prepareWindowToDisplayDuringRelayout(mergedConfiguration);
         }
         if ((attrChanges & FORMAT_CHANGED) != 0) {

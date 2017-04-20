@@ -602,6 +602,22 @@ class WindowStateAnimator {
         }
     }
 
+    void resetDrawState() {
+        mDrawState = DRAW_PENDING;
+
+        if (mWin.mAppToken == null) {
+            return;
+        }
+
+        if (mWin.mAppToken.mAppAnimator.animation == null) {
+            mWin.mAppToken.clearAllDrawn();
+        } else {
+            // Currently animating, persist current state of allDrawn until animation
+            // is complete.
+            mWin.mAppToken.deferClearAllDrawn = true;
+        }
+    }
+
     WindowSurfaceController createSurfaceLocked(int windowType, int ownerUid) {
         final WindowState w = mWin;
         if (w.restoreSavedSurface()) {
@@ -619,16 +635,7 @@ class WindowStateAnimator {
         if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
                 "createSurface " + this + ": mDrawState=DRAW_PENDING");
 
-        mDrawState = DRAW_PENDING;
-        if (w.mAppToken != null) {
-            if (w.mAppToken.mAppAnimator.animation == null) {
-                w.mAppToken.clearAllDrawn();
-            } else {
-                // Currently animating, persist current state of allDrawn until animation
-                // is complete.
-                w.mAppToken.deferClearAllDrawn = true;
-            }
-        }
+        resetDrawState();
 
         mService.makeWindowFreezingScreenIfNeededLocked(w);
 
