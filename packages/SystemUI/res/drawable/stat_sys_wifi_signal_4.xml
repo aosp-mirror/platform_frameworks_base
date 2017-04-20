@@ -20,8 +20,8 @@
         android:viewportHeight="24.0">
     <path
         android:pathData="M13.8,12.2l5.7,0.0L23.6,7.0C23.2,6.7 18.7,3.0 12.0,3.0C5.3,3.0 0.8,6.7 0.4,7.0L12.0,21.5l0.0,0.0l0.0,0.0l1.8,-2.2L13.8,12.2z"
-        android:fillColor="?attr/fillColor"/>
+        android:fillColor="?attr/singleToneColor"/>
     <path
         android:pathData="M21.9,15.4l-1.1,-1.2 -1.9,1.900001 -1.9,-1.900001 -1.1,1.2 1.9,1.9 -1.9,1.800001 1.1,1.199999 1.9,-1.9 1.9,1.9 1.1,-1.199999 -1.9,-1.800001z"
-        android:fillColor="?attr/fillColor"/>
+        android:fillColor="?attr/singleToneColor"/>
 </vector>
