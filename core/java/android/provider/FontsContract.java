@@ -78,6 +78,10 @@ public class FontsContract {
      * client application.
      */
     public static final class Columns implements BaseColumns {
+
+        // Do not instantiate.
+        private Columns() {}
+
         /**
          * Constant used to request data from a font provider. The cursor returned from the query
          * may populate this column with a long for the font file ID. The client will request a file
