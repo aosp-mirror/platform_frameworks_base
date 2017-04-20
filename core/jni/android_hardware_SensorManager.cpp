@@ -75,6 +75,12 @@ struct ListOffsets {
     jmethodID   add;
 } gListOffsets;
 
+struct StringOffsets {
+    jclass      clazz;
+    jmethodID   intern;
+    jstring     emptyString;
+} gStringOffsets;
+
 /*
  * nativeClassInit is not inteneded to be thread-safe. It should be called before other native...
  * functions (except nativeCreate).
@@ -84,75 +90,55 @@ nativeClassInit (JNIEnv *_env, jclass _this)
 {
     //android.hardware.Sensor
     SensorOffsets& sensorOffsets = gSensorOffsets;
-    jclass sensorClass = (jclass) _env->NewGlobalRef(_env->FindClass("android/hardware/Sensor"));
-    sensorOffsets.clazz       = sensorClass;
-    sensorOffsets.name        = _env->GetFieldID(sensorClass, "mName",      "Ljava/lang/String;");
-    sensorOffsets.vendor      = _env->GetFieldID(sensorClass, "mVendor",    "Ljava/lang/String;");
-    sensorOffsets.version     = _env->GetFieldID(sensorClass, "mVersion",   "I");
-    sensorOffsets.handle      = _env->GetFieldID(sensorClass, "mHandle",    "I");
-    sensorOffsets.range       = _env->GetFieldID(sensorClass, "mMaxRange",  "F");
-    sensorOffsets.resolution  = _env->GetFieldID(sensorClass, "mResolution","F");
-    sensorOffsets.power       = _env->GetFieldID(sensorClass, "mPower",     "F");
-    sensorOffsets.minDelay    = _env->GetFieldID(sensorClass, "mMinDelay",  "I");
+    jclass sensorClass = (jclass)
+            MakeGlobalRefOrDie(_env, FindClassOrDie(_env, "android/hardware/Sensor"));
+    sensorOffsets.clazz = sensorClass;
+    sensorOffsets.name = GetFieldIDOrDie(_env, sensorClass, "mName", "Ljava/lang/String;");
+    sensorOffsets.vendor = GetFieldIDOrDie(_env, sensorClass, "mVendor", "Ljava/lang/String;");
+    sensorOffsets.version = GetFieldIDOrDie(_env, sensorClass, "mVersion", "I");
+    sensorOffsets.handle = GetFieldIDOrDie(_env, sensorClass, "mHandle", "I");
+    sensorOffsets.range = GetFieldIDOrDie(_env, sensorClass, "mMaxRange", "F");
+    sensorOffsets.resolution = GetFieldIDOrDie(_env, sensorClass, "mResolution","F");
+    sensorOffsets.power = GetFieldIDOrDie(_env, sensorClass, "mPower", "F");
+    sensorOffsets.minDelay = GetFieldIDOrDie(_env, sensorClass, "mMinDelay", "I");
     sensorOffsets.fifoReservedEventCount =
-            _env->GetFieldID(sensorClass, "mFifoReservedEventCount",  "I");
-    sensorOffsets.fifoMaxEventCount = _env->GetFieldID(sensorClass, "mFifoMaxEventCount",  "I");
-    sensorOffsets.stringType = _env->GetFieldID(sensorClass, "mStringType", "Ljava/lang/String;");
-    sensorOffsets.requiredPermission = _env->GetFieldID(sensorClass, "mRequiredPermission",
-                                                        "Ljava/lang/String;");
-    sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
-    sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
+            GetFieldIDOrDie(_env,sensorClass, "mFifoReservedEventCount", "I");
+    sensorOffsets.fifoMaxEventCount = GetFieldIDOrDie(_env,sensorClass, "mFifoMaxEventCount", "I");
+    sensorOffsets.stringType =
+            GetFieldIDOrDie(_env,sensorClass, "mStringType", "Ljava/lang/String;");
+    sensorOffsets.requiredPermission =
+            GetFieldIDOrDie(_env,sensorClass, "mRequiredPermission", "Ljava/lang/String;");
+    sensorOffsets.maxDelay = GetFieldIDOrDie(_env,sensorClass, "mMaxDelay", "I");
+    sensorOffsets.flags = GetFieldIDOrDie(_env,sensorClass, "mFlags", "I");
 
-    sensorOffsets.setType = _env->GetMethodID(sensorClass, "setType", "(I)Z");
-    sensorOffsets.setUuid = _env->GetMethodID(sensorClass, "setUuid", "(JJ)V");
-    sensorOffsets.init = _env->GetMethodID(sensorClass, "<init>", "()V");
+    sensorOffsets.setType = GetMethodIDOrDie(_env,sensorClass, "setType", "(I)Z");
+    sensorOffsets.setUuid = GetMethodIDOrDie(_env,sensorClass, "setUuid", "(JJ)V");
+    sensorOffsets.init = GetMethodIDOrDie(_env,sensorClass, "<init>", "()V");
 
     // java.util.List;
     ListOffsets& listOffsets = gListOffsets;
-    jclass listClass = (jclass) _env->NewGlobalRef(_env->FindClass("java/util/List"));
+    jclass listClass = (jclass) MakeGlobalRefOrDie(_env, FindClassOrDie(_env, "java/util/List"));
     listOffsets.clazz = listClass;
-    listOffsets.add = _env->GetMethodID(listClass, "add", "(Ljava/lang/Object;)Z");
+    listOffsets.add = GetMethodIDOrDie(_env,listClass, "add", "(Ljava/lang/Object;)Z");
+
+    // initialize java.lang.String and empty string intern
+    StringOffsets& stringOffsets = gStringOffsets;
+    stringOffsets.clazz = MakeGlobalRefOrDie(_env, FindClassOrDie(_env, "java/lang/String"));
+    stringOffsets.intern =
+            GetMethodIDOrDie(_env, stringOffsets.clazz, "intern", "()Ljava/lang/String;");
+    ScopedLocalRef<jstring> empty(_env, _env->NewStringUTF(""));
+    stringOffsets.emptyString = (jstring)
+            MakeGlobalRefOrDie(_env, _env->CallObjectMethod(empty.get(), stringOffsets.intern));
 }
 
-/**
- * A key comparator predicate.
- * It is used to intern strings associated with Sensor data.
- * It defines a 'Strict weak ordering' for the interned strings.
- */
-class InternedStringCompare {
-public:
-    bool operator()(const String8* string1, const String8* string2) const {
-        if (string1 == NULL) {
-            return string2 != NULL;
-        }
-        if (string2 == NULL) {
-            return false;
-        }
-        return string1->compare(*string2) < 0;
+static jstring getJavaInternedString(JNIEnv *env, const String8 &string) {
+    if (string == "") {
+        return gStringOffsets.emptyString;
     }
-};
 
-/**
- * A localized interning mechanism for Sensor strings.
- * We implement our own interning to avoid the overhead of using java.lang.String#intern().
- * It is common that Vendor, StringType, and RequirePermission data is common between many of the
- * Sensors, by interning the memory usage to represent Sensors is optimized.
- */
-static jstring
-getInternedString(JNIEnv *env, const String8* string) {
-    static std::map<const String8*, jstring, InternedStringCompare> internedStrings;
-
-    jstring internedString;
-    std::map<const String8*, jstring>::iterator iterator = internedStrings.find(string);
-    if (iterator != internedStrings.end()) {
-        internedString = iterator->second;
-    } else {
-        jstring localString = env->NewStringUTF(string->string());
-        // we are implementing our own interning so expect these strings to be backed by global refs
-        internedString = (jstring) env->NewGlobalRef(localString);
-        internedStrings.insert(std::make_pair(string, internedString));
-        env->DeleteLocalRef(localString);
-    }
+    ScopedLocalRef<jstring> javaString(env, env->NewStringUTF(string.string()));
+    jstring internedString = (jstring)
+            env->CallObjectMethod(javaString.get(), gStringOffsets.intern);
     return internedString;
 }
 
@@ -174,10 +160,10 @@ translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nat
     }
 
     if (sensor != NULL) {
-        jstring name = env->NewStringUTF(nativeSensor.getName().string());
-        jstring vendor = env->NewStringUTF(nativeSensor.getVendor().string());
+        jstring name = getJavaInternedString(env, nativeSensor.getName());
+        jstring vendor = getJavaInternedString(env, nativeSensor.getVendor());
         jstring requiredPermission =
-                env->NewStringUTF(nativeSensor.getRequiredPermission().string());
+                getJavaInternedString(env, nativeSensor.getRequiredPermission());
 
         env->SetObjectField(sensor, sensorOffsets.name,      name);
         env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
@@ -198,7 +184,7 @@ translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nat
 
         if (env->CallBooleanMethod(sensor, sensorOffsets.setType, nativeSensor.getType())
                 == JNI_FALSE) {
-            jstring stringType = getInternedString(env, &nativeSensor.getStringType());
+            jstring stringType = getJavaInternedString(env, nativeSensor.getStringType());
             env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
         }
 
