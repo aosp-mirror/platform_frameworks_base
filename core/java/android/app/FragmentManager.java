@@ -3009,6 +3009,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 mExecutingActions = false;
             }
         }
+        execPendingActions();
     }
 
     /**
