@@ -9529,6 +9529,32 @@ public final class Settings {
                 "intent_firewall_metadata_url";
 
         /**
+         * URL for lang id model updates
+         * @hide
+         */
+        public static final String LANG_ID_UPDATE_CONTENT_URL = "lang_id_content_url";
+
+        /**
+         * URL for lang id model update metadata
+         * @hide
+         */
+        public static final String LANG_ID_UPDATE_METADATA_URL = "lang_id_metadata_url";
+
+        /**
+         * URL for smart selection model updates
+         * @hide
+         */
+        public static final String SMART_SELECTION_UPDATE_CONTENT_URL =
+                "smart_selection_content_url";
+
+        /**
+         * URL for smart selection model update metadata
+         * @hide
+         */
+        public static final String SMART_SELECTION_UPDATE_METADATA_URL =
+                "smart_selection_metadata_url";
+
+        /**
          * SELinux enforcement status. If 0, permissive; if 1, enforcing.
          * @hide
          */
