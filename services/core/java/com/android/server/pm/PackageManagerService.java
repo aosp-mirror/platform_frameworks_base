@@ -1839,10 +1839,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 extras.putInt(Intent.EXTRA_UID, res.uid);
                 if (update) {
                     extras.putBoolean(Intent.EXTRA_REPLACING, true);
-                } else {
-                    sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_ADDED, packageName,
-                            extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
-                            null /*targetPackage*/, null /*finishedReceiver*/, updateUsers);
                 }
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                         extras, 0 /*flags*/, null /*targetPackage*/,
@@ -13406,10 +13402,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // Set to UID of the first user, EXTRA_UID is automatically updated in sendPackageBroadcast
         extras.putInt(Intent.EXTRA_UID, UserHandle.getUid(userIds[0], appId));
 
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_ADDED, packageName,
-                extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null, null, userIds);
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
-                extras, 0, null, null, userIds);
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                packageName, extras, 0, null, null, userIds);
         if (isSystem) {
             mHandler.post(() -> {
                         for (int userId : userIds) {
