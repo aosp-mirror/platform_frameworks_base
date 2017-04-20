@@ -57,7 +57,7 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
             try {
                 // make good use of our CAP_SYS_NICE capability
                 Process.setThreadGroup(tid, !isForApp ?
-                  Process.THREAD_GROUP_AUDIO_SYS : Process.THREAD_GROUP_AUDIO_APP);
+                  Process.THREAD_GROUP_AUDIO_SYS : Process.THREAD_GROUP_RT_APP);
             } catch (RuntimeException e) {
                 Log.e(TAG, "Failed setThreadGroup: " + e);
                 return PackageManager.PERMISSION_DENIED;
