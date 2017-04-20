@@ -17,7 +17,7 @@
 
 package com.android.server.autofill;
 
-import static android.view.autofill.AutofillManager.FLAG_MANUAL_REQUEST;
+import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.FLAG_VIEW_ENTERED;
@@ -68,6 +68,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -602,7 +603,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int lastResponseIdx = getLastResponseIndex();
         final int requestId = mResponses.keyAt(lastResponseIdx);
         final FillContext fillContext = new FillContext(requestId, mStructure);
-        final ArrayList fillContexts = new ArrayList(1);
+        final ArrayList<FillContext> fillContexts = new ArrayList<>(1);
         fillContexts.add(fillContext);
 
         final SaveRequest saveRequest = new SaveRequest(fillContexts, mClientState);
@@ -620,6 +621,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 viewState = new ViewState(this, id, value, this, ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
             } else if (mStructure != null && (flags & FLAG_VIEW_ENTERED) != 0) {
+                if (isIgnoredLocked(id)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Not starting partition for ignored view id " + id);
+                    }
+                    return;
+                }
                 viewState = startPartitionLocked(id, value);
             } else {
                 if (VERBOSE) Slog.v(TAG, "Ignored " + getFlagAsString(flags) + " for " + id);
@@ -929,6 +936,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         } catch (RemoteException e) {
             Slog.e(TAG, "Error launching auth intent", e);
         }
+    }
+
+    private boolean isIgnoredLocked(@NonNull AutofillId id) {
+        if (mResponses == null) return false;
+
+        for (int i = mResponses.size() - 1; i >= 0; i--) {
+            final FillResponse response = mResponses.valueAt(i);
+            final AutofillId[] ignoredIds = response.getIgnoredIds();
+            if (ignoredIds == null) continue;
+            for (int j = 0; j < ignoredIds.length; j++) {
+                final AutofillId ignoredId = ignoredIds[j];
+                if (ignoredId != null && ignoredId.equals(id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     void dumpLocked(String prefix, PrintWriter pw) {
