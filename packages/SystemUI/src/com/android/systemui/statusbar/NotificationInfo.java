@@ -262,17 +262,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private boolean hasImportanceChanged() {
         return mSingleNotificationChannel != null &&
+                mChannelEnabledSwitch != null &&
                 mStartingUserImportance != getSelectedImportance();
     }
 
     private void saveImportance() {
-        if (mSingleNotificationChannel == null) {
+        if (!hasImportanceChanged()) {
             return;
         }
-        int selectedImportance = getSelectedImportance();
-        if (selectedImportance == mStartingUserImportance) {
-            return;
-        }
+        final int selectedImportance = getSelectedImportance();
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 selectedImportance - mStartingUserImportance);
         mSingleNotificationChannel.setImportance(selectedImportance);
@@ -384,7 +382,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public boolean willBeRemoved() {
-        return !mChannelEnabledSwitch.isChecked();
+        return mChannelEnabledSwitch != null && !mChannelEnabledSwitch.isChecked();
     }
 
     @Override
