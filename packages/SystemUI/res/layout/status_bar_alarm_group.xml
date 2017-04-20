@@ -18,9 +18,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/date_time_alarm_group"
-    android:layout_width="0dp"
-    android:layout_height="48dp"
-    android:layout_weight="1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="4dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:background="?android:attr/selectableItemBackground">
@@ -28,7 +28,7 @@
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         android:textSize="@dimen/qs_time_collapsed_size"
@@ -38,7 +38,7 @@
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/alarm_status_collapsed"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:src="@drawable/ic_access_alarms_small"
         android:tint="?android:attr/textColorPrimary"
         android:paddingStart="6dp"
@@ -49,7 +49,7 @@
     <com.android.systemui.statusbar.AlphaOptimizedButton
         android:id="@+id/alarm_status"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         android:gravity="center_vertical"
         android:background="@null"
