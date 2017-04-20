@@ -314,7 +314,7 @@ public abstract class ViewStructure {
      * <p>Typically used by nodes whose {@link View#getAutofillType()} is a list to indicate the
      * meaning of each possible value in the list.
      */
-    public abstract void setAutofillOptions(String[] options);
+    public abstract void setAutofillOptions(CharSequence[] options);
 
     /**
      * Sets the {@link android.text.InputType} bits of this node.
