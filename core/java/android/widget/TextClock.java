@@ -133,6 +133,7 @@ public class TextClock extends TextView {
     private CharSequence mDescFormat;
 
     private boolean mRegistered;
+    private boolean mShouldRunTicker;
 
     private Calendar mTime;
     private String mTimeZone;
@@ -252,8 +253,7 @@ public class TextClock extends TextView {
         }
 
         createTime(mTimeZone);
-        // Wait until registering for events to handle the ticker
-        chooseFormat(false);
+        chooseFormat();
     }
 
     private void createTime(String timeZone) {
@@ -461,16 +461,6 @@ public class TextClock extends TextView {
     }
 
     /**
-     * Selects either one of {@link #getFormat12Hour()} or {@link #getFormat24Hour()}
-     * depending on whether the user has selected 24-hour format.
-     *
-     * Calling this method does not schedule or unschedule the time ticker.
-     */
-    private void chooseFormat() {
-        chooseFormat(true);
-    }
-
-    /**
      * Returns the current format string. Always valid after constructor has
      * finished, and will never be {@code null}.
      *
@@ -483,11 +473,8 @@ public class TextClock extends TextView {
     /**
      * Selects either one of {@link #getFormat12Hour()} or {@link #getFormat24Hour()}
      * depending on whether the user has selected 24-hour format.
-     *
-     * @param handleTicker true if calling this method should schedule/unschedule the
-     *                     time ticker, false otherwise
      */
-    private void chooseFormat(boolean handleTicker) {
+    private void chooseFormat() {
         final boolean format24Requested = is24HourModeEnabled();
 
         LocaleData ld = LocaleData.get(getContext().getResources().getConfiguration().locale);
@@ -503,7 +490,7 @@ public class TextClock extends TextView {
         boolean hadSeconds = mHasSeconds;
         mHasSeconds = DateFormat.hasSeconds(mFormat);
 
-        if (handleTicker && mRegistered && hadSeconds != mHasSeconds) {
+        if (mShouldRunTicker && hadSeconds != mHasSeconds) {
             if (hadSeconds) getHandler().removeCallbacks(mTicker);
             else mTicker.run();
         }
@@ -517,25 +504,43 @@ public class TextClock extends TextView {
     }
 
     @Override
-    public void onVisibilityAggregated(boolean isVisible) {
-        if (!mRegistered && isVisible) {
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if (!mRegistered) {
             mRegistered = true;
 
             registerReceiver();
             registerObserver();
 
             createTime(mTimeZone);
+        }
+    }
 
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+
+        if (!mShouldRunTicker && isVisible) {
+            mShouldRunTicker = true;
             if (mHasSeconds) {
                 mTicker.run();
             } else {
                 onTimeChanged();
             }
-        } else if (mRegistered && !isVisible) {
+        } else if (mShouldRunTicker && !isVisible) {
+            mShouldRunTicker = false;
+            getHandler().removeCallbacks(mTicker);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (mRegistered) {
             unregisterReceiver();
             unregisterObserver();
-
-            getHandler().removeCallbacks(mTicker);
 
             mRegistered = false;
         }
@@ -586,10 +591,16 @@ public class TextClock extends TextView {
         }
     }
 
+    /**
+     * Update the displayed time if this view and its ancestors and window is visible
+     */
     private void onTimeChanged() {
-        mTime.setTimeInMillis(System.currentTimeMillis());
-        setText(DateFormat.format(mFormat, mTime));
-        setContentDescription(DateFormat.format(mDescFormat, mTime));
+        // mShouldRunTicker always equals the last value passed into onVisibilityAggregated
+        if (mShouldRunTicker) {
+            mTime.setTimeInMillis(System.currentTimeMillis());
+            setText(DateFormat.format(mFormat, mTime));
+            setContentDescription(DateFormat.format(mDescFormat, mTime));
+        }
     }
 
     /** @hide */
