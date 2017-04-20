@@ -2022,7 +2022,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected boolean shouldUseDismissingAnimation() {
         return mStatusBarState != StatusBarState.SHADE
-                && !mStatusBar.isKeyguardCurrentlySecure();
+                && (!mStatusBar.isKeyguardCurrentlySecure() || !isTracking());
     }
 
     @Override
