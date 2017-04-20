@@ -15,6 +15,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-base-testutils \
     services.accessibility \
     services.appwidget \
+    services.backup \
     services.core \
     services.devicepolicy \
     services.net \
