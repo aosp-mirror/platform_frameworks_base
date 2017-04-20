@@ -37,6 +37,7 @@ import android.text.util.Linkify;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.TextViewMetrics;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -243,6 +244,8 @@ final class TextClassifierImpl implements TextClassifier {
         }
 
         final String type = getHighestScoringType(classifications);
+        builder.setLogType(IntentFactory.getLogType(type));
+
         final Intent intent = IntentFactory.create(mContext, type, text.toString());
         final PackageManager pm;
         final ResolveInfo resolveInfo;
@@ -541,6 +544,23 @@ final class TextClassifierImpl implements TextClassifier {
                     return context.getString(com.android.internal.R.string.browse);
                 default:
                     return null;
+            }
+        }
+
+        @Nullable
+        public static int getLogType(String type) {
+            type = type.trim().toLowerCase(Locale.ENGLISH);
+            switch (type) {
+                case TextClassifier.TYPE_EMAIL:
+                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_EMAIL;
+                case TextClassifier.TYPE_PHONE:
+                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_PHONE;
+                case TextClassifier.TYPE_ADDRESS:
+                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_ADDRESS;
+                case TextClassifier.TYPE_URL:
+                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_URL;
+                default:
+                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_OTHER;
             }
         }
     }
