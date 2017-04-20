@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import libcore.io.IoUtils;
 
 /**
  * Representation of a clipped data on the clipboard.
@@ -335,46 +336,46 @@ public class ClipData implements Parcelable {
             // If this Item has a URI value, try using that.
             Uri uri = getUri();
             if (uri != null) {
-
                 // First see if the URI can be opened as a plain text stream
                 // (of any sub-type).  If so, this is the best textual
                 // representation for it.
+                final ContentResolver resolver = context.getContentResolver();
+                AssetFileDescriptor descr = null;
                 FileInputStream stream = null;
+                InputStreamReader reader = null;
                 try {
-                    // Ask for a stream of the desired type.
-                    AssetFileDescriptor descr = context.getContentResolver()
-                            .openTypedAssetFileDescriptor(uri, "text/*", null);
-                    stream = descr.createInputStream();
-                    InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
-
-                    // Got it...  copy the stream into a local string and return it.
-                    StringBuilder builder = new StringBuilder(128);
-                    char[] buffer = new char[8192];
-                    int len;
-                    while ((len=reader.read(buffer)) > 0) {
-                        builder.append(buffer, 0, len);
+                    try {
+                        // Ask for a stream of the desired type.
+                        descr = resolver.openTypedAssetFileDescriptor(uri, "text/*", null);
+                    } catch (SecurityException e) {
+                        Log.w("ClipData", "Failure opening stream", e);
+                    } catch (FileNotFoundException|RuntimeException e) {
+                        // Unable to open content URI as text...  not really an
+                        // error, just something to ignore.
                     }
-                    return builder.toString();
-
-                } catch (SecurityException e) {
-                    Log.w("ClipData", "Failure opening stream", e);
-
-                } catch (FileNotFoundException e) {
-                    // Unable to open content URI as text...  not really an
-                    // error, just something to ignore.
-
-                } catch (IOException e) {
-                    // Something bad has happened.
-                    Log.w("ClipData", "Failure loading text", e);
-                    return e.toString();
-
-                } finally {
-                    if (stream != null) {
+                    if (descr != null) {
                         try {
-                            stream.close();
+                            stream = descr.createInputStream();
+                            reader = new InputStreamReader(stream, "UTF-8");
+
+                            // Got it...  copy the stream into a local string and return it.
+                            final StringBuilder builder = new StringBuilder(128);
+                            char[] buffer = new char[8192];
+                            int len;
+                            while ((len=reader.read(buffer)) > 0) {
+                                builder.append(buffer, 0, len);
+                            }
+                            return builder.toString();
                         } catch (IOException e) {
+                            // Something bad has happened.
+                            Log.w("ClipData", "Failure loading text", e);
+                            return e.toString();
                         }
                     }
+                } finally {
+                    IoUtils.closeQuietly(descr);
+                    IoUtils.closeQuietly(stream);
+                    IoUtils.closeQuietly(reader);
                 }
 
                 // If we couldn't open the URI as a stream, use the URI itself as a textual
