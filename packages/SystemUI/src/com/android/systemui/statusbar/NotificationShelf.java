@@ -18,12 +18,13 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
-
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
@@ -71,6 +72,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int mRelativeOffset;
     private boolean mInteractive;
     private boolean mAnimationsEnabled = true;
+    private boolean mShowNotificationShelf;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -99,21 +101,24 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     private void initDimens() {
-        mIconAppearTopPadding = getResources().getDimensionPixelSize(
-                R.dimen.notification_icon_appear_padding);
-        mStatusBarHeight = getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
-        mStatusBarPaddingStart = getResources().getDimensionPixelOffset(
-                R.dimen.status_bar_padding_start);
-        mPaddingBetweenElements = getResources().getDimensionPixelSize(
-                R.dimen.notification_divider_height);
+        Resources res = getResources();
+        mIconAppearTopPadding = res.getDimensionPixelSize(R.dimen.notification_icon_appear_padding);
+        mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
+        mStatusBarPaddingStart = res.getDimensionPixelOffset(R.dimen.status_bar_padding_start);
+        mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
+
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        layoutParams.height = getResources().getDimensionPixelOffset(
-                R.dimen.notification_shelf_height);
+        layoutParams.height = res.getDimensionPixelOffset(R.dimen.notification_shelf_height);
         setLayoutParams(layoutParams);
-        int padding = getResources().getDimensionPixelOffset(R.dimen.shelf_icon_container_padding);
+
+        int padding = res.getDimensionPixelOffset(R.dimen.shelf_icon_container_padding);
         mShelfIcons.setPadding(padding, 0, padding, 0);
-        mScrollFastThreshold = getResources().getDimensionPixelOffset(
-                R.dimen.scroll_fast_threshold);
+        mScrollFastThreshold = res.getDimensionPixelOffset(R.dimen.scroll_fast_threshold);
+        mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
+
+        if (!mShowNotificationShelf) {
+            setVisibility(GONE);
+        }
     }
 
     @Override
@@ -148,7 +153,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     public void updateState(StackScrollState resultState,
             AmbientState ambientState) {
         View lastView = ambientState.getLastVisibleBackgroundChild();
-        if (lastView != null) {
+        if (mShowNotificationShelf && lastView != null) {
             float maxShelfEnd = ambientState.getInnerHeight() + ambientState.getTopPadding()
                     + ambientState.getStackTranslation();
             ExpandableViewState lastViewState = resultState.getViewStateForView(lastView);
@@ -186,6 +191,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
      * the icons from the notification area into the shelf.
      */
     public void updateAppearance() {
+        // If the shelf should not be shown, then there is no need to update anything.
+        if (!mShowNotificationShelf) {
+            return;
+        }
+
         mShelfIcons.resetViewStates();
         float shelfStart = getTranslationY();
         float numViewsInShelf = 0.0f;
@@ -630,6 +640,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
         @Override
         public void applyToView(View view) {
+            if (!mShowNotificationShelf) {
+                return;
+            }
+
             super.applyToView(view);
             setMaxShelfEnd(maxShelfEnd);
             setOpenedAmount(openedAmount);
@@ -640,6 +654,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
         @Override
         public void animateTo(View child, AnimationProperties properties) {
+            if (!mShowNotificationShelf) {
+                return;
+            }
+
             super.animateTo(child, properties);
             setMaxShelfEnd(maxShelfEnd);
             setOpenedAmount(openedAmount);

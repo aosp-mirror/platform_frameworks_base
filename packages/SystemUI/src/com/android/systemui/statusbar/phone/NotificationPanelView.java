@@ -41,12 +41,10 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
@@ -59,6 +57,7 @@ import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -422,8 +421,9 @@ public class NotificationPanelView extends PanelView implements
                 mKeyguardStatusView.getHeight());
         int notificationPadding = Math.max(1, getResources().getDimensionPixelSize(
                 R.dimen.notification_divider_height));
-        float shelfSize = mNotificationStackScroller.getNotificationShelf().getIntrinsicHeight()
-                + notificationPadding;
+        NotificationShelf shelf = mNotificationStackScroller.getNotificationShelf();
+        float shelfSize = shelf.getVisibility() == GONE ? 0
+                : shelf.getIntrinsicHeight() + notificationPadding;
         float availableSpace = mNotificationStackScroller.getHeight() - minPadding - shelfSize
                 - mIndicationBottomPadding;
         int count = 0;
