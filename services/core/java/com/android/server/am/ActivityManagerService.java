@@ -832,9 +832,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     ProcessRecord mHeavyWeightProcess = null;
 
     /**
-     * Non-persistent app uid whitelist for background restrictions
+     * Non-persistent appId whitelist for background restrictions
      */
-    int[] mBackgroundUidWhitelist = new int[] {
+    int[] mBackgroundAppIdWhitelist = new int[] {
             BLUETOOTH_UID
     };
 
@@ -12102,9 +12102,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean uidOnBackgroundWhitelist(final int uid) {
-        final int N = mBackgroundUidWhitelist.length;
+        final int appId = UserHandle.getAppId(uid);
+        final int[] whitelist = mBackgroundAppIdWhitelist;
+        final int N = whitelist.length;
         for (int i = 0; i < N; i++) {
-            if (uid == mBackgroundUidWhitelist[i]) {
+            if (appId == whitelist[i]) {
                 return true;
             }
         }
@@ -12121,11 +12123,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.i(TAG, "Adding uid " + uid + " to bg uid whitelist");
         }
         synchronized (this) {
-            final int N = mBackgroundUidWhitelist.length;
+            final int N = mBackgroundAppIdWhitelist.length;
             int[] newList = new int[N+1];
-            System.arraycopy(mBackgroundUidWhitelist, 0, newList, 0, N);
-            newList[N] = uid;
-            mBackgroundUidWhitelist = newList;
+            System.arraycopy(mBackgroundAppIdWhitelist, 0, newList, 0, N);
+            newList[N] = UserHandle.getAppId(uid);
+            mBackgroundAppIdWhitelist = newList;
         }
     }
 
