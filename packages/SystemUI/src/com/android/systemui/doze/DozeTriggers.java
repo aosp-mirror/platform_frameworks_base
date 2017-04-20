@@ -119,6 +119,7 @@ public class DozeTriggers implements DozeMachine.Part {
         DozeMachine.State state = mMachine.getState();
         if (near && state == DozeMachine.State.DOZE_PULSING) {
             if (DEBUG) Log.i(TAG, "Prox NEAR, ending pulse");
+            DozeLog.tracePulseCanceledByProx(mContext);
             mMachine.requestState(DozeMachine.State.DOZE_PULSE_DONE);
         }
         if (far && state == DozeMachine.State.DOZE_AOD_PAUSED) {
@@ -181,6 +182,10 @@ public class DozeTriggers implements DozeMachine.Part {
         Assert.isMainThread();
         mDozeHost.extendPulse();
         if (mPulsePending || !mAllowPulseTriggers || !canPulse()) {
+            if (mAllowPulseTriggers) {
+                DozeLog.tracePulseDropped(mContext, mPulsePending, mMachine.getState(),
+                        mDozeHost.isPulsingBlocked());
+            }
             return;
         }
 
@@ -204,6 +209,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 }
                 // avoid pulsing in pockets
                 if (result == RESULT_NEAR) {
+                    mPulsePending = false;
                     return;
                 }
 
@@ -221,6 +227,8 @@ public class DozeTriggers implements DozeMachine.Part {
     private void continuePulseRequest(int reason) {
         mPulsePending = false;
         if (mDozeHost.isPulsingBlocked() || !canPulse()) {
+            DozeLog.tracePulseDropped(mContext, mPulsePending, mMachine.getState(),
+                    mDozeHost.isPulsingBlocked());
             return;
         }
         mMachine.requestState(DozeMachine.State.DOZE_REQUEST_PULSE);
