@@ -114,7 +114,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 154 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 155 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -565,9 +565,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private int mEstimatedBatteryCapacity = -1;
 
-    // Last learned capacity reported by BatteryService in
-    // setBatteryState().
-    private int mLastChargeFullUAh = 0;
+    private int mMinLearnedBatteryCapacity = -1;
+    private int mMaxLearnedBatteryCapacity = -1;
 
     private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
 
@@ -603,6 +602,16 @@ public class BatteryStatsImpl extends BatteryStats {
     @Override
     public int getEstimatedBatteryCapacity() {
         return mEstimatedBatteryCapacity;
+    }
+
+    @Override
+    public int getMinLearnedBatteryCapacity() {
+        return mMinLearnedBatteryCapacity;
+    }
+
+    @Override
+    public int getMaxLearnedBatteryCapacity() {
+        return mMaxLearnedBatteryCapacity;
     }
 
     public BatteryStatsImpl() {
@@ -8832,6 +8841,8 @@ public class BatteryStatsImpl extends BatteryStats {
         } else {
             mEstimatedBatteryCapacity = -1;
         }
+        mMinLearnedBatteryCapacity = -1;
+        mMaxLearnedBatteryCapacity = -1;
         mInteractiveTimer.reset(false);
         mPowerSaveModeEnabledTimer.reset(false);
         mLastIdleTimeStart = elapsedRealtimeMillis;
@@ -10193,15 +10204,12 @@ public class BatteryStatsImpl extends BatteryStats {
             mRecordingHistory = DEBUG;
         }
 
-        if (differsByMoreThan(chargeFullUAh, mLastChargeFullUAh, 100)) {
-            mLastChargeFullUAh = chargeFullUAh;
-            addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ESTIMATED_BATTERY_CAP,
-                    "", chargeFullUAh / 1000);
+        if (mMinLearnedBatteryCapacity == -1) {
+            mMinLearnedBatteryCapacity = chargeFullUAh;
+        } else {
+            Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
         }
-    }
-
-    private static boolean differsByMoreThan(int left, int right, int diff) {
-        return Math.abs(left - right) > diff;
+        mMaxLearnedBatteryCapacity = Math.max(mMaxLearnedBatteryCapacity, chargeFullUAh);
     }
 
     public long getAwakeTimeBattery() {
@@ -10814,6 +10822,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeCurrentLevel = in.readInt();
         mCurrentBatteryLevel = in.readInt();
         mEstimatedBatteryCapacity = in.readInt();
+        mMinLearnedBatteryCapacity = in.readInt();
+        mMaxLearnedBatteryCapacity = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOnSinceCharge = in.readInt();
@@ -11189,6 +11199,8 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(mCurrentBatteryLevel);
         out.writeInt(mEstimatedBatteryCapacity);
+        out.writeInt(mMinLearnedBatteryCapacity);
+        out.writeInt(mMaxLearnedBatteryCapacity);
         out.writeInt(getLowDischargeAmountSinceCharge());
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
@@ -11581,6 +11593,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mRealtimeStart = in.readLong();
         mOnBattery = in.readInt() != 0;
         mEstimatedBatteryCapacity = in.readInt();
+        mMinLearnedBatteryCapacity = in.readInt();
+        mMaxLearnedBatteryCapacity = in.readInt();
         mOnBatteryInternal = false; // we are no longer really running.
         mOnBatteryTimeBase.readFromParcel(in);
         mOnBatteryScreenOffTimeBase.readFromParcel(in);
@@ -11775,6 +11789,8 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mRealtimeStart);
         out.writeInt(mOnBattery ? 1 : 0);
         out.writeInt(mEstimatedBatteryCapacity);
+        out.writeInt(mMinLearnedBatteryCapacity);
+        out.writeInt(mMaxLearnedBatteryCapacity);
         mOnBatteryTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
         mOnBatteryScreenOffTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
 

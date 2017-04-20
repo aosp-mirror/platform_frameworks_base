@@ -1365,8 +1365,6 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_WAKEUP_AP = 0x0013;
         // Event for reporting that a specific partial wake lock has been held for a long duration.
         public static final int EVENT_LONG_WAKE_LOCK = 0x0014;
-        // Event reporting the new estimated (learned) capacity of the battery in mAh.
-        public static final int EVENT_ESTIMATED_BATTERY_CAP = 0x0015;
 
         // Number of event types.
         public static final int EVENT_COUNT = 0x0016;
@@ -2501,6 +2499,16 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getEstimatedBatteryCapacity();
 
     /**
+     * @return The minimum learned battery capacity in uAh.
+     */
+    public abstract int getMinLearnedBatteryCapacity();
+
+    /**
+     * @return The maximum learned battery capacity in uAh.
+     */
+    public abstract int getMaxLearnedBatteryCapacity() ;
+
+    /**
      * Return the array of discharge step durations.
      */
     public abstract LevelStepTracker getDischargeLevelStepTracker();
@@ -2990,13 +2998,14 @@ public abstract class BatteryStats implements Parcelable {
         final String category = STAT_NAMES[which];
 
         // Dump "battery" stat
-        dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, 
+        dumpLine(pw, 0 /* uid */, category, BATTERY_DATA,
                 which == STATS_SINCE_CHARGED ? getStartCount() : "N/A",
                 whichBatteryRealtime / 1000, whichBatteryUptime / 1000,
                 totalRealtime / 1000, totalUptime / 1000,
                 getStartClockTime(),
                 whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000,
-                getEstimatedBatteryCapacity());
+                getEstimatedBatteryCapacity(),
+                getMinLearnedBatteryCapacity(), getMaxLearnedBatteryCapacity());
 
         
         // Calculate wakelock times across all uids.
@@ -3579,6 +3588,25 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(prefix);
                 sb.append("  Estimated battery capacity: ");
                 sb.append(BatteryStatsHelper.makemAh(estimatedBatteryCapacity));
+                sb.append(" mAh");
+            pw.println(sb.toString());
+        }
+
+        final int minLearnedBatteryCapacity = getMinLearnedBatteryCapacity();
+        if (minLearnedBatteryCapacity > 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                sb.append("  Min learned battery capacity: ");
+                sb.append(BatteryStatsHelper.makemAh(minLearnedBatteryCapacity / 1000));
+                sb.append(" mAh");
+            pw.println(sb.toString());
+        }
+        final int maxLearnedBatteryCapacity = getMaxLearnedBatteryCapacity();
+        if (maxLearnedBatteryCapacity > 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                sb.append("  Max learned battery capacity: ");
+                sb.append(BatteryStatsHelper.makemAh(maxLearnedBatteryCapacity / 1000));
                 sb.append(" mAh");
             pw.println(sb.toString());
         }
