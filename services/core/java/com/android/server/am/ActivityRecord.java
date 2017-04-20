@@ -2130,6 +2130,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (mWindowContainerController == null) {
             return;
         }
+        if (mTaskOverlay) {
+            // We don't show starting window for overlay activities.
+            return;
+        }
+
         final CompatibilityInfo compatInfo =
                 service.compatibilityInfoForPackageLocked(info.applicationInfo);
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
