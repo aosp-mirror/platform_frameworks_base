@@ -17,6 +17,7 @@
 package com.android.internal.content;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -150,14 +151,17 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         return childId;
     }
 
-    private void addFolderToMediaStore(File visibleFolder) {
-        assert(visibleFolder.isDirectory());
+    private void addFolderToMediaStore(@Nullable File visibleFolder) {
+        // visibleFolder is null if we're adding a folder to external thumb drive or SD card.
+        if (visibleFolder != null) {
+            assert (visibleFolder.isDirectory());
 
-        final ContentResolver resolver = getContext().getContentResolver();
-        final Uri uri = MediaStore.Files.getDirectoryUri("external");
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Files.FileColumns.DATA, visibleFolder.getAbsolutePath());
-        resolver.insert(uri, values);
+            final ContentResolver resolver = getContext().getContentResolver();
+            final Uri uri = MediaStore.Files.getDirectoryUri("external");
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Files.FileColumns.DATA, visibleFolder.getAbsolutePath());
+            resolver.insert(uri, values);
+        }
     }
 
     @Override
@@ -204,8 +208,12 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         return docId;
     }
 
-    private void moveInMediaStore(File oldVisibleFile, File newVisibleFile) {
-        if (newVisibleFile != null) {
+    private void moveInMediaStore(@Nullable File oldVisibleFile, @Nullable File newVisibleFile) {
+        // visibleFolders are null if we're moving a document in external thumb drive or SD card.
+        //
+        // They should be all null or not null at the same time. File#renameTo() doesn't work across
+        // volumes so an exception will be thrown before calling this method.
+        if (oldVisibleFile != null && newVisibleFile != null) {
             final ContentResolver resolver = getContext().getContentResolver();
             final Uri externalUri = newVisibleFile.isDirectory()
                     ? MediaStore.Files.getDirectoryUri("external")
@@ -241,8 +249,9 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         removeFromMediaStore(visibleFile, isDirectory);
     }
 
-    private void removeFromMediaStore(File visibleFile, boolean isFolder)
+    private void removeFromMediaStore(@Nullable File visibleFile, boolean isFolder)
             throws FileNotFoundException {
+        // visibleFolder is null if we're removing a document from external thumb drive or SD card.
         if (visibleFile != null) {
             final ContentResolver resolver = getContext().getContentResolver();
             final Uri externalUri = MediaStore.Files.getContentUri("external");
