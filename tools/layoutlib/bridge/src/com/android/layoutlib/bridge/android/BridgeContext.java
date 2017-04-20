@@ -1614,7 +1614,7 @@ public class BridgeContext extends Context {
     }
 
     @Override
-    public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1, boolean arg2) {
+    public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1, int arg2) {
         // pass
         return null;
     }
@@ -1628,7 +1628,7 @@ public class BridgeContext extends Context {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1,
-            String arg2, Handler arg3, boolean arg4) {
+            String arg2, Handler arg3, int arg4) {
         // pass
         return null;
     }
