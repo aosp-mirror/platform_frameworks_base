@@ -290,6 +290,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // current setting - 4 hours
     private static final long MAX_RETRY_INTERVAL = 4*60*60*1000;
 
+    // Timeout when holding wakelocks for downloading XTRA data.
+    private static final long DOWNLOAD_XTRA_DATA_TIMEOUT_MS = 60 * 1000;
+
     private BackOff mNtpBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
     private BackOff mXtraBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
 
@@ -992,7 +995,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mDownloadXtraDataPending = STATE_DOWNLOADING;
 
         // hold wake lock while task runs
-        mWakeLock.acquire();
+        mWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
         Log.i(TAG, "WakeLock acquired by handleDownloadXtraData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
@@ -1015,7 +1018,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 }
 
                 // release wake lock held by task
-                mWakeLock.release();
+                if (mWakeLock.isHeld()) {
+                    mWakeLock.release();
+                } else {
+                    Log.e(TAG, "WakeLock expired before release in handleDownloadXtraData()");
+                }
                 Log.i(TAG, "WakeLock released by handleDownloadXtraData()");
             }
         });
