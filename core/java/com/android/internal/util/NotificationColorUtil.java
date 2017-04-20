@@ -460,13 +460,25 @@ public class NotificationColorUtil {
         if (backgroundColor == Notification.COLOR_DEFAULT) {
             return context.getColor(com.android.internal.R.color.notification_action_list);
         }
-        boolean useDark = shouldUseDark(backgroundColor);
+        return getShiftedColor(backgroundColor, 7);
+    }
+
+    /**
+     * Get a color that stays in the same tint, but darkens or lightens it by a certain
+     * amount.
+     * This also looks at the lightness of the provided color and shifts it appropriately.
+     *
+     * @param color the base color to use
+     * @param amount the amount from 1 to 100 how much to modify the color
+     * @return the now color that was modified
+     */
+    public static int getShiftedColor(int color, int amount) {
         final double[] result = ColorUtilsFromCompat.getTempDouble3Array();
-        ColorUtilsFromCompat.colorToLAB(backgroundColor, result);
-        if (useDark && result[0] < 97 || !useDark && result[0] < 4) {
-            result[0] = Math.min(100, result[0] + 7);
+        ColorUtilsFromCompat.colorToLAB(color, result);
+        if (result[0] >= 4) {
+            result[0] = Math.max(0, result[0] - amount);
         } else {
-            result[0] = Math.max(0, result[0] - 7);
+            result[0] = Math.min(100, result[0] + amount);
         }
         return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
     }

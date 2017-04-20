@@ -83,7 +83,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     /**
      * How much faster we collapse the lockscreen when authenticating with fingerprint.
      */
-    private static final float FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR = 1.3f;
+    private static final float FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR = 1.1f;
 
     private PowerManager mPowerManager;
     private Handler mHandler = new Handler();
