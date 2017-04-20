@@ -181,7 +181,23 @@ public final class AdvertisingSet {
     }
 
     /**
-     * Returns advertiserId associated with thsi advertising set.
+     * Returns address associated with this advertising set.
+     * This method is exposed only for Bluetooth PTS tests, no app or system service
+     * should ever use it.
+     *
+     * This method requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission.
+     * @hide
+     */
+    public void getOwnAddress(){
+        try {
+            gatt.getOwnAddress(this.advertiserId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "remote exception - ", e);
+        }
+    }
+
+    /**
+     * Returns advertiserId associated with this advertising set.
      *
      * @hide
      */
