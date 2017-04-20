@@ -92,7 +92,7 @@ public class WebViewUpdateService extends SystemService {
                                     (intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)
                                      ? PACKAGE_ADDED_REPLACED : PACKAGE_ADDED), userId);
                             break;
-                        case Intent.ACTION_USER_ADDED:
+                        case Intent.ACTION_USER_STARTED:
                             mImpl.handleNewUser(userId);
                             break;
                         case Intent.ACTION_USER_REMOVED:
@@ -115,7 +115,7 @@ public class WebViewUpdateService extends SystemService {
                 null /* broadcast permission */, null /* handler */);
 
         IntentFilter userAddedFilter = new IntentFilter();
-        userAddedFilter.addAction(Intent.ACTION_USER_ADDED);
+        userAddedFilter.addAction(Intent.ACTION_USER_STARTED);
         userAddedFilter.addAction(Intent.ACTION_USER_REMOVED);
         getContext().registerReceiverAsUser(mWebViewUpdatedReceiver, UserHandle.ALL,
                 userAddedFilter, null /* broadcast permission */, null /* handler */);
