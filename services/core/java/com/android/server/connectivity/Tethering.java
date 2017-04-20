@@ -623,9 +623,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private void sendTetherStateChangedBroadcast() {
         if (!getConnectivityManager().isTetheringSupported()) return;
 
-        ArrayList<String> availableList = new ArrayList<String>();
-        ArrayList<String> activeList = new ArrayList<String>();
-        ArrayList<String> erroredList = new ArrayList<String>();
+        final ArrayList<String> availableList = new ArrayList<>();
+        final ArrayList<String> tetherList = new ArrayList<>();
+        final ArrayList<String> localOnlyList = new ArrayList<>();
+        final ArrayList<String> erroredList = new ArrayList<>();
 
         boolean wifiTethered = false;
         boolean usbTethered = false;
@@ -641,6 +642,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     erroredList.add(iface);
                 } else if (tetherState.lastState == IControlsTethering.STATE_AVAILABLE) {
                     availableList.add(iface);
+                } else if (tetherState.lastState == IControlsTethering.STATE_LOCAL_HOTSPOT) {
+                    localOnlyList.add(iface);
                 } else if (tetherState.lastState == IControlsTethering.STATE_TETHERED) {
                     if (cfg.isUsb(iface)) {
                         usbTethered = true;
@@ -649,25 +652,25 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     } else if (cfg.isBluetooth(iface)) {
                         bluetoothTethered = true;
                     }
-                    activeList.add(iface);
+                    tetherList.add(iface);
                 }
             }
         }
-        Intent broadcast = new Intent(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
-        broadcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
+        final Intent bcast = new Intent(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
+        bcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        broadcast.putStringArrayListExtra(ConnectivityManager.EXTRA_AVAILABLE_TETHER,
-                availableList);
-        broadcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ACTIVE_TETHER, activeList);
-        broadcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ERRORED_TETHER,
-                erroredList);
-        mContext.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
+        bcast.putStringArrayListExtra(ConnectivityManager.EXTRA_AVAILABLE_TETHER, availableList);
+        bcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ACTIVE_LOCAL_ONLY, localOnlyList);
+        bcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ACTIVE_TETHER, tetherList);
+        bcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ERRORED_TETHER, erroredList);
+        mContext.sendStickyBroadcastAsUser(bcast, UserHandle.ALL);
         if (DBG) {
             Log.d(TAG, String.format(
-                    "sendTetherStateChangedBroadcast avail=[%s] active=[%s] error=[%s]",
-                    TextUtils.join(",", availableList),
-                    TextUtils.join(",", activeList),
-                    TextUtils.join(",", erroredList)));
+                    "sendTetherStateChangedBroadcast %s=[%s] %s=[%s] %s=[%s] %s=[%s]",
+                    "avail", TextUtils.join(",", availableList),
+                    "local_only", TextUtils.join(",", localOnlyList),
+                    "tether", TextUtils.join(",", tetherList),
+                    "error", TextUtils.join(",", erroredList)));
         }
 
         if (usbTethered) {
@@ -1338,7 +1341,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             mForwardedDownstreams.remove(who);
         }
 
-        class InitialState extends TetherMasterUtilState {
+        class InitialState extends State {
             @Override
             public boolean processMessage(Message message) {
                 maybeLogMessage(this, message.what);
@@ -1516,7 +1519,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
 
         class ErrorState extends State {
-            int mErrorNotification;
+            private int mErrorNotification;
+
             @Override
             public boolean processMessage(Message message) {
                 boolean retValue = true;
@@ -1534,6 +1538,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 }
                 return retValue;
             }
+
             void notify(int msgType) {
                 mErrorNotification = msgType;
                 for (TetherInterfaceStateMachine sm : mNotifyList) {
@@ -1542,6 +1547,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
 
         }
+
         class SetIpForwardingEnabledErrorState extends ErrorState {
             @Override
             public void enter() {
