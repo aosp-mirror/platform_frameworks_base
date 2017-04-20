@@ -1148,6 +1148,11 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Set the reason for installing this package. Currently,
+         * {@code PackageManager#INSTALL_REASON_UNKNOWN} and
+         * {@code PackageManager#INSTALL_REASON_POLICY} are defined.
+         */
         public void setInstallReason(int installReason) {
             this.installReason = installReason;
         }
@@ -1325,6 +1330,10 @@ public class PackageInstaller {
 
         /**
          * Return the reason for installing this package.
+         *
+         * @return The install reason, currently one of
+         *         {@code PackageManager#INSTALL_REASON_UNKNOWN} and
+         *         {@code PackageManager#INSTALL_REASON_POLICY}.
          *
          * @see PackageManager#INSTALL_REASON_UNKNOWN
          */
