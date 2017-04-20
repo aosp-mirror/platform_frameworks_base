@@ -161,7 +161,7 @@ public final class SystemServer {
     private static final String PRINT_MANAGER_SERVICE_CLASS =
             "com.android.server.print.PrintManagerService";
     private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
-            "com.android.server.print.CompanionDeviceManagerService";
+            "com.android.server.companion.CompanionDeviceManagerService";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =

@@ -27,6 +27,7 @@ services := \
     appwidget \
     autofill \
     backup \
+    companion \
     coverage\
     devicepolicy \
     midi \
