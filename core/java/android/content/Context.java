@@ -3727,7 +3727,7 @@ public abstract class Context {
      * @see #getSystemService
      * @see android.companion.CompanionDeviceManager
      */
-    public static final String COMPANION_DEVICE_SERVICE = "companion_device";
+    public static final String COMPANION_DEVICE_SERVICE = "companiondevice";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
