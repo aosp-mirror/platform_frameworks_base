@@ -22,7 +22,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 
-// #include "activity_recognition.h"
+// #include <hardware/activity_recognition.h>
 // The activity recognition HAL is being deprecated. This means -
 //    i) Android framework code shall not depend on activity recognition
 //       being provided through the activity_recognition.h interface.

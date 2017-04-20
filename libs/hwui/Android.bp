@@ -237,6 +237,7 @@ cc_defaults {
     },
 
     export_include_dirs: ["."],
+    export_shared_lib_headers: ["libRScpp"],
 }
 
 cc_library {
@@ -258,7 +259,6 @@ cc_library_static {
     srcs: [
         "debug/nullegl.cpp",
     ],
-    export_include_dirs: ["."],
 }
 
 cc_defaults {

@@ -28,7 +28,6 @@
 #include <utils/Log.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
-#include <audio_utils/primitives.h>
 
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
