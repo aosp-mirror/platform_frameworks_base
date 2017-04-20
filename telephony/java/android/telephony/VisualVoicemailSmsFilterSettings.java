@@ -38,7 +38,7 @@ import java.util.List;
  * <p>Use {@link android.telephony.VisualVoicemailSmsFilterSettings.Builder} to construct this
  * class.
  *
- * @see VisualVoicemailService#setSmsFilterSettings(Context, PhoneAccountHandle, VisualVoicemailSmsFilterSettings)
+ * @see TelephonyManager#setVisualVoicemailSmsFilterSettings(VisualVoicemailSmsFilterSettings)
  */
 public final class VisualVoicemailSmsFilterSettings implements Parcelable {
 
