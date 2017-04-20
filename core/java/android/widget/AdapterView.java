@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1282,5 +1283,25 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         encoder.addProperty("list:nextSelectedRowId", mNextSelectedRowId);
         encoder.addProperty("list:selectedPosition", mSelectedPosition);
         encoder.addProperty("list:itemCount", mItemCount);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>It also sets the autofill options in the structure; when overridden, it should set it as
+     * well, either explicitly by calling {@link ViewStructure#setAutofillOptions(CharSequence[])}
+     * or implicitly by calling {@code super.onProvideAutofillStructure(structure, flags)}.
+     */
+    @Override
+    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutofillStructure(structure, flags);
+
+        final Adapter adapter = getAdapter();
+        if (adapter == null) return;
+
+        final CharSequence[] options = adapter.getAutofillOptions();
+        if (options != null) {
+            structure.setAutofillOptions(options);
+        }
     }
 }

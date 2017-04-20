@@ -595,7 +595,7 @@ public class AssistStructure implements Parcelable {
         @View.AutofillType int mAutofillType;
         @Nullable String[] mAutofillHints;
         AutofillValue mAutofillValue;
-        String[] mAutofillOptions;
+        CharSequence[] mAutofillOptions;
         boolean mSanitized;
         HtmlInfo mHtmlInfo;
 
@@ -689,7 +689,7 @@ public class AssistStructure implements Parcelable {
                 mAutofillType = in.readInt();
                 mAutofillHints = in.readStringArray();
                 mAutofillValue = in.readParcelable(null);
-                mAutofillOptions = in.readStringArray();
+                mAutofillOptions = in.readCharSequenceArray();
                 final Parcelable p = in.readParcelable(null);
                 if (p instanceof HtmlInfo) {
                     mHtmlInfo = (HtmlInfo) p;
@@ -850,7 +850,7 @@ public class AssistStructure implements Parcelable {
                     sanitizedValue = null;
                 }
                 out.writeParcelable(sanitizedValue,  0);
-                out.writeStringArray(mAutofillOptions);
+                out.writeCharSequenceArray(mAutofillOptions);
                 if (mHtmlInfo instanceof Parcelable) {
                     out.writeParcelable((Parcelable) mHtmlInfo, 0);
                 } else {
@@ -1002,7 +1002,7 @@ public class AssistStructure implements Parcelable {
          * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
          * for assist.
          */
-        public String[] getAutofillOptions() {
+        public CharSequence[] getAutofillOptions() {
             return mAutofillOptions;
         }
 
@@ -1694,7 +1694,7 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setAutofillOptions(String[] options) {
+        public void setAutofillOptions(CharSequence[] options) {
             mNode.mAutofillOptions = options;
         }
 

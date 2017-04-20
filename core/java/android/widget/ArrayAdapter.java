@@ -83,6 +83,11 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
     private List<T> mObjects;
 
     /**
+     * Indicates whether the contents of {@link #mObjects} came from static resources.
+     */
+    private boolean mObjectsFromResources;
+
+    /**
      * If the inflated resource is not a TextView, {@code mFieldId} is used to find
      * a TextView inside the inflated views hierarchy. This field must contain the
      * identifier that matches the one defined in the resource file.
@@ -177,10 +182,16 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
      */
     public ArrayAdapter(@NonNull Context context, @LayoutRes int resource,
             @IdRes int textViewResourceId, @NonNull List<T> objects) {
+        this(context, resource, textViewResourceId, objects, false);
+    }
+
+    private ArrayAdapter(@NonNull Context context, @LayoutRes int resource,
+            @IdRes int textViewResourceId, @NonNull List<T> objects, boolean objsFromResources) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mResource = mDropDownResource = resource;
         mObjects = objects;
+        mObjectsFromResources = objsFromResources;
         mFieldId = textViewResourceId;
     }
 
@@ -196,6 +207,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
             } else {
                 mObjects.add(object);
             }
+            mObjectsFromResources = false;
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -221,6 +233,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
             } else {
                 mObjects.addAll(collection);
             }
+            mObjectsFromResources = false;
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -237,6 +250,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
             } else {
                 Collections.addAll(mObjects, items);
             }
+            mObjectsFromResources = false;
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -254,6 +268,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
             } else {
                 mObjects.add(index, object);
             }
+            mObjectsFromResources = false;
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -270,6 +285,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
             } else {
                 mObjects.remove(object);
             }
+            mObjectsFromResources = false;
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -284,6 +300,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
             } else {
                 mObjects.clear();
             }
+            mObjectsFromResources = false;
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
@@ -470,7 +487,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
     public static @NonNull ArrayAdapter<CharSequence> createFromResource(@NonNull Context context,
             @ArrayRes int textArrayResId, @LayoutRes int textViewResId) {
         final CharSequence[] strings = context.getResources().getTextArray(textArrayResId);
-        return new ArrayAdapter<>(context, textViewResId, strings);
+        return new ArrayAdapter<>(context, textViewResId, 0, Arrays.asList(strings), true);
     }
 
     @Override
@@ -479,6 +496,24 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
             mFilter = new ArrayFilter();
         }
         return mFilter;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return values from the string array used by {@link #createFromResource(Context, int, int)},
+     * or {@code null} if object was created otherwsie or if contents were dynamically changed after
+     * creation.
+     */
+    @Override
+    public CharSequence[] getAutofillOptions() {
+        if (!mObjectsFromResources || mObjects == null || mObjects.isEmpty()) {
+            return null;
+        }
+        final int size = mObjects.size();
+        final CharSequence[] options = new CharSequence[size];
+        mObjects.toArray(options);
+        return options;
     }
 
     /**
