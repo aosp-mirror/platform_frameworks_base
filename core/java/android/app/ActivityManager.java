@@ -855,7 +855,11 @@ public class ActivityManager {
         /**
          * Returns true if activities contained in this stack can request visible behind by
          * calling {@link Activity#requestVisibleBehind}.
+         *
+         * @deprecated This method's functionality is no longer supported as of
+         * {@link android.os.Build.VERSION_CODES#O} and will be removed in a future release.
          */
+        @Deprecated
         public static boolean activitiesCanRequestVisibleBehind(int stackId) {
             return stackId == FULLSCREEN_WORKSPACE_STACK_ID ||
                     stackId == ASSISTANT_STACK_ID;
