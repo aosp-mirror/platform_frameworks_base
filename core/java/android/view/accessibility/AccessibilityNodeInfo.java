@@ -695,7 +695,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private boolean mSealed;
 
     // Data.
-    private int mWindowId = UNDEFINED_ITEM_ID;
+    private int mWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
     private long mSourceNodeId = UNDEFINED_NODE_ID;
     private long mParentNodeId = UNDEFINED_NODE_ID;
     private long mLabelForId = UNDEFINED_NODE_ID;
@@ -2417,12 +2417,12 @@ public class AccessibilityNodeInfo implements Parcelable {
             AccessibilityClickableSpan[] clickableSpans =
                     spanned.getSpans(0, mText.length(), AccessibilityClickableSpan.class);
             for (int i = 0; i < clickableSpans.length; i++) {
-                clickableSpans[i].setAccessibilityNodeInfo(this);
+                clickableSpans[i].copyConnectionDataFrom(this);
             }
             AccessibilityURLSpan[] urlSpans =
                     spanned.getSpans(0, mText.length(), AccessibilityURLSpan.class);
             for (int i = 0; i < urlSpans.length; i++) {
-                urlSpans[i].setAccessibilityNodeInfo(this);
+                urlSpans[i].copyConnectionDataFrom(this);
             }
         }
         return mText;
@@ -2838,6 +2838,17 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setConnectionId(int connectionId) {
         enforceNotSealed();
         mConnectionId = connectionId;
+    }
+
+    /**
+     * Get the connection ID.
+     *
+     * @return The connection id
+     *
+     * @hide
+     */
+    public int getConnectionId() {
+        return mConnectionId;
     }
 
     /**
@@ -3354,7 +3365,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLabeledById = UNDEFINED_NODE_ID;
         mTraversalBefore = UNDEFINED_NODE_ID;
         mTraversalAfter = UNDEFINED_NODE_ID;
-        mWindowId = UNDEFINED_ITEM_ID;
+        mWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         mConnectionId = UNDEFINED_CONNECTION_ID;
         mMaxTextLength = -1;
         mMovementGranularities = 0;
@@ -3517,9 +3528,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     private boolean canPerformRequestOverConnection(long accessibilityNodeId) {
-        return (mWindowId != UNDEFINED_ITEM_ID
-                && getAccessibilityViewId(accessibilityNodeId) != UNDEFINED_ITEM_ID
-                && mConnectionId != UNDEFINED_CONNECTION_ID);
+        return ((mWindowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
+                && (getAccessibilityViewId(accessibilityNodeId) != UNDEFINED_ITEM_ID)
+                && (mConnectionId != UNDEFINED_CONNECTION_ID));
     }
 
     @Override

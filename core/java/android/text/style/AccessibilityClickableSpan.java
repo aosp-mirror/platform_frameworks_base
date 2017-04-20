@@ -16,6 +16,9 @@
 package android.text.style;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN;
+import static android.view.accessibility.AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID;
+import static android.view.accessibility.AccessibilityNodeInfo.UNDEFINED_NODE_ID;
+import static android.view.accessibility.AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
 
 import android.os.Bundle;
 import android.os.Parcel;
@@ -24,12 +27,10 @@ import android.text.ParcelableSpan;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.R;
-
-import java.lang.ref.WeakReference;
-
 
 /**
  * {@link ClickableSpan} cannot be parceled, but accessibility services need to be able to cause
@@ -47,10 +48,9 @@ public class AccessibilityClickableSpan extends ClickableSpan
     // The id of the span this one replaces
     private final int mOriginalClickableSpanId;
 
-    // Only retain a weak reference to the node to avoid referencing cycles that could create memory
-    // leaks.
-    private WeakReference<AccessibilityNodeInfo> mAccessibilityNodeInfoRef;
-
+    private int mWindowId = UNDEFINED_WINDOW_ID;
+    private long mSourceNodeId = UNDEFINED_NODE_ID;
+    private int mConnectionId = UNDEFINED_CONNECTION_ID;
 
     /**
      * @param originalClickableSpanId The id of the span this one replaces
@@ -110,13 +110,15 @@ public class AccessibilityClickableSpan extends ClickableSpan
     }
 
     /**
-     * Set the accessibilityNodeInfo that this placeholder belongs to. This node is not
-     * included in the parceling logic, and must be set to allow the onClick handler to function.
+     * Configure this object to perform clicks on the view that contains the original span.
      *
-     * @param accessibilityNodeInfo The info this span is part of
+     * @param accessibilityNodeInfo The info corresponding to the view containing the original
+     *                              span.
      */
-    public void setAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo) {
-        mAccessibilityNodeInfoRef = new WeakReference<>(accessibilityNodeInfo);
+    public void copyConnectionDataFrom(AccessibilityNodeInfo accessibilityNodeInfo) {
+        mConnectionId = accessibilityNodeInfo.getConnectionId();
+        mWindowId = accessibilityNodeInfo.getWindowId();
+        mSourceNodeId = accessibilityNodeInfo.getSourceNodeId();
     }
 
     /**
@@ -128,17 +130,18 @@ public class AccessibilityClickableSpan extends ClickableSpan
      */
     @Override
     public void onClick(View unused) {
-        if (mAccessibilityNodeInfoRef == null) {
-            return;
-        }
-        AccessibilityNodeInfo info = mAccessibilityNodeInfoRef.get();
-        if (info == null) {
-            return;
-        }
         Bundle arguments = new Bundle();
         arguments.putParcelable(ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN, this);
 
-        info.performAction(R.id.accessibilityActionClickOnClickableSpan, arguments);
+        if ((mWindowId == UNDEFINED_WINDOW_ID) || (mSourceNodeId == UNDEFINED_NODE_ID)
+                || (mConnectionId == UNDEFINED_CONNECTION_ID)) {
+            throw new RuntimeException(
+                    "ClickableSpan for accessibility service not properly initialized");
+        }
+
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        client.performAccessibilityAction(mConnectionId, mWindowId, mSourceNodeId,
+                R.id.accessibilityActionClickOnClickableSpan, arguments);
     }
 
     public static final Parcelable.Creator<AccessibilityClickableSpan> CREATOR =
