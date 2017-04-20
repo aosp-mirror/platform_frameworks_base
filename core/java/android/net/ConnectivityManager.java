@@ -48,7 +48,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
@@ -2743,46 +2742,46 @@ public class ConnectivityManager {
             NetworkRequest request = getObject(message, NetworkRequest.class);
             Network network = getObject(message, Network.class);
             if (DBG) {
-                Log.d(TAG, whatToString(message.what) + " for network " + network);
+                Log.d(TAG, getCallbackName(message.what) + " for network " + network);
             }
             switch (message.what) {
                 case CALLBACK_PRECHECK: {
-                    NetworkCallback callback = getCallback(request, "PRECHECK");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         callback.onPreCheck(network);
                     }
                     break;
                 }
                 case CALLBACK_AVAILABLE: {
-                    NetworkCallback callback = getCallback(request, "AVAILABLE");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         callback.onAvailable(network);
                     }
                     break;
                 }
                 case CALLBACK_LOSING: {
-                    NetworkCallback callback = getCallback(request, "LOSING");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         callback.onLosing(network, message.arg1);
                     }
                     break;
                 }
                 case CALLBACK_LOST: {
-                    NetworkCallback callback = getCallback(request, "LOST");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         callback.onLost(network);
                     }
                     break;
                 }
                 case CALLBACK_UNAVAIL: {
-                    NetworkCallback callback = getCallback(request, "UNAVAIL");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         callback.onUnavailable();
                     }
                     break;
                 }
                 case CALLBACK_CAP_CHANGED: {
-                    NetworkCallback callback = getCallback(request, "CAP_CHANGED");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         NetworkCapabilities cap = getObject(message, NetworkCapabilities.class);
                         callback.onCapabilitiesChanged(network, cap);
@@ -2790,7 +2789,7 @@ public class ConnectivityManager {
                     break;
                 }
                 case CALLBACK_IP_CHANGED: {
-                    NetworkCallback callback = getCallback(request, "IP_CHANGED");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         LinkProperties lp = getObject(message, LinkProperties.class);
                         callback.onLinkPropertiesChanged(network, lp);
@@ -2798,14 +2797,14 @@ public class ConnectivityManager {
                     break;
                 }
                 case CALLBACK_SUSPENDED: {
-                    NetworkCallback callback = getCallback(request, "SUSPENDED");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         callback.onNetworkSuspended(network);
                     }
                     break;
                 }
                 case CALLBACK_RESUMED: {
-                    NetworkCallback callback = getCallback(request, "RESUMED");
+                    NetworkCallback callback = getCallback(message);
                     if (callback != null) {
                         callback.onNetworkResumed(network);
                     }
@@ -2828,13 +2827,14 @@ public class ConnectivityManager {
             return (T) msg.getData().getParcelable(c.getSimpleName());
         }
 
-        private NetworkCallback getCallback(NetworkRequest req, String name) {
+        private NetworkCallback getCallback(Message msg) {
+            final NetworkRequest req = getObject(msg, NetworkRequest.class);
             final NetworkCallback callback;
             synchronized(sCallbacks) {
                 callback = sCallbacks.get(req);
             }
             if (callback == null) {
-                Log.w(TAG, "callback not found for " + name + " message");
+                Log.w(TAG, "callback not found for " + getCallbackName(msg.what) + " message");
             }
             return callback;
         }
@@ -3720,33 +3720,5 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * A holder class for debug info (mapping CALLBACK values to field names). This is stored
-     * in a holder for two reasons:
-     * 1) The reflection necessary to establish the map can't be run at compile-time. Thus, this
-     *    code will make the enclosing class not compile-time initializeable, deferring its
-     *    initialization to zygote startup. This leads to dirty (but shared) memory.
-     *    As this is debug info, use a holder that isn't initialized by default. This way the map
-     *    will be created on demand, while ConnectivityManager can be compile-time initialized.
-     * 2) Static initialization is still preferred for its strong thread safety guarantees without
-     *    requiring a lock.
-     */
-    private static class NoPreloadHolder {
-        public static final SparseArray<String> sMagicDecoderRing = MessageUtils.findMessageNames(
-                new Class[]{ConnectivityManager.class}, new String[]{"CALLBACK_"});
-    }
-
-    static {
-        // When debug is enabled, aggressively initialize the holder by touching the field (which
-        // will guarantee static initialization).
-        if (CallbackHandler.DBG) {
-            Object dummy = NoPreloadHolder.sMagicDecoderRing;
-        }
-    }
-
-    private static final String whatToString(int what) {
-        return NoPreloadHolder.sMagicDecoderRing.get(what, Integer.toString(what));
     }
 }
