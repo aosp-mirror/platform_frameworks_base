@@ -184,7 +184,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         state.dualLabelContentDescription = r.getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
-        state.state = state.value || cb.isTransient ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.state = Tile.STATE_ACTIVE;
     }
 
     @Override
