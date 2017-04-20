@@ -116,6 +116,11 @@ package android.graphics {
 
 package android.hardware {
 
+  public final class HardwareBuffer implements java.lang.AutoCloseable android.os.Parcelable {
+    method public deprecated void destroy();
+    method public deprecated boolean isDestroyed();
+  }
+
   public final class SensorDirectChannel implements java.nio.channels.Channel {
     method public deprecated boolean isValid();
   }
