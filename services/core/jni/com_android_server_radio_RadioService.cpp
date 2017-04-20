@@ -27,6 +27,9 @@
 #include <JNIHelp.h>
 
 namespace android {
+namespace server {
+namespace radio {
+namespace RadioService {
 
 using hardware::Return;
 using hardware::hidl_vec;
@@ -115,26 +118,32 @@ static sp<IBroadcastRadio> getModule(jlong nativeContext) {
     return module;
 }
 
-static jobject openTunerNative(JNIEnv *env, jobject obj, long nativeContext, bool withAudio) {
-    ALOGV("openTunerNative()");
+static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jint moduleId,
+        jobject bandConfig, bool withAudio, jobject callback) {
+    ALOGV("nativeOpenTuner()");
+    if (callback == nullptr) {
+        ALOGE("Callback is empty");
+        return nullptr;
+    }
 
+    // TODO(b/36863239): use moduleId
     auto module = getModule(nativeContext);
     if (module == nullptr) {
         return nullptr;
     }
 
-    jobject tuner = env->NewObject(gTunerClass, gTunerCstor);
+    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback);
     if (tuner == nullptr) {
         ALOGE("Unable to create new tuner object.");
         return nullptr;
     }
 
-    BandConfig bandConfig = {};  // TODO(b/36863239): convert from parameters
-    auto tunerCb = android_server_radio_Tuner_getCallback(env, tuner);
+    BandConfig bandConfigHal = {};  // TODO(b/36863239): convert from bandConfig
+    auto tunerCb = Tuner::getNativeCallback(env, tuner);
     Result halResult;
     sp<ITuner> halTuner = nullptr;
 
-    auto hidlResult = module->openTuner(bandConfig, withAudio, tunerCb,
+    auto hidlResult = module->openTuner(bandConfigHal, withAudio, tunerCb,
             [&](Result result, const sp<ITuner>& tuner) {
                 halResult = result;
                 halTuner = tuner;
@@ -147,20 +156,30 @@ static jobject openTunerNative(JNIEnv *env, jobject obj, long nativeContext, boo
         return nullptr;
     }
 
-    android_server_radio_Tuner_setHalTuner(env, tuner, halTuner);
+    Tuner::setHalTuner(env, tuner, halTuner);
+    ALOGI("Opened tuner %p", halTuner.get());
     return tuner;
 }
 
 static const JNINativeMethod gRadioServiceMethods[] = {
     { "nativeInit", "()J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
-    { "openTunerNative", "(JZ)Lcom/android/server/radio/Tuner;", (void*)openTunerNative },
+    { "nativeOpenTuner", "(JILandroid/hardware/radio/RadioManager$BandConfig;Z"
+            "Landroid/hardware/radio/ITunerCallback;)Lcom/android/server/radio/Tuner;",
+            (void*)nativeOpenTuner },
 };
 
+} // namespace RadioService
+} // namespace radio
+} // namespace server
+
 void register_android_server_radio_RadioService(JNIEnv *env) {
+    using namespace server::radio::RadioService;
+
     auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
     gTunerClass = MakeGlobalRefOrDie(env, tunerClass);
-    gTunerCstor = GetMethodIDOrDie(env, tunerClass, "<init>", "()V");
+    gTunerCstor = GetMethodIDOrDie(env, tunerClass, "<init>",
+            "(Landroid/hardware/radio/ITunerCallback;)V");
 
     auto serviceClass = FindClassOrDie(env, "com/android/server/radio/RadioService");
     gServiceClass = MakeGlobalRefOrDie(env, serviceClass);
@@ -170,4 +189,4 @@ void register_android_server_radio_RadioService(JNIEnv *env) {
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 }
 
-} /* namespace android */
+} // namespace android

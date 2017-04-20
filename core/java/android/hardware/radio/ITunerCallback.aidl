@@ -16,8 +16,10 @@
 
 package android.hardware.radio;
 
-/** @hide */
-parcelable RadioManager.ProgramInfo;
+import android.hardware.radio.RadioManager;
 
-/** @hide */
-parcelable RadioManager.BandConfig;
+/** {@hide} */
+oneway interface ITunerCallback {
+    void onError(int status);
+    void onConfigurationChanged(in RadioManager.BandConfig config);
+}
