@@ -9739,7 +9739,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = NOT_FOCUSABLE, to = "NOT_FOCUSABLE"),
             @ViewDebug.IntToString(from = FOCUSABLE, to = "FOCUSABLE"),
             @ViewDebug.IntToString(from = FOCUSABLE_AUTO, to = "FOCUSABLE_AUTO")
-            })
+            }, category = "focus")
     @Focusable
     public int getFocusable() {
         return (mViewFlags & FOCUSABLE_AUTO) > 0 ? FOCUSABLE_AUTO : mViewFlags & FOCUSABLE;
@@ -9753,7 +9753,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return Whether the view is focusable in touch mode.
      * @attr ref android.R.styleable#View_focusableInTouchMode
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(category = "focus")
     public final boolean isFocusableInTouchMode() {
         return FOCUSABLE_IN_TOUCH_MODE == (mViewFlags & FOCUSABLE_IN_TOUCH_MODE);
     }
@@ -9781,7 +9781,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if this view is a root of a cluster, or false otherwise.
      * @attr ref android.R.styleable#View_keyboardNavigationCluster
      */
-    @ViewDebug.ExportedProperty(category = "keyboardNavigationCluster")
+    @ViewDebug.ExportedProperty(category = "focus")
     public final boolean isKeyboardNavigationCluster() {
         return (mPrivateFlags3 & PFLAG3_CLUSTER) != 0;
     }
@@ -9856,7 +9856,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return {@code true} if this view is the default-focus view, {@code false} otherwise
      * @attr ref android.R.styleable#View_focusedByDefault
      */
-    @ViewDebug.ExportedProperty(category = "focusedByDefault")
+    @ViewDebug.ExportedProperty(category = "focus")
     public final boolean isFocusedByDefault() {
         return (mPrivateFlags3 & PFLAG3_FOCUSED_BY_DEFAULT) != 0;
     }
@@ -9969,7 +9969,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if this View should use a default focus highlight.
      * @attr ref android.R.styleable#View_defaultFocusHighlightEnabled
      */
-    @ViewDebug.ExportedProperty(category = "defaultFocusHighlightEnabled")
+    @ViewDebug.ExportedProperty(category = "focus")
     public final boolean getDefaultFocusHighlightEnabled() {
         return mDefaultFocusHighlightEnabled;
     }
@@ -25792,6 +25792,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // focus
         stream.addProperty("focus:hasFocus", hasFocus());
         stream.addProperty("focus:isFocused", isFocused());
+        stream.addProperty("focus:focusable", getFocusable());
         stream.addProperty("focus:isFocusable", isFocusable());
         stream.addProperty("focus:isFocusableInTouchMode", isFocusableInTouchMode());
 

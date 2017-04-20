@@ -1300,6 +1300,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Check whether this ViewGroup should ignore focus requests for itself and its children.
      */
+    @ViewDebug.ExportedProperty(category = "focus")
     public boolean getTouchscreenBlocksFocus() {
         return (mGroupFlags & FLAG_TOUCHSCREEN_BLOCKS_FOCUS) != 0;
     }
