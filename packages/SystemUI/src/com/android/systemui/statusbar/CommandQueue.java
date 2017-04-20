@@ -171,7 +171,14 @@ public class CommandQueue extends IStatusBar.Stub {
             mDisable1 = state1;
             mDisable2 = state2;
             mHandler.removeMessages(MSG_DISABLE);
-            mHandler.obtainMessage(MSG_DISABLE, state1, state2, animate).sendToTarget();
+            Message msg = mHandler.obtainMessage(MSG_DISABLE, state1, state2, animate);
+            if (Looper.myLooper() == mHandler.getLooper()) {
+                // If its the right looper execute immediately so hides can be handled quickly.
+                mHandler.handleMessage(msg);
+                msg.recycle();
+            } else {
+                msg.sendToTarget();
+            }
         }
     }
 
