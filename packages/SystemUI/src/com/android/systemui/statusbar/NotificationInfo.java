@@ -329,12 +329,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private void updateSecondaryText() {
         final boolean disabled = mSingleNotificationChannel != null &&
                 getSelectedImportance() == IMPORTANCE_NONE;
+        final boolean isDefaultChannel = mSingleNotificationChannel != null &&
+                mSingleNotificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID);
         if (disabled) {
             mChannelDisabledView.setVisibility(View.VISIBLE);
             mNumChannelsView.setVisibility(View.GONE);
         } else {
             mChannelDisabledView.setVisibility(View.GONE);
-            mNumChannelsView.setVisibility(View.VISIBLE);
+            mNumChannelsView.setVisibility(isDefaultChannel ? View.INVISIBLE : View.VISIBLE);
         }
     }
 
