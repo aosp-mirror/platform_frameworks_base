@@ -846,7 +846,7 @@ public class ClipData implements Parcelable {
      * Add a new Item to the overall ClipData container.
      * <p> This method will <em>not</em> update the list of available MIME types in the
      * {@link ClipDescription}. It should be used only when adding items which do not add new
-     * MIME types to this clip. If this is not the case, use {@link #addItem(Item, ContentResolver)}
+     * MIME types to this clip. If this is not the case, use {@link #addItem(ContentResolver, Item)}
      * or call {@link #ClipData(CharSequence, String[], Item)} with a complete list of MIME types.
      * @param item Item to be added.
      */
@@ -857,15 +857,21 @@ public class ClipData implements Parcelable {
         mItems.add(item);
     }
 
+    /** @removed use #addItem(ContentResolver, Item) instead */
+    @Deprecated
+    public void addItem(Item item, ContentResolver resolver) {
+        addItem(resolver, item);
+    }
+
     /**
      * Add a new Item to the overall ClipData container.
      * <p> Unlike {@link #addItem(Item)}, this method will update the list of available MIME types
      * in the {@link ClipDescription}.
-     * @param item Item to be added.
      * @param resolver ContentResolver used to get information about the URI possibly contained in
      * the item.
+     * @param item Item to be added.
      */
-    public void addItem(Item item, ContentResolver resolver) {
+    public void addItem(ContentResolver resolver, Item item) {
         addItem(item);
 
         if (item.getHtmlText() != null) {
