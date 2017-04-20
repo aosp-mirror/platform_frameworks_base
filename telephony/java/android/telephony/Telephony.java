@@ -3008,12 +3008,12 @@ public final class Telephony {
          * Note, however, that using a {@link JobService} does not guarantee timely delivery of
          * updates to the {@link Uri}.
          *
-         * @param subId the subId to receive updates on
+         * @param subscriptionId the subscriptionId to receive updates on
          * @param field the ServiceState field to receive updates on
          * @return the Uri used to observe {@link ServiceState} changes
          */
-        public static Uri getUriForSubIdAndField(int subId, String field) {
-            return CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(subId))
+        public static Uri getUriForSubscriptionIdAndField(int subscriptionId, String field) {
+            return CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(subscriptionId))
                     .appendEncodedPath(field).build();
         }
 
@@ -3027,11 +3027,11 @@ public final class Telephony {
          * Note, however, that using a {@link JobService} does not guarantee timely delivery of
          * updates to the {@link Uri}.
          *
-         * @param subId the subId to receive updates on
+         * @param subscriptionId the subscriptionId to receive updates on
          * @return the Uri used to observe {@link ServiceState} changes
          */
-        public static Uri getUriForSubId(int subId) {
-            return CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(subId)).build();
+        public static Uri getUriForSubscriptionId(int subscriptionId) {
+            return CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(subscriptionId)).build();
         }
 
         /**
