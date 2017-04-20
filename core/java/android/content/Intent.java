@@ -8627,6 +8627,32 @@ public class Intent implements Parcelable, Cloneable {
      *         a single statement.
      * @see #setFlags(int)
      * @see #removeFlags(int)
+     *
+     * @see #FLAG_GRANT_READ_URI_PERMISSION
+     * @see #FLAG_GRANT_WRITE_URI_PERMISSION
+     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+     * @see #FLAG_GRANT_PREFIX_URI_PERMISSION
+     * @see #FLAG_DEBUG_LOG_RESOLUTION
+     * @see #FLAG_FROM_BACKGROUND
+     * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
+     * @see #FLAG_ACTIVITY_CLEAR_TASK
+     * @see #FLAG_ACTIVITY_CLEAR_TOP
+     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
+     * @see #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+     * @see #FLAG_ACTIVITY_FORWARD_RESULT
+     * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+     * @see #FLAG_ACTIVITY_MULTIPLE_TASK
+     * @see #FLAG_ACTIVITY_NEW_DOCUMENT
+     * @see #FLAG_ACTIVITY_NEW_TASK
+     * @see #FLAG_ACTIVITY_NO_ANIMATION
+     * @see #FLAG_ACTIVITY_NO_HISTORY
+     * @see #FLAG_ACTIVITY_NO_USER_ACTION
+     * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
+     * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+     * @see #FLAG_ACTIVITY_REORDER_TO_FRONT
+     * @see #FLAG_ACTIVITY_SINGLE_TOP
+     * @see #FLAG_ACTIVITY_TASK_ON_HOME
+     * @see #FLAG_RECEIVER_REGISTERED_ONLY
      */
     public Intent addFlags(int flags) {
         mFlags |= flags;
@@ -8639,6 +8665,32 @@ public class Intent implements Parcelable, Cloneable {
      * @param flags The flags to remove.
      * @see #setFlags(int)
      * @see #addFlags(int)
+     *
+     * @see #FLAG_GRANT_READ_URI_PERMISSION
+     * @see #FLAG_GRANT_WRITE_URI_PERMISSION
+     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+     * @see #FLAG_GRANT_PREFIX_URI_PERMISSION
+     * @see #FLAG_DEBUG_LOG_RESOLUTION
+     * @see #FLAG_FROM_BACKGROUND
+     * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
+     * @see #FLAG_ACTIVITY_CLEAR_TASK
+     * @see #FLAG_ACTIVITY_CLEAR_TOP
+     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
+     * @see #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+     * @see #FLAG_ACTIVITY_FORWARD_RESULT
+     * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+     * @see #FLAG_ACTIVITY_MULTIPLE_TASK
+     * @see #FLAG_ACTIVITY_NEW_DOCUMENT
+     * @see #FLAG_ACTIVITY_NEW_TASK
+     * @see #FLAG_ACTIVITY_NO_ANIMATION
+     * @see #FLAG_ACTIVITY_NO_HISTORY
+     * @see #FLAG_ACTIVITY_NO_USER_ACTION
+     * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
+     * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+     * @see #FLAG_ACTIVITY_REORDER_TO_FRONT
+     * @see #FLAG_ACTIVITY_SINGLE_TOP
+     * @see #FLAG_ACTIVITY_TASK_ON_HOME
+     * @see #FLAG_RECEIVER_REGISTERED_ONLY
      */
     public void removeFlags(int flags) {
         mFlags &= ~flags;

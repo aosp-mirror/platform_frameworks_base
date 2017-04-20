@@ -57,6 +57,7 @@ import android.os.Looper;
 import android.os.StatFs;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -1146,16 +1147,26 @@ public abstract class Context {
 
     /**
      * Returns the absolute path to the application specific cache directory on
-     * the filesystem. These files will be ones that get deleted first when the
-     * device runs low on storage. There is no guarantee when these files will
-     * be deleted.
+     * the filesystem.
      * <p>
-     * <strong>Note: you should not <em>rely</em> on the system deleting these
-     * files for you; you should always have a reasonable maximum, such as 1 MB,
-     * for the amount of space you consume with cache files, and prune those
-     * files when exceeding that space.</strong> If your app requires a larger
-     * cache (larger than 1 MB), you should use {@link #getExternalCacheDir()}
-     * instead.
+     * The system will automatically delete files in this directory as disk
+     * space is needed elsewhere on the device. The system will always delete
+     * older files first, as reported by {@link File#lastModified()}. If
+     * desired, you can exert more control over how files are deleted using
+     * {@link StorageManager#setCacheBehaviorGroup(File, boolean)} and
+     * {@link StorageManager#setCacheBehaviorTombstone(File, boolean)}.
+     * <p>
+     * Apps are strongly encouraged to keep their usage of cache space below the
+     * quota returned by
+     * {@link StorageManager#getCacheQuotaBytes(java.util.UUID)}. If your app
+     * goes above this quota, your cached files will be some of the first to be
+     * deleted when additional disk space is needed. Conversely, if your app
+     * stays under this quota, your cached files will be some of the last to be
+     * deleted when additional disk space is needed.
+     * <p>
+     * Note that your cache quota will change over time depending on how
+     * frequently the user interacts with your app, and depending on how much
+     * system-wide disk space is used.
      * <p>
      * The returned path may change over time if the calling app is moved to an
      * adopted storage device, so only relative paths should be persisted.
@@ -1173,9 +1184,11 @@ public abstract class Context {
 
     /**
      * Returns the absolute path to the application specific cache directory on
-     * the filesystem designed for storing cached code. The system will delete
-     * any files stored in this location both when your specific application is
-     * upgraded, and when the entire platform is upgraded.
+     * the filesystem designed for storing cached code.
+     * <p>
+     * The system will delete any files stored in this location both when your
+     * specific application is upgraded, and when the entire platform is
+     * upgraded.
      * <p>
      * This location is optimal for storing compiled or optimized code generated
      * by your application at runtime.

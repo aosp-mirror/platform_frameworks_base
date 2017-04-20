@@ -5957,8 +5957,20 @@ public abstract class PackageManager {
      * <p>
      * This hint can only be set by the app which installed this package, as
      * determined by {@link #getInstallerPackageName(String)}.
+     *
+     * @param packageName the package to change the category hint for.
+     * @param categoryHint the category hint to set; one of
+     *            {@link ApplicationInfo#CATEGORY_AUDIO},
+     *            {@link ApplicationInfo#CATEGORY_GAME},
+     *            {@link ApplicationInfo#CATEGORY_IMAGE},
+     *            {@link ApplicationInfo#CATEGORY_MAPS},
+     *            {@link ApplicationInfo#CATEGORY_NEWS},
+     *            {@link ApplicationInfo#CATEGORY_PRODUCTIVITY},
+     *            {@link ApplicationInfo#CATEGORY_SOCIAL},
+     *            {@link ApplicationInfo#CATEGORY_UNDEFINED}, or
+     *            {@link ApplicationInfo#CATEGORY_VIDEO}.
      */
-    public abstract void setApplicationCategoryHint(String packageName,
+    public abstract void setApplicationCategoryHint(@NonNull String packageName,
             @ApplicationInfo.Category int categoryHint);
 
     /** {@hide} */
