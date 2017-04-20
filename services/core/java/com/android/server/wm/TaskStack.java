@@ -52,6 +52,7 @@ import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
+import com.android.server.UiThread;
 
 import java.io.PrintWriter;
 
@@ -1475,6 +1476,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return true;
     }
 
+    void onAllWindowsDrawn() {
+        if (!mBoundsAnimating) {
+            return;
+        }
+
+        mService.mBoundsAnimationController.onAllWindowsDrawn();
+    }
+
     @Override  // AnimatesBounds
     public void onAnimationStart(boolean schedulePipModeChangedCallback) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
@@ -1482,6 +1491,13 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             mBoundsAnimatingRequested = false;
             mBoundsAnimating = true;
             mCancelCurrentBoundsAnimation = false;
+
+            // If we are changing UI mode, as in the PiP to fullscreen
+            // transition, then we need to wait for the window to draw.
+            if (schedulePipModeChangedCallback) {
+                forAllWindows((w) -> { w.mWinAnimator.resetDrawState(); },
+                        false /* traverseTopToBottom */);
+            }
         }
 
         if (mStackId == PINNED_STACK_ID) {
