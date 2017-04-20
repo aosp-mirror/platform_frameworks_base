@@ -231,7 +231,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
         private final IRemoteCallback mCallback;
 
         public GetEphemeralResolveInfoCaller() {
-            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            super(BIND_SERVICE_TIMEOUT_MS);
             mCallback = new IRemoteCallback.Stub() {
                     @Override
                     public void sendResult(Bundle data) throws RemoteException {
