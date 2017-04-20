@@ -2976,4 +2976,18 @@
   <java-symbol type="bool" name="config_quickSettingsSupported" />
 
   <java-symbol type="style" name="Theme.DeviceDefault.QuickSettings" />
+
+  <java-symbol type="bool" name="enable_pbap_pce_profile" />
+
+  <java-symbol type="integer" name="default_data_warning_level_mb" />
+
+  <java-symbol type="bool" name="config_sendPackageName" />
+  <java-symbol type="string" name="config_helpPackageNameKey" />
+  <java-symbol type="string" name="config_helpPackageNameValue" />
+  <java-symbol type="string" name="config_helpIntentExtraKey" />
+  <java-symbol type="string" name="config_helpIntentNameKey" />
+  <java-symbol type="string" name="config_feedbackIntentExtraKey" />
+  <java-symbol type="string" name="config_feedbackIntentNameKey" />
+
+  <java-symbol type="array" name="config_hideWhenDisabled_packageNames" />
 </resources>
