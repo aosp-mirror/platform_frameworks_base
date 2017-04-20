@@ -411,6 +411,14 @@ public class FontFamily_Delegate {
         sManager.removeJavaReferenceFor(builderPtr);
     }
 
+    /**
+     * @see FontFamily#allowUnsupportedFont
+     */
+    @LayoutlibDelegate
+    /*package*/ static void nAllowUnsupportedFont(long builderPtr) {
+        // Do nothing here as this is used for Minikin fonts
+    }
+
     // ---- private helper methods ----
 
     private void init() {

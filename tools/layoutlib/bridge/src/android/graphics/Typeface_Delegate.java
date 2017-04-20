@@ -90,9 +90,12 @@ public final class Typeface_Delegate {
         assert variant != FontVariant.NONE;
 
         // Calculate the required weight based on style and weight of this typeface.
-        int weight = mWeight + ((mStyle & Font.BOLD) == 0 ? 0 : FontFamily_Delegate.BOLD_FONT_WEIGHT_DELTA);
-        if (weight > 900) {
-            weight = 900;
+        int weight = mWeight + 50 +
+                ((mStyle & Font.BOLD) == 0 ? 0 : FontFamily_Delegate.BOLD_FONT_WEIGHT_DELTA);
+        if (weight > 1000) {
+            weight = 1000;
+        } else if (weight < 100) {
+            weight = 100;
         }
         final boolean isItalic = (mStyle & Font.ITALIC) != 0;
         List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
@@ -163,6 +166,22 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static long nativeCreateFromTypefaceWithExactStyle(long native_instance,
+            int weight, boolean italic) {
+        Typeface_Delegate delegate = sManager.getDelegate(native_instance);
+        if (delegate == null) {
+            delegate = sManager.getDelegate(sDefaultTypeface);
+        }
+        if (delegate == null) {
+            return 0;
+        }
+
+        int style = weight >= 600 ? (italic ? Typeface.BOLD_ITALIC : Typeface.BOLD) :
+                (italic ? Typeface.ITALIC : Typeface.NORMAL);
+        return sManager.addNewDelegate(new Typeface_Delegate(delegate.mFontFamilies, style, weight));
+    }
+
+    @LayoutlibDelegate
     /*package*/ static synchronized long nativeCreateFromTypefaceWithVariation(long native_instance,
             List<FontVariationAxis> axes) {
         long newInstance = nativeCreateFromTypeface(native_instance, 0);
@@ -195,12 +214,21 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static synchronized long nativeCreateFromArray(long[] familyArray) {
+    /*package*/ static synchronized long nativeCreateFromArray(long[] familyArray, int weight,
+            int italic) {
         FontFamily_Delegate[] fontFamilies = new FontFamily_Delegate[familyArray.length];
         for (int i = 0; i < familyArray.length; i++) {
             fontFamilies[i] = FontFamily_Delegate.getDelegate(familyArray[i]);
         }
-        Typeface_Delegate delegate = new Typeface_Delegate(fontFamilies, Typeface.NORMAL);
+        if (weight == Typeface.RESOLVE_BY_FONT_TABLE) {
+            weight = 400;
+        }
+        if (italic == Typeface.RESOLVE_BY_FONT_TABLE) {
+            italic = 0;
+        }
+        int style = weight >= 600 ? (italic == 1 ? Typeface.BOLD_ITALIC : Typeface.BOLD) :
+                (italic == 1 ? Typeface.ITALIC : Typeface.NORMAL);
+        Typeface_Delegate delegate = new Typeface_Delegate(fontFamilies, style, weight);
         return sManager.addNewDelegate(delegate);
     }
 
@@ -225,6 +253,15 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static int nativeGetBaseWeight(long native_instance) {
+        Typeface_Delegate delegate = sManager.getDelegate(native_instance);
+        if (delegate == null) {
+            return 0;
+        }
+        return delegate.mWeight;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static File getSystemFontConfigLocation() {
         return new File(getFontLocation());
     }
@@ -243,10 +280,6 @@ public final class Typeface_Delegate {
     }
 
     // ---- Private delegate/helper methods ----
-
-    private Typeface_Delegate(@NonNull FontFamily_Delegate[] fontFamilies, int style) {
-        this(fontFamilies, style, FontFamily_Delegate.DEFAULT_FONT_WEIGHT);
-    }
 
     public Typeface_Delegate(@NonNull FontFamily_Delegate[] fontFamilies, int style, int weight) {
         mFontFamilies = fontFamilies;
