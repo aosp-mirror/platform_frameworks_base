@@ -26,6 +26,7 @@ import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
 import java.io.PrintWriter;
+import java.lang.Integer;
 import java.util.List;
 
 /**
@@ -71,6 +72,9 @@ public class WebViewUpdateServiceImpl {
     private SystemInterface mSystemInterface;
     private WebViewUpdater mWebViewUpdater;
     final private Context mContext;
+
+    private final static int MULTIPROCESS_SETTING_ON_VALUE = Integer.MAX_VALUE;
+    private final static int MULTIPROCESS_SETTING_OFF_VALUE = Integer.MIN_VALUE;
 
     public WebViewUpdateServiceImpl(Context context, SystemInterface systemInterface) {
         mContext = context;
@@ -234,31 +238,20 @@ public class WebViewUpdateServiceImpl {
     }
 
     boolean isMultiProcessEnabled() {
-        PackageInfo current = getCurrentWebViewPackage();
-        if (current == null) return false;
-        int currentVersion = current.versionCode;
         int settingValue = mSystemInterface.getMultiProcessSetting(mContext);
         if (mSystemInterface.isMultiProcessDefaultEnabled()) {
-            // Multiprocess should be enabled unless the user has turned it off manually for this
-            // version or newer, as we want to re-enable it when it's updated to get fresh
-            // bug reports.
-            return settingValue > -currentVersion;
+            // Multiprocess should be enabled unless the user has turned it off manually.
+            return settingValue > MULTIPROCESS_SETTING_OFF_VALUE;
         } else {
-            // Multiprocess should not be enabled, unless the user has turned it on manually for
-            // any version.
-            return settingValue > 0;
+            // Multiprocess should not be enabled, unless the user has turned it on manually.
+            return settingValue >= MULTIPROCESS_SETTING_ON_VALUE;
         }
     }
 
     void enableMultiProcess(boolean enable) {
-        // The value we store for the setting is the version code of the current package, if it's
-        // enabled, or the negation of the version code of the current package, if it's disabled.
-        // Users who have a setting from before this scheme was implemented will have it set to 0 or
-        // 1 instead.
         PackageInfo current = getCurrentWebViewPackage();
-        int currentVersion = current != null ? current.versionCode : 1;
         mSystemInterface.setMultiProcessSetting(mContext,
-                                                enable ? currentVersion : -currentVersion);
+                enable ? MULTIPROCESS_SETTING_ON_VALUE : MULTIPROCESS_SETTING_OFF_VALUE);
         mSystemInterface.notifyZygote(enable);
         if (current != null) {
             mSystemInterface.killPackageDependents(current.packageName);
