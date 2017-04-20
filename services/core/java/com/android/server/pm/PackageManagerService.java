@@ -127,6 +127,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
+import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.FallbackCategoryProvider;
@@ -8612,6 +8613,31 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
         mDexManager.notifyDexLoad(ai, dexPaths, loaderIsa, userId);
+    }
+
+    @Override
+    public void registerDexModule(String packageName, String dexModulePath, boolean isSharedModule,
+            IDexModuleRegisterCallback callback) {
+        int userId = UserHandle.getCallingUserId();
+        ApplicationInfo ai = getApplicationInfo(packageName, /*flags*/ 0, userId);
+        DexManager.RegisterDexModuleResult result;
+        if (ai == null) {
+            Slog.w(TAG, "Registering a dex module for a package that does not exist for the" +
+                     " calling user. package=" + packageName + ", user=" + userId);
+            result = new DexManager.RegisterDexModuleResult(false, "Package not installed");
+        } else {
+            result = mDexManager.registerDexModule(ai, dexModulePath, isSharedModule, userId);
+        }
+
+        if (callback != null) {
+            mHandler.post(() -> {
+                try {
+                    callback.onDexModuleRegistered(dexModulePath, result.success, result.message);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to callback after module registration " + dexModulePath, e);
+                }
+            });
+        }
     }
 
     @Override

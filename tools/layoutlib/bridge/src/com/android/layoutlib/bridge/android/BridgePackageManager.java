@@ -949,4 +949,10 @@ public class BridgePackageManager extends PackageManager {
     public String getInstantAppAndroidId(String packageName, UserHandle user) {
         return null;
     }
+
+    @Override
+    public void registerDexModule(String dexModulePath,
+            @Nullable DexModuleRegisterCallback callback) {
+        callback.onDexModuleRegistered(dexModulePath, false, null);
+    }
 }
