@@ -3911,6 +3911,18 @@ message MetricsEvent {
     // OS: O
     APPLICATIONS_STORAGE_MOVIES = 935;
 
+    // OPEN: Text selection "assist" menu item shown.
+    //  SUBTYPE: 1 is for EMAIL, 2 is for PHONE, 3 is for ADDRESS, 4 is for URL, 0 is for OTHER.
+    // CATEGORY: TEXT_CONTROLS
+    // OS: O
+    TEXT_SELECTION_MENU_ITEM_ASSIST = 936;
+
+    // ACTION: Text selection "assist" menu item clicked.
+    //  SUBTYPE: 1 is for EMAIL, 2 is for PHONE, 3 is for ADDRESS, 4 is for URL, 0 is for OTHER.
+    // CATEGORY: TEXT_CONTROLS
+    // OS: O
+    ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST = 937;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
