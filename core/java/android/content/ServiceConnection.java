@@ -61,6 +61,6 @@ public interface ServiceConnection {
      * @param name The concrete component name of the service whose
      * connection is dead.
      */
-    default void onBindingDead(ComponentName name) {
+    default void onBindingDied(ComponentName name) {
     }
 }
