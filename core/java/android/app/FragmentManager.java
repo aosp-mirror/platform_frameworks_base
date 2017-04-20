@@ -1334,6 +1334,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         f.performDestroyView();
                         dispatchOnFragmentViewDestroyed(f, false);
                         if (f.mView != null && f.mContainer != null) {
+                            // Stop any current animations:
+                            f.mView.clearAnimation();
+                            f.mContainer.endViewTransition(f.mView);
                             Animator anim = null;
                             if (mCurState > Fragment.INITIALIZING && !mDestroyed
                                     && f.mView.getVisibility() == View.VISIBLE
