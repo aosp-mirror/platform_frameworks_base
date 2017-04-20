@@ -84,6 +84,14 @@ public final class AssociationRequest implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return "AssociationRequest{" +
+                "mSingleDevice=" + mSingleDevice +
+                ", mDeviceFilters=" + mDeviceFilters +
+                '}';
+    }
+
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte((byte) (mSingleDevice ? 1 : 0));
         dest.writeParcelableList(mDeviceFilters, flags);
