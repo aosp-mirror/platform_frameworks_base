@@ -1815,12 +1815,8 @@ public abstract class PackageManager {
      * will enumerate at least one {@code VkPhysicalDevice}, and the feature version will indicate
      * what level of optional compute features are supported beyond the Vulkan 1.0 requirements.
      * <p>
-     * Compute level 0 indicates support for:
-     * <ul>
-     * <li>Ability to use pointers to buffer data from shaders</li>
-     * <li>Ability to load/store 16-bit values from buffers</li>
-     * <li>Ability to control shader floating point rounding mode</li>
-     * </ul>
+     * Compute level 0 indicates support for the {@code VariablePointers} SPIR-V capability defined
+     * by the SPV_KHR_variable_pointers extension.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VULKAN_HARDWARE_COMPUTE = "android.hardware.vulkan.compute";
