@@ -312,62 +312,72 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetMessageWithNoOrganizationAndNoVPN() {
-        assertEquals(getExpectedMessage(false /* hasDeviceOwnerOrganization */, false /* hasVPN */),
-                mFooter.getMessage(DEVICE_OWNER_PACKAGE,
-                        null /* profileOwnerPackage */,
-                        null /* primaryVpn */,
-                        null /* profileVpn */,
-                        null /* deviceOwnerOrganization */,
-                        false /* hasProfileOwner */));
+    public void testGetManagementMessage() {
+        assertEquals(null, mFooter.getManagementMessage(false, MANAGING_ORGANIZATION));
+        assertEquals(mContext.getString(R.string.monitoring_description_named_management,
+                                        MANAGING_ORGANIZATION),
+                     mFooter.getManagementMessage(true, MANAGING_ORGANIZATION));
+        assertEquals(mContext.getString(R.string.monitoring_description_management),
+                     mFooter.getManagementMessage(true, null));
     }
 
     @Test
-    public void testGetMessageWithNoOrganizationAndVPN() {
-        assertEquals(getExpectedMessage(false /* hasDeviceOwnerOrganization */, true /* hasVPN */),
-                mFooter.getMessage(DEVICE_OWNER_PACKAGE,
-                        null /* profileOwnerPackage */,
-                        VPN_PACKAGE,
-                        null /* profileVpn */,
-                        null /* deviceOwnerOrganization */,
-                        false /* hasProfileOwner */));
+    public void testGetCaCertsMessage() {
+        assertEquals(null, mFooter.getCaCertsMessage(true, false, false));
+        assertEquals(null, mFooter.getCaCertsMessage(false, false, false));
+        assertEquals(mContext.getString(R.string.monitoring_description_management_ca_certificate),
+                     mFooter.getCaCertsMessage(true, true, true));
+        assertEquals(mContext.getString(R.string.monitoring_description_management_ca_certificate),
+                     mFooter.getCaCertsMessage(true, false, true));
+        assertEquals(mContext.getString(
+                         R.string.monitoring_description_managed_profile_ca_certificate),
+                     mFooter.getCaCertsMessage(false, false, true));
+        assertEquals(mContext.getString(
+                         R.string.monitoring_description_ca_certificate),
+                     mFooter.getCaCertsMessage(false, true, false));
     }
 
     @Test
-    public void testGetMessageWithOrganizationAndNoVPN() {
-        assertEquals(getExpectedMessage(true /* hasDeviceOwnerOrganization */, false /* hasVPN */),
-                mFooter.getMessage(DEVICE_OWNER_PACKAGE,
-                        null /* profileOwnerPackage */,
-                        null /* primaryVpn */,
-                        null /* profileVpn */,
-                        MANAGING_ORGANIZATION,
-                        false /* hasProfileOwner */));
+    public void testGetNetworkLoggingMessage() {
+        assertEquals(null, mFooter.getNetworkLoggingMessage(false));
+        assertEquals(mContext.getString(R.string.monitoring_description_management_network_logging),
+                     mFooter.getNetworkLoggingMessage(true));
     }
 
     @Test
-    public void testGetMessageWithOrganizationAndVPN() {
-        assertEquals(getExpectedMessage(true /* hasDeviceOwnerOrganization */, true /* hasVPN */),
-                mFooter.getMessage(DEVICE_OWNER_PACKAGE,
-                        null /* profileOwnerPackage */,
-                        VPN_PACKAGE,
-                        null /* profileVpn */,
-                        MANAGING_ORGANIZATION,
-                        false /* hasProfileOwner */));
+    public void testGetVpnMessage() {
+        assertEquals(null, mFooter.getVpnMessage(true, true, null, null));
+        assertEquals(addLink(mContext.getString(R.string.monitoring_description_two_named_vpns,
+                                 VPN_PACKAGE, VPN_PACKAGE_2)),
+                     mFooter.getVpnMessage(true, true, VPN_PACKAGE, VPN_PACKAGE_2));
+        assertEquals(addLink(mContext.getString(R.string.monitoring_description_two_named_vpns,
+                                 VPN_PACKAGE, VPN_PACKAGE_2)),
+                     mFooter.getVpnMessage(false, true, VPN_PACKAGE, VPN_PACKAGE_2));
+        assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
+                                 VPN_PACKAGE)),
+                     mFooter.getVpnMessage(true, false, VPN_PACKAGE, null));
+        assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
+                                 VPN_PACKAGE)),
+                     mFooter.getVpnMessage(false, false, VPN_PACKAGE, null));
+        assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
+                                 VPN_PACKAGE_2)),
+                     mFooter.getVpnMessage(true, true, null, VPN_PACKAGE_2));
+        assertEquals(addLink(mContext.getString(
+                                 R.string.monitoring_description_managed_profile_named_vpn,
+                                 VPN_PACKAGE_2)),
+                     mFooter.getVpnMessage(false, true, null, VPN_PACKAGE_2));
+        assertEquals(addLink(mContext.getString(
+                                 R.string.monitoring_description_personal_profile_named_vpn,
+                                 VPN_PACKAGE)),
+                     mFooter.getVpnMessage(false, true, VPN_PACKAGE, null));
     }
 
-    private CharSequence getExpectedMessage(boolean hasDeviceOwnerOrganization, boolean hasVPN) {
+    private CharSequence addLink(CharSequence description) {
         final SpannableStringBuilder message = new SpannableStringBuilder();
-        message.append(hasDeviceOwnerOrganization ?
-                mContext.getString(R.string.monitoring_description_do_header_with_name,
-                        MANAGING_ORGANIZATION, DEVICE_OWNER_PACKAGE) :
-                mContext.getString(R.string.monitoring_description_do_header_generic,
-                        DEVICE_OWNER_PACKAGE));
-        message.append("\n\n");
-        message.append(mContext.getString(R.string.monitoring_description_do_body));
-        message.append(mContext.getString(
-                R.string.monitoring_description_do_learn_more_separator));
-        message.append(mContext.getString(R.string.monitoring_description_do_learn_more),
-                mFooter.new EnterprisePrivacySpan(), 0);
+        message.append(description);
+        message.append(mContext.getString(R.string.monitoring_description_vpn_settings_separator));
+        message.append(mContext.getString(R.string.monitoring_description_vpn_settings),
+                mFooter.new VpnSpan(), 0);
         return message;
     }
 }
