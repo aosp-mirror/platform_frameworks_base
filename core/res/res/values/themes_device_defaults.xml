@@ -794,6 +794,8 @@ easier.
 
     <!-- Theme used for the intent picker activity. -->
     <style name="Theme.DeviceDefault.Resolver" parent="Theme.Material.Light">
+        <item name="windowEnterTransition">@empty</item>
+        <item name="windowExitTransition">@empty</item>
         <item name="windowIsTranslucent">true</item>
         <item name="windowNoTitle">true</item>
         <item name="windowBackground">@color/transparent</item>
