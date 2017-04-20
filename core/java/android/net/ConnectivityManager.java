@@ -2730,18 +2730,12 @@ public class ConnectivityManager {
     public static final int CALLBACK_CAP_CHANGED         = BASE + 6;
     /** @hide */
     public static final int CALLBACK_IP_CHANGED          = BASE + 7;
-    // TODO: consider deleting CALLBACK_RELEASED and shifting following enum codes down by 1.
-    /** @hide */
-    public static final int CALLBACK_RELEASED            = BASE + 8;
-    // TODO: consider deleting CALLBACK_EXIT and shifting following enum codes down by 1.
-    /** @hide */
-    public static final int CALLBACK_EXIT                = BASE + 9;
     /** @hide obj = NetworkCapabilities, arg1 = seq number */
-    private static final int EXPIRE_LEGACY_REQUEST       = BASE + 10;
+    private static final int EXPIRE_LEGACY_REQUEST       = BASE + 8;
     /** @hide */
-    public static final int CALLBACK_SUSPENDED           = BASE + 11;
+    public static final int CALLBACK_SUSPENDED           = BASE + 9;
     /** @hide */
-    public static final int CALLBACK_RESUMED             = BASE + 12;
+    public static final int CALLBACK_RESUMED             = BASE + 10;
 
     /** @hide */
     public static String getCallbackName(int whichCallback) {
@@ -2753,8 +2747,6 @@ public class ConnectivityManager {
             case CALLBACK_UNAVAIL:      return "CALLBACK_UNAVAIL";
             case CALLBACK_CAP_CHANGED:  return "CALLBACK_CAP_CHANGED";
             case CALLBACK_IP_CHANGED:   return "CALLBACK_IP_CHANGED";
-            case CALLBACK_RELEASED:     return "CALLBACK_RELEASED";
-            case CALLBACK_EXIT:         return "CALLBACK_EXIT";
             case EXPIRE_LEGACY_REQUEST: return "EXPIRE_LEGACY_REQUEST";
             case CALLBACK_SUSPENDED:    return "CALLBACK_SUSPENDED";
             case CALLBACK_RESUMED:      return "CALLBACK_RESUMED";
@@ -2846,12 +2838,6 @@ public class ConnectivityManager {
                     if (callback != null) {
                         callback.onNetworkResumed(network);
                     }
-                    break;
-                }
-                case CALLBACK_RELEASED: {
-                    break;
-                }
-                case CALLBACK_EXIT: {
                     break;
                 }
                 case EXPIRE_LEGACY_REQUEST: {
