@@ -116,6 +116,10 @@ public class WebViewUpdateServiceImpl {
     }
 
     void handleNewUser(int userId) {
+        // The system user is always started at boot, and by that point we have already run one
+        // round of the package-changing logic (through prepareWebViewInSystemServer()), so early
+        // out here.
+        if (userId == UserHandle.USER_SYSTEM) return;
         handleUserChange();
     }
 
