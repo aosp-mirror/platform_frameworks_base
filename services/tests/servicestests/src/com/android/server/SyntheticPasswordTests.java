@@ -320,6 +320,26 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
     }
 
+    public void testEscrowTokenActivatedLaterWithUserPasswordNeedsMigration() throws RemoteException {
+        final String TOKEN = "some-high-entropy-secure-token";
+        final String PASSWORD = "password";
+        // Set up pre-SP user password
+        disableSyntheticPassword(PRIMARY_USER_ID);
+        mService.setLockCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
+                PRIMARY_USER_ID);
+        enableSyntheticPassword(PRIMARY_USER_ID);
+
+        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        // Token not activated immediately since user password exists
+        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        // Activate token (password gets migrated to SP at the same time)
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
+                        PRIMARY_USER_ID).getResponseCode());
+        // Verify token is activated
+        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+    }
+
     // b/34600579
     //TODO: add non-migration work profile case, and unify/un-unify transition.
     //TODO: test token after user resets password
