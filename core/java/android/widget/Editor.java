@@ -41,6 +41,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -164,6 +165,8 @@ public class Editor {
     private UndoOwner mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
     final UndoInputFilter mUndoInputFilter = new UndoInputFilter(this);
     boolean mAllowUndo = true;
+
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     // Cursor Controllers.
     private InsertionPointCursorController mInsertionPointCursorController;
@@ -3894,6 +3897,10 @@ public class Editor {
                     menu.add(TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST, label)
                             .setIcon(icon)
                             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                    mMetricsLogger.write(
+                            new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
+                                    .setType(MetricsEvent.TYPE_OPEN)
+                                    .setSubtype(textClassificationResult.getLogType()));
                 }
             }
         }
@@ -3922,6 +3929,9 @@ public class Editor {
                                 .onClick(mTextView);
                     }
                 }
+                mMetricsLogger.action(
+                        MetricsEvent.ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST,
+                        textClassificationResult.getLogType());
                 stopTextActionMode();
                 return true;
             }
