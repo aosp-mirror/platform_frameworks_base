@@ -112,6 +112,8 @@ public class BoundsAnimationController {
     private final Interpolator mFastOutSlowInInterpolator;
     private boolean mFinishAnimationAfterTransition = false;
 
+    private static final int WAIT_FOR_DRAW_TIMEOUT_MS = 3000;
+
     BoundsAnimationController(Context context, AppTransition transition, Handler handler) {
         mHandler = handler;
         mAppTransition = transition;
@@ -175,6 +177,13 @@ public class BoundsAnimationController {
             }
         }
 
+        final Runnable mResumeRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    resume();
+                }
+        };
+
         @Override
         public void onAnimationStart(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
@@ -196,7 +205,23 @@ public class BoundsAnimationController {
             // the starting position so we don't jump at the beginning of the animation.
             if (animatingToLargerSize()) {
                 mTarget.setPinnedStackSize(mFrom, mTmpRect);
+
+                // We pause the animation until the app has drawn at the new size.
+                // The target will notify us via BoundsAnimationController#resume.
+                // We do this here and pause the animation, rather than just defer starting it
+                // so we can enter the animating state and have WindowStateAnimator apply the
+                // correct logic to make this resize seamless.
+                if (mMoveToFullscreen) {
+                    pause();
+                    mHandler.postDelayed(mResumeRunnable, WAIT_FOR_DRAW_TIMEOUT_MS);
+                }
             }
+        }
+
+        @Override
+        public void resume() {
+            mHandler.removeCallbacks(mResumeRunnable);
+            super.resume();
         }
 
         @Override
@@ -370,5 +395,16 @@ public class BoundsAnimationController {
         animator.setInterpolator(mFastOutSlowInInterpolator);
         animator.start();
         return animator;
+    }
+
+    private void resume() {
+        for (int i = 0; i < mRunningAnimations.size(); i++) {
+            final BoundsAnimator b = mRunningAnimations.valueAt(i);
+            b.resume();
+        }
+    }
+
+    public void onAllWindowsDrawn() {
+        mHandler.post(this::resume);
     }
 }
