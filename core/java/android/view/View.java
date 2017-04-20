@@ -6468,7 +6468,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
-                setFocusedInCluster();
+                updateFocusedInCluster(oldFocus, direction);
             }
 
             if (mAttachInfo != null) {
@@ -9834,19 +9834,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public final void setFocusedInCluster() {
-        View top = findKeyboardNavigationCluster();
-        if (top == this) {
+        setFocusedInCluster(findKeyboardNavigationCluster());
+    }
+
+    private void setFocusedInCluster(View cluster) {
+        if (this instanceof ViewGroup) {
+            ((ViewGroup) this).mFocusedInCluster = null;
+        }
+        if (cluster == this) {
             return;
         }
         ViewParent parent = mParent;
         View child = this;
         while (parent instanceof ViewGroup) {
-            ((ViewGroup) parent).setFocusedInCluster(child);
-            if (parent == top) {
-                return;
+            ((ViewGroup) parent).mFocusedInCluster = child;
+            if (parent == cluster) {
+                break;
             }
             child = (View) parent;
             parent = parent.getParent();
+        }
+    }
+
+    private void updateFocusedInCluster(View oldFocus, @FocusDirection int direction) {
+        if (oldFocus != null) {
+            View oldCluster = oldFocus.findKeyboardNavigationCluster();
+            View cluster = findKeyboardNavigationCluster();
+            if (oldCluster != cluster) {
+                // Going from one cluster to another, so save last-focused.
+                // This covers cluster jumps because they are always FOCUS_DOWN
+                oldFocus.setFocusedInCluster(oldCluster);
+                if (direction == FOCUS_FORWARD || direction == FOCUS_BACKWARD) {
+                    // This is a result of ordered navigation so consider navigation through
+                    // the previous cluster "complete" and clear its last-focused memory.
+                    if (oldFocus.mParent instanceof ViewGroup) {
+                        ((ViewGroup) oldFocus.mParent).clearFocusedInCluster(oldFocus);
+                    }
+                }
+            }
         }
     }
 
