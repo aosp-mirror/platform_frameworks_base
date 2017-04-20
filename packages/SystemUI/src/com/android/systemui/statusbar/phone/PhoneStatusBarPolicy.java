@@ -561,12 +561,14 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         Intent browserIntent = getTaskIntent(taskId, userId);
         Notification.Builder builder = new Notification.Builder(mContext, NotificationChannels.GENERAL);
         if (browserIntent != null) {
+            // Make sure that this doesn't resolve back to an instant app
+            browserIntent.setComponent(null)
+                    .setPackage(null)
+                    .addFlags(Intent.FLAG_IGNORE_EPHEMERAL)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
             PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
                     0 /* requestCode */, browserIntent, 0 /* flags */);
-            browserIntent.setComponent(null);
-            browserIntent.addFlags(Intent.FLAG_IGNORE_EPHEMERAL);
-            browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
             ComponentName aiaComponent = null;
             try {
                 aiaComponent = AppGlobals.getPackageManager().getInstantAppInstallerComponent();
