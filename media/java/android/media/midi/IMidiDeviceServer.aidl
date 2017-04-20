@@ -31,5 +31,7 @@ interface IMidiDeviceServer
     int connectPorts(IBinder token, in FileDescriptor fd, int outputPortNumber);
 
     MidiDeviceInfo getDeviceInfo();
-    void setDeviceInfo(in MidiDeviceInfo deviceInfo);
+
+    // For use by MidiService.
+    oneway void setDeviceInfo(in MidiDeviceInfo deviceInfo);
 }
