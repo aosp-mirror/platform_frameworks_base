@@ -76,6 +76,16 @@ public class ComposeShader extends Shader {
                 mShaderA.getNativeInstance(), mShaderB.getNativeInstance(), mPorterDuffMode);
     }
 
+    @Override
+    void verifyNativeInstance() {
+        if (mShaderA.getNativeInstance() != mNativeInstanceShaderA
+                || mShaderB.getNativeInstance() != mNativeInstanceShaderB) {
+            // Child shader native instance has been updated,
+            // so our cached native instance is no longer valid - discard it
+            discardNativeInstance();
+        }
+    }
+
     /**
      * @hide
      */
