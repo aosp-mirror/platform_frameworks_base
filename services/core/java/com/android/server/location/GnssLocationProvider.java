@@ -583,6 +583,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 // override default value of this if lpp_prof is not empty
                 properties.setProperty("LPP_PROFILE", lpp_prof);
         }
+        /*
+         * Overlay carrier properties from a debug configuration file.
+         */
+        loadPropertiesFromFile(DEBUG_PROPERTIES_FILE, properties);
         // TODO: we should get rid of C2K specific setting.
         setSuplHostPort(properties.getProperty("SUPL_HOST"),
                         properties.getProperty("SUPL_PORT"));
@@ -595,10 +599,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 Log.e(TAG, "unable to parse C2K_PORT: " + portString);
             }
         }
-        /*
-         * Allow carrier properties to be loaded from a  debug configuration file.
-         */
-        loadPropertiesFromFile(DEBUG_PROPERTIES_FILE, properties);
         if (native_is_gnss_configuration_supported()) {
             Map<String, SetCarrierProperty> map = new HashMap<String, SetCarrierProperty>() {
                 {
@@ -672,7 +672,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
 
         } catch (IOException e) {
-            Log.v(TAG, "Could not open GPS configuration file " + filename);
+            if (DEBUG) Log.d(TAG, "Could not open GPS configuration file " + filename);
             return false;
         }
         return true;
