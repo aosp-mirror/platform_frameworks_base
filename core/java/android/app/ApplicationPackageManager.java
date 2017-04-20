@@ -820,11 +820,15 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    @Override
-    public int getInstantAppCookieMaxSize() {
+    public int getInstantAppCookieMaxBytes() {
         return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
                 DEFAULT_EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
+    }
+
+    @Override
+    public int getInstantAppCookieMaxSize() {
+        return getInstantAppCookieMaxBytes();
     }
 
     @Override
@@ -837,6 +841,25 @@ public class ApplicationPackageManager extends PackageManager {
             } else {
                 return EmptyArray.BYTE;
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void clearInstantAppCookie() {
+        updateInstantAppCookie(null);
+    }
+
+    @Override
+    public void updateInstantAppCookie(@NonNull byte[] cookie) {
+        if (cookie != null && cookie.length > getInstantAppCookieMaxBytes()) {
+            throw new IllegalArgumentException("instant cookie longer than "
+                    + getInstantAppCookieMaxBytes());
+        }
+        try {
+            mPM.setInstantAppCookie(mContext.getPackageName(),
+                    cookie, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

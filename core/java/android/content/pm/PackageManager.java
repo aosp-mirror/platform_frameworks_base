@@ -2841,7 +2841,7 @@ public abstract class PackageManager {
      * by passing {@link #VERSION_CODE_HIGHEST} in the {@link VersionedPackage}
      * constructor.
      *
-     * @param versionedPackage The versioned packages for which to query.
+     * @param versionedPackage The versioned package for which to query.
      * @param flags Additional option flags. Use any combination of
      *         {@link #GET_ACTIVITIES}, {@link #GET_CONFIGURATIONS},
      *         {@link #GET_GIDS}, {@link #GET_INSTRUMENTATION},
@@ -3863,9 +3863,9 @@ public abstract class PackageManager {
      * @return Whether caller is an instant app.
      *
      * @see #isInstantApp(String)
-     * @see #setInstantAppCookie(byte[])
+     * @see #updateInstantAppCookie(byte[])
      * @see #getInstantAppCookie()
-     * @see #getInstantAppCookieMaxSize()
+     * @see #getInstantAppCookieMaxBytes()
      */
     public abstract boolean isInstantApp();
 
@@ -3876,9 +3876,10 @@ public abstract class PackageManager {
      * @return Whether the given package is an instant app.
      *
      * @see #isInstantApp()
-     * @see #setInstantAppCookie(byte[])
+     * @see #updateInstantAppCookie(byte[])
      * @see #getInstantAppCookie()
-     * @see #getInstantAppCookieMaxSize()
+     * @see #getInstantAppCookieMaxBytes()
+     * @see #clearInstantAppCookie()
      */
     public abstract boolean isInstantApp(String packageName);
 
@@ -3890,8 +3891,15 @@ public abstract class PackageManager {
      *
      * @see #isInstantApp()
      * @see #isInstantApp(String)
-     * @see #setInstantAppCookie(byte[])
+     * @see #updateInstantAppCookie(byte[])
      * @see #getInstantAppCookie()
+     * @see #clearInstantAppCookie()
+     */
+    public abstract int getInstantAppCookieMaxBytes();
+
+    /**
+     * @deprecated
+     * @hide
      */
     public abstract int getInstantAppCookieMaxSize();
 
@@ -3899,7 +3907,7 @@ public abstract class PackageManager {
      * Gets the instant application cookie for this app. Non
      * instant apps and apps that were instant but were upgraded
      * to normal apps can still access this API. For instant apps
-     * this cooke is cached for some time after uninstall while for
+     * this cookie is cached for some time after uninstall while for
      * normal apps the cookie is deleted after the app is uninstalled.
      * The cookie is always present while the app is installed.
      *
@@ -3907,31 +3915,49 @@ public abstract class PackageManager {
      *
      * @see #isInstantApp()
      * @see #isInstantApp(String)
-     * @see #setInstantAppCookie(byte[])
-     * @see #getInstantAppCookieMaxSize()
+     * @see #updateInstantAppCookie(byte[])
+     * @see #getInstantAppCookieMaxBytes()
+     * @see #clearInstantAppCookie()
      */
     public abstract @NonNull byte[] getInstantAppCookie();
 
     /**
-     * Sets the instant application cookie for the calling app. Non
-     * instant apps and apps that were instant but were upgraded
-     * to normal apps can still access this API. For instant apps
-     * this cooke is cached for some time after uninstall while for
-     * normal apps the cookie is deleted after the app is uninstalled.
-     * The cookie is always present while the app is installed. The
-     * cookie size is limited by {@link #getInstantAppCookieMaxSize()}.
-     * If the provided cookie size is over the limit this method
-     * returns <code>false</code>. Passing <code>null</code> or an empty
-     * array clears the cookie.
-     * </p>
-     *
-     * @param cookie The cookie data.
-     * @return Whether the cookie was set.
+     * Clears the instant application cookie for the calling app.
      *
      * @see #isInstantApp()
      * @see #isInstantApp(String)
-     * @see #getInstantAppCookieMaxSize()
+     * @see #getInstantAppCookieMaxBytes()
      * @see #getInstantAppCookie()
+     * @see #clearInstantAppCookie()
+     */
+    public abstract void clearInstantAppCookie();
+
+    /**
+     * Updates the instant application cookie for the calling app. Non
+     * instant apps and apps that were instant but were upgraded
+     * to normal apps can still access this API. For instant apps
+     * this cookie is cached for some time after uninstall while for
+     * normal apps the cookie is deleted after the app is uninstalled.
+     * The cookie is always present while the app is installed. The
+     * cookie size is limited by {@link #getInstantAppCookieMaxBytes()}.
+     * Passing <code>null</code> or an empty array clears the cookie.
+     * </p>
+     *
+     * @param cookie The cookie data.
+     *
+     * @see #isInstantApp()
+     * @see #isInstantApp(String)
+     * @see #getInstantAppCookieMaxBytes()
+     * @see #getInstantAppCookie()
+     * @see #clearInstantAppCookie()
+     *
+     * @throws IllegalArgumentException if the array exceeds max cookie size.
+     */
+    public abstract void updateInstantAppCookie(@Nullable byte[] cookie);
+
+    /**
+     * @removed
+     * @hide
      */
     public abstract boolean setInstantAppCookie(@Nullable byte[] cookie);
 
@@ -3951,9 +3977,6 @@ public abstract class PackageManager {
      * @param flags To filter the libraries to return.
      * @return The shared library list.
      *
-     * @see #MATCH_FACTORY_ONLY
-     * @see #MATCH_KNOWN_PACKAGES
-     * @see #MATCH_ANY_USER
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
     public abstract @NonNull List<SharedLibraryInfo> getSharedLibraries(
