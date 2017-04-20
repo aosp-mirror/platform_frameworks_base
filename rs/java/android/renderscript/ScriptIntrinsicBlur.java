@@ -59,6 +59,9 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
      * @param ain The input allocation
      */
     public void setInput(Allocation ain) {
+        if (ain.getType().getY() == 0) {
+            throw new RSIllegalArgumentException("Input set to a 1D Allocation");
+        }
         mInput = ain;
         setVar(1, ain);
     }
@@ -85,6 +88,9 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
      *             type.
      */
     public void forEach(Allocation aout) {
+        if (aout.getType().getY() == 0) {
+            throw new RSIllegalArgumentException("Output is a 1D Allocation");
+        }
         forEach(0, (Allocation) null, aout, null);
     }
 
@@ -97,6 +103,9 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
      * @param opt LaunchOptions for clipping
      */
     public void forEach(Allocation aout, Script.LaunchOptions opt) {
+        if (aout.getType().getY() == 0) {
+            throw new RSIllegalArgumentException("Output is a 1D Allocation");
+        }
         forEach(0, (Allocation) null, aout, null, opt);
     }
 
