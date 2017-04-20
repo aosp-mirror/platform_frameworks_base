@@ -91,7 +91,7 @@ public final class AutofillManager {
      * android.service.autofill.FillCallback#onSuccess(android.service.autofill.FillResponse)} with
      * a {@code FillResponse} that requires authentication, the Intent that launches the
      * service authentication will contain the Bundle set by
-     * {@link android.service.autofill.FillResponse.Builder#setExtras(Bundle)} on this extra.
+     * {@link android.service.autofill.FillResponse.Builder#setClientState(Bundle)} on this extra.
      *
      * <p>
      * Type: {@link android.os.Bundle}
@@ -107,7 +107,7 @@ public final class AutofillManager {
      *
      * @deprecated Use {@link android.service.autofill.FillRequest#FLAG_MANUAL_REQUEST}
      */
-    // TODO(b/33197203): remove
+    // TODO(b/33197203): remove (and change value of private flags)
     @Deprecated
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
