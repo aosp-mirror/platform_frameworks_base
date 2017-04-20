@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ใช้การสแกน Wi-Fi ข้ามเครือข่ายเสมอ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"เปิดใช้อินเทอร์เน็ตมือถือเสมอ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ปิดใช้การควบคุมระดับเสียงของอุปกรณ์อื่น"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"เปิดใช้การส่งเสียงในช่องสัญญาณเดียวกัน"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้คุณลักษณะการควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ให้เสียงเรียกเข้าในโทรศัพท์เล่นในชุดหูฟังบลูทูธ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"การตรวจสอบ HDCP"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ใช้งานอยู่ แตะเพื่อสลับ"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"บริการที่ทำงานอยู่"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ดูและควบคุมบริการที่ทำงานอยู่"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView แบบหลายขั้นตอน"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"เรียกใช้โหมดแสดงภาพ WebView แยกต่างหาก"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"การใช้งาน WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ตั้งค่าการใช้งาน WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ตัวเลือกนี้ใช้ไม่ได้อีกต่อไป โปรดลองอีกครั้ง"</string>

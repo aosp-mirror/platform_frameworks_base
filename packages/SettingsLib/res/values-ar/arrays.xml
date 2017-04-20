@@ -230,7 +230,7 @@
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"إيقاف"</item>
     <item msgid="7688197031296835369">"عرض مناطق تجاوز الحد"</item>
-    <item msgid="2290859360633824369">"‏عرض مناطق العرض المسرحي Deuteranomaly"</item>
+    <item msgid="2290859360633824369">"عرض مناطق العجز في رؤية اللونين الأخضر والأحمر"</item>
   </string-array>
   <string-array name="debug_hw_renderer_entries">
     <item msgid="2578620445459945681">"‏OpenGL (الافتراضي)"</item>

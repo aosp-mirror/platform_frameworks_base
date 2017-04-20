@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"எப்போதும் வைஃபை ரோமிங் ஸ்கேன்களை அனுமதி"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"மொபைல் தரவை எப்போதும் இயக்கத்திலேயே வை"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கு"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"இன்-பேண்ட் ரிங் செய்வதை இயக்கு"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"புளூடூத் AVRCP பதிப்பு"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"புளூடூத் AVRCP பதிப்பைத் தேர்ந்தெடு"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"புளூடூத் ஆடியோ கோடெக்"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB பயன்பாடுகளை சரிபார்"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"தீங்கு விளைவிக்கும் செயல்பாட்டை அறிய ADB/ADT மூலம் நிறுவப்பட்டப் பயன்பாடுகளைச் சரிபார்."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"மிகவும் அதிகமான ஒலியளவு அல்லது கட்டுப்பாடு இழப்பு போன்ற தொலைநிலைச் சாதனங்களில் ஏற்படும் ஒலி தொடர்பான சிக்கல்கள் இருக்கும் சமயங்களில், புளூடூத் அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கும்."</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ஃபோனில் இருக்கும் ரிங்டோன்களை, புளூடூத் ஹெட்செட்களில் இயக்க அனுமதி"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"அக முனையம்"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் பயன்பாட்டை இயக்கு"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP சரிபார்ப்பு"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"செயலில் உள்ளது. மாற்ற, தட்டவும்."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"பல செயல்முறை WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ரெண்டரர்களைத் தனித்தனியாக இயக்கு"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView செயல்படுத்தலை அமை"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"இனி இந்தத் தேர்வைப் பயன்படுத்த முடியாது. மீண்டும் முயலவும்."</string>

@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Se permite întotdeauna scanarea traficului Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Date mobile permanent active"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Dezactivați volumul absolut"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activați soneria în căști"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versiunea AVRCP pentru Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selectați versiunea AVRCP pentru Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificați aplicațiile prin USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificați aplicațiile instalate utilizând ADB/ADT, pentru a detecta un comportament dăunător."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Dezactivează funcția Bluetooth de volum absolut în cazul problemelor de volum apărute la dispozitivele la distanță, cum ar fi volumul mult prea ridicat sau lipsa de control asupra acestuia."</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permiteți ca tonurile de sonerie de pe telefon să fie redate prin căștile Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Aplicație terminal locală"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activați aplicația terminal care oferă acces la shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Verificare HDCP"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Activă. Atingeți pentru a comuta."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Servicii în curs de funcționare"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Vedeți și controlați serviciile care funcționează în prezent"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView cu mai multe procese"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Rulați programele de redare WebView separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementare WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Setați implementarea WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Această opțiune nu mai este validă. Încercați din nou."</string>

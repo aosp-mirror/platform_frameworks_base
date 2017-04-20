@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillåt alltid sökning efter Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata alltid aktiverad"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inaktivera Absolute volume"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Aktivera samtal inom nätverket"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"AVRCP-version för Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Välj AVRCP-version för Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Ljudkodek för Bluetooth"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiera appar via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollera om appar som installeras via ADB/ADT kan vara skadliga."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Inaktivera Bluetooth-funktionen Absolute volume om det skulle uppstå problem med volymen på fjärrenheter, t.ex. alldeles för hög volym eller brist på kontroll."</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Tillåt att ringsignaler på mobilen kan spelas upp i Bluetooth-headset"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivera en terminalapp som ger åtkomst till hyllor lokalt"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontroll"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Tryck om du vill inaktivera."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktiva tjänster"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Visa och styr aktiva tjänster"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView-multibearbetning"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Kör WebView-renderare separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ange WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Det här alternativet är inte längre giltigt. Försök igen."</string>
