@@ -43,12 +43,13 @@ public class ExpandHelperTest extends SysuiTestCase {
     private ExpandHelper.Callback mCallback;
 
     @Before
-    @UiThreadTest
-    public void setUp() {
+    public void setUp() throws Exception {
         Context context = getContext();
         mRow = new NotificationTestHelper(context).createRow();
         mCallback = mock(ExpandHelper.Callback.class);
-        mExpandHelper = new ExpandHelper(context, mCallback, 10, 100);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> mExpandHelper = new ExpandHelper(context, mCallback, 10, 100));
+
     }
 
     @Test

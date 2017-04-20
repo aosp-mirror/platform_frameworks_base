@@ -18,11 +18,10 @@ package com.android.systemui.statusbar.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -39,7 +38,8 @@ public class NotificationInflater {
     @VisibleForTesting
     static final int FLAG_REINFLATE_ALL = ~0;
     private static final int FLAG_REINFLATE_CONTENT_VIEW = 1<<0;
-    private static final int FLAG_REINFLATE_EXPANDED_VIEW = 1<<1;
+    @VisibleForTesting
+    static final int FLAG_REINFLATE_EXPANDED_VIEW = 1<<1;
     private static final int FLAG_REINFLATE_HEADS_UP_VIEW = 1<<2;
     private static final int FLAG_REINFLATE_PUBLIC_VIEW = 1<<3;
     private static final int FLAG_REINFLATE_AMBIENT_VIEW = 1<<4;
@@ -50,7 +50,7 @@ public class NotificationInflater {
     private boolean mUsesIncreasedHeadsUpHeight;
     private RemoteViews.OnClickHandler mRemoteViewClickHandler;
     private boolean mIsChildInGroup;
-    private InflationExceptionHandler mInflateExceptionHandler;
+    private InflationCallback mCallback;
     private boolean mRedactAmbient;
 
     public NotificationInflater(ExpandableNotificationRow row) {
@@ -66,21 +66,14 @@ public class NotificationInflater {
      *
      * @return whether the view was re-inflated
      */
-    public boolean setIsChildInGroup(boolean childInGroup) {
+    public void setIsChildInGroup(boolean childInGroup) {
         if (childInGroup != mIsChildInGroup) {
             mIsChildInGroup = childInGroup;
             if (mIsLowPriority) {
-                try {
-                    int flags = FLAG_REINFLATE_CONTENT_VIEW | FLAG_REINFLATE_EXPANDED_VIEW;
-                    inflateNotificationViews(flags);
-                } catch (InflationException e) {
-                    mInflateExceptionHandler.handleInflationException(
-                            mRow.getStatusBarNotification(), e);
-                }
+                int flags = FLAG_REINFLATE_CONTENT_VIEW | FLAG_REINFLATE_EXPANDED_VIEW;
+                inflateNotificationViews(flags);
             }
-            return true;
-        }
-        return false;
+        } ;
     }
 
     public void setUsesIncreasedHeight(boolean usesIncreasedHeight) {
@@ -101,39 +94,29 @@ public class NotificationInflater {
             if (mRow.getEntry() == null) {
                 return;
             }
-            try {
-                inflateNotificationViews(FLAG_REINFLATE_AMBIENT_VIEW);
-            } catch (InflationException e) {
-                mInflateExceptionHandler.handleInflationException(
-                        mRow.getStatusBarNotification(), e);
-            }
+            inflateNotificationViews(FLAG_REINFLATE_AMBIENT_VIEW);
         }
     }
 
-    public void inflateNotificationViews() throws InflationException {
+    /**
+     * Inflate all views of this notification on a background thread. This is asynchronous and will
+     * notify the callback once it's finished.
+     */
+    public void inflateNotificationViews() {
         inflateNotificationViews(FLAG_REINFLATE_ALL);
     }
 
     /**
-     * reinflate all views for the specified flags
+     * Reinflate all views for the specified flags on a background thread. This is asynchronous and
+     * will notify the callback once it's finished.
+     *
      * @param reInflateFlags flags which views should be reinflated. Use {@link #FLAG_REINFLATE_ALL}
      *                       to reinflate all of views.
-     * @throws InflationException
      */
-    private void inflateNotificationViews(int reInflateFlags)
-            throws InflationException {
+    @VisibleForTesting
+    void inflateNotificationViews(int reInflateFlags) {
         StatusBarNotification sbn = mRow.getEntry().notification;
-        try {
-            final Notification.Builder recoveredBuilder
-                    = Notification.Builder.recoverBuilder(mRow.getContext(), sbn.getNotification());
-            Context packageContext = sbn.getPackageContext(mRow.getContext());
-            inflateNotificationViews(reInflateFlags, recoveredBuilder, packageContext);
-
-        } catch (RuntimeException e) {
-            final String ident = sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId());
-            Log.e(StatusBar.TAG, "couldn't inflate view for notification " + ident, e);
-            throw new InflationException("Couldn't inflate contentViews");
-        }
+        new AsyncInflationTask(mRow.getContext(), sbn, reInflateFlags).execute();
     }
 
     @VisibleForTesting
@@ -284,12 +267,13 @@ public class NotificationInflater {
                         && a.getLayoutId() == b.getLayoutId());
     }
 
-    public void setInflateExceptionHandler(InflationExceptionHandler inflateExceptionHandler) {
-        mInflateExceptionHandler = inflateExceptionHandler;
+    public void setInflationCallback(InflationCallback callback) {
+        mCallback = callback;
     }
 
-    public interface InflationExceptionHandler {
+    public interface InflationCallback {
         void handleInflationException(StatusBarNotification notification, InflationException e);
+        void onAsyncInflationFinished(NotificationData.Entry entry);
     }
 
     public void onDensityOrFontScaleChanged() {
@@ -299,12 +283,67 @@ public class NotificationInflater {
         entry.cachedContentView = null;
         entry.cachedHeadsUpContentView = null;
         entry.cachedPublicContentView = null;
-        try {
-            inflateNotificationViews();
-        } catch (InflationException e) {
-            mInflateExceptionHandler.handleInflationException(
-                    mRow.getStatusBarNotification(), e);
+        inflateNotificationViews();
+    }
+
+    private class AsyncInflationTask extends AsyncTask<Void, Void, Notification.Builder> {
+
+        private final StatusBarNotification mSbn;
+        private final Context mContext;
+        private final int mReInflateFlags;
+        private Context mPackageContext = null;
+        private Exception mError;
+
+        private AsyncInflationTask(Context context, StatusBarNotification notification,
+                int reInflateFlags) {
+            mSbn = notification;
+            mContext = context;
+            mReInflateFlags = reInflateFlags;
+            mRow.getEntry().addInflationTask(this);
+        }
+
+        @Override
+        protected Notification.Builder doInBackground(Void... params) {
+            try {
+                final Notification.Builder recoveredBuilder
+                        = Notification.Builder.recoverBuilder(mContext,
+                        mSbn.getNotification());
+                mPackageContext = mSbn.getPackageContext(mContext);
+                return recoveredBuilder;
+            } catch (Exception e) {
+                mError = e;
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Notification.Builder builder) {
+            if (mError == null) {
+                finishInflation(mReInflateFlags, builder, mPackageContext);
+            } else {
+                handleError(mError);
+            }
         }
     }
 
+    private void finishInflation(int reinflationFlags, Notification.Builder builder,
+            Context context) {
+        try {
+            inflateNotificationViews(reinflationFlags, builder, context);
+        } catch (RuntimeException e){
+            handleError(e);
+            return;
+        }
+        mRow.onNotificationUpdated();
+        mCallback.onAsyncInflationFinished(mRow.getEntry());
+    }
+
+    private void handleError(Exception e) {
+        StatusBarNotification sbn = mRow.getStatusBarNotification();
+        final String ident = sbn.getPackageName() + "/0x"
+                + Integer.toHexString(sbn.getId());
+        Log.e(StatusBar.TAG, "couldn't inflate view for notification " + ident, e);
+        mCallback.handleInflationException(sbn,
+                new InflationException("Couldn't inflate contentViews" + e));
+    }
 }
