@@ -76,17 +76,23 @@
             android:id="@+id/bottom_label_space"
             android:layout_width="@dimen/usage_graph_labels_width"
             android:layout_height="wrap_content"/>
-        <include android:id="@+id/label_start"
-            layout="@layout/usage_side_label" />
-
-        <Space
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr">
+            <include android:id="@+id/label_start"
+                     layout="@layout/usage_side_label" />
 
-        <include android:id="@+id/label_end"
-            layout="@layout/usage_side_label" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
+            <include android:id="@+id/label_end"
+                     layout="@layout/usage_side_label" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
