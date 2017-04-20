@@ -527,7 +527,7 @@ public class TileUtils {
             return null;
         }
         if (!providerMap.containsKey(authority)) {
-            providerMap.put(authority, context.getContentResolver().acquireProvider(uri));
+            providerMap.put(authority, context.getContentResolver().acquireUnstableProvider(uri));
         }
         return providerMap.get(authority);
     }

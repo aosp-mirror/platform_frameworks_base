@@ -307,8 +307,10 @@ public class TileUtilsTest {
         when(mIContentProvider.call(anyString(),
                 eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
                 any())).thenReturn(bundle);
-        when(mContentResolver.acquireProvider(anyString())).thenReturn(mIContentProvider);
-        when(mContentResolver.acquireProvider(any(Uri.class))).thenReturn(mIContentProvider);
+        when(mContentResolver.acquireUnstableProvider(anyString()))
+                .thenReturn(mIContentProvider);
+        when(mContentResolver.acquireUnstableProvider(any(Uri.class)))
+                .thenReturn(mIContentProvider);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
