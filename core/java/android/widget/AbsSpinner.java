@@ -27,7 +27,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStructure;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.R;
@@ -493,37 +492,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     }
 
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
-
-    @Override
-    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutofillStructure(structure, flags);
-
-        final SpinnerAdapter adapter = getAdapter();
-
-        if (adapter == null) return;
-
-        // TODO(b/33197203): implement sanitization so initial value is only sanitized when coming
-        // from resources.
-
-        final int count = adapter.getCount();
-        int size = 0;
-        if (count > 0) {
-            final String[] options = new String[count];
-            for (int i = 0; i < count; i++) {
-                final Object item = adapter.getItem(i);
-                if (item != null) {
-                    options[size++] = item.toString();
-                }
-            }
-            if (size == count) {
-                structure.setAutofillOptions(options);
-            } else {
-                final String[] validOptions = new String[size];
-                System.arraycopy(options, 0, validOptions, 0, size);
-                structure.setAutofillOptions(validOptions);
-            }
-        }
-    }
 
     @Override
     public void autofill(AutofillValue value) {

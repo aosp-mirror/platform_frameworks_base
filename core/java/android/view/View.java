@@ -7280,7 +7280,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>The view contents does not include PII (Personally Identifiable Information), so it
      * can call {@link ViewStructure#setDataIsSensitive(boolean)} passing {@code false}.
      * <li>It must set fields such {@link ViewStructure#setText(CharSequence)},
-     * {@link ViewStructure#setAutofillOptions(String[])}, or {@link ViewStructure#setUrl(String)}.
+     * {@link ViewStructure#setAutofillOptions(CharSequence[])},
+     * or {@link ViewStructure#setUrl(String)}.
      * </ol>
      *
      * @param structure Fill in with structured view data. The default implementation
