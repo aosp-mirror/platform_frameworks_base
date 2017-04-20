@@ -43,6 +43,22 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+
+/**
+ * A proxy to BackupManagerService implementation.
+ *
+ * This is an external interface to the BackupManagerService which is being accessed via published
+ * binder (see BackupManagerService$Lifecycle). This lets us turn down the heavy implementation
+ * object on the fly without disturbing binders that have been cached somewhere in the system.
+ *
+ * This is where it is decided whether backup subsystem is available. It can be disabled with the
+ * following two methods:
+ *
+ * <ul>
+ * <li> Temporarily - create a file named Trampoline.BACKUP_SUPPRESS_FILENAME, or
+ * <li> Product level - set Trampoline.BACKUP_DISABLE_PROPERTY system property to true.
+ * </ul>
+ */
 public class Trampoline extends IBackupManager.Stub {
     static final String TAG = "BackupManagerService";
     static final boolean DEBUG_TRAMPOLINE = false;
@@ -59,14 +75,20 @@ public class Trampoline extends IBackupManager.Stub {
     volatile BackupManagerServiceInterface mService;
 
     public Trampoline(Context context) {
-        mContext = context;
-        File dir = new File(Environment.getDataDirectory(), "backup");
-        dir.mkdirs();
-        mSuppressFile = new File(dir, BACKUP_SUPPRESS_FILENAME);
-        mGlobalDisable = SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
+        this(context,
+                SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false),
+                new File(new File(Environment.getDataDirectory(), "backup"),
+                        BACKUP_SUPPRESS_FILENAME));
     }
 
-    private BackupManagerServiceInterface createService() {
+    protected Trampoline(Context context, boolean globalDisable, File suppressFile) {
+        mContext = context;
+        mGlobalDisable = globalDisable;
+        mSuppressFile = suppressFile;
+        mSuppressFile.getParentFile().mkdirs();
+    }
+
+    protected BackupManagerServiceInterface createService() {
         boolean refactoredServiceEnabled = Settings.Global.getInt(mContext.getContentResolver(),
             Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 1) == 0;
         if (refactoredServiceEnabled) {
