@@ -287,6 +287,12 @@ public class FontsContract {
          */
         public static final int STATUS_UNEXPECTED_DATA_PROVIDED = 2;
 
+        /**
+         * Constant represents that the fetching font data was rejected by system. This happens if
+         * the passed context is restricted.
+         */
+        public static final int STATUS_REJECTED = 3;
+
         /** @hide */
         @IntDef({STATUS_OK, STATUS_WRONG_CERTIFICATES, STATUS_UNEXPECTED_DATA_PROVIDED})
         @Retention(RetentionPolicy.SOURCE)
@@ -559,6 +565,10 @@ public class FontsContract {
     public static @NonNull FontFamilyResult fetchFonts(
             @NonNull Context context, @Nullable CancellationSignal cancellationSignal,
             @NonNull FontRequest request) throws NameNotFoundException {
+        if (context.isRestricted()) {
+            // TODO: Should we allow if the peer process is system or myself?
+            return new FontFamilyResult(FontFamilyResult.STATUS_REJECTED, null);
+        }
         ProviderInfo providerInfo = getProvider(context.getPackageManager(), request);
         if (providerInfo == null) {
             return new FontFamilyResult(FontFamilyResult.STATUS_WRONG_CERTIFICATES, null);
@@ -594,6 +604,10 @@ public class FontsContract {
     public static Typeface buildTypeface(@NonNull Context context,
             @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fonts,
             int weight, boolean italic, @Nullable String fallbackFontName) {
+        if (context.isRestricted()) {
+            // TODO: Should we allow if the peer process is system or myself?
+            return null;
+        }
         final Map<Uri, ByteBuffer> uriBuffer =
                 prepareFontData(context, fonts, cancellationSignal);
         return new Typeface.Builder(fonts, uriBuffer)
@@ -617,6 +631,10 @@ public class FontsContract {
      */
     public static Typeface buildTypeface(@NonNull Context context,
             @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fonts) {
+        if (context.isRestricted()) {
+            // TODO: Should we allow if the peer process is system or myself?
+            return null;
+        }
         final Map<Uri, ByteBuffer> uriBuffer =
                 prepareFontData(context, fonts, cancellationSignal);
         return new Typeface.Builder(fonts, uriBuffer).build();
