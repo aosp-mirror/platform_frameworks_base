@@ -21,6 +21,7 @@
 #include <SkColorMatrixFilter.h>
 #include <SkColorSpace.h>
 #include <SkImagePriv.h>
+#include <SkPathOps.h>
 #include <SkShader.h>
 
 using namespace android;
@@ -89,6 +90,16 @@ TEST(SkiaBehavior, porterDuffCreateIsCached) {
     ASSERT_NE(expected, paint.getBlendMode());
     paint.setBlendMode(SkBlendMode::kOverlay);
     ASSERT_EQ(expected, paint.getBlendMode());
+}
+
+TEST(SkiaBehavior, pathIntersection) {
+    SkPath p0, p1, result;
+    p0.addRect(SkRect::MakeXYWH(-5.0f, 0.0f, 1080.0f, 242.0f));
+    p1.addRect(SkRect::MakeXYWH(0.0f, 0.0f, 1080.0f, 242.0f));
+    Op(p0, p1, kIntersect_SkPathOp, &result);
+    SkRect resultRect;
+    ASSERT_TRUE(result.isRect(&resultRect));
+    ASSERT_EQ(SkRect::MakeXYWH(0.0f, 0.0f, 1075.0f, 242.0f), resultRect);
 }
 
 TEST(SkiaBehavior, srgbColorSpaceIsSingleton) {
