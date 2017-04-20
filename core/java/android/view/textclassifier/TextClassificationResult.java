@@ -47,6 +47,7 @@ public final class TextClassificationResult {
     @Nullable private final OnClickListener mOnClickListener;
     @NonNull private final EntityConfidence<String> mEntityConfidence;
     @NonNull private final List<String> mEntities;
+    private int mLogType;
 
     private TextClassificationResult(
             @NonNull String text,
@@ -54,7 +55,8 @@ public final class TextClassificationResult {
             String label,
             Intent intent,
             OnClickListener onClickListener,
-            @NonNull EntityConfidence<String> entityConfidence) {
+            @NonNull EntityConfidence<String> entityConfidence,
+            int logType) {
         mText = text;
         mIcon = icon;
         mLabel = label;
@@ -62,6 +64,7 @@ public final class TextClassificationResult {
         mOnClickListener = onClickListener;
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
         mEntities = mEntityConfidence.getEntities();
+        mLogType = logType;
     }
 
     /**
@@ -134,6 +137,14 @@ public final class TextClassificationResult {
         return mOnClickListener;
     }
 
+    /**
+     * Returns the MetricsLogger subtype for the action that is performed for this result.
+     * @hide
+     */
+    public int getLogType() {
+        return mLogType;
+    }
+
     @Override
     public String toString() {
         return String.format("TextClassificationResult {"
@@ -167,6 +178,7 @@ public final class TextClassificationResult {
         @Nullable private OnClickListener mOnClickListener;
         @NonNull private final EntityConfidence<String> mEntityConfidence =
                 new EntityConfidence<>();
+        private int mLogType;
 
         /**
          * Sets the classified text.
@@ -215,6 +227,15 @@ public final class TextClassificationResult {
         }
 
         /**
+         * Sets the MetricsLogger subtype for the action that is performed for this result.
+         * @hide
+         */
+        public Builder setLogType(int type) {
+            mLogType = type;
+            return this;
+        }
+
+        /**
          * Sets an OnClickListener that may be triggered to act on the classified text.
          */
         public Builder setOnClickListener(@Nullable OnClickListener onClickListener) {
@@ -227,7 +248,7 @@ public final class TextClassificationResult {
          */
         public TextClassificationResult build() {
             return new TextClassificationResult(
-                    mText, mIcon, mLabel, mIntent, mOnClickListener, mEntityConfidence);
+                    mText, mIcon, mLabel, mIntent, mOnClickListener, mEntityConfidence, mLogType);
         }
     }
 }
