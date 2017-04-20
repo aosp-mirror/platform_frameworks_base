@@ -51,6 +51,9 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Retention(CLASS)
 @Target({ANNOTATION_TYPE})
 public @interface IntDef {
+    /** Defines the constant prefix for this element */
+    String[] prefix() default "";
+
     /** Defines the allowed constants for this element */
     long[] value() default {};
 
