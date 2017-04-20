@@ -309,6 +309,12 @@ public class NotificationInflater {
                         = Notification.Builder.recoverBuilder(mContext,
                         mSbn.getNotification());
                 mPackageContext = mSbn.getPackageContext(mContext);
+                Notification notification = mSbn.getNotification();
+                if (notification.isColorizedMedia()) {
+                    MediaNotificationProcessor processor = new MediaNotificationProcessor(
+                            mPackageContext);
+                    processor.processNotification(notification, recoveredBuilder);
+                }
                 return recoveredBuilder;
             } catch (Exception e) {
                 mError = e;
