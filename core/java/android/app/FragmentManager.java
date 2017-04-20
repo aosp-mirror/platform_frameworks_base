@@ -1464,13 +1464,17 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                     } else {
                         final ViewGroup container = fragment.mContainer;
                         final View animatingView = fragment.mView;
-                        container.startViewTransition(animatingView);
+                        if (container != null) {
+                            container.startViewTransition(animatingView);
+                        }
                         // Delay the actual hide operation until the animation finishes, otherwise
                         // the fragment will just immediately disappear
                         anim.addListener(new AnimatorListenerAdapter() {
                             @Override
                             public void onAnimationEnd(Animator animation) {
-                                container.endViewTransition(animatingView);
+                                if (container != null) {
+                                    container.endViewTransition(animatingView);
+                                }
                                 animation.removeListener(this);
                                 animatingView.setVisibility(View.GONE);
                             }
