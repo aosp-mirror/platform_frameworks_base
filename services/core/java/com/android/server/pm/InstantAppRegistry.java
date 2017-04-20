@@ -35,6 +35,7 @@ import android.os.Message;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.ByteStringUtils;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -56,8 +57,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -81,6 +84,7 @@ class InstantAppRegistry {
     private static final String INSTANT_APP_COOKIE_FILE_PREFIX = "cookie_";
     private static final String INSTANT_APP_COOKIE_FILE_SIFFIX = ".dat";
     private static final String INSTANT_APP_METADATA_FILE = "metadata.xml";
+    private static final String INSTANT_APP_ANDROID_ID_FILE = "android_id";
 
     private static final String TAG_PACKAGE = "package";
     private static final String TAG_PERMISSIONS = "permissions";
@@ -193,6 +197,36 @@ class InstantAppRegistry {
             return BitmapFactory.decodeFile(iconFile.toString());
         }
         return null;
+    }
+
+    public String getInstantAppAndroidIdLPw(@NonNull String packageName,
+                                            @UserIdInt int userId) {
+        File idFile = new File(getInstantApplicationDir(packageName, userId),
+                INSTANT_APP_ANDROID_ID_FILE);
+        if (idFile.exists()) {
+            try {
+                return IoUtils.readFileAsString(idFile.getAbsolutePath());
+            } catch (IOException e) {
+                Slog.e(LOG_TAG, "Failed to read instant app android id file: " + idFile, e);
+            }
+        }
+        return generateInstantAppAndroidIdLPw(packageName, userId);
+    }
+
+    private String generateInstantAppAndroidIdLPw(@NonNull String packageName,
+                                                @UserIdInt int userId) {
+        byte[] randomBytes = new byte[8];
+        new SecureRandom().nextBytes(randomBytes);
+        String id = ByteStringUtils.toHexString(randomBytes).toLowerCase(Locale.US);
+        File idFile = new File(getInstantApplicationDir(packageName, userId),
+                INSTANT_APP_ANDROID_ID_FILE);
+        try (FileOutputStream fos = new FileOutputStream(idFile)) {
+            fos.write(id.getBytes());
+        } catch (IOException e) {
+            Slog.e(LOG_TAG, "Error writing instant app android id file: " + idFile, e);
+        }
+        return id;
+
     }
 
     public @Nullable List<InstantAppInfo> getInstantAppsLPr(@UserIdInt int userId) {
@@ -462,6 +496,7 @@ class InstantAppRegistry {
         File instantAppDir = getInstantApplicationDir(packageName, userId);
         new File(instantAppDir, INSTANT_APP_METADATA_FILE).delete();
         new File(instantAppDir, INSTANT_APP_ICON_FILE).delete();
+        new File(instantAppDir, INSTANT_APP_ANDROID_ID_FILE).delete();
         File cookie = peekInstantCookieFile(packageName, userId);
         if (cookie != null) {
             cookie.delete();

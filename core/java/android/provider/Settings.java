@@ -5082,6 +5082,10 @@ public final class Settings {
          * (available on certain devices running Android 4.2 or higher), each user appears as a
          * completely separate device, so the {@code ANDROID_ID} value is unique to each
          * user.</p>
+         *
+         * <p class="note"><strong>Note:</strong> If the caller is an Instant App the id is scoped
+         * to the Instant App, it is generated when the Instant App is first installed and reset if
+         * the user clears the Instant App.
          */
         public static final String ANDROID_ID = "android_id";
 
