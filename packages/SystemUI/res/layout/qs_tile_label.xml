@@ -24,10 +24,10 @@
     android:paddingTop="12dp">
     <LinearLayout
         android:id="@+id/label_group"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="horizontal">
