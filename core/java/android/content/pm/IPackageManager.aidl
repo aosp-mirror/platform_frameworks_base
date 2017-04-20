@@ -634,4 +634,6 @@ interface IPackageManager {
     ComponentName getInstantAppResolverSettingsComponent();
 
     ComponentName getInstantAppInstallerComponent();
+
+    String getInstantAppAndroidId(String packageName, int userId);
 }

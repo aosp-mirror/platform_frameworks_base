@@ -928,4 +928,9 @@ public class BridgePackageManager extends PackageManager {
     public ComponentName getInstantAppInstallerComponent() {
         return null;
     }
+
+    @Override
+    public String getInstantAppAndroidId(String packageName, UserHandle user) {
+        return null;
+    }
 }
