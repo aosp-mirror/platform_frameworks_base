@@ -923,6 +923,7 @@ public class UsbDeviceManager {
                     break;
                 case MSG_UPDATE_PORT_STATE:
                     SomeArgs args = (SomeArgs) msg.obj;
+                    boolean prevHostConnected = mHostConnected;
                     mHostConnected = (args.argi1 == 1);
                     mSourcePower = (args.argi2 == 1);
                     mSinkPower = (args.argi3 == 1);
@@ -930,7 +931,9 @@ public class UsbDeviceManager {
                     args.recycle();
                     updateUsbNotification(false);
                     if (mBootCompleted) {
-                        updateUsbStateBroadcastIfNeeded(false);
+                        if (mHostConnected || prevHostConnected) {
+                            updateUsbStateBroadcastIfNeeded(false);
+                        }
                     } else {
                         mPendingBootBroadcast = true;
                     }
