@@ -146,7 +146,7 @@ class InstantAppRegistry {
             @Nullable byte[] cookie, @UserIdInt int userId) {
         if (cookie != null && cookie.length > 0) {
             final int maxCookieSize = mService.mContext.getPackageManager()
-                    .getInstantAppCookieMaxSize();
+                    .getInstantAppCookieMaxBytes();
             if (cookie.length > maxCookieSize) {
                 Slog.e(LOG_TAG, "Instant app cookie for package " + packageName + " size "
                         + cookie.length + " bytes while max size is " + maxCookieSize);
