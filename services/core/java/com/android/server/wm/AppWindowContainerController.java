@@ -470,6 +470,13 @@ public class AppWindowContainerController
                 return false;
             }
 
+            final WindowState mainWin = mContainer.findMainWindow();
+            if (mainWin != null && mainWin.isVisible() && mainWin.isDrawnLw()) {
+                // App already has a visible window that is drawn...why would you want a starting
+                // window?
+                return false;
+            }
+
             final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                     allowTaskSnapshot);
 
