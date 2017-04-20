@@ -317,6 +317,10 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     }
 
     private void dismiss(View animView, float velocity) {
+        if (mFadeAnimator != null) {
+            mFadeAnimator.cancel();
+        }
+        mHandler.removeCallbacks(mCheckForDrag);
         mMenuSnappedTo = false;
         mDismissing = true;
         mSwipeHelper.dismiss(animView, velocity);
