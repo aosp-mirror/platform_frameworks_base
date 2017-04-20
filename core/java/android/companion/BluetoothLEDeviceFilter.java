@@ -225,6 +225,23 @@ public final class BluetoothLEDeviceFilter implements DeviceFilter<ScanResult> {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "BluetoothLEDeviceFilter{" +
+                "mNamePattern=" + mNamePattern +
+                ", mScanFilter=" + mScanFilter +
+                ", mRawDataFilter=" + Arrays.toString(mRawDataFilter) +
+                ", mRawDataFilterMask=" + Arrays.toString(mRawDataFilterMask) +
+                ", mRenamePrefix='" + mRenamePrefix + '\'' +
+                ", mRenameSuffix='" + mRenameSuffix + '\'' +
+                ", mRenameBytesFrom=" + mRenameBytesFrom +
+                ", mRenameBytesTo=" + mRenameBytesTo +
+                ", mRenameNameFrom=" + mRenameNameFrom +
+                ", mRenameNameTo=" + mRenameNameTo +
+                ", mRenameBytesReverseOrder=" + mRenameBytesReverseOrder +
+                '}';
+    }
+
     public static final Creator<BluetoothLEDeviceFilter> CREATOR
             = new Creator<BluetoothLEDeviceFilter>() {
         @Override
