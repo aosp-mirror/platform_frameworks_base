@@ -17,8 +17,10 @@
 package com.android.server.backup.restore;
 
 import android.util.Slog;
+
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.RefactoredBackupManagerService;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -27,13 +29,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
-  private static final String TAG = "AdbRestoreFinishedLatch";
+    private static final String TAG = "AdbRestoreFinishedLatch";
     private RefactoredBackupManagerService backupManagerService;
     final CountDownLatch mLatch;
     private final int mCurrentOpToken;
 
     public AdbRestoreFinishedLatch(RefactoredBackupManagerService backupManagerService,
-        int currentOpToken) {
+            int currentOpToken) {
         this.backupManagerService = backupManagerService;
         mLatch = new CountDownLatch(1);
         mCurrentOpToken = currentOpToken;
@@ -42,7 +44,8 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
     void await() {
         boolean latched = false;
         try {
-            latched = mLatch.await(RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
+            latched = mLatch.await(RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
+                    TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Slog.w(TAG, "Interrupted!");
         }

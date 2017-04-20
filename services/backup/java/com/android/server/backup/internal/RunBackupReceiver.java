@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Message;
 import android.util.Slog;
+
 import com.android.server.backup.RefactoredBackupManagerService;
 
 public class RunBackupReceiver extends BroadcastReceiver {
@@ -39,11 +40,12 @@ public class RunBackupReceiver extends BroadcastReceiver {
                     // If there are pending init operations, we process those
                     // and then settle into the usual periodic backup schedule.
                     if (RefactoredBackupManagerService.MORE_DEBUG) {
-                      Slog.v(RefactoredBackupManagerService.TAG, "Init pending at scheduled backup");
+                        Slog.v(RefactoredBackupManagerService.TAG,
+                                "Init pending at scheduled backup");
                     }
                     try {
                         backupManagerService.mAlarmManager.cancel(
-                            backupManagerService.mRunInitIntent);
+                                backupManagerService.mRunInitIntent);
                         backupManagerService.mRunInitIntent.send();
                     } catch (PendingIntent.CanceledException ce) {
                         Slog.e(RefactoredBackupManagerService.TAG, "Run init intent cancelled");
@@ -55,7 +57,7 @@ public class RunBackupReceiver extends BroadcastReceiver {
                     if (backupManagerService.mEnabled && backupManagerService.mProvisioned) {
                         if (!backupManagerService.mBackupRunning) {
                             if (RefactoredBackupManagerService.DEBUG) {
-                              Slog.v(RefactoredBackupManagerService.TAG, "Running a backup pass");
+                                Slog.v(RefactoredBackupManagerService.TAG, "Running a backup pass");
                             }
 
                             // Acquire the wakelock and pass it to the backup thread.  it will
@@ -64,14 +66,17 @@ public class RunBackupReceiver extends BroadcastReceiver {
                             backupManagerService.mWakelock.acquire();
 
                             Message msg = backupManagerService.mBackupHandler.obtainMessage(
-                                RefactoredBackupManagerService.MSG_RUN_BACKUP);
+                                    RefactoredBackupManagerService.MSG_RUN_BACKUP);
                             backupManagerService.mBackupHandler.sendMessage(msg);
                         } else {
-                            Slog.i(RefactoredBackupManagerService.TAG, "Backup time but one already running");
+                            Slog.i(RefactoredBackupManagerService.TAG,
+                                    "Backup time but one already running");
                         }
                     } else {
                         Slog.w(
-                            RefactoredBackupManagerService.TAG, "Backup pass but e=" + backupManagerService.mEnabled + " p=" + backupManagerService.mProvisioned);
+                                RefactoredBackupManagerService.TAG,
+                                "Backup pass but e=" + backupManagerService.mEnabled + " p="
+                                        + backupManagerService.mProvisioned);
                     }
                 }
             }

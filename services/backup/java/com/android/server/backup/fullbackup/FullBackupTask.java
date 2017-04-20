@@ -19,6 +19,7 @@ package com.android.server.backup.fullbackup;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.os.RemoteException;
 import android.util.Slog;
+
 import com.android.server.backup.RefactoredBackupManagerService;
 
 /**
@@ -38,7 +39,8 @@ public abstract class FullBackupTask implements Runnable {
             try {
                 mObserver.onStartBackup();
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "full backup observer went away: startBackup");
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "full backup observer went away: startBackup");
                 mObserver = null;
             }
         }
@@ -50,7 +52,8 @@ public abstract class FullBackupTask implements Runnable {
                 // TODO: use a more user-friendly name string
                 mObserver.onBackupPackage(name);
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "full backup observer went away: backupPackage");
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "full backup observer went away: backupPackage");
                 mObserver = null;
             }
         }
@@ -61,7 +64,8 @@ public abstract class FullBackupTask implements Runnable {
             try {
                 mObserver.onEndBackup();
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "full backup observer went away: endBackup");
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "full backup observer went away: endBackup");
                 mObserver = null;
             }
         }

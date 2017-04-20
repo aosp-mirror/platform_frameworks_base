@@ -54,10 +54,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Slog;
+
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -104,14 +106,14 @@ public class FullRestoreEngine extends RestoreEngine {
 
     // possible handling states for a given package in the restore dataset
     final HashMap<String, RestorePolicy> mPackagePolicies
-        = new HashMap<>();
+            = new HashMap<>();
 
     // installer package names for each encountered app, derived from the manifests
     final HashMap<String, String> mPackageInstallers = new HashMap<>();
 
     // Signatures for a given package found in its manifest file
     final HashMap<String, Signature[]> mManifestSignatures
-        = new HashMap<>();
+            = new HashMap<>();
 
     // Packages we've already wiped data on when restoring their first file
     final HashSet<String> mClearedPackages = new HashSet<>();
@@ -134,13 +136,13 @@ public class FullRestoreEngine extends RestoreEngine {
     // invocations of the full restore API asynchronously. Used by adb restore.
     class RestoreFileRunnable implements Runnable {
 
-      IBackupAgent mAgent;
+        IBackupAgent mAgent;
         FileMetadata mInfo;
         ParcelFileDescriptor mSocket;
         int mToken;
 
         RestoreFileRunnable(IBackupAgent agent, FileMetadata info,
-            ParcelFileDescriptor socket, int token) throws IOException {
+                ParcelFileDescriptor socket, int token) throws IOException {
             mAgent = agent;
             mInfo = info;
             mToken = token;
@@ -157,8 +159,8 @@ public class FullRestoreEngine extends RestoreEngine {
         public void run() {
             try {
                 mAgent.doRestoreFile(mSocket, mInfo.size, mInfo.type,
-                    mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
-                    mToken, backupManagerService.mBackupManagerBinder);
+                        mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
+                        mToken, backupManagerService.mBackupManagerBinder);
             } catch (RemoteException e) {
                 // never happens; this is used strictly for local binder calls
             }
@@ -166,9 +168,9 @@ public class FullRestoreEngine extends RestoreEngine {
     }
 
     public FullRestoreEngine(RefactoredBackupManagerService backupManagerService,
-        BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
-        IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
-        boolean allowObbs, int ephemeralOpToken) {
+            BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
+            IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
+            boolean allowObbs, int ephemeralOpToken) {
         this.backupManagerService = backupManagerService;
         mEphemeralOpToken = ephemeralOpToken;
         mMonitorTask = monitorTask;
@@ -212,8 +214,9 @@ public class FullRestoreEngine extends RestoreEngine {
                     // one app's data but see a different app's on the wire
                     if (mOnlyPackage != null) {
                         if (!pkg.equals(mOnlyPackage.packageName)) {
-                            Slog.w(RefactoredBackupManagerService.TAG, "Expected data for " + mOnlyPackage
-                                + " but saw " + pkg);
+                            Slog.w(RefactoredBackupManagerService.TAG,
+                                    "Expected data for " + mOnlyPackage
+                                            + " but saw " + pkg);
                             setResult(RestoreEngine.TRANSPORT_FAILURE);
                             setRunning(false);
                             return false;
@@ -230,7 +233,8 @@ public class FullRestoreEngine extends RestoreEngine {
                     // and let the observer know we're considering a new app.
                     if (mAgent != null) {
                         if (RefactoredBackupManagerService.DEBUG) {
-                          Slog.d(RefactoredBackupManagerService.TAG, "Saw new package; finalizing old one");
+                            Slog.d(RefactoredBackupManagerService.TAG,
+                                    "Saw new package; finalizing old one");
                         }
                         // Now we're really done
                         tearDownPipes();
@@ -248,7 +252,8 @@ public class FullRestoreEngine extends RestoreEngine {
                     // input file
                     skipTarPadding(info.size, instream);
                     sendOnRestorePackage(pkg);
-                } else if (info.path.equals(RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
+                } else if (info.path.equals(
+                        RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
                     // Metadata blobs!
                     readMetadata(info, instream);
                     skipTarPadding(info.size, instream);
@@ -267,15 +272,16 @@ public class FullRestoreEngine extends RestoreEngine {
                             // see MUST be the apk.
                             if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
                                 if (RefactoredBackupManagerService.DEBUG) {
-                                  Slog.d(RefactoredBackupManagerService.TAG, "APK file; installing");
+                                    Slog.d(RefactoredBackupManagerService.TAG,
+                                            "APK file; installing");
                                 }
                                 // Try to install the app.
                                 String installerName = mPackageInstallers.get(pkg);
                                 okay = installApk(info, installerName, instream);
                                 // good to go; promote to ACCEPT
                                 mPackagePolicies.put(pkg, (okay)
-                                    ? RestorePolicy.ACCEPT
-                                    : RestorePolicy.IGNORE);
+                                        ? RestorePolicy.ACCEPT
+                                        : RestorePolicy.IGNORE);
                                 // At this point we've consumed this file entry
                                 // ourselves, so just strip the tar footer and
                                 // go on to the next file in the input stream
@@ -292,7 +298,8 @@ public class FullRestoreEngine extends RestoreEngine {
                         case ACCEPT:
                             if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
                                 if (RefactoredBackupManagerService.DEBUG) {
-                                  Slog.d(RefactoredBackupManagerService.TAG, "apk present but ACCEPT");
+                                    Slog.d(RefactoredBackupManagerService.TAG,
+                                            "apk present but ACCEPT");
                                 }
                                 // we can take the data without the apk, so we
                                 // *want* to do so.  skip the apk by declaring this
@@ -306,7 +313,8 @@ public class FullRestoreEngine extends RestoreEngine {
                             // Something has gone dreadfully wrong when determining
                             // the restore policy from the manifest.  Ignore the
                             // rest of this package's data.
-                            Slog.e(RefactoredBackupManagerService.TAG, "Invalid policy from manifest");
+                            Slog.e(RefactoredBackupManagerService.TAG,
+                                    "Invalid policy from manifest");
                             okay = false;
                             mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
                             break;
@@ -320,15 +328,18 @@ public class FullRestoreEngine extends RestoreEngine {
                     // If the policy is satisfied, go ahead and set up to pipe the
                     // data to the agent.
                     if (RefactoredBackupManagerService.MORE_DEBUG && okay && mAgent != null) {
-                        Slog.i(RefactoredBackupManagerService.TAG, "Reusing existing agent instance");
+                        Slog.i(RefactoredBackupManagerService.TAG,
+                                "Reusing existing agent instance");
                     }
                     if (okay && mAgent == null) {
                         if (RefactoredBackupManagerService.MORE_DEBUG) {
-                          Slog.d(RefactoredBackupManagerService.TAG, "Need to launch agent for " + pkg);
+                            Slog.d(RefactoredBackupManagerService.TAG,
+                                    "Need to launch agent for " + pkg);
                         }
 
                         try {
-                            mTargetApp = backupManagerService.mPackageManager.getApplicationInfo(pkg, 0);
+                            mTargetApp = backupManagerService.mPackageManager.getApplicationInfo(
+                                    pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
                             // need to clear it first.  Check that.
@@ -338,28 +349,29 @@ public class FullRestoreEngine extends RestoreEngine {
                                 // restore.
                                 if (mTargetApp.backupAgentName == null) {
                                     if (RefactoredBackupManagerService.DEBUG) {
-                                      Slog.d(RefactoredBackupManagerService.TAG,
-                                          "Clearing app data preparatory to full restore");
+                                        Slog.d(RefactoredBackupManagerService.TAG,
+                                                "Clearing app data preparatory to full restore");
                                     }
                                     backupManagerService.clearApplicationDataSynchronous(pkg);
                                 } else {
                                     if (RefactoredBackupManagerService.MORE_DEBUG) {
-                                      Slog.d(RefactoredBackupManagerService.TAG, "backup agent ("
-                                          + mTargetApp.backupAgentName + ") => no clear");
+                                        Slog.d(RefactoredBackupManagerService.TAG, "backup agent ("
+                                                + mTargetApp.backupAgentName + ") => no clear");
                                     }
                                 }
                                 mClearedPackages.add(pkg);
                             } else {
                                 if (RefactoredBackupManagerService.MORE_DEBUG) {
                                     Slog.d(RefactoredBackupManagerService.TAG,
-                                        "We've initialized this app already; no clear required");
+                                            "We've initialized this app already; no clear "
+                                                    + "required");
                                 }
                             }
 
                             // All set; now set up the IPC and launch the agent
                             setUpPipes();
                             mAgent = backupManagerService.bindToAgentSynchronous(mTargetApp,
-                                ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
+                                    ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
                             mAgentPackage = pkg;
                         } catch (IOException e) {
                             // fall through to error handling
@@ -369,7 +381,8 @@ public class FullRestoreEngine extends RestoreEngine {
 
                         if (mAgent == null) {
                             Slog.e(
-                                RefactoredBackupManagerService.TAG, "Unable to create agent for " + pkg);
+                                    RefactoredBackupManagerService.TAG,
+                                    "Unable to create agent for " + pkg);
                             okay = false;
                             tearDownPipes();
                             mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
@@ -380,7 +393,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     // should never happen but a little paranoia here won't go amiss.
                     if (okay && !pkg.equals(mAgentPackage)) {
                         Slog.e(RefactoredBackupManagerService.TAG, "Restoring data for " + pkg
-                            + " but agent is for " + mAgentPackage);
+                                + " but agent is for " + mAgentPackage);
                         okay = false;
                     }
 
@@ -393,46 +406,54 @@ public class FullRestoreEngine extends RestoreEngine {
                         long toCopy = info.size;
                         try {
                             backupManagerService.prepareOperationTimeout(mEphemeralOpToken,
-                                RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL, mMonitorTask,
-                                RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT);
+                                    RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
+                                    mMonitorTask,
+                                    RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT);
 
                             if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
                                 if (RefactoredBackupManagerService.DEBUG) {
-                                  Slog.d(RefactoredBackupManagerService.TAG, "Restoring OBB file for " + pkg
-                                      + " : " + info.path);
+                                    Slog.d(RefactoredBackupManagerService.TAG,
+                                            "Restoring OBB file for " + pkg
+                                                    + " : " + info.path);
                                 }
                                 mObbConnection.restoreObbFile(pkg, mPipes[0],
-                                    info.size, info.type, info.path, info.mode,
-                                    info.mtime, mEphemeralOpToken, backupManagerService.mBackupManagerBinder);
+                                        info.size, info.type, info.path, info.mode,
+                                        info.mtime, mEphemeralOpToken,
+                                        backupManagerService.mBackupManagerBinder);
                             } else {
                                 if (RefactoredBackupManagerService.MORE_DEBUG) {
-                                  Slog.d(RefactoredBackupManagerService.TAG, "Invoking agent to restore file "
-                                      + info.path);
+                                    Slog.d(RefactoredBackupManagerService.TAG,
+                                            "Invoking agent to restore file "
+                                                    + info.path);
                                 }
                                 // fire up the app's agent listening on the socket.  If
                                 // the agent is running in the system process we can't
                                 // just invoke it asynchronously, so we provide a thread
                                 // for it here.
                                 if (mTargetApp.processName.equals("system")) {
-                                    Slog.d(RefactoredBackupManagerService.TAG, "system process agent - spinning a thread");
+                                    Slog.d(RefactoredBackupManagerService.TAG,
+                                            "system process agent - spinning a thread");
                                     RestoreFileRunnable runner = new RestoreFileRunnable(
-                                        mAgent, info, mPipes[0], mEphemeralOpToken);
+                                            mAgent, info, mPipes[0], mEphemeralOpToken);
                                     new Thread(runner, "restore-sys-runner").start();
                                 } else {
                                     mAgent.doRestoreFile(mPipes[0], info.size, info.type,
-                                        info.domain, info.path, info.mode, info.mtime,
-                                        mEphemeralOpToken, backupManagerService.mBackupManagerBinder);
+                                            info.domain, info.path, info.mode, info.mtime,
+                                            mEphemeralOpToken,
+                                            backupManagerService.mBackupManagerBinder);
                                 }
                             }
                         } catch (IOException e) {
                             // couldn't dup the socket for a process-local restore
-                            Slog.d(RefactoredBackupManagerService.TAG, "Couldn't establish restore");
+                            Slog.d(RefactoredBackupManagerService.TAG,
+                                    "Couldn't establish restore");
                             agentSuccess = false;
                             okay = false;
                         } catch (RemoteException e) {
                             // whoops, remote entity went away.  We'll eat the content
                             // ourselves, then, and not copy it over.
-                            Slog.e(RefactoredBackupManagerService.TAG, "Agent crashed during full restore");
+                            Slog.e(RefactoredBackupManagerService.TAG,
+                                    "Agent crashed during full restore");
                             agentSuccess = false;
                             okay = false;
                         }
@@ -440,21 +461,22 @@ public class FullRestoreEngine extends RestoreEngine {
                         // Copy over the data if the agent is still good
                         if (okay) {
                             if (RefactoredBackupManagerService.MORE_DEBUG) {
-                                Slog.v(RefactoredBackupManagerService.TAG, "  copying to restore agent: "
-                                    + toCopy + " bytes");
+                                Slog.v(RefactoredBackupManagerService.TAG,
+                                        "  copying to restore agent: "
+                                                + toCopy + " bytes");
                             }
                             boolean pipeOkay = true;
                             FileOutputStream pipe = new FileOutputStream(
-                                mPipes[1].getFileDescriptor());
+                                    mPipes[1].getFileDescriptor());
                             while (toCopy > 0) {
                                 int toRead = (toCopy > mBuffer.length)
-                                    ? mBuffer.length : (int) toCopy;
+                                        ? mBuffer.length : (int) toCopy;
                                 int nRead = instream.read(mBuffer, 0, toRead);
                                 if (nRead >= 0) {
-                                  mBytes += nRead;
+                                    mBytes += nRead;
                                 }
                                 if (nRead <= 0) {
-                                  break;
+                                    break;
                                 }
                                 toCopy -= nRead;
 
@@ -464,8 +486,9 @@ public class FullRestoreEngine extends RestoreEngine {
                                     try {
                                         pipe.write(mBuffer, 0, nRead);
                                     } catch (IOException e) {
-                                        Slog.e(RefactoredBackupManagerService.TAG, "Failed to write to restore pipe: "
-                                            + e.getMessage());
+                                        Slog.e(RefactoredBackupManagerService.TAG,
+                                                "Failed to write to restore pipe: "
+                                                        + e.getMessage());
                                         pipeOkay = false;
                                     }
                                 }
@@ -477,15 +500,17 @@ public class FullRestoreEngine extends RestoreEngine {
 
                             // and now that we've sent it all, wait for the remote
                             // side to acknowledge receipt
-                            agentSuccess = backupManagerService.waitUntilOperationComplete(mEphemeralOpToken);
+                            agentSuccess = backupManagerService.waitUntilOperationComplete(
+                                    mEphemeralOpToken);
                         }
 
                         // okay, if the remote end failed at any point, deal with
                         // it by ignoring the rest of the restore on it
                         if (!agentSuccess) {
-                            Slog.w(RefactoredBackupManagerService.TAG, "Agent failure; ending restore");
+                            Slog.w(RefactoredBackupManagerService.TAG,
+                                    "Agent failure; ending restore");
                             backupManagerService.mBackupHandler.removeMessages(
-                                RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
+                                    RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp);
                             mAgent = null;
@@ -506,18 +531,18 @@ public class FullRestoreEngine extends RestoreEngine {
                     // next stream entry by reading and discarding this file.
                     if (!okay) {
                         if (RefactoredBackupManagerService.MORE_DEBUG) {
-                          Slog.d(RefactoredBackupManagerService.TAG, "[discarding file content]");
+                            Slog.d(RefactoredBackupManagerService.TAG, "[discarding file content]");
                         }
                         long bytesToConsume = (info.size + 511) & ~511;
                         while (bytesToConsume > 0) {
                             int toRead = (bytesToConsume > mBuffer.length)
-                                ? mBuffer.length : (int) bytesToConsume;
+                                    ? mBuffer.length : (int) bytesToConsume;
                             long nRead = instream.read(mBuffer, 0, toRead);
                             if (nRead >= 0) {
-                              mBytes += nRead;
+                                mBytes += nRead;
                             }
                             if (nRead <= 0) {
-                              break;
+                                break;
                             }
                             bytesToConsume -= nRead;
                         }
@@ -526,7 +551,8 @@ public class FullRestoreEngine extends RestoreEngine {
             }
         } catch (IOException e) {
             if (RefactoredBackupManagerService.DEBUG) {
-              Slog.w(RefactoredBackupManagerService.TAG, "io exception on restore socket read: " + e.getMessage());
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "io exception on restore socket read: " + e.getMessage());
             }
             setResult(RestoreEngine.TRANSPORT_FAILURE);
             info = null;
@@ -535,7 +561,8 @@ public class FullRestoreEngine extends RestoreEngine {
         // If we got here we're either running smoothly or we've finished
         if (info == null) {
             if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.i(RefactoredBackupManagerService.TAG, "No [more] data for this package; tearing down");
+                Slog.i(RefactoredBackupManagerService.TAG,
+                        "No [more] data for this package; tearing down");
             }
             tearDownPipes();
             setRunning(false);
@@ -584,7 +611,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
     class RestoreInstallObserver extends PackageInstallObserver {
 
-      final AtomicBoolean mDone = new AtomicBoolean();
+        final AtomicBoolean mDone = new AtomicBoolean();
         String mPackageName;
         int mResult;
 
@@ -611,7 +638,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
         @Override
         public void onPackageInstalled(String packageName, int returnCode,
-            String msg, Bundle extras) {
+                String msg, Bundle extras) {
             synchronized (mDone) {
                 mResult = returnCode;
                 mPackageName = packageName;
@@ -623,7 +650,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
     class RestoreDeleteObserver extends IPackageDeleteObserver.Stub {
 
-      final AtomicBoolean mDone = new AtomicBoolean();
+        final AtomicBoolean mDone = new AtomicBoolean();
         int mResult;
 
         public void reset() {
@@ -660,7 +687,8 @@ public class FullRestoreEngine extends RestoreEngine {
         boolean okay = true;
 
         if (RefactoredBackupManagerService.DEBUG) {
-          Slog.d(RefactoredBackupManagerService.TAG, "Installing from backup: " + info.packageName);
+            Slog.d(RefactoredBackupManagerService.TAG,
+                    "Installing from backup: " + info.packageName);
         }
 
         // The file content is an .apk file.  Copy it out to a staging location and
@@ -674,7 +702,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 long toRead = (buffer.length < size) ? buffer.length : size;
                 int didRead = instream.read(buffer, 0, (int) toRead);
                 if (didRead >= 0) {
-                  mBytes += didRead;
+                    mBytes += didRead;
                 }
                 apkStream.write(buffer, 0, didRead);
                 size -= didRead;
@@ -688,8 +716,8 @@ public class FullRestoreEngine extends RestoreEngine {
             Uri packageUri = Uri.fromFile(apkFile);
             mInstallObserver.reset();
             backupManagerService.mPackageManager.installPackage(packageUri, mInstallObserver,
-                PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
-                installerPackage);
+                    PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
+                    installerPackage);
             mInstallObserver.waitForCompletion();
 
             if (mInstallObserver.getResult() != PackageManager.INSTALL_SUCCEEDED) {
@@ -703,20 +731,24 @@ public class FullRestoreEngine extends RestoreEngine {
                 // Okay, the install succeeded.  Make sure it was the right app.
                 boolean uninstall = false;
                 if (!mInstallObserver.mPackageName.equals(info.packageName)) {
-                    Slog.w(RefactoredBackupManagerService.TAG, "Restore stream claimed to include apk for "
-                        + info.packageName + " but apk was really "
-                        + mInstallObserver.mPackageName);
+                    Slog.w(RefactoredBackupManagerService.TAG,
+                            "Restore stream claimed to include apk for "
+                                    + info.packageName + " but apk was really "
+                                    + mInstallObserver.mPackageName);
                     // delete the package we just put in place; it might be fraudulent
                     okay = false;
                     uninstall = true;
                 } else {
                     try {
-                        PackageInfo pkg = backupManagerService.mPackageManager.getPackageInfo(info.packageName,
-                            PackageManager.GET_SIGNATURES);
+                        PackageInfo pkg = backupManagerService.mPackageManager.getPackageInfo(
+                                info.packageName,
+                                PackageManager.GET_SIGNATURES);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
-                            == 0) {
-                            Slog.w(RefactoredBackupManagerService.TAG, "Restore stream contains apk of package "
-                                + info.packageName + " but it disallows backup/restore");
+                                == 0) {
+                            Slog.w(RefactoredBackupManagerService.TAG,
+                                    "Restore stream contains apk of package "
+                                            + info.packageName
+                                            + " but it disallows backup/restore");
                             okay = false;
                         } else {
                             // So far so good -- do the signatures match the manifest?
@@ -725,21 +757,24 @@ public class FullRestoreEngine extends RestoreEngine {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
                                 if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
-                                    && (pkg.applicationInfo.backupAgentName == null)) {
-                                    Slog.w(RefactoredBackupManagerService.TAG, "Installed app " + info.packageName
-                                        + " has restricted uid and no agent");
+                                        && (pkg.applicationInfo.backupAgentName == null)) {
+                                    Slog.w(RefactoredBackupManagerService.TAG,
+                                            "Installed app " + info.packageName
+                                                    + " has restricted uid and no agent");
                                     okay = false;
                                 }
                             } else {
-                                Slog.w(RefactoredBackupManagerService.TAG, "Installed app " + info.packageName
-                                    + " signatures do not match restore manifest");
+                                Slog.w(RefactoredBackupManagerService.TAG,
+                                        "Installed app " + info.packageName
+                                                + " signatures do not match restore manifest");
                                 okay = false;
                                 uninstall = true;
                             }
                         }
                     } catch (NameNotFoundException e) {
-                        Slog.w(RefactoredBackupManagerService.TAG, "Install of package " + info.packageName
-                            + " succeeded but now not found");
+                        Slog.w(RefactoredBackupManagerService.TAG,
+                                "Install of package " + info.packageName
+                                        + " succeeded but now not found");
                         okay = false;
                     }
                 }
@@ -748,13 +783,15 @@ public class FullRestoreEngine extends RestoreEngine {
                 // that we just installed.
                 if (uninstall) {
                     mDeleteObserver.reset();
-                    backupManagerService.mPackageManager.deletePackage(mInstallObserver.mPackageName,
-                        mDeleteObserver, 0);
+                    backupManagerService.mPackageManager.deletePackage(
+                            mInstallObserver.mPackageName,
+                            mDeleteObserver, 0);
                     mDeleteObserver.waitForCompletion();
                 }
             }
         } catch (IOException e) {
-            Slog.e(RefactoredBackupManagerService.TAG, "Unable to transcribe restored apk for install");
+            Slog.e(RefactoredBackupManagerService.TAG,
+                    "Unable to transcribe restored apk for install");
             okay = false;
         } finally {
             apkFile.delete();
@@ -770,13 +807,14 @@ public class FullRestoreEngine extends RestoreEngine {
         if (partial > 0) {
             final int needed = 512 - (int) partial;
             if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.i(RefactoredBackupManagerService.TAG, "Skipping tar padding: " + needed + " bytes");
+                Slog.i(RefactoredBackupManagerService.TAG,
+                        "Skipping tar padding: " + needed + " bytes");
             }
             byte[] buffer = new byte[needed];
             if (readExactly(instream, buffer, 0, needed) == needed) {
                 mBytes += needed;
             } else {
-              throw new IOException("Unexpected EOF in padding");
+                throw new IOException("Unexpected EOF in padding");
             }
         }
     }
@@ -792,7 +830,7 @@ public class FullRestoreEngine extends RestoreEngine {
         if (readExactly(instream, buffer, 0, (int) info.size) == info.size) {
             mBytes += info.size;
         } else {
-          throw new IOException("Unexpected EOF in widget data");
+            throw new IOException("Unexpected EOF in widget data");
         }
 
         String[] str = new String[1];
@@ -805,20 +843,21 @@ public class FullRestoreEngine extends RestoreEngine {
                 // Data checks out -- the rest of the buffer is a concatenation of
                 // binary blobs as described in the comment at writeAppWidgetData()
                 ByteArrayInputStream bin = new ByteArrayInputStream(buffer,
-                    offset, buffer.length - offset);
+                        offset, buffer.length - offset);
                 DataInputStream in = new DataInputStream(bin);
                 while (bin.available() > 0) {
                     int token = in.readInt();
                     int size = in.readInt();
                     if (size > 64 * 1024) {
                         throw new IOException("Datum "
-                            + Integer.toHexString(token)
-                            + " too big; corrupt? size=" + info.size);
+                                + Integer.toHexString(token)
+                                + " too big; corrupt? size=" + info.size);
                     }
                     switch (token) {
                         case RefactoredBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN: {
                             if (RefactoredBackupManagerService.MORE_DEBUG) {
-                                Slog.i(RefactoredBackupManagerService.TAG, "Got widget metadata for " + info.packageName);
+                                Slog.i(RefactoredBackupManagerService.TAG,
+                                        "Got widget metadata for " + info.packageName);
                             }
                             mWidgetData = new byte[size];
                             in.read(mWidgetData);
@@ -827,8 +866,8 @@ public class FullRestoreEngine extends RestoreEngine {
                         default: {
                             if (RefactoredBackupManagerService.DEBUG) {
                                 Slog.i(RefactoredBackupManagerService.TAG, "Ignoring metadata blob "
-                                    + Integer.toHexString(token)
-                                    + " for " + info.packageName);
+                                        + Integer.toHexString(token)
+                                        + " for " + info.packageName);
                             }
                             in.skipBytes(size);
                             break;
@@ -836,38 +875,39 @@ public class FullRestoreEngine extends RestoreEngine {
                     }
                 }
             } else {
-                Slog.w(RefactoredBackupManagerService.TAG, "Metadata mismatch: package " + info.packageName
-                    + " but widget data for " + pkg);
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "Metadata mismatch: package " + info.packageName
+                                + " but widget data for " + pkg);
 
                 Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                    EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
                 monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                    BackupManagerMonitor.EXTRA_LOG_WIDGET_PACKAGE_NAME, pkg);
+                        BackupManagerMonitor.EXTRA_LOG_WIDGET_PACKAGE_NAME, pkg);
                 mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                    BackupManagerMonitor.LOG_EVENT_ID_WIDGET_METADATA_MISMATCH,
-                    null,
-                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    monitoringExtras);
+                        BackupManagerMonitor.LOG_EVENT_ID_WIDGET_METADATA_MISMATCH,
+                        null,
+                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
             }
         } else {
             Slog.w(RefactoredBackupManagerService.TAG, "Unsupported metadata version " + version);
 
             Bundle monitoringExtras = backupManagerService
-                .putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
-                    info.packageName);
+                    .putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
+                            info.packageName);
             monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
+                    EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
             mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                BackupManagerMonitor.LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION,
-                null,
-                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                monitoringExtras);
+                    BackupManagerMonitor.LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION,
+                    null,
+                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    monitoringExtras);
         }
     }
 
     // Returns a policy constant
     RestorePolicy readAppManifest(FileMetadata info, InputStream instream)
-        throws IOException {
+            throws IOException {
         // Fail on suspiciously large manifest files
         if (info.size > 64 * 1024) {
             throw new IOException("Restore manifest too big; corrupt? size=" + info.size);
@@ -875,13 +915,14 @@ public class FullRestoreEngine extends RestoreEngine {
 
         byte[] buffer = new byte[(int) info.size];
         if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.i(RefactoredBackupManagerService.TAG, "   readAppManifest() looking for " + info.size + " bytes, "
-                + mBytes + " already consumed");
+            Slog.i(RefactoredBackupManagerService.TAG,
+                    "   readAppManifest() looking for " + info.size + " bytes, "
+                            + mBytes + " already consumed");
         }
         if (readExactly(instream, buffer, 0, (int) info.size) == info.size) {
             mBytes += info.size;
         } else {
-          throw new IOException("Unexpected EOF in manifest");
+            throw new IOException("Unexpected EOF in manifest");
         }
 
         RestorePolicy policy = RestorePolicy.IGNORE;
@@ -918,16 +959,17 @@ public class FullRestoreEngine extends RestoreEngine {
 
                         // Okay, got the manifest info we need...
                         try {
-                            PackageInfo pkgInfo = backupManagerService.mPackageManager.getPackageInfo(
-                                info.packageName, PackageManager.GET_SIGNATURES);
+                            PackageInfo pkgInfo =
+                                    backupManagerService.mPackageManager.getPackageInfo(
+                                            info.packageName, PackageManager.GET_SIGNATURES);
                             // Fall through to IGNORE if the app explicitly disallows backup
                             final int flags = pkgInfo.applicationInfo.flags;
                             if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
                                 // Restore system-uid-space packages only if they have
                                 // defined a custom backup agent
                                 if ((pkgInfo.applicationInfo.uid
-                                    >= Process.FIRST_APPLICATION_UID)
-                                    || (pkgInfo.applicationInfo.backupAgentName != null)) {
+                                        >= Process.FIRST_APPLICATION_UID)
+                                        || (pkgInfo.applicationInfo.backupAgentName != null)) {
                                     // Verify signatures against any installed version; if they
                                     // don't match, then we fall though and ignore the data.  The
                                     // signatureMatch() method explicitly ignores the signature
@@ -935,78 +977,92 @@ public class FullRestoreEngine extends RestoreEngine {
                                     // such packages are signed with the platform cert instead of
                                     // the app developer's cert, so they're different on every
                                     // device.
-                                    if (RefactoredBackupManagerService.signaturesMatch(sigs, pkgInfo)) {
+                                    if (RefactoredBackupManagerService.signaturesMatch(sigs,
+                                            pkgInfo)) {
                                         if ((pkgInfo.applicationInfo.flags
-                                            & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
+                                                & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
                                             Slog.i(RefactoredBackupManagerService.TAG,
-                                                "Package has restoreAnyVersion; taking data");
-                                            mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                                                LOG_EVENT_ID_RESTORE_ANY_VERSION,
-                                                pkgInfo,
-                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                null);
+                                                    "Package has restoreAnyVersion; taking data");
+                                            mMonitor = RefactoredBackupManagerService.monitorEvent(
+                                                    mMonitor,
+                                                    LOG_EVENT_ID_RESTORE_ANY_VERSION,
+                                                    pkgInfo,
+                                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                    null);
                                             policy = RestorePolicy.ACCEPT;
                                         } else if (pkgInfo.versionCode >= version) {
-                                            Slog.i(RefactoredBackupManagerService.TAG, "Sig + version match; taking data");
+                                            Slog.i(RefactoredBackupManagerService.TAG,
+                                                    "Sig + version match; taking data");
                                             policy = RestorePolicy.ACCEPT;
-                                            mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                                                LOG_EVENT_ID_VERSIONS_MATCH,
-                                                pkgInfo,
-                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                null);
+                                            mMonitor = RefactoredBackupManagerService.monitorEvent(
+                                                    mMonitor,
+                                                    LOG_EVENT_ID_VERSIONS_MATCH,
+                                                    pkgInfo,
+                                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                    null);
                                         } else {
                                             // The data is from a newer version of the app than
                                             // is presently installed.  That means we can only
                                             // use it if the matching apk is also supplied.
                                             if (mAllowApks) {
-                                                Slog.i(RefactoredBackupManagerService.TAG, "Data version " + version
-                                                    + " is newer than installed version "
-                                                    + pkgInfo.versionCode
-                                                    + " - requiring apk");
+                                                Slog.i(RefactoredBackupManagerService.TAG,
+                                                        "Data version " + version
+                                                                + " is newer than installed "
+                                                                + "version "
+                                                                + pkgInfo.versionCode
+                                                                + " - requiring apk");
                                                 policy = RestorePolicy.ACCEPT_IF_APK;
                                             } else {
-                                                Slog.i(RefactoredBackupManagerService.TAG, "Data requires newer version "
-                                                    + version + "; ignoring");
+                                                Slog.i(RefactoredBackupManagerService.TAG,
+                                                        "Data requires newer version "
+                                                                + version + "; ignoring");
                                                 mMonitor = RefactoredBackupManagerService
-                                                    .monitorEvent(mMonitor,
-                                                        LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER,
-                                                        pkgInfo,
-                                                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                        backupManagerService.putMonitoringExtra(null,
-                                                            EXTRA_LOG_OLD_VERSION,
-                                                            version));
+                                                        .monitorEvent(mMonitor,
+                                                                LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER,
+                                                                pkgInfo,
+                                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                                backupManagerService
+                                                                        .putMonitoringExtra(
+                                                                        null,
+                                                                        EXTRA_LOG_OLD_VERSION,
+                                                                        version));
 
                                                 policy = RestorePolicy.IGNORE;
                                             }
                                         }
                                     } else {
-                                        Slog.w(RefactoredBackupManagerService.TAG, "Restore manifest signatures do not match "
-                                            + "installed application for " + info.packageName);
-                                        mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                                            LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH,
-                                            pkgInfo,
-                                            LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                            null);
+                                        Slog.w(RefactoredBackupManagerService.TAG,
+                                                "Restore manifest signatures do not match "
+                                                        + "installed application for "
+                                                        + info.packageName);
+                                        mMonitor = RefactoredBackupManagerService.monitorEvent(
+                                                mMonitor,
+                                                LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH,
+                                                pkgInfo,
+                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                null);
                                     }
                                 } else {
-                                    Slog.w(RefactoredBackupManagerService.TAG, "Package " + info.packageName
-                                        + " is system level with no agent");
+                                    Slog.w(RefactoredBackupManagerService.TAG,
+                                            "Package " + info.packageName
+                                                    + " is system level with no agent");
                                     mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                                        LOG_EVENT_ID_SYSTEM_APP_NO_AGENT,
-                                        pkgInfo,
-                                        LOG_EVENT_CATEGORY_AGENT,
-                                        null);
+                                            LOG_EVENT_ID_SYSTEM_APP_NO_AGENT,
+                                            pkgInfo,
+                                            LOG_EVENT_CATEGORY_AGENT,
+                                            null);
                                 }
                             } else {
                                 if (RefactoredBackupManagerService.DEBUG) {
-                                  Slog.i(RefactoredBackupManagerService.TAG, "Restore manifest from "
-                                      + info.packageName + " but allowBackup=false");
+                                    Slog.i(RefactoredBackupManagerService.TAG,
+                                            "Restore manifest from "
+                                                    + info.packageName + " but allowBackup=false");
                                 }
                                 mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                                    LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE,
-                                    pkgInfo,
-                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                    null);
+                                        LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE,
+                                        pkgInfo,
+                                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                        null);
                             }
                         } catch (NameNotFoundException e) {
                             // Okay, the target app isn't installed.  We can process
@@ -1014,78 +1070,86 @@ public class FullRestoreEngine extends RestoreEngine {
                             // apk file and we can successfully install it.
                             if (mAllowApks) {
                                 if (RefactoredBackupManagerService.DEBUG) {
-                                  Slog.i(RefactoredBackupManagerService.TAG, "Package " + info.packageName
-                                      + " not installed; requiring apk in dataset");
+                                    Slog.i(RefactoredBackupManagerService.TAG,
+                                            "Package " + info.packageName
+                                                    + " not installed; requiring apk in dataset");
                                 }
                                 policy = RestorePolicy.ACCEPT_IF_APK;
                             } else {
                                 policy = RestorePolicy.IGNORE;
                             }
                             Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                                EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                            monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                                EXTRA_LOG_POLICY_ALLOW_APKS, mAllowApks);
+                                    EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                            monitoringExtras = backupManagerService.putMonitoringExtra(
+                                    monitoringExtras,
+                                    EXTRA_LOG_POLICY_ALLOW_APKS, mAllowApks);
                             mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                                LOG_EVENT_ID_APK_NOT_INSTALLED,
-                                null,
-                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                monitoringExtras);
+                                    LOG_EVENT_ID_APK_NOT_INSTALLED,
+                                    null,
+                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                    monitoringExtras);
                         }
 
                         if (policy == RestorePolicy.ACCEPT_IF_APK && !hasApk) {
-                            Slog.i(RefactoredBackupManagerService.TAG, "Cannot restore package " + info.packageName
-                                + " without the matching .apk");
+                            Slog.i(RefactoredBackupManagerService.TAG,
+                                    "Cannot restore package " + info.packageName
+                                            + " without the matching .apk");
                             mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                                LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK,
+                                    LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK,
+                                    null,
+                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                    backupManagerService.putMonitoringExtra(null,
+                                            EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
+                        }
+                    } else {
+                        Slog.i(RefactoredBackupManagerService.TAG,
+                                "Missing signature on backed-up package "
+                                        + info.packageName);
+                        mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                                LOG_EVENT_ID_MISSING_SIGNATURE,
                                 null,
                                 LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                                 backupManagerService.putMonitoringExtra(null,
-                                    EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
-                        }
-                    } else {
-                        Slog.i(RefactoredBackupManagerService.TAG, "Missing signature on backed-up package "
-                            + info.packageName);
-                        mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                            LOG_EVENT_ID_MISSING_SIGNATURE,
-                            null,
-                            LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                            backupManagerService.putMonitoringExtra(null,
-                                EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
+                                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
                     }
                 } else {
-                    Slog.i(RefactoredBackupManagerService.TAG, "Expected package " + info.packageName
-                        + " but restore manifest claims " + manifestPackage);
+                    Slog.i(RefactoredBackupManagerService.TAG,
+                            "Expected package " + info.packageName
+                                    + " but restore manifest claims " + manifestPackage);
                     Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                            EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
                     monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                        EXTRA_LOG_MANIFEST_PACKAGE_NAME, manifestPackage);
+                            EXTRA_LOG_MANIFEST_PACKAGE_NAME, manifestPackage);
                     mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                        LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE,
+                            LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE,
+                            null,
+                            LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                            monitoringExtras);
+                }
+            } else {
+                Slog.i(RefactoredBackupManagerService.TAG,
+                        "Unknown restore manifest version " + version
+                                + " for package " + info.packageName);
+                Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
+                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
+                        EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
+                mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_VERSION,
                         null,
                         LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                         monitoringExtras);
-                }
-            } else {
-                Slog.i(RefactoredBackupManagerService.TAG, "Unknown restore manifest version " + version
-                    + " for package " + info.packageName);
-                Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                    EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                    EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
-                mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                    BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_VERSION,
-                    null,
-                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    monitoringExtras);
 
             }
         } catch (NumberFormatException e) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Corrupt restore manifest for package " + info.packageName);
+            Slog.w(RefactoredBackupManagerService.TAG,
+                    "Corrupt restore manifest for package " + info.packageName);
             mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
-                BackupManagerMonitor.LOG_EVENT_ID_CORRUPT_MANIFEST,
-                null,
-                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                backupManagerService.putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
+                    BackupManagerMonitor.LOG_EVENT_ID_CORRUPT_MANIFEST,
+                    null,
+                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    backupManagerService.putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
+                            info.packageName));
         } catch (IllegalArgumentException e) {
             Slog.w(RefactoredBackupManagerService.TAG, e.getMessage());
         }
@@ -1098,7 +1162,7 @@ public class FullRestoreEngine extends RestoreEngine {
     int extractLine(byte[] buffer, int offset, String[] outStr) throws IOException {
         final int end = buffer.length;
         if (offset >= end) {
-          throw new IOException("Incomplete data");
+            throw new IOException("Incomplete data");
         }
 
         int pos;
@@ -1155,20 +1219,28 @@ public class FullRestoreEngine extends RestoreEngine {
             try {
                 // okay, presume we're okay, and extract the various metadata
                 info = new FileMetadata();
-                info.size = extractRadix(block, RefactoredBackupManagerService.TAR_HEADER_OFFSET_FILESIZE,
-                    RefactoredBackupManagerService.TAR_HEADER_LENGTH_FILESIZE, RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
-                info.mtime = extractRadix(block, RefactoredBackupManagerService.TAR_HEADER_OFFSET_MODTIME,
-                    RefactoredBackupManagerService.TAR_HEADER_LENGTH_MODTIME, RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
-                info.mode = extractRadix(block, RefactoredBackupManagerService.TAR_HEADER_OFFSET_MODE,
-                    RefactoredBackupManagerService.TAR_HEADER_LENGTH_MODE, RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
+                info.size = extractRadix(block,
+                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_FILESIZE,
+                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_FILESIZE,
+                        RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
+                info.mtime = extractRadix(block,
+                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_MODTIME,
+                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_MODTIME,
+                        RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
+                info.mode = extractRadix(block,
+                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_MODE,
+                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_MODE,
+                        RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
 
-                info.path = extractString(block, RefactoredBackupManagerService.TAR_HEADER_OFFSET_PATH_PREFIX,
-                    RefactoredBackupManagerService.TAR_HEADER_LENGTH_PATH_PREFIX);
-                String path = extractString(block, RefactoredBackupManagerService.TAR_HEADER_OFFSET_PATH,
-                    RefactoredBackupManagerService.TAR_HEADER_LENGTH_PATH);
+                info.path = extractString(block,
+                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_PATH_PREFIX,
+                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_PATH_PREFIX);
+                String path = extractString(block,
+                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_PATH,
+                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_PATH);
                 if (path.length() > 0) {
                     if (info.path.length() > 0) {
-                      info.path += '/';
+                        info.path += '/';
                     }
                     info.path += path;
                 }
@@ -1184,7 +1256,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         gotHeader = readTarHeader(instream, block);
                     }
                     if (!gotHeader) {
-                      throw new IOException("Bad or missing pax header");
+                        throw new IOException("Bad or missing pax header");
                     }
 
                     typeChar = block[RefactoredBackupManagerService.TAR_HEADER_OFFSET_TYPE_CHAR];
@@ -1192,12 +1264,13 @@ public class FullRestoreEngine extends RestoreEngine {
 
                 switch (typeChar) {
                     case '0':
-                      info.type = BackupAgent.TYPE_FILE;
-                      break;
+                        info.type = BackupAgent.TYPE_FILE;
+                        break;
                     case '5': {
                         info.type = BackupAgent.TYPE_DIRECTORY;
                         if (info.size != 0) {
-                            Slog.w(RefactoredBackupManagerService.TAG, "Directory entry with nonzero size in header");
+                            Slog.w(RefactoredBackupManagerService.TAG,
+                                    "Directory entry with nonzero size in header");
                             info.size = 0;
                         }
                         break;
@@ -1205,12 +1278,14 @@ public class FullRestoreEngine extends RestoreEngine {
                     case 0: {
                         // presume EOF
                         if (RefactoredBackupManagerService.MORE_DEBUG) {
-                          Slog.w(RefactoredBackupManagerService.TAG, "Saw type=0 in tar header block, info=" + info);
+                            Slog.w(RefactoredBackupManagerService.TAG,
+                                    "Saw type=0 in tar header block, info=" + info);
                         }
                         return null;
                     }
                     default: {
-                        Slog.e(RefactoredBackupManagerService.TAG, "Unknown tar entity type: " + typeChar);
+                        Slog.e(RefactoredBackupManagerService.TAG,
+                                "Unknown tar entity type: " + typeChar);
                         throw new IOException("Unknown entity type " + typeChar);
                     }
                 }
@@ -1219,16 +1294,17 @@ public class FullRestoreEngine extends RestoreEngine {
                 //
                 // first: apps/shared/unrecognized
                 if (FullBackup.SHARED_PREFIX.regionMatches(0,
-                    info.path, 0, FullBackup.SHARED_PREFIX.length())) {
+                        info.path, 0, FullBackup.SHARED_PREFIX.length())) {
                     // File in shared storage.  !!! TODO: implement this.
                     info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
                     info.packageName = RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
                     info.domain = FullBackup.SHARED_STORAGE_TOKEN;
                     if (RefactoredBackupManagerService.DEBUG) {
-                      Slog.i(RefactoredBackupManagerService.TAG, "File in shared storage: " + info.path);
+                        Slog.i(RefactoredBackupManagerService.TAG,
+                                "File in shared storage: " + info.path);
                     }
                 } else if (FullBackup.APPS_PREFIX.regionMatches(0,
-                    info.path, 0, FullBackup.APPS_PREFIX.length())) {
+                        info.path, 0, FullBackup.APPS_PREFIX.length())) {
                     // App content!  Parse out the package name and domain
 
                     // strip the apps/ prefix
@@ -1237,7 +1313,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     // extract the package name
                     int slash = info.path.indexOf('/');
                     if (slash < 0) {
-                      throw new IOException("Illegal semantic path in " + info.path);
+                        throw new IOException("Illegal semantic path in " + info.path);
                     }
                     info.packageName = info.path.substring(0, slash);
                     info.path = info.path.substring(slash + 1);
@@ -1245,11 +1321,12 @@ public class FullRestoreEngine extends RestoreEngine {
                     // if it's a manifest or metadata payload we're done, otherwise parse
                     // out the domain into which the file will be restored
                     if (!info.path.equals(RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME)
-                        && !info.path.equals(RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
+                            && !info.path.equals(
+                            RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
                         slash = info.path.indexOf('/');
                         if (slash < 0) {
                             throw new IOException("Illegal semantic path in non-manifest "
-                                + info.path);
+                                    + info.path);
                         }
                         info.domain = info.path.substring(0, slash);
                         info.path = info.path.substring(slash + 1);
@@ -1257,7 +1334,8 @@ public class FullRestoreEngine extends RestoreEngine {
                 }
             } catch (IOException e) {
                 if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.e(RefactoredBackupManagerService.TAG, "Parse error in header: " + e.getMessage());
+                    Slog.e(RefactoredBackupManagerService.TAG,
+                            "Parse error in header: " + e.getMessage());
                     if (RefactoredBackupManagerService.MORE_DEBUG) {
                         HEXLOG(block);
                     }
@@ -1283,7 +1361,8 @@ public class FullRestoreEngine extends RestoreEngine {
             // the app.
             if (info.path.startsWith("no_backup/")) {
                 if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.i(RefactoredBackupManagerService.TAG, "Dropping no_backup file path " + info.path);
+                    Slog.i(RefactoredBackupManagerService.TAG,
+                            "Dropping no_backup file path " + info.path);
                 }
                 return false;
             }
@@ -1322,26 +1401,28 @@ public class FullRestoreEngine extends RestoreEngine {
     // Returns false if EOF is encountered before the requested number of bytes
     // could be read.
     int readExactly(InputStream in, byte[] buffer, int offset, int size)
-        throws IOException {
+            throws IOException {
         if (size <= 0) {
-          throw new IllegalArgumentException("size must be > 0");
+            throw new IllegalArgumentException("size must be > 0");
         }
-      if (RefactoredBackupManagerService.MORE_DEBUG) {
-        Slog.i(RefactoredBackupManagerService.TAG, "  ... readExactly(" + size + ") called");
-      }
+        if (RefactoredBackupManagerService.MORE_DEBUG) {
+            Slog.i(RefactoredBackupManagerService.TAG, "  ... readExactly(" + size + ") called");
+        }
         int soFar = 0;
         while (soFar < size) {
             int nRead = in.read(buffer, offset + soFar, size - soFar);
             if (nRead <= 0) {
                 if (RefactoredBackupManagerService.MORE_DEBUG) {
-                  Slog.w(RefactoredBackupManagerService.TAG, "- wanted exactly " + size + " but got only " + soFar);
+                    Slog.w(RefactoredBackupManagerService.TAG,
+                            "- wanted exactly " + size + " but got only " + soFar);
                 }
                 break;
             }
             soFar += nRead;
-          if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.v(RefactoredBackupManagerService.TAG, "   + got " + nRead + "; now wanting " + (size - soFar));
-          }
+            if (RefactoredBackupManagerService.MORE_DEBUG) {
+                Slog.v(RefactoredBackupManagerService.TAG,
+                        "   + got " + nRead + "; now wanting " + (size - soFar));
+            }
         }
         return soFar;
     }
@@ -1349,10 +1430,10 @@ public class FullRestoreEngine extends RestoreEngine {
     boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
         final int got = readExactly(instream, block, 0, 512);
         if (got == 0) {
-          return false;     // Clean EOF
+            return false;     // Clean EOF
         }
         if (got < 512) {
-          throw new IOException("Unable to read full block header");
+            throw new IOException("Unable to read full block header");
         }
         mBytes += 512;
         return true;
@@ -1360,11 +1441,12 @@ public class FullRestoreEngine extends RestoreEngine {
 
     // overwrites 'info' fields based on the pax extended header
     boolean readPaxExtendedHeader(InputStream instream, FileMetadata info)
-        throws IOException {
+            throws IOException {
         // We should never see a pax extended header larger than this
         if (info.size > 32 * 1024) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Suspiciously large pax header size " + info.size
-                + " - aborting");
+            Slog.w(RefactoredBackupManagerService.TAG,
+                    "Suspiciously large pax header size " + info.size
+                            + " - aborting");
             throw new IOException("Sanity failure: pax header size " + info.size);
         }
 
@@ -1382,7 +1464,7 @@ public class FullRestoreEngine extends RestoreEngine {
             // extract the line at 'offset'
             int eol = offset + 1;
             while (eol < contentSize && data[eol] != ' ') {
-              eol++;
+                eol++;
             }
             if (eol >= contentSize) {
                 // error: we just hit EOD looking for the end of the size field
@@ -1394,7 +1476,7 @@ public class FullRestoreEngine extends RestoreEngine {
             eol = offset + linelen - 1; // trailing LF
             int value;
             for (value = key + 1; data[value] != '=' && value <= eol; value++) {
-              ;
+                ;
             }
             if (value > eol) {
                 throw new IOException("Invalid pax declaration");
@@ -1411,7 +1493,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 info.size = Long.parseLong(valStr);
             } else {
                 if (RefactoredBackupManagerService.DEBUG) {
-                  Slog.i(RefactoredBackupManagerService.TAG, "Unhandled pax key: " + key);
+                    Slog.i(RefactoredBackupManagerService.TAG, "Unhandled pax key: " + key);
                 }
             }
 
@@ -1422,18 +1504,18 @@ public class FullRestoreEngine extends RestoreEngine {
     }
 
     long extractRadix(byte[] data, int offset, int maxChars, int radix)
-        throws IOException {
+            throws IOException {
         long value = 0;
         final int end = offset + maxChars;
         for (int i = offset; i < end; i++) {
             final byte b = data[i];
             // Numeric fields in tar can terminate with either NUL or SPC
             if (b == 0 || b == ' ') {
-              break;
+                break;
             }
             if (b < '0' || b > ('0' + radix - 1)) {
                 throw new IOException("Invalid number in header: '" + (char) b
-                    + "' for radix " + radix);
+                        + "' for radix " + radix);
             }
             value = radix * value + (b - '0');
         }
@@ -1445,7 +1527,7 @@ public class FullRestoreEngine extends RestoreEngine {
         int eos = offset;
         // tar string fields terminate early with a NUL
         while (eos < end && data[eos] != 0) {
-          eos++;
+            eos++;
         }
         return new String(data, offset, eos - offset, "US-ASCII");
     }
@@ -1455,7 +1537,8 @@ public class FullRestoreEngine extends RestoreEngine {
             try {
                 mObserver.onStartRestore();
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "full restore observer went away: startRestore");
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "full restore observer went away: startRestore");
                 mObserver = null;
             }
         }
@@ -1467,7 +1550,8 @@ public class FullRestoreEngine extends RestoreEngine {
                 // TODO: use a more user-friendly name string
                 mObserver.onRestorePackage(name);
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "full restore observer went away: restorePackage");
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "full restore observer went away: restorePackage");
                 mObserver = null;
             }
         }
@@ -1478,7 +1562,8 @@ public class FullRestoreEngine extends RestoreEngine {
             try {
                 mObserver.onEndRestore();
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "full restore observer went away: endRestore");
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "full restore observer went away: endRestore");
                 mObserver = null;
             }
         }
