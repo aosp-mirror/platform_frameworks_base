@@ -492,7 +492,7 @@ public class MockContext extends Context {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
-            boolean visibleToInstantApps) {
+            int flags) {
         throw new UnsupportedOperationException();
     }
 
@@ -504,7 +504,7 @@ public class MockContext extends Context {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
-            String broadcastPermission, Handler scheduler, boolean visibleToInstantApps) {
+            String broadcastPermission, Handler scheduler, int flags) {
         throw new UnsupportedOperationException();
     }
 

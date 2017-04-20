@@ -1357,34 +1357,34 @@ class ContextImpl extends Context {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
-            boolean visibleToInstantApps) {
-        return registerReceiver(receiver, filter, null, null, visibleToInstantApps);
+            int flags) {
+        return registerReceiver(receiver, filter, null, null, flags);
     }
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
         return registerReceiverInternal(receiver, getUserId(),
-                filter, broadcastPermission, scheduler, getOuterContext(), false);
+                filter, broadcastPermission, scheduler, getOuterContext(), 0);
     }
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
-            String broadcastPermission, Handler scheduler, boolean visibleToInstantApps) {
+            String broadcastPermission, Handler scheduler, int flags) {
         return registerReceiverInternal(receiver, getUserId(),
-                filter, broadcastPermission, scheduler, getOuterContext(), visibleToInstantApps);
+                filter, broadcastPermission, scheduler, getOuterContext(), flags);
     }
 
     @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
         return registerReceiverInternal(receiver, user.getIdentifier(),
-                filter, broadcastPermission, scheduler, getOuterContext(), false);
+                filter, broadcastPermission, scheduler, getOuterContext(), 0);
     }
 
     private Intent registerReceiverInternal(BroadcastReceiver receiver, int userId,
             IntentFilter filter, String broadcastPermission,
-            Handler scheduler, Context context, boolean visibleToInstantApps) {
+            Handler scheduler, Context context, int flags) {
         IIntentReceiver rd = null;
         if (receiver != null) {
             if (mPackageInfo != null && context != null) {
@@ -1405,7 +1405,7 @@ class ContextImpl extends Context {
         try {
             final Intent intent = ActivityManager.getService().registerReceiver(
                     mMainThread.getApplicationThread(), mBasePackageName, rd, filter,
-                    broadcastPermission, userId, visibleToInstantApps);
+                    broadcastPermission, userId, flags);
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
                 intent.prepareToEnterProcess();
