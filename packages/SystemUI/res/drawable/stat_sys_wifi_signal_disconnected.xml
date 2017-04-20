@@ -26,8 +26,7 @@
         S0.9,5.9 0.42,6.32
         l12.57,15.6 4.21,-5.17
         c-0.76,-0.87 -1.22,-2.0 -1.22,-3.25
-        c0.0,-2.76 2.24,-5.0 5.0,-5.0z"
-        android:fillAlpha=".3"/>
+        c0.0,-2.76 2.24,-5.0 5.0,-5.0z"/>
     <path
         android:fillColor="?attr/backgroundColor"
         android:pathData="M21.0,10.0
