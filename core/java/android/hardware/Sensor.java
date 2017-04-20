@@ -664,7 +664,7 @@ public final class Sensor {
      * @see #TYPE_LOW_LATENCY_OFFBODY_DETECT
      */
     public static final String STRING_TYPE_LOW_LATENCY_OFFBODY_DETECT =
-            "android.sensor.low_latency_offbody";
+            "android.sensor.low_latency_offbody_detect";
 
     /**
      * A constant describing an uncalibrated accelerometer sensor.
