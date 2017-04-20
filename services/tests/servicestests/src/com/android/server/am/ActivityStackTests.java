@@ -16,8 +16,10 @@
 
 package com.android.server.am;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
 import android.platform.test.annotations.Presubmit;
@@ -50,6 +52,7 @@ public class ActivityStackTests extends ActivityTestsBase {
                 "testEmptyTaskCleanupOnRemove", ActivityStack.REMOVE_TASK_MODE_DESTROYING);
         assertNull(task.getWindowContainerController());
     }
+
     @Test
     public void testOccupiedTaskCleanupOnRemove() throws Exception {
         final ActivityManagerService service = createActivityManagerService();
@@ -59,5 +62,26 @@ public class ActivityStackTests extends ActivityTestsBase {
         service.mStackSupervisor.getStack(TEST_STACK_ID).removeTask(task,
                 "testOccupiedTaskCleanupOnRemove", ActivityStack.REMOVE_TASK_MODE_DESTROYING);
         assertNotNull(task.getWindowContainerController());
+    }
+
+    @Test
+    public void testNoPauseDuringResumeTopActivity() throws Exception {
+        final ActivityManagerService service = createActivityManagerService();
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
+        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
+        final ActivityStack testStack = service.mStackSupervisor.getStack(TEST_STACK_ID);
+
+        // Simulate the a resumed activity set during
+        // {@link ActivityStack#resumeTopActivityUncheckedLocked}.
+        service.mStackSupervisor.inResumeTopActivity = true;
+        testStack.mResumedActivity = activityRecord;
+
+        final boolean waiting = testStack.checkReadyForSleepLocked();
+
+        // Ensure we report not being ready for sleep.
+        assertTrue(waiting);
+
+        // Make sure the resumed activity is untouched.
+        assertEquals(testStack.mResumedActivity, activityRecord);
     }
 }
