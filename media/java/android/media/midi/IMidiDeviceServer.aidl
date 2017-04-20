@@ -24,7 +24,7 @@ interface IMidiDeviceServer
     FileDescriptor openInputPort(IBinder token, int portNumber);
     FileDescriptor openOutputPort(IBinder token, int portNumber);
     void closePort(IBinder token);
-    void closeDevice();
+    oneway void closeDevice();
 
     // connects the input port pfd to the specified output port
     // Returns the PID of the called process.
