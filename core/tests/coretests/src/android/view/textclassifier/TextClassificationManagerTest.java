@@ -24,11 +24,6 @@ import android.os.LocaleList;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.textclassifier.TextClassificationManager;
-import android.view.textclassifier.TextClassificationResult;
-import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextLanguage;
-import android.view.textclassifier.TextSelection;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -74,6 +69,23 @@ public class TextClassificationManagerTest {
     }
 
     @Test
+    public void testSmartSelection_nullLocaleList() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Contact me at droid@android.com";
+        String selected = "droid";
+        String suggested = "droid@android.com";
+        int startIndex = text.indexOf(selected);
+        int endIndex = startIndex + selected.length();
+        int smartStartIndex = text.indexOf(suggested);
+        int smartEndIndex = smartStartIndex + suggested.length();
+        LocaleList nullLocales = null;
+
+        assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, nullLocales),
+                isTextSelection(smartStartIndex, smartEndIndex, TextClassifier.TYPE_EMAIL));
+    }
+
+    @Test
     public void testSmartSelection_url() {
         if (isTextClassifierDisabled()) return;
 
@@ -111,6 +123,19 @@ public class TextClassificationManagerTest {
         int endIndex = startIndex + classifiedText.length();
         assertThat(mClassifier.getTextClassificationResult(text, startIndex, endIndex, LOCALES),
                 isTextClassificationResult(classifiedText, TextClassifier.TYPE_URL));
+    }
+
+    @Test
+    public void testTextClassificationResult_nullLocaleList() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Contact me at droid@android.com";
+        String classifiedText = "droid@android.com";
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+        LocaleList nullLocales = null;
+        assertThat(mClassifier.getTextClassificationResult(text, startIndex, endIndex, nullLocales),
+                isTextClassificationResult(classifiedText, TextClassifier.TYPE_EMAIL));
     }
 
     @Test
