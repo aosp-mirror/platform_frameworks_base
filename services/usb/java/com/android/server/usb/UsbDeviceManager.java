@@ -682,7 +682,7 @@ public class UsbDeviceManager {
             }
 
             // send broadcast intent only if the USB state has changed
-            if (!isUsbStateChanged(intent)) {
+            if (!isUsbStateChanged(intent) && !configChanged) {
                 if (DEBUG) {
                     Slog.d(TAG, "skip broadcasting " + intent + " extras: " + intent.getExtras());
                 }
