@@ -29,9 +29,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
@@ -53,11 +55,15 @@ import android.telephony.CarrierConfigManager;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.Vector;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -81,7 +87,9 @@ public class TetheringTest {
     private final TestLooper mLooper = new TestLooper();
     private final String mTestIfname = "test_wlan0";
 
+    private Vector<Intent> mIntents;
     private BroadcastInterceptingContext mServiceContext;
+    private BroadcastReceiver mBroadcastReceiver;
     private Tethering mTethering;
 
     private class MockContext extends BroadcastInterceptingContext {
@@ -100,7 +108,8 @@ public class TetheringTest {
         }
     }
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mResources.getStringArray(com.android.internal.R.array.config_tether_dhcp_range))
                 .thenReturn(new String[0]);
@@ -118,8 +127,22 @@ public class TetheringTest {
                 .thenReturn(new InterfaceConfiguration());
 
         mServiceContext = new MockContext(mContext);
+        mIntents = new Vector<>();
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mIntents.addElement(intent);
+            }
+        };
+        mServiceContext.registerReceiver(mBroadcastReceiver,
+                new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
         mTethering = new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
                                    mLooper.getLooper(), mSystemProperties);
+    }
+
+    @After
+    public void tearDown() {
+        mServiceContext.unregisterReceiver(mBroadcastReceiver);
     }
 
     private void setupForRequiredProvisioning() {
@@ -180,6 +203,23 @@ public class TetheringTest {
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
+    private void verifyInterfaceServingModeStarted() throws Exception {
+        verify(mNMService, times(1)).listInterfaces();
+        verify(mNMService, times(1)).getInterfaceConfig(mTestIfname);
+        verify(mNMService, times(1))
+                .setInterfaceConfig(eq(mTestIfname), any(InterfaceConfiguration.class));
+        verify(mNMService, times(1)).tetherInterface(mTestIfname);
+    }
+
+    private void verifyTetheringBroadcast(String ifname, String whichExtra) {
+        // Verify that ifname is in the whichExtra array of the tether state changed broadcast.
+        final Intent bcast = mIntents.get(0);
+        assertEquals(ConnectivityManager.ACTION_TETHER_STATE_CHANGED, bcast.getAction());
+        final ArrayList<String> ifnames = bcast.getStringArrayListExtra(whichExtra);
+        assertTrue(ifnames.contains(ifname));
+        mIntents.remove(bcast);
+    }
+
     @Test
     public void workingLocalOnlyHotspot() throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
@@ -193,14 +233,12 @@ public class TetheringTest {
         sendWifiApStateChanged(WifiManager.WIFI_AP_STATE_ENABLED);
         mLooper.dispatchAll();
 
-        verify(mNMService, times(1)).listInterfaces();
-        verify(mNMService, times(1)).getInterfaceConfig(mTestIfname);
-        verify(mNMService, times(1))
-                .setInterfaceConfig(eq(mTestIfname), any(InterfaceConfiguration.class));
-        verify(mNMService, times(1)).tetherInterface(mTestIfname);
+        verifyInterfaceServingModeStarted();
+        verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
         verifyNoMoreInteractions(mNMService);
+        verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_ACTIVE_LOCAL_ONLY);
         // UpstreamNetworkMonitor will be started, and will register two callbacks:
         // a "listen all" and a "track default".
         verify(mConnectivityManager, times(1)).registerNetworkCallback(
@@ -252,14 +290,12 @@ public class TetheringTest {
         sendWifiApStateChanged(WifiManager.WIFI_AP_STATE_ENABLED);
         mLooper.dispatchAll();
 
-        verify(mNMService, times(1)).listInterfaces();
-        verify(mNMService, times(1)).getInterfaceConfig(mTestIfname);
-        verify(mNMService, times(1))
-                .setInterfaceConfig(eq(mTestIfname), any(InterfaceConfiguration.class));
-        verify(mNMService, times(1)).tetherInterface(mTestIfname);
+        verifyInterfaceServingModeStarted();
+        verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
         verifyNoMoreInteractions(mNMService);
+        verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_ACTIVE_TETHER);
         // UpstreamNetworkMonitor will be started, and will register two callbacks:
         // a "listen all" and a "track default".
         verify(mConnectivityManager, times(1)).registerNetworkCallback(
