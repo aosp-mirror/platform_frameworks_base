@@ -184,7 +184,6 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
-import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
 import android.util.DisplayMetrics;
@@ -513,8 +512,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mGoingToSleep;
     volatile boolean mRecentsVisible;
     volatile boolean mPictureInPictureVisible;
-    // Written by vr manager thread, only read in this class
-    volatile boolean mPersistentVrModeEnabled;
     volatile private boolean mDismissImeOnBackKeyPressed;
 
     // Used to hold the last user key used to wake the device.  This helps us prevent up events
@@ -1004,14 +1001,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     MyOrientationListener mOrientationListener;
-
-    final IPersistentVrStateCallbacks mPersistentVrModeListener =
-            new IPersistentVrStateCallbacks.Stub() {
-        @Override
-        public void onPersistentVrStateChanged(boolean enabled) {
-            mPersistentVrModeEnabled = enabled;
-        }
-    };
 
     private final StatusBarController mStatusBarController = new StatusBarController();
 
@@ -1965,17 +1954,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         if (mStatusBar != null) {
                             requestTransientBars(mStatusBar);
                         }
-                        if (mPersistentVrModeEnabled) {
-                            exitPersistentVrMode();
-                        }
                     }
                     @Override
                     public void onSwipeFromBottom() {
                         if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_BOTTOM) {
                             requestTransientBars(mNavigationBar);
-                        }
-                        if (mPersistentVrModeEnabled) {
-                            exitPersistentVrMode();
                         }
                     }
                     @Override
@@ -1983,17 +1966,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_RIGHT) {
                             requestTransientBars(mNavigationBar);
                         }
-                        if (mPersistentVrModeEnabled) {
-                            exitPersistentVrMode();
-                        }
                     }
                     @Override
                     public void onSwipeFromLeft() {
                         if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_LEFT) {
                             requestTransientBars(mNavigationBar);
-                        }
-                        if (mPersistentVrModeEnabled) {
-                            exitPersistentVrMode();
                         }
                     }
                     @Override
@@ -6618,13 +6595,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mVrManagerInternal.onScreenStateChanged(isScreenOn);
     }
 
-    private void exitPersistentVrMode() {
-        if (mVrManagerInternal == null) {
-            return;
-        }
-        mVrManagerInternal.setPersistentVrModeEnabled(false);
-    }
-
     private void finishWindowsDrawn() {
         synchronized (mLock) {
             if (!mScreenOnEarly || mWindowManagerDrawComplete) {
@@ -7112,9 +7082,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardDelegate.onSystemReady();
 
         mVrManagerInternal = LocalServices.getService(VrManagerInternal.class);
-        if (mVrManagerInternal != null) {
-            mVrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
-        }
 
         readCameraLensCoverState();
         updateUiMode();
