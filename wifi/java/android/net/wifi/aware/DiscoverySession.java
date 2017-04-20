@@ -38,10 +38,10 @@ import java.lang.ref.WeakReference;
  *     {@link #createNetworkSpecifierOpen(PeerHandle)} or
  *     {@link #createNetworkSpecifierPassphrase(PeerHandle, String)}.
  * </ul>
- * The {@link #destroy()} method must be called to destroy discovery sessions once they are
+ * The {@link #close()} method must be called to destroy discovery sessions once they are
  * no longer needed.
  */
-public class DiscoverySession {
+public class DiscoverySession implements AutoCloseable {
     private static final String TAG = "DiscoverySession";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
@@ -96,7 +96,8 @@ public class DiscoverySession {
      *     exception is a session for which we received a termination callback,
      *     {@link DiscoverySessionCallback#onSessionTerminated()}.
      */
-    public void destroy() {
+    @Override
+    public void close() {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.w(TAG, "destroy: called post GC on WifiAwareManager");
@@ -134,7 +135,7 @@ public class DiscoverySession {
             }
 
             if (!mTerminated) {
-                destroy();
+                close();
             }
         } finally {
             super.finalize();

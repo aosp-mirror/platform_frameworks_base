@@ -82,7 +82,7 @@ import java.util.List;
  *     discovery or connection setup only after receiving confirmation that Aware attach
  *     succeeded - {@link AttachCallback#onAttached(WifiAwareSession)}. When an
  *     application is finished using Aware it <b>must</b> use the
- *     {@link WifiAwareSession#destroy()} API to indicate to the Aware service that the device
+ *     {@link WifiAwareSession#close()} API to indicate to the Aware service that the device
  *     may detach from the Aware cluster. The device will actually disable Aware once the last
  *     application detaches.
  * <p>
@@ -104,7 +104,7 @@ import java.util.List;
  *     also be used to send messages using the
  *     {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])} APIs. When an
  *     application is finished with a discovery session it <b>must</b> terminate it using the
- *     {@link DiscoverySession#destroy()} API.
+ *     {@link DiscoverySession#close()} API.
  * <p>
  *    Creating connections between Aware devices is managed by the standard
  *    {@link ConnectivityManager#requestNetwork(NetworkRequest,
@@ -215,7 +215,7 @@ public class WifiAwareManager {
      * create connections to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable Aware in its vicinity). Results
      * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
-     * An application <b>must</b> call {@link WifiAwareSession#destroy()} when done with the
+     * An application <b>must</b> call {@link WifiAwareSession#close()} when done with the
      * Wi-Fi Aware object.
      * <p>
      * Note: a Aware cluster is a shared resource - if the device is already attached to a cluster
@@ -237,7 +237,7 @@ public class WifiAwareManager {
      * create connections to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable Aware in its vicinity). Results
      * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
-     * An application <b>must</b> call {@link WifiAwareSession#destroy()} when done with the
+     * An application <b>must</b> call {@link WifiAwareSession#close()} when done with the
      * Wi-Fi Aware object.
      * <p>
      * Note: a Aware cluster is a shared resource - if the device is already attached to a cluster
