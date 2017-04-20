@@ -459,9 +459,13 @@ public class StatusBarIconView extends AnimatedImageView {
         }
 
         CharSequence title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
+        CharSequence text = n.extras.getCharSequence(Notification.EXTRA_TEXT);
         CharSequence ticker = n.tickerText;
 
-        CharSequence desc = !TextUtils.isEmpty(title) ? title
+        // Some apps just put the app name into the title
+        CharSequence titleOrText = TextUtils.equals(title, appName) ? text : title;
+
+        CharSequence desc = !TextUtils.isEmpty(titleOrText) ? titleOrText
                 : !TextUtils.isEmpty(ticker) ? ticker : "";
 
         return c.getString(R.string.accessibility_desc_notification_icon, appName, desc);
