@@ -1211,9 +1211,6 @@ public class ActivityOptions {
      * methods that take an options Bundle.
      */
     public Bundle toBundle() {
-        if (mAnimationType == ANIM_DEFAULT) {
-            return null;
-        }
         Bundle b = new Bundle();
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
