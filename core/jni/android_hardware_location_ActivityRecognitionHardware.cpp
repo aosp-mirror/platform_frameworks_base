@@ -22,7 +22,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 
-#include "activity_recognition.h"
+#include <hardware/activity_recognition.h>
 
 
 // keep base connection data from the HAL

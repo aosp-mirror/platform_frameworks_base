@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "context_hub.h"
+#include <hardware/context_hub.h>
 
 #define LOG_NDEBUG 0
 #define LOG_TAG "ContextHubService"
