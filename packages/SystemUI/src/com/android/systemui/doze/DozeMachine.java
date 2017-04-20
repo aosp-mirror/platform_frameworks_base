@@ -42,7 +42,7 @@ public class DozeMachine {
     static final String TAG = "DozeMachine";
     static final boolean DEBUG = DozeService.DEBUG;
 
-    enum State {
+    public enum State {
         /** Default state. Transition to INITIALIZED to get Doze going. */
         UNINITIALIZED,
         /** Doze components are set up. Followed by transition to DOZE or DOZE_AOD. */
