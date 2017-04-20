@@ -223,8 +223,6 @@ public class TetheringTest {
     @Test
     public void workingLocalOnlyHotspot() throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
-        when(mWifiManager.setWifiApEnabled(any(WifiConfiguration.class), anyBoolean()))
-                .thenReturn(true);
 
         // Emulate externally-visible WifiManager effects, causing the
         // per-interface state machine to start up, and telling us that
@@ -272,13 +270,12 @@ public class TetheringTest {
     @Test
     public void workingWifiTethering() throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
-        when(mWifiManager.setWifiApEnabled(any(WifiConfiguration.class), anyBoolean()))
-                .thenReturn(true);
+        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
         mTethering.startTethering(ConnectivityManager.TETHERING_WIFI, null, false);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).setWifiApEnabled(null, true);
+        verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
@@ -322,7 +319,7 @@ public class TetheringTest {
         // Emulate pressing the WiFi tethering button.
         mTethering.stopTethering(ConnectivityManager.TETHERING_WIFI);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).setWifiApEnabled(null, false);
+        verify(mWifiManager, times(1)).stopSoftAp();
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
