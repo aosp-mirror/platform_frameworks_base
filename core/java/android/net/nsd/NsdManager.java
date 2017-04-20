@@ -45,7 +45,7 @@ import com.android.internal.util.Protocol;
  * http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
  *
  * <p> The API is asynchronous and responses to requests from an application are on listener
- * callbacks on a seperate thread.
+ * callbacks on a seperate internal thread.
  *
  * <p> There are three main operations the API supports - registration, discovery and resolution.
  * <pre>
@@ -119,8 +119,8 @@ import com.android.internal.util.Protocol;
  * {@see NsdServiceInfo}
  */
 public final class NsdManager {
-    private static final String TAG = "NsdManager";
-    INsdManager mService;
+    private static final String TAG = NsdManager.class.getSimpleName();
+    private static final boolean DBG = false;
 
     /**
      * Broadcast intent action to indicate whether network service discovery is
@@ -130,8 +130,7 @@ public final class NsdManager {
      * @see #EXTRA_NSD_STATE
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_NSD_STATE_CHANGED =
-        "android.net.nsd.STATE_CHANGED";
+    public static final String ACTION_NSD_STATE_CHANGED = "android.net.nsd.STATE_CHANGED";
 
     /**
      * The lookup key for an int that indicates whether network service discovery is enabled
@@ -208,13 +207,47 @@ public final class NsdManager {
     /** Dns based service discovery protocol */
     public static final int PROTOCOL_DNS_SD = 0x0001;
 
-    private Context mContext;
+    private static final SparseArray<String> EVENT_NAMES = new SparseArray<>();
+    static {
+        EVENT_NAMES.put(DISCOVER_SERVICES, "DISCOVER_SERVICES");
+        EVENT_NAMES.put(DISCOVER_SERVICES_STARTED, "DISCOVER_SERVICES_STARTED");
+        EVENT_NAMES.put(DISCOVER_SERVICES_FAILED, "DISCOVER_SERVICES_FAILED");
+        EVENT_NAMES.put(SERVICE_FOUND, "SERVICE_FOUND");
+        EVENT_NAMES.put(SERVICE_LOST, "SERVICE_LOST");
+        EVENT_NAMES.put(STOP_DISCOVERY, "STOP_DISCOVERY");
+        EVENT_NAMES.put(STOP_DISCOVERY_FAILED, "STOP_DISCOVERY_FAILED");
+        EVENT_NAMES.put(STOP_DISCOVERY_SUCCEEDED, "STOP_DISCOVERY_SUCCEEDED");
+        EVENT_NAMES.put(REGISTER_SERVICE, "REGISTER_SERVICE");
+        EVENT_NAMES.put(REGISTER_SERVICE_FAILED, "REGISTER_SERVICE_FAILED");
+        EVENT_NAMES.put(REGISTER_SERVICE_SUCCEEDED, "REGISTER_SERVICE_SUCCEEDED");
+        EVENT_NAMES.put(UNREGISTER_SERVICE, "UNREGISTER_SERVICE");
+        EVENT_NAMES.put(UNREGISTER_SERVICE_FAILED, "UNREGISTER_SERVICE_FAILED");
+        EVENT_NAMES.put(UNREGISTER_SERVICE_SUCCEEDED, "UNREGISTER_SERVICE_SUCCEEDED");
+        EVENT_NAMES.put(RESOLVE_SERVICE, "RESOLVE_SERVICE");
+        EVENT_NAMES.put(RESOLVE_SERVICE_FAILED, "RESOLVE_SERVICE_FAILED");
+        EVENT_NAMES.put(RESOLVE_SERVICE_SUCCEEDED, "RESOLVE_SERVICE_SUCCEEDED");
+        EVENT_NAMES.put(ENABLE, "ENABLE");
+        EVENT_NAMES.put(DISABLE, "DISABLE");
+        EVENT_NAMES.put(NATIVE_DAEMON_EVENT, "NATIVE_DAEMON_EVENT");
+    }
+
+    /** @hide */
+    public static String nameOf(int event) {
+        String name = EVENT_NAMES.get(event);
+        if (name == null) {
+            return Integer.toString(event);
+        }
+        return name;
+    }
+
+    private final INsdManager mService;
+    private final Context mContext;
 
     private static final int INVALID_LISTENER_KEY = 0;
     private static final int BUSY_LISTENER_KEY = -1;
     private int mListenerKey = 1;
     private final SparseArray mListenerMap = new SparseArray();
-    private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<NsdServiceInfo>();
+    private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<>();
     private final Object mMapLock = new Object();
 
     private final AsyncChannel mAsyncChannel = new AsyncChannel();
@@ -300,6 +333,7 @@ public final class NsdManager {
 
         @Override
         public void handleMessage(Message message) {
+            if (DBG) Log.d(TAG, "received " + nameOf(message.what));
             switch (message.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
@@ -377,7 +411,6 @@ public final class NsdManager {
 
     // if the listener is already in the map, reject it.  Otherwise, add it and
     // return its key.
-
     private int putListener(Object listener, NsdServiceInfo s) {
         if (listener == null) return INVALID_LISTENER_KEY;
         int key;
