@@ -1152,6 +1152,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep needs to pause " + mResumedActivity);
             if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
                     "Sleep => pause with userLeaving=false");
+
+            // If we are in the middle of resuming the top activity in
+            // {@link #resumeTopActivityUncheckedLocked}, mResumedActivity will be set but not
+            // resumed yet. We must not proceed pausing the activity here. This method will be
+            // called again if necessary as part of
+            // {@link ActivityStackSupervisor#checkReadyForSleepLocked}.
+            if (mStackSupervisor.inResumeTopActivity) {
+                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "In the middle of resuming top activity "
+                        + mResumedActivity);
+                return true;
+            }
+
             startPausingLocked(false, true, null, false);
             return true;
         }
@@ -1229,6 +1241,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
         ActivityRecord prev = mResumedActivity;
+
         if (prev == null) {
             if (resuming == null) {
                 Slog.wtf(TAG, "Trying to pause when nothing is resumed");
@@ -2191,6 +2204,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         } finally {
             mStackSupervisor.inResumeTopActivity = false;
         }
+        // When resuming the top activity, it may be necessary to pause the top activity (for
+        // example, returning to the lock screen. We suppress the normal pause logic in
+        // {@link #resumeTopActivityUncheckedLocked}, since the top activity is resumed at the end.
+        // We call the {@link ActivityStackSupervisor#checkReadyForSleepLocked} again here to ensure
+        // any necessary pause logic occurs.
+        mStackSupervisor.checkReadyForSleepLocked();
+
         return result;
     }
 
