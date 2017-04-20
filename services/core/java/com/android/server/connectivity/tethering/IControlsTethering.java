@@ -23,9 +23,9 @@ package com.android.server.connectivity.tethering;
  */
 public interface IControlsTethering {
     public final int STATE_UNAVAILABLE = 0;
-    public final int STATE_AVAILABLE = 1;
-    public final int STATE_TETHERED = 2;
-    public final int STATE_LOCAL_HOTSPOT = 3;
+    public final int STATE_AVAILABLE   = 1;
+    public final int STATE_TETHERED    = 2;
+    public final int STATE_LOCAL_ONLY  = 3;
 
     /**
      * Notify that |who| has changed its tethering state.  This may be called from any thread.
