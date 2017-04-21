@@ -25,5 +25,9 @@ public class SmartSelectionInstallReceiver extends ConfigUpdateInstallReceiver {
             "metadata/smartselection",
             "version");
     }
-}
 
+    @Override
+    protected boolean verifyVersion(int current, int alternative) {
+        return true;
+    }
+}
