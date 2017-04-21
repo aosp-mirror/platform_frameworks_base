@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import dalvik.annotation.optimization.FastNative;
+import dalvik.system.CloseGuard;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,7 +38,7 @@ import libcore.util.NativeAllocationRegistry;
  *
  * For more information, see the NDK documentation for <code>AHardwareBuffer</code>.
  */
-public final class HardwareBuffer implements Parcelable {
+public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RGBA_8888, RGBA_FP16, RGBA_1010102, RGBX_8888, RGB_888, RGB_565, BLOB})
@@ -64,6 +65,8 @@ public final class HardwareBuffer implements Parcelable {
 
     // Invoked on destruction
     private Runnable mCleaner;
+
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -163,14 +166,25 @@ public final class HardwareBuffer implements Parcelable {
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
                 loader, nGetNativeFinalizer(), NATIVE_HARDWARE_BUFFER_SIZE);
         mCleaner = registry.registerNativeAllocation(this, mNativeObject);
+        mCloseGuard.open("close");
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            mCloseGuard.warnIfOpen();
+            close();
+        } finally {
+            super.finalize();
+        }
     }
 
     /**
      * Returns the width of this buffer in pixels.
      */
     public int getWidth() {
-        if (mNativeObject == 0) {
-            throw new IllegalStateException("This HardwareBuffer has been destroyed and its width "
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its width "
                     + "cannot be obtained.");
         }
         return nGetWidth(mNativeObject);
@@ -180,8 +194,8 @@ public final class HardwareBuffer implements Parcelable {
      * Returns the height of this buffer in pixels.
      */
     public int getHeight() {
-        if (mNativeObject == 0) {
-            throw new IllegalStateException("This HardwareBuffer has been destroyed and its height "
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its height "
                     + "cannot be obtained.");
         }
         return nGetHeight(mNativeObject);
@@ -193,8 +207,8 @@ public final class HardwareBuffer implements Parcelable {
      */
     @Format
     public int getFormat() {
-        if (mNativeObject == 0) {
-            throw new IllegalStateException("This HardwareBuffer has been destroyed and its format "
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its format "
                     + "cannot be obtained.");
         }
         return nGetFormat(mNativeObject);
@@ -204,8 +218,8 @@ public final class HardwareBuffer implements Parcelable {
      * Returns the number of layers in this buffer.
      */
     public int getLayers() {
-        if (mNativeObject == 0) {
-            throw new IllegalStateException("This HardwareBuffer has been destroyed and its layer "
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its layer "
                     + "count cannot be obtained.");
         }
         return nGetLayers(mNativeObject);
@@ -215,11 +229,23 @@ public final class HardwareBuffer implements Parcelable {
      * Returns the usage flags of the usage hints set on this buffer.
      */
     public long getUsage() {
-        if (mNativeObject == 0) {
-            throw new IllegalStateException("This HardwareBuffer has been destroyed and its usage "
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its usage "
                     + "cannot be obtained.");
         }
         return nGetUsage(mNativeObject);
+    }
+
+    /** @removed replaced by {@link #close()} */
+    @Deprecated
+    public void destroy() {
+        close();
+    }
+
+    /** @removed replaced by {@link #isClosed()} */
+    @Deprecated
+    public boolean isDestroyed() {
+        return isClosed();
     }
 
     /**
@@ -227,10 +253,12 @@ public final class HardwareBuffer implements Parcelable {
      * underlying native resources. After calling this method, this buffer
      * must not be used in any way.
      *
-     * @see #isDestroyed()
+     * @see #isClosed()
      */
-    public void destroy() {
-        if (mNativeObject != 0) {
+    @Override
+    public void close() {
+        if (!isClosed()) {
+            mCloseGuard.close();
             mNativeObject = 0;
             mCleaner.run();
             mCleaner = null;
@@ -238,15 +266,15 @@ public final class HardwareBuffer implements Parcelable {
     }
 
     /**
-     * Indicates whether this buffer has been destroyed. A destroyed buffer
-     * cannot be used in any way: the buffer cannot be written to a parcel, etc.
+     * Indicates whether this buffer has been closed. A closed buffer cannot
+     * be used in any way: the buffer cannot be written to a parcel, etc.
      *
-     * @return True if this <code>HardwareBuffer</code> is in a destroyed state,
+     * @return True if this <code>HardwareBuffer</code> is in a closed state,
      *         false otherwise.
      *
-     * @see #destroy()
+     * @see #close()
      */
-    public boolean isDestroyed() {
+    public boolean isClosed() {
         return mNativeObject == 0;
     }
 
@@ -259,7 +287,7 @@ public final class HardwareBuffer implements Parcelable {
      * Flatten this object in to a Parcel.
      *
      * <p>Calling this method will throw an <code>IllegalStateException</code> if
-     * {@link #destroy()} has been previously called.</p>
+     * {@link #close()} has been previously called.</p>
      *
      * @param dest The Parcel in which the object should be written.
      * @param flags Additional flags about how the object should be written.
@@ -267,8 +295,8 @@ public final class HardwareBuffer implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (mNativeObject == 0) {
-            throw new IllegalStateException("This HardwareBuffer has been destroyed and cannot be "
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and cannot be "
                     + "written to a parcel.");
         }
         nWriteHardwareBufferToParcel(mNativeObject, dest);
