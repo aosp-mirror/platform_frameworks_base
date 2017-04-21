@@ -1367,26 +1367,48 @@ public final class JobSchedulerService extends com.android.server.SystemService
      *      - The component is enabled and runnable.
      */
     private boolean isReadyToBeExecutedLocked(JobStatus job) {
-        final boolean jobExists = mJobs.containsJob(job);
         final boolean jobReady = job.isReady();
-        final boolean jobPending = mPendingJobs.contains(job);
-        final boolean jobActive = isCurrentlyActiveLocked(job);
-        final boolean jobBackingUp = mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0;
+
+        if (DEBUG) {
+            Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                    + " ready=" + jobReady);
+        }
+
+        // This is a condition that is very likely to be false (most jobs that are
+        // scheduled are sitting there, not ready yet) and very cheap to check (just
+        // a few conditions on data in JobStatus).
+        if (!jobReady) {
+            return false;
+        }
+
+        final boolean jobExists = mJobs.containsJob(job);
 
         final int userId = job.getUserId();
         final boolean userStarted = ArrayUtils.contains(mStartedUsers, userId);
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
-                    + " exists=" + jobExists
-                    + " ready=" + jobReady + " pending=" + jobPending
-                    + " active=" + jobActive + " backingup=" + jobBackingUp
-                    + " userStarted=" + userStarted);
+                    + " exists=" + jobExists + " userStarted=" + userStarted);
         }
 
-        // Short circuit: don't do the expensive PM check unless we really think
-        // we might need to run this job now.
-        if (!jobExists || !userStarted || !jobReady || jobPending || jobActive || jobBackingUp) {
+        // These are also fairly cheap to check, though they typically will not
+        // be conditions we fail.
+        if (!jobExists || !userStarted) {
+            return false;
+        }
+
+        final boolean jobPending = mPendingJobs.contains(job);
+        final boolean jobActive = isCurrentlyActiveLocked(job);
+
+        if (DEBUG) {
+            Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                    + " pending=" + jobPending + " active=" + jobActive);
+        }
+
+        // These can be a little more expensive (especially jobActive, since we need to
+        // go through the array of all potentially active jobs), so we are doing them
+        // later...  but still before checking with the package manager!
+        if (jobPending || jobActive) {
             return false;
         }
 
