@@ -49,6 +49,7 @@ import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
 import android.service.autofill.FillEventHistory;
+import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
@@ -521,8 +522,7 @@ final class AutofillManagerServiceImpl {
      */
     void setAuthenticationSelected() {
         synchronized (mLock) {
-            mEventHistory.addEvent(
-                    new FillEventHistory.Event(FillEventHistory.Event.TYPE_AUTHENTICATION_SELECTED, null));
+            mEventHistory.addEvent(new Event(Event.TYPE_AUTHENTICATION_SELECTED, null));
         }
     }
 
@@ -531,8 +531,8 @@ final class AutofillManagerServiceImpl {
      */
     void setDatasetAuthenticationSelected(@Nullable String selectedDataset) {
         synchronized (mLock) {
-            mEventHistory.addEvent(new FillEventHistory.Event(
-                    FillEventHistory.Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
+            mEventHistory.addEvent(
+                    new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
         }
     }
 
@@ -541,7 +541,7 @@ final class AutofillManagerServiceImpl {
      */
     void setSaveShown() {
         synchronized (mLock) {
-            mEventHistory.addEvent(new FillEventHistory.Event(FillEventHistory.Event.TYPE_SAVE_SHOWN, null));
+            mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null));
         }
     }
 
@@ -550,8 +550,7 @@ final class AutofillManagerServiceImpl {
      */
     void setDatasetSelected(@Nullable String selectedDataset) {
         synchronized (mLock) {
-            mEventHistory.addEvent(
-                    new FillEventHistory.Event(FillEventHistory.Event.TYPE_DATASET_SELECTED, selectedDataset));
+            mEventHistory.addEvent(new Event(Event.TYPE_DATASET_SELECTED, selectedDataset));
         }
     }
 
@@ -601,7 +600,8 @@ final class AutofillManagerServiceImpl {
             }
         }
 
-        if (mEventHistory == null || mEventHistory.getEvents().size() == 0) {
+        if (mEventHistory == null || mEventHistory.getEvents() == null
+                || mEventHistory.getEvents().size() == 0) {
             pw.print(prefix); pw.println("No event on last fill response");
         } else {
             pw.print(prefix); pw.println("Events of last fill response:");
@@ -609,7 +609,7 @@ final class AutofillManagerServiceImpl {
 
             int numEvents = mEventHistory.getEvents().size();
             for (int i = 0; i < numEvents; i++) {
-                FillEventHistory.Event event = mEventHistory.getEvents().get(i);
+                final Event event = mEventHistory.getEvents().get(i);
                 pw.println("  " + i + ": eventType=" + event.getType() + " datasetId="
                         + event.getDatasetId());
             }
