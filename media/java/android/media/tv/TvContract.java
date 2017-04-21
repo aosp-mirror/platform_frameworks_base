@@ -2989,6 +2989,8 @@ public final class TvContract {
          */
         public static final String COLUMN_LAST_ENGAGEMENT_TIME_UTC_MILLIS =
                 "last_engagement_time_utc_millis";
+
+        private WatchNextPrograms() {}
     }
 
     /**
