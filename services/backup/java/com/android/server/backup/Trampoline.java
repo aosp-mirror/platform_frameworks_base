@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IBackupManagerMonitor;
@@ -361,7 +362,10 @@ public class Trampoline extends IBackupManager.Stub {
     public int requestBackup(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.requestBackup(packages, observer, monitor, flags) : null;
+        if (svc == null) {
+            return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
+        }
+        return svc.requestBackup(packages, observer, monitor, flags);
     }
 
     @Override
