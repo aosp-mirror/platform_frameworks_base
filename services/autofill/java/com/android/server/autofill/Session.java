@@ -85,10 +85,6 @@ import java.util.Map.Entry;
  * to fill the activity but it requires authentication first, that response need to be held
  * until the user authenticates or it times out.
  */
-// TODO(b/33197203): make sure sessions are removed (and tested by CTS):
-// - On all authentication scenarios.
-// - When user does not interact back after a while.
-// - When service is unbound.
 final class Session implements RemoteFillService.FillServiceCallbacks, ViewState.Listener,
         AutoFillUI.AutoFillUiCallback {
     private static final String TAG = "AutofillSession";
@@ -251,7 +247,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         synchronized (mLock) {
             if (response.getAuthentication() != null) {
-                // TODO(b/33197203 , b/35707731): make sure it's ignored if there is one already
+                // TODO(b/37424539): proper implementation
                 mResponseWaitingAuth = response;
             }
             processResponseLocked(response, requestId);
@@ -326,7 +322,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // FillServiceCallbacks
     @Override
     public void onServiceDied(RemoteFillService service) {
-        // TODO(b/33197203): implement
+        // TODO(b/337565347): implement
     }
 
     // AutoFillUiCallback
@@ -599,7 +595,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mStructure.dump();
         }
 
-        // TODO(b/33197203): Implement partitioning properly
+        // TODO(b/37426206): Implement partitioning properly
         final int lastResponseIdx = getLastResponseIndex();
         final int requestId = mResponses.keyAt(lastResponseIdx);
         final FillContext fillContext = new FillContext(requestId, mStructure);
@@ -692,7 +688,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private ViewState startPartitionLocked(AutofillId id, AutofillValue value) {
-        // TODO(b/33197203 , b/35707731): temporary workaround until partitioning supports auth
+        // TODO(b/37424539): proper implementation
         if (mResponseWaitingAuth != null) {
             final ViewState viewState =
                     new ViewState(this, id, value, this, ViewState.STATE_WAITING_RESPONSE_AUTH);
@@ -751,11 +747,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void notifyUnavailableToClient() {
         synchronized (mLock) {
-            if (mCurrentViewId == null) {
-                // TODO(b/33197203): temporary sanity check; should never happen
-                Slog.w(TAG, "notifyUnavailable(): mCurrentViewId is null");
-                return;
-            }
             if (!mHasCallback) return;
             try {
                 mClient.notifyNoFillUi(id, mWindowToken, mCurrentViewId);
@@ -922,7 +913,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             // ...or handle authentication.
-            // TODO(b/33197203 , b/35707731): make sure it's ignored if there is one already
+            // TODO(b/37424539): proper implementation
             mService.setDatasetAuthenticationSelected(dataset.getId());
             mDatasetWaitingAuth = dataset;
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH);
@@ -992,7 +983,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         if (VERBOSE) {
             pw.print(prefix); pw.print("mStructure: " );
-            // TODO(b/33197203): add method do dump AssistStructure on pw
+            // TODO: add method on AssistStructure to dump on pw
             if (mStructure != null) {
                 pw.println("look at logcat" );
                 mStructure.dump(); // dumps to logcat

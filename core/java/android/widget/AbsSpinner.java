@@ -491,8 +491,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         return AbsSpinner.class.getName();
     }
 
-    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
-
     @Override
     public void autofill(AutofillValue value) {
         if (!isEnabled()) return;

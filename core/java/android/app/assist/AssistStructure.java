@@ -600,7 +600,7 @@ public class AssistStructure implements Parcelable {
         String mIdType;
         String mIdEntry;
 
-        // TODO(b/33197203): once we have more flags, it might be better to store the individual
+        // TODO: once we have more flags, it might be better to store the individual
         // fields (viewId and childId) of the field.
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
@@ -639,7 +639,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
         static final int FLAGS_OPAQUE = 0x00008000;
 
-        // TODO(b/33197203): autofill data is made of many fields and ideally we should verify
+        // TODO: autofill data is made of many fields and ideally we should verify
         // one-by-one to optimize what's sent over, but there isn't enough flag bits for that, we'd
         // need to create a 'flags2' or 'autoFillFlags' field and add these flags there.
         // So, to keep thinkg simpler for now, let's just use on flag for all of them...
@@ -1043,8 +1043,6 @@ public class AssistStructure implements Parcelable {
          */
         public void updateAutofillValue(AutofillValue value) {
             mAutofillValue = value;
-            // TODO(b/33197203, b/33802548): decide whether to set text as well (so it would work
-            // with "legacy" views) or just the autofill value
             if (value.isText()) {
                 mText.mText = value.getTextValue();
             }

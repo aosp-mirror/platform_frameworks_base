@@ -81,7 +81,6 @@ import java.util.List;
  * {@link AutofillManagerServiceImpl} per user; the real work is done by
  * {@link AutofillManagerServiceImpl} itself.
  */
-// TODO(b/33197203): Handle removing of packages
 public final class AutofillManagerService extends SystemService {
 
     private static final String TAG = "AutofillManagerService";
@@ -109,10 +108,8 @@ public final class AutofillManagerService extends SystemService {
     @GuardedBy("mLock")
     private final SparseBooleanArray mDisabledUsers = new SparseBooleanArray();
 
-    // TODO(b/33197203): set a different max (or disable it) on low-memory devices.
     private final LocalLog mRequestsHistory = new LocalLog(20);
 
-    // TODO(b/33197203): is this still needed?
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -376,7 +373,6 @@ public final class AutofillManagerService extends SystemService {
         public int startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
                 AutofillId autofillId, Rect bounds, AutofillValue value, int userId,
                 boolean hasCallback, int flags, String packageName) {
-            // TODO(b/33197203): make sure it's called by resumed / focused activity
 
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
             appCallback = Preconditions.checkNotNull(appCallback, "appCallback");

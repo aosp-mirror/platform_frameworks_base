@@ -252,7 +252,6 @@ public final class AutofillValue implements Parcelable {
      *
      * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
      */
-    // TODO(b/33197203): use cache
     public static AutofillValue forText(@Nullable CharSequence value) {
         return value == null ? null : new AutofillValue(AUTOFILL_TYPE_TEXT, value);
     }
