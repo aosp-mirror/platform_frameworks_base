@@ -169,6 +169,13 @@ public class ArrayUtils {
     }
 
     /**
+     * Length of the given array or 0 if it's null.
+     */
+    public static int size(@Nullable Object[] array) {
+        return array == null ? 0 : array.length;
+    }
+
+    /**
      * Checks that value is present as at least one of the elements of the array.
      * @param array the array to check in
      * @param value the value to check for
