@@ -5089,14 +5089,14 @@ public class NotificationManagerService extends SystemService {
                 if (!serviceInfo.enabledAndUserMatches(UserHandle.getCallingUserId())) {
                     continue;
                 }
-                if (!hasCompanionDevice(serviceInfo)) {
-                    continue;
-                }
+
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyNotificationChannelChanged(
-                                serviceInfo, pkg, user, channel, modificationType);
+                        if (hasCompanionDevice(serviceInfo)) {
+                            notifyNotificationChannelChanged(
+                                    serviceInfo, pkg, user, channel, modificationType);
+                        }
                     }
                 });
             }
@@ -5112,14 +5112,14 @@ public class NotificationManagerService extends SystemService {
                 if (!serviceInfo.enabledAndUserMatches(UserHandle.getCallingUserId())) {
                     continue;
                 }
-                if (!hasCompanionDevice(serviceInfo)) {
-                    continue;
-                }
+
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyNotificationChannelGroupChanged(
-                                serviceInfo, pkg, user, group, modificationType);
+                        if (hasCompanionDevice(serviceInfo)) {
+                            notifyNotificationChannelGroupChanged(
+                                    serviceInfo, pkg, user, group, modificationType);
+                        }
                     }
                 });
             }
