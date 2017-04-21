@@ -73,7 +73,8 @@ public class StorageStatsManager {
     }
 
     /**
-     * Return the total size of the media hosting this storage volume.
+     * Return the total size of the underlying media that is hosting this
+     * storage volume.
      * <p>
      * To reduce end user confusion, this value matches the total storage size
      * advertised in a retail environment, which is typically larger than the
