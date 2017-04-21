@@ -19,7 +19,6 @@ package android.content;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.TimeUtils;
 
@@ -150,7 +149,7 @@ public class ClipDescription implements Parcelable {
      * global clipboard.
      *
      * @param timeStamp at which the associated {@link ClipData} is copeid to clipboard in
-     *                  {@link SystemClock#elapsedRealtime()} time base.
+     *                  {@link System#currentTimeMillis()} time base.
      * @hide
      */
     public void setTimestamp(long timeStamp) {
@@ -159,7 +158,7 @@ public class ClipDescription implements Parcelable {
 
     /**
      * Return the timestamp at which the associated {@link ClipData} is copied to global clipboard
-     * in the {@link SystemClock#elapsedRealtime()} time base.
+     * in the {@link System#currentTimeMillis()} time base.
      *
      * @return timestamp at which the associated {@link ClipData} is copied to global clipboard
      *         or {@code 0} if it is not copied to clipboard.
@@ -317,7 +316,9 @@ public class ClipDescription implements Parcelable {
                 b.append(' ');
             }
             first = false;
-            TimeUtils.formatDuration(mTimeStamp, b);
+            b.append('<');
+            b.append(TimeUtils.logTimeOfDay(mTimeStamp));
+            b.append('>');
         }
         return !first;
     }
