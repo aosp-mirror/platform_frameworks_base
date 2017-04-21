@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Lejo gjithmonë skanimet për Wi-Fi edhe kur je në lëvizje"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Çaktivizo volumin absolut"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Aktivizo zilen brenda të njëjtit brez"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versioni AVRCP i Bluetooth-it"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Zgjidh versionin AVRCP të Bluetooth-it"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeku Bluetooth Audio"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiko apl. përmes USB-së"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollo aplikacionet e instaluara nëpërmjet ADB/ADT për sjellje të dëmshme."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Çaktivizon funksionin e volumit absolut të Bluetooth në rast të problemeve të volumit me pajisjet në largësi, si p.sh. një volum i lartë i papranueshëm ose mungesa e kontrollit."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Lejo që zilet në telefon të luhen në kufjet me \"Bluetooth\""</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminali lokal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivizo aplikacionin terminal që ofron qasje në guaskën lokale"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrolli HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trokit për ta ndryshuar."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Shërbimet në ekzekutim"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Shiko dhe kontrollo shërbimet që po ekzekutohen aktualisht"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView me shumë procese"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Ekzekuto më vete interpretuesit e WebView"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Zbatimi i WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Cakto zbatimin e WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Kjo zgjedhje nuk është më e vlefshme. Provo përsëri."</string>

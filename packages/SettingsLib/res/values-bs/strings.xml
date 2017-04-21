@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvijek dopustiti Wi-Fi lutajuće skeniranje"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilna mreža za prijenos podataka je uvijek aktivna"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogućite apsolutnu jačinu zvuka"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Omogući zvono unutar pojasa"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP verzija"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Odaberite Bluetooth AVRCP verziju"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio kodek"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifikuj aplikacije putem USB-a"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Provjerava da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamerno ponašanje."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogućava opciju Bluetooth apsolutne jačine zvuka u slučaju problema s jačinom zvuka na udaljenim uređajima, kao što je neprihvatljivo glasan zvuk ili nedostatak kontrole."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Dopusti da se melodije zvona reproduciranju na Bluetooth slušalicama"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući terminalnu aplik. koja nudi pristup lok. kom. okruženju"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provjeravanje"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivno. Dodirnite za promjenu opcije."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Pokrenute usluge"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Prikažite trenutno pokrenute usluge i upravljajte njima"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Višeprocesni WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Pokreni odvojeno WebView rendere"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Postavljanje WebViewa"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Podesi WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ovaj izbor više ne vrijedi. Pokušajte ponovo."</string>

@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"តែងតែ​អនុញ្ញាត​​​ការវិភាគ​រ៉ូម​វ៉ាយហ្វាយ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ទិន្នន័យទូរសព្ទចល័តដំណើរការជានិច្ច"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"បិទកម្រិតសំឡេងលឺខ្លាំង"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"បើក​ការ​រោទ៍​ក្នុងបណ្តាញ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"កំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ជ្រើសរើសកំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"កូឌិក​សំឡេង​ប៊្លូធូស"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ផ្ទៀងផ្ទាត់​កម្មវិធី​តាម​យូអេសប៊ី"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ពិនិត្យ​កម្មវិធី​បាន​ដំឡើង​តាម​រយៈ ADB/ADT សម្រាប់​ឥរិយាបថ​ដែល​គ្រោះ​ថ្នាក់។"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"បិទលក្ខណៈពិសេសកម្រិតសំឡេងលឺខ្លាំងពេលភ្ជាប់ប៊្លូធូសក្នុងករណីមានបញ្ហាជាមួយឧបករណ៍បញ្ជាពីចម្ងាយ ដូចជាកម្រិតសំឡេងលឺខ្លាំងដែលមិនអាចទទួលយកបាន ឬខ្វះការគ្រប់គ្រង។"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"អនុញ្ញាត​ឲ្យ​សំឡេង​រោទ៍​នៅ​លើ​ទូរសព្ទ​បញ្ចេញសំឡេង​តាម​រយៈ​កាស​ប្ល៊ូធូស"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"ពិនិត្យ HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"សេវាកម្ម​កំពុង​ដំណើរការ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"មើល និង​គ្រប់គ្រង​សេវាកម្ម​កំពុង​ដំណើរការ​បច្ចុប្បន្ន"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView ដែលមានអង្គដំណើរការច្រើន"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"ដំណើរការកម្មវិធីបម្លែង WebView ដោយឡែក"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"កំណត់ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ជម្រើសនេះលែងមានសុពលភាពទៀតហើយ ព្យាយាមម្តងទៀត"</string>

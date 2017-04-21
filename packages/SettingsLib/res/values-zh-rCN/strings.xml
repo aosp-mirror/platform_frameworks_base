@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"一律允许WLAN漫游扫描"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"始终开启移动数据网络"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"停用绝对音量功能"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"启用手机默认铃声"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"蓝牙 AVRCP 版本"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"选择蓝牙 AVRCP 版本"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"蓝牙音频编解码器"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过USB验证应用"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"通过 ADB/ADT 检查安装的应用是否存在有害行为。"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"停用蓝牙绝对音量功能，即可避免在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"允许手机铃声通过蓝牙耳机播放"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"本地终端"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"启用终端应用，以便在本地访问 Shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 检查"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"已启用。点按即可切换。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"正在运行的服务"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"查看和控制当前正在运行的服务"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"多进程 WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"单独运行 WebView 渲染程序"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 实现"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"设置 WebView 实现"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"此选项已失效，请重试。"</string>

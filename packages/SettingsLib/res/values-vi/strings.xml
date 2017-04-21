@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Luôn cho phép quét chuyển vùng Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hiện hoạt"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Vô hiệu hóa âm lượng tuyệt đối"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Bật đổ chuông trong dải"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth phiên bản AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Chọn Bluetooth phiên bản AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec âm thanh Bluetooth"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Xác minh ứng dụng qua USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kiểm tra các ứng dụng được cài đặt qua ADB/ADT để xem có hoạt động gây hại hay không."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Vô hiệu hóa tính năng âm lượng tuyệt đối qua Bluetooth trong trường hợp xảy ra sự cố về âm lượng với các thiết bị từ xa, chẳng hạn như âm lượng lớn không thể chấp nhận được hoặc thiếu kiểm soát."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Cho phép nhạc chuông trên điện thoại được phát trên tai nghe Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Dòng lệnh cục bộ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Bật ứng dụng dòng lệnh cung cấp quyền truy cập vỏ cục bộ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kiểm tra HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Hiện hoạt. Nhấn để chuyển đổi."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Các dịch vụ đang hoạt động"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Xem và kiểm soát các dịch vụ hiện đang hoạt động"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView đa quy trình"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Chạy riêng kết xuất đồ họa WebView"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Triển khai WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Đặt triển khai WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Lựa chọn này không còn hợp lệ nữa. Hãy thử lại."</string>

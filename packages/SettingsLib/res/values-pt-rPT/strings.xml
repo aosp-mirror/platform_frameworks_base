@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permitir sempre a deteção de Wi-Fi em roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dados móveis sempre ativos"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desativar volume absoluto"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ativar toque dentro da banda"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versão de Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecionar versão de Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec de áudio Bluetooth"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificar aplicações de USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificar as aplicações instaladas via ADB/ADT para detetar comportamento perigoso."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desativa a funcionalidade de volume absoluto do Bluetooth caso existam problemas de volume com dispositivos remotos, como um volume insuportavelmente alto ou a ausência de controlo."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permitir que os toques no telemóvel sejam reproduzidos em auscultadores com microfone integrado Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Ativar aplicação terminal que oferece acesso local à shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Verificação HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ativo. Toque para ativar/desativar."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Serviços em execução"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Ver e controlar os serviços actualmente em execução"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView multiprocessos"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Executar renderizadores WebView separadamente"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementação WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Definir implementação WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Esta opção já não é válida. Tente novamente."</string>
