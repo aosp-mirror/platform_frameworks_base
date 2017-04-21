@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ Wi‑Fi Roam Scans ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ਮੋਬਾਈਲ ਡੈਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਿਊਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ਇਨ-ਬੈਂਡ ਘੰਟੀ ਵੱਜਣ ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ਬਲੂਟੁੱਥ AVRCP ਰੂਪ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ਬਲੂਟੁੱਥ AVRCP ਰੂਪ ਚੁਣੋ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ਤੇ ਐਪਸ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਵੌਲਿਊਮ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਵੌਲਿਊਮ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਵੌਲਿਊਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਰਿੰਗਟੋਨਾਂ ਨੂੰ ਬਲੂਟੁੱਥ ਹੈੱਡਸੈੱਟਾਂ \'ਤੇ ਚਲਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ਸਥਾਨਕ ਟਰਮੀਨਲ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ਟਰਮੀਨਲ ਐਪ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ ਜੋ ਸਥਾਨਕ ਸ਼ੈਲ ਪਹੁੰਚ ਆੱਫਰ ਕਰਦਾ ਹੈ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ਜਾਂਚ"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ਕਿਰਿਆਸ਼ੀਲ। ਟੌਗਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ਇਸ ਵੇਲੇ ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ ਦੇਖੋ ਅਤੇ ਇਹਨਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"ਮਲਟੀਪ੍ਰੋਸੈੱਸ WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ਰੈਂਡਰਰਾਂ ਨੂੰ ਵੱਖਰੇ ਤੌਰ \'ਤੇ ਚਲਾਓ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ਅਮਲ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ਅਮਲ ਸੈੱਟ ਕਰੋ"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ਇਹ ਚੋਣ ਹੁਣ ਵੈਧ ਨਹੀਂ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>

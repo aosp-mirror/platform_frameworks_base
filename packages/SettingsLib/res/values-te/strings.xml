@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi సంచార స్కాన్‌లను ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"మొబైల్ డేటాని ఎల్లప్పుడూ సక్రియంగా ఉంచు"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"సంపూర్ణ వాల్యూమ్‌‍ను నిలిపివేయి"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ఇన్-బ్యాండ్ రింగింగ్‌ని ప్రారంభించండి"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"బ్లూటూత్ AVRCP సంస్కరణ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"బ్లూటూత్ ఆడియో కోడెక్"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ద్వారా అనువర్తనాలను ధృవీకరించు"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలను తనిఖీ చేయి."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ నియంత్రణ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ లక్షణాన్ని నిలిపివేస్తుంది."</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"బ్లూటూత్ హెడ్‌సెట్‌లలో ప్లే చేయడానికి ఫోన్‌లో రింగ్‌టోన్‌లను అనుమతించండి"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"స్థానిక షెల్ ప్రాప్యతను అందించే టెర్మినల్ అనువర్తనాన్ని ప్రారంభించు"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP తనిఖీ"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"సక్రియంగా ఉంది. టోగుల్ చేయడానికి నొక్కండి."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"అమలులో ఉన్న సేవలు"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ప్రస్తుతం అమలులో ఉన్న సేవలను వీక్షించండి మరియు నియంత్రించండి"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"మల్టీప్రాసెస్ వెబ్ వీక్షణ"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"వెబ్ వీక్షణ రెండెరెర్‌లను అమలు చేయి"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"వెబ్ వీక్షణ అమలు"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"వెబ్ వీక్షణ అమలుని సెట్ చేయండి"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ఈ ఎంపిక ఇప్పుడు లేదు. మళ్లీ ప్రయత్నించండి."</string>

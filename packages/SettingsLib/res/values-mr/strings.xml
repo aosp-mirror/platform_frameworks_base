@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"वाय-फाय रोम स्‍कॅनला नेहमी अनुमती द्या"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा नेहमी सक्रिय"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"संपूर्ण आवाज अक्षम करा"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"इन-बँड रिंगिंग सक्षम करा"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लूटुथ AVRCP आवृत्ती"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ब्लूटुथ AVRCP आवृत्ती निवडा"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ब्लूटूथ ऑडिओ कोडेक"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वरील अॅप्स सत्यापित करा"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे स्थापित अॅप्स तपासा."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"दूरस्थ डिव्हाइसेसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटुथ संपूर्ण आवाज वैशिष्ट्य अक्षम करते."</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"फोनवरील रिंगटोन ब्लूटुथ हेडसेटवर वाजू द्या"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानिक टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानिक शेल प्रवेश देणारा टर्मिनल अॅप सक्षम करा"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP तपासणी"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय. टॉगल करण्यासाठी टॅप करा."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चालू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"सध्या चालत असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"एकाधिक प्रक्रिया वेबदृश्य"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"वेबदृश्य प्रस्तुतकर्ते स्वतंत्रपणे चालवा"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबदृश्य अंमलबजावणी"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबदृश्य अंमलबजावणी सेट करा"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ही निवड यापुढे वैध असणार नाही. पुन्हा प्रयत्न करा."</string>

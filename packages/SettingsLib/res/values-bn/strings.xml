@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ইন-ব্যান্ড রিং করা সক্ষম করুন"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ব্লুটুথ AVRCP সংস্করণ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ব্লুটুথ AVRCP সংস্করণ বেছে নিন"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ব্লুটুথ অডিও কোডেক"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB এর অ্যাপ্লিকেশানগুলি যাচাই করুন"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ফোনের রিংটোন ব্লুটুথ হেডসেটে শোনা সক্ষম করুন"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP পরীক্ষণ"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"সক্রিয় রয়েছে৷ টগল করতে আলতো চাপুন৷"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"এখন চলছে যে পরিষেবাগুলি"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"বহু-প্রক্রিয়া ওয়েবভিউ"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"ওয়েবভিউ রেন্ডারারগুলি আলাদাভাবে চালান"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ওয়েবভিউ প্রয়োগ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ওয়েবভিউ প্রয়োগ সেট করুন"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"এই পছন্দটি আর বৈধ নেই৷ আবার চেষ্টা করুন৷"</string>

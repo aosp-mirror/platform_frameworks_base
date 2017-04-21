@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Luba alati WiFi-rändluse skannimine"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobiilne andmeside on alati aktiivne"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Keela absoluutne helitugevus"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Luba ribasisene helisemine"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetoothi AVRCP versioon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Valige Bluetoothi AVRCP versioon"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetoothi heli kodek"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Kinnita rakendus USB kaudu"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrolli, kas ADB/ADT-ga installitud rakendused on ohtlikud."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Keelatakse Bluetoothi absoluutse helitugevuse funktsioon, kui kaugseadmetega on helitugevuse probleeme (nt liiga vali heli või juhitavuse puudumine)."</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Lubab telefonis olevaid helinaid esitada Bluetoothi peakomplektides"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Kohalik terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Luba kohalikku turvalist juurdepääsu pakkuv terminalirakendus"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontrollimine"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiivne. Puudutage vahetamiseks."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Käitatud teenused"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Praegu käitatud teenuste vaatamine ja juhtimine"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Mitme protsessiga WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Käita WebView\' renderdajaid eraldi"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView\' rakendamine"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView\' rakendamise seadistamine"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"See valik ei kehti enam. Proovige uuesti."</string>

@@ -156,7 +156,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"電源メニューにバグレポートを取得するボタンを表示する"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"スリープモードにしない"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"充電中に画面をスリープにしない"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCIスヌープログを有効にする"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCIスヌープログをON"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Bluetooth HCIパケットをすべてファイルにキャプチャする"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEMロック解除"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ブートローダーによるロック解除を許可する"</string>
@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fiローミングスキャンを常に許可する"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"モバイルデータを常に ON にする"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"絶対音量を無効にする"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"インバンド リンギングを有効にする"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP バージョン"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP バージョンを選択する"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth オーディオ コーデック"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB経由のアプリを確認"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT経由でインストールされたアプリに不正な動作がないかを確認する"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"リモート端末で音量に関する問題（音量が大きすぎる、制御できないなど）が発生した場合に、Bluetooth の絶対音量の機能を無効にする。"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"スマートフォンの着信音が Bluetooth ヘッドセットで再生されることを許可する"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ローカルターミナル"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ローカルシェルアクセスを提供するターミナルアプリを有効にします"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCPチェック"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"有効です。タップすると切り替わります。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"実行中のサービス"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"現在実行中のサービスを表示して制御する"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"マルチプロセス WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView レンダラを別個に実行"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView の実装"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView の実装の設定"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"この選択は無効になりました。もう一度お試しください。"</string>

@@ -172,8 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Секогаш дозволувај Wi‑Fi скенирање во роаминг"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилниот интернет е секогаш активен"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Оневозможете апсолутна јачина на звук"</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing (3291686366721786740) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Овозможете ѕвонење во појас"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Верзија Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Изберете верзија Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодек за аудио преку Bluetooth"</string>
@@ -211,8 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Потврди апликации преку УСБ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Провери апликации инсталирани преку ADB/ADT за штетно однесување."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Ја оневозможува карактеристиката за апсолутна јачина на звук преку Bluetooth во случај кога ќе настанат проблеми со далечинските уреди, како на пр., неприфатливо силен звук или недоволна контрола."</string>
-    <!-- no translation found for bluetooth_enable_inband_ringing_summary (2787866074741784975) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Дозволи мелодиите на телефонот да се пуштаат на Bluetooth слушалките"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Овозможи апликација на терминал што овозможува локален пристап кон школка."</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверување HDCP"</string>
@@ -299,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активно. Допрете за да смените."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Активни услуги"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Погледнете и контролирајте услуги што се моментално активни"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Повеќекратен процес на WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Посебно извршувајте ги прикажувачите на WebView"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Воведување WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Поставете воведување WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Овој избор веќе не важи. Обидете се повторно."</string>
