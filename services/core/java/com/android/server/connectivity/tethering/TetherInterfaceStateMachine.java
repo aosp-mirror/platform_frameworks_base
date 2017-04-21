@@ -194,7 +194,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 case CMD_TETHER_REQUESTED:
                     mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
                     switch (message.arg1) {
-                        case IControlsTethering.STATE_LOCAL_HOTSPOT:
+                        case IControlsTethering.STATE_LOCAL_ONLY:
                             transitionTo(mLocalHotspotState);
                             break;
                         case IControlsTethering.STATE_TETHERED:
@@ -304,7 +304,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             }
 
             if (DBG) Log.d(TAG, "Local hotspot " + mIfaceName);
-            sendInterfaceState(IControlsTethering.STATE_LOCAL_HOTSPOT);
+            sendInterfaceState(IControlsTethering.STATE_LOCAL_ONLY);
         }
 
         @Override
