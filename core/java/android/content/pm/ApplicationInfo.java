@@ -891,7 +891,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public @Category int category = CATEGORY_UNDEFINED;
 
     /** {@hide} */
-    @IntDef({
+    @IntDef(prefix = { "CATEGORY_" }, value = {
             CATEGORY_UNDEFINED,
             CATEGORY_GAME,
             CATEGORY_AUDIO,
