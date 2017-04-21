@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
@@ -46,9 +45,9 @@ import com.android.internal.util.Protocol;
 import com.android.server.net.NetworkPinner;
 
 import java.net.InetAddress;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.Collections;
 
 /**
  * This class provides the primary API for managing all aspects of Wi-Fi
@@ -446,6 +445,35 @@ public class WifiManager {
      *  @hide
      */
     public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
+
+    /**
+     * Interface IP mode for configuration error.
+     *
+     * @see updateInterfaceIpState(String, int)
+     *
+     * @hide
+     */
+    public static final int IFACE_IP_MODE_CONFIGURATION_ERROR = 0;
+
+    /**
+     * Interface IP mode for tethering.
+     *
+     * @see updateInterfaceIpState(String, int)
+     *
+     * @hide
+     */
+    public static final int IFACE_IP_MODE_TETHERED = 1;
+
+    /**
+     * Interface IP mode for Local Only Hotspot.
+     *
+     * @see updateInterfaceIpState(String, int)
+     *
+     * @hide
+     */
+    public static final int IFACE_IP_MODE_LOCAL_ONLY = 2;
+
+
     /**
      * Broadcast intent action indicating that a connection to the supplicant has
      * been established (and it is now possible
@@ -1726,6 +1754,26 @@ public class WifiManager {
         try {
             mService.setWifiApEnabled(wifiConfig, enabled);
             return true;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Call allowing ConnectivityService to update WifiService with interface mode changes.
+     *
+     * The possible modes include: {@link IFACE_IP_MODE_TETHERED},
+     *                             {@link IFACE_IP_MODE_LOCAL_ONLY},
+     *                             {@link IFACE_IP_MODE_CONFIGURATION_ERROR}
+     *
+     * @param ifaceName String name of the updated interface
+     * @param mode int representing the new mode
+     *
+     * @hide
+     */
+    public void updateInterfaceIpState(String ifaceName, int mode) {
+        try {
+            mService.updateInterfaceIpState(ifaceName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
