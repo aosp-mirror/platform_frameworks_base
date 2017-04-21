@@ -98,14 +98,14 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
-        final long turnedOffprofileSid =
+        final long turnedOffProfileSid =
                 mGateKeeperService.getSecureUserId(TURNED_OFF_PROFILE_USER_ID);
         assertTrue(primarySid != 0);
         assertTrue(profileSid != 0);
         assertTrue(profileSid != primarySid);
-        assertTrue(turnedOffprofileSid != 0);
-        assertTrue(turnedOffprofileSid != primarySid);
-        assertTrue(turnedOffprofileSid != profileSid);
+        assertTrue(turnedOffProfileSid != 0);
+        assertTrue(turnedOffProfileSid != primarySid);
+        assertTrue(turnedOffProfileSid != profileSid);
 
         // clear auth token and wait for verify challenge from primary user to re-generate it.
         mGateKeeperService.clearAuthToken(MANAGED_PROFILE_USER_ID);
@@ -119,7 +119,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertNotNull(mGateKeeperService.getAuthToken(MANAGED_PROFILE_USER_ID));
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
 
-        // Verify that profile which arent't running (e.g. turn off work) don't get unlocked
+        // Verify that profile which aren't running (e.g. turn off work) don't get unlocked
         assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
         /* Currently in LockSettingsService.setLockCredential, unlockUser() is called with the new
