@@ -41,7 +41,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -407,7 +406,7 @@ public class ClipboardService extends SystemService {
         if (clip != null) {
             final ClipDescription description = clip.getDescription();
             if (description != null) {
-                description.setTimestamp(SystemClock.elapsedRealtime());
+                description.setTimestamp(System.currentTimeMillis());
             }
         }
         final long ident = Binder.clearCallingIdentity();
