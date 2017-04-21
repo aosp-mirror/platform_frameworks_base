@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Ombi la muunganisho"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> inataka kusanidi muunganisho wa VPN utakaoiruhusu kufuatilia trafiki ya mtandao. Kubali ikiwa tu unakiamini chanzo. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; huonekana sehemu ya juu ya skrini yako VPN inapofanya kazi."</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> inataka kusanidi muunganisho wa VPN utakaoiruhusu kufuatilia shughuli kwenye mtandao. Kubali ikiwa tu unakiamini chanzo. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; huonekana sehemu ya juu ya skrini yako VPN inapofanya kazi."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN imeunganishwa"</string>
     <string name="configure" msgid="4905518375574791375">"Sanidi"</string>
     <string name="disconnect" msgid="971412338304200056">"Tenganisha"</string>
