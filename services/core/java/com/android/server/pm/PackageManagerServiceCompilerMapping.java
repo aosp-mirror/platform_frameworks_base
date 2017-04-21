@@ -26,7 +26,7 @@ import dalvik.system.DexFile;
 public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
     static final String REASON_STRINGS[] = {
-            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "forced-dexopt"
+            "first-boot", "boot", "install", "bg-dexopt", "ab-ota"
     };
 
     // Static block to ensure the strings array is of the right length.
@@ -52,16 +52,6 @@ public class PackageManagerServiceCompilerMapping {
                 !DexFile.isValidCompilerFilter(sysPropValue)) {
             throw new IllegalStateException("Value \"" + sysPropValue +"\" not valid "
                     + "(reason " + REASON_STRINGS[reason] + ")");
-        }
-
-        // Ensure that some reasons are not mapped to profile-guided filters.
-        switch (reason) {
-            case PackageManagerService.REASON_FORCED_DEXOPT:
-                if (DexFile.isProfileGuidedCompilerFilter(sysPropValue)) {
-                    throw new IllegalStateException("\"" + sysPropValue + "\" is profile-guided, "
-                            + "but not allowed for " + REASON_STRINGS[reason]);
-                }
-                break;
         }
 
         return sysPropValue;
@@ -103,12 +93,12 @@ public class PackageManagerServiceCompilerMapping {
     }
 
     /**
-     * Return the compiler filter for "full" compilation.
+     * Return the default compiler filter for compilation.
      *
      * We derive that from the traditional "dalvik.vm.dex2oat-filter" property and just make
      * sure this isn't profile-guided. Returns "speed" in case of invalid (or missing) values.
      */
-    public static String getFullCompilerFilter() {
+    public static String getDefaultCompilerFilter() {
         String value = SystemProperties.get("dalvik.vm.dex2oat-filter");
         if (value == null || value.isEmpty()) {
             return "speed";
