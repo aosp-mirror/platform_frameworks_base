@@ -178,18 +178,43 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Displays text to the user and optionally allows them to edit it.  A TextView
- * is a complete text editor, however the basic class is configured to not
- * allow editing; see {@link EditText} for a subclass that configures the text
- * view for editing.
- *
+ * A user interface element that displays text to the user.
+ * To provide user-editable text, see {@link EditText}.
  * <p>
- * To allow users to copy some or all of the TextView's value and paste it somewhere else, set the
- * XML attribute {@link android.R.styleable#TextView_textIsSelectable
- * android:textIsSelectable} to "true" or call
- * {@link #setTextIsSelectable setTextIsSelectable(true)}. The {@code textIsSelectable} flag
- * allows users to make selection gestures in the TextView, which in turn triggers the system's
- * built-in copy/paste controls.
+ * The following code sample shows a typical use, with an XML layout
+ * and code to modify the contents of the text view:
+ * </p>
+
+ * <pre>
+ * &lt;LinearLayout
+       xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"&gt;
+ *    &lt;TextView
+ *        android:id="@+id/text_view_id"
+ *        android:layout_height="wrap_content"
+ *        android:layout_width="wrap_content"
+ *        android:text="@string/hello" /&gt;
+ * &lt;/LinearLayout&gt;
+ * </pre>
+ * <p>
+ * This code sample demonstrates how to modify the contents of the text view
+ * defined in the previous XML layout:
+ * </p>
+ * <pre>
+ * public class MainActivity extends Activity {
+ *
+ *    protected void onCreate(Bundle savedInstanceState) {
+ *         super.onCreate(savedInstanceState);
+ *         setContentView(R.layout.activity_main);
+ *         final TextView helloTextView = (TextView) findViewById(R.id.text_view_id);
+ *         helloTextView.setText(R.string.user_greeting);
+ *     }
+ * }
+ * </pre>
+ * <p>
+ * To customize the appearance of TextView, see <a href="https://developer.android.com/guide/topics/ui/themes.html">Styles and Themes</a>.
+ * </p>
  * <p>
  * <b>XML attributes</b>
  * <p>
@@ -674,7 +699,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextEditSuggestionHighlightStyle;
 
     /**
-     * EditText specific data, created on demand when one of the Editor fields is used.
+     * {@link EditText} specific data, created on demand when one of the Editor fields is used.
      * See {@link #createEditorIfNeeded()}.
      */
     private Editor mEditor;
@@ -2172,10 +2197,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * with an argument of {@link android.widget.TextView.BufferType#SPANNABLE BufferType.SPANNABLE}
      * or {@link android.widget.TextView.BufferType#EDITABLE BufferType.EDITABLE}, you can cast
      * the return value from this method to Spannable or Editable, respectively.
-     * <p/>
-     * The content of the return value should not be modified. If you want a modifiable one, you
-     * should make your own copy first.
      *
+     * <p>The content of the return value should not be modified. If you want a modifiable one, you
+     * should make your own copy first.</p>
+     *
+     * @return The text displayed by the text view.
      * @attr ref android.R.styleable#TextView_text
      */
     @ViewDebug.CapturedViewProperty
@@ -2185,6 +2211,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Returns the length, in characters, of the text managed by this TextView
+     * @return The length of the text managed by the TextView in characters.
      */
     public int length() {
         return mText.length();
@@ -2201,26 +2228,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the height of one standard line in pixels.  Note that markup
-     * within the text can cause individual lines to be taller or shorter
-     * than this height, and the layout may contain additional first-
-     * or last-line padding.
+     * Gets the vertical distance between lines of text, in pixels.
+     * Note that markup within the text can cause individual lines
+     * to be taller or shorter than this height, and the layout may
+     * contain additional first-or last-line padding.
+     * @return The height of one standard line in pixels.
      */
     public int getLineHeight() {
         return FastMath.round(mTextPaint.getFontMetricsInt(null) * mSpacingMult + mSpacingAdd);
     }
 
     /**
-     * @return the Layout that is currently being used to display the text.
-     * This can be null if the text or width has recently changes.
+     * Gets the {@link android.text.Layout} that is currently being used to display the text.
+     * This value can be null if the text or width has recently changed.
+     * @return The Layout that is currently being used to display the text.
      */
     public final Layout getLayout() {
         return mLayout;
     }
 
     /**
-     * @return the Layout that is currently being used to display the hint text.
-     * This can be null.
+     * @return the {@link android.text.Layout} that is currently being used to
+     * display the hint text. This can be null.
      */
     final Layout getHintLayout() {
         return mHintLayout;
@@ -2272,8 +2301,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the current key listener for this TextView.
+     * Gets the current {@link KeyListener} for the TextView.
      * This will frequently be null for non-EditText TextViews.
+     * @return the current key listener for this TextView.
      *
      * @attr ref android.R.styleable#TextView_numeric
      * @attr ref android.R.styleable#TextView_digits
@@ -2350,17 +2380,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the movement method being used for this TextView.
+     * Gets the {@link android.text.method.MovementMethod} being used for this TextView,
+     * which provides positioning, scrolling, and text selection functionality.
      * This will frequently be null for non-EditText TextViews.
+     * @return the movement method being used for this TextView.
+     * @see android.text.method.MovementMethod
      */
     public final MovementMethod getMovementMethod() {
         return mMovement;
     }
 
     /**
-     * Sets the movement method (arrow key handler) to be used for
-     * this TextView.  This can be null to disallow using the arrow keys
-     * to move the cursor or scroll the view.
+     * Sets the {@link android.text.method.MovementMethod} for handling arrow key movement
+     * for this TextView. This can be null to disallow using the arrow keys to move the
+     * cursor or scroll the view.
      * <p>
      * Be warned that if you want a TextView with a key listener or movement
      * method not to be focusable, or if you want a TextView without a
@@ -2397,9 +2430,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Gets the current {@link android.text.method.TransformationMethod} for the TextView.
+     * This is frequently null, except for single-line and password fields.
      * @return the current transformation method for this TextView.
-     * This will frequently be null except for single-line and password
-     * fields.
      *
      * @attr ref android.R.styleable#TextView_password
      * @attr ref android.R.styleable#TextView_singleLine
@@ -3432,8 +3465,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Set the default {@link LocaleList} of the text in this TextView to a one-member list
-     * containing just the given value.
+     * Set the default {@link Locale} of the text in this TextView to a one-member
+     * {@link LocaleList} containing just the given Locale.
      *
      * @param locale the {@link Locale} for drawing text, must not be null.
      *
@@ -3492,7 +3525,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the size (in scaled pixels) of thee default text size in this TextView.
+     * @return the size (in scaled pixels) of the default text size in this TextView.
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "text")
@@ -3574,16 +3607,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the extent by which text is currently being stretched
-     * horizontally.  This will usually be 1.
+     * Gets the extent by which text should be stretched horizontally.
+     * This will usually be 1.0.
+     * @return The horizontal scale factor.
      */
     public float getTextScaleX() {
         return mTextPaint.getTextScaleX();
     }
 
     /**
-     * Sets the extent by which text should be stretched horizontally.
-     *
+     * Sets the horizontal scale factor for text. The default value
+     * is 1.0. Values greater than 1.0 stretch the text wider.
+     * Values less than 1.0 make the text narrower. By default, this value is 1.0.
+     * @param size The horizontal scale factor.
      * @attr ref android.R.styleable#TextView_textScaleX
      */
     @android.view.RemotableViewMethod
@@ -3626,8 +3662,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the current typeface and style in which the text is being
-     * displayed.
+     * Gets the current {@link Typeface} that is used to style the text.
+     * @return The current Typeface.
      *
      * @see #setTypeface(Typeface)
      *
@@ -3660,8 +3696,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the extent by which text is currently being letter-spaced.
-     * This will normally be 0.
+     * Gets the text letter-space value, which determines the spacing between characters.
+     * The value returned is in ems. Normally, this value is 0.0.
+     * @return The text letter-space value in ems.
      *
      * @see #setLetterSpacing(float)
      * @see Paint#setLetterSpacing
@@ -3671,12 +3708,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets text letter-spacing.  The value is in 'EM' units.  Typical values
+     * Sets text letter-spacing in em units.  Typical values
      * for slight expansion will be around 0.05.  Negative values tighten text.
      *
      * @see #getLetterSpacing()
      * @see Paint#getLetterSpacing
      *
+     * @param letterSpacing A text letter-space value in ems.
      * @attr ref android.R.styleable#TextView_letterSpacing
      */
     @android.view.RemotableViewMethod
@@ -3741,7 +3779,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the currently set break strategy.
+     * Gets the current strategy for breaking paragraphs into lines.
+     * @return the current strategy for breaking paragraphs into lines.
      *
      * @attr ref android.R.styleable#TextView_breakStrategy
      * @see #setBreakStrategy(int)
@@ -3752,9 +3791,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the hyphenation frequency. The default value for both TextView and EditText, which is
-     * set from the theme, is {@link Layout#HYPHENATION_FREQUENCY_NORMAL}.
+     * Sets the frequency of automatic hyphenation to use when determining word breaks.
+     * The default value for both TextView and {@link EditText} is
+     * {@link Layout#HYPHENATION_FREQUENCY_NORMAL}.
+     * Note that the default hyphenation frequency value is set from the theme.
      *
+     * @param hyphenationFrequency The hyphenation frequency to use.
      * @attr ref android.R.styleable#TextView_hyphenationFrequency
      * @see #getHyphenationFrequency()
      */
@@ -3768,7 +3810,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the currently set hyphenation frequency.
+     * Gets the current frequency of automatic hyphenation to be used when determining word breaks.
+     * @return the current frequency of automatic hyphenation to be used when determining word
+     * breaks.
      *
      * @attr ref android.R.styleable#TextView_hyphenationFrequency
      * @see #setHyphenationFrequency(int)
@@ -3927,7 +3971,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * <p>Return the current color selected for normal text.</p>
+     * Return the current color selected for normal text.
      *
      * @return Returns the current text color.
      */
@@ -4037,7 +4081,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the vertical offset of the shadow layer
+     * Gets the vertical offset of the shadow layer.
+     * @return The vertical offset of the shadow layer.
      *
      * @see #setShadowLayer(float, float, float, int)
      *
@@ -4048,6 +4093,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Gets the color of the shadow layer.
      * @return the color of the shadow layer
      *
      * @see #setShadowLayer(float, float, float, int)
@@ -4060,8 +4106,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the base paint used for the text.  Please use this only to
-     * consult the Paint's properties and not to change them.
+     * Gets the {@link TextPaint} used for the text.
+     * Use this only to consult the Paint's properties and not to change them.
+     * @return The base paint used for the text.
      */
     public TextPaint getPaint() {
         return mTextPaint;
@@ -4105,7 +4152,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns the list of URLSpans attached to the text
+     * Returns the list of {@link android.text.style.URLSpan URLSpans} attached to the text
      * (by {@link Linkify} or otherwise) if any.  You can call
      * {@link URLSpan#getURL} on them to find where they link to
      * or use {@link Spanned#getSpanStart} and {@link Spanned#getSpanEnd}
@@ -4266,7 +4313,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the flags on the Paint being used to display the text.
+     * Gets the flags on the Paint being used to display the text.
+     * @return The flags on the Paint being used to display the text.
      * @see Paint#getFlags
      */
     public int getPaintFlags() {
@@ -5691,8 +5739,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Change the editor type integer associated with the text view, which
-     * will be reported to an IME with {@link EditorInfo#imeOptions} when it
-     * has focus.
+     * is reported to an Input Method Editor (IME) with {@link EditorInfo#imeOptions}
+     * when it has focus.
      * @see #getImeOptions
      * @see android.view.inputmethod.EditorInfo
      * @attr ref android.R.styleable#TextView_imeOptions
@@ -5704,8 +5752,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Get the type of the IME editor.
-     *
+     * Get the type of the Input Method Editor (IME).
+     * @return the type of the IME
      * @see #setImeOptions(int)
      * @see android.view.inputmethod.EditorInfo
      */
@@ -7532,7 +7580,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Called by the framework in response to a text auto-correction (such as fixing a typo using a
-     * a dictionary) from the current input method, provided by it calling
+     * dictionary) from the current input method, provided by it calling
      * {@link InputConnection#commitCorrection(CorrectionInfo) InputConnection.commitCorrection()}.
      * The default implementation flashes the background of the corrected word to provide
      * feedback to the user.
@@ -9636,6 +9684,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onTrackballEvent(event);
     }
 
+    /**
+     * Sets the Scroller used for producing a scrolling animation
+     *
+     * @param s A Scroller instance
+     */
     public void setScroller(Scroller s) {
         mScroller = s;
     }
@@ -10581,6 +10634,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns whether this text view is a current input method target.  The
      * default implementation just checks with {@link InputMethodManager}.
+     * @return True if the TextView is a current input method target; false otherwise.
      */
     public boolean isInputMethodTarget() {
         InputMethodManager imm = InputMethodManager.peekInstance();
