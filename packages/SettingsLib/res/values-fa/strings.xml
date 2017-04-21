@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏اسکن‌های رومینگ Wi‑Fi همیشه مجاز است"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"داده تلفن همراه همیشه فعال باشد"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"غیرفعال کردن میزان صدای مطلق"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"فعال کردن زنگ زدن درون باندی"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏انتخاب نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"کدک بلوتوث صوتی"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌های نصب شده از طریق USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب شده از طریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"در صورت وجود مشکل میزان صدا با دستگاه‌های راه دور مثل میزان صدای بلند ناخوشایند یا عدم کنترل صدا، قابلیت میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"اجازه می‌دهد آهنگ‌های زنگ تلفن در هدست‌های بلوتوث پخش شود"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏بررسی HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال. برای تغییر حالت ضربه بزنید."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"وب‌نمای چندپردازشی"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"اجرای تولیدکننده تصویر وب‌نما"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"اجرای وب‌نما"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"تنظیم اجرای وب‌نما"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"این انتخاب دیگر معتبر نیست. دوباره امتحان کنید."</string>

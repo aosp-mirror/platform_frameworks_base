@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi роумингін іздеулерге әрқашан рұқсат ету"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобильдік деректер әрқашан қосулы"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Абсолютті дыбыс деңгейін өшіру"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ішкі жолақтағы шылдырлауды қосу"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP нұсқасы"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP нұсқасын таңдау"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудимазмұн кодегі"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB арқылы орнатылған қолданбаларды растау"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT арқылы орнатылған қолданбалардың залалды болмауын тексеру."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қолайсыз қатты дыбыс деңгейі немесе басқарудың болмауы сияқты қашықтағы құрылғыларда дыбыс деңгейімен мәселелер жағдайында Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Телефондағы қоңырау әуендерінің Bluetooth құлақаспабында ойнатылуына мүмкіндік беру"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP (жоғары кең жолақты сандық мазмұнды қорғау) тексеру"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Белсенді. Ауыстырып қосу үшін түртіңіз."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Қосылып тұрған қызметтер"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Ағымдағы қосылып тұрған қызметтерді көру және басқару"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Бірнеше процесті WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView бейнелеушілерін бөлек қолдану"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ендіру"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ендіруін орнату"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Бұл таңдау енді жарамды емес. Әрекетті қайталаңыз."</string>

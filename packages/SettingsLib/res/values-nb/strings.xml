@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillat alltid skanning for Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er alltid aktiv"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Slå av funksjonen for absolutt volum"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Slå på innenbåndsringing"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Velg Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodek for Bluetooth-lyd"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Bekreft apper via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sjekk apper som er installert via ADB/ADT for skadelig adferd."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Slår av funksjonen for absolutt volum via Bluetooth i tilfelle det oppstår volumrelaterte problemer med eksterne enheter, for eksempel uakseptabelt høyt volum eller mangel på kontroll."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Tillater at ringelyder på telefonen spilles av på Bluetooth-hodetelefoner"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktiver terminalappen som gir lokal kommandolistetilgang"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontroll"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trykk for å slå av/på."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktive tjenester"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Se og kontrollér tjenester som kjører for øyeblikket"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView for flere prosesser"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Kjør WebView-gjengivere separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Angi WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Dette valget er ikke gyldig lenger. Prøv på nytt."</string>

@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Consenti sempre scansioni roaming Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dati mobili sempre attivi"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disattiva volume assoluto"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Attiva suoneria in banda"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Seleziona versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica app tramite USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Controlla che le app installate tramite ADB/ADT non abbiano un comportamento dannoso."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Consente di disattivare la funzione del volume assoluto Bluetooth in caso di problemi con il volume dei dispositivi remoti, ad esempio un volume troppo alto o la mancanza di controllo."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Consenti la riproduzione delle suonerie del telefono tramite gli auricolari Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminale locale"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Abilita l\'app Terminale che offre l\'accesso alla shell locale"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Verifica HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Attiva. Tocca per attivare/disattivare."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Servizi in esecuzione"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Visualizza e controlla i servizi attualmente in esecuzione"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView multiprocesso"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Esegui renderer WebView separatamente"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementazione di WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Imposta l\'implementazione di WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"La selezione non è più valida. Riprova."</string>

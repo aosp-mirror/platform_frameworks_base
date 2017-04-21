@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvijek dopusti slobodno traženje Wi-Fi mreže"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilni podaci uvijek aktivni"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogući apsolutnu glasnoću"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Omogući zvuk zvona unutar pojasne širine"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verzija AVRCP-a za Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Odaberite verziju AVRCP-a za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodek za Bluetooth Audio"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Potvrdi aplikacije putem USB-a"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Provjerite uzrokuju li aplikacije instalirane putem ADB-a/ADT-a poteškoće."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogućuje Bluetoothovu značajku apsolutne glasnoće ako udaljeni uređaji imaju poteškoća sa zvukom, kao što su, primjerice, neprihvatljiva glasnoća ili nepostojanje kontrole."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Omogući reprodukciju melodija zvona telefona putem Bluetooth slušalica"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući aplikaciju terminala koja nudi pristup lokalnoj ovojnici"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provjera"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivno. Dodirnite da biste to promijenili."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Pokrenute usluge"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Pogledajte i nadzirite pokrenute procese"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Višeprocesni web-prikaz"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Ispunjivače web-prikaza pokreni zasebno"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacija WebViewa"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Postavi implementaciju WebViewa"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Taj izbor više nije važeći. Pokušajte ponovo."</string>

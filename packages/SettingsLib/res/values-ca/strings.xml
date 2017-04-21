@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permet sempre cerca de Wi-Fi en ininerància"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dades mòbils sempre actives"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desactiva el volum absolut"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activa el so al mateix canal"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versió AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona la versió AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Còdec d\'àudio per Bluetooth"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica aplicacions per USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Comprova les aplicacions instal·lades mitjançant ADB/ADT per detectar possibles comportaments perillosos"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desactiva la funció de volum absolut de Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permet que els sons de trucada del telèfon es reprodueixin en auriculars amb Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activa l\'aplicació de terminal que ofereix accés al shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Comprovació HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aplicació activa. Toca per desactivar-la."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Visualitza i controla els serveis en execució"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView amb multiprocés"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Executa els renderitzadors de WebView per separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementació de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Configura la implementació de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Aquesta opció ja no és vàlida. Torna-ho a provar."</string>

@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi घुम्ने स्क्यान गर्न सधैँ अनुमति दिनुहोस्"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"निरपेक्ष आवाज असक्षम गर्नुहोस्"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"इन-ब्यान्ड घन्टी बज्ने सुविधालाई सक्षम पार्नुहोस्"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लुटुथको AVRCP संस्करण"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ब्लुटुथको AVRCP संस्करण चयन गर्नुहोस्"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ब्लुटुथ अडियोको कोडेक"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB मा अनुप्रयोगहरू रुजु गर्नुहोस्"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक व्यवहारको लागि ADB/ADT को माध्यमबाट स्थापित अनुप्रयोगहरूको जाँच गर्नुहोस्।"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"रिमोट यन्त्रहरूमा अस्वीकार्य चर्को आवाज वा नियन्त्रणमा कमी जस्ता आवाज सम्बन्धी समस्याहरूको अवस्थामा ब्लुटुथ निरपेक्ष आवाज सुविधालाई असक्षम गराउँछ।"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"उक्त फोनमा भएका रिङटोनहरूलाई ब्लुटुथका हेडसेटहरूमा प्ले गर्न दिनुहोस्"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल अनुप्रयोग सक्षम गर्नुहोस्"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP जाँच गर्दै"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"मल्टिप्रोसेस WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView रेन्डररहरूलाई पृथक रूपमा सञ्चालन गर्नुहोस्"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView कार्यान्वयन"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView कार्यान्वयन सेट गर्नुहोस्"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"यो छनोट अब मान्य छैन। फेरि प्रयास गर्नुहोस्।"</string>

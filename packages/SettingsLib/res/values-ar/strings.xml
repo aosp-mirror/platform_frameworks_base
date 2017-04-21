@@ -172,6 +172,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏السماح دائمًا بعمليات فحص Wi-Fi للتجوال"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"تعطيل مستوى الصوت المطلق"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"تمكين الرنين ضمن النطاق الأساسي"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏اختيار إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
@@ -209,6 +210,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏التحقق من التطبيقات عبر USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏التحقق من التطبيقات المثبتة عبر ADB/ADT لكشف السلوك الضار"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"لتعطيل ميزة مستوى الصوت المطلق للبلوتوث في حالة حدوث مشكلات متعلقة بمستوى الصوت مع الأجهزة البعيدة مثل مستوى صوت عالٍ بشكل غير مقبول أو نقص إمكانية التحكم في الصوت."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"السماح بتشغيل نغمات الرنين على الهاتف من خلال سماعات الرأس البلوتوث"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"تطبيق طرفي محلي"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"تمكين تطبيق طرفي يوفر إمكانية الدخول إلى واجهة النظام المحلية"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏التحقق من HDCP"</string>
@@ -295,8 +297,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"نشط، انقر للتبديل."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"الخدمات قيد التشغيل"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"عرض الخدمات قيد التشغيل في الوقت الحالي والتحكم فيها"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"‏WebView متعدد العمليات"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"‏تشغيل أجهزة عرض WebView بشكل منفصل"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏تطبيق WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏تعيين تطبيق WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"لم يعد هذا الاختيار صالحًا. أعد المحاولة."</string>
@@ -310,7 +310,7 @@
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"‏استخدام sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"معطَّل"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"عمى ألوان كامل"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"شذوذ إبصار الأخضر والأحمر (الأحمر والأخضر)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"العجز في رؤية اللونين الأخضر والأحمر"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"غطش الأحمر (الأحمر والأخضر)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"غمش الأزرق (الأزرق والأصفر)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"تصحيح الألوان"</string>
