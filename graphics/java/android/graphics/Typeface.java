@@ -475,11 +475,14 @@ public class Typeface {
         /**
          * Called when a Typeface request done via {@link Typeface#create(FontRequest,
          * FontRequestCallback)} fails.
-         * @param reason One of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
+         * @param reason May be one of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_LOAD_ERROR},
          *               {@link #FAIL_REASON_FONT_UNAVAILABLE} or
-         *               {@link #FAIL_REASON_MALFORMED_QUERY}.
+         *               {@link #FAIL_REASON_MALFORMED_QUERY} if returned by the system. May also be
+         *               a positive value greater than 0 defined by the font provider as an
+         *               additional error code. Refer to the provider's documentation for more
+         *               information on possible returned error codes.
          */
         void onTypefaceRequestFailed(@FontRequestFailReason int reason);
     }
