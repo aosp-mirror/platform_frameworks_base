@@ -839,6 +839,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 setViewStatesLocked(response, dataset, state);
             }
         }
+        final SaveInfo saveInfo = response.getSaveInfo();
+        if (saveInfo != null) {
+            final AutofillId[] requiredIds = saveInfo.getRequiredIds();
+            for (int i = 0; i < requiredIds.length; i++) {
+                final AutofillId id = requiredIds[i];
+                createOrUpdateViewStateLocked(id, state, null);
+            }
+            final AutofillId[] optionalIds = saveInfo.getOptionalIds();
+            if (optionalIds != null) {
+                for (int i = 0; i < optionalIds.length; i++) {
+                    final AutofillId id = optionalIds[i];
+                    createOrUpdateViewStateLocked(id, state, null);
+                }
+            }
+        }
     }
 
     /**
@@ -850,24 +865,29 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final ArrayList<AutofillValue> values = dataset.getFieldValues();
         for (int j = 0; j < ids.size(); j++) {
             final AutofillId id = ids.get(j);
-            ViewState viewState = mViewStates.get(id);
-            if (viewState != null)  {
-                viewState.setState(state);
-            } else {
-                viewState = new ViewState(this, id, null, this, state);
-                if (DEBUG) { // TODO(b/33197203): change to VERBOSE once stable
-                    Slog.d(TAG, "Adding autofillable view with id " + id + " and state " + state);
-                }
-                mViewStates.put(id, viewState);
-            }
-            if ((state & ViewState.STATE_AUTOFILLED) != 0) {
-                viewState.setAutofilledValue(values.get(j));
-            }
-
+            final AutofillValue value = values.get(j);
+            final ViewState viewState = createOrUpdateViewStateLocked(id, state, value);
             if (response != null) {
                 viewState.setResponse(response);
             }
         }
+    }
+
+    private ViewState createOrUpdateViewStateLocked(AutofillId id, int state,AutofillValue value) {
+        ViewState viewState = mViewStates.get(id);
+        if (viewState != null)  {
+            viewState.setState(state);
+        } else {
+            viewState = new ViewState(this, id, null, this, state);
+            if (DEBUG) { // TODO(b/33197203): change to VERBOSE once stable
+                Slog.d(TAG, "Adding autofillable view with id " + id + " and state " + state);
+            }
+            mViewStates.put(id, viewState);
+        }
+        if ((state & ViewState.STATE_AUTOFILLED) != 0) {
+            viewState.setAutofilledValue(value);
+        }
+        return viewState;
     }
 
     /**
