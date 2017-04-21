@@ -865,6 +865,7 @@ public abstract class Connection extends Conferenceable {
      * {@link Call#sendRttRequest()}
      */
     public static final class RttModifyStatus {
+        private RttModifyStatus() {}
         /**
          * Session modify request was successful.
          */
