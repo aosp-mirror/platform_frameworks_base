@@ -35,9 +35,6 @@ import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Controller for monitoring changes to content URIs through a ContentObserver.
@@ -61,11 +58,11 @@ public class ContentObserverController extends StateController {
     private static final Object sCreationLock = new Object();
     private static volatile ContentObserverController sController;
 
-    final private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
+    final private ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     /**
      * Per-userid {@link JobInfo.TriggerContentUri} keyed ContentObserver cache.
      */
-    SparseArray<ArrayMap<JobInfo.TriggerContentUri, ObserverInstance>> mObservers =
+    final SparseArray<ArrayMap<JobInfo.TriggerContentUri, ObserverInstance>> mObservers =
             new SparseArray<>();
     final Handler mHandler;
 
@@ -101,6 +98,7 @@ public class ContentObserverController extends StateController {
                 Slog.i(TAG, "Tracking content-trigger job " + taskStatus);
             }
             mTrackedTasks.add(taskStatus);
+            taskStatus.setTrackingController(JobStatus.TRACKING_CONTENT);
             boolean havePendingUris = false;
             // If there is a previous job associated with the new job, propagate over
             // any pending content URI trigger reports.
@@ -156,7 +154,8 @@ public class ContentObserverController extends StateController {
     @Override
     public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
             boolean forUpdate) {
-        if (taskStatus.hasContentTriggerConstraint()) {
+        if (taskStatus.clearTrackingController(JobStatus.TRACKING_CONTENT)) {
+            mTrackedTasks.remove(taskStatus);
             if (taskStatus.contentObserverJobInstance != null) {
                 taskStatus.contentObserverJobInstance.unscheduleLocked();
                 if (incomingJob != null) {
@@ -190,7 +189,6 @@ public class ContentObserverController extends StateController {
             if (DEBUG) {
                 Slog.i(TAG, "No longer tracking job " + taskStatus);
             }
-            mTrackedTasks.remove(taskStatus);
         }
     }
 
@@ -374,9 +372,8 @@ public class ContentObserverController extends StateController {
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.println("Content:");
-        Iterator<JobStatus> it = mTrackedTasks.iterator();
-        while (it.hasNext()) {
-            JobStatus js = it.next();
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            JobStatus js = mTrackedTasks.valueAt(i);
             if (!js.shouldDump(filterUid)) {
                 continue;
             }

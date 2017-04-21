@@ -358,6 +358,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.android.server.job.JobSchedulerInternal;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -18158,6 +18159,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
 
+        int oldBackupUid;
+        int newBackupUid;
+
         synchronized(this) {
             // !!! TODO: currently no check here that we're already bound
             BatteryStatsImpl.Uid.Pkg.Serv ss = null;
@@ -18198,6 +18202,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc.inFullBackup = true;
             }
             r.app = proc;
+            oldBackupUid = mBackupTarget != null ? mBackupTarget.appInfo.uid : -1;
+            newBackupUid = proc.inFullBackup ? r.appInfo.uid : -1;
             mBackupTarget = r;
             mBackupAppName = app.packageName;
 
@@ -18223,6 +18229,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             // know that it's scheduled for a backup-agent operation.
         }
 
+        JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+        if (oldBackupUid != -1) {
+            js.removeBackingUpUid(oldBackupUid);
+        }
+        if (newBackupUid != -1) {
+            js.addBackingUpUid(newBackupUid);
+        }
+
         return true;
     }
 
@@ -18235,6 +18249,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             mBackupTarget = null;
             mBackupAppName = null;
         }
+
+        JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+        js.clearAllBackingUpUids();
     }
 
     // A backup agent has just come up
@@ -18272,6 +18289,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
+        int oldBackupUid;
+
         synchronized(this) {
             try {
                 if (mBackupAppName == null) {
@@ -18289,6 +18308,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 updateOomAdjLocked(proc);
                 proc.inFullBackup = false;
 
+                oldBackupUid = mBackupTarget != null ? mBackupTarget.appInfo.uid : -1;
+
                 // If the app crashed during backup, 'thread' will be null here
                 if (proc.thread != null) {
                     try {
@@ -18304,7 +18325,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mBackupAppName = null;
             }
         }
+
+        if (oldBackupUid != -1) {
+            JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+            js.removeBackingUpUid(oldBackupUid);
+        }
     }
+
     // =========================================================
     // BROADCASTS
     // =========================================================
