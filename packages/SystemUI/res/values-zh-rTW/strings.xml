@@ -152,9 +152,12 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"沒有 SIM 卡。"</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"行動數據"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"已啟用行動數據連線"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"行動數據連線已關閉"</string>
+    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛行模式。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"沒有 SIM 卡。"</string>
@@ -239,9 +242,11 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"充電中"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"已暫停 2G-3G 數據連線"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"已暫停 4G 數據連線"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"已暫停行動數據連線"</string>
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
+    <skip />
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"已暫停數據連線"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"你的數據用量已達設定的用量上限，因此系統已停止使用行動數據連線。\n\n如果你繼續使用行動數據連線，可能需要支付相關的數據傳輸費用。"</string>
+    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢復連線"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"沒有網際網路連線"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已連線"</string>
@@ -314,7 +319,8 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"無線基地台"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"手電筒"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"行動數據"</string>
+    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
+    <skip />
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"數據用量"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩餘資料"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"超過上限"</string>
@@ -427,7 +433,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Work 設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"個人設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"裝置已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"裝置監控"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"設定檔監控"</string>
     <string name="monitoring_title" msgid="169206259253048106">"網路監控"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -436,14 +443,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"停用 VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"中斷 VPN 連線"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"查看政策"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"你的裝置是由「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」所管理。\n\n你的管理員可以監控及管理與裝置相關聯的設定、公司系統權限、應用程式和資料，以及裝置的位置資訊。\n\n如要瞭解詳情，請與你的管理員聯絡。"</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"你的裝置是由貴機構所管理。\n\n你的管理員可以監控及管理與裝置相關聯的設定、公司系統權限、應用程式和資料，以及裝置的位置資訊。\n\n如要瞭解詳情，請與你的管理員聯絡。"</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"貴機構已為這個裝置安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"貴機構已為你的 Work 設定檔安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"這個裝置已安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"你的管理員已啟用網路紀錄功能，可監控你裝置的流量。"</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"由於你已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"由於你已連結至「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這兩個應用程式監控。"</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"由於你的 Work 設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"由於你的個人設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"你的裝置是由「<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>」所管理。"</string>
@@ -558,6 +569,12 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>和另外 <xliff:g id="NUMBER_5">%3$d</xliff:g> 個管道</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>和另外 <xliff:g id="NUMBER_2">%3$d</xliff:g> 個管道</item>
     </plurals>
+    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
+    <skip />
+    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
+    <skip />
+    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
+    <skip />
     <string name="notification_all_categories" msgid="5407190218055113282">"所有類別"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"自訂：<xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -568,7 +585,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 分鐘"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 分鐘"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 小時"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"取消"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"復原"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"已延後 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池用量"</string>
@@ -714,6 +730,17 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"子母畫面選單"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"「<xliff:g id="NAME">%s</xliff:g>」目前在子母畫面中"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"如果你不想讓「<xliff:g id="NAME">%s</xliff:g>」使用這項功能，請輕觸開啟設定頁面，然後停用此功能。"</string>
+    <!-- no translation found for pip_play (1417176722760265888) -->
+    <skip />
+    <!-- no translation found for pip_pause (8881063404466476571) -->
+    <skip />
+    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
+    <skip />
+    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
+    <skip />
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"手機先前過熱，因此關閉電源"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"手機現在已恢復正常運作"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"手機先前的溫度過高，因此關閉了電源以進行降溫。手機現在已恢復正常運作。\n\n以下情況可能會導致你的手機溫度過高：\n	• 使用需要密集處理資料的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上傳大型檔案\n	• 在高溫環境下使用手機"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"手機變熱"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。你仍可繼續使用手機，但是手機的運作速度可能會較慢。\n\n手機降溫完畢後，就會恢復正常的運作速度。"</string>
@@ -738,16 +765,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"免安裝應用程式"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"免安裝應用程式不必安裝就能使用。"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資訊"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"行動數據"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi 已關閉"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"藍牙已關閉"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"零打擾模式已關閉"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"「<xliff:g id="ID_1">%s</xliff:g>」自動規則已將零打擾模式開啟。"</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"「<xliff:g id="ID_1">%s</xliff:g>」應用程式已將零打擾模式開啟。"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"某個自動規則或應用程式已將零打擾模式開啟。"</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"直到 <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"保留"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"取代"</string>

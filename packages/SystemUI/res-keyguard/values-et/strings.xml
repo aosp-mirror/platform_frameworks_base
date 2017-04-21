@@ -51,6 +51,7 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM-kaardi PUK-koodi ala"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Järgmine alarm on määratud ajaks <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Kustuta"</string>
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"Keela eSIM-kaart"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Sisesta"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Unustasin mustri"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Vale muster"</string>
@@ -58,8 +59,9 @@
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Vale PIN-kood"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Proovige <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast uuesti."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Joonistage oma muster"</string>
-    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"Sisestage SIM-kaardi PIN-kood"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Sisestage operaatori „<xliff:g id="CARRIER">%1$s</xliff:g>” puhul SIM-kaardi PIN-kood"</string>
+    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Sisestage SIM-kaardi PIN-kood."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Sisestage operaatori „<xliff:g id="CARRIER">%1$s</xliff:g>” SIM-kaardi PIN-kood."</string>
+    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Keelake eSIM-kaart, et seadet ilma mobiilsideteenuseta kasutada."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Sisestage PIN-kood"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Sisestage parool"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Lisateabe saamiseks võtke ühendust operaatoriga."</string>

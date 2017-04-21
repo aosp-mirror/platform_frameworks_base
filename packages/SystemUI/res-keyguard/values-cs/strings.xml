@@ -51,6 +51,7 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Oblast kódu PUK SIM karty"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Další budík je nastaven na <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Smazat"</string>
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"Deaktivovat eSIM kartu"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Zapomenuté gesto"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Nesprávné gesto"</string>
@@ -58,8 +59,9 @@
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Nesprávný kód PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Zkuste to znovu za <xliff:g id="NUMBER">%d</xliff:g> s."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Zadejte gesto"</string>
-    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"Zadejte kód PIN SIM karty"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Zadejte kód PIN SIM karty <xliff:g id="CARRIER">%1$s</xliff:g>"</string>
+    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Zadejte kód PIN SIM karty."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Zadejte kód PIN SIM karty <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
+    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"eSIM kartu deaktivujte, chcete-li telefon používat bez mobilních služeb."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Zadejte kód PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Zadejte heslo"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM karta byla zablokována. Chcete-li pokračovat, je třeba zadat kód PUK. Podrobné informace získáte od operátora."</string>
@@ -112,9 +114,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Po restartování zařízení je vyžadováno gesto"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Po restartování zařízení je vyžadován kód PIN"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Po restartování zařízení je vyžadováno heslo"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"Za účelem zvýšení zabezpečení je vyžadováno gesto"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"Za účelem zvýšení zabezpečení je vyžadován kód PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"Za účelem zvýšení zabezpečení je vyžadováno heslo"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"Pro ještě lepší zabezpečení je vyžadováno gesto"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"Pro ještě lepší zabezpečení je vyžadován kód PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"Pro ještě lepší zabezpečení je vyžadováno heslo"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Po přepnutí profilů je vyžadováno gesto"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Po přepnutí profilů je vyžadován kód PIN"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Po přepnutí profilů je vyžadováno heslo"</string>
