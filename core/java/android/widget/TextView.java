@@ -1371,6 +1371,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         autoSizePresetTextSizes.recycle();
                     }
                     break;
+                case com.android.internal.R.styleable.TextView_justificationMode:
+                    mJustificationMode = a.getInt(attr, Layout.JUSTIFICATION_MODE_NONE);
+                    break;
             }
         }
 

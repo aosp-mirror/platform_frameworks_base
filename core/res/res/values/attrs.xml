@@ -4776,6 +4776,13 @@
         <attr name="autoSizeMinTextSize" format="dimension" />
         <!-- The maximum text size constraint to be used when auto-sizing text. -->
         <attr name="autoSizeMaxTextSize" format="dimension" />
+        <!-- Mode for justification. -->
+        <attr name="justificationMode">
+            <!-- No justification. -->
+            <enum name="none" value="0" />
+            <!-- Justification by stretching word spacing. -->
+            <enum name="inter_word" value = "1" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
