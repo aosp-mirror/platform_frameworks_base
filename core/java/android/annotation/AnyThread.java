@@ -15,30 +15,34 @@
  */
 package android.annotation;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 /**
- * Denotes that the annotated method can be called from any thread (e.g. it is "thread safe".)
- * If the annotated element is a class, then all methods in the class can be called
- * from any thread.
+ * Denotes that the annotated method can be called from any thread (e.g. it is
+ * "thread safe".) If the annotated element is a class, then all methods in the
+ * class can be called from any thread.
  * <p>
- * The main purpose of this method is to indicate that you believe a method can be called
- * from any thread; static tools can then check that nothing you call from within this method
- * or class have more strict threading requirements.
+ * The main purpose of this method is to indicate that you believe a method can
+ * be called from any thread; static tools can then check that nothing you call
+ * from within this method or class have more strict threading requirements.
  * <p>
  * Example:
- * <pre><code>
+ *
+ * <pre>
+ * <code>
  *  &#64;AnyThread
  *  public void deliverResult(D data) { ... }
- * </code></pre>
+ * </code>
+ * </pre>
  *
- * {@hide}
+ * @memberDoc This method is safe to call from any thread.
+ * @hide
  */
 @Retention(SOURCE)
 @Target({METHOD,CONSTRUCTOR,TYPE})

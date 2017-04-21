@@ -673,7 +673,6 @@ public final class BluetoothAdapter {
      * Return true if Bluetooth is currently enabled and ready for use.
      * <p>Equivalent to:
      * <code>getBluetoothState() == STATE_ON</code>
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return true if the local adapter is turned on
      */
@@ -811,7 +810,6 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return current state of Bluetooth adapter
      */
@@ -854,7 +852,6 @@ public final class BluetoothAdapter {
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF},
      * {@link #STATE_BLE_TURNING_OFF}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return current state of Bluetooth adapter
      * @hide
@@ -910,8 +907,6 @@ public final class BluetoothAdapter {
      * #STATE_ON}. If this call returns false then there was an
      * immediate problem that will prevent the adapter from being turned on -
      * such as Airplane mode, or the adapter is already turned on.
-     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission
      *
      * @return true to indicate adapter startup has begun, or false on
      *         immediate error
@@ -946,8 +941,6 @@ public final class BluetoothAdapter {
      * #STATE_ON}. If this call returns false then there was an
      * immediate problem that will prevent the adapter from being turned off -
      * such as the adapter already being turned off.
-     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission
      *
      * @return true to indicate adapter shutdown has begun, or false on
      *         immediate error
@@ -981,7 +974,6 @@ public final class BluetoothAdapter {
     /**
      * Returns the hardware address of the local Bluetooth adapter.
      * <p>For example, "00:11:22:AA:BB:CC".
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return Bluetooth hardware address as string
      */
@@ -1085,7 +1077,6 @@ public final class BluetoothAdapter {
      * will return false. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
      * to get the updated value.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
      * @param name a valid Bluetooth name
      * @return     true if the name was set, false otherwise
@@ -1116,7 +1107,6 @@ public final class BluetoothAdapter {
      * will return {@link #SCAN_MODE_NONE}. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
      * to get the updated value.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return scan mode
      */
@@ -1255,7 +1245,6 @@ public final class BluetoothAdapter {
      * will return false. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
      * to get the updated value.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return true on success, false on error
      */
@@ -1275,7 +1264,6 @@ public final class BluetoothAdapter {
 
     /**
      * Cancel the current device discovery process.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      * <p>Because discovery is a heavyweight procedure for the Bluetooth
      * adapter, this method should always be called before attempting to connect
      * to a remote device with {@link
@@ -1319,7 +1307,6 @@ public final class BluetoothAdapter {
      * will return false. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
      * to get the updated value.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return true if discovering
      */
@@ -1586,7 +1573,6 @@ public final class BluetoothAdapter {
      * will return an empty set. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
      * to get the updated value.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return unmodifiable set of {@link BluetoothDevice}, or null on error
      */
@@ -1670,8 +1656,6 @@ public final class BluetoothAdapter {
      * is connected to any remote device for a specific profile.
      * Profile can be one of {@link BluetoothProfile#HEALTH}, {@link BluetoothProfile#HEADSET},
      * {@link BluetoothProfile#A2DP}.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * <p> Return value can be one of
      * {@link BluetoothProfile#STATE_DISCONNECTED},
@@ -1762,7 +1746,6 @@ public final class BluetoothAdapter {
      * closed, or if this application closes unexpectedly.
      * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to
      * connect to this socket from another device using the same {@link UUID}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      * @param name service name for SDP record
      * @param uuid uuid for SDP record
      * @return a listening RFCOMM BluetoothServerSocket
@@ -1794,7 +1777,6 @@ public final class BluetoothAdapter {
      * closed, or if this application closes unexpectedly.
      * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to
      * connect to this socket from another device using the same {@link UUID}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      * @param name service name for SDP record
      * @param uuid uuid for SDP record
      * @return a listening RFCOMM BluetoothServerSocket
@@ -2386,8 +2368,6 @@ public final class BluetoothAdapter {
      * <p>Results of the scan are reported using the
      * {@link LeScanCallback#onLeScan} callback.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
-     *
      * @param callback the callback LE scan results are delivered
      * @return true, if the scan was started successfully
      * @deprecated use {@link BluetoothLeScanner#startScan(List, ScanSettings, ScanCallback)}
@@ -2405,8 +2385,6 @@ public final class BluetoothAdapter {
      *
      * <p>Devices which advertise all specified services are reported using the
      * {@link LeScanCallback#onLeScan} callback.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param serviceUuids Array of services to look for
      * @param callback the callback LE scan results are delivered
@@ -2494,8 +2472,6 @@ public final class BluetoothAdapter {
 
     /**
      * Stops an ongoing Bluetooth LE device scan.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param callback used to identify which scan to stop
      *        must be the same handle used to start the scan

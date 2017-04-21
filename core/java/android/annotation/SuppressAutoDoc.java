@@ -16,13 +16,16 @@
 
 package android.annotation;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
  * Denotes that any automatically generated documentation should be suppressed
@@ -31,6 +34,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * @hide
  */
 @Retention(SOURCE)
-@Target({METHOD, PARAMETER, FIELD})
+@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
 public @interface SuppressAutoDoc {
 }
