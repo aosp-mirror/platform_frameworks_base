@@ -109,7 +109,7 @@ public class BinderThreadPriorityTest extends AndroidTestCase {
     }
 
     public static String expectedSchedulerGroup(int prio) {
-        return "/";
+        return prio < Process.THREAD_PRIORITY_BACKGROUND ? "/" : "/bg_non_interactive";
     }
 
     public void testPassPriorityToService() throws Exception {
