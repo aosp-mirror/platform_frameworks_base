@@ -1733,7 +1733,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ਸਮਾਂ ਇਨਪੁੱਟ ਕਰਨ ਲਈ ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ \'ਤੇ ਬਦਲੀ ਕਰੋ।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ਸਮਾਂ ਇਨਪੁੱਟ ਕਰਨ ਲਈ ਘੜੀ ਮੋਡ \'ਤੇ ਬਦਲੀ ਕਰੋ।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ਆਟੋਫਿਲ ਵਿਕਲਪ"</string>
-    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ਸਮੱਗਰੀਆਂ ਆਟੋਫਿਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ਸਮੱਗਰੀਆਂ ਨੂੰ ਆਟੋਫਿਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੀਏ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> ਨੂੰ <xliff:g id="LABEL">%2$s</xliff:g> ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੀਏ?"</string>
     <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ਨੂੰ <xliff:g id="LABEL">%3$s</xliff:g> ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੀਏ?"</string>

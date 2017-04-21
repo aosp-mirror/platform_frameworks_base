@@ -181,7 +181,7 @@
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Programu ya msimamizi wa wasifu wa kazini imepotea au ina hitilafu. Kwa sababu hiyo, wasifu wako wa kazini na data husika imefutwa. Wasiliana na msimamizi wako kwa usaidizi."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Wasifu wako wa kazini haupatikani tena kwenye kifaa hiki"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Kifaa kinadhibitiwa"</string>
-    <string name="network_logging_notification_text" msgid="7930089249949354026">"Shirika lako linadhibiti kifaa hiki na huenda likafuatilia trafiki ya mtandao. Gonga ili upate maelezo zaidi."</string>
+    <string name="network_logging_notification_text" msgid="7930089249949354026">"Shirika lako linadhibiti kifaa hiki na huenda likafuatilia shughuli kwenye mtandao. Gonga ili upate maelezo zaidi."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Data iliyomo kwenye kifaa chako itafutwa"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"Huwezi kutumia programu ya msimamizi. Sasa data iliyo kwenye kifaa chako itafutwa.\n\nIkiwa una maswali yoyote, wasiliana na msimamizi wa shirika lako."</string>
     <string name="me" msgid="6545696007631404292">"Mimi"</string>
@@ -277,7 +277,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kihisi kuhusu alama zako muhimu"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Rejesha maudhui ya dirisha"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Chunguza maudhui ya dirisha unaloingiliana nalo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Washa Chunguza kwa Mguso"</string>
@@ -466,9 +466,9 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Huruhusu programu kuomba njia za kuongeza na kufuta violezo vya kitambulisho kwa matumizi."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya kitambulisho"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Huruhusu programu kutumia maunzi ya kitambulisho kwa uthibitisho"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kihisi kimegundua sehemu ya kitambulisho. Tafadhali jaribu tena."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya kitambulisho. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Haikuweza kuchakata kitambulisho. Tafadhali jaribu tena."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Kihisi kitambulisho ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Kitambuzi alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Ulisogeza kidole kwa kasi mno. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Kidole kilisogezwa polepole zaidi. Tafadhali jaribu tena."</string>
   <string-array name="fingerprint_acquired_vendor">
