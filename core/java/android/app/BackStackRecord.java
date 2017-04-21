@@ -890,6 +890,7 @@ final class BackStackRecord extends FragmentTransaction implements
      *                      this set of ops
      * @return the new oldPrimaryNav fragment after this record's ops would be run
      */
+    @SuppressWarnings("ReferenceEquality")
     Fragment expandOps(ArrayList<Fragment> added, Fragment oldPrimaryNav) {
         for (int opNum = 0; opNum < mOps.size(); opNum++) {
             final Op op = mOps.get(opNum);
