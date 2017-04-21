@@ -2821,6 +2821,7 @@
         <public name="requiredSystemPropertyName" />
         <!-- @hide @SystemApi -->
         <public name="requiredSystemPropertyValue" />
+        <public name="justificationMode" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
