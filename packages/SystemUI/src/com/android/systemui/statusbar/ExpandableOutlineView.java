@@ -34,6 +34,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private final Rect mOutlineRect = new Rect();
     private boolean mCustomOutline;
     private float mOutlineAlpha = -1f;
+    private float mOutlineRadius;
 
     /**
      * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
@@ -46,12 +47,13 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         public void getOutline(View view, Outline outline) {
             int translation = mShouldTranslateContents ? 0 : (int) getTranslation();
             if (!mCustomOutline) {
-                outline.setRect(translation,
+                outline.setRoundRect(translation,
                         mClipTopAmount,
                         getWidth() + translation,
-                        Math.max(getActualHeight() - mClipBottomAmount, mClipTopAmount));
+                        Math.max(getActualHeight() - mClipBottomAmount, mClipTopAmount),
+                        mOutlineRadius);
             } else {
-                outline.setRect(mOutlineRect);
+                outline.setRoundRect(mOutlineRect, mOutlineRadius);
             }
             outline.setAlpha(mOutlineAlpha);
         }
@@ -60,9 +62,20 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOutlineProvider(mProvider);
+        initDimens();
+    }
+
+    private void initDimens() {
         Resources res = getResources();
         mShouldTranslateContents =
                 res.getBoolean(R.bool.config_translateNotificationContentsOnSwipe);
+        mOutlineRadius = res.getDimension(R.dimen.notification_shadow_radius);
+        setClipToOutline(res.getBoolean(R.bool.config_clipNotificationsToOutline));
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        initDimens();
+        invalidateOutline();
     }
 
     @Override
@@ -119,8 +132,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     /**
-     * @return whether the view currently needs an outline. This is usually false in case it doesn't
-     * have a background.
+     * @return Whether the view currently needs an outline. This is usually {@code false} in case
+     * it doesn't have a background.
      */
     protected boolean needsOutline() {
         if (isChildInGroup()) {
