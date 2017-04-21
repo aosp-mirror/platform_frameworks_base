@@ -357,4 +357,8 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_VPN"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.google.android.ext.services">
+        <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
+    </privapp-permissions>
+
 </permissions>

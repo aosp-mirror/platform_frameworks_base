@@ -65,6 +65,12 @@ public abstract class ResolverRankerService extends Service {
     public static final String SERVICE_INTERFACE = "android.service.resolver.ResolverRankerService";
 
     /**
+     * The permission that a service must hold. If the service does not hold the permission, the
+     * system will skip that service.
+     */
+    public static final String HOLD_PERMISSION = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
+
+    /**
      * The permission that a service must require to ensure that only Android system can bind to it.
      * If this permission is not enforced in the AndroidManifest of the service, the system will
      * skip that service.

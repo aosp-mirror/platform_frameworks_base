@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package android.ext.services.resolver;
 
 import android.content.Context;
 import android.content.Intent;
