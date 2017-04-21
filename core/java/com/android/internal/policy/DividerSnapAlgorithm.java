@@ -332,8 +332,12 @@ public class DividerSnapAlgorithm {
     }
 
     private void addMinimizedTarget(boolean isHorizontalDivision) {
-        int position = mTaskHeightInMinimizedMode;
-        position += isHorizontalDivision ? mInsets.top : mInsets.left;
+        // In portrait offset the position by the statusbar height, in landscape add the statusbar
+        // height as well to match portrait offset
+        int position = mTaskHeightInMinimizedMode + mInsets.top;
+        if (!isHorizontalDivision) {
+            position += mInsets.left;
+        }
         mTargets.add(new SnapTarget(position, position, SnapTarget.FLAG_NONE));
     }
 
