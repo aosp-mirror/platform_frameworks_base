@@ -152,9 +152,9 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM yoxdur"</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobil məlumatlar"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobil Data Aktivdir"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobil Data Deaktivdir"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobil Data"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobil Data Aktivdir"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobil Data Deaktivdir"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tezering."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Uçuş rejimi"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM kart yoxdur."</string>
@@ -239,9 +239,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Enerji yığır"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G məlumatlarına fasilə verildi"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G məlumatlarına fasilə verildi"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobil məlumatlara fasilə verildi"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobil dataya fasilə verildi"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Məlumatlara fasilə verildi"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Daha limitini keçdiniz. Artıq mobil data istifadə etmirsiniz.\n\nDavam etsəniz, data istifadəsi üçün ödəniş tətbiq oluna bilər."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Ayarladığınız data limiti doldu. Artıq mobil datadan istifadə etmirsiniz.\n\nDavam etsəniz, data istifadəsi üçün ödəniş tutulacaq."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Davam et"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"İnternet bağlantısı yoxdur"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi qoşulub"</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Bildirişlər"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"İşartı"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Şəbəkə datası"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobil data"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Data istifadəsi"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Qalan data"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limit aşılıb"</string>
@@ -427,7 +427,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"İş profili <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşuludur"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Şəxsi profil <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşuludur"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşuludur"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Cihaza nəzarət"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profil izlənməsi"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Şəbəkə monitorinqi"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN (Virtual Şəxsi Şəbəkələr)"</string>
@@ -436,14 +437,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN-i deaktiv edin"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-i bağlantıdan ayırın"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Siyasətlərə Baxın"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"Cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tərəfindən idarə edilir.\n\nAdmin cihaz və cihaz məkan məlumatı ilə əlaqəli ayarlara, korporativ girişə, tətbiqə və dataya nəzarət edə və idarə edə bilər.\n\nƏtraflı məlumat üçün admin ilə əlaqə saxlayın.\""</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"Cihaz təşkilatınız tərəfindən idarə edilir.\n\nAdmin cihaz və cihaz məkan məlumatı ilə əlaqəli ayarlara, korporativ girişə, tətbiqə və dataya nəzarət edə və idarə edə bilər.\n\nƏtraflı məlumat üçün admin ilə əlaqə saxlayın.\""</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Təşkilat bu cihazda sertifikat səlahiyyəti quraşdırdı. Təhlükəsiz şəbəkə ötürülməsinə nəzarət edilə və ya dəyişdirilə bilər."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Təşkilat iş profilində sertifikat səlahiyyəti quraşdırdı. Təhlükəsiz şəbəkə ötürülməsinə nəzarət edilə və ya dəyişdirilə bilər."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Bu cihazda sertifikat səlahiyyəti quraşdırıldı. Təhlükəsiz şəbəkə ötürülməsinə nəzarət edilə və ya dəyişdirilə bilər."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Admin cihazda şəbəkə ötürülməsinə nəzarət edən şəbəkə qeydlərini aktiv etdi."</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"E-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşulusunuz."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"E-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP_0">%1$s</xliff:g> və <xliff:g id="VPN_APP_1">%2$s</xliff:g> tətbiqlərinə qoşulusunuz."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"İş profili e-poçt, tətbiq və veb saytlar da daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşuludur."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Şəxsi profil e-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşuludur."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Cihaz <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> tərəfindən idarə olunur."</string>
@@ -558,6 +563,9 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, və <xliff:g id="NUMBER_5">%3$d</xliff:g> digər</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>, və <xliff:g id="NUMBER_2">%3$d</xliff:g> digər</item>
     </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün bildiriş kontrolları açıqdır"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün bildiriş kontrolları bağlıdır"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Bu kanaldan gələn bildirişlərə icazə verin"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"Bütün Kateqoriyalar"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Daha çox ayar"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"Fərdiləşdirin: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -568,7 +576,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 dəqiqə"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 dəqiqə"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 saat"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"Ləğv edin"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"GERİ QAYTARIN"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> üçün təxirə salınıb"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batareya istifadəsi"</string>
@@ -714,6 +721,13 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Şəkil-içində-şəkil menyusu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> şəkil içində şəkildədir"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> adlı şəxsin bu funksiyadan istifadə etməyini istəmirsinizsə, ayarları açmaq və deaktiv etmək üçün klikləyin."</string>
+    <string name="pip_play" msgid="1417176722760265888">"Oxudun"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"Fasilə verin"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"Növbətiyə keçin"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"Əvvəlkinə keçin"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"İstiliyə görə telefon söndü"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"Telefon indi normal işləyir"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Telefon çox isti idi və soyumaq üçün söndü. Hazırda telefon normal işləyir.\n\n Telefon bu hallarda çox isti ola bilər:\n 	• Çox resurslu tətbiq istifadə etsəniz (oyun, video və ya naviqasiya tətbiqi kimi)\n	• Böyük həcmli fayl endirsəniz və ya yükləsəniz\n	• Telefonu yüksək temperaturda istifadə etsəniz"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon qızmağa başlayır"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon soyuyana kimi bəzi funksiyalar məhdudlaşdırılır"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonunuz avtomatik olaraq soyumağa başlayacaq. Telefon istifadəsinə davam edə bilərsiniz, lakin sürəti yavaşlaya bilər.\n\nTelefonunuz soyuduqdan sonra normal işləyəcək."</string>
@@ -738,16 +752,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"Ani Tətbiqlər"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Ani tətbiqlər quraşdırma tələb etmir."</string>
     <string name="app_info" msgid="6856026610594615344">"Tətbiq məlumatı"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"Mobil data"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi deaktivdir"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth deaktivdir"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\"Narahat Etməyin\" deaktivdir"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"\"Narahat etməyin\" rejimi (<xliff:g id="ID_1">%s</xliff:g>) avtomatik qaydası tərəfindən aktiv edildi."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"\"Narahat etməyin\" rejimi (<xliff:g id="ID_1">%s</xliff:g>) tətbiqi tərəfindən aktiv edildi."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"\"Narahat etməyin\" rejimi avtomatik qayda və ya tətbiq tərəfindən aktiv edildi."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> vaxtına qədər"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Saxlayın"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Əvəz edin"</string>

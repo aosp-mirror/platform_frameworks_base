@@ -51,6 +51,7 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Oblast za PUK za SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Sledeći alarm je podešen za <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Izbriši"</string>
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"Onemogući eSIM"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Zaboravio/la sam šablon"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Pogrešan šablon"</string>
@@ -58,8 +59,9 @@
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Pogrešan PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Probajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sek."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Nacrtajte šablon"</string>
-    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"Unesite PIN za SIM"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Unesite PIN za SIM „<xliff:g id="CARRIER">%1$s</xliff:g>“"</string>
+    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Unesite PIN za SIM."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Unesite PIN za SIM „<xliff:g id="CARRIER">%1$s</xliff:g>“."</string>
+    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Onemogućite eSIM da biste uređaj koristili bez mobilne usluge."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Unesite PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Unesite lozinku"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM kartica je sada onemogućena. Unesite PUK kôd da biste nastavili. Detaljne informacije potražite od mobilnog operatera."</string>

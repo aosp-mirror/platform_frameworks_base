@@ -21,10 +21,4 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_close" msgid="3480680679023423574">"Fechar PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Tela cheia"</string>
-    <string name="pip_play" msgid="674145557658227044">"Reproduzir"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"Pausar"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"Mantenha "<b>"INÍCIO"</b>" pressionado para controlar o PIP"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"Picture-in-picture"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"Esse recurso faz com que seu vídeo continue sendo exibido até que você reproduza outro. Mantenha "<b>"INÍCIO"</b>" pressionado para controlá-lo."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"Entendi"</string>
 </resources>

@@ -154,9 +154,9 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-карта отсутствует."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобильные данные"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Передача мобильных данных включена"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Передача мобильных данных отключена"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобильный Интернет"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобильный Интернет включен"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобильный Интернет отключен"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим полета."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Нет SIM-карты."</string>
@@ -187,7 +187,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Уведомление закрыто"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Панель уведомлений"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Быстрые настройки"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Заблокированный экран."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Экран блокировки."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Настройки"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Обзор."</string>
     <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Заблокировано"</string>
@@ -243,9 +243,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Зарядка батареи"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Передача данных 2G и 3G приостановлена"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Передача данных 4G приостановлена"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Передача мобильных данных приостановлена"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Передача данных по моб. сети приостановлена"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Передача данных приостановлена"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Достигнут установленный вами лимит на передачу мобильных данных.\n\nЕсли вы продолжите, может взиматься дополнительная плата."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Достигнут лимит мобильного трафика, и вы больше его не расходуете.\n\nЕсли вы продолжите, возможно, начнет взиматься плата за передачу данных."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Возобновить"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нет интернет-подключения"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi подключено"</string>
@@ -320,7 +320,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Точка доступа"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Уведомления"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Фонарик"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Передача данных"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобильный Интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Передача данных"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Остается данных"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Ограничение превышено"</string>
@@ -433,7 +433,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"В рабочем профиле запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"В личном профиле запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"На устройстве запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Отслеживание устройств"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Мониторинг профиля"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Отслеживание сетей"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"Настройки VPN"</string>
@@ -442,14 +443,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Отключить VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Отключить VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Просмотреть политику"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"Этим устройством управляет организация \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nАдминистратор может контролировать настройки, приложения и параметры доступа к корпоративным ресурсам, а также данные, связанные с этим устройством, например его местоположение.\n\nЧтобы получить подробную информацию, обратитесь к администратору."</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"Этим устройством управляет ваша организация.\n\nАдминистратор может контролировать настройки, приложения и параметры доступа к корпоративным ресурсам, а также данные, связанные с этим устройством, например его местоположение.\n\nЧтобы получить подробную информацию, обратитесь к администратору."</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Ваша организация установила сертификат ЦС на устройство. Она может отслеживать и изменять защищенный сетевой трафик."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Ваша организация установила сертификат ЦС в рабочем профиле. Она может отслеживать и изменять защищенный сетевой трафик."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"На устройстве установлен сертификат ЦС. Ваш защищенный сетевой трафик могут отслеживать и изменять."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве."</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"Запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Оно может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"Запущены приложения \"<xliff:g id="VPN_APP_0">%1$s</xliff:g>\" и \"<xliff:g id="VPN_APP_1">%2$s</xliff:g>\". Они могут отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"В рабочем профиле запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\", которое может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"В личном профиле запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\", которое может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Этим устройством управляет приложение \"<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>\""</string>
@@ -568,6 +573,9 @@
       <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> и ещё <xliff:g id="NUMBER_5">%3$d</xliff:g> каналов</item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> и ещё <xliff:g id="NUMBER_5">%3$d</xliff:g> канала</item>
     </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Настройки уведомлений для приложения <xliff:g id="APP_NAME">%1$s</xliff:g> открыты"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Настройки уведомлений для приложения <xliff:g id="APP_NAME">%1$s</xliff:g> закрыты"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Показывать уведомления с этого канала"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"Все категории"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Другие настройки"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"<xliff:g id="SUB_CATEGORY">%1$s</xliff:g>: настроить"</string>
@@ -578,7 +586,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 минут"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 минут"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 час"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"Отмена"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ОТМЕНИТЬ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Отложено на <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Уровень заряда"</string>
@@ -627,7 +634,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Музыка"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Календарь"</string>
-    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Показывать при нажатии кнопок регулировки громкости"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Показывать с регуляторами громкости"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Не беспокоить"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Кнопки регулировки громкости"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Отключать режим \"Не беспокоить\" при увеличении громкости"</string>
@@ -642,7 +649,7 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Включено"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Отключено"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Панель навигации"</string>
-    <string name="nav_bar_layout" msgid="3664072994198772020">"Раскладка"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Расположение кнопок"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Дополнительный тип кнопки \"Влево\""</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Дополнительный тип кнопки \"Вправо\""</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(по умолчанию)"</string>
@@ -655,8 +662,8 @@
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Обычная"</item>
     <item msgid="8256205964297588988">"Компактная"</item>
-    <item msgid="8719936228094005878">"С уклоном влево"</item>
-    <item msgid="586019486955594690">"С уклоном вправо"</item>
+    <item msgid="8719936228094005878">"Со сдвигом влево"</item>
+    <item msgid="586019486955594690">"Со сдвигом вправо"</item>
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"Переключение раскладки"</string>
     <string name="save" msgid="2311877285724540644">"Сохранить"</string>
@@ -724,13 +731,20 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Меню \"Картинка в картинке\""</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> находится в режиме \"Картинка в картинке\""</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Чтобы отключить эту функцию для приложения \"<xliff:g id="NAME">%s</xliff:g>\", перейдите в настройки."</string>
+    <string name="pip_play" msgid="1417176722760265888">"Воспроизвести"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"Приостановить"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"Перейти к следующему"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"Перейти к предыдущему"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"Телефон выключился из-за перегрева"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"Сейчас телефон работает нормально"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Ваш телефон выключился из-за перегрева. Сейчас он работает нормально.\n\nВозможные причины перегрева телефона:\n	• использование ресурсоемких игр и приложений, связанных с видео или навигацией);\n	• скачивание или загрузка больших файлов;\n	• высокая температура окружающей среды."</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон нагревается"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Пока телефон не остынет, некоторые функции могут быть недоступны."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш телефон остынет автоматически.\n\nОбратите внимание, что до тех пор он может работать медленнее, чем обычно."</string>
-    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ярлык \"Влево\""</string>
-    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Ярлык \"Вправо\""</string>
-    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ярлык \"Влево\" также разблокирует экран"</string>
-    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Ярлык \"Вправо\" также разблокирует экран"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ярлык слева"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Ярлык справа"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ярлык слева также разблокирует экран"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Ярлык справа также разблокирует экран"</string>
     <string name="lockscreen_none" msgid="4783896034844841821">"Нет"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"Запустить приложение \"<xliff:g id="APP">%1$s</xliff:g>\""</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Другие приложения"</string>
@@ -748,16 +762,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"Приложения с мгновенным запуском"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Приложения с мгновенным запуском не требуется устанавливать."</string>
     <string name="app_info" msgid="6856026610594615344">"О приложении"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"Моб. Интернет"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Модуль Wi-Fi отключен"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Модуль Bluetooth отключен"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Режим \"Не беспокоить\" отключен"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Режим \"Не беспокоить\" был включен специальным правилом (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Режим \"Не беспокоить\" был включен приложением (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Режим \"Не беспокоить\" был включен специальным правилом или приложением."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"До <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Сохранить"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Заменить"</string>

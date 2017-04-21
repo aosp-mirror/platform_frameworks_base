@@ -51,6 +51,7 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Поле для PUK-кода SIM-карты"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Наступны будзільнік пастаўлены на <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Выдаліць"</string>
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"Адключыць eSIM-карту"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Увесці"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Забыў(-ла) узор"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Няправільны ўзор"</string>
@@ -58,8 +59,9 @@
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Няправільны PIN-код"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> с."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Намалюйце ўзор"</string>
-    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"Увядзіце PIN-код SIM-карты"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Увядзіце PIN-код SIM-карты \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
+    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Увядзіце PIN-код SIM-карты."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Увядзіце PIN-код SIM-карты для \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
+    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Адключыце eSIM-карту, каб выкарыстоўваць прыладу без сэрвісу мабільнай перадачы даных."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Увядзіце PIN-код"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Увядзіце пароль"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM-карта зараз адключана. Увядзіце PUK-код, каб працягнуць. Звяжыцеся са сваім аператарам, каб атрымаць дадатковую інфармацыю."</string>

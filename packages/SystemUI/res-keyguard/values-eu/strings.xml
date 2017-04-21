@@ -51,6 +51,7 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM txartelaren PUK kodearen eremua"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Hurrengo alarmak ordu honetan joko du: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Ezabatu"</string>
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"Desgaitu eSIM txartela"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Sartu"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Eredua ahaztu zaizu"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Eredu hori ez da zuzena"</string>
@@ -58,8 +59,9 @@
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN kode hori ez da zuzena"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Saiatu berriro <xliff:g id="NUMBER">%d</xliff:g> segundo barru."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Marraztu eredua"</string>
-    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"Idatzi SIM txartelaren PIN kodea"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Idatzi \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartelaren PIN kodea"</string>
+    <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Idatzi SIM txartelaren PIN kodea."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Idatzi \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartelaren PIN kodea."</string>
+    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Desgaitu eSIM txartela gailua zerbitzu mugikorrik gabe erabiltzeko."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Idatzi PIN kodea"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Idatzi pasahitza"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. Xehetasunak lortzeko, jarri operadorearekin harremanetan."</string>
