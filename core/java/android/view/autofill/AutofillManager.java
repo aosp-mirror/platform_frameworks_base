@@ -101,17 +101,15 @@ public final class AutofillManager {
     static final String SESSION_ID_TAG = "android:sessionId";
     static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
 
-    // Public flags start from the lowest bit
     /**
-     * Indicates autofill was explicitly requested by the user.
-     *
      * @deprecated Use {@link android.service.autofill.FillRequest#FLAG_MANUAL_REQUEST}
+     * @hide
      */
     // TODO(b/33197203): remove (and change value of private flags)
     @Deprecated
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
-    // Private flags start from the highest bit
+    // TODO(b/37563972): start from 0x1 once FLAG_MANUAL_REQUEST is gone
     /** @hide */ public static final int FLAG_START_SESSION = 0x80000000;
     /** @hide */ public static final int FLAG_VIEW_ENTERED =  0x40000000;
     /** @hide */ public static final int FLAG_VIEW_EXITED =   0x20000000;

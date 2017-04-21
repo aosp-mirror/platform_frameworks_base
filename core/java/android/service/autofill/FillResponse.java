@@ -311,6 +311,7 @@ public final class FillResponse implements Parcelable {
 
         /**
          * @deprecated Use {@link #setClientState(Bundle)} instead.
+         * @hide
          */
         @Deprecated
         public Builder setExtras(@Nullable Bundle extras) {
