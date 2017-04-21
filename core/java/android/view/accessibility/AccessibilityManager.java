@@ -183,13 +183,17 @@ public final class AccessibilityManager {
      * Listener for changes to the state of accessibility services. Changes include services being
      * enabled or disabled, or changes to the {@link AccessibilityServiceInfo} of a running service.
      * {@see #addAccessibilityServicesStateChangeListener}.
+     *
+     * @hide
      */
     public interface AccessibilityServicesStateChangeListener {
 
         /**
          * Called when the state of accessibility services changes.
+         *
+         * @param manager The manager that is calling back
          */
-        void onAccessibilityServicesStateChanged();
+        void onAccessibilityServicesStateChanged(AccessibilityManager manager);
     }
 
     /**
@@ -614,11 +618,13 @@ public final class AccessibilityManager {
      *
      * @param listener The listener.
      * @return True if successfully registered.
+     *
+     * @hide
      */
-    public boolean addAccessibilityServicesStateChangeListener(
+    public void addAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
         // Final CopyOnWriteArrayList - no lock needed.
-        return mServicesStateChangeListeners.add(listener);
+        mServicesStateChangeListeners.add(listener);
     }
 
     /**
@@ -626,11 +632,13 @@ public final class AccessibilityManager {
      *
      * @param listener The listener.
      * @return True if successfully unregistered.
+     *
+     * @hide
      */
-    public boolean removeAccessibilityServicesStateChangeListener(
+    public void removeAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
         // Final CopyOnWriteArrayList - no lock needed.
-        return mServicesStateChangeListeners.remove(listener);
+        mServicesStateChangeListeners.remove(listener);
     }
 
     /**
@@ -969,7 +977,7 @@ public final class AccessibilityManager {
     private void handleNotifyServicesStateChanged() {
         // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
         for (AccessibilityServicesStateChangeListener listener : mServicesStateChangeListeners) {
-            listener.onAccessibilityServicesStateChanged();
+            listener.onAccessibilityServicesStateChanged(this);
         }
     }
 
