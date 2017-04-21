@@ -175,6 +175,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private boolean mDisbalePreviewScreenshots;
 
+    Task mLastParent;
+
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
@@ -725,19 +727,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void onParentSet() {
         super.onParentSet();
 
+        final Task task = getTask();
+
         // When the associated task is {@code null}, the {@link AppWindowToken} can no longer
         // access visual elements like the {@link DisplayContent}. We must remove any associations
         // such as animations.
         if (!mReparenting) {
-            final Task task = getTask();
             if (task == null) {
                 // It is possible we have been marked as a closing app earlier. We must remove ourselves
                 // from this list so we do not participate in any future animations.
                 mService.mClosingApps.remove(this);
-            } else if (task.mStack != null) {
+            } else if (mLastParent != null && mLastParent.mStack != null) {
                 task.mStack.mExitingAppTokens.remove(this);
             }
         }
+        mLastParent = task;
     }
 
     void postWindowRemoveStartingWindowCleanup(WindowState win) {
