@@ -1123,6 +1123,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         return mCurState >= state;
     }
 
+    @SuppressWarnings("ReferenceEquality")
     void moveToState(Fragment f, int newState, int transit, int transitionStyle,
             boolean keepActive) {
         if (DEBUG && false) Log.v(TAG, "moveToState: " + f
@@ -1226,6 +1227,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         }
                         f.mRetaining = false;
                     }
+                    // fall through
                 case Fragment.CREATED:
                     // This is outside the if statement below on purpose; we want this to run
                     // even if we do a moveToState from CREATED => *, CREATED => CREATED, and
@@ -1286,16 +1288,19 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         }
                         f.mSavedFragmentState = null;
                     }
+                    // fall through
                 case Fragment.ACTIVITY_CREATED:
                     if (newState > Fragment.ACTIVITY_CREATED) {
                         f.mState = Fragment.STOPPED;
                     }
+                    // fall through
                 case Fragment.STOPPED:
                     if (newState > Fragment.STOPPED) {
                         if (DEBUG) Log.v(TAG, "moveto STARTED: " + f);
                         f.performStart();
                         dispatchOnFragmentStarted(f, false);
                     }
+                    // fall through
                 case Fragment.STARTED:
                     if (newState > Fragment.STARTED) {
                         if (DEBUG) Log.v(TAG, "moveto RESUMED: " + f);
@@ -1314,12 +1319,14 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         f.performPause();
                         dispatchOnFragmentPaused(f, false);
                     }
+                    // fall through
                 case Fragment.STARTED:
                     if (newState < Fragment.STARTED) {
                         if (DEBUG) Log.v(TAG, "movefrom STARTED: " + f);
                         f.performStop();
                         dispatchOnFragmentStopped(f, false);
                     }
+                    // fall through
                 case Fragment.STOPPED:
                 case Fragment.ACTIVITY_CREATED:
                     if (newState < Fragment.ACTIVITY_CREATED) {
@@ -1374,6 +1381,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         f.mView = null;
                         f.mInLayout = false;
                     }
+                    // fall through
                 case Fragment.CREATED:
                     if (newState < Fragment.CREATED) {
                         if (mDestroyed) {
@@ -3192,6 +3200,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
     }
 
+    @SuppressWarnings("ReferenceEquality")
     public void setPrimaryNavigationFragment(Fragment f) {
         if (f != null && (mActive.get(f.mIndex) != f
                 || (f.mHost != null && f.getFragmentManager() != this))) {
