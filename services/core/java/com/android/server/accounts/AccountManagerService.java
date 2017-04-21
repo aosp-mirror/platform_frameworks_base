@@ -5006,7 +5006,7 @@ public class AccountManagerService
             INotificationManager notificationManager = mInjector.getNotificationManager();
             try {
                 notificationManager.enqueueNotificationWithTag(packageName, packageName,
-                        id.mTag, id.mId, notification, new int[1], userId);
+                        id.mTag, id.mId, notification, userId);
             } catch (RemoteException e) {
                 /* ignore - local call */
             }

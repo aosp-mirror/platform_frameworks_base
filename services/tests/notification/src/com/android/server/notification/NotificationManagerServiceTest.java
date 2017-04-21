@@ -280,7 +280,7 @@ public class NotificationManagerServiceTest {
     @UiThreadTest
     public void testEnqueueNotificationWithTag_PopulatesGetActiveNotifications() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
-                generateNotificationRecord(null).getNotification(), new int[1], 0);
+                generateNotificationRecord(null).getNotification(), 0);
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(PKG);
@@ -291,7 +291,7 @@ public class NotificationManagerServiceTest {
     @UiThreadTest
     public void testCancelNotificationImmediatelyAfterEnqueue() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
-                generateNotificationRecord(null).getNotification(), new int[1], 0);
+                generateNotificationRecord(null).getNotification(), 0);
         mBinderService.cancelNotificationWithTag(PKG, "tag", 0, 0);
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -303,10 +303,10 @@ public class NotificationManagerServiceTest {
     @UiThreadTest
     public void testCancelNotificationWhilePostedAndEnqueued() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
-                generateNotificationRecord(null).getNotification(), new int[1], 0);
+                generateNotificationRecord(null).getNotification(), 0);
         waitForIdle();
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
-                generateNotificationRecord(null).getNotification(), new int[1], 0);
+                generateNotificationRecord(null).getNotification(), 0);
         mBinderService.cancelNotificationWithTag(PKG, "tag", 0, 0);
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -319,7 +319,7 @@ public class NotificationManagerServiceTest {
     public void testCancelNotificationsFromListenerImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
-                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelNotificationsFromListener(null, null);
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -332,7 +332,7 @@ public class NotificationManagerServiceTest {
     public void testCancelAllNotificationsImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
-                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -346,7 +346,7 @@ public class NotificationManagerServiceTest {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
-                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -360,7 +360,7 @@ public class NotificationManagerServiceTest {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
-                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelAllNotifications("other_pkg_name", sbn.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -373,7 +373,7 @@ public class NotificationManagerServiceTest {
     public void testCancelAllNotifications_NullPkgRemovesAll() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
-                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelAllNotifications(null, sbn.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -386,7 +386,7 @@ public class NotificationManagerServiceTest {
     public void testCancelAllNotifications_NullPkgIgnoresUserAllNotifications() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
-                sbn.getId(), sbn.getNotification(), new int[1], UserHandle.USER_ALL);
+                sbn.getId(), sbn.getNotification(), UserHandle.USER_ALL);
         // Null pkg is how we signal a user switch.
         mBinderService.cancelAllNotifications(null, sbn.getUserId());
         waitForIdle();
@@ -401,7 +401,7 @@ public class NotificationManagerServiceTest {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
-                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mInternalService.removeForegroundServiceFlagFromNotification(PKG, sbn.getId(),
                 sbn.getUserId());
         waitForIdle();
@@ -421,7 +421,7 @@ public class NotificationManagerServiceTest {
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
-                generateNotificationRecord(null, tv).getNotification(), new int[1], 0);
+                generateNotificationRecord(null, tv).getNotification(), 0);
         verify(mRankingHelper, times(1)).getNotificationChannel(
                 anyString(), anyInt(), eq("foo"), anyBoolean());
     }
@@ -437,7 +437,7 @@ public class NotificationManagerServiceTest {
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
-                generateNotificationRecord(null, tv).getNotification(), new int[1], 0);
+                generateNotificationRecord(null, tv).getNotification(), 0);
         verify(mRankingHelper, times(1)).getNotificationChannel(
                 anyString(), anyInt(), eq(mTestNotificationChannel.getId()), anyBoolean());
     }
