@@ -107,7 +107,7 @@ public class SurfaceTexture {
      *
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      *
-     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @throws android.view.Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName) {
         this(texName, false);
@@ -128,7 +128,7 @@ public class SurfaceTexture {
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
      *
-     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @throws android.view.Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(int texName, boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
@@ -155,7 +155,7 @@ public class SurfaceTexture {
      *
      * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
      *
-     * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+     * @throws android.view.Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
      */
     public SurfaceTexture(boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
