@@ -21,10 +21,4 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_close" msgid="3480680679023423574">"PIP\'yi kapat"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Tam ekran"</string>
-    <string name="pip_play" msgid="674145557658227044">"Oynat"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"Duraklat"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"PIP\'yi kontrol etmek için "<b>"ANA EKRAN"</b>"\'ı basılı tutun"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"Resim içinde resim"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"Bu işlev, videonuzu, başka bir video oynatılıncaya kadar görünür tutar. Bu işlevi kontrol etmek için "<b>"ANA EKRAN"</b>" tuşunu basılı tutun."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"Anladım"</string>
 </resources>

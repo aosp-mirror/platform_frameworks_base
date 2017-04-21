@@ -21,10 +21,4 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_close" msgid="3480680679023423574">"Затвори PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Цел екран"</string>
-    <string name="pip_play" msgid="674145557658227044">"Пушти"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"Пауза"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"Задржете "<b>"ДОМА"</b>" за кон. PIP"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"Слика во слика"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"Видеото се прикажува сѐ додека не пуштите друго. Притиснете и задржете "<b>"ПОЧЕТЕН ЕКРАН"</b>" за да го контролирате."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"Разбрав"</string>
 </resources>

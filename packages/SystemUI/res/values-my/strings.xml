@@ -152,9 +152,9 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ဆင်းကဒ်မရှိပါ။"</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"ဆဲလ်လူလာ ဒေတာ"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"ဆဲလ်လူလာ ဒေတာ ဖွင့်ထားသည်"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ဆဲလ်လူလာဒေတာပိတ်ထားသည်"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"မိုဘိုင်းဒေတာ"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"မိုဘိုင်းဒေတာကို ဖွင့်ထားပါသည်"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"မိုဘိုင်းဒေတာကို ပိတ်ထားပါသည်"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
@@ -239,9 +239,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"အားသွင်းနေသည်"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ဒေတာ ခေတ္တရပ်တန့်သည်"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G data ခေတ္တရပ်တန့်သည်"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"cellular data ခေတ္တရပ်တန့်သည်"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"မိုဘိုင်းဒေတာကို ခေတ္တရပ်ထားသည်"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ဒေတာ ခေတ္တရပ်တန့်သည်"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"သင်သတ်မှတ်ထားသော ဒေတာကန့်သတ်ချက်သို့ ရောက်နေပါပြီ။ သင်သည် ဆယ်လူလာဒေတာကို အသုံးမပြုတော့ပါ။\n\nသင်ဆက်လုပ်မည်ဆိုလျှင် ဒေတာသုံးစွဲမှုအတွက် အခငွေ ကျသင့်မှုရှိနိုင်ပါသည်။"</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"သင်သတ်မှတ်ထားသော ဒေတာကန့်သတ်ချက်သို့ ရောက်နေပါပြီ။ သင်သည် မိုဘိုင်းဒေတာကို အသုံးပြုနေခြင်း မရှိတော့ပါ။\n\nဆက်သုံးမည်ဆိုလျှင် ဒေတာသုံးစွဲခ ကျသင့်နိုင်ပါသည်။"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ပြန်ဆက်လုပ်ရန်"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"အင်တာနက်မရှိ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ကြိုးမဲ့ဆက်သွယ်မှု"</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ဟော့စပေါ့"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"အကြောင်းကြားချက်များ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ဖလက်ရှမီး"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"ဆဲလ်လူလာ ဒေတာ"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"မိုဘိုင်းဒေတာ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ဒေတာ သုံးစွဲမှု"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ကျန်ရှိ ဒေတာ"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"ကန့်သတ်ချက် ကျော်လွန်"</string>
@@ -427,7 +427,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"အလုပ်ပရိုဖိုင်ကို <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"ကိုယ်ပိုင်ပရိုဖိုင်ကို <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"စက်ပစ္စည်းကို <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ကိရိယာကို စောင့်ကြပ်ခြင်း"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"ပရိုဖိုင် စောင့်ကြပ်မှု"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ကွန်ရက်ကို စောင့်ကြပ်ခြင်း"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -436,14 +437,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN ကို ပိတ်ထားရန်"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ကို အဆက်ဖြတ်ရန်"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"မူဝါဒများကို ကြည့်ရန်"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"သင်၏စက်ပစ္စည်းကို <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> က စီမံခန့်ခွဲထားပါသည်။\n\nစီမံခန့်ခွဲသူသည် ဆက်တင်များ၊ အဖွဲ့အစည်း အသုံးပြုခွင့်များ၊ အက်ပ်များ၊ စက်ပစ္စည်းနှင့် ဆက်စပ်နေသည့် ဒေတာများနှင့် စက်ပစ္စည်း၏ တည်နေရာ အချက်အလက်များကို စောင့်ကြည့်၍ စီမံနိုင်ပါသည်။\n\nနောက်ထပ် အချက်အလက်များအတွက် စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။\""</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"သင်၏စက်ပစ္စည်းကို သင်၏ အဖွဲ့အစည်းက စီမံခန့်ခွဲထားပါသည်။\n\nသင်၏ စီမံခန့်ခွဲသူသည် ဆက်တင်များ၊ အဖွဲ့အစည်း အသုံးပြုခွင့်များ၊ အက်ပ်များ၊ စက်ပစ္စည်းနှင့် ဆက်စပ်နေသည့် ဒေတာများနှင့် စက်ပစ္စည်း၏ တည်နေရာ အချက်အလက်များကို စောင့်ကြည့်၍ စီမံနိုင်ပါသည်။\n\nနောက်ထပ် အချက်အလက်များအတွက် စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။\""</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"သင်၏ အဖွဲ့အစည်းက ဤစက်ပစ္စည်းတွင် စီမံခန့်ခွဲမှုဆိုင်ရာ အသိအမှတ်ပြုလက်မှတ်ကို ထည့်သွင်းထားပါသည်။ လုံခြုံမှုရှိသော ကွန်ရက်ဒေတာစီးဆင်းမှုကို စောင့်ကြည့်ခြင်း သို့မဟုတ် ပြုပြင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"သင်၏ အဖွဲ့အစည်းသည် သင်၏ အလုပ်ပရိုဖိုင်တွင် စီမံခန့်ခွဲမှုဆိုင်ရာ အသိအမှတ်ပြုလက်မှတ်ကို ထည့်သွင်းထားပါသည်။ လုံခြုံမှုရှိသော ကွန်ရက်ဒေတာစီးဆင်းမှုကို စောင့်ကြည့်ခြင်း သို့မဟုတ် ပြုပြင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"ဤစက်ပစ္စည်းတွင် စီမံခန့်ခွဲမှုဆိုင်ရာ အသိအမှတ်ပြုလက်မှတ်ကို ထည့်သွင်းထားပါသည်။ လုံခြုံမှုရှိသော ကွန်ရက်ဒေတာစီးဆင်းမှုကို စောင့်ကြည့်ခြင်း သို့မဟုတ် ပြုပြင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"စက်ပစ္စည်းပေါ်ရှိ ဒေတာစီးဆင်းမှုများကို စောင့်ကြည့်နိုင်သည့်  ကွန်ရက်မှတ်တမ်းတင်ခြင်းစနစ်ကို သင်၏ စီမံခန့်ခွဲသူက ဖွင့်ထားပါသည်။"</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"သင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"သင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP_0">%1$s</xliff:g>နှင့် <xliff:g id="VPN_APP_1">%2$s</xliff:g>သို့ ချိတ်ဆက်ထားပါသည်။"</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"သင်၏အလုပ်ပရိုဖိုင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"သင်၏ ကိုယ်ပိုင်ပရိုဖိုင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"သင့်စက်ပစ္စည်းကို <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> က စီမံခန့်ခွဲထားပါသည်။"</string>
@@ -558,6 +563,9 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>၊ <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> နှင့် <xliff:g id="NUMBER_5">%3$d</xliff:g> အခြား</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>၊ <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> နှင့် <xliff:g id="NUMBER_2">%3$d</xliff:g> အခြား</item>
     </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် အကြောင်းကြားချက်ထိန်းချုပ်မှုများကို ဖွင့်ထားသည်"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် အကြောင်းကြားချက်ထိန်းချုပ်မှုများကို ပိတ်ထားသည်"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ဤချန်နယ်မှ အကြောင်းကြားချက်များကို ခွင့်ပြုပါ"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"အုပ်စုအားလုံး"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"စိတ်ကြိုက်သတ်မှတ်ရန်− <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -568,7 +576,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"၁၅ မိနစ်"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"၃၀ မိနစ်"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"၁ နာရီ"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"မလုပ်တော့"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"တစ်ဆင့် နောက်ပြန်ပြန်ပါ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ဆိုင်းငံ့ရန်"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ဘက်ထရီ အသုံးပြုမှု"</string>
@@ -714,6 +721,13 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"တစ်ခုပေါ်တစ်ခု ထပ်၍ ဖွင့်ခြင်းမီနူး"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> သည် တစ်ခုပေါ် တစ်ခုထပ်၍ ဖွင့်ထားသည်"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> အား ဤဝန်ဆောင်မှုကို အသုံးမပြုစေလိုလျှင် ဆက်တင်ကိုဖွင့်ရန် တို့ပြီး ၎င်းဝန်ဆောင်မှုကို ပိတ်လိုက်ပါ။"</string>
+    <string name="pip_play" msgid="1417176722760265888">"ဖွင့်ရန်"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"ခေတ္တရပ်ရန်"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"နောက်တစ်ခုသို့ ကျော်ရန်"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"ယခင်တစ်ခုသို့ ပြန်သွားရန်"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"အပူရှိန်ကြောင့်ဖုန်းပိတ်ထားသည်"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"သင်၏ဖုန်းသည် ပုံမှန် အလုပ်လုပ်နေပါသည်"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"သင့်ဖုန်းအလွန်ပူနေသည့်အတွက် အေးသွားစေရန် ပိတ်ထားပါသည်။ ယခုပုံမှန် အလုပ်လုပ်ပါပြီ။\n\nအောက်ပါတို့ကိုသုံးလျှင် ပူလာပါမည်-\n	• အရင်းအမြစ်များသောအက်ပ်ကို သုံခြင်း (ဥပမာ ဂိမ်းကစားခြင်း၊ ဗီဒီယိုကြည့်ခြင်း (သို့) လမ်းညွှန်အက်ပ်)\n	• ကြီးမားသောဖိုင်များ ဒေါင်းလုဒ် (သို့) အပ်လုဒ်လုပ်ခြင်း\n	• အပူရှိန်မြင့်သောနေရာတွင် သုံးခြင်း"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ဖုန်း ပူနွေးလာပါပြီ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
@@ -738,16 +752,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ချက်ခြင်းသုံးအက်ပ်များကို ထည့်သွင်းစရာမလိုပါ။"</string>
     <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"မိုဘိုင်းဒေတာ"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ကို ပိတ်ထားသည်"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ဘလူးတုသ်ကို ပိတ်ထားသည်"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\"မနှောင့်ယှက်ရ\" ကို ပိတ်ထားသည်"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"\"မနှောင့်ယှက်ရ\" ကို အလိုအလျောက်စည်းမျဉ်း (<xliff:g id="ID_1">%s</xliff:g>) က ဖွင့်ခဲ့သည်။"</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"\"မနှောင့်ယှက်ရ\" ကို အက်ပ် (<xliff:g id="ID_1">%s</xliff:g>) က ဖွင့်ခဲ့သည်။"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"\"မနှောင့်ယှက်ရ\" ကို အလိုအလျောက်စည်းမျဉ်းတစ်ခု သို့မဟုတ် အက်ပ်တစ်ခုက ဖွင့်ခဲ့သည်။"</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> အထိ"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"သိမ်းထားရန်"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"အစားထိုးရန်"</string>
