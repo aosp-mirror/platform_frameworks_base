@@ -148,7 +148,7 @@ public class ClipDescription implements Parcelable {
      * Used for setting the timestamp at which the associated {@link ClipData} is copied to
      * global clipboard.
      *
-     * @param timeStamp at which the associated {@link ClipData} is copeid to clipboard in
+     * @param timeStamp at which the associated {@link ClipData} is copied to clipboard in
      *                  {@link System#currentTimeMillis()} time base.
      * @hide
      */
