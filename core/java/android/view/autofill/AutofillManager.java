@@ -1143,7 +1143,7 @@ public final class AutofillManager {
                     }
 
                     if (isVisible) {
-                        mVisibleTrackedIds = addToSet(mInvisibleTrackedIds, id);
+                        mVisibleTrackedIds = addToSet(mVisibleTrackedIds, id);
                     } else {
                         mInvisibleTrackedIds = addToSet(mInvisibleTrackedIds, id);
                     }
