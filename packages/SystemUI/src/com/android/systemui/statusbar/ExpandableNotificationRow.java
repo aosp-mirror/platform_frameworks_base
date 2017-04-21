@@ -1273,7 +1273,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public float getTranslation() {
-        if (mShouldTranslateContents) {
+        if (!mShouldTranslateContents) {
             return getTranslationX();
         }
 
