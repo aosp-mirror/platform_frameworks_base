@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification;
 
 import android.content.Context;
-import android.service.notification.StatusBarNotification;
 import android.view.View;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;

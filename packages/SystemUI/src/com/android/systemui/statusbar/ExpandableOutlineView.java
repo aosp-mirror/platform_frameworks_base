@@ -17,12 +17,14 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import com.android.systemui.R;
 
 /**
  * Like {@link ExpandableView}, but setting an outline for the height and clipping.
@@ -33,10 +35,16 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private boolean mCustomOutline;
     private float mOutlineAlpha = -1f;
 
-    ViewOutlineProvider mProvider = new ViewOutlineProvider() {
+    /**
+     * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
+     * it is moved. Otherwise, the translation is set on the {@code ExpandableOutlineView} itself.
+     */
+    protected boolean mShouldTranslateContents;
+
+    private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
-            int translation = (int) getTranslation();
+            int translation = mShouldTranslateContents ? 0 : (int) getTranslation();
             if (!mCustomOutline) {
                 outline.setRect(translation,
                         mClipTopAmount,
@@ -52,6 +60,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOutlineProvider(mProvider);
+        Resources res = getResources();
+        mShouldTranslateContents =
+                res.getBoolean(R.bool.config_translateNotificationContentsOnSwipe);
     }
 
     @Override
