@@ -13,7 +13,6 @@ LOCAL_SRC_FILES += \
     ../../../../system/netd/server/binder/android/net/INetd.aidl \
     ../../../../system/netd/server/binder/android/net/metrics/INetdEventListener.aidl \
     ../../../native/cmds/installd/binder/android/os/IInstalld.aidl \
-    ../../../native/services/vr/vr_window_manager/aidl/android/service/vr/IVrWindowManager.aidl \
 
 LOCAL_AIDL_INCLUDES += \
     system/netd/server/binder
