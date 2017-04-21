@@ -289,13 +289,20 @@ public class ZenModePanel extends FrameLayout {
         }
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (DEBUG) Log.d(mTag, "onAttachedToWindow");
+    private void onAttach() {
         setExpanded(true);
         mAttached = true;
-        mAttachedZen = getSelectedZen(-1);
+        for (int i = 0; i < mZenRadioGroupContent.getChildCount(); i++) {
+            ConditionTag tag = getConditionTagAt(i);
+            if (tag != null) tag.rb.setChecked(false);
+            mZenRadioGroupContent.getChildAt(i).setTag(null);
+        }
+        mAttachedZen = mController.getZen();
+        ZenRule manualRule = mController.getManualRule();
+        mExitCondition = manualRule != null ? manualRule.condition : null;
+        if (DEBUG) Log.d(mTag, "onAttach " + mAttachedZen + " " + manualRule);
+        handleUpdateManualRule(manualRule);
+        mZenButtons.setSelectedValue(mAttachedZen, false);
         mSessionZen = mAttachedZen;
         mTransitionHelper.clear();
         mController.addCallback(mZenCallback);
@@ -304,10 +311,8 @@ public class ZenModePanel extends FrameLayout {
         setRequestingConditions(!mHidden);
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (DEBUG) Log.d(mTag, "onDetachedFromWindow");
+    private void onDetach() {
+        if (DEBUG) Log.d(mTag, "onDetach");
         setExpanded(false);
         checkForAttachedZenChange();
         mAttached = false;
@@ -317,6 +322,17 @@ public class ZenModePanel extends FrameLayout {
         setSessionExitCondition(null);
         setRequestingConditions(false);
         mTransitionHelper.clear();
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        if (isVisible == mAttached) return;
+        if (isVisible) {
+            onAttach();
+        } else {
+            onDetach();
+        }
     }
 
     private void setSessionExitCondition(Condition condition) {
@@ -680,7 +696,8 @@ public class ZenModePanel extends FrameLayout {
         final int favoriteIndex = mPrefs.getMinuteIndex();
         if (mExitCondition != null && mExitCondition.equals(mTimeCondition)) {
             getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
-        } else if (favoriteIndex == -1 || !mCountdownConditionSupported) {
+        } else if (favoriteIndex == -1 || !mCountdownConditionSupported ||
+                mAttachedZen != Global.ZEN_MODE_OFF) {
             foreverTag.rb.setChecked(true);
         } else {
             mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
