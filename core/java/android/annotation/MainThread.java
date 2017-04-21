@@ -23,18 +23,25 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.os.Looper;
+
 /**
  * Denotes that the annotated method should only be called on the main thread.
- * If the annotated element is a class, then all methods in the class should be called
- * on the main thread.
+ * If the annotated element is a class, then all methods in the class should be
+ * called on the main thread.
  * <p>
  * Example:
- * <pre><code>
+ *
+ * <pre>
+ * <code>
  *  &#64;MainThread
  *  public void deliverResult(D data) { ... }
- * </code></pre>
+ * </code>
+ * </pre>
  *
- * {@hide}
+ * @memberDoc This method must be called from the
+ *            {@linkplain Looper#getMainLooper() main thread} of your app.
+ * @hide
  */
 @Retention(SOURCE)
 @Target({METHOD,CONSTRUCTOR,TYPE})

@@ -21,6 +21,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SystemApi;
+import android.app.NotificationManager.Importance;
 import android.content.Intent;
 import android.media.AudioAttributes;
 import android.net.Uri;
@@ -389,16 +390,14 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets the level of interruption of this notification channel.
-     *
-     * Only modifiable before the channel is submitted to
+     * Sets the level of interruption of this notification channel. Only
+     * modifiable before the channel is submitted to
      * {@link NotificationManager#notify(String, int, Notification)}.
      *
-     * @param importance the amount the user should be interrupted by notifications from this
-     *                   channel. See e.g.
-     *                   {@link android.app.NotificationManager#IMPORTANCE_DEFAULT}.
+     * @param importance the amount the user should be interrupted by
+     *            notifications from this channel.
      */
-    public void setImportance(int importance) {
+    public void setImportance(@Importance int importance) {
         this.mImportance = importance;
     }
 
