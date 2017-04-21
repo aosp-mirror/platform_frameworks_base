@@ -38,27 +38,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
 
 /**
- * This class represents an IpSecTransform, which encapsulates both properties and state of IPsec.
+ * This class represents an IPsec transform, which comprises security associations in one or both
+ * directions.
  *
- * <p>IpSecTransforms must be built from an IpSecTransform.Builder, and they must persist throughout
- * the lifetime of the underlying transform. If a transform object leaves scope, the underlying
- * transform may be disabled automatically, with likely undesirable results.
+ * <p>Transforms are created using {@link IpSecTransform.Builder}. Each {@code IpSecTransform}
+ * object encapsulates the properties and state of an inbound and outbound IPsec security
+ * association. That includes, but is not limited to, algorithm choice, key material, and allocated
+ * system resources.
  *
- * <p>An IpSecTransform may either represent a tunnel mode transform that operates on a wide array
- * of traffic or may represent a transport mode transform operating on a Socket or Sockets.
+ * @see <a href="https://tools.ietf.org/html/rfc4301">RFC 4301, Security Architecture for the
+ * Internet Protocol</a>
  */
 public final class IpSecTransform implements AutoCloseable {
     private static final String TAG = "IpSecTransform";
 
     /**
-     * For direction-specific attributes of an IpSecTransform, indicates that an attribute applies
-     * to traffic towards the host.
+     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
+     * applies to traffic towards the host.
      */
     public static final int DIRECTION_IN = 0;
 
     /**
-     * For direction-specific attributes of an IpSecTransform, indicates that an attribute applies
-     * to traffic from the host.
+     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
+     * applies to traffic from the host.
      */
     public static final int DIRECTION_OUT = 1;
 
@@ -77,16 +79,16 @@ public final class IpSecTransform implements AutoCloseable {
     public static final int ENCAP_NONE = 0;
 
     /**
-     * IpSec traffic will be encapsulated within a UDP header with an additional 8-byte header pad
-     * (of '0'-value bytes) that prevents traffic from being interpreted as IKE or as ESP over UDP.
+     * IPsec traffic will be encapsulated within UDP, but with 8 zero-value bytes between the UDP
+     * header and payload. This prevents traffic from being interpreted as ESP or IKEv2.
      *
      * @hide
      */
     public static final int ENCAP_ESPINUDP_NON_IKE = 1;
 
     /**
-     * IpSec traffic will be encapsulated within UDP as per <a
-     * href="https://tools.ietf.org/html/rfc3948">RFC3498</a>.
+     * IPsec traffic will be encapsulated within UDP as per
+     * <a href="https://tools.ietf.org/html/rfc3948">RFC 3498</a>.
      *
      * @hide
      */
@@ -165,13 +167,14 @@ public final class IpSecTransform implements AutoCloseable {
     }
 
     /**
-     * Deactivate an IpSecTransform and free all resources for that transform that are managed by
-     * the system for this Transform.
+     * Deactivate this {@code IpSecTransform} and free allocated resources.
      *
-     * <p>Deactivating a transform while it is still applied to any Socket will result in sockets
-     * refusing to send or receive data. This method will silently succeed if the specified
-     * transform has already been removed; thus, it is always safe to attempt cleanup when a
-     * transform is no longer needed.
+     * <p>Deactivating a transform while it is still applied to a socket will result in errors on
+     * that socket. Make sure to remove transforms by calling {@link
+     * IpSecManager#removeTransportModeTransform}. Note, removing an {@code IpSecTransform} from a
+     * socket will not deactivate it (because one transform may be applied to multiple sockets).
+     *
+     * <p>It is safe to call this method on a transform that has already been deactivated.
      */
     public void close() {
         Log.d(TAG, "Removing Transform with Id " + mResourceId);
@@ -197,6 +200,7 @@ public final class IpSecTransform implements AutoCloseable {
         }
     }
 
+    /** Check that the transform was closed properly. */
     @Override
     protected void finalize() throws Throwable {
         if (mCloseGuard != null) {
@@ -264,65 +268,63 @@ public final class IpSecTransform implements AutoCloseable {
     }
 
     /**
-     * Builder object to facilitate the creation of IpSecTransform objects.
-     *
-     * <p>Apply additional properties to the transform and then call a build() method to return an
-     * IpSecTransform object.
-     *
-     * @see Builder#buildTransportModeTransform(InetAddress)
+     * This class is used to build {@link IpSecTransform} objects.
      */
     public static class Builder {
         private Context mContext;
         private IpSecConfig mConfig;
 
         /**
-         * Add an encryption algorithm to the transform for the given direction.
+         * Set the encryption algorithm for the given direction.
          *
-         * <p>If encryption is set for a given direction without also providing an SPI for that
-         * direction, creation of an IpSecTransform will fail upon calling a build() method.
+         * <p>If encryption is set for a direction without also providing an SPI for that direction,
+         * creation of an {@code IpSecTransform} will fail when attempting to build the transform.
          *
-         * <p>Authenticated encryption is mutually exclusive with encryption and authentication.
+         * <p>Encryption is mutually exclusive with authenticated encryption.
          *
-         * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
+         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the encryption to be applied.
          */
         public IpSecTransform.Builder setEncryption(
                 @TransformDirection int direction, IpSecAlgorithm algo) {
+            // TODO: throw IllegalArgumentException if algo is not an encryption algorithm.
             mConfig.setEncryption(direction, algo);
             return this;
         }
 
         /**
-         * Add an authentication/integrity algorithm to the transform.
+         * Set the authentication (integrity) algorithm for the given direction.
          *
-         * <p>If authentication is set for a given direction without also providing an SPI for that
-         * direction, creation of an IpSecTransform will fail upon calling a build() method.
+         * <p>If authentication is set for a direction without also providing an SPI for that
+         * direction, creation of an {@code IpSecTransform} will fail when attempting to build the
+         * transform.
          *
-         * <p>Authenticated encryption is mutually exclusive with encryption and authentication.
+         * <p>Authentication is mutually exclusive with authenticated encryption.
          *
-         * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
+         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the authentication to be applied.
          */
         public IpSecTransform.Builder setAuthentication(
                 @TransformDirection int direction, IpSecAlgorithm algo) {
+            // TODO: throw IllegalArgumentException if algo is not an authentication algorithm.
             mConfig.setAuthentication(direction, algo);
             return this;
         }
 
         /**
-         * Add an authenticated encryption algorithm to the transform for the given direction.
+         * Set the authenticated encryption algorithm for the given direction.
          *
          * <p>If an authenticated encryption algorithm is set for a given direction without also
-         * providing an SPI for that direction, creation of an IpSecTransform will fail upon calling
-         * a build() method.
+         * providing an SPI for that direction, creation of an {@code IpSecTransform} will fail when
+         * attempting to build the transform.
          *
          * <p>The Authenticated Encryption (AE) class of algorithms are also known as Authenticated
          * Encryption with Associated Data (AEAD) algorithms, or Combined mode algorithms (as
-         * referred to in RFC 4301)
+         * referred to in <a href="https://tools.ietf.org/html/rfc4301">RFC 4301</a>).
          *
          * <p>Authenticated encryption is mutually exclusive with encryption and authentication.
          *
-         * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
+         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the authenticated encryption algorithm to
          *     be applied.
          */
@@ -333,19 +335,16 @@ public final class IpSecTransform implements AutoCloseable {
         }
 
         /**
-         * Set the SPI, which uniquely identifies a particular IPsec session from others. Because
-         * IPsec operates at the IP layer, this 32-bit identifier uniquely identifies packets to a
-         * given destination address.
+         * Set the SPI for the given direction.
          *
-         * <p>Care should be chosen when selecting an SPI to ensure that is is as unique as
-         * possible. To reserve a value call {@link IpSecManager#reserveSecurityParameterIndex(int,
-         * InetAddress, int)}. Otherwise, SPI collisions would prevent a transform from being
-         * activated. IpSecManager#reserveSecurityParameterIndex(int, InetAddres$s, int)}.
+         * <p>Because IPsec operates at the IP layer, this 32-bit identifier uniquely identifies
+         * packets to a given destination address. To prevent SPI collisions, values should be
+         * reserved by calling {@link IpSecManager#reserveSecurityParameterIndex}.
          *
-         * <p>Unless an SPI is set for a given direction, traffic in that direction will be
-         * sent/received without any IPsec applied.
+         * <p>If the SPI and algorithms are omitted for one direction, traffic in that direction
+         * will not be encrypted or authenticated.
          *
-         * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
+         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
          * @param spi a unique {@link IpSecManager.SecurityParameterIndex} to identify transformed
          *     traffic
          */
@@ -356,11 +355,10 @@ public final class IpSecTransform implements AutoCloseable {
         }
 
         /**
-         * Specify the network on which this transform will emit its traffic; (otherwise it will
-         * emit on the default network).
+         * Set the {@link Network} which will carry tunneled traffic.
          *
-         * <p>Restricts the transformed traffic to a particular {@link Network}. This is required in
-         * tunnel mode.
+         * <p>Restricts the transformed traffic to a particular {@link Network}. This is required
+         * for tunnel mode, otherwise tunneled traffic would be sent on the default network.
          *
          * @hide
          */
@@ -371,15 +369,18 @@ public final class IpSecTransform implements AutoCloseable {
         }
 
         /**
-         * Add UDP encapsulation to an IPv4 transform
+         * Add UDP encapsulation to an IPv4 transform.
          *
-         * <p>This option allows IPsec traffic to pass through NAT. Refer to RFC 3947 and 3948 for
-         * details on how UDP should be applied to IPsec.
+         * <p>This allows IPsec traffic to pass through a NAT.
          *
-         * @param localSocket a {@link IpSecManager.UdpEncapsulationSocket} for sending and
-         *     receiving encapsulating traffic.
-         * @param remotePort the UDP port number of the remote that will send and receive
-         *     encapsulated traffic. In the case of IKE, this is likely port 4500.
+         * @see <a href="https://tools.ietf.org/html/rfc3948">RFC 3948, UDP Encapsulation of IPsec
+         * ESP Packets</a>
+         * @see <a href="https://tools.ietf.org/html/rfc7296#section-2.23">RFC 7296 section 2.23,
+         * NAT Traversal of IKEv2</a>
+         *
+         * @param localSocket a socket for sending and receiving encapsulated traffic
+         * @param remotePort the UDP port number of the remote host that will send and receive
+         *     encapsulated traffic. In the case of IKEv2, this should be port 4500.
          */
         public IpSecTransform.Builder setIpv4Encapsulation(
                 IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
@@ -393,12 +394,15 @@ public final class IpSecTransform implements AutoCloseable {
         // TODO: Probably a better exception to throw for NATTKeepalive failure
         // TODO: Specify the needed NATT keepalive permission.
         /**
-         * Send a NATT Keepalive packet with a given maximum interval. This will create an offloaded
-         * request to do power-efficient NATT Keepalive. If NATT keepalive is requested but cannot
-         * be activated, then the transform will fail to activate and throw an IOException.
+         * Set NAT-T keepalives to be sent with a given interval.
          *
-         * @param intervalSeconds the maximum number of seconds between keepalive packets, no less
-         *     than 20s and no more than 3600s.
+         * <p>This will set power-efficient keepalive packets to be sent by the system. If NAT-T
+         * keepalive is requested but cannot be activated, then creation of an {@link
+         * IpSecTransform} will fail when calling the build method.
+         *
+         * @param intervalSeconds the maximum number of seconds between keepalive packets. Must be
+         *     between 20s and 3600s.
+         *
          * @hide
          */
         @SystemApi
@@ -408,36 +412,29 @@ public final class IpSecTransform implements AutoCloseable {
         }
 
         /**
-         * Build and return an active {@link IpSecTransform} object as a Transport Mode Transform.
-         * Some parameters have interdependencies that are checked at build time. If a well-formed
-         * transform cannot be created from the supplied parameters, this method will throw an
-         * Exception.
+         * Build a transport mode {@link IpSecTransform}.
          *
-         * <p>Upon a successful return from this call, the provided IpSecTransform will be active
-         * and may be applied to sockets. If too many IpSecTransform objects are active for a given
-         * user this operation will fail and throw ResourceUnavailableException. To avoid these
-         * exceptions, unused Transform objects must be cleaned up by calling {@link
-         * IpSecTransform#close()} when they are no longer needed.
+         * <p>This builds and activates a transport mode transform. Note that an active transform
+         * will not affect any network traffic until it has been applied to one or more sockets.
          *
-         * @param remoteAddress the {@link InetAddress} that, when matched on traffic to/from this
-         *     socket will cause the transform to be applied.
-         *     <p>Note that an active transform will not impact any network traffic until it has
-         *     been applied to one or more Sockets. Calling this method is a necessary precondition
-         *     for applying it to a socket, but is not sufficient to actually apply IPsec.
+         * @see IpSecManager#applyTransportModeTransform
+         *
+         * @param remoteAddress the remote {@code InetAddress} of traffic on sockets that will use
+         *     this transform
          * @throws IllegalArgumentException indicating that a particular combination of transform
-         *     properties is invalid.
-         * @throws IpSecManager.ResourceUnavailableException in the event that no more Transforms
-         *     may be allocated
-         * @throws SpiUnavailableException if the SPI collides with an existing transform
-         *     (unlikely).
-         * @throws ResourceUnavailableException if the current user currently has exceeded the
-         *     number of allowed active transforms.
+         *     properties is invalid
+         * @throws IpSecManager.ResourceUnavailableException indicating that too many transforms are
+         *     active
+         * @throws IpSecManager.SpiUnavailableException indicating the rare case where an SPI
+         *     collides with an existing transform
+         * @throws IOException indicating other errors
          */
         public IpSecTransform buildTransportModeTransform(InetAddress remoteAddress)
                 throws IpSecManager.ResourceUnavailableException,
                         IpSecManager.SpiUnavailableException, IOException {
             mConfig.setMode(MODE_TRANSPORT);
             mConfig.setRemoteAddress(remoteAddress.getHostAddress());
+            // FIXME: modifying a builder after calling build can change the built transform.
             return new IpSecTransform(mContext, mConfig).activate();
         }
 
@@ -465,9 +462,9 @@ public final class IpSecTransform implements AutoCloseable {
         }
 
         /**
-         * Create a new IpSecTransform.Builder to construct an IpSecTransform
+         * Create a new IpSecTransform.Builder.
          *
-         * @param context current Context
+         * @param context current context
          */
         public Builder(@NonNull Context context) {
             Preconditions.checkNotNull(context);

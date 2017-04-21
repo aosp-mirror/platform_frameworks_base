@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.StringDef;
 import android.os.Build;
 import android.os.Parcel;
@@ -27,8 +28,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * IpSecAlgorithm specifies a single algorithm that can be applied to an IpSec Transform. Refer to
- * RFC 4301.
+ * This class represents a single algorithm that can be used by an {@link IpSecTransform}.
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc4301">RFC 4301, Security Architecture for the
+ * Internet Protocol</a>
  */
 public final class IpSecAlgorithm implements Parcelable {
     /**
@@ -39,16 +42,16 @@ public final class IpSecAlgorithm implements Parcelable {
     public static final String CRYPT_AES_CBC = "cbc(aes)";
 
     /**
-     * MD5 HMAC Authentication/Integrity Algorithm. This algorithm is not recommended for use in new
-     * applications and is provided for legacy compatibility with 3gpp infrastructure.
+     * MD5 HMAC Authentication/Integrity Algorithm. <b>This algorithm is not recommended for use in
+     * new applications and is provided for legacy compatibility with 3gpp infrastructure.</b>
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 128.
      */
     public static final String AUTH_HMAC_MD5 = "hmac(md5)";
 
     /**
-     * SHA1 HMAC Authentication/Integrity Algorithm. This algorithm is not recommended for use in
-     * new applications and is provided for legacy compatibility with 3gpp infrastructure.
+     * SHA1 HMAC Authentication/Integrity Algorithm. <b>This algorithm is not recommended for use in
+     * new applications and is provided for legacy compatibility with 3gpp infrastructure.</b>
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 160.
      */
@@ -69,7 +72,7 @@ public final class IpSecAlgorithm implements Parcelable {
     public static final String AUTH_HMAC_SHA384 = "hmac(sha384)";
 
     /**
-     * SHA512 HMAC Authentication/Integrity Algorithm
+     * SHA512 HMAC Authentication/Integrity Algorithm.
      *
      * <p>Valid truncation lengths are multiples of 8 bits from 256 to (default) 512.
      */
@@ -80,9 +83,9 @@ public final class IpSecAlgorithm implements Parcelable {
      *
      * <p>Valid lengths for keying material are {160, 224, 288}.
      *
-     * <p>As per RFC4106 (Section 8.1), keying material consists of a 128, 192, or 256 bit AES key
-     * followed by a 32-bit salt. RFC compliance requires that the salt must be unique per
-     * invocation with the same key.
+     * <p>As per <a href="https://tools.ietf.org/html/rfc4106#section-8.1">RFC4106 (Section
+     * 8.1)</a>, keying material consists of a 128, 192, or 256 bit AES key followed by a 32-bit
+     * salt. RFC compliance requires that the salt must be unique per invocation with the same key.
      *
      * <p>Valid ICV (truncation) lengths are {64, 96, 128}.
      */
@@ -105,48 +108,47 @@ public final class IpSecAlgorithm implements Parcelable {
     private final int mTruncLenBits;
 
     /**
-     * Specify a IpSecAlgorithm of one of the supported types including the truncation length of the
-     * algorithm
+     * Creates an IpSecAlgorithm of one of the supported types. Supported algorithm names are
+     * defined as constants in this class.
      *
-     * @param algorithm type for IpSec.
-     * @param key non-null Key padded to a multiple of 8 bits.
+     * @param algorithm name of the algorithm.
+     * @param key key padded to a multiple of 8 bits.
      */
-    public IpSecAlgorithm(String algorithm, byte[] key) {
+    public IpSecAlgorithm(@AlgorithmName String algorithm, @NonNull byte[] key) {
         this(algorithm, key, key.length * 8);
     }
 
     /**
-     * Specify a IpSecAlgorithm of one of the supported types including the truncation length of the
-     * algorithm
+     * Creates an IpSecAlgorithm of one of the supported types. Supported algorithm names are
+     * defined as constants in this class.
      *
-     * @param algoName precise name of the algorithm to be used.
-     * @param key non-null Key padded to a multiple of 8 bits.
-     * @param truncLenBits the number of bits of output hash to use; only meaningful for
-     *     Authentication or Authenticated Encryption (equivalent to ICV length).
+     * <p>This constructor only supports algorithms that use a truncation length. i.e.
+     * Authentication and Authenticated Encryption algorithms.
+     *
+     * @param algorithm name of the algorithm.
+     * @param key key padded to a multiple of 8 bits.
+     * @param truncLenBits number of bits of output hash to use.
      */
-    public IpSecAlgorithm(@AlgorithmName String algoName, byte[] key, int truncLenBits) {
-        if (!isTruncationLengthValid(algoName, truncLenBits)) {
+    public IpSecAlgorithm(@AlgorithmName String algorithm, @NonNull byte[] key, int truncLenBits) {
+        if (!isTruncationLengthValid(algorithm, truncLenBits)) {
             throw new IllegalArgumentException("Unknown algorithm or invalid length");
         }
-        mName = algoName;
+        mName = algorithm;
         mKey = key.clone();
         mTruncLenBits = Math.min(truncLenBits, key.length * 8);
     }
 
-    /** Retrieve the algorithm name */
+    /** Get the algorithm name */
     public String getName() {
         return mName;
     }
 
-    /** Retrieve the key for this algorithm */
+    /** Get the key for this algorithm */
     public byte[] getKey() {
         return mKey.clone();
     }
 
-    /**
-     * Retrieve the truncation length, in bits, for the key in this algo. By default this will be
-     * the length in bits of the key.
-     */
+    /** Get the truncation length of this algorithm, in bits */
     public int getTruncationLengthBits() {
         return mTruncLenBits;
     }

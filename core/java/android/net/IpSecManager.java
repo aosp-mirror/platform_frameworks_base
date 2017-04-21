@@ -19,6 +19,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
@@ -37,22 +38,28 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 /**
- * This class contains methods for managing IPsec sessions, which will perform kernel-space
- * encryption and decryption of socket or Network traffic.
+ * This class contains methods for managing IPsec sessions. Once configured, the kernel will apply
+ * confidentiality (encryption) and integrity (authentication) to IP traffic.
  *
- * <p>An IpSecManager may be obtained by calling {@link
- * android.content.Context#getSystemService(String) Context#getSystemService(String)} with {@link
- * android.content.Context#IPSEC_SERVICE Context#IPSEC_SERVICE}
+ * <p>Note that not all aspects of IPsec are permitted by this API. Applications may create
+ * transport mode security associations and apply them to individual sockets. Applications looking
+ * to create a VPN should use {@link VpnService}.
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc4301">RFC 4301, Security Architecture for the
+ * Internet Protocol</a>
  */
 @SystemService(Context.IPSEC_SERVICE)
 public final class IpSecManager {
     private static final String TAG = "IpSecManager";
 
     /**
-     * The Security Parameter Index, SPI, 0 indicates an unknown or invalid index.
+     * The Security Parameter Index (SPI) 0 indicates an unknown or invalid index.
      *
      * <p>No IPsec packet may contain an SPI of 0.
+     *
+     * @hide
      */
+    @TestApi
     public static final int INVALID_SECURITY_PARAMETER_INDEX = 0;
 
     /** @hide */
@@ -66,10 +73,12 @@ public final class IpSecManager {
     public static final int INVALID_RESOURCE_ID = 0;
 
     /**
-     * Indicates that the combination of remote InetAddress and SPI was non-unique for a given
-     * request. If encountered, selection of a new SPI is required before a transform may be
-     * created. Note, this should happen very rarely if the SPI is chosen to be sufficiently random
-     * or reserved using reserveSecurityParameterIndex.
+     * Thrown to indicate that a requested SPI is in use.
+     *
+     * <p>The combination of remote {@code InetAddress} and SPI must be unique across all apps on
+     * one device. If this error is encountered, a new SPI is required before a transform may be
+     * created. This error can be avoided by calling {@link
+     * IpSecManager#reserveSecurityParameterIndex}.
      */
     public static final class SpiUnavailableException extends AndroidException {
         private final int mSpi;
@@ -78,24 +87,26 @@ public final class IpSecManager {
          * Construct an exception indicating that a transform with the given SPI is already in use
          * or otherwise unavailable.
          *
-         * @param msg Description indicating the colliding SPI
+         * @param msg description indicating the colliding SPI
          * @param spi the SPI that could not be used due to a collision
          */
         SpiUnavailableException(String msg, int spi) {
-            super(msg + "(spi: " + spi + ")");
+            super(msg + " (spi: " + spi + ")");
             mSpi = spi;
         }
 
-        /** Retrieve the SPI that caused a collision */
+        /** Get the SPI that caused a collision. */
         public int getSpi() {
             return mSpi;
         }
     }
 
     /**
-     * Indicates that the requested system resource for IPsec, such as a socket or other system
-     * resource is unavailable. If this exception is thrown, try releasing allocated objects of the
-     * type requested.
+     * Thrown to indicate that an IPsec resource is unavailable.
+     *
+     * <p>This could apply to resources such as sockets, {@link SecurityParameterIndex}, {@link
+     * IpSecTransform}, or other system resources. If this exception is thrown, users should release
+     * allocated objects of the type requested.
      */
     public static final class ResourceUnavailableException extends AndroidException {
 
@@ -106,6 +117,13 @@ public final class IpSecManager {
 
     private final IIpSecService mService;
 
+    /**
+     * This class represents a reserved SPI.
+     *
+     * <p>Objects of this type are used to track reserved security parameter indices. They can be
+     * obtained by calling {@link IpSecManager#reserveSecurityParameterIndex} and must be released
+     * by calling {@link #close()} when they are no longer needed.
+     */
     public static final class SecurityParameterIndex implements AutoCloseable {
         private final IIpSecService mService;
         private final InetAddress mRemoteAddress;
@@ -113,7 +131,7 @@ public final class IpSecManager {
         private int mSpi = INVALID_SECURITY_PARAMETER_INDEX;
         private int mResourceId;
 
-        /** Return the underlying SPI held by this object */
+        /** Get the underlying SPI held by this object. */
         public int getSpi() {
             return mSpi;
         }
@@ -135,6 +153,7 @@ public final class IpSecManager {
             mCloseGuard.close();
         }
 
+        /** Check that the SPI was closed properly. */
         @Override
         protected void finalize() throws Throwable {
             if (mCloseGuard != null) {
@@ -197,13 +216,13 @@ public final class IpSecManager {
     }
 
     /**
-     * Reserve an SPI for traffic bound towards the specified remote address.
+     * Reserve a random SPI for traffic bound to or from the specified remote address.
      *
      * <p>If successful, this SPI is guaranteed available until released by a call to {@link
      * SecurityParameterIndex#close()}.
      *
      * @param direction {@link IpSecTransform#DIRECTION_IN} or {@link IpSecTransform#DIRECTION_OUT}
-     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress.
+     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress
      * @return the reserved SecurityParameterIndex
      * @throws ResourceUnavailableException indicating that too many SPIs are currently allocated
      *     for this user
@@ -223,17 +242,18 @@ public final class IpSecManager {
     }
 
     /**
-     * Reserve an SPI for traffic bound towards the specified remote address.
+     * Reserve the requested SPI for traffic bound to or from the specified remote address.
      *
      * <p>If successful, this SPI is guaranteed available until released by a call to {@link
      * SecurityParameterIndex#close()}.
      *
      * @param direction {@link IpSecTransform#DIRECTION_IN} or {@link IpSecTransform#DIRECTION_OUT}
-     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress.
-     * @param requestedSpi the requested SPI, or '0' to allocate a random SPI.
+     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress
+     * @param requestedSpi the requested SPI, or '0' to allocate a random SPI
      * @return the reserved SecurityParameterIndex
      * @throws ResourceUnavailableException indicating that too many SPIs are currently allocated
      *     for this user
+     * @throws SpiUnavailableException indicating that the requested SPI could not be reserved
      */
     public SecurityParameterIndex reserveSecurityParameterIndex(
             int direction, InetAddress remoteAddress, int requestedSpi)
@@ -245,16 +265,28 @@ public final class IpSecManager {
     }
 
     /**
-     * Apply an active Transport Mode IPsec Transform to a stream socket to perform IPsec
-     * encapsulation of the traffic flowing between the socket and the remote InetAddress of that
-     * transform. For security reasons, attempts to send traffic to any IP address other than the
-     * address associated with that transform will throw an IOException. In addition, if the
-     * IpSecTransform is later deactivated, the socket will throw an IOException on any calls to
-     * send() or receive() until the transform is removed from the socket by calling {@link
-     * #removeTransportModeTransform(Socket, IpSecTransform)};
+     * Apply an IPsec transform to a stream socket.
+     *
+     * <p>This applies transport mode encapsulation to the given socket. Once applied, I/O on the
+     * socket will be encapsulated according to the parameters of the {@code IpSecTransform}. When
+     * the transform is removed from the socket by calling {@link #removeTransportModeTransform},
+     * unprotected traffic can resume on that socket.
+     *
+     * <p>For security reasons, the destination address of any traffic on the socket must match the
+     * remote {@code  InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
+     * other IP address will result in an IOException. In addition, reads and writes on the socket
+     * will throw IOException if the user deactivates the transform (by calling {@link
+     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
+     *
+     * <h4>Rekey Procedure</h4> <p>When applying a new tranform to a socket, the previous transform
+     * will be removed. However, inbound traffic on the old transform will continue to be decrypted
+     * until that transform is deallocated by calling {@link IpSecTransform#close()}. This overlap
+     * allows rekey procedures where both transforms are valid until both endpoints are using the
+     * new transform and all in-flight packets have been received.
      *
      * @param socket a stream socket
-     * @param transform an {@link IpSecTransform}, which must be an active Transport Mode transform.
+     * @param transform a transport mode {@code IpSecTransform}
+     * @throws IOException indicating that the transform could not be applied
      * @hide
      */
     public void applyTransportModeTransform(Socket socket, IpSecTransform transform)
@@ -265,16 +297,28 @@ public final class IpSecManager {
     }
 
     /**
-     * Apply an active Transport Mode IPsec Transform to a datagram socket to perform IPsec
-     * encapsulation of the traffic flowing between the socket and the remote InetAddress of that
-     * transform. For security reasons, attempts to send traffic to any IP address other than the
-     * address associated with that transform will throw an IOException. In addition, if the
-     * IpSecTransform is later deactivated, the socket will throw an IOException on any calls to
-     * send() or receive() until the transform is removed from the socket by calling {@link
-     * #removeTransportModeTransform(DatagramSocket, IpSecTransform)};
+     * Apply an IPsec transform to a datagram socket.
+     *
+     * <p>This applies transport mode encapsulation to the given socket. Once applied, I/O on the
+     * socket will be encapsulated according to the parameters of the {@code IpSecTransform}. When
+     * the transform is removed from the socket by calling {@link #removeTransportModeTransform},
+     * unprotected traffic can resume on that socket.
+     *
+     * <p>For security reasons, the destination address of any traffic on the socket must match the
+     * remote {@code InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
+     * other IP address will result in an IOException. In addition, reads and writes on the socket
+     * will throw IOException if the user deactivates the transform (by calling {@link
+     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
+     *
+     * <h4>Rekey Procedure</h4> <p>When applying a new tranform to a socket, the previous transform
+     * will be removed. However, inbound traffic on the old transform will continue to be decrypted
+     * until that transform is deallocated by calling {@link IpSecTransform#close()}. This overlap
+     * allows rekey procedures where both transforms are valid until both endpoints are using the
+     * new transform and all in-flight packets have been received.
      *
      * @param socket a datagram socket
-     * @param transform an {@link IpSecTransform}, which must be an active Transport Mode transform.
+     * @param transform a transport mode {@code IpSecTransform}
+     * @throws IOException indicating that the transform could not be applied
      * @hide
      */
     public void applyTransportModeTransform(DatagramSocket socket, IpSecTransform transform)
@@ -285,16 +329,28 @@ public final class IpSecManager {
     }
 
     /**
-     * Apply an active Transport Mode IPsec Transform to a stream socket to perform IPsec
-     * encapsulation of the traffic flowing between the socket and the remote InetAddress of that
-     * transform. For security reasons, attempts to send traffic to any IP address other than the
-     * address associated with that transform will throw an IOException. In addition, if the
-     * IpSecTransform is later deactivated, the socket will throw an IOException on any calls to
-     * send() or receive() until the transform is removed from the socket by calling {@link
-     * #removeTransportModeTransform(FileDescriptor, IpSecTransform)};
+     * Apply an IPsec transform to a socket.
+     *
+     * <p>This applies transport mode encapsulation to the given socket. Once applied, I/O on the
+     * socket will be encapsulated according to the parameters of the {@code IpSecTransform}. When
+     * the transform is removed from the socket by calling {@link #removeTransportModeTransform},
+     * unprotected traffic can resume on that socket.
+     *
+     * <p>For security reasons, the destination address of any traffic on the socket must match the
+     * remote {@code InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
+     * other IP address will result in an IOException. In addition, reads and writes on the socket
+     * will throw IOException if the user deactivates the transform (by calling {@link
+     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
+     *
+     * <h4>Rekey Procedure</h4> <p>When applying a new tranform to a socket, the previous transform
+     * will be removed. However, inbound traffic on the old transform will continue to be decrypted
+     * until that transform is deallocated by calling {@link IpSecTransform#close()}. This overlap
+     * allows rekey procedures where both transforms are valid until both endpoints are using the
+     * new transform and all in-flight packets have been received.
      *
      * @param socket a socket file descriptor
-     * @param transform an {@link IpSecTransform}, which must be an active Transport Mode transform.
+     * @param transform a transport mode {@code IpSecTransform}
+     * @throws IOException indicating that the transform could not be applied
      */
     public void applyTransportModeTransform(FileDescriptor socket, IpSecTransform transform)
             throws IOException {
@@ -323,6 +379,7 @@ public final class IpSecManager {
      * Applications should probably not use this API directly. Instead, they should use {@link
      * VpnService} to provide VPN capability in a more generic fashion.
      *
+     * TODO: Update javadoc for tunnel mode APIs at the same time the APIs are re-worked.
      * @param net a {@link Network} that will be tunneled via IP Sec.
      * @param transform an {@link IpSecTransform}, which must be an active Tunnel Mode transform.
      * @hide
@@ -330,14 +387,19 @@ public final class IpSecManager {
     public void applyTunnelModeTransform(Network net, IpSecTransform transform) {}
 
     /**
-     * Remove a transform from a given stream socket. Once removed, traffic on the socket will not
-     * be encypted. This allows sockets that have been used for IPsec to be reclaimed for
-     * communication in the clear in the event socket reuse is desired. This operation will succeed
-     * regardless of the underlying state of a transform. If a transform is removed, communication
-     * on all sockets to which that transform was applied will fail until this method is called.
+     * Remove an IPsec transform from a stream socket.
      *
-     * @param socket a socket that previously had a transform applied to it.
+     * <p>Once removed, traffic on the socket will not be encrypted. This operation will succeed
+     * regardless of the state of the transform. Removing a transform from a socket allows the
+     * socket to be reused for communication in the clear.
+     *
+     * <p>If an {@code IpSecTransform} object applied to this socket was deallocated by calling
+     * {@link IpSecTransform#close()}, then communication on the socket will fail until this method
+     * is called.
+     *
+     * @param socket a socket that previously had a transform applied to it
      * @param transform the IPsec Transform that was previously applied to the given socket
+     * @throws IOException indicating that the transform could not be removed from the socket
      * @hide
      */
     public void removeTransportModeTransform(Socket socket, IpSecTransform transform)
@@ -348,14 +410,19 @@ public final class IpSecManager {
     }
 
     /**
-     * Remove a transform from a given datagram socket. Once removed, traffic on the socket will not
-     * be encypted. This allows sockets that have been used for IPsec to be reclaimed for
-     * communication in the clear in the event socket reuse is desired. This operation will succeed
-     * regardless of the underlying state of a transform. If a transform is removed, communication
-     * on all sockets to which that transform was applied will fail until this method is called.
+     * Remove an IPsec transform from a datagram socket.
      *
-     * @param socket a socket that previously had a transform applied to it.
+     * <p>Once removed, traffic on the socket will not be encrypted. This operation will succeed
+     * regardless of the state of the transform. Removing a transform from a socket allows the
+     * socket to be reused for communication in the clear.
+     *
+     * <p>If an {@code IpSecTransform} object applied to this socket was deallocated by calling
+     * {@link IpSecTransform#close()}, then communication on the socket will fail until this method
+     * is called.
+     *
+     * @param socket a socket that previously had a transform applied to it
      * @param transform the IPsec Transform that was previously applied to the given socket
+     * @throws IOException indicating that the transform could not be removed from the socket
      * @hide
      */
     public void removeTransportModeTransform(DatagramSocket socket, IpSecTransform transform)
@@ -366,14 +433,19 @@ public final class IpSecManager {
     }
 
     /**
-     * Remove a transform from a given stream socket. Once removed, traffic on the socket will not
-     * be encypted. This allows sockets that have been used for IPsec to be reclaimed for
-     * communication in the clear in the event socket reuse is desired. This operation will succeed
-     * regardless of the underlying state of a transform. If a transform is removed, communication
-     * on all sockets to which that transform was applied will fail until this method is called.
+     * Remove an IPsec transform from a socket.
      *
-     * @param socket a socket file descriptor that previously had a transform applied to it.
+     * <p>Once removed, traffic on the socket will not be encrypted. This operation will succeed
+     * regardless of the state of the transform. Removing a transform from a socket allows the
+     * socket to be reused for communication in the clear.
+     *
+     * <p>If an {@code IpSecTransform} object applied to this socket was deallocated by calling
+     * {@link IpSecTransform#close()}, then communication on the socket will fail until this method
+     * is called.
+     *
+     * @param socket a socket that previously had a transform applied to it
      * @param transform the IPsec Transform that was previously applied to the given socket
+     * @throws IOException indicating that the transform could not be removed from the socket
      */
     public void removeTransportModeTransform(FileDescriptor socket, IpSecTransform transform)
             throws IOException {
@@ -382,7 +454,7 @@ public final class IpSecManager {
         }
     }
 
-    /* Call down to activate a transform */
+    /* Call down to remove a transform */
     private void removeTransportModeTransform(ParcelFileDescriptor pfd, IpSecTransform transform) {
         try {
             mService.removeTransportModeTransform(pfd, transform.getResourceId());
@@ -397,6 +469,7 @@ public final class IpSecManager {
      * all traffic that cannot be routed to the Tunnel's outbound interface. If that interface is
      * lost, all traffic will drop.
      *
+     * TODO: Update javadoc for tunnel mode APIs at the same time the APIs are re-worked.
      * @param net a network that currently has transform applied to it.
      * @param transform a Tunnel Mode IPsec Transform that has been previously applied to the given
      *     network
@@ -405,11 +478,18 @@ public final class IpSecManager {
     public void removeTunnelModeTransform(Network net, IpSecTransform transform) {}
 
     /**
-     * Class providing access to a system-provided UDP Encapsulation Socket, which may be used for
-     * IKE signalling as well as for inbound and outbound UDP encapsulated IPsec traffic.
+     * This class provides access to a UDP encapsulation Socket.
      *
-     * <p>The socket provided by this class cannot be re-bound or closed via the inner
-     * FileDescriptor. Instead, disposing of this socket requires a call to close().
+     * <p>{@code UdpEncapsulationSocket} wraps a system-provided datagram socket intended for IKEv2
+     * signalling and UDP encapsulated IPsec traffic. Instances can be obtained by calling {@link
+     * IpSecManager#openUdpEncapsulationSocket}. The provided socket cannot be re-bound by the
+     * caller. The caller should not close the {@code FileDescriptor} returned by {@link
+     * #getSocket}, but should use {@link #close} instead.
+     *
+     * <p>Allowing the user to close or unbind a UDP encapsulation socket could impact the traffic
+     * of the next user who binds to that port. To prevent this scenario, these sockets are held
+     * open by the system so that they may only be closed by calling {@link #close} or when the user
+     * process exits.
      */
     public static final class UdpEncapsulationSocket implements AutoCloseable {
         private final ParcelFileDescriptor mPfd;
@@ -443,7 +523,7 @@ public final class IpSecManager {
             mCloseGuard.open("constructor");
         }
 
-        /** Access the inner UDP Encapsulation Socket */
+        /** Get the wrapped socket. */
         public FileDescriptor getSocket() {
             if (mPfd == null) {
                 return null;
@@ -451,22 +531,19 @@ public final class IpSecManager {
             return mPfd.getFileDescriptor();
         }
 
-        /** Retrieve the port number of the inner encapsulation socket */
+        /** Get the bound port of the wrapped socket. */
         public int getPort() {
             return mPort;
         }
 
-        @Override
         /**
-         * Release the resources that have been reserved for this Socket.
+         * Close this socket.
          *
-         * <p>This method closes the underlying socket, reducing a user's allocated sockets in the
-         * system. This must be done as part of cleanup following use of a socket. Failure to do so
-         * will cause the socket to count against a total allocation limit for IpSec and eventually
-         * fail due to resource limits.
-         *
-         * @param fd a file descriptor previously returned as a UDP Encapsulation socket.
+         * <p>This closes the wrapped socket. Open encapsulation sockets count against a user's
+         * resource limits, and forgetting to close them eventually will result in {@link
+         * ResourceUnavailableException} being thrown.
          */
+        @Override
         public void close() throws IOException {
             try {
                 mService.closeUdpEncapsulationSocket(mResourceId);
@@ -483,6 +560,7 @@ public final class IpSecManager {
             mCloseGuard.close();
         }
 
+        /** Check that the socket was closed properly. */
         @Override
         protected void finalize() throws Throwable {
             if (mCloseGuard != null) {
@@ -499,21 +577,14 @@ public final class IpSecManager {
     };
 
     /**
-     * Open a socket that is bound to a free UDP port on the system.
+     * Open a socket for UDP encapsulation and bind to the given port.
      *
-     * <p>By binding in this manner and holding the FileDescriptor, the socket cannot be un-bound by
-     * the caller. This provides safe access to a socket on a port that can later be used as a UDP
-     * Encapsulation port.
+     * <p>See {@link UdpEncapsulationSocket} for the proper way to close the returned socket.
      *
-     * <p>This socket reservation works in conjunction with IpSecTransforms, which may re-use the
-     * socket port. Explicitly opening this port is only necessary if communication is desired on
-     * that port.
-     *
-     * @param port a local UDP port to be reserved for UDP Encapsulation. is provided, then this
-     *     method will bind to the specified port or fail. To retrieve the port number, call {@link
-     *     android.system.Os#getsockname(FileDescriptor)}.
-     * @return a {@link UdpEncapsulationSocket} that is bound to the requested port for the lifetime
-     *     of the object.
+     * @param port a local UDP port
+     * @return a socket that is bound to the given port
+     * @throws IOException indicating that the socket could not be opened or bound
+     * @throws ResourceUnavailableException indicating that too many encapsulation sockets are open
      */
     // Returning a socket in this fashion that has been created and bound by the system
     // is the only safe way to ensure that a socket is both accessible to the user and
@@ -533,17 +604,16 @@ public final class IpSecManager {
     }
 
     /**
-     * Open a socket that is bound to a port selected by the system.
+     * Open a socket for UDP encapsulation.
      *
-     * <p>By binding in this manner and holding the FileDescriptor, the socket cannot be un-bound by
-     * the caller. This provides safe access to a socket on a port that can later be used as a UDP
-     * Encapsulation port.
+     * <p>See {@link UdpEncapsulationSocket} for the proper way to close the returned socket.
      *
-     * <p>This socket reservation works in conjunction with IpSecTransforms, which may re-use the
-     * socket port. Explicitly opening this port is only necessary if communication is desired on
-     * that port.
+     * <p>The local port of the returned socket can be obtained by calling {@link
+     * UdpEncapsulationSocket#getPort()}.
      *
-     * @return a {@link UdpEncapsulationSocket} that is bound to an arbitrarily selected port
+     * @return a socket that is bound to a local port
+     * @throws IOException indicating that the socket could not be opened or bound
+     * @throws ResourceUnavailableException indicating that too many encapsulation sockets are open
      */
     // Returning a socket in this fashion that has been created and bound by the system
     // is the only safe way to ensure that a socket is both accessible to the user and
@@ -556,7 +626,7 @@ public final class IpSecManager {
     }
 
     /**
-     * Retrieve an instance of an IpSecManager within you application context
+     * Construct an instance of IpSecManager within an application context.
      *
      * @param context the application context for this manager
      * @hide
