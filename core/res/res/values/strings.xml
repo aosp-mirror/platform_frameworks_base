@@ -212,6 +212,21 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at System &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
 
+    <!-- Telephony notification channel name for a channel containing network alert notifications. -->
+    <string name="notification_channel_network_alert">Alerts</string>
+    <!-- Telephony notification channel name for a channel containing call forwarding notifications. -->
+    <string name="notification_channel_call_forward">Call forwarding</string>
+    <!-- Telephony notification channel name for a channel containing emergency callback mode notifications. -->
+    <string name="notification_channel_emergency_callback">Emergency callback mode</string>
+    <!-- Telephony notification channel name for a channel containing mobile data alert notifications. -->
+    <string name="notification_channel_mobile_data_alert">Mobile data alerts</string>
+    <!-- Telephony notification channel name for a channel containing sms notifications. -->
+    <string name="notification_channel_sms">SMS messages</string>
+    <!-- Telephony notification channel name for a channel containing voice mail notifications. -->
+    <string name="notification_channel_voice_mail">Voicemail messages</string>
+    <!-- Telephony notification channel name for a channel containing wifi calling status notifications. -->
+    <string name="notification_channel_wfc">Wi-Fi calling</string>
+
     <!-- Displayed to tell the user that peer changed TTY mode -->
     <string name="peerTtyModeFull">Peer requested TTY Mode FULL</string>
     <string name="peerTtyModeHco">Peer requested TTY Mode HCO</string>
