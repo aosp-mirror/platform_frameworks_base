@@ -495,7 +495,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"consultar el contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permite que la aplicación lea el contenido del almacenamiento USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permite que la aplicación lea el contenido de la tarjeta SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"editar o borrar contenido de USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"editar o borrar contenido de almacenamiento USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modificar o eliminar el contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite escribir en el almacenamiento USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite que la aplicación escriba en la tarjeta SD."</string>
