@@ -20,6 +20,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 
 /**
@@ -36,11 +37,13 @@ public class TestAccessPointBuilder {
 
     // set some sensible defaults
     private int mRssi = AccessPoint.UNREACHABLE_RSSI;
-    private int networkId = WifiConfiguration.INVALID_NETWORK_ID;
+    private int mNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
     private String ssid = "TestSsid";
     private NetworkInfo mNetworkInfo = null;
     private String mFqdn = null;
     private String mProviderFriendlyName = null;
+    private WifiConfiguration mWifiConfig;
+    private WifiInfo mWifiInfo;
 
     Context mContext;
 
@@ -51,12 +54,13 @@ public class TestAccessPointBuilder {
     public AccessPoint build() {
         Bundle bundle = new Bundle();
 
-        WifiConfiguration wifiConig = new WifiConfiguration();
-        wifiConig.networkId = networkId;
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.networkId = mNetworkId;
 
         bundle.putString(AccessPoint.KEY_SSID, ssid);
-        bundle.putParcelable(AccessPoint.KEY_CONFIG, wifiConig);
+        bundle.putParcelable(AccessPoint.KEY_CONFIG, wifiConfig);
         bundle.putParcelable(AccessPoint.KEY_NETWORKINFO, mNetworkInfo);
+        bundle.putParcelable(AccessPoint.KEY_WIFIINFO, mWifiInfo);
         if (mFqdn != null) {
             bundle.putString(AccessPoint.KEY_FQDN, mFqdn);
         }
@@ -81,17 +85,12 @@ public class TestAccessPointBuilder {
         return this;
     }
 
-    public TestAccessPointBuilder setRssi(int rssi) {
-        mRssi = rssi;
-        return this;
-    }
-
     /**
-    * Set the rssi based upon the desired signal level.
+     * Set the rssi based upon the desired signal level.
      *
-    * <p>Side effect: if this AccessPoint was previously unreachable,
-    * setting the level will also make it reachable.
-    */
+     * <p>Side effect: if this AccessPoint was previously unreachable,
+     * setting the level will also make it reachable.
+     */
     public TestAccessPointBuilder setLevel(int level) {
         // Reversal of WifiManager.calculateSignalLevels
         if (level == 0) {
@@ -103,6 +102,16 @@ public class TestAccessPointBuilder {
             float outputRange = AccessPoint.SIGNAL_LEVELS - 1;
             mRssi = (int) (level * inputRange / outputRange + MIN_RSSI);
         }
+        return this;
+    }
+
+    public TestAccessPointBuilder setNetworkInfo(NetworkInfo info) {
+        mNetworkInfo = info;
+        return this;
+    }
+
+    public TestAccessPointBuilder setRssi(int rssi) {
+        mRssi = rssi;
         return this;
     }
 
@@ -125,9 +134,9 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setSaved(boolean saved){
         if (saved) {
-             networkId = 1;
+             mNetworkId = 1;
         } else {
-             networkId = WifiConfiguration.INVALID_NETWORK_ID;
+             mNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
         }
         return this;
     }
@@ -144,6 +153,22 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setProviderFriendlyName(String friendlyName) {
         mProviderFriendlyName = friendlyName;
+        return this;
+    }
+
+    public TestAccessPointBuilder setWifiInfo(WifiInfo info) {
+        mWifiInfo = info;
+        return this;
+    }
+
+    /**
+     * Set the networkId in the WifiConfig.
+     *
+     * <p>Setting this to a value other than {@link WifiConfiguration#INVALID_NETWORK_ID} makes this
+     * AccessPoint a saved network.
+     */
+    public TestAccessPointBuilder setNetworkId(int networkId) {
+        mNetworkId = networkId;
         return this;
     }
 }
