@@ -19121,6 +19121,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case android.security.KeyChain.ACTION_TRUST_STORE_CHANGED:
                     mHandler.sendEmptyMessage(HANDLE_TRUST_STORAGE_UPDATE_MSG);
                     break;
+                case "com.android.launcher.action.INSTALL_SHORTCUT":
+                    // As of O, we no longer support this broadcasts, even for pre-O apps.
+                    // Apps should now be using ShortcutManager.pinRequestShortcut().
+                    Log.w(TAG, "Broadcast " + action
+                            + " no longer supported. It will not be delivered.");
+                    return ActivityManager.BROADCAST_SUCCESS;
             }
 
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
