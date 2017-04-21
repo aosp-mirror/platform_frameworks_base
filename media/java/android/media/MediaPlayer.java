@@ -1010,6 +1010,8 @@ public class MediaPlayer extends PlayerBase
      *                The headers must not include cookies. Instead, use the cookies param.
      * @param cookies the cookies to be sent together with the request
      * @throws IllegalStateException if it is called in an invalid state
+     * @throws NullPointerException  if context or uri is null
+     * @throws IOException           if uri has a file scheme and an I/O error occurs
      *
      * <p><strong>Note</strong> that the cross domain redirection is allowed by default,
      * but that can be changed with key/value pairs through the headers parameter with
@@ -1018,7 +1020,15 @@ public class MediaPlayer extends PlayerBase
      */
     public void setDataSource(@NonNull Context context, @NonNull Uri uri,
             @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+            throws IOException {
+        if (context == null) {
+            throw new NullPointerException("context param can not be null.");
+        }
+
+        if (uri == null) {
+            throw new NullPointerException("uri param can not be null.");
+        }
+
         // The context and URI usually belong to the calling user. Get a resolver for that user
         // and strip out the userId from the URI if present.
         final ContentResolver resolver = context.getContentResolver();
@@ -4624,13 +4634,25 @@ public class MediaPlayer extends PlayerBase
         }   // synchronized
     }
 
+    /**
+     * Encapsulates the DRM properties of the source.
+     */
     public static final class DrmInfo {
         private Map<UUID, byte[]> mapPssh;
         private UUID[] supportedSchemes;
 
+        /**
+         * Returns the PSSH info of the data source for each supported DRM scheme.
+         */
         public Map<UUID, byte[]> getPssh() {
             return mapPssh;
         }
+
+        /**
+         * Returns the intersection of the data source and the device DRM schemes.
+         * It effectively identifies the subset of the source's DRM schemes which
+         * are supported by the device too.
+         */
         public UUID[] getSupportedSchemes() {
             return supportedSchemes;
         }
