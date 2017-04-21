@@ -172,7 +172,7 @@ public class IPv6TetheringCoordinator {
         final Downstream ds = findDownstream(sm);
         if (ds == null) return null;
 
-        if (ds.mode == IControlsTethering.STATE_LOCAL_HOTSPOT) {
+        if (ds.mode == IControlsTethering.STATE_LOCAL_ONLY) {
             // Build a Unique Locally-assigned Prefix configuration.
             return getUniqueLocalConfig(mUniqueLocalPrefix, ds.subnetId);
         }
