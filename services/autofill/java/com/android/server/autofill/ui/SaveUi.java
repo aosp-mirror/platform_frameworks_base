@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.os.Handler;
 import android.service.autofill.SaveInfo;
+import android.text.Html;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Gravity;
@@ -125,23 +126,24 @@ final class SaveUi {
             types.add(context.getString(R.string.autofill_save_type_email_address));
         }
 
-        final String title;
+        final CharSequence title;
         switch (types.size()) {
             case 1:
-                title = context.getString(R.string.autofill_save_title_with_type,
-                        types.valueAt(0), providerLabel);
+                title = Html.fromHtml(context.getString(R.string.autofill_save_title_with_type,
+                        types.valueAt(0), providerLabel), 0);
                 break;
             case 2:
-                title = context.getString(R.string.autofill_save_title_with_2types,
-                        types.valueAt(0), types.valueAt(1), providerLabel);
+                title = Html.fromHtml(context.getString(R.string.autofill_save_title_with_2types,
+                        types.valueAt(0), types.valueAt(1), providerLabel), 0);
                 break;
             case 3:
-                title = context.getString(R.string.autofill_save_title_with_3types,
-                        types.valueAt(0), types.valueAt(1), types.valueAt(2), providerLabel);
+                title = Html.fromHtml(context.getString(R.string.autofill_save_title_with_3types,
+                        types.valueAt(0), types.valueAt(1), types.valueAt(2), providerLabel), 0);
                 break;
             default:
                 // Use generic if more than 3 or invalid type (size 0).
-                title = context.getString(R.string.autofill_save_title, providerLabel);
+                title = Html.fromHtml(
+                        context.getString(R.string.autofill_save_title, providerLabel), 0);
         }
 
         titleView.setText(title);
