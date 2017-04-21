@@ -35,6 +35,9 @@ public final class FontRequest implements Parcelable {
     private final String mQuery;
     private final List<List<byte[]>> mCertificates;
 
+    // Used for key of the cache.
+    private final String mIdentifier;
+
     /**
      * @param providerAuthority The authority of the Font Provider to be used for the request. This
      *         should be a system installed app.
@@ -49,6 +52,8 @@ public final class FontRequest implements Parcelable {
         mQuery = Preconditions.checkNotNull(query);
         mProviderPackage = Preconditions.checkNotNull(providerPackage);
         mCertificates = Collections.emptyList();
+        mIdentifier = new StringBuilder(mProviderAuthority).append("-").append(mProviderPackage)
+                .append("-").append(mQuery).toString();
     }
 
     /**
@@ -68,6 +73,8 @@ public final class FontRequest implements Parcelable {
         mProviderPackage = Preconditions.checkNotNull(providerPackage);
         mQuery = Preconditions.checkNotNull(query);
         mCertificates = Preconditions.checkNotNull(certificates);
+        mIdentifier = new StringBuilder(mProviderAuthority).append("-").append(mProviderPackage)
+                .append("-").append(mQuery).toString();
     }
 
     /**
@@ -102,6 +109,11 @@ public final class FontRequest implements Parcelable {
         return mCertificates;
     }
 
+    /** @hide */
+    public String getIdentifier() {
+        return mIdentifier;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -121,6 +133,8 @@ public final class FontRequest implements Parcelable {
         mQuery = in.readString();
         mCertificates = new ArrayList<>();
         in.readList(mCertificates, null);
+        mIdentifier = new StringBuilder(mProviderAuthority).append("-").append(mProviderPackage)
+                .append("-").append(mQuery).toString();
     }
 
     public static final Parcelable.Creator<FontRequest> CREATOR =
