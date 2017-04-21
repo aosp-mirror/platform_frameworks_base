@@ -362,11 +362,19 @@ public abstract class ViewStructure {
     public abstract AutofillId getAutofillId();
 
     /**
-     * Sets the URL represented by this node.
+     * @deprecated - use {@link #setWebDomain(String)} instead.
+     */
+    @Deprecated
+    public abstract void setUrl(String url);
+
+    /**
+     * Sets the Web domain represented by this node.
      *
      * <p>Typically used when the view is a container for an HTML document.
+     *
+     * @param domain URL representing the domain; only the host part will be used.
      */
-    public abstract void setUrl(String url);
+    public abstract void setWebDomain(@Nullable String domain);
 
     /**
      * Sets the the list of locales associated with this node.
