@@ -145,8 +145,10 @@ public class NotificationManager
             = "android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL";
 
     /** @hide */
-    @IntDef({INTERRUPTION_FILTER_NONE, INTERRUPTION_FILTER_PRIORITY, INTERRUPTION_FILTER_ALARMS,
-            INTERRUPTION_FILTER_ALL, INTERRUPTION_FILTER_UNKNOWN})
+    @IntDef(prefix = { "INTERRUPTION_FILTER_" }, value = {
+            INTERRUPTION_FILTER_NONE, INTERRUPTION_FILTER_PRIORITY, INTERRUPTION_FILTER_ALARMS,
+            INTERRUPTION_FILTER_ALL, INTERRUPTION_FILTER_UNKNOWN
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InterruptionFilter {}
 
@@ -186,8 +188,10 @@ public class NotificationManager
     public static final int INTERRUPTION_FILTER_UNKNOWN = 0;
 
     /** @hide */
-    @IntDef({IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
-            IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH})
+    @IntDef(prefix = { "IMPORTANCE_" }, value = {
+            IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
+            IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Importance {}
 
@@ -717,9 +721,8 @@ public class NotificationManager
     }
 
     /**
-     * Returns the user specified importance for notifications from the calling package.
-     *
-     * @return An importance level, such as {@link #IMPORTANCE_DEFAULT}.
+     * Returns the user specified importance for notifications from the calling
+     * package.
      */
     public @Importance int getImportance() {
         INotificationManager service = getService();
@@ -1095,12 +1098,10 @@ public class NotificationManager
 
     /**
      * Gets the current notification interruption filter.
-     *
      * <p>
-     * The interruption filter defines which notifications are allowed to interrupt the user
-     * (e.g. via sound &amp; vibration) and is applied globally.
-     * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
-     * unavailable.
+     * The interruption filter defines which notifications are allowed to
+     * interrupt the user (e.g. via sound &amp; vibration) and is applied
+     * globally.
      */
     public final @InterruptionFilter int getCurrentInterruptionFilter() {
         final INotificationManager service = getService();
@@ -1113,18 +1114,15 @@ public class NotificationManager
 
     /**
      * Sets the current notification interruption filter.
-     *
      * <p>
-     * The interruption filter defines which notifications are allowed to interrupt the user
-     * (e.g. via sound &amp; vibration) and is applied globally.
-     * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
-     * unavailable.
-     *
+     * The interruption filter defines which notifications are allowed to
+     * interrupt the user (e.g. via sound &amp; vibration) and is applied
+     * globally.
      * <p>
-     * Only available if policy access is granted to this package.
-     * See {@link #isNotificationPolicyAccessGranted}.
+     * Only available if policy access is granted to this package. See
+     * {@link #isNotificationPolicyAccessGranted}.
      */
-    public final void setInterruptionFilter(int interruptionFilter) {
+    public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
         final INotificationManager service = getService();
         try {
             service.setInterruptionFilter(mContext.getOpPackageName(), interruptionFilter);
