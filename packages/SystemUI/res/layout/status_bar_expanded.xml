@@ -55,6 +55,8 @@
             android:layout_gravity="@integer/notification_panel_layout_gravity"
             android:layout_marginBottom="@dimen/close_handle_underlap" />
 
+        <include layout="@layout/ambient_indication" />
+
         <ViewStub
             android:id="@+id/keyguard_user_switcher"
             android:layout="@layout/keyguard_user_switcher"

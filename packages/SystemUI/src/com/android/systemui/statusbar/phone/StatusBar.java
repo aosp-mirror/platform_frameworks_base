@@ -6138,6 +6138,10 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Called when the notification panel layouts
      */
     public void onPanelLaidOut() {
+        updateKeyguardMaxNotifications();
+    }
+
+    public void updateKeyguardMaxNotifications() {
         if (mState == StatusBarState.KEYGUARD) {
             // Since the number of notifications is determined based on the height of the view, we
             // need to update them.
@@ -6891,6 +6895,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mAssistManager != null) {
             mAssistManager.showDisclosure();
         }
+    }
+
+    public NotificationPanelView getPanel() {
+        return mNotificationPanel;
     }
 
     @Override
