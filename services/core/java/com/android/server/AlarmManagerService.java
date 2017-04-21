@@ -1276,6 +1276,11 @@ class AlarmManagerService extends SystemService {
                     mAllowWhileIdleDispatches.add(ent);
                 }
             }
+            if ((mPendingIdleUntil != a) && (mPendingIdleUntil != null)) {
+                Slog.wtfStack(TAG, "setImplLocked: idle until changed from " + mPendingIdleUntil
+                        + " to " + a);
+            }
+
             mPendingIdleUntil = a;
             mConstants.updateAllowWhileIdleMinTimeLocked();
             needRebatch = true;
