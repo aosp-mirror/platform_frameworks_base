@@ -1266,6 +1266,11 @@
             <meta-data android:name="com.android.frameworks.coretests.reference" android:resource="@xml/metadata" />
         </provider>
 
+        <provider android:name="android.provider.MockFontProvider"
+                  android:authorities="android.provider.fonts.font"
+                  android:exported="false"
+                  android:multiprocess="true" />
+
         <!-- Application components used for content tests -->
         <provider android:name="android.content.MemoryFileProvider"
                 android:authorities="android.content.MemoryFileProvider"
