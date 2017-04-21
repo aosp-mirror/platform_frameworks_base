@@ -1484,8 +1484,8 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Return the maximum LE advertising data length,
-     * if LE Extended Advertising feature is supported.
+     * Return the maximum LE advertising data length in bytes,
+     * if LE Extended Advertising feature is supported, 0 otherwise.
      *
      * @return the maximum LE advertising data length.
      */
