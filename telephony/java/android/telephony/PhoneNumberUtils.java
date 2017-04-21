@@ -3093,34 +3093,20 @@ public class PhoneNumberUtils
     /*
      * The config held calling number conversion map, expected to convert to emergency number.
      */
-    private static final String[] CONVERT_TO_EMERGENCY_MAP = Resources.getSystem().getStringArray(
-            com.android.internal.R.array.config_convert_to_emergency_number_map);
-    /**
-     * Check whether conversion to emergency number is enabled
-     *
-     * @return {@code true} when conversion to emergency numbers is enabled,
-     *         {@code false} otherwise
-     *
-     * @hide
-     */
-    public static boolean isConvertToEmergencyNumberEnabled() {
-        return CONVERT_TO_EMERGENCY_MAP != null && CONVERT_TO_EMERGENCY_MAP.length > 0;
-    }
+    private static String[] sConvertToEmergencyMap = null;
 
     /**
      * Converts to emergency number based on the conversion map.
      * The conversion map is declared as config_convert_to_emergency_number_map.
      *
-     * Make sure {@link #isConvertToEmergencyNumberEnabled} is true before calling
-     * this function.
-     *
+     * @param context a context to use for accessing resources
      * @return The converted emergency number if the number matches conversion map,
      * otherwise original number.
      *
      * @hide
      */
-    public static String convertToEmergencyNumber(String number) {
-        if (TextUtils.isEmpty(number)) {
+    public static String convertToEmergencyNumber(Context context, String number) {
+        if (context == null || TextUtils.isEmpty(number)) {
             return number;
         }
 
@@ -3131,7 +3117,17 @@ public class PhoneNumberUtils
             return number;
         }
 
-        for (String convertMap : CONVERT_TO_EMERGENCY_MAP) {
+        if (sConvertToEmergencyMap == null) {
+            sConvertToEmergencyMap = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_convert_to_emergency_number_map);
+        }
+
+        // The conversion map is not defined (this is default). Skip conversion.
+        if (sConvertToEmergencyMap == null || sConvertToEmergencyMap.length == 0 ) {
+            return number;
+        }
+
+        for (String convertMap : sConvertToEmergencyMap) {
             if (DBG) log("convertToEmergencyNumber: " + convertMap);
             String[] entry = null;
             String[] filterNumbers = null;
