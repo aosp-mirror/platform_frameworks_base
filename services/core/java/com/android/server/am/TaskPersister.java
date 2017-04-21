@@ -435,13 +435,15 @@ public class TaskPersister {
             }
             try {
                 final int taskId = Integer.parseInt(taskFile.getName().substring(
-                        0, taskFile.getName().length() - TASK_FILENAME_SUFFIX.length()));
+                        0 /* beginIndex */,
+                        taskFile.getName().length() - TASK_FILENAME_SUFFIX.length()));
                 if (preaddedTasks.get(taskId, false)) {
-                    Slog.w(TAG, "Task #" + taskId + " has already been created so we don't restore"
-                            + " again");
+                    Slog.w(TAG, "Task #" + taskId +
+                            " has already been created so we don't restore again");
                     continue;
                 }
             } catch (NumberFormatException e) {
+                Slog.w(TAG, "Unexpected task file name", e);
                 continue;
             }
 

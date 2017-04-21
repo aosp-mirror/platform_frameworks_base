@@ -126,7 +126,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         mUsersWithRecentsLoaded.put(userId, true);
 
         // If we have tasks added before loading recents, we need to update persistent task IDs.
-        if (preaddedTasks.size() != 0) {
+        if (preaddedTasks.size() > 0) {
             syncPersistentTaskIdsLocked();
         }
     }
