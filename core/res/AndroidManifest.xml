@@ -122,6 +122,7 @@
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.LOCAL_NAME_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.BLUETOOTH_ADDRESS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.UUID" />
     <protected-broadcast android:name="android.bluetooth.device.action.MAS_INSTANCE" />
