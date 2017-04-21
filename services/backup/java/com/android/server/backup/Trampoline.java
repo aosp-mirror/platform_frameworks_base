@@ -76,28 +76,45 @@ public class Trampoline extends IBackupManager.Stub {
     volatile BackupManagerServiceInterface mService;
 
     public Trampoline(Context context) {
-        this(context,
-                SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false),
-                new File(new File(Environment.getDataDirectory(), "backup"),
-                        BACKUP_SUPPRESS_FILENAME));
-    }
-
-    protected Trampoline(Context context, boolean globalDisable, File suppressFile) {
         mContext = context;
-        mGlobalDisable = globalDisable;
-        mSuppressFile = suppressFile;
+        mGlobalDisable = isBackupDisabled();
+        mSuppressFile = getSuppressFile();
         mSuppressFile.getParentFile().mkdirs();
     }
 
     protected BackupManagerServiceInterface createService() {
-        boolean refactoredServiceEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-            Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 1) == 0;
-        if (refactoredServiceEnabled) {
+        if (isRefactoredServiceEnabled()) {
             Slog.i(TAG, "Instantiating RefactoredBackupManagerService");
-            return new RefactoredBackupManagerService(mContext, this);
+            return createRefactoredBackupManagerService();
         }
 
         Slog.i(TAG, "Instantiating BackupManagerService");
+        return createBackupManagerService();
+    }
+
+    protected boolean isBackupDisabled() {
+        return SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
+    }
+
+    protected boolean isRefactoredServiceEnabled() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 1) == 0;
+    }
+
+    protected int binderGetCallingUid() {
+        return Binder.getCallingUid();
+    }
+
+    protected File getSuppressFile() {
+        return new File(new File(Environment.getDataDirectory(), "backup"),
+                BACKUP_SUPPRESS_FILENAME);
+    }
+
+    protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
+        return new RefactoredBackupManagerService(mContext, this);
+    }
+
+    protected BackupManagerServiceInterface createBackupManagerService() {
         return new BackupManagerService(mContext, this);
     }
 
@@ -124,7 +141,7 @@ public class Trampoline extends IBackupManager.Stub {
 
     public void setBackupServiceActive(final int userHandle, boolean makeActive) {
         // Only the DPM should be changing the active state of backup
-        final int caller = Binder.getCallingUid();
+        final int caller = binderGetCallingUid();
         if (caller != Process.SYSTEM_UID
                 && caller != Process.ROOT_UID) {
             throw new SecurityException("No permission to configure backup activity");

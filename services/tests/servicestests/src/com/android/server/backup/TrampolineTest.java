@@ -20,12 +20,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.app.Instrumentation;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -33,25 +34,29 @@ import android.app.backup.IFullBackupRestoreObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-// TODO: Tests for createService().
-// TODO: Tests for setBackupServiceActive().
-// TODO: Tests for dump().
+@SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class TrampolineTest {
     private static final String PACKAGE_NAME = "some.package.name";
@@ -71,16 +76,21 @@ public class TrampolineTest {
             new ComponentName("package1", "class1"),
             new ComponentName("package2", "class2")
     };
+    private final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
 
-    @Mock private BackupManagerServiceInterface mBackupManagerServiceMock;
+    @Mock private BackupManagerService mBackupManagerServiceMock;
+    @Mock private RefactoredBackupManagerService mRefactoredBackupManagerServiceMock;
     @Mock private Context mContextMock;
     @Mock private File mSuppressFileMock;
     @Mock private File mSuppressFileParentMock;
     @Mock private IBinder mAgentMock;
-    @Mock private ParcelFileDescriptor mFileDescriptorMock;
+    @Mock private ParcelFileDescriptor mParcelFileDescriptorMock;
     @Mock private IFullBackupRestoreObserver mFullBackupRestoreObserverMock;
     @Mock private IBackupObserver mBackupObserverMock;
     @Mock private IBackupManagerMonitor mBackupManagerMonitorMock;
+    @Mock private PrintWriter mPrintWriterMock;
+
+    private FileDescriptor mFileDescriptorStub = new FileDescriptor();
 
     private TrampolineTestable mTrampoline;
 
@@ -88,14 +98,21 @@ public class TrampolineTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mTrampoline = new TrampolineTestable(mContextMock);
+        TrampolineTestable.sRefactoredBackupManagerServiceMock =
+                mRefactoredBackupManagerServiceMock;
+        TrampolineTestable.sBackupManagerServiceMock = mBackupManagerServiceMock;
+        TrampolineTestable.sSuppressFile = mSuppressFileMock;
+        TrampolineTestable.sCallingUid = Process.SYSTEM_UID;
+        TrampolineTestable.sRefactoredServiceEnabled = false;
+        TrampolineTestable.sBackupDisabled = false;
 
         when(mSuppressFileMock.getParentFile()).thenReturn(mSuppressFileParentMock);
+
+        mTrampoline = new TrampolineTestable(mContextMock);
     }
 
     @Test
     public void constructor_createsSuppressFileDirectory() {
-        new TrampolineTestable(mContextMock, false, mSuppressFileMock);
         verify(mSuppressFileParentMock).mkdirs();
     }
 
@@ -110,16 +127,16 @@ public class TrampolineTest {
     // other user trying to initialize it leaves it non-active.
     @Test
     public void initialize_forNonUserSystem_nonInitialized() {
-        int nonUserSystem = UserHandle.USER_SYSTEM + 1;
-        mTrampoline.initialize(nonUserSystem);
+        mTrampoline.initialize(NON_USER_SYSTEM);
 
-        assertFalse(mTrampoline.isBackupServiceActive(nonUserSystem));
+        assertFalse(mTrampoline.isBackupServiceActive(NON_USER_SYSTEM));
     }
 
     @Test
     public void initialize_globallyDisabled_nonInitialized() {
-        TrampolineTestable trampoline = new TrampolineTestable(mContextMock,
-                true /* globalDisable */, mSuppressFileMock);
+        TrampolineTestable.sBackupDisabled = true;
+
+        TrampolineTestable trampoline = new TrampolineTestable(mContextMock);
         trampoline.initialize(UserHandle.USER_SYSTEM);
 
         assertFalse(trampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
@@ -130,8 +147,7 @@ public class TrampolineTest {
     public void initialize_suppressFileExists_nonInitialized() {
         when(mSuppressFileMock.exists()).thenReturn(true);
 
-        TrampolineTestable trampoline = new TrampolineTestable(mContextMock,
-                false /* globalDisable */, mSuppressFileMock);
+        TrampolineTestable trampoline = new TrampolineTestable(mContextMock);
         trampoline.initialize(UserHandle.USER_SYSTEM);
 
         assertFalse(trampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
@@ -140,6 +156,122 @@ public class TrampolineTest {
     @Test
     public void isBackupServiceActive_calledBeforeInitialize_returnsFalse() {
         assertFalse(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void createService_refactoredServiceEnabled() {
+        TrampolineTestable.sRefactoredServiceEnabled = true;
+
+        assertEquals(mRefactoredBackupManagerServiceMock, mTrampoline.createService());
+    }
+
+    @Test
+    public void createService_refactoredServiceDisabled() {
+        TrampolineTestable.sRefactoredServiceEnabled = false;
+
+        assertEquals(mBackupManagerServiceMock, mTrampoline.createService());
+    }
+
+    @Test
+    public void setBackupServiceActive_callerSystemUid_serviceCreated() {
+        TrampolineTestable.sCallingUid = Process.SYSTEM_UID;
+
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+
+        assertTrue(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void setBackupServiceActive_callerRootUid_serviceCreated() {
+        TrampolineTestable.sCallingUid = Process.ROOT_UID;
+
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+
+        assertTrue(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void setBackupServiceActive_callerNonRootNonSystem_securityExceptionThrown() {
+        TrampolineTestable.sCallingUid = Process.FIRST_APPLICATION_UID;
+
+        try {
+            mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+            fail();
+        } catch (SecurityException expected) {
+        }
+
+        assertFalse(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void setBackupServiceActive_backupDisabled_ignored() {
+        TrampolineTestable.sBackupDisabled = true;
+        TrampolineTestable trampoline = new TrampolineTestable(mContextMock);
+
+        trampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+
+        assertFalse(trampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void setBackupServiceActive_nonUserSystem_ignored() {
+        mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, true);
+
+        assertFalse(mTrampoline.isBackupServiceActive(NON_USER_SYSTEM));
+    }
+
+    @Test
+    public void setBackupServiceActive_alreadyActive_ignored() {
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+        assertTrue(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+        assertEquals(1, mTrampoline.getCreateServiceCallsCount());
+
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+        assertTrue(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+        assertEquals(1, mTrampoline.getCreateServiceCallsCount());
+    }
+
+    @Test
+    public void setBackupServiceActive_makeActive_serviceCreatedAndSuppressFileDeleted() {
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+
+        assertTrue(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+        verify(mSuppressFileMock).delete();
+    }
+
+    @Test
+    public void setBackupServiceActive_makeNonActive_serviceDeletedAndSuppressFileCreated()
+            throws IOException {
+        mTrampoline.initialize(UserHandle.USER_SYSTEM);
+        assertTrue(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, false);
+
+        assertFalse(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+        verify(mSuppressFileMock).createNewFile();
+    }
+
+    @Test
+    public void
+    setBackupServiceActive_makeNonActive_serviceDeletedAndSuppressFileCreated_ioExceptionHandled()
+            throws IOException {
+        when(mSuppressFileMock.createNewFile()).thenThrow(new IOException());
+        mTrampoline.initialize(UserHandle.USER_SYSTEM);
+        assertTrue(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, false);
+
+        assertFalse(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
+        verify(mSuppressFileMock).createNewFile();
+    }
+
+    @Test
+    public void setBackupServiceActive_makeNonActive_alreadyNonActive_ignored() throws IOException {
+        reset(mSuppressFileMock);
+
+        mTrampoline.setBackupServiceActive(UserHandle.USER_SYSTEM, false);
+
+        verifyNoMoreInteractions(mSuppressFileMock);
     }
 
     @Test
@@ -300,7 +432,8 @@ public class TrampolineTest {
 
     @Test
     public void adbBackup_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.adbBackup(mFileDescriptorMock, true, true, true, true, true, true, true, true,
+        mTrampoline.adbBackup(mParcelFileDescriptorMock, true, true, true, true, true, true, true,
+                true,
                 PACKAGE_NAMES);
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
@@ -308,9 +441,11 @@ public class TrampolineTest {
     @Test
     public void adbBackup_forwarded() throws RemoteException {
         mTrampoline.initialize(UserHandle.USER_SYSTEM);
-        mTrampoline.adbBackup(mFileDescriptorMock, true, true, true, true, true, true, true, true,
+        mTrampoline.adbBackup(mParcelFileDescriptorMock, true, true, true, true, true, true, true,
+                true,
                 PACKAGE_NAMES);
-        verify(mBackupManagerServiceMock).adbBackup(mFileDescriptorMock, true, true, true, true,
+        verify(mBackupManagerServiceMock).adbBackup(mParcelFileDescriptorMock, true, true, true,
+                true,
                 true, true, true, true, PACKAGE_NAMES);
     }
 
@@ -329,15 +464,15 @@ public class TrampolineTest {
 
     @Test
     public void adbRestore_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.adbRestore(mFileDescriptorMock);
+        mTrampoline.adbRestore(mParcelFileDescriptorMock);
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
 
     @Test
     public void adbRestore_forwarded() throws RemoteException {
         mTrampoline.initialize(UserHandle.USER_SYSTEM);
-        mTrampoline.adbRestore(mFileDescriptorMock);
-        verify(mBackupManagerServiceMock).adbRestore(mFileDescriptorMock);
+        mTrampoline.adbRestore(mParcelFileDescriptorMock);
+        verify(mBackupManagerServiceMock).adbRestore(mParcelFileDescriptorMock);
     }
 
     @Test
@@ -629,18 +764,94 @@ public class TrampolineTest {
         verify(mBackupManagerServiceMock).endFullBackup();
     }
 
-    private class TrampolineTestable extends Trampoline {
-        public TrampolineTestable(Context context) {
-            super(context);
-        }
+    @Test
+    public void dump_callerDoesNotHavePermission_ignored() throws RemoteException {
+        when(mContextMock.checkCallingOrSelfPermission(
+                android.Manifest.permission.DUMP)).thenReturn(
+                PackageManager.PERMISSION_DENIED);
 
-        public TrampolineTestable(Context context, boolean globalDisable, File suppressFile) {
-            super(context, globalDisable, suppressFile);
+        mTrampoline.initialize(UserHandle.USER_SYSTEM);
+
+        mTrampoline.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
+
+        verifyNoMoreInteractions(mBackupManagerServiceMock);
+    }
+
+    @Test
+    public void dump_calledBeforeInitialize_ignored() throws RemoteException {
+        when(mContextMock.checkCallingOrSelfPermission(
+                android.Manifest.permission.DUMP)).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+
+        mTrampoline.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
+
+        verifyNoMoreInteractions(mBackupManagerServiceMock);
+    }
+
+    @Test
+    public void dump_callerHasPermission_forwarded() throws RemoteException {
+        when(mContextMock.checkCallingOrSelfPermission(
+                android.Manifest.permission.DUMP)).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+
+        mTrampoline.initialize(UserHandle.USER_SYSTEM);
+
+        mTrampoline.dump(mFileDescriptorStub, mPrintWriterMock, null);
+
+        verify(mBackupManagerServiceMock).dump(mFileDescriptorStub, mPrintWriterMock, null);
+    }
+
+    private static class TrampolineTestable extends Trampoline {
+        static boolean sBackupDisabled = false;
+        static boolean sRefactoredServiceEnabled = false;
+        static File sSuppressFile = null;
+        static int sCallingUid = -1;
+        static BackupManagerService sBackupManagerServiceMock = null;
+        static RefactoredBackupManagerService sRefactoredBackupManagerServiceMock = null;
+        private int mCreateServiceCallsCount = 0;
+
+        TrampolineTestable(Context context) {
+            super(context);
         }
 
         @Override
         protected BackupManagerServiceInterface createService() {
-            return mBackupManagerServiceMock;
+            mCreateServiceCallsCount++;
+            return super.createService();
+        }
+
+        @Override
+        public boolean isBackupDisabled() {
+            return sBackupDisabled;
+        }
+
+        @Override
+        public File getSuppressFile() {
+            return sSuppressFile;
+        }
+
+        @Override
+        protected int binderGetCallingUid() {
+            return sCallingUid;
+        }
+
+        @Override
+        protected boolean isRefactoredServiceEnabled() {
+            return sRefactoredServiceEnabled;
+        }
+
+        @Override
+        protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
+            return sRefactoredBackupManagerServiceMock;
+        }
+
+        @Override
+        protected BackupManagerServiceInterface createBackupManagerService() {
+            return sBackupManagerServiceMock;
+        }
+
+        int getCreateServiceCallsCount() {
+            return mCreateServiceCallsCount;
         }
     }
 }
