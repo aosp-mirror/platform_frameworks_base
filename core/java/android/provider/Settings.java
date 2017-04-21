@@ -303,7 +303,7 @@ public final class Settings {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_UNKNOWN_APP_SOURCES =
-            "android.settings.action.MANAGE_UNKNOWN_APP_SOURCES";
+            "android.settings.MANAGE_UNKNOWN_APP_SOURCES";
 
     /**
      * Activity Action: Show trusted credentials settings, opening to the user tab,
