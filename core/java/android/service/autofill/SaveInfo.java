@@ -21,9 +21,7 @@ import static android.view.autofill.Helper.DEBUG;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.assist.AssistStructure;
 import android.content.IntentSender;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DebugUtils;
@@ -154,7 +152,7 @@ public final class SaveInfo implements Parcelable {
     @interface SaveDataType{}
 
     /**
-     * Usually {@link AutofillService#onSaveRequest(AssistStructure, Bundle, SaveCallback)}
+     * Usually {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}
      * is called once the activity finishes. If this flag is set it is called once all saved views
      * become invisible.
      */
@@ -228,8 +226,7 @@ public final class SaveInfo implements Parcelable {
         private final @SaveDataType int mType;
         private CharSequence mNegativeActionTitle;
         private IntentSender mNegativeActionListener;
-        // TODO(b/33197203): make mRequiredIds final once addSavableIds() is gone
-        private AutofillId[] mRequiredIds;
+        private final AutofillId[] mRequiredIds;
         private AutofillId[] mOptionalIds;
         private CharSequence mDescription;
         private boolean mDestroyed;
@@ -251,34 +248,10 @@ public final class SaveInfo implements Parcelable {
          * @throws IllegalArgumentException if {@code requiredIds} is {@code null} or empty.
          */
         public Builder(@SaveDataType int type, @NonNull AutofillId[] requiredIds) {
-            if (false) {// TODO(b/33197203): re-move when clients use it
             Preconditions.checkArgument(requiredIds != null && requiredIds.length > 0,
                     "must have at least one required id: " + Arrays.toString(requiredIds));
-            }
             mType = type;
             mRequiredIds = requiredIds;
-        }
-
-        /**
-         * @hide
-         * @deprecated
-         * // TODO(b/33197203): make sure is removed when clients migrated
-         */
-        @Deprecated
-        public Builder(@SaveDataType int type) {
-            this(type, null);
-        }
-
-        /**
-         * @hide
-         * @deprecated
-         * // TODO(b/33197203): make sure is removed when clients migrated
-         */
-        @Deprecated
-        public @NonNull Builder addSavableIds(@Nullable AutofillId... ids) {
-            throwIfDestroyed();
-            mRequiredIds = ids;
-            return this;
         }
 
         /**
