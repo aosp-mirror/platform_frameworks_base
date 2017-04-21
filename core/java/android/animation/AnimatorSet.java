@@ -1092,6 +1092,14 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 AnimationEvent event = mEvents.get(i);
                 Node node = event.mNode;
                 if (event.mEvent == AnimationEvent.ANIMATION_END) {
+                    if (node.mAnimation.isStarted()) {
+                        // If the animation has already been started before its due time (i.e.
+                        // the child animator is being manipulated outside of the AnimatorSet), we
+                        // need to cancel the animation to reset the internal state (e.g. frame
+                        // time tracking) and remove the self pulsing callbacks
+                        node.mAnimation.cancel();
+                    }
+                    node.mEnded = false;
                     mPlayingSet.add(event.mNode);
                     node.mAnimation.startWithoutPulsing(true);
                     pulseFrame(node, 0);
@@ -1106,6 +1114,14 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 Node node = event.mNode;
                 if (event.mEvent == AnimationEvent.ANIMATION_START) {
                     mPlayingSet.add(event.mNode);
+                    if (node.mAnimation.isStarted()) {
+                        // If the animation has already been started before its due time (i.e.
+                        // the child animator is being manipulated outside of the AnimatorSet), we
+                        // need to cancel the animation to reset the internal state (e.g. frame
+                        // time tracking) and remove the self pulsing callbacks
+                        node.mAnimation.cancel();
+                    }
+                    node.mEnded = false;
                     node.mAnimation.startWithoutPulsing(false);
                     pulseFrame(node, 0);
                 } else if (event.mEvent == AnimationEvent.ANIMATION_END && !node.mEnded) {
