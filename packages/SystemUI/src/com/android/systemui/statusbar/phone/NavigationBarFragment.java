@@ -402,7 +402,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
-        updateAccessibilityServicesState();
+        updateAccessibilityServicesState(mAccessibilityManager);
     }
 
     private boolean onHomeTouch(View v, MotionEvent event) {
@@ -565,7 +565,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         return true;
     }
 
-    private void updateAccessibilityServicesState() {
+    private void updateAccessibilityServicesState(AccessibilityManager accessibilityManager) {
         int requestingServices = 0;
         try {
             if (Settings.Secure.getIntForUser(mContentResolver,
@@ -579,7 +579,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         // AccessibilityManagerService resolves services for the current user since the local
         // AccessibilityManager is created from a Context with the INTERACT_ACROSS_USERS permission
         final List<AccessibilityServiceInfo> services =
-                mAccessibilityManager.getEnabledAccessibilityServiceList(
+                accessibilityManager.getEnabledAccessibilityServiceList(
                         AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
         for (int i = services.size() - 1; i >= 0; --i) {
             AccessibilityServiceInfo info = services.get(i);
@@ -638,7 +638,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         @Override
         public void onChange(boolean selfChange) {
-            NavigationBarFragment.this.updateAccessibilityServicesState();
+            NavigationBarFragment.this.updateAccessibilityServicesState(mAccessibilityManager);
         }
     }
 
