@@ -128,6 +128,38 @@ public final class JobStatus {
     // Set to true if doze constraint was satisfied due to app being whitelisted.
     public boolean dozeWhitelisted;
 
+    /**
+     * Flag for {@link #trackingControllers}: the battery controller is currently tracking this job.
+     */
+    public static final int TRACKING_BATTERY = 1<<0;
+    /**
+     * Flag for {@link #trackingControllers}: the network connectivity controller is currently
+     * tracking this job.
+     */
+    public static final int TRACKING_CONNECTIVITY = 1<<1;
+    /**
+     * Flag for {@link #trackingControllers}: the content observer controller is currently
+     * tracking this job.
+     */
+    public static final int TRACKING_CONTENT = 1<<2;
+    /**
+     * Flag for {@link #trackingControllers}: the idle controller is currently tracking this job.
+     */
+    public static final int TRACKING_IDLE = 1<<3;
+    /**
+     * Flag for {@link #trackingControllers}: the storage controller is currently tracking this job.
+     */
+    public static final int TRACKING_STORAGE = 1<<4;
+    /**
+     * Flag for {@link #trackingControllers}: the time controller is currently tracking this job.
+     */
+    public static final int TRACKING_TIME = 1<<5;
+
+    /**
+     * Bit mask of controllers that are currently tracking the job.
+     */
+    private int trackingControllers;
+
     // These are filled in by controllers when preparing for execution.
     public ArraySet<Uri> changedUris;
     public ArraySet<String> changedAuthorities;
@@ -609,6 +641,18 @@ public final class JobStatus {
         return (satisfiedConstraints&constraint) != 0;
     }
 
+    boolean clearTrackingController(int which) {
+        if ((trackingControllers&which) != 0) {
+            trackingControllers &= ~which;
+            return true;
+        }
+        return false;
+    }
+
+    void setTrackingController(int which) {
+        trackingControllers |= which;
+    }
+
     public boolean shouldDump(int filterUid) {
         return filterUid == -1 || UserHandle.getAppId(getUid()) == filterUid
                 || UserHandle.getAppId(getSourceUid()) == filterUid;
@@ -924,6 +968,16 @@ public final class JobStatus {
             if (dozeWhitelisted) {
                 pw.print(prefix); pw.println("Doze whitelisted: true");
             }
+        }
+        if (trackingControllers != 0) {
+            pw.print(prefix); pw.print("Tracking:");
+            if ((trackingControllers&TRACKING_BATTERY) != 0) pw.print(" BATTERY");
+            if ((trackingControllers&TRACKING_CONNECTIVITY) != 0) pw.print(" CONNECTIVITY");
+            if ((trackingControllers&TRACKING_CONTENT) != 0) pw.print(" CONTENT");
+            if ((trackingControllers&TRACKING_IDLE) != 0) pw.print(" IDLE");
+            if ((trackingControllers&TRACKING_STORAGE) != 0) pw.print(" STORAGE");
+            if ((trackingControllers&TRACKING_TIME) != 0) pw.print(" TIME");
+            pw.println();
         }
         if (changedAuthorities != null) {
             pw.print(prefix); pw.println("Changed authorities:");
