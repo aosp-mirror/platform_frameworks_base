@@ -317,7 +317,17 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
 }
 
 void Bitmap::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
-    reconfigure(info().makeColorSpace(std::move(colorSpace)), rowBytes(), sk_ref_sp(colorTable()));
+    mInfo = mInfo.makeColorSpace(std::move(colorSpace));
+}
+
+static SkImageInfo validateAlpha(const SkImageInfo& info) {
+    // Need to validate the alpha type to filter against the color type
+    // to prevent things like a non-opaque RGB565 bitmap
+    SkAlphaType alphaType;
+    LOG_ALWAYS_FATAL_IF(!SkColorTypeValidateAlphaType(
+            info.colorType(), info.alphaType(), &alphaType),
+            "Failed to validate alpha type!");
+    return info.makeAlphaType(alphaType);
 }
 
 void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, sk_sp<SkColorTable> ctable) {
@@ -325,19 +335,14 @@ void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, sk_sp<SkCo
         ctable = nullptr;
     }
 
-    // Need to validate the alpha type to filter against the color type
-    // to prevent things like a non-opaque RGB565 bitmap
-    SkAlphaType alphaType;
-    LOG_ALWAYS_FATAL_IF(!SkColorTypeValidateAlphaType(
-            newInfo.colorType(), newInfo.alphaType(), &alphaType),
-            "Failed to validate alpha type!");
+    mInfo = validateAlpha(newInfo);
 
     // Dirty hack is dirty
     // TODO: Figure something out here, Skia's current design makes this
     // really hard to work with. Skia really, really wants immutable objects,
     // but with the nested-ref-count hackery going on that's just not
     // feasible without going insane trying to figure it out
-    this->android_only_reset(newInfo.makeAlphaType(alphaType), rowBytes, std::move(ctable));
+    this->android_only_reset(mInfo.width(), mInfo.height(), rowBytes, std::move(ctable));
 }
 
 static sk_sp<SkColorTable> sanitize(const SkImageInfo& info, sk_sp<SkColorTable> ctable) {
@@ -347,8 +352,11 @@ static sk_sp<SkColorTable> sanitize(const SkImageInfo& info, sk_sp<SkColorTable>
     }
     return nullptr; // drop the ctable if we're not indexed
 }
-Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable)
-            : SkPixelRef(info, address, rowBytes, sanitize(info, std::move(ctable)))
+Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes,
+        sk_sp<SkColorTable> ctable)
+            : SkPixelRef(info.width(), info.height(), address, rowBytes,
+                    sanitize(info, std::move(ctable)))
+            , mInfo(validateAlpha(info))
             , mPixelStorageType(PixelStorageType::Heap) {
     mPixelStorage.heap.address = address;
     mPixelStorage.heap.size = size;
@@ -356,7 +364,9 @@ Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBy
 
 Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
                 const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable)
-            : SkPixelRef(info, address, rowBytes, sanitize(info, std::move(ctable)))
+            : SkPixelRef(info.width(), info.height(), address, rowBytes,
+                    sanitize(info, std::move(ctable)))
+            , mInfo(validateAlpha(info))
             , mPixelStorageType(PixelStorageType::External) {
     mPixelStorage.external.address = address;
     mPixelStorage.external.context = context;
@@ -365,7 +375,9 @@ Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
 
 Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
                 const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable)
-            : SkPixelRef(info, address, rowBytes, sanitize(info, std::move(ctable)))
+            : SkPixelRef(info.width(), info.height(), address, rowBytes,
+                    sanitize(info, std::move(ctable)))
+            , mInfo(validateAlpha(info))
             , mPixelStorageType(PixelStorageType::Ashmem) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
@@ -373,9 +385,10 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
 }
 
 Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
-        : SkPixelRef(info, nullptr,
+        : SkPixelRef(info.width(), info.height(), nullptr,
                      bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride(),
                      nullptr)
+        , mInfo(validateAlpha(info))
         , mPixelStorageType(PixelStorageType::Hardware) {
     mPixelStorage.hardware.buffer = buffer;
     buffer->incStrong(buffer);
@@ -428,10 +441,6 @@ void* Bitmap::getStorage() const {
     }
 }
 
-size_t Bitmap::getAllocatedSizeInBytes() const {
-    return info().getSafeSize(this->rowBytes());
-}
-
 int Bitmap::getAshmemFd() const {
     switch (mPixelStorageType) {
     case PixelStorageType::Ashmem:
@@ -459,7 +468,7 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
         return;
     }
 
-    changeAlphaType(alphaType);
+    mInfo = mInfo.makeAlphaType(alphaType);
 }
 
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
@@ -470,19 +479,19 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
         uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
         return;
     }
-    outBitmap->setInfo(info(), rowBytes());
+    outBitmap->setInfo(mInfo, rowBytes());
     outBitmap->setPixelRef(sk_ref_sp(this), 0, 0);
 }
 
 void Bitmap::getSkBitmapForShaders(SkBitmap* outBitmap) {
-    outBitmap->setInfo(info(), rowBytes());
+    outBitmap->setInfo(mInfo, rowBytes());
     outBitmap->setPixelRef(sk_ref_sp(this), 0, 0);
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
 }
 
 void Bitmap::getBounds(SkRect* bounds) const {
     SkASSERT(bounds);
-    bounds->set(0, 0, SkIntToScalar(info().width()), SkIntToScalar(info().height()));
+    bounds->set(0, 0, SkIntToScalar(width()), SkIntToScalar(height()));
 }
 
 GraphicBuffer* Bitmap::graphicBuffer() {

@@ -67,11 +67,8 @@ public:
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
             size_t rowBytes, sk_sp<SkColorTable> ctable);
 
-    int width() const { return info().width(); }
-    int height() const { return info().height(); }
-
     int rowBytesAsPixels() const {
-        return rowBytes() >> info().shiftPerPixel();
+        return rowBytes() >> SkColorTypeShiftPerPixel(mInfo.colorType());
     }
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable);
@@ -91,8 +88,12 @@ public:
     void setHasHardwareMipMap(bool hasMipMap);
     bool hasHardwareMipMap() const;
 
-    bool isOpaque() const {return info().isOpaque(); }
-    SkColorType colorType() const { return info().colorType(); }
+    bool isOpaque() const { return mInfo.isOpaque(); }
+    SkColorType colorType() const { return mInfo.colorType(); }
+    const SkImageInfo& info() const {
+        return mInfo;
+    }
+
     void getBounds(SkRect* bounds) const;
 
     bool readyToDraw() const {
@@ -104,12 +105,12 @@ public:
     }
 
     GraphicBuffer* graphicBuffer();
-protected:
-    virtual size_t getAllocatedSizeInBytes() const override;
 private:
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
     virtual ~Bitmap();
     void* getStorage() const;
+
+    SkImageInfo mInfo;
 
     const PixelStorageType mPixelStorageType;
 
