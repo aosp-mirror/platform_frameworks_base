@@ -844,7 +844,7 @@ public class MediaRecorder
      * @throws IllegalStateException if it is called before prepare().
      * @throws IOException if setNextOutputFile fails otherwise.
      */
-    public void setNextOutputFile(FileDescriptor fd) throws IllegalStateException, IOException
+    public void setNextOutputFile(FileDescriptor fd) throws IOException
     {
         _setNextOutputFile(fd);
     }
@@ -881,7 +881,7 @@ public class MediaRecorder
      * @throws IllegalStateException if it is called before prepare().
      * @throws IOException if setNextOutputFile fails otherwise.
      */
-    public void setNextOutputFile(File file) throws IllegalStateException, IOException
+    public void setNextOutputFile(File file) throws IOException
     {
         RandomAccessFile f = new RandomAccessFile(file, "rws");
         try {
