@@ -139,7 +139,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         public boolean isCurrentlyServing() {
             switch (lastState) {
                 case IControlsTethering.STATE_TETHERED:
-                case IControlsTethering.STATE_LOCAL_HOTSPOT:
+                case IControlsTethering.STATE_LOCAL_ONLY:
                     return true;
                 default:
                     return false;
@@ -646,7 +646,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     erroredList.add(iface);
                 } else if (tetherState.lastState == IControlsTethering.STATE_AVAILABLE) {
                     availableList.add(iface);
-                } else if (tetherState.lastState == IControlsTethering.STATE_LOCAL_HOTSPOT) {
+                } else if (tetherState.lastState == IControlsTethering.STATE_LOCAL_ONLY) {
                     localOnlyList.add(iface);
                 } else if (tetherState.lastState == IControlsTethering.STATE_TETHERED) {
                     if (cfg.isUsb(iface)) {
@@ -824,7 +824,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         // Otherwise, assume it's a local-only hotspot request.
                         final int state = mWifiTetherRequested
                                 ? IControlsTethering.STATE_TETHERED
-                                : IControlsTethering.STATE_LOCAL_HOTSPOT;
+                                : IControlsTethering.STATE_LOCAL_ONLY;
                         tetherMatchingInterfaces(state, ConnectivityManager.TETHERING_WIFI);
                         break;
                     case WifiManager.WIFI_AP_STATE_DISABLED:
@@ -894,7 +894,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 result = untether(chosenIface);
                 break;
             case IControlsTethering.STATE_TETHERED:
-            case IControlsTethering.STATE_LOCAL_HOTSPOT:
+            case IControlsTethering.STATE_LOCAL_ONLY:
                 result = tether(chosenIface, requestedState);
                 break;
             default:
@@ -1653,7 +1653,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     case IControlsTethering.STATE_TETHERED:
                         pw.print("TetheredState");
                         break;
-                    case IControlsTethering.STATE_LOCAL_HOTSPOT:
+                    case IControlsTethering.STATE_LOCAL_ONLY:
                         pw.print("LocalHotspotState");
                         break;
                     default:
@@ -1708,7 +1708,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 which = TetherMasterSM.EVENT_IFACE_SERVING_STATE_INACTIVE;
                 break;
             case IControlsTethering.STATE_TETHERED:
-            case IControlsTethering.STATE_LOCAL_HOTSPOT:
+            case IControlsTethering.STATE_LOCAL_ONLY:
                 which = TetherMasterSM.EVENT_IFACE_SERVING_STATE_ACTIVE;
                 break;
             default:
