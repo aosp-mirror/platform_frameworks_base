@@ -137,6 +137,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable RemoteViews mPresentation;
     private final @Nullable IntentSender mAuthentication;
     private final @Nullable AutofillId[] mAuthenticationIds;
+    private final @Nullable AutofillId[] mIgnoredIds;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
@@ -145,6 +146,7 @@ public final class FillResponse implements Parcelable {
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
         mAuthenticationIds = builder.mAuthenticationIds;
+        mIgnoredIds = builder.mIgnoredIds;
     }
 
     /** @hide */
@@ -177,6 +179,11 @@ public final class FillResponse implements Parcelable {
         return mAuthenticationIds;
     }
 
+    /** @hide */
+    public @Nullable AutofillId[] getIgnoredIds() {
+        return mIgnoredIds;
+    }
+
     /**
      * Builder for {@link FillResponse} objects. You must to provide at least
      * one dataset or set an authentication intent with a presentation view.
@@ -188,6 +195,7 @@ public final class FillResponse implements Parcelable {
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private AutofillId[] mAuthenticationIds;
+        private AutofillId[] mIgnoredIds;
         private boolean mDestroyed;
 
         /**
@@ -265,7 +273,7 @@ public final class FillResponse implements Parcelable {
          * {@code EditText} representing a captcha.
          */
         public Builder setIgnoredIds(AutofillId...ids) {
-            // TODO: implement
+            mIgnoredIds = ids;
             return this;
         }
 
@@ -374,6 +382,8 @@ public final class FillResponse implements Parcelable {
                 .append(", hasAuthentication=").append(mAuthentication != null)
                 .append(", authenticationSize=").append(mAuthenticationIds != null
                         ? mAuthenticationIds.length : "N/A")
+                .append(", ignoredIdsSize=").append(mIgnoredIds != null
+                    ? mIgnoredIds.length : "N/A")
                 .toString();
     }
 
@@ -394,6 +404,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mAuthenticationIds, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
+        parcel.writeParcelableArray(mIgnoredIds, flags);
     }
 
     public static final Parcelable.Creator<FillResponse> CREATOR =
@@ -410,9 +421,10 @@ public final class FillResponse implements Parcelable {
                 builder.addDataset(datasets.get(i));
             }
             builder.setSaveInfo(parcel.readParcelable(null));
-            builder.setExtras(parcel.readParcelable(null));
+            builder.setClientState(parcel.readParcelable(null));
             builder.setAuthentication(parcel.readParcelableArray(null, AutofillId.class),
                     parcel.readParcelable(null), parcel.readParcelable(null));
+            builder.setIgnoredIds(parcel.readParcelableArray(null, AutofillId.class));
             return builder.build();
         }
 
