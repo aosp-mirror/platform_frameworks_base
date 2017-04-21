@@ -69,10 +69,6 @@
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">92dp</dimen>
 
-    <!-- Width of each individual notification in the notification panel. MATCH_PARENT in this
-         case means the notifications will be measured with its parent's MeasureSpec. -->
-    <dimen name="notification_child_width">@dimen/match_parent</dimen>
-
     <!-- Increased height of a small notification in the status bar -->
     <dimen name="notification_min_height_increased">132dp</dimen>
 
@@ -208,6 +204,9 @@
     <dimen name="notification_panel_margin_bottom">0dp</dimen>
 
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
+
+    <!-- The width of the panel that holds the quick settings. -->
+    <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
     <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
 

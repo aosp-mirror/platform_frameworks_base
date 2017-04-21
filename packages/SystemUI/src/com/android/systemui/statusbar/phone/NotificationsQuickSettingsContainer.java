@@ -85,7 +85,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     private void reloadWidth(View view) {
         LayoutParams params = (LayoutParams) view.getLayoutParams();
         params.width = getContext().getResources().getDimensionPixelSize(
-                R.dimen.notification_panel_width);
+                R.dimen.qs_panel_width);
         view.setLayoutParams(params);
     }
 
