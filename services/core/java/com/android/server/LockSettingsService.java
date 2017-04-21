@@ -962,8 +962,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     if (pi.isManagedProfile()
                             && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id)
                             && mStorage.hasChildProfileLock(pi.id)
-                            && mUserManager.isUserRunning(pi.id)
-                            && !mUserManager.isUserUnlocked(pi.id)) {
+                            && mUserManager.isUserRunning(pi.id)) {
                         unlockChildProfile(pi.id);
                     }
                 }
