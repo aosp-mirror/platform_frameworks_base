@@ -837,7 +837,7 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавање говорне поште"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозвољава апликацији да додаје поруке у пријемно сандуче говорне поште."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"измена дозвола за географске локације Прегледача"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозвољава апликацији да измени дозволе Прегледача за утврђивање географске локације. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб сајтовима."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозвољава апликацији да измени дозволе Прегледача за утврђивање географске локације. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб-сајтовима."</string>
     <string name="save_password_message" msgid="767344687139195790">"Желите ли да прегледач запамти ову лозинку?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не сада"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запамти"</string>

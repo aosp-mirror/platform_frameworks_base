@@ -1736,10 +1736,8 @@
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"કન્ટેન્ટ સ્વતઃ ભરી શકાતું નથી"</string>
     <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> માં સાચવીએ?"</string>
     <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> ને <xliff:g id="LABEL">%2$s</xliff:g> માં સાચવીએ?"</string>
-    <!-- no translation found for autofill_save_title_with_2types (8875796560521962098) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_3types (6889899028382843493) -->
-    <skip />
+    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="LABEL">%3$s</xliff:g>માં <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> સાચવીએ?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="LABEL">%4$s</xliff:g>માં <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> સાચવીએ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"સાચવો"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"નહીં આભાર"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"પાસવર્ડ"</string>
