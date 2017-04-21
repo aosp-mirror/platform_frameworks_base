@@ -24,6 +24,7 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -32,9 +33,6 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Simple controller that tracks whether the phone is charging or not. The phone is considered to
@@ -47,7 +45,7 @@ public class BatteryController extends StateController {
     private static final Object sCreationLock = new Object();
     private static volatile BatteryController sController;
 
-    private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
+    private final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     private ChargingTracker mChargeTracker;
 
     public static BatteryController get(JobSchedulerService taskManagerService) {
@@ -82,6 +80,7 @@ public class BatteryController extends StateController {
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasPowerConstraint()) {
             mTrackedTasks.add(taskStatus);
+            taskStatus.setTrackingController(JobStatus.TRACKING_BATTERY);
             taskStatus.setChargingConstraintSatisfied(mChargeTracker.isOnStablePower());
             taskStatus.setBatteryNotLowConstraintSatisfied(mChargeTracker.isBatteryNotLow());
         }
@@ -89,7 +88,7 @@ public class BatteryController extends StateController {
 
     @Override
     public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
-        if (taskStatus.hasPowerConstraint()) {
+        if (taskStatus.clearTrackingController(JobStatus.TRACKING_BATTERY)) {
             mTrackedTasks.remove(taskStatus);
         }
     }
@@ -103,7 +102,7 @@ public class BatteryController extends StateController {
         boolean reportChange = false;
         synchronized (mLock) {
             for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
-                final JobStatus ts = mTrackedTasks.get(i);
+                final JobStatus ts = mTrackedTasks.valueAt(i);
                 boolean previous = ts.setChargingConstraintSatisfied(stablePower);
                 if (previous != stablePower) {
                     reportChange = true;
@@ -251,7 +250,7 @@ public class BatteryController extends StateController {
         pw.print(mTrackedTasks.size());
         pw.println(":");
         for (int i = 0; i < mTrackedTasks.size(); i++) {
-            final JobStatus js = mTrackedTasks.get(i);
+            final JobStatus js = mTrackedTasks.valueAt(i);
             if (!js.shouldDump(filterUid)) {
                 continue;
             }

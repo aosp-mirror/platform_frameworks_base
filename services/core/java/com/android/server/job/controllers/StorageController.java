@@ -20,9 +20,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -31,8 +31,6 @@ import com.android.server.job.StateChangedListener;
 import com.android.server.storage.DeviceStorageMonitorService;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Simple controller that tracks the status of the device's storage.
@@ -43,7 +41,7 @@ public class StorageController extends StateController {
     private static final Object sCreationLock = new Object();
     private static volatile StorageController sController;
 
-    private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
+    private final ArraySet<JobStatus> mTrackedTasks = new ArraySet<JobStatus>();
     private StorageTracker mStorageTracker;
 
     public static StorageController get(JobSchedulerService taskManagerService) {
@@ -78,13 +76,15 @@ public class StorageController extends StateController {
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasStorageNotLowConstraint()) {
             mTrackedTasks.add(taskStatus);
+            taskStatus.setTrackingController(JobStatus.TRACKING_STORAGE);
             taskStatus.setStorageNotLowConstraintSatisfied(mStorageTracker.isStorageNotLow());
         }
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
-        if (taskStatus.hasPowerConstraint()) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
+            boolean forUpdate) {
+        if (taskStatus.clearTrackingController(JobStatus.TRACKING_STORAGE)) {
             mTrackedTasks.remove(taskStatus);
         }
     }
@@ -94,7 +94,7 @@ public class StorageController extends StateController {
         boolean reportChange = false;
         synchronized (mLock) {
             for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
-                final JobStatus ts = mTrackedTasks.get(i);
+                final JobStatus ts = mTrackedTasks.valueAt(i);
                 boolean previous = ts.setStorageNotLowConstraintSatisfied(storageNotLow);
                 if (previous != storageNotLow) {
                     reportChange = true;
@@ -178,7 +178,7 @@ public class StorageController extends StateController {
         pw.print(mTrackedTasks.size());
         pw.println(":");
         for (int i = 0; i < mTrackedTasks.size(); i++) {
-            final JobStatus js = mTrackedTasks.get(i);
+            final JobStatus js = mTrackedTasks.valueAt(i);
             if (!js.shouldDump(filterUid)) {
                 continue;
             }

@@ -244,7 +244,7 @@ public class JobInfo implements Parcelable {
     /**
      * Bundle of extras which are returned to your application at execution time.
      */
-    public PersistableBundle getExtras() {
+    public @NonNull PersistableBundle getExtras() {
         return extras;
     }
 
@@ -252,7 +252,7 @@ public class JobInfo implements Parcelable {
      * Bundle of transient extras which are returned to your application at execution time,
      * but not persisted by the system.
      */
-    public Bundle getTransientExtras() {
+    public @NonNull Bundle getTransientExtras() {
         return transientExtras;
     }
 
@@ -260,7 +260,7 @@ public class JobInfo implements Parcelable {
      * ClipData of information that is returned to your application at execution time,
      * but not persisted by the system.
      */
-    public ClipData getClipData() {
+    public @Nullable ClipData getClipData() {
         return clipData;
     }
 
@@ -274,7 +274,7 @@ public class JobInfo implements Parcelable {
     /**
      * Name of the service endpoint that will be called back into by the JobScheduler.
      */
-    public ComponentName getService() {
+    public @NonNull ComponentName getService() {
         return service;
     }
 
@@ -327,8 +327,7 @@ public class JobInfo implements Parcelable {
      * Which content: URIs must change for the job to be scheduled.  Returns null
      * if there are none required.
      */
-    @Nullable
-    public TriggerContentUri[] getTriggerContentUris() {
+    public @Nullable TriggerContentUri[] getTriggerContentUris() {
         return triggerContentUris;
     }
 
@@ -811,7 +810,7 @@ public class JobInfo implements Parcelable {
          * @param jobService The endpoint that you implement that will receive the callback from the
          * JobScheduler.
          */
-        public Builder(int jobId, ComponentName jobService) {
+        public Builder(int jobId, @NonNull ComponentName jobService) {
             mJobService = jobService;
             mJobId = jobId;
         }
@@ -832,7 +831,7 @@ public class JobInfo implements Parcelable {
          * Set optional extras. This is persisted, so we only allow primitive types.
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
          */
-        public Builder setExtras(PersistableBundle extras) {
+        public Builder setExtras(@NonNull PersistableBundle extras) {
             mExtras = extras;
             return this;
         }
@@ -842,7 +841,7 @@ public class JobInfo implements Parcelable {
          * persisted with {@link #setPersisted(boolean)}; mixing the two is not allowed.
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
          */
-        public Builder setTransientExtras(Bundle extras) {
+        public Builder setTransientExtras(@NonNull Bundle extras) {
             mTransientExtras = extras;
             return this;
         }
@@ -869,7 +868,7 @@ public class JobInfo implements Parcelable {
          * {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, and
          * {@link android.content.Intent#FLAG_GRANT_PREFIX_URI_PERMISSION}.
          */
-        public Builder setClipData(ClipData clip, int grantFlags) {
+        public Builder setClipData(@Nullable ClipData clip, int grantFlags) {
             mClipData = clip;
             mClipGrantFlags = grantFlags;
             return this;

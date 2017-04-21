@@ -72,7 +72,7 @@ public abstract class JobScheduler {
      * you can schedule.
      * @return An int representing ({@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}).
      */
-    public abstract int schedule(JobInfo job);
+    public abstract int schedule(@NonNull JobInfo job);
 
     /**
      * Similar to {@link #schedule}, but allows you to enqueue work for an existing job.  If a job
@@ -108,7 +108,7 @@ public abstract class JobScheduler {
      * @param work New work to enqueue.  This will be available later when the job starts running.
      * @return An int representing ({@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}).
      */
-    public abstract int enqueue(JobInfo job, JobWorkItem work);
+    public abstract int enqueue(@NonNull JobInfo job, @NonNull JobWorkItem work);
 
     /**
      *
@@ -121,7 +121,8 @@ public abstract class JobScheduler {
      * @hide
      */
     @SystemApi
-    public abstract int scheduleAsPackage(JobInfo job, String packageName, int userId, String tag);
+    public abstract int scheduleAsPackage(@NonNull JobInfo job, @NonNull String packageName,
+            int userId, String tag);
 
     /**
      * Cancel a job that is pending in the JobScheduler.

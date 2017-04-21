@@ -164,13 +164,12 @@ public class DeviceIdleJobsController extends StateController {
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        synchronized (mLock) {
-            updateTaskStateLocked(jobStatus);
-        }
+        updateTaskStateLocked(jobStatus);
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
+            boolean forUpdate) {
     }
 
     @Override
