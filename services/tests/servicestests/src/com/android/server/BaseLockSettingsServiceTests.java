@@ -20,40 +20,27 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.UserInfo;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.FileUtils;
-import android.os.Handler;
 import android.os.IProgressListener;
-import android.os.RemoteException;
 import android.os.UserManager;
-import android.os.storage.IStorageManager;
 import android.security.KeyStore;
-import android.service.gatekeeper.GateKeeperResponse;
-import android.service.gatekeeper.IGateKeeperService;
 import android.test.AndroidTestCase;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.VerifyCredentialResponse;
-import com.android.server.LockSettingsService.SynchronizedStrongAuthTracker;
-import com.android.server.LockSettingsStorage.CredentialHash;
-import com.android.server.MockGateKeeperService.AuthToken;
-import com.android.server.MockGateKeeperService.VerifyHandle;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class BaseLockSettingsServiceTests extends AndroidTestCase {
@@ -110,10 +97,9 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);
-        installQuietModeChildProfile(TURNED_OFF_PROFILE_USER_ID);
+        installAndTurnOffChildProfile(TURNED_OFF_PROFILE_USER_ID);
         when(mUserManager.getProfiles(eq(PRIMARY_USER_ID))).thenReturn(mPrimaryUserProfiles);
         when(mUserManager.getUserInfo(eq(SECONDARY_USER_ID))).thenReturn(SECONDARY_USER_INFO);
-        when(mUserManager.isUserRunning(eq(MANAGED_PROFILE_USER_ID))).thenReturn(true);
 
         when(mActivityManager.unlockUser(anyInt(), any(), any(), any())).thenAnswer(
                 new Answer<Boolean>() {
@@ -139,12 +125,16 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mPrimaryUserProfiles.add(userInfo);
         when(mUserManager.getUserInfo(eq(profileId))).thenReturn(userInfo);
         when(mUserManager.getProfileParent(eq(profileId))).thenReturn(PRIMARY_USER_INFO);
+        when(mUserManager.isUserRunning(eq(profileId))).thenReturn(true);
+        when(mUserManager.isUserUnlocked(eq(profileId))).thenReturn(true);
         return userInfo;
     }
 
-    private UserInfo installQuietModeChildProfile(int profileId) {
+    private UserInfo installAndTurnOffChildProfile(int profileId) {
         final UserInfo userInfo = installChildProfile(profileId);
         userInfo.flags |= UserInfo.FLAG_QUIET_MODE;
+        when(mUserManager.isUserRunning(eq(profileId))).thenReturn(false);
+        when(mUserManager.isUserUnlocked(eq(profileId))).thenReturn(false);
         return userInfo;
     }
 
