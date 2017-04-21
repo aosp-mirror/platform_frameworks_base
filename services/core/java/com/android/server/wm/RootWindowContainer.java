@@ -188,7 +188,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (dc == null) {
             final Display display = mService.mDisplayManager.getDisplay(displayId);
             if (display != null) {
-                dc = createDisplayContent(display);
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    dc = createDisplayContent(display);
+                } finally {
+                    Binder.restoreCallingIdentity(callingIdentity);
+                }
             }
         }
         return dc;
