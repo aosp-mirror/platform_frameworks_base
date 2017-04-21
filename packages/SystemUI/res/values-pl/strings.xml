@@ -154,9 +154,12 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Brak karty SIM."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Komórkowa transmisja danych"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Komórkowa transmisja danych włączona"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Komórkowa transmisja danych jest wyłączona"</string>
+    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Powiązanie Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Tryb samolotowy."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Brak karty SIM."</string>
@@ -241,9 +244,11 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Ładowanie"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Transmisja danych 2G-3G została wstrzymana"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Transmisja danych 4G została wstrzymana"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Komórkowa transmisja danych została wstrzymana"</string>
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
+    <skip />
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Transmisja danych została wstrzymana"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Osiągnięto ustawiony limit danych. Nie korzystasz już z komórkowej transmisji danych.\n\nJeśli włączysz ją ponownie, może zostać naliczona opłata za transmisję danych."</string>
+    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Wznów"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Brak internetu"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: połączono"</string>
@@ -315,10 +320,11 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Połączono"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Łączę..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Powiązanie"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Punkt dostępu"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Powiadomienia"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Latarka"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Transmisja danych komórkowych"</string>
+    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
+    <skip />
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Użycie danych"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Pozostały limit"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Przekroczono limit"</string>
@@ -431,7 +437,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Profil do pracy połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Profil osobisty połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Urządzenie połączone z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitorowanie urządzeń"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorowanie profilu"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Monitorowanie sieci"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -440,14 +447,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Wyłącz VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Rozłącz z VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Zobacz zasady"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> zarządza Twoim urządzeniem.\n\nAdministrator może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane dotyczące urządzenia i lokalizacji oraz nimi zarządzać.\n\nAby uzyskać więcej informacji, skontaktuj się z administratorem”."</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"Twoim urządzeniem zarządza organizacja.\n\nAdministrator może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane dotyczące urządzenia i lokalizacji oraz nimi zarządzać.\n\nAby uzyskać więcej informacji, skontaktuj się z administratorem”."</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Twoja organizacja zainstalowała urząd certyfikacji na tym urządzeniu. Zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Twoja organizacja zainstalowała urząd certyfikacji w Twoim profilu do pracy. Zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Urząd certyfikacji zainstalowany na tym urządzeniu. Twój zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu."</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"Łączysz się z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"Łączysz się z aplikacjami <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, które mogą monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Twój profil do pracy jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Twój profil osobisty jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Twoim urządzeniem zarządza <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -566,6 +577,12 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> i <xliff:g id="NUMBER_5">%3$d</xliff:g> innego</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> i <xliff:g id="NUMBER_2">%3$d</xliff:g> inny</item>
     </plurals>
+    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
+    <skip />
+    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
+    <skip />
+    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
+    <skip />
     <string name="notification_all_categories" msgid="5407190218055113282">"Wszystkie kategorie"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Więcej ustawień"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"Dostosuj: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -576,7 +593,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 min"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 min"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 godz."</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"Anuluj"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"COFNIJ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Odłożono na <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Wykorzystanie baterii"</string>
@@ -722,6 +738,17 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Menu funkcji Obraz w obrazie"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Aplikacja <xliff:g id="NAME">%s</xliff:g> działa w trybie obraz w obrazie"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
+    <!-- no translation found for pip_play (1417176722760265888) -->
+    <skip />
+    <!-- no translation found for pip_pause (8881063404466476571) -->
+    <skip />
+    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
+    <skip />
+    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
+    <skip />
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"Telefon wyłączony: przegrzanie"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"Telefon działa teraz normalnie"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Telefon był zbyt gorący i wyłączył się, by obniżyć temperaturę. Urządzenie działa teraz normalnie.\n\nTelefon może się przegrzać, gdy:\n	• Używasz aplikacji zużywających dużo zasobów (np. gier, nawigacji czy odtwarzaczy filmów)\n	• Pobierasz lub przesyłasz duże pliki\n	• Używasz telefonu w wysokiej temperaturze"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon się nagrzewa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Podczas obniżania temperatury telefonu niektóre funkcje są ograniczone"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon automatycznie podejmie próbę obniżenia temperatury. Możesz go wciąż używać, ale telefon może działać wolniej.\n\nGdy temperatura się obniży, telefon będzie działał normalnie."</string>
@@ -746,16 +773,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"Aplikacje błyskawiczne"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Aplikacji błyskawicznych nie trzeba instalować."</string>
     <string name="app_info" msgid="6856026610594615344">"O aplikacji"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"Komórkowa transmisja danych"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi jest wyłączone"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth jest wyłączony"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Tryb Nie przeszkadzać jest wyłączony"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Tryb Nie przeszkadzać został włączony przez regułę automatyczną (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Tryb Nie przeszkadzać został włączony przez aplikację (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Tryb Nie przeszkadzać został włączony przez regułę automatyczną lub aplikację."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Do: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Zachowaj"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zastąp"</string>

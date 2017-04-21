@@ -152,9 +152,9 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"வைஃபை"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"சிம் இல்லை."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"செல்லுலார் தரவு"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"செல்லுலார் தரவு இயக்கப்பட்டது"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"செல்லுலார் தரவு முடக்கப்பட்டது"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"மொபைல் தரவு"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"மொபைல் தரவு இயக்கப்பட்டது"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"மொபைல் தரவு முடக்கப்பட்டது"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் டெதெரிங்."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"விமானப் பயன்முறை."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"சிம் கார்டு இல்லை."</string>
@@ -239,9 +239,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"சார்ஜ் ஏறுகிறது"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G டேட்டா இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G டேட்டா இடைநிறுத்தப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"செல்லுலார் தரவு இடைநிறுத்தப்பட்டது"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"மொபைல் தரவு இடைநிறுத்தப்பட்டுள்ளது"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"தரவு இடைநிறுத்தப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"நீங்கள் அமைத்த தரவு வரம்பை அடைந்துவிட்டீர்கள். இப்போது செல்லுலார் தரவைப் பயன்படுத்த முடியாது.\n\nமீண்டும் தொடங்கினால், தரவுப் பயன்பாட்டிற்குக் கட்டணங்கள் விதிக்கப்படலாம்."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"நீங்கள் அமைத்த தரவு வரம்பை அடைந்துவிட்டீர்கள். இப்போது மொபைல் தரவைப் பயன்படுத்தவில்லை.\n\nபயன்படுத்தத் தொடங்கினால், தரவு உபயோகத்திற்குக் கட்டணங்கள் விதிக்கப்படலாம்."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"மீண்டும் தொடங்கு"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"இணைய இணைப்பு இல்லை"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"வைஃபை இணைக்கப்பட்டது"</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ஹாட்ஸ்பாட்"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"அறிவிப்புகள்"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"டார்ச் லைட்"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"செல்லுலார் தரவு"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"மொபைல் தரவு"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"தரவுப் பயன்பாடு"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"மீதமுள்ள தரவு"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"வரம்பைக் கடந்தது"</string>
@@ -427,7 +427,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"<xliff:g id="VPN_APP">%1$s</xliff:g> உடன் பணிவிவரம் இணைக்கப்பட்டுள்ளது"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"தனிப்பட்ட சுயவிவரம் <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"சாதனம் <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"சாதனத்தைக் கண்காணித்தல்"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"சுயவிவரத்தைக் கண்காணித்தல்"</string>
     <string name="monitoring_title" msgid="169206259253048106">"நெட்வொர்க்கைக் கண்காணித்தல்"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -436,14 +437,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPNஐ முடக்கு"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNஐத் துண்டி"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"கொள்கைகளைக் காட்டு"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"சாதனத்தை <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> நிர்வகிக்கிறது.\n\nஅமைப்புகள், கார்ப்பரேட் அணுகல், பயன்பாடுகள், அனுமதிகள், சாதனத்துடன் தொடர்புடைய தரவு, சாதனத்தின் இருப்பிடத் தகவல் ஆகியவற்றை உங்கள் நிர்வாகியால் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்.\n\nமேலும் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்.\""</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது.\n\nஅமைப்புகள், கார்ப்பரேட் அணுகல், பயன்பாடுகள், அனுமதிகள், சாதனத்துடன் தொடர்புடைய தரவு, சாதனத்தின் இருப்பிடத் தகவல் ஆகியவற்றை உங்கள் நிர்வாகியால் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்.\n\nமேலும் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்.\""</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"உங்கள் நிறுவனம் இந்தச் சாதனத்தில் சான்றிதழ் அங்கீகாரத்தை நிறுவியுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"உங்கள் நிறுவனம், பணி விவரத்தில் சான்றிதழ் அங்கீகாரத்தை நிறுவியுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"இந்தச் சாதனத்தில் சான்றிதழ் அங்கீகாரம் நிறுவப்பட்டுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"உங்கள் நிர்வாகி, நெட்வொர்க் பதிவெடுத்தலை இயக்கியுள்ளார். இது சாதனத்தில் ட்ராஃபிக்கைக் கண்காணிக்கும்."</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள்."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="VPN_APP_0">%1$s</xliff:g> மற்றும் <xliff:g id="VPN_APP_1">%2$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள்."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் உங்கள் பணி விவரம் இணைக்கப்பட்டுள்ளது."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் உங்களின் தனிப்பட்ட சுயவிவரம் இணைக்கப்பட்டுள்ளது."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"உங்கள் சாதனத்தை நிர்வகிப்பது: <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -558,6 +563,9 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, மேலும் <xliff:g id="NUMBER_5">%3$d</xliff:g> சேனல்கள்</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>, மேலும் <xliff:g id="NUMBER_2">%3$d</xliff:g> சேனல்</item>
     </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் திறக்கப்பட்டன"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் மூடப்பட்டன"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"இந்தச் சேனலிலிருந்து அறிவிப்புகளைப் பெறுவதை அனுமதிக்கும்"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"எல்லா வகைகளும்"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"மேலும் அமைப்புகள்"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"தனிப்பயனாக்கு: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -568,7 +576,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 நிமிடங்கள்"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 நிமிடங்கள்"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 மணிநேரம்"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"ரத்துசெய்"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"செயல்தவிர்"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"உறக்கநிலையில் வைத்திருந்த நேரம்: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"பேட்டரி உபயோகம்"</string>
@@ -714,6 +721,13 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"பிக்ச்சர் இன் பிக்ச்சர் மெனு"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> தற்போது பிக்ச்சர் இன் பிக்ச்சரில் உள்ளது"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால், அமைப்புகளைத் திறந்து அதை முடக்க, தட்டவும்."</string>
+    <string name="pip_play" msgid="1417176722760265888">"இயக்கு"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"இடைநிறுத்து"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"அடுத்ததற்குச் செல்"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"முந்தையதற்குச் செல்"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"வெப்பத்தினால் ஃபோன் ஆஃப் செய்யப்பட்டது"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"இப்போது உங்கள் ஃபோன் இயல்புநிலையில் இயங்குகிறது"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"உங்கள் ஃபோன் அதிகமாகச் சூடானதால், அதன் சூட்டைக் குறைக்க, ஆஃப் செய்யப்பட்டது. இப்போது உங்கள் ஃபோன் இயல்புநிலையில் இயங்குகிறது.\n\nபின்வருவனவற்றைச் செய்தால், ஃபோன் சூடாகலாம்:\n	• அதிகளவு தரவைப் பயன்படுத்தும் பயன்பாடுகளை (எ.கா: கேமிங், வீடியோ (அ) வழிகாட்டுதல் பயன்பாடுகள்) பயன்படுத்துவது\n	• பெரிய கோப்புகளைப் பதிவிறக்குவது/பதிவேற்றுவது\n	• அதிக வெப்பநிலையில் ஃபோனைப் பயன்படுத்துவது"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"மொபைல் சூடாகிறது"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
@@ -738,16 +752,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"இன்ஸ்டண்ட் பயன்பாடுகள்"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"இன்ஸ்டண்ட் பயன்பாடுகளுக்கு நிறுவல் தேவையில்லை."</string>
     <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"மொபைல் தரவு"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"வைஃபை முடக்கத்தில் உள்ளது"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"புளூடூத் முடக்கத்தில் உள்ளது"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\"தொந்தரவு செய்ய வேண்டாம்\" முடக்கத்தில் உள்ளது"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"\"தொந்தரவு செய்ய வேண்டாம்\" எனும் பயன்முறையை, தானியங்கு விதி (<xliff:g id="ID_1">%s</xliff:g>) இயக்கியுள்ளது."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"\"தொந்தரவு செய்ய வேண்டாம்\" எனும் பயன்முறையை, பயன்பாடு (<xliff:g id="ID_1">%s</xliff:g>) இயக்கியுள்ளது."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"\"தொந்தரவு செய்ய வேண்டாம்\" எனும் பயன்முறையை, தானியங்கு விதி அல்லது பயன்பாடு இயக்கியுள்ளது."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> வரை"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"வைத்திரு"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"மாற்று"</string>

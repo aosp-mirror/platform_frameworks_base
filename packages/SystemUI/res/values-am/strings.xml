@@ -152,9 +152,9 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ምንም SIM የለም።"</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"የተንቀሳቃሽ ስልክ ውሂብ በርቷል"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"የተንቀሳቃሽ ስልክ ውሂብ ጠፍቷል"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"የተንቀሳቃሽ ስልክ ውሂብ በርቷል"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"የተንቀሳቃሽ ስልክ ውሂብ ጠፍቷል"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ብሉቱዝ ማያያዝ።"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"የአውሮፕላን ሁነታ።"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ምንም SIM ካርድ የለም።"</string>
@@ -239,9 +239,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ኃይል በመሙላት ላይ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2ጂ-3ጂ ውሂብ ላፍታ ቆሟል"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4ጂ ውሂብ ላፍታ ቆሟል"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"የተንቀሳቃሽ ስልክ ውሂብ ላፍታ ቆሟል"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"የተንቀሳቃሽ ስልክ ውሂብ ባለበት ቆሟል"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ውሂብ ላፍታ ቆሟል"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"እርስዎ ያስቀመጡት የውሂብ ገደብ ላይ ተደርሷል። ከእንግዲህ ተንቀሳቃሽ ውሂብ እየተጠቀሙ አይደለም ያሉት።\n\nከቆመበት ከቀጠሉ የውሂብ አጠቃቀም ክፍያዎች ተፈጻሚ ሊሆኑ ይችላሉ።"</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"የውሂብ ገደቡ ላይ ተደርሷል። ከእንግዲህ የተንቀሳቃሽ ስልክ ውሂብ እየተጠቀሙ አይደሉም።\n\nከቆመበት ከቀጠሉ የውሂብ አጠቃቀም ክፍያዎች ተፈጻሚ ሊሆኑ ይችላሉ።"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ከቆመበት ቀጥል"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ምንም በይነመረብ ተያያዥ የለም።"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ተያይዟል"</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"መገናኛ ነጥብ"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ማሳወቂያዎች"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"የባትሪ ብርሃን"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"የውሂብ አጠቃቀም"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ቀሪ ውሂብ"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"ከገደብ በላይ"</string>
@@ -427,7 +427,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"የሥራ መገለጫ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"የግል መገለጫ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"ይህ መሣሪያ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"የመሣሪያ ክትትል"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"መገለጫን መከታተል"</string>
     <string name="monitoring_title" msgid="169206259253048106">"የአውታረ መረብ ክትትል"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -436,14 +437,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN አሰናክል"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"የVPN ግንኙነት አቋርጥ"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"መመሪያዎችን ይመልከቱ"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"የእርስዎ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ይተዳደራል።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻን እና ውሂብን እና የመሣሪያዎን አካባቢ መረጃ መከታተል እና ማቀናበር ይችላል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።»"</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"የእርስዎ መሣሪያ በእርስዎ ድርጅት ይተዳደራል።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻን እና ውሂብን እና የመሣሪያዎን አካባቢ መረጃ መከታተል እና ማቀናበር ይችላል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።»"</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"የእርስዎ ድርጅት የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"የእርስዎ ድርጅት የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በእርስዎ የሥራ መገለጫ ላይ ጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ተጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"የእርስዎ አስተዳዳሪ የአውታረ መረብ ምዝግብ ማስታወሻ መያዝን አብርተዋል፣ ይህም በመሣሪያዎ ላይ ያለውን ትራፊክ ይከታተላል።"</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችሉት <xliff:g id="VPN_APP_0">%1$s</xliff:g> እና <xliff:g id="VPN_APP_1">%2$s</xliff:g> ጋር ተገናኝተዋል።"</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"የእርስዎ የሥራ መገለጫ የእርስዎን ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"የእርስዎ የግል መገለጫ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"የእርስዎ መሣሪያ በ<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ነው የሚቀናበረው።"</string>
@@ -558,6 +563,9 @@
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>፣ <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> እና <xliff:g id="NUMBER_5">%3$d</xliff:g> ሌሎች</item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>፣ <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> እና <xliff:g id="NUMBER_5">%3$d</xliff:g> ሌሎች</item>
     </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ መቆጣጠሪያዎች ተከፍተዋል"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ መቆጣጠሪያዎች ተዘግተዋል"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ከዚህ ሰርጥ የመጡ ሁሉንም ማሳወቂያች ፍቀድ"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"ሁሉም ምድቦች"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ተጨማሪ ቅንብሮች"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"ያብጁ፦ <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -568,7 +576,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 ደቂቃዎች"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 ደቂቃዎች"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ሰዓት"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"ይቅር"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ቀልብስ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"ለ<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> አሸልቧል"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"የባትሪ አጠቃቀም"</string>
@@ -714,6 +721,13 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"በስዕል ምናሌ ውስጥ ያለ ስዕል"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> በስዕል-ላይ-ስዕል ውስጥ ነው"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> ይህን ባህሪ እንዲጠቀም ካልፈለጉ ቅንብሮችን ለመክፈት መታ ያድርጉና ያጥፉት።"</string>
+    <string name="pip_play" msgid="1417176722760265888">"አጫውት"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"ባለበት አቁም"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"ወደ ቀጣይ ዝለል"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"ወደ ቀዳሚ ዝለል"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"ስልክ በሙቀት ምክንያት ጠፍቷል"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"የእርስዎ ስልክ በጣም ግሎ ነበር፣ ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪዲዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትላልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ስልክዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ስልኩ እየሞቀ ነው"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ስልኩ እየቀዘቀዘ ሳለ አንዳንድ ባህሪዎች ይገደባሉ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"የእርስዎ ስልክ በራስ-ሰር ለመቀዝቀዝ ይሞክራል። አሁንም ስልክዎን መጠቀም ይችላሉ፣ ነገር ግን ሊንቀራፈፍ ይችላል።\n\nአንዴ ስልክዎ ከቀዘቀዘ በኋላ በመደበኝነት ያሄዳል።"</string>
@@ -738,16 +752,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"የቅጽበት መተግበሪያዎች"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ቅጽበታዊ መተግበሪያዎች መጫን አያስፈልጋቸውም።"</string>
     <string name="app_info" msgid="6856026610594615344">"የመተግበሪያ መረጃ"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ጠፍቷል"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ብሉቱዝ ጠፍቷል"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"አትረብሽ ጠፍቷል"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"አትረብሽ በአንድ ራስ-ሰር ደንብ (<xliff:g id="ID_1">%s</xliff:g>) በርቷል።"</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"አትረብሽ በአንድ መተግበሪያ (<xliff:g id="ID_1">%s</xliff:g>) በርቷል።"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"አትረብሽ በአንድ ራስ-ሰር ደንብ ወይም መተግበሪያ በርቷል።"</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"እስከ <xliff:g id="ID_1">%s</xliff:g> ድረስ"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"አቆይ"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ተካ"</string>

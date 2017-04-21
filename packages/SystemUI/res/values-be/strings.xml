@@ -154,9 +154,9 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM-карты."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Сотавая перадача даных"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Сотавая перадача даных уключана"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мабільная перадача даных адключана"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"Мабільная перадача даных"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мабільная перадача даных уключана"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мабільная перадача даных выключана"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Сувязь па Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Рэжым палёту."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Няма SIM-карты."</string>
@@ -243,9 +243,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Ідзе зарадка"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Перадача даных 2G-3G прыпынена"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Перадача даных 4G прыпынена"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Мабільная перадача даных прыпынена"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Мабільная перадача даных прыпынена"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Перадача даных прыпынена"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Ліміт даных, які вы задалі, быў дасягнуты. Вы больш не выкарыстоўваеце сотавую перадачу даных.\n\nКалі вы ўзновіце карыстанне, можа спаганяцца плата за выкарыстанне трафіка."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Ліміт даных, які вы задалі, быў дасягнуты. Вы больш не выкарыстоўваеце мабільную перадачу даных.\n\nКалі вы ўзновіце карыстанне, можа спаганяцца плата за выкарыстанне трафіка."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Узнавіць"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Няма падключэння да Iнтэрнэту"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi падключаны"</string>
@@ -320,7 +320,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Хот-спот"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Апавяшчэнні"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Ліхтарык"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мабільная перадача даных"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мабільная перадача даных"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Выкарыстанне трафіку"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Засталося трафіку"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Ліміт перавышаны"</string>
@@ -433,7 +433,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Працоўны профіль падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Асабісты профіль падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Прылада падключана да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Маніторынг прылад"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Маніторынг профіляў"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Маніторынг сеткі"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -442,14 +443,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Адключыць VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Адлучыць VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Праглядзець палітыку"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"Ваша прылада знаходзіцца пад кіраваннем <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nУ вашага адміністратара ёсць магчымасць маніторынгу і адміністравання налад, карпаратыўнага доступу, праграм, даных, звязаных з гэтай прыладай, і адпаведных геаданых.\n\nДля атрымання дадатковай інфармацыі звярніцеся да адміністратара."</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"Ваша прылада знаходзіцца пад кіраваннем вашай арганізацыі.\n\nУ вашага адміністратара ёсць магчымасць маніторынгу і адміністравання налад, карпаратыўнага доступу, праграм, даных, звязаных з гэтай прыладай, і адпаведных геаданых.\n\nДля атрымання дадатковай інфармацыі звярніцеся да адміністратара."</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Ваша арганізацыя ўсталявала на гэтай прыладзе цэнтр сертыфікацыі. Ваш абаронены сеткавы трафік могуць праглядваць ці змяняць."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Ваша арганізацыя ўсталявала ў вашым працоўным профілі цэнтр сертыфікацыі. Ваш абаронены сеткавы трафік могуць праглядваць ці змяняць."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"На гэтай прыладзе ўсталяваны цэнтр сертыфікацыі. Ваш абаронены сеткавы трафік могуць праглядваць ці змяняць."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Ваш адміністратар уключыў вядзенне журнала сеткі, з дапамогай якога адсочваецца трафік на вашай прыладзе."</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"Вы падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"Вы падключаны да праграм <xliff:g id="VPN_APP_0">%1$s</xliff:g> і <xliff:g id="VPN_APP_1">%2$s</xliff:g>, якія могуць сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Ваш працоўны профіль падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Ваш асабісты профіль падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Ваша прылада знаходзіцца пад кіраваннем <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -568,6 +573,9 @@
       <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і яшчэ <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і яшчэ <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
     </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Кіраванне апавяшчэннямі для <xliff:g id="APP_NAME">%1$s</xliff:g> адкрыта"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Кіраванне апавяшчэннямі для <xliff:g id="APP_NAME">%1$s</xliff:g> закрыта"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Дазволіць апавяшчэнні з гэтага канала"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"Усе катэгорыі"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дадатковыя налады"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"Персаналізаваць: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -578,7 +586,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 хвілін"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 хвілін"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 гадзіна"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"Скасаваць"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"АДРАБІЦЬ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Адкладзена на <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Выкарыстанне зараду"</string>
@@ -724,6 +731,13 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Меню \"Відарыс у відарысе\""</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> з’яўляецца відарысам у відарысе"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Калі вы не хочаце, каб праграма <xliff:g id="NAME">%s</xliff:g> выкарыстоўвала гэту функцыю, дакраніцеся, каб адкрыць налады і адключыць яе."</string>
+    <string name="pip_play" msgid="1417176722760265888">"Прайграць"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"Прыпыніць"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"Перайсці да наступнага"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"Перайсці да папярэдняга"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"З-за перагрэву тэл. выключыўся"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"Тэлефон працуе нармальна"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Ваш тэлефон пераграваўся, таму ён выключыўся, каб астыць. Зараз тэлефон працуе нармальна.\n\nТэлефон можа перагравацца пры:\n	• Выкарыстанні рэсурсаёмістых праграм (напрыклад, гульняў, відэа або праграм навігацыі)\n	• Спампоўцы або запампоўцы вялікіх файлаў\n	• Выкарыстанні тэлефона пры высокіх тэмпературах"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Тэлефон награваецца"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Некаторыя функцыі абмежаваны, пакуль тэлефон астывае"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш тэлефон аўтаматычна паспрабуе астыць. Вы можаце па-ранейшаму карыстацца сваім тэлефонам, але ён можа працаваць больш павольна.\n\nПасля таго як ваш тэлефон астыне, ён будзе працаваць у звычайным рэжыме."</string>
@@ -748,16 +762,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"Імгненныя праграмы"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Імгненныя праграмы не патрабуюць усталёўкі."</string>
     <string name="app_info" msgid="6856026610594615344">"Інфармацыя пра праграму"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"Маб. перадача даных"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi выключаны"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth выключаны"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Рэжым \"Не турбаваць\" выключаны"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Рэжым \"Не турбаваць\" быў уключаны аўтаматычным правілам (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Рэжым \"Не турбаваць\" быў уключаны праграмай (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Рэжым \"Не турбаваць\" быў уключаны аўтаматычным правілам ці праграмай."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Да <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Пакінуць"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замяніць"</string>

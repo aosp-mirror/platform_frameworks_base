@@ -152,9 +152,12 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Intet SIM-kort."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobildata"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobildata er slået til"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobildata er slået fra."</string>
+    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
+    <skip />
+    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-netdeling."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flytilstand."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Der er ikke noget SIM-kort."</string>
@@ -239,9 +242,11 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Oplader"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G-data er sat på pause"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data er sat på pause"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobildata er sat på pause"</string>
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
+    <skip />
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data er sat på pause"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Du har nået den angivne datagrænse. Du vil ikke længere bruge mobildata.\n\nHvis du fortsætter, vil du muligvis blive opkrævet betaling for dit dataforbrug."</string>
+    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Genoptag"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen internetforb."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi er forbundet"</string>
@@ -314,7 +319,8 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Underretninger"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lommelygte"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobildata"</string>
+    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
+    <skip />
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Dataforbrug"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Resterende data"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Over grænsen"</string>
@@ -427,7 +433,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Arbejdsprofilen er forbundet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Den personlige profil er forbundet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Enheden er forbundet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Overvågning af enhed"</string>
+    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
+    <skip />
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilovervågning"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Overvågning af netværk"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -436,14 +443,18 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Afbryd VPN-forbindelse"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Se politikker"</string>
-    <string name="monitoring_description_named_management" msgid="4872859182820011954">"Enheden administreres af <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er knyttet til denne enhed, samt enhedens stedoplysninger.\n\nKontakt din administrator for at få flere oplysninger."</string>
-    <string name="monitoring_description_management" msgid="3115563193381106341">"Enheden administreres af din organisation.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er knyttet til denne enhed, samt enhedens placeringsoplysninger.\n\nKontakt din administrator for at få flere oplysninger."</string>
+    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Din organisation har installeret et nøglecenter på denne enhed. Din sikre netværkstrafik kan overvåges eller ændres."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Din organisation har installeret et nøglecenter på din arbejdsprofil. Din sikre netværkstrafik kan overvåges eller ændres."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Der er installeret et nøglecenter på denne enhed. Din sikre netværkstrafik kan overvåges eller ændres."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Din administrator har aktiveret netværksregistrering, som overvåger trafik på din enhed."</string>
-    <string name="monitoring_description_named_vpn" msgid="639013857356724268">"Du har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4479748971871539316">"Du har forbindelse til <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
+    <skip />
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Din arbejdsprofil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Din personlige profil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Din enhed administreres af <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -558,6 +569,12 @@
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> og <xliff:g id="NUMBER_5">%3$d</xliff:g> anden</item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> og <xliff:g id="NUMBER_5">%3$d</xliff:g> andre</item>
     </plurals>
+    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
+    <skip />
+    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
+    <skip />
+    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
+    <skip />
     <string name="notification_all_categories" msgid="5407190218055113282">"Alle kategorier"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere indstillinger"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"Tilpas: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -568,7 +585,6 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minutter"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 minutter"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 time"</string>
-    <string name="snooze_option_dont_snooze" msgid="2252098379349499668">"Annuller"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"FORTRYD"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Udsat i <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteriforbrug"</string>
@@ -714,6 +730,17 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Billede i billede-menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> vises i billede i billede"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Hvis du ikke ønsker, at <xliff:g id="NAME">%s</xliff:g> skal benytte denne funktion, kan du åbne indstillingerne og deaktivere den."</string>
+    <!-- no translation found for pip_play (1417176722760265888) -->
+    <skip />
+    <!-- no translation found for pip_pause (8881063404466476571) -->
+    <skip />
+    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
+    <skip />
+    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
+    <skip />
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"Telefonen slukkede pga. varme"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"Din telefon kører nu normalt"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Din telefon var blevet for varm, så den slukkede for at køle ned. Din telefon kører nu igen normalt. \n\nDin telefon kan blive for varm, hvis du:\n	• Bruger ressourcekrævende apps (f.eks. spil, video eller navigation)\n	• Downloader eller uploader store filer\n	• Bruger din telefon i varme omgivelser"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonen er ved at blive varm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Nogle funktioner er begrænsede, mens telefonen køler ned"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Din telefon forsøger automatisk at køle ned. Du kan stadig bruge telefonen, men den kører muligvis langsommere.\n\nNår din telefon er kølet ned, fungerer den normalt igen."</string>
@@ -738,16 +765,15 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant apps kræver ingen installation."</string>
     <string name="app_info" msgid="6856026610594615344">"Oplysninger om appen"</string>
+    <!-- no translation found for go_to_web (1106022723459948514) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"Mobildata"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi er slået fra"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth er slået fra"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Forstyr ikke er slået fra"</string>
-    <!-- no translation found for qs_dnd_prompt_auto_rule (862559028345233052) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_app (7978037419334156034) -->
-    <skip />
-    <!-- no translation found for qs_dnd_prompt_auto_rule_app (2599343675391111951) -->
-    <skip />
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Tilstanden Forstyr ikke blev aktiveret af en automatisk regel (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Tilstanden Forstyr ikke blev aktiveret af en app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Tilstanden Forstyr ikke blev aktiveret af en automatisk regel eller en app."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Indtil <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Behold"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Erstat"</string>

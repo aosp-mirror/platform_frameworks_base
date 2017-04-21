@@ -21,10 +21,4 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_close" msgid="3480680679023423574">"Κλείσιμο PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Πλήρης οθόνη"</string>
-    <string name="pip_play" msgid="674145557658227044">"Αναπαραγωγή"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"Παύση"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"Κρατήστε το πλήκτρο "<b>"HOME"</b>" πατημένο για έλεγχο του PIP"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"Λειτουργία Picture-in-picture"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"Αυτό διατηρεί το βίντεό σας σε προβολή έως ότου γίνει αναπαραγωγή κάποιου άλλου. Πατήστε παρατεταμένα το πλήκτρο "<b></b>" (ΑΡΧΙΚΗ ΣΕΛΙΔΑ) για να ελέγξετε αυτήν την επιλογή."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"Κατάλαβα"</string>
 </resources>
