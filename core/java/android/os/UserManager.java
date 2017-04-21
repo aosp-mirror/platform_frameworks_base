@@ -472,10 +472,11 @@ public class UserManager {
     public static final String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
 
     /**
-     * Specifies if a user is disallowed from adjusting microphone
-     * volume. If set, the microphone will be muted. This can only be set by device owners
-     * and profile owners on the primary user. The default value is <code>false</code>.
+     * Specifies if a user is disallowed from adjusting microphone volume. If set, the microphone
+     * will be muted. This can be set by device owners and profile owners. The default value is
+     * <code>false</code>.
      *
+     * <p>This restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -485,10 +486,11 @@ public class UserManager {
     public static final String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
 
     /**
-     * Specifies if a user is disallowed from adjusting the master
-     * volume. If set, the master volume will be muted. This can only be set by device owners
-     * and profile owners on the primary user. The default value is <code>false</code>.
+     * Specifies if a user is disallowed from adjusting the master volume. If set, the master volume
+     * will be muted. This can be set by device owners and profile owners. The default value is
+     * <code>false</code>.
      *
+     * <p>This restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
