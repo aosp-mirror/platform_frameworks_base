@@ -258,10 +258,11 @@ public class Installer extends SystemService {
         }
     }
 
-    public long[] getExternalSize(String uuid, int userId, int flags) throws InstallerException {
+    public long[] getExternalSize(String uuid, int userId, int flags, int[] appIds)
+            throws InstallerException {
         if (!checkBeforeRemote()) return new long[4];
         try {
-            return mInstalld.getExternalSize(uuid, userId, flags);
+            return mInstalld.getExternalSize(uuid, userId, flags, appIds);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
