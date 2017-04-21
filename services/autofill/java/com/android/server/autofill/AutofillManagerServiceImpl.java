@@ -16,9 +16,6 @@
 
 package com.android.server.autofill;
 
-import static android.service.autofill.AutofillService.EXTRA_SESSION_ID;
-import static android.service.voice.VoiceInteractionSession.KEY_RECEIVER_EXTRAS;
-import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
 import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
 import static android.view.autofill.AutofillManager.NO_SESSION;
 
@@ -27,10 +24,7 @@ import static com.android.server.autofill.Helper.VERBOSE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.app.assist.AssistStructure;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -50,7 +44,6 @@ import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
-import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
@@ -66,7 +59,6 @@ import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.IResultReceiver;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
@@ -126,56 +118,6 @@ final class AutofillManagerServiceImpl {
     /** The last selection */
     @GuardedBy("mLock")
     private FillEventHistory mEventHistory;
-
-    /**
-     * Receiver of assist data from the app's {@link Activity}.
-     */
-    private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
-        @Override
-        public void send(int resultCode, Bundle resultData) throws RemoteException {
-            if (VERBOSE) {
-                Slog.v(TAG, "resultCode on mAssistReceiver: " + resultCode);
-            }
-
-            final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
-            if (structure == null) {
-                Slog.wtf(TAG, "no assist structure for id " + resultCode);
-                return;
-            }
-
-            final Bundle receiverExtras = resultData.getBundle(KEY_RECEIVER_EXTRAS);
-            if (receiverExtras == null) {
-                Slog.wtf(TAG, "No " + KEY_RECEIVER_EXTRAS + " on receiver");
-                return;
-            }
-
-            final int sessionId = receiverExtras.getInt(EXTRA_SESSION_ID);
-            final Session session;
-            synchronized (mLock) {
-                session = mSessions.get(sessionId);
-                if (session == null) {
-                    Slog.w(TAG, "no server session for " + sessionId);
-                    return;
-                }
-                session.setStructureLocked(structure);
-            }
-
-
-            // TODO(b/35708678): Must fetch the data so it's available later on
-            // handleSave(), even if if the activity is gone by then, but structure.ensureData()
-            // gives a ONE_WAY warning because system_service could block on app calls.
-            // We need to change AssistStructure so it provides a "one-way" writeToParcel()
-            // method that sends all the data
-            structure.ensureData();
-
-            // Sanitize structure before it's sent to service.
-            structure.sanitizeForParceling(true);
-
-            // This is the first request, hence there is no Bundle to be sent as clientState
-            final FillRequest request = new FillRequest(structure, null, session.mFlags);
-            session.mRemoteFillService.onFillRequest(request);
-        }
-    };
 
     AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
             int userId, AutoFillUI ui, boolean disabled) {
@@ -393,21 +335,6 @@ final class AutofillManagerServiceImpl {
                 mInfo.getServiceInfo().getComponentName(), packageName);
         mSessions.put(newSession.id, newSession);
 
-        try {
-            final Bundle receiverExtras = new Bundle();
-            receiverExtras.putInt(EXTRA_SESSION_ID, sessionId);
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                if (!ActivityManager.getService().requestAutofillData(mAssistReceiver,
-                        receiverExtras, activityToken)) {
-                    Slog.w(TAG, "failed to request autofill data for " + activityToken);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        } catch (RemoteException e) {
-            // Should not happen, it's a local call.
-        }
         return newSession;
     }
 
