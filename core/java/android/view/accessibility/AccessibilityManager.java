@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.View;
@@ -47,7 +48,6 @@ import com.android.internal.util.IntPair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * System level service that serves as an event dispatch for {@link AccessibilityEvent}s,
@@ -137,17 +137,18 @@ public final class AccessibilityManager {
 
     boolean mIsHighTextContrastEnabled;
 
-    private final CopyOnWriteArrayList<AccessibilityStateChangeListener>
-            mAccessibilityStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final ArrayMap<AccessibilityStateChangeListener, Handler>
+            mAccessibilityStateChangeListeners = new ArrayMap<>();
 
-    private final CopyOnWriteArrayList<TouchExplorationStateChangeListener>
-            mTouchExplorationStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final ArrayMap<TouchExplorationStateChangeListener, Handler>
+            mTouchExplorationStateChangeListeners = new ArrayMap<>();
 
-    private final CopyOnWriteArrayList<HighTextContrastChangeListener>
-            mHighTextContrastStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final ArrayMap<HighTextContrastChangeListener, Handler>
+            mHighTextContrastStateChangeListeners = new ArrayMap<>();
 
-    private final CopyOnWriteArrayList<AccessibilityServicesStateChangeListener>
-            mServicesStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final ArrayMap<AccessibilityServicesStateChangeListener, Handler>
+            mServicesStateChangeListeners = new ArrayMap<>();
+
     /**
      * Listener for the system accessibility state. To listen for changes to the
      * accessibility state on the device, implement this interface and register
@@ -229,7 +230,21 @@ public final class AccessibilityManager {
 
         @Override
         public void notifyServicesStateChanged() {
-            mHandler.obtainMessage(MyCallback.MSG_NOTIFY_SERVICES_STATE_CHANGED).sendToTarget();
+            final ArrayMap<AccessibilityServicesStateChangeListener, Handler> listeners;
+            synchronized (mLock) {
+                if (mServicesStateChangeListeners.isEmpty()) {
+                    return;
+                }
+                listeners = new ArrayMap<>(mServicesStateChangeListeners);
+            }
+
+            int numListeners = listeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                final AccessibilityServicesStateChangeListener listener =
+                        mServicesStateChangeListeners.keyAt(i);
+                mServicesStateChangeListeners.valueAt(i).post(() -> listener
+                        .onAccessibilityServicesStateChanged(AccessibilityManager.this));
+            }
         }
 
         @Override
@@ -565,73 +580,118 @@ public final class AccessibilityManager {
 
     /**
      * Registers an {@link AccessibilityStateChangeListener} for changes in
-     * the global accessibility state of the system.
+     * the global accessibility state of the system. Equivalent to calling
+     * {@link #addAccessibilityStateChangeListener(AccessibilityStateChangeListener, Handler)}
+     * with a null handler.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
+     * @return Always returns {@code true}.
      */
     public boolean addAccessibilityStateChangeListener(
             @NonNull AccessibilityStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mAccessibilityStateChangeListeners.add(listener);
+        addAccessibilityStateChangeListener(listener, null);
+        return true;
+    }
+
+    /**
+     * Registers an {@link AccessibilityStateChangeListener} for changes in
+     * the global accessibility state of the system. If the listener has already been registered,
+     * the handler used to call it back is updated.
+     *
+     * @param listener The listener.
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
+     */
+    public void addAccessibilityStateChangeListener(
+            @NonNull AccessibilityStateChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mAccessibilityStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
     }
 
     /**
      * Unregisters an {@link AccessibilityStateChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
+     * @return True if the listener was previously registered.
      */
     public boolean removeAccessibilityStateChangeListener(
             @NonNull AccessibilityStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mAccessibilityStateChangeListeners.remove(listener);
+        synchronized (mLock) {
+            int index = mAccessibilityStateChangeListeners.indexOfKey(listener);
+            mAccessibilityStateChangeListeners.remove(listener);
+            return (index >= 0);
+        }
     }
 
     /**
      * Registers a {@link TouchExplorationStateChangeListener} for changes in
-     * the global touch exploration state of the system.
+     * the global touch exploration state of the system. Equivalent to calling
+     * {@link #addTouchExplorationStateChangeListener(TouchExplorationStateChangeListener, Handler)}
+     * with a null handler.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
+     * @return Always returns {@code true}.
      */
     public boolean addTouchExplorationStateChangeListener(
             @NonNull TouchExplorationStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mTouchExplorationStateChangeListeners.add(listener);
+        addTouchExplorationStateChangeListener(listener, null);
+        return true;
+    }
+
+    /**
+     * Registers an {@link TouchExplorationStateChangeListener} for changes in
+     * the global touch exploration state of the system. If the listener has already been
+     * registered, the handler used to call it back is updated.
+     *
+     * @param listener The listener.
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
+     */
+    public void addTouchExplorationStateChangeListener(
+            @NonNull TouchExplorationStateChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mTouchExplorationStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
     }
 
     /**
      * Unregisters a {@link TouchExplorationStateChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
+     * @return True if listener was previously registered.
      */
     public boolean removeTouchExplorationStateChangeListener(
             @NonNull TouchExplorationStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mTouchExplorationStateChangeListeners.remove(listener);
+        synchronized (mLock) {
+            int index = mTouchExplorationStateChangeListeners.indexOfKey(listener);
+            mTouchExplorationStateChangeListeners.remove(listener);
+            return (index >= 0);
+        }
     }
 
     /**
      * Registers a {@link AccessibilityServicesStateChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
-     *
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
      * @hide
      */
     public void addAccessibilityServicesStateChangeListener(
-            @NonNull AccessibilityServicesStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        mServicesStateChangeListeners.add(listener);
+            @NonNull AccessibilityServicesStateChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mServicesStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
     }
 
     /**
      * Unregisters a {@link AccessibilityServicesStateChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
      *
      * @hide
      */
@@ -646,28 +706,29 @@ public final class AccessibilityManager {
      * the global high text contrast state of the system.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
      *
      * @hide
      */
-    public boolean addHighTextContrastStateChangeListener(
-            @NonNull HighTextContrastChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mHighTextContrastStateChangeListeners.add(listener);
+    public void addHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mHighTextContrastStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
     }
 
     /**
      * Unregisters a {@link HighTextContrastChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
      *
      * @hide
      */
-    public boolean removeHighTextContrastStateChangeListener(
+    public void removeHighTextContrastStateChangeListener(
             @NonNull HighTextContrastChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mHighTextContrastStateChangeListeners.remove(listener);
+        synchronized (mLock) {
+            mHighTextContrastStateChangeListeners.remove(listener);
+        }
     }
 
     /**
@@ -732,15 +793,15 @@ public final class AccessibilityManager {
         mIsHighTextContrastEnabled = highTextContrastEnabled;
 
         if (wasEnabled != enabled) {
-            mHandler.sendEmptyMessage(MyCallback.MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED);
+            notifyAccessibilityStateChanged();
         }
 
         if (wasTouchExplorationEnabled != touchExplorationEnabled) {
-            mHandler.sendEmptyMessage(MyCallback.MSG_NOTIFY_EXPLORATION_STATE_CHANGED);
+            notifyTouchExplorationStateChanged();
         }
 
         if (wasHighTextContrastEnabled != highTextContrastEnabled) {
-            mHandler.sendEmptyMessage(MyCallback.MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED);
+            notifyHighTextContrastStateChanged();
         }
     }
 
@@ -932,81 +993,78 @@ public final class AccessibilityManager {
     /**
      * Notifies the registered {@link AccessibilityStateChangeListener}s.
      */
-    private void handleNotifyAccessibilityStateChanged() {
+    private void notifyAccessibilityStateChanged() {
         final boolean isEnabled;
+        final ArrayMap<AccessibilityStateChangeListener, Handler> listeners;
         synchronized (mLock) {
+            if (mAccessibilityStateChangeListeners.isEmpty()) {
+                return;
+            }
             isEnabled = mIsEnabled;
+            listeners = new ArrayMap<>(mAccessibilityStateChangeListeners);
         }
-        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
-        for (AccessibilityStateChangeListener listener : mAccessibilityStateChangeListeners) {
-            listener.onAccessibilityStateChanged(isEnabled);
+
+        int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            final AccessibilityStateChangeListener listener =
+                    mAccessibilityStateChangeListeners.keyAt(i);
+            mAccessibilityStateChangeListeners.valueAt(i)
+                    .post(() -> listener.onAccessibilityStateChanged(isEnabled));
         }
     }
 
     /**
      * Notifies the registered {@link TouchExplorationStateChangeListener}s.
      */
-    private void handleNotifyTouchExplorationStateChanged() {
+    private void notifyTouchExplorationStateChanged() {
         final boolean isTouchExplorationEnabled;
+        final ArrayMap<TouchExplorationStateChangeListener, Handler> listeners;
         synchronized (mLock) {
+            if (mTouchExplorationStateChangeListeners.isEmpty()) {
+                return;
+            }
             isTouchExplorationEnabled = mIsTouchExplorationEnabled;
+            listeners = new ArrayMap<>(mTouchExplorationStateChangeListeners);
         }
-        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
-        for (TouchExplorationStateChangeListener listener :mTouchExplorationStateChangeListeners) {
-            listener.onTouchExplorationStateChanged(isTouchExplorationEnabled);
+
+        int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            final TouchExplorationStateChangeListener listener =
+                    mTouchExplorationStateChangeListeners.keyAt(i);
+            mTouchExplorationStateChangeListeners.valueAt(i)
+                    .post(() -> listener.onTouchExplorationStateChanged(isTouchExplorationEnabled));
         }
     }
 
     /**
      * Notifies the registered {@link HighTextContrastChangeListener}s.
      */
-    private void handleNotifyHighTextContrastStateChanged() {
+    private void notifyHighTextContrastStateChanged() {
         final boolean isHighTextContrastEnabled;
+        final ArrayMap<HighTextContrastChangeListener, Handler> listeners;
         synchronized (mLock) {
+            if (mHighTextContrastStateChangeListeners.isEmpty()) {
+                return;
+            }
             isHighTextContrastEnabled = mIsHighTextContrastEnabled;
+            listeners = new ArrayMap<>(mHighTextContrastStateChangeListeners);
         }
-        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
-        for (HighTextContrastChangeListener listener : mHighTextContrastStateChangeListeners) {
-            listener.onHighTextContrastStateChanged(isHighTextContrastEnabled);
-        }
-    }
 
-    /**
-     * Notifies the registered {@link AccessibilityServicesStateChangeListener}s.
-     */
-    private void handleNotifyServicesStateChanged() {
-        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
-        for (AccessibilityServicesStateChangeListener listener : mServicesStateChangeListeners) {
-            listener.onAccessibilityServicesStateChanged(this);
+        int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            final HighTextContrastChangeListener listener =
+                    mHighTextContrastStateChangeListeners.keyAt(i);
+            mHighTextContrastStateChangeListeners.valueAt(i)
+                    .post(() -> listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
     }
 
     private final class MyCallback implements Handler.Callback {
-        public static final int MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED = 1;
-        public static final int MSG_NOTIFY_EXPLORATION_STATE_CHANGED = 2;
-        public static final int MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED = 3;
-        public static final int MSG_SET_STATE = 4;
-        public static final int MSG_NOTIFY_SERVICES_STATE_CHANGED = 5;
+        public static final int MSG_SET_STATE = 1;
 
         @Override
         public boolean handleMessage(Message message) {
             switch (message.what) {
-                case MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED: {
-                    handleNotifyAccessibilityStateChanged();
-                } break;
-
-                case MSG_NOTIFY_EXPLORATION_STATE_CHANGED: {
-                    handleNotifyTouchExplorationStateChanged();
-                } break;
-
-                case MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED: {
-                    handleNotifyHighTextContrastStateChanged();
-                } break;
-
-                case MSG_NOTIFY_SERVICES_STATE_CHANGED: {
-                    handleNotifyServicesStateChanged();
-                } break;
-
                 case MSG_SET_STATE: {
                     // See comment at mClient
                     final int state = message.arg1;
