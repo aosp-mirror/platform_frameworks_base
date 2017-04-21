@@ -32,9 +32,17 @@ namespace aapt {
 class ResourceTable;
 class SymbolTable;
 
+// The type of package to build.
+enum class PackageType {
+  kApp,
+  kSharedLib,
+  kStaticLib,
+};
+
 struct IAaptContext {
   virtual ~IAaptContext() = default;
 
+  virtual PackageType GetPackageType() = 0;
   virtual SymbolTable* GetExternalSymbols() = 0;
   virtual IDiagnostics* GetDiagnostics() = 0;
   virtual const std::string& GetCompilationPackage() = 0;

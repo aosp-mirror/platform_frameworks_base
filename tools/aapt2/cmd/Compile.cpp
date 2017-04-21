@@ -582,6 +582,11 @@ static bool CompileFile(IAaptContext* context, const CompileOptions& options,
 
 class CompileContext : public IAaptContext {
  public:
+  PackageType GetPackageType() override {
+    // Every compilation unit starts as an app and then gets linked as potentially something else.
+    return PackageType::kApp;
+  }
+
   void SetVerbose(bool val) {
     verbose_ = val;
   }
