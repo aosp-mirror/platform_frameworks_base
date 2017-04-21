@@ -83,7 +83,7 @@ public class AppWidgetHostViewTest {
     @Test
     public void asyncInflation() throws Exception {
         RunnableList executor = new RunnableList();
-        mHostView.setAsyncExecutor(executor);
+        mHostView.setExecutor(executor);
 
         mHostView.updateAppWidget(mViews);
         assertNull(mHostView.findViewById(R.id.image));
@@ -100,7 +100,7 @@ public class AppWidgetHostViewTest {
     @Test
     public void asyncInflation_cancelled() throws Exception {
         RunnableList executor = new RunnableList();
-        mHostView.setAsyncExecutor(executor);
+        mHostView.setExecutor(executor);
 
         mHostView.updateAppWidget(mViews.clone());
         mHostView.updateAppWidget(mViews.clone());
