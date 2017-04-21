@@ -204,12 +204,11 @@ class KeyguardController {
         mOccluded = false;
         mDismissingKeyguardActivity = null;
         final ArrayList<ActivityStack> stacks = mStackSupervisor.getStacksOnDefaultDisplay();
-        final int topStackNdx = stacks.size() - 1;
-        for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
+        for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = stacks.get(stackNdx);
 
-            // Only the very top activity may control occluded state
-            if (stackNdx == topStackNdx) {
+            // Only the focused stack top activity may control occluded state
+            if (mStackSupervisor.isFocusedStack(stack)) {
 
                 // A dismissing activity occludes Keyguard in the insecure case for legacy reasons.
                 final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
