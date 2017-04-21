@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
+import android.app.backup.BackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -567,12 +568,10 @@ public class TrampolineTest {
         verify(mBackupManagerServiceMock).isAppEligibleForBackup(PACKAGE_NAME);
     }
 
-    // Test is ignored until Trampoline.requestBackup() is fixed not to throw NPE.
-    @Ignore
     @Test
     public void requestBackup_calledBeforeInitialize_ignored() throws RemoteException {
-        assertEquals(0, mTrampoline.requestBackup(PACKAGE_NAMES, mBackupObserverMock,
-                mBackupManagerMonitorMock, 123));
+        assertEquals(BackupManager.ERROR_BACKUP_NOT_ALLOWED, mTrampoline.requestBackup(
+                PACKAGE_NAMES, mBackupObserverMock, mBackupManagerMonitorMock, 123));
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
 
