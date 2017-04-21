@@ -47,11 +47,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-
 /**
  * An adapter to a RemoteViewsService which fetches and caches RemoteViews
  * to be later inflated as child views.
@@ -1114,7 +1109,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 layout = (RemoteViewsFrameLayout) convertView;
             } else {
                 layout = new RemoteViewsFrameLayout(parent.getContext(), mCache);
-                layout.setAsyncExecutor(mAsyncViewLoadExecutor);
+                layout.setExecutor(mAsyncViewLoadExecutor);
             }
 
             if (isInCache) {

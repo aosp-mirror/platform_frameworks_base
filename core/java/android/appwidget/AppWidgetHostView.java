@@ -353,7 +353,7 @@ public class AppWidgetHostView extends FrameLayout {
      *
      * @param executor the executor to use or null.
      */
-    public void setAsyncExecutor(Executor executor) {
+    public void setExecutor(Executor executor) {
         if (mLastExecutionSignal != null) {
             mLastExecutionSignal.cancel();
             mLastExecutionSignal = null;
