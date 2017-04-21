@@ -17,7 +17,7 @@
 
 package com.android.server.autofill;
 
-import static android.view.autofill.AutofillManager.FLAG_MANUAL_REQUEST;
+import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.FLAG_VIEW_ENTERED;
