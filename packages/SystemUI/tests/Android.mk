@@ -43,7 +43,8 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v7-appcompat \
     android-support-v7-mediarouter \
     android-support-v14-preference \
-    android-support-v17-leanback
+    android-support-v17-leanback \
+    colorextraction
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     metrics-helper-lib \

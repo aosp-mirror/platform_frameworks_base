@@ -58,6 +58,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.ExpandHelper;
@@ -86,6 +87,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
+
+import android.support.v4.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -485,16 +488,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         float alpha = BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
         alpha *= mBackgroundFadeAmount;
         // We need to manually blend in the background color
-        int scrimColor = mScrimController.getScrimBehindColor();
-        // SRC_OVER blending Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc
-        float alphaInv = 1 - alpha;
-        int color = Color.argb((int) (alpha * 255 + alphaInv * Color.alpha(scrimColor)),
-                (int) (mBackgroundFadeAmount * Color.red(mBgColor)
-                        + alphaInv * Color.red(scrimColor)),
-                (int) (mBackgroundFadeAmount * Color.green(mBgColor)
-                        + alphaInv * Color.green(scrimColor)),
-                (int) (mBackgroundFadeAmount * Color.blue(mBgColor)
-                        + alphaInv * Color.blue(scrimColor)));
+        int scrimColor = mScrimController.getBackgroundColor();
+        int color = ColorUtils.blendARGB(scrimColor, mBgColor, alpha);
         if (mCachedBackgroundColor != color) {
             mCachedBackgroundColor = color;
             mBackgroundPaint.setColor(color);
@@ -4074,12 +4069,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setScrimController(ScrimController scrimController) {
         mScrimController = scrimController;
-        mScrimController.setScrimBehindChangeRunnable(new Runnable() {
-            @Override
-            public void run() {
-                updateBackgroundDimming();
-            }
-        });
+        mScrimController.setScrimBehindChangeRunnable(this::updateBackgroundDimming);
     }
 
     public void forceNoOverlappingRendering(boolean force) {
