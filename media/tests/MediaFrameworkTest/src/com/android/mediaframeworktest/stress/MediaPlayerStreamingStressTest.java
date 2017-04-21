@@ -144,7 +144,7 @@ public class MediaPlayerStreamingStressTest extends ActivityInstrumentationTestC
                 //Get url
                 String filename = urls.get(i);
                 onCompleteSuccess =
-                    CodecTest.playMediaSamples(filename, 60000);
+                    CodecTest.playMediaSamples(filename, 60000, true /* streamingTest */);
                 if (!onCompleteSuccess){
                     //Don't fail the test right away, print out the failure file.
                     fileWithError += filename + '\n';

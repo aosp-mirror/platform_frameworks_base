@@ -789,11 +789,12 @@ public class CodecTest {
     };
 
     public static boolean playMediaSamples(String filePath) throws Exception {
-        return playMediaSamples(filePath, 2000);
+        return playMediaSamples(filePath, 2000, false /* streamingTest */);
     }
 
     // For each media file, forward twice and backward once, then play to the end
-    public static boolean playMediaSamples(String filePath, int buffertime) throws Exception {
+    public static boolean playMediaSamples(String filePath, int buffertime, boolean streamingTest)
+            throws Exception {
         int duration = 0;
         int curPosition = 0;
         int nextPosition = 0;
@@ -808,27 +809,32 @@ public class CodecTest {
         mFailedToCompleteWithNoError = true;
         String testResult;
 
-        final MediaCodecList list = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-        final MediaExtractor extractor = new MediaExtractor();
         boolean hasSupportedVideo = false;
 
-        try {
-            extractor.setDataSource(filePath);
+        if (!streamingTest) {
+            final MediaCodecList list = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+            final MediaExtractor extractor = new MediaExtractor();
 
-            for (int index = 0; index < extractor.getTrackCount(); ++index) {
-                MediaFormat format = extractor.getTrackFormat(index);
-                String mime = format.getString(MediaFormat.KEY_MIME);
-                if (!mime.startsWith("video/")) {
-                    continue;
-                }
+            try {
+                extractor.setDataSource(filePath);
 
-                if (list.findDecoderForFormat(format) != null) {
-                    hasSupportedVideo = true;
-                    break;
+                for (int index = 0; index < extractor.getTrackCount(); ++index) {
+                    MediaFormat format = extractor.getTrackFormat(index);
+                    String mime = format.getString(MediaFormat.KEY_MIME);
+                    if (!mime.startsWith("video/")) {
+                        continue;
+                    }
+
+                    if (list.findDecoderForFormat(format) != null) {
+                        hasSupportedVideo = true;
+                        break;
+                    }
                 }
+            } finally {
+                extractor.release();
             }
-        } finally {
-            extractor.release();
+        } else { // streamingTest
+            hasSupportedVideo = true;
         }
 
         initializeMessageLooper();
