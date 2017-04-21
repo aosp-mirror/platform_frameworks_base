@@ -41,6 +41,7 @@ import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
+import android.util.TypedValue;
 import android.view.Gravity;
 
 import com.android.internal.R;
@@ -49,6 +50,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * A Drawable that wraps a bitmap and can be tiled, stretched, or aligned. You can create a
@@ -749,7 +751,7 @@ public class BitmapDrawable extends Drawable {
         super.inflate(r, parser, attrs, theme);
 
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.BitmapDrawable);
-        updateStateFromTypedArray(a);
+        updateStateFromTypedArray(a, mSrcDensityOverride);
         verifyRequiredAttributes(a);
         a.recycle();
 
@@ -775,7 +777,8 @@ public class BitmapDrawable extends Drawable {
     /**
      * Updates the constant state from the values in the typed array.
      */
-    private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
+    private void updateStateFromTypedArray(TypedArray a, int srcDensityOverride)
+            throws XmlPullParserException {
         final Resources r = a.getResources();
         final BitmapState state = mBitmapState;
 
@@ -785,9 +788,37 @@ public class BitmapDrawable extends Drawable {
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
 
+        state.mSrcDensityOverride = srcDensityOverride;
+
+        state.mTargetDensity = Drawable.resolveDensity(r, 0);
+
         final int srcResId = a.getResourceId(R.styleable.BitmapDrawable_src, 0);
         if (srcResId != 0) {
-            final Bitmap bitmap = BitmapFactory.decodeResource(r, srcResId);
+            final TypedValue value = new TypedValue();
+            r.getValueForDensity(srcResId, srcDensityOverride, value, true);
+
+            // Pretend the requested density is actually the display density. If
+            // the drawable returned is not the requested density, then force it
+            // to be scaled later by dividing its density by the ratio of
+            // requested density to actual device density. Drawables that have
+            // undefined density or no density don't need to be handled here.
+            if (srcDensityOverride > 0 && value.density > 0
+                    && value.density != TypedValue.DENSITY_NONE) {
+                if (value.density == srcDensityOverride) {
+                    value.density = r.getDisplayMetrics().densityDpi;
+                } else {
+                    value.density =
+                            (value.density * r.getDisplayMetrics().densityDpi) / srcDensityOverride;
+                }
+            }
+
+            Bitmap bitmap = null;
+            try (InputStream is = r.openRawResource(srcResId, value)) {
+                bitmap = BitmapFactory.decodeResourceStream(r, value, is, null, null);
+            } catch (Exception e) {
+                // Do nothing and pick up the error below.
+            }
+
             if (bitmap == null) {
                 throw new XmlPullParserException(a.getPositionDescription() +
                         ": <bitmap> requires a valid 'src' attribute");
@@ -795,8 +826,6 @@ public class BitmapDrawable extends Drawable {
 
             state.mBitmap = bitmap;
         }
-
-        state.mTargetDensity = r.getDisplayMetrics().densityDpi;
 
         final boolean defMipMap = state.mBitmap != null ? state.mBitmap.hasMipMap() : false;
         setMipMap(a.getBoolean(R.styleable.BitmapDrawable_mipMap, defMipMap));
@@ -839,8 +868,6 @@ public class BitmapDrawable extends Drawable {
         if (tileModeY != TILE_MODE_UNDEFINED) {
             setTileModeY(parseTileMode(tileModeY));
         }
-
-        state.mTargetDensity = Drawable.resolveDensity(r, 0);
     }
 
     @Override
@@ -855,7 +882,7 @@ public class BitmapDrawable extends Drawable {
         if (state.mThemeAttrs != null) {
             final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.BitmapDrawable);
             try {
-                updateStateFromTypedArray(a);
+                updateStateFromTypedArray(a, state.mSrcDensityOverride);
             } catch (XmlPullParserException e) {
                 rethrowAsRuntimeException(e);
             } finally {
@@ -929,7 +956,14 @@ public class BitmapDrawable extends Drawable {
         float mBaseAlpha = 1.0f;
         Shader.TileMode mTileModeX = null;
         Shader.TileMode mTileModeY = null;
+
+        // The density to use when looking up the bitmap in Resources. A value of 0 means use
+        // the system's density.
+        int mSrcDensityOverride = 0;
+
+        // The density at which to render the bitmap.
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+
         boolean mAutoMirrored = false;
 
         @Config int mChangingConfigurations;
@@ -949,6 +983,7 @@ public class BitmapDrawable extends Drawable {
             mGravity = bitmapState.mGravity;
             mTileModeX = bitmapState.mTileModeX;
             mTileModeY = bitmapState.mTileModeY;
+            mSrcDensityOverride = bitmapState.mSrcDensityOverride;
             mTargetDensity = bitmapState.mTargetDensity;
             mBaseAlpha = bitmapState.mBaseAlpha;
             mPaint = new Paint(bitmapState.mPaint);

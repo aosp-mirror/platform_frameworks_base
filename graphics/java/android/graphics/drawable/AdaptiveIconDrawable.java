@@ -16,8 +16,6 @@
 
 package android.graphics.drawable;
 
-import static android.graphics.drawable.Drawable.obtainAttributes;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -218,14 +216,16 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
         // The density may have changed since the last update. This will
         // apply scaling to any existing constant state properties.
-        final int density = Drawable.resolveDensity(r, 0);
-        state.setDensity(density);
+        final int deviceDensity = Drawable.resolveDensity(r, 0);
+        state.setDensity(deviceDensity);
+        state.mSrcDensityOverride = mSrcDensityOverride;
 
         final ChildDrawable[] array = state.mChildren;
         for (int i = 0; i < state.mChildren.length; i++) {
             final ChildDrawable layer = array[i];
-            layer.setDensity(density);
+            layer.setDensity(deviceDensity);
         }
+
         inflateLayers(r, parser, attrs, theme);
     }
 
@@ -444,7 +444,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     /**
      * Inflates child layers using the specified parser.
      */
-    void inflateLayers(@NonNull Resources r, @NonNull XmlPullParser parser,
+    private void inflateLayers(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         final LayerState state = mLayerState;
@@ -491,7 +491,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
                 }
 
                 // We found a child drawable. Take ownership.
-                layer.mDrawable = Drawable.createFromXmlInner(r, parser, attrs, theme);
+                layer.mDrawable = Drawable.createFromXmlInnerForDensity(r, parser, attrs,
+                        mLayerState.mSrcDensityOverride, theme);
                 layer.mDrawable.setCallback(this);
                 state.mChildrenChangingConfigurations |=
                         layer.mDrawable.getChangingConfigurations();
@@ -509,7 +510,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         // Extract the theme attributes, if any.
         layer.mThemeAttrs = a.extractThemeAttrs();
 
-        Drawable dr = a.getDrawable(R.styleable.AdaptiveIconDrawableLayer_drawable);
+        Drawable dr = a.getDrawableForDensity(R.styleable.AdaptiveIconDrawableLayer_drawable,
+                state.mSrcDensityOverride);
         if (dr != null) {
             if (layer.mDrawable != null) {
                 // It's possible that a drawable was already set, in which case
@@ -951,7 +953,13 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         final static int N_CHILDREN = 2;
         ChildDrawable[] mChildren;
 
+        // The density at which to render the drawable and its children.
         int mDensity;
+
+        // The density to use when inflating/looking up the children drawables. A value of 0 means
+        // use the system's density.
+        int mSrcDensityOverride = 0;
+
         int mOpacityOverride = PixelFormat.UNKNOWN;
 
         @Config int mChangingConfigurations;
@@ -986,6 +994,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
                 mAutoMirrored = orig.mAutoMirrored;
                 mThemeAttrs = orig.mThemeAttrs;
                 mOpacityOverride = orig.mOpacityOverride;
+                mSrcDensityOverride = orig.mSrcDensityOverride;
             } else {
                 for (int i = 0; i < N_CHILDREN; i++) {
                     mChildren[i] = new ChildDrawable(mDensity);
