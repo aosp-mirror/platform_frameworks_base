@@ -1500,7 +1500,7 @@ public class NetworkPolicyManagerServiceTest {
         final FutureAnswer<String> futureAnswer = new FutureAnswer<String>(2);
         doAnswer(futureAnswer).when(mNotifManager).enqueueNotificationWithTag(
                 anyString(), anyString(), anyString() /* capture here (index 2)*/,
-                anyInt(), isA(Notification.class), isA(int[].class), anyInt());
+                anyInt(), isA(Notification.class), anyInt());
         return futureAnswer;
     }
 

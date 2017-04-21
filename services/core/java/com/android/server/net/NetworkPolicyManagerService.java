@@ -1254,14 +1254,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // TODO: move to NotificationManager once we can mock it
         try {
             final String packageName = mContext.getPackageName();
-            final int[] idReceived = new int[1];
             if (!TextUtils.isEmpty(body)) {
                 builder.setStyle(new Notification.BigTextStyle()
                         .bigText(body));
             }
             mNotifManager.enqueueNotificationWithTag(
                     packageName, packageName, notificationId.getTag(), notificationId.getId(),
-                    builder.build(), idReceived, UserHandle.USER_ALL);
+                    builder.build(), UserHandle.USER_ALL);
             mActiveNotifs.add(notificationId);
         } catch (RemoteException e) {
             // ignored; service lives in system_server

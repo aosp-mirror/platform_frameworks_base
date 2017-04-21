@@ -524,10 +524,9 @@ final class ServiceRecord extends Binder {
                             throw new RuntimeException("invalid service notification: "
                                     + foregroundNoti);
                         }
-                        int[] outId = new int[1];
                         nm.enqueueNotification(localPackageName, localPackageName,
                                 appUid, appPid, null, localForegroundId, localForegroundNoti,
-                                outId, userId);
+                                userId);
 
                         foregroundNoti = localForegroundNoti; // save it for amending next time
                     } catch (RuntimeException e) {
