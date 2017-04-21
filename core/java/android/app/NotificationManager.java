@@ -298,7 +298,6 @@ public class NotificationManager
      */
     public void notifyAsUser(String tag, int id, Notification notification, UserHandle user)
     {
-        int[] idOut = new int[1];
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
         // Fix the notification as best we can.
@@ -320,10 +319,7 @@ public class NotificationManager
         final Notification copy = Builder.maybeCloneStrippedForDelivery(notification);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    copy, idOut, user.getIdentifier());
-            if (localLOGV && id != idOut[0]) {
-                Log.v(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
-            }
+                    copy, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

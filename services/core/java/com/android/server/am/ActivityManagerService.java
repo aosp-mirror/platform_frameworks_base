@@ -2114,10 +2114,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     new UserHandle(root.userId)))
                             .build();
                     try {
-                        int[] outId = new int[1];
                         inm.enqueueNotificationWithTag("android", "android", null,
                                 SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION,
-                                notification, outId, root.userId);
+                                notification, root.userId);
                     } catch (RuntimeException e) {
                         Slog.w(ActivityManagerService.TAG,
                                 "Error showing notification for heavy-weight app", e);
@@ -2369,10 +2368,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         .build();
 
                 try {
-                    int[] outId = new int[1];
                     inm.enqueueNotificationWithTag("android", "android", null,
                             SystemMessage.NOTE_DUMP_HEAP_NOTIFICATION,
-                            notification, outId, userId);
+                            notification, userId);
                 } catch (RuntimeException e) {
                     Slog.w(ActivityManagerService.TAG,
                             "Error showing notification for dump heap", e);
