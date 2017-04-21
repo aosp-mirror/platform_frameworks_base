@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Denotes that the annotated method should only be called on a worker thread.
- * If the annotated element is a class, then all methods in the class should be
- * called on a worker thread.
- * <p>
- * Example:
+ * Denotes that any automatically generated documentation should be suppressed
+ * for the annotated method, parameter, or field.
  *
- * <pre>
- * <code>
- *  &#64;WorkerThread
- *  protected abstract FilterResults performFiltering(CharSequence constraint);
- * </code>
- * </pre>
- *
- * @memberDoc This method may take several seconds to complete, so it should
- *            only be called from a worker thread.
  * @hide
  */
 @Retention(SOURCE)
-@Target({METHOD,CONSTRUCTOR,TYPE})
-public @interface WorkerThread {
+@Target({METHOD, PARAMETER, FIELD})
+public @interface SuppressAutoDoc {
 }

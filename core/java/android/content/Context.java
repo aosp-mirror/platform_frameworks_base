@@ -4111,15 +4111,7 @@ public abstract class Context {
      *
      * @param toPackage The package you would like to allow to access the Uri.
      * @param uri The Uri you would like to grant access to.
-     * @param modeFlags The desired access modes.  Any combination of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
-     * Intent.FLAG_GRANT_READ_URI_PERMISSION},
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
-     * Intent.FLAG_GRANT_WRITE_URI_PERMISSION},
-     * {@link Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-     * Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION}, or
-     * {@link Intent#FLAG_GRANT_PREFIX_URI_PERMISSION
-     * Intent.FLAG_GRANT_PREFIX_URI_PERMISSION}.
+     * @param modeFlags The desired access modes.
      *
      * @see #revokeUriPermission
      */
@@ -4150,11 +4142,7 @@ public abstract class Context {
      * revoke grants that another app could be strongly expecting to stick around.</p>
      *
      * @param uri The Uri you would like to revoke access to.
-     * @param modeFlags The desired access modes.  Any combination of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
-     * Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
-     * Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to revoke.
      *
      * @see #grantUriPermission
      */
@@ -4177,11 +4165,7 @@ public abstract class Context {
      *
      * @param toPackage The package you had previously granted access to.
      * @param uri The Uri you would like to revoke access to.
-     * @param modeFlags The desired access modes.  Any combination of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
-     * Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
-     * Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to revoke.
      *
      * @see #grantUriPermission
      */
@@ -4199,9 +4183,7 @@ public abstract class Context {
      * @param pid The process ID being checked against.  Must be &gt; 0.
      * @param uid The user ID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to check.
      *
      * @return {@link PackageManager#PERMISSION_GRANTED} if the given
      * pid/uid is allowed to access that uri, or
@@ -4228,9 +4210,7 @@ public abstract class Context {
      * will always fail.
      *
      * @param uri The uri that is being checked.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to check.
      *
      * @return {@link PackageManager#PERMISSION_GRANTED} if the caller
      * is allowed to access that uri, or
@@ -4248,9 +4228,7 @@ public abstract class Context {
      * if you are not currently processing an IPC.  Use with care!
      *
      * @param uri The uri that is being checked.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to check.
      *
      * @return {@link PackageManager#PERMISSION_GRANTED} if the caller
      * is allowed to access that uri, or
@@ -4276,9 +4254,7 @@ public abstract class Context {
      * @param pid The process ID being checked against.  Must be &gt; 0.
      * @param uid The user ID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to check.
      *
      * @return {@link PackageManager#PERMISSION_GRANTED} if the caller
      * is allowed to access that uri or holds one of the given permissions, or
@@ -4301,9 +4277,7 @@ public abstract class Context {
      * @param pid The process ID being checked against.  Must be &gt; 0.
      * @param uid The user ID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.
      *
      * @see #checkUriPermission(Uri, int, int, int)
@@ -4323,9 +4297,7 @@ public abstract class Context {
      * will always throw a SecurityException.
      *
      * @param uri The uri that is being checked.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.
      *
      * @see #checkCallingUriPermission(Uri, int)
@@ -4342,9 +4314,7 @@ public abstract class Context {
      * with care!
      *
      * @param uri The uri that is being checked.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.
      *
      * @see #checkCallingOrSelfUriPermission(Uri, int)
@@ -4366,9 +4336,7 @@ public abstract class Context {
      * @param pid The process ID being checked against.  Must be &gt; 0.
      * @param uid The user ID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
-     * @param modeFlags The type of access to grant.  May be one or both of
-     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
-     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.
      *
      * @see #checkUriPermission(Uri, String, String, int, int, int)

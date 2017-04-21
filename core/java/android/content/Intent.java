@@ -4891,14 +4891,14 @@ public class Intent implements Parcelable, Cloneable {
     // Intent flags (see mFlags variable).
 
     /** @hide */
-    @IntDef(flag = true, value = {
+    @IntDef(flag = true, prefix = { "FLAG_GRANT_" }, value = {
             FLAG_GRANT_READ_URI_PERMISSION, FLAG_GRANT_WRITE_URI_PERMISSION,
             FLAG_GRANT_PERSISTABLE_URI_PERMISSION, FLAG_GRANT_PREFIX_URI_PERMISSION })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GrantUriMode {}
 
     /** @hide */
-    @IntDef(flag = true, value = {
+    @IntDef(flag = true, prefix = { "FLAG_GRANT_" }, value = {
             FLAG_GRANT_READ_URI_PERMISSION, FLAG_GRANT_WRITE_URI_PERMISSION })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AccessUriMode {}

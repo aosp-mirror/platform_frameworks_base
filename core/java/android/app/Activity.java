@@ -2720,12 +2720,13 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "DEFAULT_KEYS_" }, value = {
             DEFAULT_KEYS_DISABLE,
             DEFAULT_KEYS_DIALER,
             DEFAULT_KEYS_SHORTCUT,
             DEFAULT_KEYS_SEARCH_LOCAL,
-            DEFAULT_KEYS_SEARCH_GLOBAL})
+            DEFAULT_KEYS_SEARCH_GLOBAL
+    })
     @Retention(RetentionPolicy.SOURCE)
     @interface DefaultKeyMode {}
 
@@ -2791,11 +2792,6 @@ public class Activity extends ContextThemeWrapper
      *
      * @param mode The desired default key mode constant.
      *
-     * @see #DEFAULT_KEYS_DISABLE
-     * @see #DEFAULT_KEYS_DIALER
-     * @see #DEFAULT_KEYS_SHORTCUT
-     * @see #DEFAULT_KEYS_SEARCH_LOCAL
-     * @see #DEFAULT_KEYS_SEARCH_GLOBAL
      * @see #onKeyDown
      */
     public final void setDefaultKeyMode(@DefaultKeyMode int mode) {
