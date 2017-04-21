@@ -18,6 +18,7 @@
     <step category="com.android.settings.suggested.category.DEFERRED_SETUP"
         exclusive="true" />
     <step category="com.android.settings.suggested.category.LOCK_SCREEN" />
+    <step category="com.android.settings.suggested.category.TRUST_AGENT" />
     <step category="com.android.settings.suggested.category.EMAIL" />
     <step category="com.android.settings.suggested.category.PARTNER_ACCOUNT"
         multiple="true" />
