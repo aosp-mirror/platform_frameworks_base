@@ -390,6 +390,9 @@
     <!-- Content description of the airplane mode icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_airplane_mode">Airplane mode.</string>
 
+    <!-- Content description of the VPN icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_vpn_on">VPN on.</string>
+
     <!-- Content description of the no sim icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_sims">No SIM card.</string>
 
