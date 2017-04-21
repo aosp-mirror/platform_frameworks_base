@@ -2838,4 +2838,9 @@
 
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
+
+    <!-- Flag indicating that the entire notification header can be clicked to expand the
+         notification. If false, then the expand icon has to be clicked in order for the expand
+         to occur. The expand button will have increased touch boundaries to accomodate this. -->
+    <bool name="config_notificationHeaderClickableForExpand">false</bool>
 </resources>
