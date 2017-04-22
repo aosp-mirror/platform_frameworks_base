@@ -1728,7 +1728,7 @@ public final class ActiveServices {
             return null;
         }
 
-        if (!whileRestarting && r.restartDelay > 0) {
+        if (!whileRestarting && mRestartingServices.contains(r)) {
             // If waiting for a restart, then do nothing.
             return null;
         }
@@ -1740,7 +1740,6 @@ public final class ActiveServices {
         // We are now bringing the service up, so no longer in the
         // restarting state.
         if (mRestartingServices.remove(r)) {
-            r.resetRestartCounter();
             clearRestartingIfNeededLocked(r);
         }
 
