@@ -32,7 +32,11 @@ import java.lang.ref.WeakReference;
 
 /**
  * Helper for implementing a {@link android.app.Service} that interacts with
- * {@link JobScheduler}.
+ * {@link JobScheduler}.  This is not intended for use by regular applications, but
+ * allows frameworks built on top of the platform to create their own
+ * {@link android.app.Service} that interact with {@link JobScheduler} as well as
+ * add in additional functionality.  If you just want to execute jobs normally, you
+ * should instead be looking at {@link JobService}.
  */
 public abstract class JobServiceEngine {
     private static final String TAG = "JobServiceEngine";
@@ -215,7 +219,7 @@ public abstract class JobServiceEngine {
      * {@link JobService#jobFinished(JobParameters, boolean)}  JobService.jobFinished} for more
      * information.
      */
-    public final void jobFinished(JobParameters params, boolean needsReschedule) {
+    public void jobFinished(JobParameters params, boolean needsReschedule) {
         Message m = Message.obtain(mHandler, MSG_JOB_FINISHED, params);
         m.arg2 = needsReschedule ? 1 : 0;
         m.sendToTarget();

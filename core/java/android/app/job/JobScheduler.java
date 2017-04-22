@@ -75,21 +75,22 @@ public abstract class JobScheduler {
     public abstract int schedule(@NonNull JobInfo job);
 
     /**
-     * Similar to {@link #schedule}, but allows you to enqueue work for an existing job.  If a job
-     * with the same ID is already scheduled, it will be replaced with the new {@link JobInfo}, but
-     * any previously enqueued work will remain and be dispatched the next time it runs.  If a job
-     * with the same ID is already running, the new work will be enqueued for it.
+     * Similar to {@link #schedule}, but allows you to enqueue work for a new <em>or existing</em>
+     * job.  If a job with the same ID is already scheduled, it will be replaced with the
+     * new {@link JobInfo}, but any previously enqueued work will remain and be dispatched the
+     * next time it runs.  If a job with the same ID is already running, the new work will be
+     * enqueued for it.
      *
      * <p>The work you enqueue is later retrieved through
-     * {@link JobParameters#dequeueWork() JobParameters.dequeueWork()}.  Be sure to see there
+     * {@link JobParameters#dequeueWork() JobParameters.dequeueWork}.  Be sure to see there
      * about how to process work; the act of enqueueing work changes how you should handle the
      * overall lifecycle of an executing job.</p>
      *
      * <p>It is strongly encouraged that you use the same {@link JobInfo} for all work you
-     * enqueue.  This will allow the system to optimal schedule work along with any pending
+     * enqueue.  This will allow the system to optimally schedule work along with any pending
      * and/or currently running work.  If the JobInfo changes from the last time the job was
      * enqueued, the system will need to update the associated JobInfo, which can cause a disruption
-     * in exection.  In particular, this can result in any currently running job that is processing
+     * in execution.  In particular, this can result in any currently running job that is processing
      * previous work to be stopped and restarted with the new JobInfo.</p>
      *
      * <p>It is recommended that you avoid using
@@ -100,7 +101,7 @@ public abstract class JobScheduler {
      * (That said, you should be relatively safe with a simple set of consistent data in these
      * fields.)  You should never use {@link JobInfo.Builder#setClipData(ClipData, int)} with
      * work you are enqueue, since currently this will always be treated as a different JobInfo,
-     * even if the ClipData contents is exactly the same.</p>
+     * even if the ClipData contents are exactly the same.</p>
      *
      * @param job The job you wish to enqueue work for. See
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs

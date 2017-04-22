@@ -22,15 +22,19 @@ import android.os.Parcelable;
 
 /**
  * A unit of work that can be enqueued for a job using
- * {@link JobScheduler#enqueue JobScheduler.enqueue}.
+ * {@link JobScheduler#enqueue JobScheduler.enqueue}.  See
+ * {@link JobParameters#dequeueWork() JobParameters.dequeueWork} for more details.
  */
 final public class JobWorkItem implements Parcelable {
     final Intent mIntent;
+    int mDeliveryCount;
     int mWorkId;
     Object mGrants;
 
     /**
-     * Create a new piece of work.
+     * Create a new piece of work, which can be submitted to
+     * {@link JobScheduler#enqueue JobScheduler.enqueue}.
+     *
      * @param intent The general Intent describing this work.
      */
     public JobWorkItem(Intent intent) {
@@ -42,6 +46,23 @@ final public class JobWorkItem implements Parcelable {
      */
     public Intent getIntent() {
         return mIntent;
+    }
+
+    /**
+     * Return the count of the number of times this work item has been delivered
+     * to the job.  The value will be > 1 if it has been redelivered because the job
+     * was stopped or crashed while it had previously been delivered but before the
+     * job had called {@link JobParameters#completeWork JobParameters.completeWork} for it.
+     */
+    public int getDeliveryCount() {
+        return mDeliveryCount;
+    }
+
+    /**
+     * @hide
+     */
+    public void bumpDeliveryCount() {
+        mDeliveryCount++;
     }
 
     /**
@@ -73,7 +94,17 @@ final public class JobWorkItem implements Parcelable {
     }
 
     public String toString() {
-        return "JobWorkItem{id=" + mWorkId + " intent=" + mIntent + "}";
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("JobWorkItem{id=");
+        sb.append(mWorkId);
+        sb.append(" intent=");
+        sb.append(mIntent);
+        if (mDeliveryCount != 0) {
+            sb.append(" dcount=");
+            sb.append(mDeliveryCount);
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     public int describeContents() {
@@ -87,6 +118,7 @@ final public class JobWorkItem implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        out.writeInt(mDeliveryCount);
         out.writeInt(mWorkId);
     }
 
@@ -101,12 +133,13 @@ final public class JobWorkItem implements Parcelable {
         }
     };
 
-    public JobWorkItem(Parcel in) {
+    JobWorkItem(Parcel in) {
         if (in.readInt() != 0) {
             mIntent = Intent.CREATOR.createFromParcel(in);
         } else {
             mIntent = null;
         }
+        mDeliveryCount = in.readInt();
         mWorkId = in.readInt();
     }
 }
