@@ -19,6 +19,7 @@ package com.android.server.net;
 import static android.util.DebugUtils.valueToString;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -36,8 +37,10 @@ import android.content.IntentSender;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -91,11 +94,14 @@ public class ConnOnActivityStartTest {
 
     private static final String EXTRA_NETWORK_STATE_OBSERVER = TEST_PKG + ".observer";
 
-    private static final int WAIT_FOR_INSTALL_TIMEOUT_MS = 2000; // 2 sec
+    private static final long BATTERY_OFF_TIMEOUT_MS = 2000; // 2 sec
+    private static final long BATTERY_OFF_CHECK_INTERVAL_MS = 200; // 0.2 sec
 
-    private static final int NETWORK_CHECK_TIMEOUT_MS = 6000; // 6 sec
+    private static final long WAIT_FOR_INSTALL_TIMEOUT_MS = 2000; // 2 sec
 
-    private static final int SCREEN_ON_DELAY_MS = 500; // 0.5 sec
+    private static final long NETWORK_CHECK_TIMEOUT_MS = 6000; // 6 sec
+
+    private static final long SCREEN_ON_DELAY_MS = 500; // 0.5 sec
 
     private static final String NETWORK_STATUS_SEPARATOR = "\\|";
 
@@ -104,6 +110,8 @@ public class ConnOnActivityStartTest {
     private static Context mContext;
     private static UiDevice mUiDevice;
     private static int mTestPkgUid;
+    private static BatteryManager mBatteryManager;
+    private static ConnectivityManager mConnectivityManager;
 
     @BeforeClass
     public static void setUpOnce() throws Exception {
@@ -114,6 +122,10 @@ public class ConnOnActivityStartTest {
         mContext.getPackageManager().setApplicationEnabledSetting(TEST_PKG,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
         mTestPkgUid = mContext.getPackageManager().getPackageUid(TEST_PKG, 0);
+
+        mBatteryManager = (BatteryManager) mContext.getSystemService(Context.BATTERY_SERVICE);
+        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
     }
 
     @AfterClass
@@ -130,6 +142,9 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_batterySaver() throws Exception {
+        if (!isNetworkAvailable()) {
+            fail("Device doesn't have network connectivity");
+        }
         setBatterySaverMode(true);
         try {
             testConnOnActivityStart("testStartActivity_batterySaver");
@@ -140,6 +155,9 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_dataSaver() throws Exception {
+        if (!isNetworkAvailable()) {
+            fail("Device doesn't have network connectivity");
+        }
         setDataSaverMode(true);
         try {
             testConnOnActivityStart("testStartActivity_dataSaver");
@@ -150,6 +168,9 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_dozeMode() throws Exception {
+        if (!isNetworkAvailable()) {
+            fail("Device doesn't have network connectivity");
+        }
         setDozeMode(true);
         try {
             testConnOnActivityStart("testStartActivity_dozeMode");
@@ -160,6 +181,9 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_appStandby() throws Exception {
+        if (!isNetworkAvailable()) {
+            fail("Device doesn't have network connectivity");
+        }
         try{
             turnBatteryOff();
             setAppIdle(true);
@@ -174,6 +198,9 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_backgroundRestrict() throws Exception {
+        if (!isNetworkAvailable()) {
+            fail("Device doesn't have network connectivity");
+        }
         updateRestrictBackgroundBlacklist(true);
         try {
             testConnOnActivityStart("testStartActivity_backgroundRestrict");
@@ -271,6 +298,15 @@ public class ConnOnActivityStartTest {
 
     private void turnBatteryOff() throws Exception {
         executeCommand("cmd battery unplug");
+        assertBatteryOff();
+    }
+
+    private void assertBatteryOff() throws Exception {
+        final long endTime = SystemClock.uptimeMillis() + BATTERY_OFF_TIMEOUT_MS;
+        while (mBatteryManager.isCharging() && SystemClock.uptimeMillis() < endTime) {
+            SystemClock.sleep(BATTERY_OFF_CHECK_INTERVAL_MS);
+        }
+        assertFalse("Power should be disconnected", mBatteryManager.isCharging());
     }
 
     private void turnBatteryOn() throws Exception {
@@ -307,6 +343,11 @@ public class ConnOnActivityStartTest {
         }
         fail("Command '" + cmd + "' did not return '" + expectedResult + "' after "
                 + maxTries + " attempts. Last result: '" + result + "'");
+    }
+
+    private boolean isNetworkAvailable() throws Exception {
+        final NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     private void startActivityAndCheckNetworkAccess() throws Exception {
