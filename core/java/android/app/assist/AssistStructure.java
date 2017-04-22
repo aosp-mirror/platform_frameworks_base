@@ -34,8 +34,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Assist data automatically created by the platform's implementation
- * of {@link android.app.Activity#onProvideAssistData}.
+ * Assist data automatically created by the platform's implementation of Assist and Autofill.
+ *
+ * <p>The structure is used for Assist purposes when created by
+ * {@link android.app.Activity#onProvideAssistData}, {@link View#onProvideStructure(ViewStructure)},
+ * or {@link View#onProvideVirtualStructure(ViewStructure)}.
+ *
+ * <p>The structure is used for Autofill purposes when created by
+ * {@link View#onProvideAutofillStructure(ViewStructure, int)},
+ * or {@link View#onProvideAutofillVirtualStructure(ViewStructure, int)}.
+ *
+ * <p>For performance reasons, some properties of the Assist data might be available just for Assist
+ * or Autofill purposes; in those case, the property availability will be document in its javadoc.
  */
 public class AssistStructure implements Parcelable {
     static final String TAG = "AssistStructure";
@@ -592,7 +602,7 @@ public class AssistStructure implements Parcelable {
         // TODO(b/33197203): once we have more flags, it might be better to store the individual
         // fields (viewId and childId) of the field.
         AutofillId mAutofillId;
-        @View.AutofillType int mAutofillType;
+        @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
         @Nullable String[] mAutofillHints;
         AutofillValue mAutofillValue;
         CharSequence[] mAutofillOptions;
@@ -938,18 +948,22 @@ public class AssistStructure implements Parcelable {
         /**
          * Gets the id that can be used to autofill the view contents.
          *
-         * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
-         * for assist.
+         * <p>It's relevant set when the {@link AssistStructure} is used for Autofill purposes.
+         *
+         * @return id that can be used to autofill the view contents, or {@code null} if the
+         * structure was created for Assist purposes.
          */
-        public AutofillId getAutofillId() {
+        @Nullable public AutofillId getAutofillId() {
             return mAutofillId;
         }
 
         /**
          * Gets the the type of value that can be used to autofill the view contents.
          *
-         * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
-         * for assist.
+         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes.
+         *
+         * @return autofill type as defined by {@link View#getAutofillType()},
+         * or {@link View#AUTOFILL_TYPE_NONE} if the structure was created for Assist purposes.
          */
         public @View.AutofillType int getAutofillType() {
             return mAutofillType;
@@ -959,32 +973,26 @@ public class AssistStructure implements Parcelable {
          * Describes the content of a view so that a autofill service can fill in the appropriate
          * data.
          *
-         * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
-         * for assist.</p>
+         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes,
+         * not for Assist - see {@link View#getAutofillHints()} for more info.
          *
-         * @return The hints for this view
+         * @return The autofill hints for this view, or {@code null} if the structure was created
+         * for Assist purposes.
          */
         @Nullable public String[] getAutofillHints() {
             return mAutofillHints;
         }
 
         /**
-         * @hide
-         * @deprecated use getAutofillHints() instead.
-         */
-        // TODO(b/33197203): remove once clients don't use it anymore...
-        @Deprecated
-        @Nullable public String[] getAutoFillHints() {
-            return mAutofillHints;
-        }
-
-        /**
          * Gets the the value of this view.
          *
-         * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
-         * for assist.
+         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes,
+         * not for Assist purposes.
+         *
+         * @return the autofill value of this view, or {@code null} if the structure was created
+         * for Assist purposes.
          */
-        public AutofillValue getAutofillValue() {
+        @Nullable public AutofillValue getAutofillValue() {
             return mAutofillValue;
         }
 
@@ -994,15 +1002,18 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Gets the options that can be used to autofill this structure.
+         * Gets the options that can be used to autofill this view.
          *
          * <p>Typically used by nodes whose {@link View#getAutofillType()} is a list to indicate
          * the meaning of each possible value in the list.
          *
-         * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
-         * for assist.
+         * <p>It's relevant when the {@link AssistStructure} is used for Autofill purposes, not
+         * for Assist purposes.
+         *
+         * @return the options that can be used to autofill this view, or {@code null} if the
+         * structure was created for Assist purposes.
          */
-        public CharSequence[] getAutofillOptions() {
+        @Nullable public CharSequence[] getAutofillOptions() {
             return mAutofillOptions;
         }
 
@@ -1226,33 +1237,36 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Returns the URL represented by this node.
+         * Returns the URL represented by this view.
          *
-         * <p>Typically used when the view associated with the node is a container for an HTML
+         * <p>Typically used when the view associated with the view is a container for an HTML
          * document.
          *
          * <strong>WARNING:</strong> a {@link android.service.autofill.AutofillService} should only
-         * use this URL for autofill purposes when it trusts the app generating it (i.e., the app
+         * use this URL for Autofill purposes when it trusts the app generating it (i.e., the app
          * defined by {@link AssistStructure#getActivityComponent()}).
          */
-        public String getUrl() {
+        @Nullable public String getUrl() {
             return mUrl;
         }
 
         /**
-         * Returns the HTML properties associated with this node.
+         * Returns the HTML properties associated with this view.
          *
-         * <p>It's only set when the {@link AssistStructure} is used for autofilling purposes, not
-         * for assist.
+         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes,
+         * not for Assist purposes.
+         *
+         * @return the HTML properties associated with this view, or {@code null} if the
+         * structure was created for Assist purposes.
          */
-        public HtmlInfo getHtmlInfo() {
+        @Nullable public HtmlInfo getHtmlInfo() {
             return mHtmlInfo;
         }
 
         /**
-         * Returns the the list of locales associated with this node.
+         * Returns the the list of locales associated with this view.
          */
-        public LocaleList getLocaleList() {
+        @Nullable public LocaleList getLocaleList() {
             return mLocaleList;
         }
 
@@ -1965,7 +1979,7 @@ public class AssistStructure implements Parcelable {
                     + ", type=" + node.getAutofillType()
                     + ", options=" + Arrays.toString(node.getAutofillOptions())
                     + ", inputType=" + node.getInputType()
-                    + ", hints=" + Arrays.toString(node.getAutoFillHints())
+                    + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized());
         }
