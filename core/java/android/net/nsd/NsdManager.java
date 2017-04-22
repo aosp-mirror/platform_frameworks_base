@@ -31,6 +31,7 @@ import android.util.SparseArray;
 
 import java.util.concurrent.CountDownLatch;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
@@ -326,7 +327,8 @@ public final class NsdManager {
         public void onServiceResolved(NsdServiceInfo serviceInfo);
     }
 
-    private class ServiceHandler extends Handler {
+    @VisibleForTesting
+    class ServiceHandler extends Handler {
         ServiceHandler(Looper looper) {
             super(looper);
         }
