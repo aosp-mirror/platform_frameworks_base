@@ -48,6 +48,7 @@ class TaskChangeNotificationController {
     static final int NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG = 15;
     static final int NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG = 16;
     static final int NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG = 17;
+    static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG = 18;
 
     // Delay in notifying task stack change listeners (in millis)
     static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -115,11 +116,15 @@ class TaskChangeNotificationController {
     };
 
     private final TaskStackConsumer mNotifyActivityForcedResizable = (l, m) -> {
-        l.onActivityForcedResizable((String) m.obj, m.arg1);
+        l.onActivityForcedResizable((String) m.obj, m.arg1, m.arg2);
     };
 
     private final TaskStackConsumer mNotifyActivityDismissingDockedStack = (l, m) -> {
         l.onActivityDismissingDockedStack();
+    };
+
+    private final TaskStackConsumer mNotifyActivityLaunchOnSecondaryDisplayFailed = (l, m) -> {
+        l.onActivityLaunchOnSecondaryDisplayFailed();
     };
 
     private final TaskStackConsumer mNotifyTaskProfileLocked = (l, m) -> {
@@ -190,6 +195,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG:
                     forAllRemoteListeners(mNotifyActivityDismissingDockedStack, msg);
+                    break;
+                case NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG:
+                    forAllRemoteListeners(mNotifyActivityLaunchOnSecondaryDisplayFailed, msg);
                     break;
                 case NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskProfileLocked, msg);
@@ -324,11 +332,19 @@ class TaskChangeNotificationController {
         forAllLocalListeners(mNotifyActivityDismissingDockedStack, message);
     }
 
-    void notifyActivityForcedResizable(int taskId, String packageName) {
+    void notifyActivityForcedResizable(int taskId, int reason, String packageName) {
         mHandler.removeMessages(NOTIFY_FORCED_RESIZABLE_MSG);
-        final Message msg = mHandler.obtainMessage(NOTIFY_FORCED_RESIZABLE_MSG, taskId,
-                0 /* unused */, packageName);
+        final Message msg = mHandler.obtainMessage(NOTIFY_FORCED_RESIZABLE_MSG, taskId, reason,
+                packageName);
         forAllLocalListeners(mNotifyActivityForcedResizable, msg);
+        msg.sendToTarget();
+    }
+
+    void notifyActivityLaunchOnSecondaryDisplayFailed() {
+        mHandler.removeMessages(NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG);
+        final Message msg = mHandler.obtainMessage(
+                NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG);
+        forAllLocalListeners(mNotifyActivityLaunchOnSecondaryDisplayFailed, msg);
         msg.sendToTarget();
     }
 

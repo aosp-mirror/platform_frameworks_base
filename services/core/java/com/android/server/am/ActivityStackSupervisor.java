@@ -33,6 +33,8 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
+import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -108,6 +110,7 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.IActivityContainerCallback;
+import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
@@ -483,6 +486,33 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         activityDisplay.onOverrideConfigurationChanged(overrideConfiguration);
+    }
+
+    /** Check if placing task or activity on specified display is allowed. */
+    boolean canPlaceEntityOnDisplay(int displayId, boolean resizeable) {
+        return displayId == DEFAULT_DISPLAY || (mService.mSupportsMultiDisplay
+                && (resizeable || displayConfigMatchesGlobal(displayId)));
+    }
+
+    /**
+     * Check if configuration of specified display matches current global config.
+     * Used to check if we can put a non-resizeable activity on a secondary display and it will get
+     * the same config as on the default display.
+     * @param displayId Id of the display to check.
+     * @return {@code true} if configuration matches.
+     */
+    private boolean displayConfigMatchesGlobal(int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            return true;
+        }
+        if (displayId == INVALID_DISPLAY) {
+            return false;
+        }
+        final ActivityDisplay targetDisplay = mActivityDisplays.get(displayId);
+        if (targetDisplay == null) {
+            throw new IllegalArgumentException("No display found with id: " + displayId);
+        }
+        return getConfiguration().equals(targetDisplay.getConfiguration());
     }
 
     static class FindTaskResult {
@@ -2104,8 +2134,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + currentStack);
 
-        handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, currentStack.mStackId,
-                forceNonResizeable);
+        handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, DEFAULT_DISPLAY,
+                currentStack.mStackId, forceNonResizeable);
     }
 
     boolean canUseActivityOptionsLaunchBounds(ActivityOptions options, int launchStackId) {
@@ -2156,7 +2186,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Return the topmost valid stack on the display.
         for (int i = activityDisplay.mStacks.size() - 1; i >= 0; --i) {
             final ActivityStack stack = activityDisplay.mStacks.get(i);
-            if (mService.mActivityStarter.isValidLaunchStackId(stack.mStackId, r)) {
+            if (mService.mActivityStarter.isValidLaunchStackId(stack.mStackId, displayId, r)) {
                 return stack;
             }
         }
@@ -2164,7 +2194,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // If there is no valid stack on the external display - check if new dynamic stack will do.
         if (displayId != Display.DEFAULT_DISPLAY) {
             final int newDynamicStackId = getNextStackId();
-            if (mService.mActivityStarter.isValidLaunchStackId(newDynamicStackId, r)) {
+            if (mService.mActivityStarter.isValidLaunchStackId(newDynamicStackId, displayId, r)) {
                 return createStackOnDisplay(newDynamicStackId, displayId, true /*onTop*/);
             }
         }
@@ -3987,31 +4017,68 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void handleNonResizableTaskIfNeeded(TaskRecord task, int preferredStackId, int actualStackId) {
-        handleNonResizableTaskIfNeeded(task, preferredStackId, actualStackId,
+    void handleNonResizableTaskIfNeeded(TaskRecord task, int preferredStackId,
+            int preferredDisplayId, int actualStackId) {
+        handleNonResizableTaskIfNeeded(task, preferredStackId, preferredDisplayId, actualStackId,
                 false /* forceNonResizable */);
     }
 
-    void handleNonResizableTaskIfNeeded(
-            TaskRecord task, int preferredStackId, int actualStackId, boolean forceNonResizable) {
-        if ((!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID)
-                || task.isHomeTask()) {
+    private void handleNonResizableTaskIfNeeded(TaskRecord task, int preferredStackId,
+            int preferredDisplayId, int actualStackId, boolean forceNonResizable) {
+        final boolean isSecondaryDisplayPreferred =
+                (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY)
+                || StackId.isDynamicStack(preferredStackId);
+        if (((!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID)
+                && !isSecondaryDisplayPreferred) || task.isHomeTask()) {
             return;
         }
 
+        // Handle incorrect launch/move to secondary display if needed.
+        final boolean launchOnSecondaryDisplayFailed;
+        if (isSecondaryDisplayPreferred) {
+            final int actualDisplayId = task.getStack().mDisplayId;
+            if (!task.canBeLaunchedOnDisplay(actualDisplayId)) {
+                // The task landed on an inappropriate display somehow, move it to the default
+                // display.
+                // TODO(multi-display): Find proper stack for the task on the default display.
+                mService.moveTaskToStack(task.taskId, FULLSCREEN_WORKSPACE_STACK_ID,
+                        true /* toTop */);
+                launchOnSecondaryDisplayFailed = true;
+            } else {
+                // The task might have landed on a display different from requested.
+                launchOnSecondaryDisplayFailed = actualDisplayId == DEFAULT_DISPLAY
+                        || (preferredDisplayId != INVALID_DISPLAY
+                            && preferredDisplayId != actualDisplayId);
+            }
+        } else {
+            // The task wasn't requested to be on a secondary display.
+            launchOnSecondaryDisplayFailed = false;
+        }
+
         final ActivityRecord topActivity = task.getTopActivity();
-        if (!task.supportsSplitScreen() || forceNonResizable) {
-            // Display a warning toast that we tried to put a non-dockable task in the docked stack.
-            mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
+        if (launchOnSecondaryDisplayFailed || !task.supportsSplitScreen() || forceNonResizable) {
+            if (launchOnSecondaryDisplayFailed) {
+                // Display a warning toast that we tried to put a non-resizeable task on a secondary
+                // display with config different from global config.
+                mService.mTaskChangeNotificationController
+                        .notifyActivityLaunchOnSecondaryDisplayFailed();
+            } else {
+                // Display a warning toast that we tried to put a non-dockable task in the docked
+                // stack.
+                mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
+            }
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
             moveTasksToFullscreenStackLocked(DOCKED_STACK_ID, actualStackId == DOCKED_STACK_ID);
         } else if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
                 && !topActivity.noDisplay) {
-            String packageName = topActivity.appInfo.packageName;
+            final String packageName = topActivity.appInfo.packageName;
+            final int reason = isSecondaryDisplayPreferred
+                    ? FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY
+                    : FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
             mService.mTaskChangeNotificationController.notifyActivityForcedResizable(
-                    task.taskId, packageName);
+                    task.taskId, reason, packageName);
         }
     }
 
@@ -4084,8 +4151,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             resumeFocusedStackTopActivityLocked();
             mWindowManager.executeAppTransition();
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
-            handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.getStackId(),
-                    true /* forceNonResizable */);
+            handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, DEFAULT_DISPLAY,
+                    task.getStackId(), true /* forceNonResizable */);
         }
     }
 

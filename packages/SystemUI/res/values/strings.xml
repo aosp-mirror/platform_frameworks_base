@@ -1811,10 +1811,14 @@
     <string name="report_rejected_touch" translatable="false">Report rejected touch</string>
 
     <!-- Multi-Window strings -->
-    <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity and that things might crash/not work properly [CHAR LIMIT=NONE] -->
+    <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity to be displayed in split-screen and that things might crash/not work properly [CHAR LIMIT=NONE] -->
     <string name="dock_forced_resizable">App may not work with split-screen.</string>
-    <!-- Warning message when we try to dock a non-resizeble tasks and launch it in fullscreen instead. -->
+    <!-- Warning message when we try to dock a non-resizeable task and launch it in fullscreen instead. -->
     <string name="dock_non_resizeble_failed_to_dock_text">App does not support split-screen.</string>
+    <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity to be displayed on a secondary display and that things might crash/not work properly [CHAR LIMIT=NONE] -->
+    <string name="forced_resizable_secondary_display">App may not work on a secondary display.</string>
+    <!-- Warning message when we try to launch a non-resizeable activity on a secondary display and launch it on the primary instead. -->
+    <string name="activity_launch_on_secondary_display_failed_text">App does not support launch on secondary displays.</string>
 
     <!-- accessibility label for button to open settings [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_settings">Open settings.</string>
