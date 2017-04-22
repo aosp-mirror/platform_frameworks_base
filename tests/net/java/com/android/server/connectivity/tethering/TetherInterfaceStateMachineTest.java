@@ -32,7 +32,6 @@ import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
 import static android.net.ConnectivityManager.TETHERING_USB;
 import static android.net.ConnectivityManager.TETHERING_WIFI;
 import static com.android.server.connectivity.tethering.IControlsTethering.STATE_AVAILABLE;
-import static com.android.server.connectivity.tethering.IControlsTethering.STATE_LOCAL_HOTSPOT;
 import static com.android.server.connectivity.tethering.IControlsTethering.STATE_TETHERED;
 import static com.android.server.connectivity.tethering.IControlsTethering.STATE_UNAVAILABLE;
 
