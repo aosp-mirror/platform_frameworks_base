@@ -188,11 +188,10 @@ final class AutofillManagerServiceImpl {
     }
 
     CharSequence getServiceName() {
-        if (mInfo == null) {
+        final String packageName = getPackageName();
+        if (packageName == null) {
             return null;
         }
-        final ComponentName serviceComponent = mInfo.getServiceInfo().getComponentName();
-        final String packageName = serviceComponent.getPackageName();
 
         try {
             final PackageManager pm = mContext.getPackageManager();
@@ -202,6 +201,14 @@ final class AutofillManagerServiceImpl {
             Slog.e(TAG, "Could not get label for " + packageName + ": " + e);
             return packageName;
         }
+    }
+
+    String getPackageName() {
+        if (mInfo == null) {
+            return null;
+        }
+        final ComponentName serviceComponent = mInfo.getServiceInfo().getComponentName();
+        return serviceComponent.getPackageName();
     }
 
     private String getComponentNameFromSettings() {
