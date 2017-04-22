@@ -180,6 +180,12 @@ public class JobParameters implements Parcelable {
      * doing so any pending as well as remaining uncompleted work will be re-queued
      * for the next time the job runs.</p>
      *
+     * <p>This example shows how to construct a JobService that will serially dequeue and
+     * process work that is available for it:</p>
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/JobWorkService.java
+     *      service}
+     *
      * @return Returns a new {@link JobWorkItem} if there is one pending, otherwise null.
      * If null is returned, the system will also stop the job if all work has also been completed.
      * (This means that for correct operation, you must always call dequeueWork() after you have
