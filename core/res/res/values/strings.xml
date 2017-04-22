@@ -4602,6 +4602,9 @@
     <!-- Accessibility title for the autofill dialog used to select a list of options to autofill an activity. [CHAR LIMIT=NONE] -->
     <string name="autofill_picker_accessibility_title">Autofill options</string>
 
+    <!-- Accessibility title for the autofill dialog used to ask user to save the information on the screen by sending it to an Autofill Service. [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_accessibility_title">Save for Autofill</string>
+
     <!-- Toast message shown when user manually request autofill but service could not figure out the data that would autofill the screen contents. [CHAR LIMIT=NONE] -->
     <string name="autofill_error_cannot_autofill">Contents can\u2019t be autofilled</string>
 
