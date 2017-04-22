@@ -51,11 +51,16 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onActivityForcedResizable(String packageName, int taskId) throws RemoteException {
+    public void onActivityForcedResizable(String packageName, int taskId, int reason)
+            throws RemoteException {
     }
 
     @Override
     public void onActivityDismissingDockedStack() throws RemoteException {
+    }
+
+    @Override
+    public void onActivityLaunchOnSecondaryDisplayFailed() throws RemoteException {
     }
 
     @Override
