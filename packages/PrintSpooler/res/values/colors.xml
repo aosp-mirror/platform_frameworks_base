@@ -24,4 +24,5 @@
 
     <color name="material_grey_500">#ffa3a3a3</color>
 
+    <color name="pdf_printer_color">#009688</color>
 </resources>
