@@ -1469,6 +1469,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                     }
                                     break;
                                 }
+                            } else {
+                                if (finishDrawingRunnable != null) {
+                                    Log.w(TAG, "Warning, !readyToDraw() but waiting for " +
+                                            "draw finished! Early reporting draw finished.");
+                                    finishDrawingRunnable.run();
+                                    finishDrawingRunnable = null;
+                                }
                             }
                             // By design, this is the only place in a GLThread thread where we wait().
                             if (LOG_THREADS) {
