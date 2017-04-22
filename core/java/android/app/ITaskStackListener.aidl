@@ -21,6 +21,11 @@ import android.content.ComponentName;
 
 /** @hide */
 oneway interface ITaskStackListener {
+    /** Activity was resized to be displayed in split-screen. */
+    const int FORCED_RESIZEABLE_REASON_SPLIT_SCREEN = 1;
+    /** Activity was resized to be displayed on a secondary display. */
+    const int FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY = 2;
+
     /** Called whenever there are changes to the state of tasks in a stack. */
     void onTaskStackChanged();
 
@@ -49,13 +54,24 @@ oneway interface ITaskStackListener {
 
     /**
      * Called when we launched an activity that we forced to be resizable.
+     *
+     * @param packageName Package name of the top activity in the task.
+     * @param taskId Id of the task.
+     * @param reason {@link #FORCED_RESIZEABLE_REASON_SPLIT_SCREEN} or
+      *              {@link #FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY}.
      */
-    void onActivityForcedResizable(String packageName, int taskId);
+    void onActivityForcedResizable(String packageName, int taskId, int reason);
 
     /**
-     * Callen when we launched an activity that is dismissed the docked stack.
+     * Called when we launched an activity that dismissed the docked stack.
      */
     void onActivityDismissingDockedStack();
+
+    /**
+     * Called when an activity was requested to be launched on a secondary display but was not
+     * allowed there.
+     */
+    void onActivityLaunchOnSecondaryDisplayFailed();
 
     /**
      * Called when a task is added.

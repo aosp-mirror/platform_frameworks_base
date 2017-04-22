@@ -97,6 +97,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
@@ -748,7 +750,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             supervisor.resumeFocusedStackTopActivityLocked();
         }
 
-        supervisor.handleNonResizableTaskIfNeeded(this, preferredStackId, stackId);
+        // TODO: Handle incorrect request to move before the actual move, not after.
+        supervisor.handleNonResizableTaskIfNeeded(this, preferredStackId, DEFAULT_DISPLAY, stackId);
 
         boolean successful = (preferredStackId == stackId);
         if (successful && stackId == DOCKED_STACK_ID) {
@@ -1558,6 +1561,17 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return mService.mSupportsSplitScreenMultiWindow
                 && isResizeable(false /* checkSupportsPip */)
                 && !ActivityInfo.isPreserveOrientationMode(mResizeMode);
+    }
+
+    /**
+     * Check whether this task can be launched on the specified display.
+     * @param displayId Target display id.
+     * @return {@code true} if either it is the default display or this activity is resizeable and
+     *         can be put a secondary screen.
+     */
+    boolean canBeLaunchedOnDisplay(int displayId) {
+        return mService.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
+                isResizeable(false /* checkSupportsPip */));
     }
 
     /**

@@ -68,6 +68,7 @@ import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SCREENSHOTS;
@@ -1160,6 +1161,17 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return service.mSupportsMultiWindow && !isHomeActivity()
                 && (ActivityInfo.isResizeableMode(info.resizeMode)
                         || service.mForceResizableActivities);
+    }
+
+    /**
+     * Check whether this activity can be launched on the specified display.
+     * @param displayId Target display id.
+     * @return {@code true} if either it is the default display or this activity is resizeable and
+     *         can be put a secondary screen.
+     */
+    boolean canBeLaunchedOnDisplay(int displayId) {
+        return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
+                supportsResizeableMultiWindow());
     }
 
     /**

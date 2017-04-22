@@ -156,8 +156,9 @@ public class SystemServicesProxy {
         public void onPinnedActivityRestartAttempt() { }
         public void onPinnedStackAnimationStarted() { }
         public void onPinnedStackAnimationEnded() { }
-        public void onActivityForcedResizable(String packageName, int taskId) { }
+        public void onActivityForcedResizable(String packageName, int taskId, int reason) { }
         public void onActivityDismissingDockedStack() { }
+        public void onActivityLaunchOnSecondaryDisplayFailed() { }
         public void onTaskProfileLocked(int taskId, int userId) { }
 
         /**
@@ -224,15 +225,20 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onActivityForcedResizable(String packageName, int taskId)
+        public void onActivityForcedResizable(String packageName, int taskId, int reason)
                 throws RemoteException {
-            mHandler.obtainMessage(H.ON_ACTIVITY_FORCED_RESIZABLE, taskId, 0, packageName)
+            mHandler.obtainMessage(H.ON_ACTIVITY_FORCED_RESIZABLE, taskId, reason, packageName)
                     .sendToTarget();
         }
 
         @Override
         public void onActivityDismissingDockedStack() throws RemoteException {
             mHandler.sendEmptyMessage(H.ON_ACTIVITY_DISMISSING_DOCKED_STACK);
+        }
+
+        @Override
+        public void onActivityLaunchOnSecondaryDisplayFailed() throws RemoteException {
+            mHandler.sendEmptyMessage(H.ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED);
         }
 
         @Override
@@ -1235,6 +1241,7 @@ public class SystemServicesProxy {
         private static final int ON_TASK_PROFILE_LOCKED = 8;
         private static final int ON_PINNED_STACK_ANIMATION_STARTED = 9;
         private static final int ON_ACTIVITY_UNPINNED = 10;
+        private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED = 11;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1285,13 +1292,19 @@ public class SystemServicesProxy {
                 case ON_ACTIVITY_FORCED_RESIZABLE: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onActivityForcedResizable(
-                                (String) msg.obj, msg.arg1);
+                                (String) msg.obj, msg.arg1, msg.arg2);
                     }
                     break;
                 }
                 case ON_ACTIVITY_DISMISSING_DOCKED_STACK: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onActivityDismissingDockedStack();
+                    }
+                    break;
+                }
+                case ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onActivityLaunchOnSecondaryDisplayFailed();
                     }
                     break;
                 }
