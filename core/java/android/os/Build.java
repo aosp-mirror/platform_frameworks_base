@@ -115,8 +115,7 @@ public class Build {
     public static final String SERIAL = getString("no.such.thing");
 
     /**
-     * Gets the hardware serial, if available. Requires holding the {@link
-     * android.Manifest.permission#READ_PHONE_STATE} permission.
+     * Gets the hardware serial, if available.
      * @return The serial if specified.
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)

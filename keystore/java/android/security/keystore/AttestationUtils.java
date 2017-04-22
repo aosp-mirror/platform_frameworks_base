@@ -95,9 +95,6 @@ public abstract class AttestationUtils {
      * For privacy reasons, you cannot distinguish between (1) and (2). If attestation is
      * unsuccessful, the device may not support it in general or the user may have permanently
      * disabled it.
-     * <p>
-     * The caller must hold {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
-     * permission.
      *
      * @param context the context to use for retrieving device identifiers.
      * @param idTypes the types of device identifiers to attest.
