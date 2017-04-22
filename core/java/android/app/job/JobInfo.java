@@ -837,8 +837,12 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Set optional transient extras. This is incompatible with jobs that are also
-         * persisted with {@link #setPersisted(boolean)}; mixing the two is not allowed.
+         * Set optional transient extras.
+         *
+         * <p>Because setting this property is not compatible with persisted
+         * jobs, doing so will throw an {@link java.lang.IllegalArgumentException} when
+         * {@link android.app.job.JobInfo.Builder#build()} is called.</p>
+         *
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
          */
         public Builder setTransientExtras(@NonNull Bundle extras) {

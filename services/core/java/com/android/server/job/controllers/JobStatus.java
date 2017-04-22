@@ -339,6 +339,7 @@ public final class JobStatus {
                     executingWork = new ArrayList<>();
                 }
                 executingWork.add(work);
+                work.bumpDeliveryCount();
             }
             return work;
         }
@@ -661,6 +662,9 @@ public final class JobStatus {
     /**
      * @return Whether or not this job is ready to run, based on its requirements. This is true if
      * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
+     * TODO: This function is called a *lot*.  We should probably just have it check an
+     * already-computed boolean, which we updated whenever we see one of the states it depends
+     * on here change.
      */
     public boolean isReady() {
         // Deadline constraint trumps other constraints (except for periodic jobs where deadline
@@ -856,7 +860,8 @@ public final class JobStatus {
 
     private void dumpJobWorkItem(PrintWriter pw, String prefix, JobWorkItem work, int index) {
         pw.print(prefix); pw.print("  #"); pw.print(index); pw.print(": #");
-        pw.print(work.getWorkId()); pw.print(" "); pw.println(work.getIntent());
+        pw.print(work.getWorkId()); pw.print(" "); pw.print(work.getDeliveryCount());
+        pw.print("x "); pw.println(work.getIntent());
         if (work.getGrants() != null) {
             pw.print(prefix); pw.println("  URI grants:");
             ((GrantedUriPermissions)work.getGrants()).dump(pw, prefix + "    ");
