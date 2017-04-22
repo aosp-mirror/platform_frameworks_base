@@ -185,7 +185,9 @@ final class SaveUi {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         window.setGravity(Gravity.BOTTOM | Gravity.CENTER);
         window.setCloseOnTouchOutside(true);
-        window.getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
+        final WindowManager.LayoutParams params = window.getAttributes();
+        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+        params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
 
         mDialog.show();
     }
