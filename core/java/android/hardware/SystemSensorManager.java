@@ -285,17 +285,22 @@ public class SystemSensorManager extends SensorManager {
                 }
                 // Initialize a client for data_injection.
                 if (sInjectEventQueue == null) {
-                    sInjectEventQueue = new InjectEventQueue(mMainLooper, this,
-                            mContext.getPackageName());
+                    try {
+                        sInjectEventQueue = new InjectEventQueue(
+                                mMainLooper, this, mContext.getPackageName());
+                    } catch (RuntimeException e) {
+                        Log.e(TAG, "Cannot create InjectEventQueue: " + e);
+                    }
                 }
+                return sInjectEventQueue != null;
             } else {
                 // If data injection is being disabled clean up the native resources.
                 if (sInjectEventQueue != null) {
                     sInjectEventQueue.dispose();
                     sInjectEventQueue = null;
                 }
+                return true;
             }
-            return true;
         }
     }
 

@@ -427,6 +427,11 @@ static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jlong sensorM
     String8 clientName(packageUtf.c_str());
     sp<SensorEventQueue> queue(mgr->createEventQueue(clientName, mode));
 
+    if (queue == NULL) {
+        jniThrowRuntimeException(env, "Cannot construct native SensorEventQueue.");
+        return 0;
+    }
+
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, msgQ);
     if (messageQueue == NULL) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
