@@ -15,6 +15,8 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
@@ -198,7 +200,7 @@ public class BuzzBeepBlinkTest {
             boolean noisy, boolean buzzy, boolean lights, boolean defaultVibration,
             boolean defaultSound, boolean defaultLights) {
         NotificationChannel channel =
-                new NotificationChannel("test", "test", NotificationManager.IMPORTANCE_HIGH);
+                new NotificationChannel("test", "test", IMPORTANCE_HIGH);
         final Builder builder = new Builder(getContext())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -678,6 +680,23 @@ public class BuzzBeepBlinkTest {
         // quiet update should stop making noise
         mService.buzzBeepBlinkLocked(s);
         verifyStopVibrate();
+    }
+
+    @Test
+    public void testEmptyUriSoundTreatedAsNoSound() throws Exception {
+        NotificationChannel channel = new NotificationChannel("test", "test", IMPORTANCE_HIGH);
+        channel.setSound(Uri.EMPTY, null);
+        final Notification n = new Builder(getContext(), "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
+
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
+                mPid, n, mUser, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        mService.addNotification(r);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {
