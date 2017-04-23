@@ -3938,6 +3938,16 @@ message MetricsEvent {
     // OS: O
     ENTERPRISE_PRIVACY_DEFAULT_APPS = 940;
 
+    // OPEN: Settings > Notifications > An app > A channel > Importance
+    // CATEGORY: SETTINGS
+    // OS: O
+    NOTIFICATION_CHANNEL_IMPORTANCE = 941;
+
+    // OPEN: Settings > Notifications > An app > A channel > On the lock screen
+    // CATEGORY: SETTINGS
+    // OS: O
+    NOTIFICATION_CHANNEL_LOCK_SCREEN_VIS = 942;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
