@@ -101,6 +101,7 @@ import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
+import com.android.server.backup.utils.PasswordUtils;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
@@ -121,11 +122,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -138,10 +135,6 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 
 public class RefactoredBackupManagerService implements BackupManagerServiceInterface {
 
@@ -669,12 +662,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private File mPasswordVersionFile;
     private byte[] mPasswordSalt;
 
-    // Configuration of PBKDF2 that we use for generating pw hashes and intermediate keys
-    public static final int PBKDF2_HASH_ROUNDS = 10000;
-    private static final int PBKDF2_KEY_SIZE = 256;     // bits
-    public static final int PBKDF2_SALT_SIZE = 512;    // bits
-    public static final String ENCRYPTION_ALGORITHM_NAME = "AES-256";
-
     // Keep a log of all the apps we've ever backed up, and what the
     // dataset tokens are for both the current backup dataset and
     // the ancestral dataset.
@@ -1169,62 +1156,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    public SecretKey buildPasswordKey(String algorithm, String pw, byte[] salt, int rounds) {
-        return buildCharArrayKey(algorithm, pw.toCharArray(), salt, rounds);
-    }
-
-    private SecretKey buildCharArrayKey(String algorithm, char[] pwArray, byte[] salt, int rounds) {
-        try {
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(algorithm);
-            KeySpec ks = new PBEKeySpec(pwArray, salt, rounds, PBKDF2_KEY_SIZE);
-            return keyFactory.generateSecret(ks);
-        } catch (InvalidKeySpecException e) {
-            Slog.e(TAG, "Invalid key spec for PBKDF2!");
-        } catch (NoSuchAlgorithmException e) {
-            Slog.e(TAG, "PBKDF2 unavailable!");
-        }
-        return null;
-    }
-
-    private String buildPasswordHash(String algorithm, String pw, byte[] salt, int rounds) {
-        SecretKey key = buildPasswordKey(algorithm, pw, salt, rounds);
-        if (key != null) {
-            return byteArrayToHex(key.getEncoded());
-        }
-        return null;
-    }
-
-    public String byteArrayToHex(byte[] data) {
-        StringBuilder buf = new StringBuilder(data.length * 2);
-        for (int i = 0; i < data.length; i++) {
-            buf.append(Byte.toHexString(data[i], true));
-        }
-        return buf.toString();
-    }
-
-    public byte[] hexToByteArray(String digits) {
-        final int bytes = digits.length() / 2;
-        if (2 * bytes != digits.length()) {
-            throw new IllegalArgumentException("Hex string must have an even number of digits");
-        }
-
-        byte[] result = new byte[bytes];
-        for (int i = 0; i < digits.length(); i += 2) {
-            result[i / 2] = (byte) Integer.parseInt(digits.substring(i, i + 2), 16);
-        }
-        return result;
-    }
-
-    public byte[] makeKeyChecksum(String algorithm, byte[] pwBytes, byte[] salt, int rounds) {
-        char[] mkAsChar = new char[pwBytes.length];
-        for (int i = 0; i < pwBytes.length; i++) {
-            mkAsChar[i] = (char) pwBytes[i];
-        }
-
-        Key checksum = buildCharArrayKey(algorithm, mkAsChar, salt, rounds);
-        return checksum.getEncoded();
-    }
-
     // Used for generating random salts or passwords
     public byte[] randomBytes(int bits) {
         byte[] array = new byte[bits / 8];
@@ -1241,7 +1172,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         } else {
             // hash the stated current pw and compare to the stored one
             if (candidatePw != null && candidatePw.length() > 0) {
-                String currentPwHash = buildPasswordHash(algorithm, candidatePw, mPasswordSalt,
+                String currentPwHash = PasswordUtils.buildPasswordHash(algorithm, candidatePw,
+                        mPasswordSalt,
                         rounds);
                 if (mPasswordHash.equalsIgnoreCase(currentPwHash)) {
                     // candidate hash matches the stored hash -- the password matches
@@ -1262,9 +1194,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         // If the supplied pw doesn't hash to the the saved one, fail.  The password
         // might be caught in the legacy crypto mismatch; verify that too.
-        if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PBKDF2_HASH_ROUNDS)
+        if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS)
                 && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
-                currentPw, PBKDF2_HASH_ROUNDS))) {
+                currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS))) {
             return false;
         }
 
@@ -1304,8 +1236,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         try {
             // Okay, build the hash of the new backup password
-            byte[] salt = randomBytes(PBKDF2_SALT_SIZE);
-            String newPwHash = buildPasswordHash(PBKDF_CURRENT, newPw, salt, PBKDF2_HASH_ROUNDS);
+            byte[] salt = randomBytes(PasswordUtils.PBKDF2_SALT_SIZE);
+            String newPwHash = PasswordUtils.buildPasswordHash(PBKDF_CURRENT, newPw, salt,
+                    PasswordUtils.PBKDF2_HASH_ROUNDS);
 
             OutputStream pwf = null, buffer = null;
             DataOutputStream out = null;
@@ -1344,9 +1277,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public boolean backupPasswordMatches(String currentPw) {
         if (hasBackupPassword()) {
             final boolean pbkdf2Fallback = (mPasswordVersion < BACKUP_PW_FILE_VERSION);
-            if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PBKDF2_HASH_ROUNDS)
+            if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS)
                     && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
-                    currentPw, PBKDF2_HASH_ROUNDS))) {
+                    currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS))) {
                 if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
                 return false;
             }

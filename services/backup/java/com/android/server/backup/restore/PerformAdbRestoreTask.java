@@ -42,6 +42,7 @@ import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.PasswordUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -315,15 +316,15 @@ public class PerformAdbRestoreTask implements Runnable {
 
         try {
             Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKey userKey = backupManagerService
+            SecretKey userKey = PasswordUtils
                     .buildPasswordKey(algorithm, mDecryptPassword, userSalt,
                             rounds);
-            byte[] IV = backupManagerService.hexToByteArray(userIvHex);
+            byte[] IV = PasswordUtils.hexToByteArray(userIvHex);
             IvParameterSpec ivSpec = new IvParameterSpec(IV);
             c.init(Cipher.DECRYPT_MODE,
                     new SecretKeySpec(userKey.getEncoded(), "AES"),
                     ivSpec);
-            byte[] mkCipher = backupManagerService.hexToByteArray(masterKeyBlobHex);
+            byte[] mkCipher = PasswordUtils.hexToByteArray(masterKeyBlobHex);
             byte[] mkBlob = c.doFinal(mkCipher);
 
             // first, the master key IV
@@ -342,7 +343,7 @@ public class PerformAdbRestoreTask implements Runnable {
                     offset, offset + len);
 
             // now validate the decrypted master key against the checksum
-            byte[] calculatedCk = backupManagerService.makeKeyChecksum(algorithm, mk, ckSalt,
+            byte[] calculatedCk = PasswordUtils.makeKeyChecksum(algorithm, mk, ckSalt,
                     rounds);
             if (Arrays.equals(calculatedCk, mkChecksum)) {
                 ivSpec = new IvParameterSpec(IV);
@@ -392,13 +393,13 @@ public class PerformAdbRestoreTask implements Runnable {
             InputStream rawInStream) {
         InputStream result = null;
         try {
-            if (encryptionName.equals(RefactoredBackupManagerService.ENCRYPTION_ALGORITHM_NAME)) {
+            if (encryptionName.equals(PasswordUtils.ENCRYPTION_ALGORITHM_NAME)) {
 
                 String userSaltHex = readHeaderLine(rawInStream); // 5
-                byte[] userSalt = backupManagerService.hexToByteArray(userSaltHex);
+                byte[] userSalt = PasswordUtils.hexToByteArray(userSaltHex);
 
                 String ckSaltHex = readHeaderLine(rawInStream); // 6
-                byte[] ckSalt = backupManagerService.hexToByteArray(ckSaltHex);
+                byte[] ckSalt = PasswordUtils.hexToByteArray(ckSaltHex);
 
                 int rounds = Integer.parseInt(readHeaderLine(rawInStream)); // 7
                 String userIvHex = readHeaderLine(rawInStream); // 8
@@ -557,8 +558,9 @@ public class PerformAdbRestoreTask implements Runnable {
                         }
 
                         try {
-                            mTargetApp = backupManagerService.getPackageManager().getApplicationInfo(
-                                    pkg, 0);
+                            mTargetApp =
+                                    backupManagerService.getPackageManager().getApplicationInfo(
+                                            pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
                             // need to clear it first.  Check that.
@@ -836,7 +838,8 @@ public class PerformAdbRestoreTask implements Runnable {
                     if (RefactoredBackupManagerService.DEBUG) {
                         Slog.d(RefactoredBackupManagerService.TAG, "Killing host process");
                     }
-                    backupManagerService.getActivityManager().killApplicationProcess(app.processName,
+                    backupManagerService.getActivityManager().killApplicationProcess(
+                            app.processName,
                             app.uid);
                 } else {
                     if (RefactoredBackupManagerService.DEBUG) {
