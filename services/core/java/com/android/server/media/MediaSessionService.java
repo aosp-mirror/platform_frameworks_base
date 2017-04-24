@@ -965,7 +965,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                if (uid != Process.BLUETOOTH_UID) {
+                if (!UserHandle.isSameApp(uid, Process.BLUETOOTH_UID)) {
                     throw new SecurityException("Only Bluetooth service processes can set"
                             + " Callback");
                 }
