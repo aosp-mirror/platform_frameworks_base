@@ -35,7 +35,6 @@ public final class ChangedPackages implements Parcelable {
     /** The names of the packages that have changed */
     private final List<String> mPackageNames;
 
-    @TestApi
     public ChangedPackages(int sequenceNumber, @NonNull List<String> packageNames) {
         this.mSequenceNumber = sequenceNumber;
         this.mPackageNames = packageNames;
