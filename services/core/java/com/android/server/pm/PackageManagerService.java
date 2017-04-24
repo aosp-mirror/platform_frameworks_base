@@ -1779,6 +1779,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final boolean update = res.removedInfo != null
                     && res.removedInfo.removedPackage != null;
+            final String origInstallerPackageName = res.removedInfo != null
+                    ? res.removedInfo.installerPackageName : null;
 
             // If this is the first time we have child packages for a disabled privileged
             // app that had no children, we grant requested runtime permissions to the new
@@ -1840,8 +1842,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     extras.putBoolean(Intent.EXTRA_REPLACING, true);
                 }
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
-                        extras, 0 /*flags*/, null /*targetPackage*/,
-                        null /*finishedReceiver*/, updateUsers);
+                        extras, 0 /*flags*/,
+                        null /*targetPackage*/, null /*finishedReceiver*/, updateUsers);
+                if (origInstallerPackageName != null) {
+                    sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                            extras, 0 /*flags*/,
+                            origInstallerPackageName, null /*finishedReceiver*/, updateUsers);
+                }
 
                 // Send replaced for users that don't see the package for the first time
                 if (update) {
@@ -1849,6 +1856,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             packageName, extras, 0 /*flags*/,
                             null /*targetPackage*/, null /*finishedReceiver*/,
                             updateUsers);
+                    if (origInstallerPackageName != null) {
+                        sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
+                                extras, 0 /*flags*/,
+                                origInstallerPackageName, null /*finishedReceiver*/, updateUsers);
+                    }
                     sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                             null /*package*/, null /*extras*/, 0 /*flags*/,
                             packageName /*targetPackage*/,
@@ -13512,6 +13524,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
         info.removedPackage = packageName;
+        info.installerPackageName = pkgSetting.installerPackageName;
         info.removedUsers = new int[] {userId};
         info.broadcastUsers = new int[] {userId};
         info.uid = UserHandle.getUid(userId, pkgSetting.appId);
@@ -16043,6 +16056,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean isInstantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
 
         final PackageParser.Package oldPackage;
+        final PackageSetting ps;
         final String pkgName = pkg.packageName;
         final int[] allUsers;
         final int[] installedUsers;
@@ -16064,7 +16078,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return;
             }
 
-            final PackageSetting ps = mSettings.mPackages.get(pkgName);
+            ps = mSettings.mPackages.get(pkgName);
 
             // verify signatures are valid
             if (shouldCheckUpgradeKeySetLP(ps, scanFlags)) {
@@ -16150,10 +16164,10 @@ public class PackageManagerService extends IPackageManager.Stub
         res.removedInfo = new PackageRemovedInfo(this);
         res.removedInfo.uid = oldPackage.applicationInfo.uid;
         res.removedInfo.removedPackage = oldPackage.packageName;
+        res.removedInfo.installerPackageName = ps.installerPackageName;
         res.removedInfo.isStaticSharedLib = pkg.staticSharedLibName != null;
         res.removedInfo.isUpdate = true;
         res.removedInfo.origUsers = installedUsers;
-        final PackageSetting ps = mSettings.getPackageLPr(pkgName);
         res.removedInfo.installReasons = new SparseArray<>(installedUsers.length);
         for (int i = 0; i < installedUsers.length; i++) {
             final int userId = installedUsers[i];
@@ -16171,6 +16185,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (childRes != null) {
                     childRes.removedInfo.uid = childPkg.applicationInfo.uid;
                     childRes.removedInfo.removedPackage = childPkg.packageName;
+                    if (childPs != null) {
+                        childRes.removedInfo.installerPackageName = childPs.installerPackageName;
+                    }
                     childRes.removedInfo.isUpdate = true;
                     childRes.removedInfo.installReasons = res.removedInfo.installReasons;
                     childPackageUpdated = true;
@@ -16179,6 +16196,9 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!childPackageUpdated) {
                 PackageRemovedInfo childRemovedRes = new PackageRemovedInfo(this);
                 childRemovedRes.removedPackage = childPkg.packageName;
+                if (childPs != null) {
+                    childRemovedRes.installerPackageName = childPs.installerPackageName;
+                }
                 childRemovedRes.isUpdate = false;
                 childRemovedRes.dataRemoved = true;
                 synchronized (mPackages) {
@@ -16869,6 +16889,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if ((mPackages.containsKey(childPkg.packageName))) {
                         childRes.removedInfo = new PackageRemovedInfo(this);
                         childRes.removedInfo.removedPackage = childPkg.packageName;
+                        childRes.removedInfo.installerPackageName = childPs.installerPackageName;
                     }
                     if (res.addedChildPackages == null) {
                         res.addedChildPackages = new ArrayMap<>();
@@ -17817,6 +17838,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static class PackageRemovedInfo {
         final PackageSender packageSender;
         String removedPackage;
+        String installerPackageName;
         int uid = -1;
         int removedAppId = -1;
         int[] origUsers;
@@ -17876,11 +17898,19 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putInt(Intent.EXTRA_UID, removedAppId >= 0 ? removedAppId : uid);
             extras.putBoolean(Intent.EXTRA_REPLACING, true);
             packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                removedPackage, extras, 0, null, null, null);
+                removedPackage, extras, 0, null /*targetPackage*/, null, null);
             packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                removedPackage, extras, 0, null, null, null);
+                removedPackage, extras, 0, null /*targetPackage*/, null, null);
             packageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                 null, null, 0, removedPackage, null, null);
+            if (installerPackageName != null) {
+                packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                        removedPackage, extras, 0 /*flags*/,
+                        installerPackageName, null, null);
+                packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
+                        removedPackage, extras, 0 /*flags*/,
+                        installerPackageName, null, null);
+            }
         }
 
         private void sendPackageRemovedBroadcastInternal(boolean killApp) {
@@ -17900,7 +17930,12 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, removedForAllUsers);
             if (removedPackage != null) {
                 packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
-                    removedPackage, extras, 0, null, null, broadcastUsers);
+                    removedPackage, extras, 0, null /*targetPackage*/, null, broadcastUsers);
+                if (installerPackageName != null) {
+                    packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
+                            removedPackage, extras, 0 /*flags*/,
+                            installerPackageName, null, broadcastUsers);
+                }
                 if (dataRemoved && !isRemovedPackageSystemUpdate) {
                     packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
                         removedPackage, extras,
@@ -17952,6 +17987,7 @@ public class PackageManagerService extends IPackageManager.Stub
             deletedPs = mSettings.mPackages.get(packageName);
             if (outInfo != null) {
                 outInfo.removedPackage = packageName;
+                outInfo.installerPackageName = ps.installerPackageName;
                 outInfo.isStaticSharedLib = deletedPkg != null
                         && deletedPkg.staticSharedLibName != null;
                 outInfo.populateUsers(deletedPs == null ? null
@@ -18440,6 +18476,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     String childPackageName = ps.childPackageNames.get(i);
                     PackageRemovedInfo childInfo = new PackageRemovedInfo(this);
                     childInfo.removedPackage = childPackageName;
+                    childInfo.installerPackageName = ps.installerPackageName;
                     outInfo.removedChildPackages.put(childPackageName, childInfo);
                     PackageSetting childPs = mSettings.getPackageLPr(childPackageName);
                     if (childPs != null) {
@@ -18564,6 +18601,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (outInfo != null) {
             outInfo.removedPackage = ps.name;
+            outInfo.installerPackageName = ps.installerPackageName;
             outInfo.isStaticSharedLib = pkg != null && pkg.staticSharedLibName != null;
             outInfo.removedAppId = ps.appId;
             outInfo.removedUsers = userIds;
