@@ -107,7 +107,6 @@ class CompatibilityDisplay {
             // TODO: STOPSHIP Remove createVirtualDisplay conditional before launching.
             if (createVirtualDisplay) {
                 startVirtualDisplay();
-                startImageReader();
             }
         } else {
             // Stop virtual display to test exit condition
@@ -208,6 +207,8 @@ class CompatibilityDisplay {
             if (mVirtualDisplay != null) {
                 mActivityManagerInternal.setVrCompatibilityDisplayId(
                     mVirtualDisplay.getDisplay().getDisplayId());
+                // Now create the ImageReader to supply a Surface to the new virtual display.
+                startImageReader();
             } else {
                 Log.w(TAG, "Virtual display id is null after createVirtualDisplay");
                 mActivityManagerInternal.setVrCompatibilityDisplayId(INVALID_DISPLAY);
@@ -241,6 +242,7 @@ class CompatibilityDisplay {
                                 mVirtualDisplay.release();
                                 mVirtualDisplay = null;
                             }
+                            stopImageReader();
                         }
                     }
                }
@@ -284,6 +286,16 @@ class CompatibilityDisplay {
         }
         synchronized (mVdLock) {
             setSurfaceLocked(mImageReader.getSurface());
+        }
+    }
+
+    /**
+     * Cleans up the ImageReader.
+     */
+    private void stopImageReader() {
+        if (mImageReader != null) {
+            mImageReader.close();
+            mImageReader = null;
         }
     }
 }
