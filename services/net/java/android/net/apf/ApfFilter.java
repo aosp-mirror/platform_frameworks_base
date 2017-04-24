@@ -18,6 +18,14 @@ package android.net.apf;
 
 import static android.system.OsConstants.*;
 
+import static com.android.internal.util.BitUtils.bytesToBEInt;
+import static com.android.internal.util.BitUtils.getUint16;
+import static com.android.internal.util.BitUtils.getUint32;
+import static com.android.internal.util.BitUtils.getUint8;
+import static com.android.internal.util.BitUtils.uint16;
+import static com.android.internal.util.BitUtils.uint32;
+import static com.android.internal.util.BitUtils.uint8;
+
 import android.os.SystemClock;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -1157,41 +1165,9 @@ public class ApfFilter {
         }
     }
 
-    private static int uint8(byte b) {
-        return b & 0xff;
-    }
-
-    private static int uint16(short s) {
-        return s & 0xffff;
-    }
-
-    private static long uint32(int i) {
-        return i & 0xffffffffL;
-    }
-
-    private static int getUint8(ByteBuffer buffer, int position) {
-        return uint8(buffer.get(position));
-    }
-
-    private static int getUint16(ByteBuffer buffer, int position) {
-        return uint16(buffer.getShort(position));
-    }
-
-    private static long getUint32(ByteBuffer buffer, int position) {
-        return uint32(buffer.getInt(position));
-    }
-
     // TODO: move to android.net.NetworkUtils
     @VisibleForTesting
     public static int ipv4BroadcastAddress(byte[] addrBytes, int prefixLength) {
-        return bytesToInt(addrBytes) | (int) (uint32(-1) >>> prefixLength);
-    }
-
-    @VisibleForTesting
-    public static int bytesToInt(byte[] addrBytes) {
-        return (uint8(addrBytes[0]) << 24)
-                + (uint8(addrBytes[1]) << 16)
-                + (uint8(addrBytes[2]) << 8)
-                + (uint8(addrBytes[3]));
+        return bytesToBEInt(addrBytes) | (int) (uint32(-1) >>> prefixLength);
     }
 }
