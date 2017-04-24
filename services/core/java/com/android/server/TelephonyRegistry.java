@@ -1531,6 +1531,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         }
 
+        // Wakeup apps for the (SUBSCRIPTION_)PHONE_STATE broadcast.
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+
         // Send broadcast twice, once for apps that have PRIVILEGED permission and once for those
         // that have the runtime one
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
