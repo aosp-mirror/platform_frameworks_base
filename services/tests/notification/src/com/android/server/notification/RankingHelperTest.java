@@ -18,6 +18,7 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_NONE;
 
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
@@ -504,10 +505,21 @@ public class RankingHelperTest {
 
     @Test
     public void testCreateChannel_blocked() throws Exception {
-        mHelper.setImportance(PKG, UID, NotificationManager.IMPORTANCE_NONE);
+        mHelper.setImportance(PKG, UID, IMPORTANCE_NONE);
 
         mHelper.createNotificationChannel(PKG, UID,
                 new NotificationChannel("bananas", "bananas", IMPORTANCE_LOW), true);
+    }
+
+    @Test
+    public void testCreateChannel_ImportanceNone() throws Exception {
+        try {
+            mHelper.createNotificationChannel(PKG, UID,
+                    new NotificationChannel("bananas", "bananas", IMPORTANCE_NONE), true);
+            fail("Was allowed to create a blocked channel");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
     }
 
 
