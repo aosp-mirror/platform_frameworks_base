@@ -365,6 +365,21 @@ static bool FlattenXmlToOutStream(IAaptContext* context, const StringPiece& outp
   return true;
 }
 
+static bool IsValidFile(IAaptContext* context, const StringPiece& input_path) {
+  const file::FileType file_type = file::GetFileType(input_path);
+  if (file_type != file::FileType::kRegular && file_type != file::FileType::kSymlink) {
+    if (file_type == file::FileType::kDirectory) {
+      context->GetDiagnostics()->Error(DiagMessage(input_path)
+                                       << "resource file cannot be a directory");
+    } else {
+      context->GetDiagnostics()->Error(DiagMessage(input_path)
+                                       << "not a valid resource file");
+    }
+    return false;
+  }
+  return true;
+}
+
 static bool CompileXml(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& path_data, IArchiveWriter* writer,
                        const std::string& output_path) {
@@ -569,7 +584,8 @@ static bool CompileFile(IAaptContext* context, const CompileOptions& options,
   std::string error_str;
   Maybe<android::FileMap> f = file::MmapPath(path_data.source.path, &error_str);
   if (!f) {
-    context->GetDiagnostics()->Error(DiagMessage(path_data.source) << error_str);
+    context->GetDiagnostics()->Error(DiagMessage(path_data.source) << "failed to mmap file: "
+                                     << error_str);
     return false;
   }
 
@@ -690,6 +706,11 @@ int Compile(const std::vector<StringPiece>& args) {
   for (ResourcePathData& path_data : input_data) {
     if (options.verbose) {
       context.GetDiagnostics()->Note(DiagMessage(path_data.source) << "processing");
+    }
+
+    if (!IsValidFile(&context, path_data.source.path)) {
+      error = true;
+      continue;
     }
 
     if (path_data.resource_dir == "values") {
