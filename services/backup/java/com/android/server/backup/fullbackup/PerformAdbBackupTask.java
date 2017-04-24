@@ -30,6 +30,7 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueAdbBackupEngine;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.utils.AppBackupUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -282,14 +283,14 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
         while (iter.hasNext()) {
             PackageInfo pkg = iter.next().getValue();
-            if (!RefactoredBackupManagerService.appIsEligibleForBackup(pkg.applicationInfo)
-                    || RefactoredBackupManagerService.appIsStopped(pkg.applicationInfo)) {
+            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo)
+                    || AppBackupUtils.appIsStopped(pkg.applicationInfo)) {
                 iter.remove();
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(RefactoredBackupManagerService.TAG, "Package " + pkg.packageName
                             + " is not eligible for backup, removing.");
                 }
-            } else if (RefactoredBackupManagerService.appIsKeyValueOnly(pkg)) {
+            } else if (AppBackupUtils.appIsKeyValueOnly(pkg)) {
                 iter.remove();
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(RefactoredBackupManagerService.TAG, "Package " + pkg.packageName

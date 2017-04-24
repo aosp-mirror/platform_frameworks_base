@@ -29,10 +29,14 @@ import android.util.Slog;
 
 import com.android.internal.backup.IObbBackupService;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Full backup/restore to a file/socket.
+ */
 public class FullBackupObbConnection implements ServiceConnection {
 
     private RefactoredBackupManagerService backupManagerService;
@@ -72,7 +76,7 @@ public class FullBackupObbConnection implements ServiceConnection {
                             null, RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
             mService.backupObbs(pkg.packageName, pipes[1], token,
                     backupManagerService.getBackupManagerBinder());
-            RefactoredBackupManagerService.routeSocketDataToOutput(pipes[0], out);
+            FullBackupUtils.routeSocketDataToOutput(pipes[0], out);
             success = backupManagerService.waitUntilOperationComplete(token);
         } catch (Exception e) {
             Slog.w(RefactoredBackupManagerService.TAG, "Unable to back up OBBs for " + pkg, e);

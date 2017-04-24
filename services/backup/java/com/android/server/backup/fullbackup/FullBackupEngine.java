@@ -34,6 +34,7 @@ import android.util.StringBuilderPrinter;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -42,6 +43,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Core logic for performing one package's full backup, gathering the tarball from the
+ * application and emitting it to the designated OutputStream.
+ */
 public class FullBackupEngine {
 
     private RefactoredBackupManagerService backupManagerService;
@@ -90,7 +95,7 @@ public class FullBackupEngine {
                         Slog.d(RefactoredBackupManagerService.TAG,
                                 "Writing manifest for " + mPackage.packageName);
                     }
-                    RefactoredBackupManagerService
+                    FullBackupUtils
                             .writeAppManifest(mPackage, backupManagerService.getPackageManager(),
                                     mManifestFile, mSendApk,
                                     writeWidgetData);
@@ -211,7 +216,7 @@ public class FullBackupEngine {
                 t.start();
 
                 // Now pull data from the app and stuff it into the output
-                RefactoredBackupManagerService.routeSocketDataToOutput(pipes[0], mOutput);
+                FullBackupUtils.routeSocketDataToOutput(pipes[0], mOutput);
 
                 if (!backupManagerService.waitUntilOperationComplete(mOpToken)) {
                     Slog.e(RefactoredBackupManagerService.TAG,

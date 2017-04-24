@@ -41,6 +41,7 @@ import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
+import com.android.server.backup.utils.AppBackupUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -994,7 +995,7 @@ public class PerformAdbRestoreTask implements Runnable {
                         } else {
                             // So far so good -- do the signatures match the manifest?
                             Signature[] sigs = mManifestSignatures.get(info.packageName);
-                            if (RefactoredBackupManagerService.signaturesMatch(sigs, pkg)) {
+                            if (AppBackupUtils.signaturesMatch(sigs, pkg)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
                                 if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
@@ -1188,7 +1189,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                     // such packages are signed with the platform cert instead of
                                     // the app developer's cert, so they're different on every
                                     // device.
-                                    if (RefactoredBackupManagerService.signaturesMatch(sigs,
+                                    if (AppBackupUtils.signaturesMatch(sigs,
                                             pkgInfo)) {
                                         if ((pkgInfo.applicationInfo.flags
                                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {

@@ -50,6 +50,9 @@ import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.RefactoredBackupManagerService.BackupState;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
+import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupObserverUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -242,7 +245,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         if (mOriginalQueue.isEmpty() && mPendingFullBackups.isEmpty()) {
             Slog.w(TAG, "Backup begun with an empty queue - nothing to do.");
             backupManagerService.addBackupTrace("queue empty at begin");
-            RefactoredBackupManagerService.sendBackupFinished(mObserver, BackupManager.SUCCESS);
+            BackupObserverUtils.sendBackupFinished(mObserver, BackupManager.SUCCESS);
             executeNextState(BackupState.FINAL);
             return;
         }
@@ -343,7 +346,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // restage everything and try again later.
                 backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
                 // In case of any other error, it's backup transport error.
-                RefactoredBackupManagerService.sendBackupFinished(mObserver,
+                BackupObserverUtils.sendBackupFinished(mObserver,
                         BackupManager.ERROR_TRANSPORT_ABORTED);
                 executeNextState(BackupState.FINAL);
             }
@@ -380,7 +383,7 @@ public class PerformBackupTask implements BackupRestoreTask {
             mCurrentPackage = backupManagerService.getPackageManager().getPackageInfo(
                     request.packageName,
                     PackageManager.GET_SIGNATURES);
-            if (!RefactoredBackupManagerService.appIsEligibleForBackup(
+            if (!AppBackupUtils.appIsEligibleForBackup(
                     mCurrentPackage.applicationInfo)) {
                 // The manifest has changed but we had a stale backup request pending.
                 // This won't happen again because the app won't be requesting further
@@ -390,14 +393,14 @@ public class PerformBackupTask implements BackupRestoreTask {
                 backupManagerService.addBackupTrace("skipping - not eligible, completion is noop");
                 // Shouldn't happen in case of requested backup, as pre-check was done in
                 // #requestBackup(), except to app update done concurrently
-                RefactoredBackupManagerService.sendBackupOnPackageResult(mObserver,
+                BackupObserverUtils.sendBackupOnPackageResult(mObserver,
                         mCurrentPackage.packageName,
                         BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                 executeNextState(BackupState.RUNNING_QUEUE);
                 return;
             }
 
-            if (RefactoredBackupManagerService.appGetsFullBackup(mCurrentPackage)) {
+            if (AppBackupUtils.appGetsFullBackup(mCurrentPackage)) {
                 // It's possible that this app *formerly* was enqueued for key/value backup,
                 // but has since been updated and now only supports the full-data path.
                 // Don't proceed with a key/value backup for it in this case.
@@ -407,19 +410,19 @@ public class PerformBackupTask implements BackupRestoreTask {
                         "skipping - fullBackupOnly, completion is noop");
                 // Shouldn't happen in case of requested backup, as pre-check was done in
                 // #requestBackup()
-                RefactoredBackupManagerService.sendBackupOnPackageResult(mObserver,
+                BackupObserverUtils.sendBackupOnPackageResult(mObserver,
                         mCurrentPackage.packageName,
                         BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                 executeNextState(BackupState.RUNNING_QUEUE);
                 return;
             }
 
-            if (RefactoredBackupManagerService.appIsStopped(mCurrentPackage.applicationInfo)) {
+            if (AppBackupUtils.appIsStopped(mCurrentPackage.applicationInfo)) {
                 // The app has been force-stopped or cleared or just installed,
                 // and not yet launched out of that state, so just as it won't
                 // receive broadcasts, we won't run it for backup.
                 backupManagerService.addBackupTrace("skipping - stopped");
-                RefactoredBackupManagerService.sendBackupOnPackageResult(mObserver,
+                BackupObserverUtils.sendBackupOnPackageResult(mObserver,
                         mCurrentPackage.packageName,
                         BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                 executeNextState(BackupState.RUNNING_QUEUE);
@@ -473,14 +476,14 @@ public class PerformBackupTask implements BackupRestoreTask {
                     backupManagerService.dataChangedImpl(request.packageName);
                     mStatus = BackupTransport.TRANSPORT_OK;
                     if (mQueue.isEmpty()) nextState = BackupState.FINAL;
-                    RefactoredBackupManagerService
+                    BackupObserverUtils
                             .sendBackupOnPackageResult(mObserver, mCurrentPackage.packageName,
                                     BackupManager.ERROR_AGENT_FAILURE);
                 } else if (mStatus == BackupTransport.AGENT_UNKNOWN) {
                     // Failed lookup of the app, so we couldn't bring up an agent, but
                     // we're otherwise fine.  Just drop it and go on to the next as usual.
                     mStatus = BackupTransport.TRANSPORT_OK;
-                    RefactoredBackupManagerService
+                    BackupObserverUtils
                             .sendBackupOnPackageResult(mObserver, mCurrentPackage.packageName,
                                     BackupManager.ERROR_PACKAGE_NOT_FOUND);
                 } else {
@@ -577,22 +580,22 @@ public class PerformBackupTask implements BackupRestoreTask {
             if (mFullBackupTask != null) {
                 mFullBackupTask.unregisterTask();
             }
-            RefactoredBackupManagerService.sendBackupFinished(mObserver,
+            BackupObserverUtils.sendBackupFinished(mObserver,
                     BackupManager.ERROR_BACKUP_CANCELLED);
         } else {
             mFullBackupTask.unregisterTask();
             switch (mStatus) {
                 case BackupTransport.TRANSPORT_OK:
-                    RefactoredBackupManagerService.sendBackupFinished(mObserver,
+                    BackupObserverUtils.sendBackupFinished(mObserver,
                             BackupManager.SUCCESS);
                     break;
                 case BackupTransport.TRANSPORT_NOT_INITIALIZED:
-                    RefactoredBackupManagerService.sendBackupFinished(mObserver,
+                    BackupObserverUtils.sendBackupFinished(mObserver,
                             BackupManager.ERROR_TRANSPORT_ABORTED);
                     break;
                 case BackupTransport.TRANSPORT_ERROR:
                 default:
-                    RefactoredBackupManagerService.sendBackupFinished(mObserver,
+                    BackupObserverUtils.sendBackupFinished(mObserver,
                             BackupManager.ERROR_TRANSPORT_ABORTED);
                     break;
             }
@@ -834,7 +837,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                                         .addBackupTrace("illegal key " + key + " from " + pkgName);
                                 EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, pkgName,
                                         "bad key");
-                                mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                                         BackupManagerMonitor.LOG_EVENT_ID_ILLEGAL_KEY,
                                         mCurrentPackage,
                                         BackupManagerMonitor
@@ -845,7 +848,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                                 backupManagerService.getBackupHandler().removeMessages(
                                         RefactoredBackupManagerService
                                                 .MSG_BACKUP_OPERATION_TIMEOUT);
-                                RefactoredBackupManagerService
+                                BackupObserverUtils
                                         .sendBackupOnPackageResult(mObserver, pkgName,
                                                 BackupManager.ERROR_AGENT_FAILURE);
                                 errorCleanup();
@@ -920,7 +923,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                                 "no backup data written; not calling transport");
                     }
                     backupManagerService.addBackupTrace("no data to send");
-                    mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                             BackupManagerMonitor.LOG_EVENT_ID_NO_DATA_TO_SEND,
                             mCurrentPackage,
                             BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -933,7 +936,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     // with the new state file it just created.
                     mBackupDataName.delete();
                     mNewStateName.renameTo(mSavedStateName);
-                    RefactoredBackupManagerService
+                    BackupObserverUtils
                             .sendBackupOnPackageResult(mObserver, pkgName, BackupManager.SUCCESS);
                     EventLog.writeEvent(EventLogTags.BACKUP_PACKAGE, pkgName, size);
                     backupManagerService.logBackupComplete(pkgName);
@@ -942,21 +945,21 @@ public class PerformBackupTask implements BackupRestoreTask {
                     // back but proceed with running the rest of the queue.
                     mBackupDataName.delete();
                     mNewStateName.delete();
-                    RefactoredBackupManagerService.sendBackupOnPackageResult(mObserver, pkgName,
+                    BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
                             BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
                     EventLogTags.writeBackupAgentFailure(pkgName, "Transport rejected");
                 } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
-                    RefactoredBackupManagerService.sendBackupOnPackageResult(mObserver, pkgName,
+                    BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
                             BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
                     EventLog.writeEvent(EventLogTags.BACKUP_QUOTA_EXCEEDED, pkgName);
                 } else {
                     // Actual transport-level failure to communicate the data to the backend
-                    RefactoredBackupManagerService.sendBackupOnPackageResult(mObserver, pkgName,
+                    BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
                             BackupManager.ERROR_TRANSPORT_ABORTED);
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
                 }
             } catch (Exception e) {
-                RefactoredBackupManagerService.sendBackupOnPackageResult(mObserver, pkgName,
+                BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
                         BackupManager.ERROR_TRANSPORT_ABORTED);
                 Slog.e(TAG, "Transport error backing up " + pkgName, e);
                 EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
@@ -1021,7 +1024,7 @@ public class PerformBackupTask implements BackupRestoreTask {
             EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, logPackageName);
             backupManagerService.addBackupTrace(
                     "cancel of " + logPackageName + ", cancelAll=" + cancelAll);
-            mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                     BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
                     mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
                     backupManagerService.putMonitoringExtra(null,
