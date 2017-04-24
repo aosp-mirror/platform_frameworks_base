@@ -16,7 +16,6 @@
 
 package com.android.server.backup;
 
-import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
 import android.app.ActivityManager;
@@ -27,7 +26,6 @@ import android.app.IBackupAgent;
 import android.app.PendingIntent;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
-import android.app.backup.BackupProgress;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -48,11 +46,9 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.Signature;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.HandlerThread;
@@ -76,7 +72,6 @@ import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StringBuilderPrinter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.backup.IBackupTransport;
@@ -103,6 +98,9 @@ import com.android.server.backup.params.ClearRetryParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.ActiveRestoreSession;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
+import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
@@ -684,7 +682,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private HashSet<String> mEverStoredApps = new HashSet<>();
 
     private static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;
-            // increment when the schema changes
+    // increment when the schema changes
     private File mTokenFile;
     private Set<String> mAncestralPackages = null;
     private long mAncestralToken = 0;
@@ -716,49 +714,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             }
         } while (token < 0);
         return token;
-    }
-
-    // High level policy: apps are generally ineligible for backup if certain conditions apply
-    public static boolean appIsEligibleForBackup(ApplicationInfo app) {
-        // 1. their manifest states android:allowBackup="false"
-        if ((app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
-            return false;
-        }
-
-        // 2. they run as a system-level uid but do not supply their own backup agent
-        if ((app.uid < Process.FIRST_APPLICATION_UID) && (app.backupAgentName == null)) {
-            return false;
-        }
-
-        // 3. it is the special shared-storage backup package used for 'adb backup'
-        if (app.packageName.equals(RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    // Checks if the app is in a stopped state, that means it won't receive broadcasts.
-    public static boolean appIsStopped(ApplicationInfo app) {
-        return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);
-    }
-
-    /* does *not* check overall backup eligibility policy! */
-    public static boolean appGetsFullBackup(PackageInfo pkg) {
-        if (pkg.applicationInfo.backupAgentName != null) {
-            // If it has an agent, it gets full backups only if it says so
-            return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FULL_BACKUP_ONLY) != 0;
-        }
-
-        // No agent or fullBackupOnly="true" means we do indeed perform full-data backups for it
-        return true;
-    }
-
-    /* adb backup: is this app only capable of doing key/value?  We say otherwise if
-     * the app has a backup agent and does not say fullBackupOnly,
-     */
-    public static boolean appIsKeyValueOnly(PackageInfo pkg) {
-        return !appGetsFullBackup(pkg);
     }
 
     // ----- Debug-only backup operation trace -----
@@ -1072,7 +1027,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     foundApps.add(pkgName); // all apps that we've addressed already
                     try {
                         PackageInfo pkg = mPackageManager.getPackageInfo(pkgName, 0);
-                        if (appGetsFullBackup(pkg) && appIsEligibleForBackup(pkg.applicationInfo)) {
+                        if (AppBackupUtils.appGetsFullBackup(pkg)
+                                && AppBackupUtils.appIsEligibleForBackup(
+                                pkg.applicationInfo)) {
                             schedule.add(new FullBackupEntry(pkgName, lastBackup));
                         } else {
                             if (DEBUG) {
@@ -1091,7 +1048,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 // New apps can arrive "out of band" via OTA and similar, so we also need to
                 // scan to make sure that we're tracking all full-backup candidates properly
                 for (PackageInfo app : apps) {
-                    if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
+                    if (AppBackupUtils.appGetsFullBackup(app)
+                            && AppBackupUtils.appIsEligibleForBackup(
+                            app.applicationInfo)) {
                         if (!foundApps.contains(app.packageName)) {
                             if (MORE_DEBUG) {
                                 Slog.i(TAG, "New full backup app " + app.packageName + " found");
@@ -1120,7 +1079,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             changed = true;
             schedule = new ArrayList<>(apps.size());
             for (PackageInfo info : apps) {
-                if (appGetsFullBackup(info) && appIsEligibleForBackup(info.applicationInfo)) {
+                if (AppBackupUtils.appGetsFullBackup(info) && AppBackupUtils.appIsEligibleForBackup(
+                        info.applicationInfo)) {
                     schedule.add(new FullBackupEntry(info.packageName, 0));
                 }
             }
@@ -1587,7 +1547,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 for (String packageName : pkgList) {
                     try {
                         PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
-                        if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
+                        if (AppBackupUtils.appGetsFullBackup(app)
+                                && AppBackupUtils.appIsEligibleForBackup(
+                                app.applicationInfo)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob(0);
                         } else {
@@ -1967,16 +1929,18 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         if (packages == null || packages.length < 1) {
             Slog.e(TAG, "No packages named for backup request");
-            sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
-            monitor = monitorEvent(monitor, BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES,
+            BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
+            monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
+                    BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES,
                     null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
         IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
         if (transport == null) {
-            sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
-            monitor = monitorEvent(monitor, BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
+            BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
+            monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
+                    BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
                     null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
@@ -1991,18 +1955,18 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
-                if (!appIsEligibleForBackup(packageInfo.applicationInfo)) {
-                    sendBackupOnPackageResult(observer, packageName,
+                if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo)) {
+                    BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
                 }
-                if (appGetsFullBackup(packageInfo)) {
+                if (AppBackupUtils.appGetsFullBackup(packageInfo)) {
                     fullBackupList.add(packageInfo.packageName);
                 } else {
                     kvBackupList.add(packageInfo.packageName);
                 }
             } catch (NameNotFoundException e) {
-                sendBackupOnPackageResult(observer, packageName,
+                BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
                         BackupManager.ERROR_PACKAGE_NOT_FOUND);
             }
         }
@@ -2019,7 +1983,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             dirName = transport.transportDirName();
         } catch (Exception e) {
             Slog.e(TAG, "Transport unavailable while attempting backup: " + e.getMessage());
-            sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
+            BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
 
@@ -2218,26 +2182,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
 
-    // ----- Full backup/restore to a file/socket -----
-
-    public static void routeSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
-            throws IOException {
-        // We do not take close() responsibility for the pipe FD
-        FileInputStream raw = new FileInputStream(inPipe.getFileDescriptor());
-        DataInputStream in = new DataInputStream(raw);
-
-        byte[] buffer = new byte[32 * 1024];
-        int chunkTotal;
-        while ((chunkTotal = in.readInt()) > 0) {
-            while (chunkTotal > 0) {
-                int toRead = (chunkTotal > buffer.length) ? buffer.length : chunkTotal;
-                int nRead = in.read(buffer, 0, toRead);
-                out.write(buffer, 0, nRead);
-                chunkTotal -= nRead;
-            }
-        }
-    }
-
     @Override
     public void tearDownAgentAndKill(ApplicationInfo app) {
         if (app == null) {
@@ -2262,55 +2206,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         } catch (RemoteException e) {
             Slog.d(TAG, "Lost app trying to shut down");
         }
-    }
-
-    // Core logic for performing one package's full backup, gathering the tarball from the
-    // application and emitting it to the designated OutputStream.
-
-    public static void writeAppManifest(PackageInfo pkg, PackageManager packageManager,
-            File manifestFile, boolean withApk, boolean withWidgets) throws IOException {
-        // Manifest format. All data are strings ending in LF:
-        //     BACKUP_MANIFEST_VERSION, currently 1
-        //
-        // Version 1:
-        //     package name
-        //     package's versionCode
-        //     platform versionCode
-        //     getInstallerPackageName() for this package (maybe empty)
-        //     boolean: "1" if archive includes .apk; any other string means not
-        //     number of signatures == N
-        // N*:    signature byte array in ascii format per Signature.toCharsString()
-        StringBuilder builder = new StringBuilder(4096);
-        StringBuilderPrinter printer = new StringBuilderPrinter(builder);
-
-        printer.println(Integer.toString(BACKUP_MANIFEST_VERSION));
-        printer.println(pkg.packageName);
-        printer.println(Integer.toString(pkg.versionCode));
-        printer.println(Integer.toString(Build.VERSION.SDK_INT));
-
-        String installerName = packageManager.getInstallerPackageName(pkg.packageName);
-        printer.println((installerName != null) ? installerName : "");
-
-        printer.println(withApk ? "1" : "0");
-        if (pkg.signatures == null) {
-            printer.println("0");
-        } else {
-            printer.println(Integer.toString(pkg.signatures.length));
-            for (Signature sig : pkg.signatures) {
-                printer.println(sig.toCharsString());
-            }
-        }
-
-        FileOutputStream outstream = new FileOutputStream(manifestFile);
-        outstream.write(builder.toString().getBytes());
-        outstream.close();
-
-        // We want the manifest block in the archive stream to be idempotent:
-        // each time we generate a backup stream for the app, we want the manifest
-        // block to be identical.  The underlying tar mechanism sees it as a file,
-        // though, and will propagate its mtime, causing the tar header to vary.
-        // Avoid this problem by pinning the mtime to zero.
-        manifestFile.setLastModified(0);
     }
 
     public boolean deviceIsEncrypted() {
@@ -2524,7 +2419,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
                     try {
                         PackageInfo appInfo = mPackageManager.getPackageInfo(entry.packageName, 0);
-                        if (!appGetsFullBackup(appInfo)) {
+                        if (!AppBackupUtils.appGetsFullBackup(appInfo)) {
                             // The head app isn't supposed to get full-data backups [any more];
                             // so we cull it and force a loop around to consider the new head
                             // app.
@@ -2609,63 +2504,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 mRunningFullBackupTask.handleCancel(true);
             }
         }
-    }
-
-    // ----- Restore handling -----
-
-    // Old style: directly match the stored vs on device signature blocks
-    public static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
-        if (target == null) {
-            return false;
-        }
-
-        // If the target resides on the system partition, we allow it to restore
-        // data from the like-named package in a restore set even if the signatures
-        // do not match.  (Unlike general applications, those flashed to the system
-        // partition will be signed with the device's platform certificate, so on
-        // different phones the same system app will have different signatures.)
-        if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            if (MORE_DEBUG) {
-                Slog.v(TAG,
-                        "System app " + target.packageName + " - skipping sig check");
-            }
-            return true;
-        }
-
-        // Allow unsigned apps, but not signed on one device and unsigned on the other
-        // !!! TODO: is this the right policy?
-        Signature[] deviceSigs = target.signatures;
-        if (MORE_DEBUG) {
-            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs
-                    + " device=" + deviceSigs);
-        }
-        if ((storedSigs == null || storedSigs.length == 0)
-                && (deviceSigs == null || deviceSigs.length == 0)) {
-            return true;
-        }
-        if (storedSigs == null || deviceSigs == null) {
-            return false;
-        }
-
-        // !!! TODO: this demands that every stored signature match one
-        // that is present on device, and does not demand the converse.
-        // Is this this right policy?
-        int nStored = storedSigs.length;
-        int nDevice = deviceSigs.length;
-
-        for (int i = 0; i < nStored; i++) {
-            boolean match = false;
-            for (int j = 0; j < nDevice; j++) {
-                if (storedSigs[i].equals(deviceSigs[j])) {
-                    match = true;
-                    break;
-                }
-            }
-            if (!match) {
-                return false;
-            }
-        }
-        return true;
     }
 
     // Used by both incremental and full restore
@@ -3738,8 +3576,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         try {
             PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                     PackageManager.GET_SIGNATURES);
-            if (!appIsEligibleForBackup(packageInfo.applicationInfo) ||
-                    appIsStopped(packageInfo.applicationInfo) ||
+            if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo) ||
+                    AppBackupUtils.appIsStopped(packageInfo.applicationInfo) ||
                     appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
                 return false;
             }
@@ -3747,7 +3585,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             if (transport != null) {
                 try {
                     return transport.isAppEligibleForBackup(packageInfo,
-                            appGetsFullBackup(packageInfo));
+                            AppBackupUtils.appGetsFullBackup(packageInfo));
                 } catch (Exception e) {
                     Slog.e(TAG, "Unable to ask about eligibility: " + e.getMessage());
                 }
@@ -3896,44 +3734,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    public static void sendBackupOnUpdate(IBackupObserver observer, String packageName,
-            BackupProgress progress) {
-        if (observer != null) {
-            try {
-                observer.onUpdate(packageName, progress);
-            } catch (RemoteException e) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Backup observer went away: onUpdate");
-                }
-            }
-        }
-    }
-
-    public static void sendBackupOnPackageResult(IBackupObserver observer, String packageName,
-            int status) {
-        if (observer != null) {
-            try {
-                observer.onResult(packageName, status);
-            } catch (RemoteException e) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Backup observer went away: onResult");
-                }
-            }
-        }
-    }
-
-    public static void sendBackupFinished(IBackupObserver observer, int status) {
-        if (observer != null) {
-            try {
-                observer.backupFinished(status);
-            } catch (RemoteException e) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Backup observer went away: backupFinished");
-                }
-            }
-        }
-    }
-
     public Bundle putMonitoringExtra(Bundle extras, String key, String value) {
         if (extras == null) {
             extras = new Bundle();
@@ -3965,33 +3765,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
         extras.putBoolean(key, value);
         return extras;
-    }
-
-    public static IBackupManagerMonitor monitorEvent(IBackupManagerMonitor monitor, int id,
-            PackageInfo pkg, int category, Bundle extras) {
-        if (monitor != null) {
-            try {
-                Bundle bundle = new Bundle();
-                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID, id);
-                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY, category);
-                if (pkg != null) {
-                    bundle.putString(EXTRA_LOG_EVENT_PACKAGE_NAME,
-                            pkg.packageName);
-                    bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
-                            pkg.versionCode);
-                }
-                if (extras != null) {
-                    bundle.putAll(extras);
-                }
-                monitor.onEvent(bundle);
-                return monitor;
-            } catch (RemoteException e) {
-                if (DEBUG) {
-                    Slog.w(TAG, "backup manager monitor went away");
-                }
-            }
-        }
-        return null;
     }
 
     @Override
