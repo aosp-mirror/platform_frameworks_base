@@ -180,21 +180,24 @@ public class HelpUtils {
         }
 
         Resources resources = context.getResources();
-        boolean includePackageName = resources.getBoolean(R.bool.config_sendPackageName);
+        boolean includePackageName =
+                resources.getBoolean(com.android.internal.R.bool.config_sendPackageName);
 
         if (sendPackageName && includePackageName) {
             String[] packageNameKey =
-                    {resources.getString(R.string.config_helpPackageNameKey)};
+                    {resources.getString(com.android.internal.R.string.config_helpPackageNameKey)};
             String[] packageNameValue =
-                    {resources.getString(R.string.config_helpPackageNameValue)};
+                    {resources.getString(
+                            com.android.internal.R.string.config_helpPackageNameValue)};
             String helpIntentExtraKey =
-                    resources.getString(R.string.config_helpIntentExtraKey);
+                    resources.getString(com.android.internal.R.string.config_helpIntentExtraKey);
             String helpIntentNameKey =
-                    resources.getString(R.string.config_helpIntentNameKey);
+                    resources.getString(com.android.internal.R.string.config_helpIntentNameKey);
             String feedbackIntentExtraKey =
-                    resources.getString(R.string.config_feedbackIntentExtraKey);
+                    resources.getString(
+                            com.android.internal.R.string.config_feedbackIntentExtraKey);
             String feedbackIntentNameKey =
-                    resources.getString(R.string.config_feedbackIntentNameKey);
+                    resources.getString(com.android.internal.R.string.config_feedbackIntentNameKey);
             intent.putExtra(helpIntentExtraKey, packageNameKey);
             intent.putExtra(helpIntentNameKey, packageNameValue);
             intent.putExtra(feedbackIntentExtraKey, packageNameKey);
