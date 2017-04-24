@@ -214,10 +214,12 @@ public abstract class ContentResolver {
      *
      * <p><b>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
      * encourage to use structured query arguments in lieu of opaque SQL query clauses.</b>
-     * See: {@link #QUERY_ARG_SORT_COLUMNS}, {@link #QUERY_ARG_SORT_DIRECTION}, and
-     * {@link #QUERY_ARG_SORT_COLLATION}.
+     *
+     * @see #QUERY_ARG_SORT_COLUMNS
+     * @see #QUERY_ARG_SORT_DIRECTION
+     * @see #QUERY_ARG_SORT_COLLATION
      */
-    public static final String QUERY_ARG_SQL_SELECTION = "android:query-sql-selection";
+    public static final String QUERY_ARG_SQL_SELECTION = "android:query-arg-sql-selection";
 
     /**
      * Key for SQL selection string arguments list.
@@ -229,10 +231,13 @@ public abstract class ContentResolver {
      *
      * <p><b>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
      * encourage to use structured query arguments in lieu of opaque SQL query clauses.</b>
-     * See: {@link #QUERY_ARG_SORT_COLUMNS}, {@link #QUERY_ARG_SORT_DIRECTION}, and
-     * {@link #QUERY_ARG_SORT_COLLATION}.
+     *
+     * @see #QUERY_ARG_SORT_COLUMNS
+     * @see #QUERY_ARG_SORT_DIRECTION
+     * @see #QUERY_ARG_SORT_COLLATION
      */
-    public static final String QUERY_ARG_SQL_SELECTION_ARGS = "android:query-sql-selection-args";
+    public static final String QUERY_ARG_SQL_SELECTION_ARGS =
+            "android:query-arg-sql-selection-args";
 
     /**
      * Key for an SQL style sort string that may be present in the query Bundle argument
@@ -241,10 +246,12 @@ public abstract class ContentResolver {
      *
      * <p><b>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
      * encourage to use structured query arguments in lieu of opaque SQL query clauses.</b>
-     * See: {@link #QUERY_ARG_SORT_COLUMNS}, {@link #QUERY_ARG_SORT_DIRECTION}, and
-     * {@link #QUERY_ARG_SORT_COLLATION}.
+     *
+     * @see #QUERY_ARG_SORT_COLUMNS
+     * @see #QUERY_ARG_SORT_DIRECTION
+     * @see #QUERY_ARG_SORT_COLLATION
      */
-    public static final String QUERY_ARG_SQL_SORT_ORDER = "android:query-sql-sort-order";
+    public static final String QUERY_ARG_SQL_SORT_ORDER = "android:query-arg-sql-sort-order";
 
     /**
      * Specifies the list of columns against which to sort results. When first column values
@@ -255,16 +262,17 @@ public abstract class ContentResolver {
      *
      * <p>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher:
      *
-     * <li>When supplying data using a ContentProvider, it is strongly recommended that
-     * an entry be included in the {@link Cursor} extras {@link Bundle} under this same key
-     * (@link QUERY_ARG_SORT_COLUMNS}) to indicate which column sorting was applied
-     * to the recordset, if any.
+     * <li>{@link ContentProvider} implementations: When preparing data in
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}, if sort columns
+     * is reflected in the returned Cursor, it is  strongly recommended that
+     * {@link #QUERY_ARG_SORT_COLUMNS} then be included in the array of honored arguments
+     * reflected in {@link Cursor} extras {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
      *
      * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in the
      * arguments {@link Bundle}, the Content framework will attempt to synthesize
      * an QUERY_ARG_SQL* argument using the corresponding QUERY_ARG_SORT* values.
      */
-    public static final String QUERY_ARG_SORT_COLUMNS = "android:query-sort-columns";
+    public static final String QUERY_ARG_SORT_COLUMNS = "android:query-arg-sort-columns";
 
     /**
      * Specifies desired sort order. When unspecified a provider may provide a default
@@ -272,50 +280,58 @@ public abstract class ContentResolver {
      *
      * <p>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher:
      *
-     * <li>When supplying data using a ContentProvider, it is strongly recommended that
-     * an entry be included in the {@link Cursor} extras {@link Bundle} under this same key
-     * (@link QUERY_ARG_SORT_DIRECTION}) to indicate that sort direction was applied
-     * to the recordset.
+     * <li>{@link ContentProvider} implementations: When preparing data in
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}, if sort direction
+     * is reflected in the returned Cursor, it is  strongly recommended that
+     * {@link #QUERY_ARG_SORT_DIRECTION} then be included in the array of honored arguments
+     * reflected in {@link Cursor} extras {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
      *
      * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in the
      * arguments {@link Bundle}, the Content framework will attempt to synthesize
-     * an QUERY_ARG_SQL* argument using the corresponding QUERY_ARG_SORT* values.
+     * a QUERY_ARG_SQL* argument using the corresponding QUERY_ARG_SORT* values.
      *
      * @see #QUERY_SORT_DIRECTION_ASCENDING
      * @see #QUERY_SORT_DIRECTION_DESCENDING
      */
-    public static final String QUERY_ARG_SORT_DIRECTION = "android:query-sort-direction";
+    public static final String QUERY_ARG_SORT_DIRECTION = "android:query-arg-sort-direction";
 
     /**
-     * Allows client to specify a hint to the provider as to which collation
+     * Allows client to specify a hint to the provider declaring which collation
      * to use when sorting text values.
      *
-     * <p>Providers may provide their own collators. When selecting a custom collator
-     * the value will be determined by the Provider.
+     * <p>Providers may support custom collators. When specifying a custom collator
+     * the value is determined by the Provider.
      *
-     * <li>When supplying data using a ContentProvider, it is strongly recommended that
-     * an entry be included in the {@link Cursor} extras {@link Bundle} under this same key
-     * (@link QUERY_ARG_SORT_COLLATION}) to indicate that sort collation was applied
-     * to the recordset.
+     * <li>{@link ContentProvider} implementations: When preparing data in
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}, if sort collation
+     * is reflected in the returned Cursor, it is  strongly recommended that
+     * {@link #QUERY_ARG_SORT_COLLATION} then be included in the array of honored arguments
+     * reflected in {@link Cursor} extras {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
      *
-     * <p>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in the
+     * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in the
      * arguments {@link Bundle}, the Content framework will attempt to synthesize
-     * an QUERY_ARG_SQL* argument using the corresponding QUERY_ARG_SORT* values.
+     * a QUERY_ARG_SQL* argument using the corresponding QUERY_ARG_SORT* values.
      *
-     * @see java.text.Collator#PRIMARY, java.text.Collator#SECONDARY,
-     *     java.text.Collator#TERTIARY, and java.text.Collator#IDENTICAL.
+     * @see java.text.Collator#PRIMARY
+     * @see java.text.Collator#SECONDARY
+     * @see java.text.Collator#TERTIARY
+     * @see java.text.Collator#IDENTICAL
      */
-    public static final String QUERY_ARG_SORT_COLLATION = "android:query-sort-collation";
+    public static final String QUERY_ARG_SORT_COLLATION = "android:query-arg-sort-collation";
 
     /**
-     * Allows provider to report back to client which keys were honored.
+     * Allows provider to report back to client which query keys are honored in a Cursor.
      *
-     * Key identifying a {@code String[]} containing all QUERY_ARG_SORT* arguments
+     * <p>Key identifying a {@code String[]} containing all QUERY_ARG_SORT* arguments
      * honored by the provider. Include this in {@link Cursor} extras {@link Bundle}
      * when any QUERY_ARG_SORT* value was honored during the preparation of the
      * results {@link Cursor}.
      *
-     * @see #QUERY_ARG_SORT_COLUMNS, #QUERY_ARG_SORT_DIRECTION, #QUERY_ARG_SORT_COLLATION.
+     * <p>If present, ALL honored arguments are enumerated in this extra’s payload.
+     *
+     * @see #QUERY_ARG_SORT_COLUMNS
+     * @see #QUERY_ARG_SORT_DIRECTION
+     * @see #QUERY_ARG_SORT_COLLATION
      */
     public static final String EXTRA_HONORED_ARGS = "android.content.extra.HONORED_ARGS";
 
@@ -343,41 +359,27 @@ public abstract class ContentResolver {
     public @interface QueryCollator {}
 
     /**
-     * Specifies the offset from which to load a recordset. Records prior to this
-     * position should be omitted from results.
-     *
-     * <p>Providers are recommended to create a content notification Uri
-     * that encapsulates QUERY_ARG_OFFSET and QUERY_ARG_LIMITS values reflected
-     * in the recordset. This will allow a provider to notify clients of changes
-     * to an individual recordset.
+     * Specifies the offset row index within a Cursor.
      */
-    public static final String QUERY_ARG_OFFSET = "android:query-page-offset";
+    public static final String QUERY_ARG_OFFSET = "android:query-arg-offset";
 
     /**
-     * Specifies the max number of records to include in a recordset with respect
-     * to the starting offset, which by default is 0. Records beyond starting offset + limit
-     * should be omitted from results.
-     *
-     * <p>Providers are recommended to create a content notification Uri
-     * that encapsulates QUERY_ARG_OFFSET and QUERY_ARG_LIMITS values reflected
-     * in the recordset. This will allow a provider to notify clients of changes
-     * to an individual recordset.
+     * Specifies the max number of rows to include in a Cursor.
      */
-    public static final String QUERY_ARG_LIMIT = "android:query-page-limit";
+    public static final String QUERY_ARG_LIMIT = "android:query-arg-limit";
 
     /**
-     * Added to {@link Cursor} extras {@link Bundle} to indicate total size of
-     * recordset when paging is active. Providers must include this when
+     * Added to {@link Cursor} extras {@link Bundle} to indicate total row count of
+     * recordset when paging is supported. Providers must include this when
      * implementing paging support.
      *
-     * <p>When full size of the recordset is unknown a provider may return -1
-     * to indicate this.
+     * <p>A provider may return -1 that row count of the recordset is unknown.
      *
      * <p>Providers having returned -1 in a previous query are recommended to
      * send content change notification once (if) full recordset size becomes
      * known.
      */
-    public static final String EXTRA_TOTAL_SIZE = "android.content.extra.TOTAL_SIZE";
+    public static final String EXTRA_TOTAL_COUNT = "android.content.extra.TOTAL_COUNT";
 
     /**
      * This is the Android platform's base MIME type for a content: URI
