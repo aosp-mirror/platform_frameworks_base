@@ -95,6 +95,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     // change.
     private boolean mReparenting;
 
+    // True if we are current in the process of removing this app token from the display
+    private boolean mRemovingFromDisplay = false;
+
     // The input dispatching timeout for this application token in nanoseconds.
     long mInputDispatchingTimeoutNanos;
 
@@ -465,6 +468,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
+    void removeImmediately() {
+        onRemovedFromDisplay();
+        super.removeImmediately();
+    }
+
+    @Override
     void removeIfPossible() {
         mIsExiting = false;
         removeAllWindowsIfPossible();
@@ -480,6 +489,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void onRemovedFromDisplay() {
+        if (mRemovingFromDisplay) {
+            return;
+        }
+        mRemovingFromDisplay = true;
+
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + this);
 
         boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
@@ -512,12 +526,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             mService.mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
-        final TaskStack stack = getTask().mStack;
+        final TaskStack stack = getStack();
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
             if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM,
                     "removeAppToken make exiting: " + this);
-            stack.mExitingAppTokens.add(this);
+            if (stack != null) {
+                stack.mExitingAppTokens.add(this);
+            }
             mIsExiting = true;
         } else {
             // Make sure there is no animation running on this token, so any windows associated
@@ -540,6 +556,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (!delayed) {
             updateReportedVisibilityLocked();
         }
+
+        mRemovingFromDisplay = false;
     }
 
     void clearAnimatingFlags() {
@@ -1557,6 +1575,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (getController() != null) {
             pw.print(prefix); pw.print("controller="); pw.println(getController());
+        }
+        if (mRemovingFromDisplay) {
+            pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);
         }
     }
 
