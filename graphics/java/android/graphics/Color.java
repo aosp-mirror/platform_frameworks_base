@@ -24,7 +24,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
-
+import android.annotation.SuppressAutoDoc;
 import android.util.Half;
 import com.android.internal.util.XmlUtils;
 
@@ -289,6 +289,7 @@ import java.util.function.DoubleUnaryOperator;
  * and <code>(1.0, 0.0, 0.0, 0.5)</code>.</p>
  */
 @AnyThread
+@SuppressAutoDoc
 public class Color {
     @ColorInt public static final int BLACK       = 0xFF000000;
     @ColorInt public static final int DKGRAY      = 0xFF444444;

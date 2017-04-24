@@ -1084,8 +1084,6 @@ public class PackageInstaller {
 
         /**
          * Sets which runtime permissions to be granted to the package at installation.
-         * Using this API requires holding {@link android.Manifest.permission
-         * #INSTALL_GRANT_RUNTIME_PERMISSIONS}
          *
          * @param permissions The permissions to grant or null to grant all runtime
          *     permissions.

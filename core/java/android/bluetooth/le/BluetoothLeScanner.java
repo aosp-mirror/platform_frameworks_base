@@ -100,7 +100,6 @@ public final class BluetoothLeScanner {
      * Start Bluetooth LE scan with default parameters and no filters. The scan results will be
      * delivered through {@code callback}.
      * <p>
-     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      * An app must hold
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
@@ -117,7 +116,6 @@ public final class BluetoothLeScanner {
     /**
      * Start Bluetooth LE scan. The scan results will be delivered through {@code callback}.
      * <p>
-     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      * An app must hold
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
@@ -243,8 +241,6 @@ public final class BluetoothLeScanner {
 
     /**
      * Stops an ongoing Bluetooth LE scan.
-     * <p>
-     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param callback
      */
@@ -263,8 +259,6 @@ public final class BluetoothLeScanner {
 
     /**
      * Stops an ongoing Bluetooth LE scan started using a PendingIntent.
-     * <p>
-     * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param callbackIntent The PendingIntent that was used to start the scan.
      * @see #startScan(List, ScanSettings, PendingIntent)

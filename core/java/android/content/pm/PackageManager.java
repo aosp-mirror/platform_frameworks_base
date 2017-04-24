@@ -3563,8 +3563,7 @@ public abstract class PackageManager {
             @ApplicationInfoFlags int flags, @UserIdInt int userId);
 
     /**
-     * Gets the instant applications the user recently used. Requires
-     * holding "android.permission.ACCESS_INSTANT_APPS".
+     * Gets the instant applications the user recently used.
      *
      * @return The instant app list.
      *

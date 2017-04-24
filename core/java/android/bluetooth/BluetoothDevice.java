@@ -762,7 +762,6 @@ public final class BluetoothDevice implements Parcelable {
      * <p>The local adapter will automatically retrieve remote names when
      * performing a device scan, and will cache them. This method just returns
      * the name for this device from the cache.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return the Bluetooth name, or null if there was a problem.
      */
@@ -780,8 +779,6 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Get the Bluetooth device type of the remote device.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return the device type {@link #DEVICE_TYPE_CLASSIC}, {@link #DEVICE_TYPE_LE}
      *                         {@link #DEVICE_TYPE_DUAL}.
@@ -862,7 +859,6 @@ public final class BluetoothDevice implements Parcelable {
      * the bonding process completes, and its result.
      * <p>Android system services will handle the necessary user interactions
      * to confirm and complete the bonding process.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return false on immediate error, true if bonding will begin
      */
@@ -1022,7 +1018,6 @@ public final class BluetoothDevice implements Parcelable {
      * {@link #BOND_NONE},
      * {@link #BOND_BONDING},
      * {@link #BOND_BONDED}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return the bond state
      */
@@ -1089,7 +1084,6 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Get the Bluetooth class of the remote device.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return Bluetooth class object, or null on error
      */
@@ -1114,7 +1108,6 @@ public final class BluetoothDevice implements Parcelable {
      * from the remote device. Instead, the local cached copy of the service
      * UUIDs are returned.
      * <p>Use {@link #fetchUuidsWithSdp} if fresh UUIDs are desired.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return the supported features (UUIDs) of the remote device,
      *         or null on error
@@ -1140,7 +1133,6 @@ public final class BluetoothDevice implements Parcelable {
       * {@link #ACTION_UUID} intent is sent with the UUIDs that is currently
       * present in the cache. Clients should use the {@link #getUuids} to get UUIDs
       * if service discovery is not to be performed.
-      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
       *
       * @return False if the sanity check fails, True if the process
       *               of initiating an ACL connection to the remote device
@@ -1221,7 +1213,6 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Confirm passkey for {@link #PAIRING_VARIANT_PASSKEY_CONFIRMATION} pairing.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
      *
      * @return true confirmation has been sent out
      *         false for error
@@ -1502,7 +1493,6 @@ public final class BluetoothDevice implements Parcelable {
      * using the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB.
      * However if you are connecting to an Android peer then please generate
      * your own unique UUID.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @param uuid service record uuid to lookup RFCOMM channel
      * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
@@ -1541,7 +1531,6 @@ public final class BluetoothDevice implements Parcelable {
      * using the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB.
      * However if you are connecting to an Android peer then please generate
      * your own unique UUID.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @param uuid service record uuid to lookup RFCOMM channel
      * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection

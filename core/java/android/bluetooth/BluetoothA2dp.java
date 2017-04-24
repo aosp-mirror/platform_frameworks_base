@@ -422,8 +422,6 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
      * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param device Bluetooth device
      * @return priority of the device
      * @hide

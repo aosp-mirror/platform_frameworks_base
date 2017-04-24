@@ -3097,6 +3097,21 @@ public class ActivityManager {
          */
         public int lastTrimLevel;
 
+        /** @hide */
+        @IntDef(prefix = { "IMPORTANCE_" }, value = {
+                IMPORTANCE_FOREGROUND,
+                IMPORTANCE_FOREGROUND_SERVICE,
+                IMPORTANCE_TOP_SLEEPING,
+                IMPORTANCE_VISIBLE,
+                IMPORTANCE_PERCEPTIBLE,
+                IMPORTANCE_CANT_SAVE_STATE,
+                IMPORTANCE_SERVICE,
+                IMPORTANCE_CACHED,
+                IMPORTANCE_GONE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Importance {}
+
         /**
          * Constant for {@link #importance}: This process is running the
          * foreground UI; that is, it is the thing currently at the top of the screen
@@ -3206,7 +3221,7 @@ public class ActivityManager {
          * will be passed to a client, use {@link #procStateToImportanceForClient}.
          * @hide
          */
-        public static int procStateToImportance(int procState) {
+        public static @Importance int procStateToImportance(int procState) {
             if (procState == PROCESS_STATE_NONEXISTENT) {
                 return IMPORTANCE_GONE;
             } else if (procState >= PROCESS_STATE_HOME) {
@@ -3235,7 +3250,8 @@ public class ActivityManager {
          * client's target SDK < {@link VERSION_CODES#O}.
          * @hide
          */
-        public static int procStateToImportanceForClient(int procState, Context clientContext) {
+        public static @Importance int procStateToImportanceForClient(int procState,
+                Context clientContext) {
             final int importance = procStateToImportance(procState);
 
             // For pre O apps, convert to the old, wrong values.
@@ -3251,7 +3267,7 @@ public class ActivityManager {
         }
 
         /** @hide */
-        public static int importanceToProcState(int importance) {
+        public static int importanceToProcState(@Importance int importance) {
             if (importance == IMPORTANCE_GONE) {
                 return PROCESS_STATE_NONEXISTENT;
             } else if (importance >= IMPORTANCE_CACHED) {
@@ -3274,14 +3290,11 @@ public class ActivityManager {
         }
 
         /**
-         * The relative importance level that the system places on this
-         * process.  May be one of {@link #IMPORTANCE_FOREGROUND},
-         * {@link #IMPORTANCE_VISIBLE}, {@link #IMPORTANCE_SERVICE}, or
-         * {@link #IMPORTANCE_CACHED}.  These
-         * constants are numbered so that "more important" values are always
-         * smaller than "less important" values.
+         * The relative importance level that the system places on this process.
+         * These constants are numbered so that "more important" values are
+         * always smaller than "less important" values.
          */
-        public int importance;
+        public @Importance int importance;
 
         /**
          * An additional ordering within a particular {@link #importance}
@@ -3475,7 +3488,7 @@ public class ActivityManager {
      */
     @SystemApi @TestApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
-    public int getPackageImportance(String packageName) {
+    public @RunningAppProcessInfo.Importance int getPackageImportance(String packageName) {
         try {
             int procState = getService().getPackageProcessState(packageName,
                     mContext.getOpPackageName());
@@ -3495,7 +3508,7 @@ public class ActivityManager {
      */
     @SystemApi @TestApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
-    public int getUidImportance(int uid) {
+    public @RunningAppProcessInfo.Importance int getUidImportance(int uid) {
         try {
             int procState = getService().getUidProcessState(uid,
                     mContext.getOpPackageName());
@@ -3521,7 +3534,7 @@ public class ActivityManager {
          * @param uid The uid whose importance has changed.
          * @param importance The new importance value as per {@link RunningAppProcessInfo}.
          */
-        void onUidImportance(int uid, int importance);
+        void onUidImportance(int uid, @RunningAppProcessInfo.Importance int importance);
     }
 
     /**
@@ -3543,7 +3556,7 @@ public class ActivityManager {
      */
     @SystemApi @TestApi
     public void addOnUidImportanceListener(OnUidImportanceListener listener,
-            int importanceCutpoint) {
+            @RunningAppProcessInfo.Importance int importanceCutpoint) {
         synchronized (this) {
             if (mImportanceListeners.containsKey(listener)) {
                 throw new IllegalArgumentException("Listener already registered: " + listener);
@@ -4279,8 +4292,7 @@ public class ActivityManager {
 
     /**
      * Enable more aggressive scheduling for latency-sensitive low-runtime VR threads that persist
-     * beyond a single process. It requires holding the
-     * {@link android.Manifest.permission#RESTRICTED_VR_ACCESS} permission. Only one thread can be a
+     * beyond a single process. Only one thread can be a
      * persistent VR thread at a time, and that thread may be subject to restrictions on the amount
      * of time it can run. Calling this method will disable aggressive scheduling for non-persistent
      * VR threads set via {@link #setVrThread}. If persistent VR mode is disabled then the
