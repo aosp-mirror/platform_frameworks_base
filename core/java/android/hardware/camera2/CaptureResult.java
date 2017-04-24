@@ -2167,9 +2167,13 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>The output images for request B may have contents captured before the output images for
      * request A, and the result metadata for request B may be older than the result metadata for
      * request A.</p>
-     * <p>Note that when enableZsl is <code>true</code>, it is not guaranteed to get output images captured in the
-     * past for requests with STILL_CAPTURE capture intent.</p>
-     * <p>The value of enableZsl in capture templates is always <code>false</code> if present.</p>
+     * <p>Note that when enableZsl is <code>true</code>, it is not guaranteed to get output images captured in
+     * the past for requests with STILL_CAPTURE capture intent.</p>
+     * <p>For applications targeting SDK versions O and newer, the value of enableZsl in
+     * TEMPLATE_STILL_CAPTURE template may be <code>true</code>. The value in other templates is always
+     * <code>false</code> if present.</p>
+     * <p>For applications targeting SDK versions older than O, the value of enableZsl in all
+     * capture templates is always <code>false</code> if present.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
