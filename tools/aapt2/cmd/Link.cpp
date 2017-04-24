@@ -65,16 +65,7 @@ using android::base::StringPrintf;
 
 namespace aapt {
 
-// The type of package to build.
-enum class PackageType {
-  kApp,
-  kSharedLib,
-  kStaticLib,
-};
-
 struct LinkOptions {
-  PackageType package_type = PackageType::kApp;
-
   std::string output_path;
   std::string manifest_path;
   std::vector<std::string> include_paths;
@@ -130,6 +121,14 @@ class LinkContext : public IAaptContext {
   LinkContext() : name_mangler_({}), symbols_(&name_mangler_) {
   }
 
+  PackageType GetPackageType() override {
+    return package_type_;
+  }
+
+  void SetPackageType(PackageType type) {
+    package_type_ = type;
+  }
+
   IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
@@ -181,6 +180,7 @@ class LinkContext : public IAaptContext {
  private:
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
+  PackageType package_type_ = PackageType::kApp;
   StdErrDiagnostics diagnostics_;
   NameMangler name_mangler_;
   std::string compilation_package_;
@@ -627,7 +627,7 @@ class LinkCommand {
       std::string error_str;
       std::unique_ptr<ResourceTable> include_static = LoadStaticLibrary(path, &error_str);
       if (include_static) {
-        if (options_.package_type != PackageType::kStaticLib) {
+        if (context_->GetPackageType() != PackageType::kStaticLib) {
           // Can't include static libraries when not building a static library (they have no IDs
           // assigned).
           context_->GetDiagnostics()->Error(
@@ -1300,7 +1300,7 @@ class LinkCommand {
    */
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
-    const bool keep_raw_values = options_.package_type == PackageType::kStaticLib;
+    const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
     bool result =
         FlattenXml(manifest, "AndroidManifest.xml", {}, keep_raw_values, writer, context_);
     if (!result) {
@@ -1325,7 +1325,7 @@ class LinkCommand {
       return false;
     }
 
-    if (options_.package_type == PackageType::kStaticLib) {
+    if (context_->GetPackageType() == PackageType::kStaticLib) {
       if (!FlattenTableToPb(table, writer)) {
         return false;
       }
@@ -1374,7 +1374,7 @@ class LinkCommand {
       context_->SetPackageId(0x01);
 
       // Verify we're building a regular app.
-      if (options_.package_type != PackageType::kApp) {
+      if (context_->GetPackageType() != PackageType::kApp) {
         context_->GetDiagnostics()->Error(
             DiagMessage() << "package 'android' can only be built as a regular app");
         return 1;
@@ -1414,7 +1414,7 @@ class LinkCommand {
       return 1;
     }
 
-    if (options_.package_type != PackageType::kStaticLib) {
+    if (context_->GetPackageType() != PackageType::kStaticLib) {
       PrivateAttributeMover mover;
       if (!mover.Consume(context_, &final_table_)) {
         context_->GetDiagnostics()->Error(DiagMessage() << "failed moving private attributes");
@@ -1469,7 +1469,7 @@ class LinkCommand {
       return 1;
     }
 
-    if (options_.package_type == PackageType::kStaticLib) {
+    if (context_->GetPackageType() == PackageType::kStaticLib) {
       if (!options_.products.empty()) {
         context_->GetDiagnostics()->Warn(DiagMessage()
                                          << "can't select products when building static library");
@@ -1490,7 +1490,7 @@ class LinkCommand {
       }
     }
 
-    if (options_.package_type != PackageType::kStaticLib && context_->GetMinSdkVersion() > 0) {
+    if (context_->GetPackageType() != PackageType::kStaticLib && context_->GetMinSdkVersion() > 0) {
       if (context_->IsVerbose()) {
         context_->GetDiagnostics()->Note(DiagMessage()
                                          << "collapsing resource versions for minimum SDK "
@@ -1514,7 +1514,7 @@ class LinkCommand {
     proguard::KeepSet proguard_keep_set;
     proguard::KeepSet proguard_main_dex_keep_set;
 
-    if (options_.package_type == PackageType::kStaticLib) {
+    if (context_->GetPackageType() == PackageType::kStaticLib) {
       if (options_.table_splitter_options.config_filter != nullptr ||
           !options_.table_splitter_options.preferred_densities.empty()) {
         context_->GetDiagnostics()->Warn(DiagMessage()
@@ -1641,11 +1641,12 @@ class LinkCommand {
       template_options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
       template_options.javadoc_annotations = options_.javadoc_annotations;
 
-      if (options_.package_type == PackageType::kStaticLib || options_.generate_non_final_ids) {
+      if (context_->GetPackageType() == PackageType::kStaticLib ||
+          options_.generate_non_final_ids) {
         template_options.use_final = false;
       }
 
-      if (options_.package_type == PackageType::kSharedLib) {
+      if (context_->GetPackageType() == PackageType::kSharedLib) {
         template_options.use_final = false;
         template_options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{};
       }
@@ -1922,18 +1923,18 @@ int Link(const std::vector<StringPiece>& args) {
   }
 
   if (shared_lib) {
-    options.package_type = PackageType::kSharedLib;
+    context.SetPackageType(PackageType::kSharedLib);
     context.SetPackageId(0x00);
   } else if (static_lib) {
-    options.package_type = PackageType::kStaticLib;
+    context.SetPackageType(PackageType::kStaticLib);
     context.SetPackageId(kAppPackageId);
   } else {
-    options.package_type = PackageType::kApp;
+    context.SetPackageType(PackageType::kApp);
     context.SetPackageId(kAppPackageId);
   }
 
   if (package_id) {
-    if (options.package_type != PackageType::kApp) {
+    if (context.GetPackageType() != PackageType::kApp) {
       context.GetDiagnostics()->Error(
           DiagMessage() << "can't specify --package-id when not building a regular app");
       return 1;
@@ -2000,7 +2001,7 @@ int Link(const std::vector<StringPiece>& args) {
     }
   }
 
-  if (options.package_type != PackageType::kStaticLib && stable_id_file_path) {
+  if (context.GetPackageType() != PackageType::kStaticLib && stable_id_file_path) {
     if (!LoadStableIdMap(context.GetDiagnostics(), stable_id_file_path.value(),
                          &options.stable_id_map)) {
       return 1;
@@ -2015,7 +2016,7 @@ int Link(const std::vector<StringPiece>& args) {
        ".3gpp2", ".amr",  ".awb",  ".wma", ".wmv",  ".webm", ".mkv"});
 
   // Turn off auto versioning for static-libs.
-  if (options.package_type == PackageType::kStaticLib) {
+  if (context.GetPackageType() == PackageType::kStaticLib) {
     options.no_auto_version = true;
     options.no_version_vectors = true;
     options.no_version_transitions = true;
