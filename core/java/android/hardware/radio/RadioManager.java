@@ -386,6 +386,9 @@ public class RadioManager {
         private final int mSpacing;
 
         BandDescriptor(int region, int type, int lowerLimit, int upperLimit, int spacing) {
+            if (type != BAND_AM && type != BAND_FM && type != BAND_FM_HD && type != BAND_AM_HD) {
+                throw new IllegalArgumentException("Unsupported band: " + type);
+            }
             mRegion = region;
             mType = type;
             mLowerLimit = lowerLimit;
@@ -439,10 +442,28 @@ public class RadioManager {
             mSpacing = in.readInt();
         }
 
+        private static int lookupTypeFromParcel(Parcel in) {
+            int pos = in.dataPosition();
+            in.readInt();  // skip region
+            int type = in.readInt();
+            in.setDataPosition(pos);
+            return type;
+        }
+
         public static final Parcelable.Creator<BandDescriptor> CREATOR
                 = new Parcelable.Creator<BandDescriptor>() {
             public BandDescriptor createFromParcel(Parcel in) {
-                return new BandDescriptor(in);
+                int type = lookupTypeFromParcel(in);
+                switch (type) {
+                    case BAND_FM:
+                    case BAND_FM_HD:
+                        return new FmBandDescriptor(in);
+                    case BAND_AM:
+                    case BAND_AM_HD:
+                        return new AmBandDescriptor(in);
+                    default:
+                        throw new IllegalArgumentException("Unsupported band: " + type);
+                }
             }
 
             public BandDescriptor[] newArray(int size) {
@@ -771,7 +792,17 @@ public class RadioManager {
         public static final Parcelable.Creator<BandConfig> CREATOR
                 = new Parcelable.Creator<BandConfig>() {
             public BandConfig createFromParcel(Parcel in) {
-                return new BandConfig(in);
+                int type = BandDescriptor.lookupTypeFromParcel(in);
+                switch (type) {
+                    case BAND_FM:
+                    case BAND_FM_HD:
+                        return new FmBandConfig(in);
+                    case BAND_AM:
+                    case BAND_AM_HD:
+                        return new AmBandConfig(in);
+                    default:
+                        throw new IllegalArgumentException("Unsupported band: " + type);
+                }
             }
 
             public BandConfig[] newArray(int size) {
@@ -1451,8 +1482,7 @@ public class RadioManager {
             ITuner tuner;
             ITunerCallback halCallback = new TunerCallbackAdapter(callback, handler);
             try {
-                // TODO(b/36863239): pass bandConfig too, after fixing deserialization bug
-                tuner = mService.openTuner(moduleId, null, withAudio, halCallback);
+                tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
