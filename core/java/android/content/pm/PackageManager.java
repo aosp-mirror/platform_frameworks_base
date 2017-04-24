@@ -522,6 +522,18 @@ public abstract class PackageManager {
      */
     public static final int PERMISSION_DENIED = -1;
 
+    /** @hide */
+    @IntDef(prefix = { "SIGNATURE_" }, value = {
+            SIGNATURE_MATCH,
+            SIGNATURE_NEITHER_SIGNED,
+            SIGNATURE_FIRST_NOT_SIGNED,
+            SIGNATURE_SECOND_NOT_SIGNED,
+            SIGNATURE_NO_MATCH,
+            SIGNATURE_UNKNOWN_PACKAGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SignatureResult {}
+
     /**
      * Signature check result: this is returned by {@link #checkSignatures}
      * if all signatures on the two packages match.
@@ -558,11 +570,25 @@ public abstract class PackageManager {
      */
     public static final int SIGNATURE_UNKNOWN_PACKAGE = -4;
 
+    /** @hide */
+    @IntDef(prefix = { "COMPONENT_ENABLED_STATE_" }, value = {
+            COMPONENT_ENABLED_STATE_DEFAULT,
+            COMPONENT_ENABLED_STATE_ENABLED,
+            COMPONENT_ENABLED_STATE_DISABLED,
+            COMPONENT_ENABLED_STATE_DISABLED_USER,
+            COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnabledState {}
+
     /**
-     * Flag for {@link #setApplicationEnabledSetting(String, int, int)}
-     * and {@link #setComponentEnabledSetting(ComponentName, int, int)}: This
-     * component or application is in its default enabled state (as specified
-     * in its manifest).
+     * Flag for {@link #setApplicationEnabledSetting(String, int, int)} and
+     * {@link #setComponentEnabledSetting(ComponentName, int, int)}: This
+     * component or application is in its default enabled state (as specified in
+     * its manifest).
+     * <p>
+     * Explicitly setting the component state to this value restores it's
+     * enabled state to whatever is set in the manifest.
      */
     public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0;
 
@@ -763,6 +789,13 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_ALLOCATE_AGGRESSIVE = 0x00008000;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {
+            DONT_KILL_APP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnabledFlags {}
 
     /**
      * Flag parameter for
@@ -2871,7 +2904,7 @@ public abstract class PackageManager {
      * does not contain such an activity, or if <em>packageName</em> is not
      * recognized.
      */
-    public abstract Intent getLaunchIntentForPackage(String packageName);
+    public abstract @Nullable Intent getLaunchIntentForPackage(@NonNull String packageName);
 
     /**
      * Return a "good" intent to launch a front-door Leanback activity in a
@@ -2885,7 +2918,7 @@ public abstract class PackageManager {
      *         the main Leanback activity in the package, or null if the package
      *         does not contain such an activity.
      */
-    public abstract Intent getLeanbackLaunchIntentForPackage(String packageName);
+    public abstract @Nullable Intent getLeanbackLaunchIntentForPackage(@NonNull String packageName);
 
     /**
      * Return an array of all of the POSIX secondary group IDs that have been
@@ -2901,7 +2934,7 @@ public abstract class PackageManager {
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
      */
-    public abstract int[] getPackageGids(String packageName)
+    public abstract int[] getPackageGids(@NonNull String packageName)
             throws NameNotFoundException;
 
     /**
@@ -3189,7 +3222,7 @@ public abstract class PackageManager {
      * @see #PERMISSION_DENIED
      */
     @CheckResult
-    public abstract int checkPermission(String permName, String pkgName);
+    public abstract @PermissionResult int checkPermission(String permName, String pkgName);
 
     /**
      * Checks whether a particular permissions has been revoked for a
@@ -3419,12 +3452,9 @@ public abstract class PackageManager {
      * #SIGNATURE_NO_MATCH} or {@link #SIGNATURE_UNKNOWN_PACKAGE}).
      *
      * @see #checkSignatures(int, int)
-     * @see #SIGNATURE_MATCH
-     * @see #SIGNATURE_NO_MATCH
-     * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
     @CheckResult
-    public abstract int checkSignatures(String pkg1, String pkg2);
+    public abstract @SignatureResult int checkSignatures(String pkg1, String pkg2);
 
     /**
      * Like {@link #checkSignatures(String, String)}, but takes UIDs of
@@ -3442,12 +3472,9 @@ public abstract class PackageManager {
      * #SIGNATURE_NO_MATCH} or {@link #SIGNATURE_UNKNOWN_PACKAGE}).
      *
      * @see #checkSignatures(String, String)
-     * @see #SIGNATURE_MATCH
-     * @see #SIGNATURE_NO_MATCH
-     * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
     @CheckResult
-    public abstract int checkSignatures(int uid1, int uid2);
+    public abstract @SignatureResult int checkSignatures(int uid1, int uid2);
 
     /**
      * Retrieve the names of all packages that are associated with a particular
@@ -3881,8 +3908,8 @@ public abstract class PackageManager {
      *         included by one of the <var>specifics</var> intents. If there are
      *         no matching activities, an empty list is returned.
      */
-    public abstract List<ResolveInfo> queryIntentActivityOptions(
-            ComponentName caller, Intent[] specifics, Intent intent, @ResolveInfoFlags int flags);
+    public abstract List<ResolveInfo> queryIntentActivityOptions(@Nullable ComponentName caller,
+            @Nullable Intent[] specifics, Intent intent, @ResolveInfoFlags int flags);
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
@@ -5136,18 +5163,11 @@ public abstract class PackageManager {
      * manifest.
      *
      * @param componentName The component to enable
-     * @param newState The new enabled state for the component.  The legal values for this state
-     *                 are:
-     *                   {@link #COMPONENT_ENABLED_STATE_ENABLED},
-     *                   {@link #COMPONENT_ENABLED_STATE_DISABLED}
-     *                   and
-     *                   {@link #COMPONENT_ENABLED_STATE_DEFAULT}
-     *                 The last one removes the setting, thereby restoring the component's state to
-     *                 whatever was set in it's manifest (or enabled, by default).
-     * @param flags Optional behavior flags: {@link #DONT_KILL_APP} or 0.
+     * @param newState The new enabled state for the component.
+     * @param flags Optional behavior flags.
      */
     public abstract void setComponentEnabledSetting(ComponentName componentName,
-            int newState, int flags);
+            @EnabledState int newState, @EnabledFlags int flags);
 
     /**
      * Return the enabled setting for a package component (activity,
@@ -5157,14 +5177,10 @@ public abstract class PackageManager {
      * the value originally specified in the manifest has not been modified.
      *
      * @param componentName The component to retrieve.
-     * @return Returns the current enabled state for the component.  May
-     * be one of {@link #COMPONENT_ENABLED_STATE_ENABLED},
-     * {@link #COMPONENT_ENABLED_STATE_DISABLED}, or
-     * {@link #COMPONENT_ENABLED_STATE_DEFAULT}.  The last one means the
-     * component's enabled state is based on the original information in
-     * the manifest as found in {@link ComponentInfo}.
+     * @return Returns the current enabled state for the component.
      */
-    public abstract int getComponentEnabledSetting(ComponentName componentName);
+    public abstract @EnabledState int getComponentEnabledSetting(
+            ComponentName componentName);
 
     /**
      * Set the enabled setting for an application
@@ -5174,18 +5190,11 @@ public abstract class PackageManager {
      * {@link #setComponentEnabledSetting} for any of the application's components.
      *
      * @param packageName The package name of the application to enable
-     * @param newState The new enabled state for the component.  The legal values for this state
-     *                 are:
-     *                   {@link #COMPONENT_ENABLED_STATE_ENABLED},
-     *                   {@link #COMPONENT_ENABLED_STATE_DISABLED}
-     *                   and
-     *                   {@link #COMPONENT_ENABLED_STATE_DEFAULT}
-     *                 The last one removes the setting, thereby restoring the applications's state to
-     *                 whatever was set in its manifest (or enabled, by default).
-     * @param flags Optional behavior flags: {@link #DONT_KILL_APP} or 0.
+     * @param newState The new enabled state for the application.
+     * @param flags Optional behavior flags.
      */
     public abstract void setApplicationEnabledSetting(String packageName,
-            int newState, int flags);
+            @EnabledState int newState, @EnabledFlags int flags);
 
     /**
      * Return the enabled setting for an application. This returns
@@ -5195,15 +5204,10 @@ public abstract class PackageManager {
      * the value originally specified in the manifest has not been modified.
      *
      * @param packageName The package name of the application to retrieve.
-     * @return Returns the current enabled state for the application.  May
-     * be one of {@link #COMPONENT_ENABLED_STATE_ENABLED},
-     * {@link #COMPONENT_ENABLED_STATE_DISABLED}, or
-     * {@link #COMPONENT_ENABLED_STATE_DEFAULT}.  The last one means the
-     * application's enabled state is based on the original information in
-     * the manifest as found in {@link ApplicationInfo}.
+     * @return Returns the current enabled state for the application.
      * @throws IllegalArgumentException if the named package does not exist.
      */
-    public abstract int getApplicationEnabledSetting(String packageName);
+    public abstract @EnabledState int getApplicationEnabledSetting(String packageName);
 
     /**
      * Flush the package restrictions for a given user to disk. This forces the package restrictions

@@ -676,7 +676,16 @@ public class Notification implements Parcelable
      * Finally, a notification can be made {@link #VISIBILITY_SECRET}, which will suppress its icon
      * and ticker until the user has bypassed the lockscreen.
      */
-    public int visibility;
+    public @Visibility int visibility;
+
+    /** @hide */
+    @IntDef(prefix = { "VISIBILITY_" }, value = {
+            VISIBILITY_PUBLIC,
+            VISIBILITY_PRIVATE,
+            VISIBILITY_SECRET,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Visibility {}
 
     /**
      * Notification visibility: Show this notification in its entirety on all lockscreens.
@@ -3545,12 +3554,9 @@ public class Notification implements Parcelable
         /**
          * Specify the value of {@link #visibility}.
          *
-         * @param visibility One of {@link #VISIBILITY_PRIVATE} (the default),
-         * {@link #VISIBILITY_SECRET}, or {@link #VISIBILITY_PUBLIC}.
-         *
          * @return The same Builder.
          */
-        public Builder setVisibility(int visibility) {
+        public Builder setVisibility(@Visibility int visibility) {
             mN.visibility = visibility;
             return this;
         }

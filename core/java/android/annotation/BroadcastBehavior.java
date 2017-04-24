@@ -53,4 +53,9 @@ public @interface BroadcastBehavior {
      * @see Intent#FLAG_RECEIVER_INCLUDE_BACKGROUND
      */
     boolean includeBackground() default false;
+
+    /**
+     * This broadcast is protected and can only be sent by the OS.
+     */
+    boolean protectedBroadcast() default false;
 }
