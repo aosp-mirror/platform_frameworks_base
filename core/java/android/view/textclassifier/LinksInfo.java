@@ -22,6 +22,7 @@ import android.annotation.NonNull;
  * Link information that can be applied to text. See: {@link #apply(CharSequence)}.
  * Typical implementations of this interface will annotate spannable text with e.g
  * {@link android.text.style.ClickableSpan}s or other annotations.
+ * @hide
  */
 public interface LinksInfo {
 

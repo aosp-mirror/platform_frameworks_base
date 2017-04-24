@@ -132,6 +132,7 @@ public interface TextClassifier {
      *      a default locale, or use the system default.
      *
      * @throws IllegalArgumentException if text is null
+     * @hide
      */
     LinksInfo getLinks(
             @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales);
