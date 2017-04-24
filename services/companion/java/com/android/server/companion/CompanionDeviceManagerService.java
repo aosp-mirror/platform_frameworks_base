@@ -110,9 +110,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private final CompanionDeviceManagerImpl mImpl;
     private final ConcurrentMap<Integer, AtomicFile> mUidToStorage = new ConcurrentHashMap<>();
     private IDeviceIdleController mIdleController;
-    private IFindDeviceCallback mFindDeviceCallback;
     private ServiceConnection mServiceConnection;
     private IAppOpsService mAppOpsManager;
+
+    private IFindDeviceCallback mFindDeviceCallback;
+    private AssociationRequest mRequest;
+    private String mCallingPackage;
+
+    private final Object mLock = new Object();
 
     public CompanionDeviceManagerService(Context context) {
         super(context);
@@ -156,8 +161,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void cleanup() {
-        mServiceConnection = unbind(mServiceConnection);
-        mFindDeviceCallback = unlinkToDeath(mFindDeviceCallback, this, 0);
+        synchronized (mLock) {
+            mServiceConnection = unbind(mServiceConnection);
+            mFindDeviceCallback = unlinkToDeath(mFindDeviceCallback, this, 0);
+            mRequest = null;
+            mCallingPackage = null;
+        }
     }
 
     /**
@@ -218,6 +227,17 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         UserHandle.of(userId));
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void stopScan(AssociationRequest request,
+                IFindDeviceCallback callback,
+                String callingPackage) {
+            if (Objects.equals(request, mRequest)
+                    && Objects.equals(callback, mFindDeviceCallback)
+                    && Objects.equals(callingPackage, mCallingPackage)) {
+                cleanup();
             }
         }
 
@@ -340,7 +360,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                             "onServiceConnected(name = " + name + ", service = "
                                     + service + ")");
                 }
+
                 mFindDeviceCallback = findDeviceCallback;
+                mRequest = request;
+                mCallingPackage = callingPackage;
+
                 try {
                     mFindDeviceCallback.asBinder().linkToDeath(
                             CompanionDeviceManagerService.this, 0);
@@ -348,6 +372,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     cleanup();
                     return;
                 }
+
                 try {
                     ICompanionDeviceDiscoveryService.Stub
                             .asInterface(service)
