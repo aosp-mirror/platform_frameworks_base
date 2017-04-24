@@ -17,7 +17,7 @@
 #ifndef _ANDROID_SERVER_RADIO_RADIOSERVICE_H
 #define _ANDROID_SERVER_RADIO_RADIOSERVICE_H
 
-#include "jni.h"
+#include <jni.h>
 
 namespace android {
 

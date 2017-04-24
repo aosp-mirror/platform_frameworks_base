@@ -1446,9 +1446,13 @@ public class RadioManager {
         }
 
         if (mService != null) {
+            Log.d(TAG, "Opening tuner...");
+
             ITuner tuner;
+            ITunerCallback halCallback = new TunerCallbackAdapter(callback, handler);
             try {
-                tuner = mService.openTuner(withAudio);
+                // TODO(b/36863239): pass bandConfig too, after fixing deserialization bug
+                tuner = mService.openTuner(moduleId, null, withAudio, halCallback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -17,22 +17,26 @@
 #ifndef _ANDROID_SERVER_RADIO_TUNER_H
 #define _ANDROID_SERVER_RADIO_TUNER_H
 
-#include "jni.h"
-
 #include <android/hardware/broadcastradio/1.1/ITuner.h>
 #include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
+#include <jni.h>
 #include <utils/StrongPointer.h>
 
 namespace android {
 
 void register_android_server_radio_Tuner(JNIEnv *env);
 
-void android_server_radio_Tuner_setHalTuner(JNIEnv *env, jobject obj,
-        sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
+namespace server {
+namespace radio {
+namespace Tuner {
 
-sp<hardware::broadcastradio::V1_1::ITunerCallback>
-android_server_radio_Tuner_getCallback(JNIEnv *env, jobject obj);
+void setHalTuner(JNIEnv *env, jobject obj, sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
 
+sp<hardware::broadcastradio::V1_1::ITunerCallback> getNativeCallback(JNIEnv *env, jobject obj);
+
+} // namespace Tuner
+} // namespace radio
+} // namespace server
 } // namespace android
 
 #endif // _ANDROID_SERVER_RADIO_TUNER_H
