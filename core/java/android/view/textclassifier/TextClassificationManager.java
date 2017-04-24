@@ -82,6 +82,7 @@ public final class TextClassificationManager {
      * This is a blocking operation you should avoid calling it on the UI thread.
      *
      * @throws IllegalArgumentException if text is null
+     * @hide
      */
     public List<TextLanguage> detectLanguages(@NonNull CharSequence text) {
         Preconditions.checkArgument(text != null);
