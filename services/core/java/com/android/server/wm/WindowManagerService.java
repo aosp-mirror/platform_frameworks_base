@@ -5606,22 +5606,19 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState win = mWindowMap.get(client);
         if (localLOGV) Slog.v(TAG_WM, "Looking up client " + client + ": " + win);
         if (win == null) {
-            RuntimeException ex = new IllegalArgumentException(
-                    "Requested window " + client + " does not exist");
             if (throwOnError) {
-                throw ex;
+                throw new IllegalArgumentException(
+                        "Requested window " + client + " does not exist");
             }
-            Slog.w(TAG_WM, "Failed looking up window", ex);
+            Slog.w(TAG_WM, "Failed looking up window callers=" + Debug.getCallers(3));
             return null;
         }
         if (session != null && win.mSession != session) {
-            RuntimeException ex = new IllegalArgumentException(
-                    "Requested window " + client + " is in session " +
-                    win.mSession + ", not " + session);
             if (throwOnError) {
-                throw ex;
+                throw new IllegalArgumentException("Requested window " + client + " is in session "
+                        + win.mSession + ", not " + session);
             }
-            Slog.w(TAG_WM, "Failed looking up window", ex);
+            Slog.w(TAG_WM, "Failed looking up window callers=" + Debug.getCallers(3));
             return null;
         }
 
