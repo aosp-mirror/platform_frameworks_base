@@ -73,7 +73,7 @@ public final class BluetoothLeScanner {
 
     /**
      * Optional extra indicating the callback type, which will be one of
-     * ScanSettings.CALLBACK_TYPE_*.
+     * CALLBACK_TYPE_* constants in {@link ScanSettings}.
      * @see ScanCallback#onScanResult(int, ScanResult)
      */
     public static final String EXTRA_CALLBACK_TYPE = "android.bluetooth.le.extra.CALLBACK_TYPE";
