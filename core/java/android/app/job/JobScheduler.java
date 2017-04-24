@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -24,6 +25,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -51,6 +54,14 @@ import java.util.List;
  * Context.getSystemService(Context.JOB_SCHEDULER_SERVICE)}.
  */
 public abstract class JobScheduler {
+    /** @hide */
+    @IntDef(prefix = { "RESULT_" }, value = {
+            RESULT_FAILURE,
+            RESULT_SUCCESS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Result {}
+
     /**
      * Returned from {@link #schedule(JobInfo)} when an invalid parameter was supplied. This can occur
      * if the run-time for your job is too short, or perhaps the system can't resolve the
@@ -70,9 +81,9 @@ public abstract class JobScheduler {
      * @param job The job you wish scheduled. See
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs
      * you can schedule.
-     * @return An int representing ({@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}).
+     * @return the result of the schedule request.
      */
-    public abstract int schedule(@NonNull JobInfo job);
+    public abstract @Result int schedule(@NonNull JobInfo job);
 
     /**
      * Similar to {@link #schedule}, but allows you to enqueue work for a new <em>or existing</em>
@@ -107,9 +118,9 @@ public abstract class JobScheduler {
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs
      * you can schedule.
      * @param work New work to enqueue.  This will be available later when the job starts running.
-     * @return An int representing ({@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}).
+     * @return the result of the enqueue request.
      */
-    public abstract int enqueue(@NonNull JobInfo job, @NonNull JobWorkItem work);
+    public abstract @Result int enqueue(@NonNull JobInfo job, @NonNull JobWorkItem work);
 
     /**
      *
@@ -118,11 +129,10 @@ public abstract class JobScheduler {
      *                    used to track battery usage and appIdleState.
      * @param userId    User on behalf of whom this job is to be scheduled.
      * @param tag Debugging tag for dumps associated with this job (instead of the service class)
-     * @return {@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}
      * @hide
      */
     @SystemApi
-    public abstract int scheduleAsPackage(@NonNull JobInfo job, @NonNull String packageName,
+    public abstract @Result int scheduleAsPackage(@NonNull JobInfo job, @NonNull String packageName,
             int userId, String tag);
 
     /**

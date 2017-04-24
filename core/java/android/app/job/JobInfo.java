@@ -18,8 +18,10 @@ package android.app.job;
 
 import static android.util.TimeUtils.formatDuration;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.net.Uri;
@@ -30,6 +32,8 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -43,6 +47,18 @@ import java.util.Objects;
  */
 public class JobInfo implements Parcelable {
     private static String TAG = "JobInfo";
+
+    /** @hide */
+    @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
+            NETWORK_TYPE_NONE,
+            NETWORK_TYPE_ANY,
+            NETWORK_TYPE_UNMETERED,
+            NETWORK_TYPE_NOT_ROAMING,
+            NETWORK_TYPE_METERED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NetworkType {}
+
     /** Default. */
     public static final int NETWORK_TYPE_NONE = 0;
     /** This job requires network connectivity. */
@@ -63,6 +79,14 @@ public class JobInfo implements Parcelable {
      * Maximum backoff we allow for a job, in milliseconds.
      */
     public static final long MAX_BACKOFF_DELAY_MILLIS = 5 * 60 * 60 * 1000;  // 5 hours.
+
+    /** @hide */
+    @IntDef(prefix = { "BACKOFF_POLICY_" }, value = {
+            BACKOFF_POLICY_LINEAR,
+            BACKOFF_POLICY_EXPONENTIAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BackoffPolicy {}
 
     /**
      * Linearly back-off a failed job. See
@@ -349,14 +373,8 @@ public class JobInfo implements Parcelable {
 
     /**
      * The kind of connectivity requirements that the job has.
-     *
-     * @return One of {@link android.app.job.JobInfo#NETWORK_TYPE_ANY},
-     * {@link android.app.job.JobInfo#NETWORK_TYPE_NONE},
-     * {@link android.app.job.JobInfo#NETWORK_TYPE_UNMETERED},
-     * {@link android.app.job.JobInfo#NETWORK_TYPE_METERED}, or
-     * {@link android.app.job.JobInfo#NETWORK_TYPE_NOT_ROAMING},
      */
-    public int getNetworkType() {
+    public @NetworkType int getNetworkType() {
         return networkType;
     }
 
@@ -421,11 +439,9 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * One of either {@link android.app.job.JobInfo#BACKOFF_POLICY_EXPONENTIAL}, or
-     * {@link android.app.job.JobInfo#BACKOFF_POLICY_LINEAR}, depending on which criteria you set
-     * when creating this job.
+     * Return the backoff policy of this job.
      */
-    public int getBackoffPolicy() {
+    public @BackoffPolicy int getBackoffPolicy() {
         return backoffPolicy;
     }
 
@@ -692,6 +708,13 @@ public class JobInfo implements Parcelable {
         private final Uri mUri;
         private final int mFlags;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+                FLAG_NOTIFY_FOR_DESCENDANTS,
+        })
+        public @interface Flags { }
+
         /**
          * Flag for trigger: also trigger if any descendants of the given URI change.
          * Corresponds to the <var>notifyForDescendants</var> of
@@ -702,10 +725,9 @@ public class JobInfo implements Parcelable {
         /**
          * Create a new trigger description.
          * @param uri The URI to observe.  Must be non-null.
-         * @param flags Optional flags for the observer, either 0 or
-         * {@link #FLAG_NOTIFY_FOR_DESCENDANTS}.
+         * @param flags Flags for the observer.
          */
-        public TriggerContentUri(@NonNull Uri uri, int flags) {
+        public TriggerContentUri(@NonNull Uri uri, @Flags int flags) {
             mUri = uri;
             mFlags = flags;
         }
@@ -720,7 +742,7 @@ public class JobInfo implements Parcelable {
         /**
          * Return the flags supplied for the trigger.
          */
-        public int getFlags() {
+        public @Flags int getFlags() {
             return mFlags;
         }
 
@@ -886,7 +908,7 @@ public class JobInfo implements Parcelable {
          * job. If the network requested is not available your job will never run. See
          * {@link #setOverrideDeadline(long)} to change this behaviour.
          */
-        public Builder setRequiredNetworkType(int networkType) {
+        public Builder setRequiredNetworkType(@NetworkType int networkType) {
             mNetworkType = networkType;
             return this;
         }
@@ -1067,10 +1089,9 @@ public class JobInfo implements Parcelable {
          * mode.
          * @param initialBackoffMillis Millisecond time interval to wait initially when job has
          *                             failed.
-         * @param backoffPolicy is one of {@link #BACKOFF_POLICY_LINEAR} or
-         * {@link #BACKOFF_POLICY_EXPONENTIAL}
          */
-        public Builder setBackoffCriteria(long initialBackoffMillis, int backoffPolicy) {
+        public Builder setBackoffCriteria(long initialBackoffMillis,
+                @BackoffPolicy int backoffPolicy) {
             mBackoffPolicySet = true;
             mInitialBackoffMillis = initialBackoffMillis;
             mBackoffPolicy = backoffPolicy;
@@ -1078,13 +1099,12 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Set whether or not to persist this job across device reboots. This will only have an
-         * effect if your application holds the permission
-         * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED}. Otherwise an exception will
-         * be thrown.
-         * @param isPersisted True to indicate that the job will be written to disk and loaded at
-         *                    boot.
+         * Set whether or not to persist this job across device reboots.
+         *
+         * @param isPersisted True to indicate that the job will be written to
+         *            disk and loaded at boot.
          */
+        @RequiresPermission(android.Manifest.permission.RECEIVE_BOOT_COMPLETED)
         public Builder setPersisted(boolean isPersisted) {
             mIsPersisted = isPersisted;
             return this;
