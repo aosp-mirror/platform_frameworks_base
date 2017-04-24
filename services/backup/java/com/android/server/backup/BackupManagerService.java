@@ -9163,6 +9163,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         // state RESTORE_FINISHED : provide the "no more data" signpost callback at the end
         private void restoreFinished() {
+            if (DEBUG) {
+                Slog.d(TAG, "restoreFinished packageName=" + mCurrentPackage.packageName);
+            }
             try {
                 prepareOperationTimeout(mEphemeralOpToken, TIMEOUT_RESTORE_FINISHED_INTERVAL, this,
                         OP_TYPE_RESTORE_WAIT);
