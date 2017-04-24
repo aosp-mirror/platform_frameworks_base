@@ -31,7 +31,6 @@ import android.os.WorkSource;
 
 import android.bluetooth.IBluetoothGattCallback;
 import android.bluetooth.IBluetoothGattServerCallback;
-import android.bluetooth.le.IAdvertiserCallback;
 import android.bluetooth.le.IAdvertisingSetCallback;
 import android.bluetooth.le.IPeriodicAdvertisingCallback;
 import android.bluetooth.le.IScannerCallback;
