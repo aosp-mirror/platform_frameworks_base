@@ -2245,7 +2245,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 wsa.destroySurface();
                 mService.mForceRemoves.add(w);
                 mTmpWindow = w;
-            } else if (w.mAppToken != null && w.mAppToken.clientHidden) {
+            } else if (w.mAppToken != null && w.mAppToken.isClientHidden()) {
                 Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
                         + w + " surface=" + wsa.mSurfaceController
                         + " token=" + w.mAppToken
