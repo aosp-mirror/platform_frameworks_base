@@ -2972,9 +2972,9 @@ public class DevicePolicyManager {
      * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param timeoutMs The new timeout, after which the user will have to unlock with strong
-     *         authentication method. A value of 0 means the admin is not participating in
-     *         controlling the timeout.
+     * @param timeoutMs The new timeout in milliseconds, after which the user will have to unlock
+     *         with strong authentication method. A value of 0 means the admin is not participating
+     *         in controlling the timeout.
      *         The minimum and maximum timeouts are platform-defined and are typically 1 hour and
      *         72 hours, respectively. Though discouraged, the admin may choose to require strong
      *         auth at all times using {@link #KEYGUARD_DISABLE_FINGERPRINT} and/or
@@ -3004,7 +3004,7 @@ public class DevicePolicyManager {
      *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      *         accross all participating admins.
-     * @return The timeout or 0 if not configured for the provided admin.
+     * @return The timeout in milliseconds or 0 if not configured for the provided admin.
      */
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin) {
         return getRequiredStrongAuthTimeout(admin, myUserId());
