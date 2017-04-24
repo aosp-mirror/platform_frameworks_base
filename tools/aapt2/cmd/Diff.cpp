@@ -31,6 +31,11 @@ class DiffContext : public IAaptContext {
   DiffContext() : name_mangler_({}), symbol_table_(&name_mangler_) {
   }
 
+  PackageType GetPackageType() override {
+    // Doesn't matter.
+    return PackageType::kApp;
+  }
+
   const std::string& GetCompilationPackage() override {
     return empty_;
   }

@@ -411,4 +411,40 @@ TEST_F(TableFlattenerTest, FlattenTableReferencingSharedLibraries) {
   EXPECT_EQ(0x03u, entries.valueAt(idx));
 }
 
+TEST_F(TableFlattenerTest, LongPackageNameIsTruncated) {
+  std::string kPackageName(256, 'F');
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage(kPackageName).SetPackageId(0x7f).Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId(kPackageName, 0x7f)
+          .AddSimple(kPackageName + ":id/foo", ResourceId(0x7f010000))
+          .Build();
+
+  ResTable result;
+  ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
+
+  ASSERT_EQ(1u, result.getBasePackageCount());
+  EXPECT_EQ(127u, result.getBasePackageName(0).size());
+}
+
+TEST_F(TableFlattenerTest, LongSharedLibraryPackageNameIsIllegal) {
+  std::string kPackageName(256, 'F');
+
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+                                              .SetCompilationPackage(kPackageName)
+                                              .SetPackageId(0x7f)
+                                              .SetPackageType(PackageType::kSharedLib)
+                                              .Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId(kPackageName, 0x7f)
+          .AddSimple(kPackageName + ":id/foo", ResourceId(0x7f010000))
+          .Build();
+
+  ResTable result;
+  ASSERT_FALSE(Flatten(context.get(), {}, table.get(), &result));
+}
+
 }  // namespace aapt
