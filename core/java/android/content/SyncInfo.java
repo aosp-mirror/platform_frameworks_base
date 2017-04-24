@@ -78,12 +78,10 @@ public class SyncInfo implements Parcelable {
         this.startTime = other.startTime;
     }
 
-    /** @hide */
     public int describeContents() {
         return 0;
     }
 
-    /** @hide */
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(authorityId);
         parcel.writeParcelable(account, flags);
@@ -99,7 +97,6 @@ public class SyncInfo implements Parcelable {
         startTime = parcel.readLong();
     }
 
-    /** @hide */
     public static final Creator<SyncInfo> CREATOR = new Creator<SyncInfo>() {
         public SyncInfo createFromParcel(Parcel in) {
             return new SyncInfo(in);
