@@ -21,6 +21,8 @@
     android:versionName="1"
     coreApp="true">
 
+    <uses-permission android:name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
+
     <application android:label="@string/app_name"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true">
@@ -29,6 +31,14 @@
              android:permission="android.permission.BIND_CACHE_QUOTA_SERVICE">
             <intent-filter>
                 <action android:name="android.app.usage.CacheQuotaService" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".resolver.LRResolverRankerService"
+                 android:permission="android.permission.BIND_RESOLVER_RANKER_SERVICE"
+                 android:priority="-1" >
+            <intent-filter>
+                <action android:name="android.service.resolver.ResolverRankerService" />
             </intent-filter>
         </service>
 
