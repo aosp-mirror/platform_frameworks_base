@@ -1896,30 +1896,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    @Override
-    public void setFirewallEgressSourceRule(String addr, boolean allow) {
-        enforceSystemUid();
-        Preconditions.checkState(mFirewallEnabled);
-        final String rule = allow ? "allow" : "deny";
-        try {
-            mConnector.execute("firewall", "set_egress_source_rule", addr, rule);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
-    public void setFirewallEgressDestRule(String addr, int port, boolean allow) {
-        enforceSystemUid();
-        Preconditions.checkState(mFirewallEnabled);
-        final String rule = allow ? "allow" : "deny";
-        try {
-            mConnector.execute("firewall", "set_egress_dest_rule", addr, port, rule);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
     private void closeSocketsForFirewallChainLocked(int chain, String chainName) {
         // UID ranges to close sockets on.
         UidRange[] ranges;
