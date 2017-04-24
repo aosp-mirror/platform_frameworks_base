@@ -39,6 +39,8 @@ import static android.system.OsConstants.*;
 
 import com.android.frameworks.tests.net.R;
 import com.android.internal.util.HexDump;
+import static com.android.internal.util.BitUtils.bytesToBEInt;
+import static com.android.internal.util.BitUtils.put;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -65,7 +67,7 @@ import libcore.io.Streams;
  * Tests for APF program generator and interpreter.
  *
  * Build, install and run with:
- *  runtest frameworks-services -c android.net.apf.ApfTest
+ *  runtest frameworks-net -c android.net.apf.ApfTest
  */
 public class ApfTest extends AndroidTestCase {
     private static final int TIMEOUT_MS = 500;
@@ -1235,15 +1237,6 @@ public class ApfTest extends AndroidTestCase {
             byte[] apf_program);
 
     @SmallTest
-    public void testBytesToInt() {
-        assertEquals(0x00000000, ApfFilter.bytesToInt(IPV4_ANY_HOST_ADDR));
-        assertEquals(0xffffffff, ApfFilter.bytesToInt(IPV4_BROADCAST_ADDRESS));
-        assertEquals(0x0a000001, ApfFilter.bytesToInt(MOCK_IPV4_ADDR));
-        assertEquals(0x0a000002, ApfFilter.bytesToInt(ANOTHER_IPV4_ADDR));
-        assertEquals(0x0a001fff, ApfFilter.bytesToInt(MOCK_BROADCAST_IPV4_ADDR));
-        assertEquals(0xe0000001, ApfFilter.bytesToInt(MOCK_MULTICAST_IPV4_ADDR));
-    }
-
     public void testBroadcastAddress() throws Exception {
         assertEqualsIp("255.255.255.255", ApfFilter.ipv4BroadcastAddress(IPV4_ANY_HOST_ADDR, 0));
         assertEqualsIp("0.0.0.0", ApfFilter.ipv4BroadcastAddress(IPV4_ANY_HOST_ADDR, 32));
@@ -1257,7 +1250,7 @@ public class ApfTest extends AndroidTestCase {
     }
 
     public void assertEqualsIp(String expected, int got) throws Exception {
-        int want = ApfFilter.bytesToInt(InetAddress.getByName(expected).getAddress());
+        int want = bytesToBEInt(InetAddress.getByName(expected).getAddress());
         assertEquals(want, got);
     }
 }
