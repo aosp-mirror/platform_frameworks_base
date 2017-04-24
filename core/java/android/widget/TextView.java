@@ -10170,8 +10170,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         structure.setInputType(getInputType());
     }
 
-    // TODO(b/33197203): add unit/CTS tests for autofill methods
-
     boolean canRequestAutofill() {
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {

@@ -51,12 +51,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * App entry point to the AutoFill Framework.
+ * App entry point to the Autofill Framework.
  *
  * <p>It is safe to call into this from any thread.
  */
-// TODO(b/33197203): improve this javadoc
-//TODO(b/33197203): restrict manager calls to activity
 public final class AutofillManager {
 
     private static final String TAG = "AutofillManager";
@@ -107,7 +105,7 @@ public final class AutofillManager {
      *
      * @deprecated Use {@link android.service.autofill.FillRequest#FLAG_MANUAL_REQUEST}
      */
-    // TODO(b/33197203): remove (and change value of private flags)
+    // TODO(b/37563972): remove (and change value of private flags)
     @Deprecated
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
@@ -675,7 +673,7 @@ public final class AutofillManager {
         if (!hasAutofillFeature()) {
             return;
         }
-        // TODO(b/33197203): the result code is being ignored, so this method is not reliably
+        // TODO: the result code is being ignored, so this method is not reliably
         // handling the cases where it's not RESULT_OK: it works fine if the service does not
         // set the EXTRA_AUTHENTICATION_RESULT extra, but it could cause weird results if the
         // service set the extra and returned RESULT_CANCELED...
@@ -1323,8 +1321,6 @@ public final class AutofillManager {
         @Override
         public void autofill(int sessionId, IBinder windowToken, List<AutofillId> ids,
                 List<AutofillValue> values) {
-            // TODO(b/33197203): must keep the dataset so subsequent calls pass the same
-            // dataset.extras to service
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.mContext.getMainThreadHandler().post(

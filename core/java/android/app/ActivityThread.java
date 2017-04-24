@@ -3004,7 +3004,7 @@ public final class ActivityThread {
         // - it needs an IAutoFillCallback
         boolean forAutofill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTOFILL;
 
-        // TODO(b/33197203): decide if lastSessionId logic applies to autofill sessions
+        // TODO: decide if lastSessionId logic applies to autofill sessions
         if (mLastSessionId != cmd.sessionId) {
             // Clear the existing structures
             mLastSessionId = cmd.sessionId;
@@ -3032,8 +3032,6 @@ public final class ActivityThread {
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutofill) {
                 structure = new AssistStructure(r.activity, forAutofill);
                 Intent activityIntent = r.activity.getIntent();
-                // TODO(b/33197203): re-evaluate conditions below for autofill. In particular,
-                // FLAG_SECURE might be allowed on AUTO_FILL but not on AUTO_FILL_SAVE)
                 boolean notSecure = r.window == null ||
                         (r.window.getAttributes().flags
                                 & WindowManager.LayoutParams.FLAG_SECURE) == 0;
@@ -3059,7 +3057,7 @@ public final class ActivityThread {
             structure = new AssistStructure();
         }
 
-        // TODO(b/33197203): decide if lastSessionId logic applies to autofill sessions
+        // TODO: decide if lastSessionId logic applies to autofill sessions
 
         structure.setAcquisitionStartTime(startTime);
         structure.setAcquisitionEndTime(SystemClock.uptimeMillis());

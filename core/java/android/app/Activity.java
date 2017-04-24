@@ -696,9 +696,6 @@ public class Activity extends ContextThemeWrapper
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
-    // TODO(b/33197203): set to false once stable
-    private static final boolean DEBUG_AUTO_FILL = true;
-
     /** Standard activity result: operation canceled. */
     public static final int RESULT_CANCELED    = 0;
     /** Standard activity result: operation succeeded. */
