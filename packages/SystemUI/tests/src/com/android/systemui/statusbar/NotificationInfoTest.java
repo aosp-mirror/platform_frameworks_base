@@ -314,16 +314,14 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_NumChannelsTextUniqueWhenDefaultChannel() throws Exception {
+    public void testBindNotification_NumChannelsTextHiddenWhenDefaultChannel() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mDefaultNotificationChannel),
                 mNotificationChannel.getImportance(), mSbn, null, null,
                 null, null, null);
         final TextView numChannelsView =
                 (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
-        assertEquals(View.VISIBLE, numChannelsView.getVisibility());
-        assertEquals(mContext.getString(R.string.notification_default_channel_desc),
-                numChannelsView.getText());
+        assertEquals(View.INVISIBLE, numChannelsView.getVisibility());
     }
 
     @Test
