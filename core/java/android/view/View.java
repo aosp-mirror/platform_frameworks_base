@@ -7381,16 +7381,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * optimal implementation providing this data.
      */
     public void onProvideVirtualStructure(ViewStructure structure) {
-        onProvideVirtualStructureForAssistOrAutofill(structure, false);
+        AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
+        if (provider != null) {
+            AccessibilityNodeInfo info = createAccessibilityNodeInfo();
+            structure.setChildCount(1);
+            ViewStructure root = structure.newChild(0);
+            populateVirtualStructure(root, provider, info);
+            info.recycle();
+        }
     }
 
     /**
      * Called when assist structure is being retrieved from a view as part of an autofill request
      * to generate additional virtual structure under this view.
-     *
-     * <p>The default implementation uses {@link #getAccessibilityNodeProvider()} to try to
-     * generate this from the view's virtual accessibility nodes, if any. You can override this
-     * for a more optimal implementation providing this data.
      *
      * <p>When implementing this method, subclasses must follow the rules below:
      *
@@ -7415,27 +7418,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param flags optional flags (currently {@code 0}).
      */
     public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
-        onProvideVirtualStructureForAssistOrAutofill(structure, true);
-    }
-
-    private void onProvideVirtualStructureForAssistOrAutofill(ViewStructure structure,
-            boolean forAutofill) {
-        if (forAutofill) {
-            setAutofillId(structure);
-        }
-        // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
-        // this method should take a boolean with the type of request.
-        AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
-        if (provider != null) {
-            AccessibilityNodeInfo info = createAccessibilityNodeInfo();
-            structure.setChildCount(1);
-            ViewStructure root = structure.newChild(0);
-            if (forAutofill) {
-                setAutofillId(root);
-            }
-            populateVirtualStructure(root, provider, info, forAutofill);
-            info.recycle();
-        }
+        // TODO(b/36171235): need a way to let apps set the ViewStructure without forcing them
+        // to call super() (in case they override both this method and dispatchProvide....
+        // Perhaps the best solution would simply make setAutofillId(ViewStructure) public.
+        setAutofillId(structure);
     }
 
     /**
@@ -7652,7 +7638,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void populateVirtualStructure(ViewStructure structure,
-            AccessibilityNodeProvider provider, AccessibilityNodeInfo info, boolean forAutofill) {
+            AccessibilityNodeProvider provider, AccessibilityNodeInfo info) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
                 null, null, null);
         Rect rect = structure.getTempRect();
@@ -7690,10 +7676,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
         structure.setContentDescription(info.getContentDescription());
-        if (!forAutofill && (info.getText() != null || info.getError() != null)) {
-            // TODO(b/33197203) (b/33269702): when sanitized, try to use the Accessibility API to
-            // just set sanitized values (like text coming from resource files), rather than not
-            // setting it at all.
+        if ((info.getText() != null || info.getError() != null)) {
             structure.setText(info.getText(), info.getTextSelectionStart(),
                     info.getTextSelectionEnd());
         }
@@ -7704,12 +7687,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 AccessibilityNodeInfo cinfo = provider.createAccessibilityNodeInfo(
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 ViewStructure child = structure.newChild(i);
-                if (forAutofill) {
-                    // TODO(b/33197203): add CTS test to autofill virtual children based on
-                    // Accessibility API.
-                    child.setAutofillId(structure, i);
-                }
-                populateVirtualStructure(child, provider, cinfo, forAutofill);
+                populateVirtualStructure(child, provider, cinfo);
                 cinfo.recycle();
             }
         }
@@ -9598,13 +9576,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return Returns {@code false} if assist data collection for autofill is not blocked,
      * else {@code true}.
-     *
-     * TODO(b/33197203): update / remove javadoc tags below
-     * @see #setAssistBlocked(boolean)
-     * @attr ref android.R.styleable#View_assistBlocked
      */
     public boolean isAutofillBlocked() {
-        return false; // TODO(b/33197203): properly implement it
+        // TODO(b/36171235): properly implement it using isImportantForAutofill()
+        return false;
     }
 
     /**

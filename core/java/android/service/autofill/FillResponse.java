@@ -242,7 +242,7 @@ public final class FillResponse implements Parcelable {
         public @NonNull Builder setAuthentication(@NonNull AutofillId[] ids,
                 @Nullable IntentSender authentication, @Nullable RemoteViews presentation) {
             throwIfDestroyed();
-            // TODO(b/33197203): assert ids is not null nor empty once old version is removed
+            // TODO(b/37424539): assert ids is not null nor empty once old version is removed
             if (authentication == null ^ presentation == null) {
                 throw new IllegalArgumentException("authentication and presentation"
                         + " must be both non-null or null");
@@ -254,7 +254,7 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * TODO(b/33197203): will be removed once clients use the version that takes ids
+         * TODO(b/37424539): will be removed once clients use the version that takes ids
          * @hide
          * @deprecated
          */

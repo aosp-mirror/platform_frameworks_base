@@ -36,9 +36,6 @@ import com.android.internal.os.SomeArgs;
 
 import java.util.List;
 
-//TODO(b/33197203): improve javadoc (of both class and methods); in particular, make sure the
-//life-cycle (and how state could be maintained on server-side) is well documented.
-
 /**
  * Top-level service of the current autofill service for a given user.
  *
@@ -46,19 +43,6 @@ import java.util.List;
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
-
-    /**
-     * The {@link Intent} that must be declared as handled by the service.
-     * To be supported, the service must also require the
-     * {@link android.Manifest.permission#BIND_AUTO_FILL} permission so
-     * that other applications can not abuse it.
-     *
-     * @hide
-     * @deprecated TODO(b/35956626): remove once clients use AutofillService
-     */
-    @Deprecated
-    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
-    public static final String OLD_SERVICE_INTERFACE = "android.service.autofill.AutoFillService";
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -91,8 +75,6 @@ public abstract class AutofillService extends Service {
     private static final int MSG_DISCONNECT = 2;
     private static final int MSG_ON_FILL_REQUEST = 3;
     private static final int MSG_ON_SAVE_REQUEST = 4;
-
-    private static final int UNUSED_ARG = -1;
 
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
@@ -170,8 +152,7 @@ public abstract class AutofillService extends Service {
 
     @Override
     public final IBinder onBind(Intent intent) {
-        if (SERVICE_INTERFACE.equals(intent.getAction())
-                || OLD_SERVICE_INTERFACE.equals(intent.getAction())) {
+        if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
         Log.w(TAG, "Tried to bind to wrong intent: " + intent);
@@ -282,7 +263,6 @@ public abstract class AutofillService extends Service {
 
     @Deprecated
     public final void disableSelf() {
-        // TODO(b/33197203): Remove when GCore has migrated off this API
         getSystemService(AutofillManager.class).disableOwnedAutofillServices();
     }
 

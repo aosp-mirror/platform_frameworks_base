@@ -320,9 +320,6 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpin
         return mFilter;
     }
 
-    // TODO(b/33197203): implement getAutofillOptions
-
-
     /**
      * This class can be used by external clients of SimpleAdapter to bind
      * values to views.
