@@ -50,7 +50,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             String packageName, String transport) {
         this.backupManagerService = backupManagerService;
         mPackageName = packageName;
-        mRestoreTransport = backupManagerService.mTransportManager.getTransportBinder(transport);
+        mRestoreTransport = backupManagerService.getTransportManager().getTransportBinder(transport);
     }
 
     public void markTimedOut() {
@@ -60,7 +60,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     // --- Binder interface ---
     public synchronized int getAvailableRestoreSets(IRestoreObserver observer,
             IBackupManagerMonitor monitor) {
-        backupManagerService.mContext.enforceCallingOrSelfPermission(
+        backupManagerService.getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP,
                 "getAvailableRestoreSets");
         if (observer == null) {
@@ -86,16 +86,16 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // We know we're doing legit work now, so halt the timeout
             // until we're done.  It gets started again when the result
             // comes in.
-            backupManagerService.mBackupHandler.removeMessages(
+            backupManagerService.getBackupHandler().removeMessages(
                     RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
 
             // spin off the transport request to our service thread
-            backupManagerService.mWakelock.acquire();
-            Message msg = backupManagerService.mBackupHandler.obtainMessage(
+            backupManagerService.getWakelock().acquire();
+            Message msg = backupManagerService.getBackupHandler().obtainMessage(
                     RefactoredBackupManagerService.MSG_RUN_GET_RESTORE_SETS,
                     new RestoreGetSetsParams(mRestoreTransport, this, observer,
                             monitor));
-            backupManagerService.mBackupHandler.sendMessage(msg);
+            backupManagerService.getBackupHandler().sendMessage(msg);
             return 0;
         } catch (Exception e) {
             Slog.e(TAG, "Error in getAvailableRestoreSets", e);
@@ -107,7 +107,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
     public synchronized int restoreAll(long token, IRestoreObserver observer,
             IBackupManagerMonitor monitor) {
-        backupManagerService.mContext.enforceCallingOrSelfPermission(
+        backupManagerService.getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP,
                 "performRestore");
 
@@ -144,23 +144,23 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             return -1;
         }
 
-        synchronized (backupManagerService.mQueueLock) {
+        synchronized (backupManagerService.getQueueLock()) {
             for (int i = 0; i < mRestoreSets.length; i++) {
                 if (token == mRestoreSets[i].token) {
                     // Real work, so stop the session timeout until we finalize the restore
-                    backupManagerService.mBackupHandler.removeMessages(
+                    backupManagerService.getBackupHandler().removeMessages(
                             RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
 
                     long oldId = Binder.clearCallingIdentity();
-                    backupManagerService.mWakelock.acquire();
+                    backupManagerService.getWakelock().acquire();
                     if (RefactoredBackupManagerService.MORE_DEBUG) {
                         Slog.d(TAG, "restoreAll() kicking off");
                     }
-                    Message msg = backupManagerService.mBackupHandler.obtainMessage(
+                    Message msg = backupManagerService.getBackupHandler().obtainMessage(
                             RefactoredBackupManagerService.MSG_RUN_RESTORE);
                     msg.obj = new RestoreParams(mRestoreTransport, dirName,
                             observer, monitor, token);
-                    backupManagerService.mBackupHandler.sendMessage(msg);
+                    backupManagerService.getBackupHandler().sendMessage(msg);
                     Binder.restoreCallingIdentity(oldId);
                     return 0;
                 }
@@ -174,7 +174,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     // Restores of more than a single package are treated as 'system' restores
     public synchronized int restoreSome(long token, IRestoreObserver observer,
             IBackupManagerMonitor monitor, String[] packages) {
-        backupManagerService.mContext.enforceCallingOrSelfPermission(
+        backupManagerService.getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP,
                 "performRestore");
 
@@ -237,23 +237,23 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             return -1;
         }
 
-        synchronized (backupManagerService.mQueueLock) {
+        synchronized (backupManagerService.getQueueLock()) {
             for (int i = 0; i < mRestoreSets.length; i++) {
                 if (token == mRestoreSets[i].token) {
                     // Stop the session timeout until we finalize the restore
-                    backupManagerService.mBackupHandler.removeMessages(
+                    backupManagerService.getBackupHandler().removeMessages(
                             RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
 
                     long oldId = Binder.clearCallingIdentity();
-                    backupManagerService.mWakelock.acquire();
+                    backupManagerService.getWakelock().acquire();
                     if (RefactoredBackupManagerService.MORE_DEBUG) {
                         Slog.d(TAG, "restoreSome() of " + packages.length + " packages");
                     }
-                    Message msg = backupManagerService.mBackupHandler.obtainMessage(
+                    Message msg = backupManagerService.getBackupHandler().obtainMessage(
                             RefactoredBackupManagerService.MSG_RUN_RESTORE);
                     msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, monitor,
                             token, packages, packages.length > 1);
-                    backupManagerService.mBackupHandler.sendMessage(msg);
+                    backupManagerService.getBackupHandler().sendMessage(msg);
                     Binder.restoreCallingIdentity(oldId);
                     return 0;
                 }
@@ -290,7 +290,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
         PackageInfo app = null;
         try {
-            app = backupManagerService.mPackageManager.getPackageInfo(packageName, 0);
+            app = backupManagerService.getPackageManager().getPackageInfo(packageName, 0);
         } catch (NameNotFoundException nnf) {
             Slog.w(TAG, "Asked to restore nonexistent pkg " + packageName);
             return -1;
@@ -298,7 +298,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
         // If the caller is not privileged and is not coming from the target
         // app's uid, throw a permission exception back to the caller.
-        int perm = backupManagerService.mContext.checkPermission(android.Manifest.permission.BACKUP,
+        int perm = backupManagerService.getContext().checkPermission(android.Manifest.permission.BACKUP,
                 Binder.getCallingPid(), Binder.getCallingUid());
         if ((perm == PackageManager.PERMISSION_DENIED) &&
                 (app.applicationInfo.uid != Binder.getCallingUid())) {
@@ -339,19 +339,19 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             }
 
             // Stop the session timeout until we finalize the restore
-            backupManagerService.mBackupHandler.removeMessages(
+            backupManagerService.getBackupHandler().removeMessages(
                     RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
 
             // Ready to go:  enqueue the restore request and claim success
-            backupManagerService.mWakelock.acquire();
+            backupManagerService.getWakelock().acquire();
             if (RefactoredBackupManagerService.MORE_DEBUG) {
                 Slog.d(TAG, "restorePackage() : " + packageName);
             }
-            Message msg = backupManagerService.mBackupHandler.obtainMessage(
+            Message msg = backupManagerService.getBackupHandler().obtainMessage(
                     RefactoredBackupManagerService.MSG_RUN_RESTORE);
             msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, monitor,
                     token, app);
-            backupManagerService.mBackupHandler.sendMessage(msg);
+            backupManagerService.getBackupHandler().sendMessage(msg);
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
@@ -397,7 +397,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             throw new IllegalStateException("Restore session already ended");
         }
 
-        backupManagerService.mBackupHandler.post(
+        backupManagerService.getBackupHandler().post(
                 new EndRestoreRunnable(backupManagerService, this));
     }
 }

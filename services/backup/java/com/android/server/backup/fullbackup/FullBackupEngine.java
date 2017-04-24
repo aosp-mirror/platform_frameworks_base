@@ -91,7 +91,7 @@ public class FullBackupEngine {
                                 "Writing manifest for " + mPackage.packageName);
                     }
                     RefactoredBackupManagerService
-                            .writeAppManifest(mPackage, backupManagerService.mPackageManager,
+                            .writeAppManifest(mPackage, backupManagerService.getPackageManager(),
                                     mManifestFile, mSendApk,
                                     writeWidgetData);
                     FullBackup.backupToTar(mPackage.packageName, null, null,
@@ -125,7 +125,7 @@ public class FullBackupEngine {
                                 mTimeoutMonitor /* in parent class */,
                                 RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
                 mAgent.doFullBackup(mPipe, mQuota, mToken,
-                        backupManagerService.mBackupManagerBinder);
+                        backupManagerService.getBackupManagerBinder());
             } catch (IOException e) {
                 Slog.e(RefactoredBackupManagerService.TAG,
                         "Error running full backup for " + mPackage.packageName);

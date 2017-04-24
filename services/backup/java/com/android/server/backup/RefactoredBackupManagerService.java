@@ -255,26 +255,26 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
     private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
-    public Context mContext;
-    public PackageManager mPackageManager;
-    public IPackageManager mPackageManagerBinder;
-    public IActivityManager mActivityManager;
+    private Context mContext;
+    private PackageManager mPackageManager;
+    private IPackageManager mPackageManagerBinder;
+    private IActivityManager mActivityManager;
     private PowerManager mPowerManager;
-    public AlarmManager mAlarmManager;
+    private AlarmManager mAlarmManager;
     private IStorageManager mStorageManager;
 
-    public IBackupManager mBackupManagerBinder;
+    private IBackupManager mBackupManagerBinder;
 
-    public final TransportManager mTransportManager;
+    private final TransportManager mTransportManager;
 
-    public boolean mEnabled;   // access to this is synchronized on 'this'
-    public boolean mProvisioned;
+    private boolean mEnabled;   // access to this is synchronized on 'this'
+    private boolean mProvisioned;
     private boolean mAutoRestore;
-    public PowerManager.WakeLock mWakelock;
+    private PowerManager.WakeLock mWakelock;
     private HandlerThread mHandlerThread;
-    public BackupHandler mBackupHandler;
+    private BackupHandler mBackupHandler;
     private PendingIntent mRunBackupIntent;
-    public PendingIntent mRunInitIntent;
+    private PendingIntent mRunInitIntent;
     private BroadcastReceiver mRunBackupReceiver;
     private BroadcastReceiver mRunInitReceiver;
     // map UIDs to the set of participating packages under that UID
@@ -282,14 +282,14 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             = new SparseArray<>();
 
     // Backups that we haven't started yet.  Keys are package names.
-    public HashMap<String, BackupRequest> mPendingBackups
+    private HashMap<String, BackupRequest> mPendingBackups
             = new HashMap<>();
 
     // Pseudoname that we use for the Package Manager metadata "package"
     public static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
 
     // locking around the pending-backup management
-    public final Object mQueueLock = new Object();
+    private final Object mQueueLock = new Object();
 
     // The thread performing the sequence of queued backups binds to each app's agent
     // in succession.  Bind notifications are asynchronously delivered through the
@@ -297,24 +297,24 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // completed.
     private final Object mAgentConnectLock = new Object();
     private IBackupAgent mConnectedAgent;
-    public volatile boolean mBackupRunning;
+    private volatile boolean mBackupRunning;
     private volatile boolean mConnecting;
-    public volatile long mLastBackupPass;
+    private volatile long mLastBackupPass;
 
     // For debugging, we maintain a progress trace of operations during backup
     public static final boolean DEBUG_BACKUP_TRACE = true;
     private final List<String> mBackupTrace = new ArrayList<>();
 
     // A similar synchronization mechanism around clearing apps' data for restore
-    public final Object mClearDataLock = new Object();
-    public volatile boolean mClearingData;
+    private final Object mClearDataLock = new Object();
+    private volatile boolean mClearingData;
 
     @GuardedBy("mPendingRestores")
-    public boolean mIsRestoreInProgress;
+    private boolean mIsRestoreInProgress;
     @GuardedBy("mPendingRestores")
-    public final Queue<PerformUnifiedRestoreTask> mPendingRestores = new ArrayDeque<>();
+    private final Queue<PerformUnifiedRestoreTask> mPendingRestores = new ArrayDeque<>();
 
-    public ActiveRestoreSession mActiveRestoreSession;
+    private ActiveRestoreSession mActiveRestoreSession;
 
     // Watch the device provisioning operation during setup
     private ContentObserver mProvisionedObserver;
@@ -328,6 +328,237 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     static Trampoline getInstance() {
         // Always constructed during system bringup, so no need to lazy-init
         return sInstance;
+    }
+
+    public Context getContext() {
+        return mContext;
+    }
+
+    public void setContext(Context context) {
+        mContext = context;
+    }
+
+    public PackageManager getPackageManager() {
+        return mPackageManager;
+    }
+
+    public void setPackageManager(PackageManager packageManager) {
+        mPackageManager = packageManager;
+    }
+
+    public IPackageManager getPackageManagerBinder() {
+        return mPackageManagerBinder;
+    }
+
+    public void setPackageManagerBinder(IPackageManager packageManagerBinder) {
+        mPackageManagerBinder = packageManagerBinder;
+    }
+
+    public IActivityManager getActivityManager() {
+        return mActivityManager;
+    }
+
+    public void setActivityManager(IActivityManager activityManager) {
+        mActivityManager = activityManager;
+    }
+
+    public AlarmManager getAlarmManager() {
+        return mAlarmManager;
+    }
+
+    public void setAlarmManager(AlarmManager alarmManager) {
+        mAlarmManager = alarmManager;
+    }
+
+    public void setBackupManagerBinder(IBackupManager backupManagerBinder) {
+        mBackupManagerBinder = backupManagerBinder;
+    }
+
+    public TransportManager getTransportManager() {
+        return mTransportManager;
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+    }
+
+    public boolean isProvisioned() {
+        return mProvisioned;
+    }
+
+    public void setProvisioned(boolean provisioned) {
+        mProvisioned = provisioned;
+    }
+
+    public PowerManager.WakeLock getWakelock() {
+        return mWakelock;
+    }
+
+    public void setWakelock(PowerManager.WakeLock wakelock) {
+        mWakelock = wakelock;
+    }
+
+    public BackupHandler getBackupHandler() {
+        return mBackupHandler;
+    }
+
+    public void setBackupHandler(BackupHandler backupHandler) {
+        mBackupHandler = backupHandler;
+    }
+
+    public PendingIntent getRunInitIntent() {
+        return mRunInitIntent;
+    }
+
+    public void setRunInitIntent(PendingIntent runInitIntent) {
+        mRunInitIntent = runInitIntent;
+    }
+
+    public HashMap<String, BackupRequest> getPendingBackups() {
+        return mPendingBackups;
+    }
+
+    public void setPendingBackups(
+            HashMap<String, BackupRequest> pendingBackups) {
+        mPendingBackups = pendingBackups;
+    }
+
+    public Object getQueueLock() {
+        return mQueueLock;
+    }
+
+    public boolean isBackupRunning() {
+        return mBackupRunning;
+    }
+
+    public void setBackupRunning(boolean backupRunning) {
+        mBackupRunning = backupRunning;
+    }
+
+    public long getLastBackupPass() {
+        return mLastBackupPass;
+    }
+
+    public void setLastBackupPass(long lastBackupPass) {
+        mLastBackupPass = lastBackupPass;
+    }
+
+    public Object getClearDataLock() {
+        return mClearDataLock;
+    }
+
+    public boolean isClearingData() {
+        return mClearingData;
+    }
+
+    public void setClearingData(boolean clearingData) {
+        mClearingData = clearingData;
+    }
+
+    public boolean isRestoreInProgress() {
+        return mIsRestoreInProgress;
+    }
+
+    public void setRestoreInProgress(boolean restoreInProgress) {
+        mIsRestoreInProgress = restoreInProgress;
+    }
+
+    public Queue<PerformUnifiedRestoreTask> getPendingRestores() {
+        return mPendingRestores;
+    }
+
+    public ActiveRestoreSession getActiveRestoreSession() {
+        return mActiveRestoreSession;
+    }
+
+    public void setActiveRestoreSession(
+            ActiveRestoreSession activeRestoreSession) {
+        mActiveRestoreSession = activeRestoreSession;
+    }
+
+    public SparseArray<Operation> getCurrentOperations() {
+        return mCurrentOperations;
+    }
+
+    public Object getCurrentOpLock() {
+        return mCurrentOpLock;
+    }
+
+    public SparseArray<AdbParams> getAdbBackupRestoreConfirmations() {
+        return mAdbBackupRestoreConfirmations;
+    }
+
+    public File getBaseStateDir() {
+        return mBaseStateDir;
+    }
+
+    public void setBaseStateDir(File baseStateDir) {
+        mBaseStateDir = baseStateDir;
+    }
+
+    public File getDataDir() {
+        return mDataDir;
+    }
+
+    public void setDataDir(File dataDir) {
+        mDataDir = dataDir;
+    }
+
+    public File getJournal() {
+        return mJournal;
+    }
+
+    public void setJournal(File journal) {
+        mJournal = journal;
+    }
+
+    public SecureRandom getRng() {
+        return mRng;
+    }
+
+    public Set<String> getAncestralPackages() {
+        return mAncestralPackages;
+    }
+
+    public void setAncestralPackages(Set<String> ancestralPackages) {
+        mAncestralPackages = ancestralPackages;
+    }
+
+    public long getAncestralToken() {
+        return mAncestralToken;
+    }
+
+    public void setAncestralToken(long ancestralToken) {
+        mAncestralToken = ancestralToken;
+    }
+
+    public long getCurrentToken() {
+        return mCurrentToken;
+    }
+
+    public void setCurrentToken(long currentToken) {
+        mCurrentToken = currentToken;
+    }
+
+    public HashSet<String> getPendingInits() {
+        return mPendingInits;
+    }
+
+    public void setPendingInits(HashSet<String> pendingInits) {
+        mPendingInits = pendingInits;
+    }
+
+    public PerformFullTransportBackupTask getRunningFullBackupTask() {
+        return mRunningFullBackupTask;
+    }
+
+    public void setRunningFullBackupTask(
+            PerformFullTransportBackupTask runningFullBackupTask) {
+        mRunningFullBackupTask = runningFullBackupTask;
     }
 
     public static final class Lifecycle extends SystemService {
@@ -415,17 +646,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
      * cancel backup tasks.
      */
     @GuardedBy("mCurrentOpLock")
-    public final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
-    public final Object mCurrentOpLock = new Object();
+    private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
+    private final Object mCurrentOpLock = new Object();
     private final Random mTokenGenerator = new Random();
 
-    public final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<>();
+    private final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<>();
 
     // Where we keep our journal files and other bookkeeping
-    public File mBaseStateDir;
-    public File mDataDir;
+    private File mBaseStateDir;
+    private File mDataDir;
     private File mJournalDir;
-    public File mJournal;
+    private File mJournal;
 
     // Backup password, if any, and the file where it's saved.  What is stored is not the
     // password text itself; it's the result of a PBKDF2 hash with a randomly chosen (but
@@ -433,7 +664,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // same PBKDF2 cycle with the persisted salt; if the resulting derived key string matches
     // the saved hash string, then the challenge text matches the originally supplied
     // password text.
-    public final SecureRandom mRng = new SecureRandom();
+    private final SecureRandom mRng = new SecureRandom();
     private String mPasswordHash;
     private File mPasswordHashFile;
     private int mPasswordVersion;
@@ -455,13 +686,13 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;
             // increment when the schema changes
     private File mTokenFile;
-    public Set<String> mAncestralPackages = null;
-    public long mAncestralToken = 0;
-    public long mCurrentToken = 0;
+    private Set<String> mAncestralPackages = null;
+    private long mAncestralToken = 0;
+    private long mCurrentToken = 0;
 
     // Persistently track the need to do a full init
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
-    public HashSet<String> mPendingInits = new HashSet<>();  // transport names
+    private HashSet<String> mPendingInits = new HashSet<>();  // transport names
 
     // Round-robin queue for scheduling full backup passes
     private static final int SCHEDULE_FILE_VERSION = 1; // current version of the schedule file
@@ -470,7 +701,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // If we're running a schedule-driven full backup, this is the task instance doing it
 
     @GuardedBy("mQueueLock")
-    public PerformFullTransportBackupTask mRunningFullBackupTask;
+    private PerformFullTransportBackupTask mRunningFullBackupTask;
 
     @GuardedBy("mQueueLock")
     private ArrayList<FullBackupEntry> mFullBackupQueue;

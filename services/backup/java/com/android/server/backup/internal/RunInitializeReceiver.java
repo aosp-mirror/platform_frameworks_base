@@ -34,18 +34,18 @@ public class RunInitializeReceiver extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         if (RefactoredBackupManagerService.RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
-            synchronized (backupManagerService.mQueueLock) {
+            synchronized (backupManagerService.getQueueLock()) {
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.v(RefactoredBackupManagerService.TAG, "Running a device init");
                 }
 
                 // Acquire the wakelock and pass it to the init thread.  it will
                 // be released once init concludes.
-                backupManagerService.mWakelock.acquire();
+                backupManagerService.getWakelock().acquire();
 
-                Message msg = backupManagerService.mBackupHandler.obtainMessage(
+                Message msg = backupManagerService.getBackupHandler().obtainMessage(
                         RefactoredBackupManagerService.MSG_RUN_INITIALIZE);
-                backupManagerService.mBackupHandler.sendMessage(msg);
+                backupManagerService.getBackupHandler().sendMessage(msg);
             }
         }
     }

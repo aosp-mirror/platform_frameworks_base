@@ -29,9 +29,9 @@ public class ClearDataObserver extends IPackageDataObserver.Stub {
     }
 
     public void onRemoveCompleted(String packageName, boolean succeeded) {
-        synchronized (backupManagerService.mClearDataLock) {
-            backupManagerService.mClearingData = false;
-            backupManagerService.mClearDataLock.notifyAll();
+        synchronized (backupManagerService.getClearDataLock()) {
+            backupManagerService.setClearingData(false);
+            backupManagerService.getClearDataLock().notifyAll();
         }
     }
 }

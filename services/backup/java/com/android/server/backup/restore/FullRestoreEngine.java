@@ -160,7 +160,7 @@ public class FullRestoreEngine extends RestoreEngine {
             try {
                 mAgent.doRestoreFile(mSocket, mInfo.size, mInfo.type,
                         mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
-                        mToken, backupManagerService.mBackupManagerBinder);
+                        mToken, backupManagerService.getBackupManagerBinder());
             } catch (RemoteException e) {
                 // never happens; this is used strictly for local binder calls
             }
@@ -338,7 +338,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
 
                         try {
-                            mTargetApp = backupManagerService.mPackageManager.getApplicationInfo(
+                            mTargetApp = backupManagerService.getPackageManager().getApplicationInfo(
                                     pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
@@ -419,7 +419,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                 mObbConnection.restoreObbFile(pkg, mPipes[0],
                                         info.size, info.type, info.path, info.mode,
                                         info.mtime, mEphemeralOpToken,
-                                        backupManagerService.mBackupManagerBinder);
+                                        backupManagerService.getBackupManagerBinder());
                             } else {
                                 if (RefactoredBackupManagerService.MORE_DEBUG) {
                                     Slog.d(RefactoredBackupManagerService.TAG,
@@ -440,7 +440,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                     mAgent.doRestoreFile(mPipes[0], info.size, info.type,
                                             info.domain, info.path, info.mode, info.mtime,
                                             mEphemeralOpToken,
-                                            backupManagerService.mBackupManagerBinder);
+                                            backupManagerService.getBackupManagerBinder());
                                 }
                             }
                         } catch (IOException e) {
@@ -509,7 +509,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         if (!agentSuccess) {
                             Slog.w(RefactoredBackupManagerService.TAG,
                                     "Agent failure; ending restore");
-                            backupManagerService.mBackupHandler.removeMessages(
+                            backupManagerService.getBackupHandler().removeMessages(
                                     RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp);
@@ -693,7 +693,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
         // The file content is an .apk file.  Copy it out to a staging location and
         // attempt to install it.
-        File apkFile = new File(backupManagerService.mDataDir, info.packageName);
+        File apkFile = new File(backupManagerService.getDataDir(), info.packageName);
         try {
             FileOutputStream apkStream = new FileOutputStream(apkFile);
             byte[] buffer = new byte[32 * 1024];
@@ -715,7 +715,7 @@ public class FullRestoreEngine extends RestoreEngine {
             // Now install it
             Uri packageUri = Uri.fromFile(apkFile);
             mInstallObserver.reset();
-            backupManagerService.mPackageManager.installPackage(packageUri, mInstallObserver,
+            backupManagerService.getPackageManager().installPackage(packageUri, mInstallObserver,
                     PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
                     installerPackage);
             mInstallObserver.waitForCompletion();
@@ -740,7 +740,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     uninstall = true;
                 } else {
                     try {
-                        PackageInfo pkg = backupManagerService.mPackageManager.getPackageInfo(
+                        PackageInfo pkg = backupManagerService.getPackageManager().getPackageInfo(
                                 info.packageName,
                                 PackageManager.GET_SIGNATURES);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
@@ -783,7 +783,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 // that we just installed.
                 if (uninstall) {
                     mDeleteObserver.reset();
-                    backupManagerService.mPackageManager.deletePackage(
+                    backupManagerService.getPackageManager().deletePackage(
                             mInstallObserver.mPackageName,
                             mDeleteObserver, 0);
                     mDeleteObserver.waitForCompletion();
@@ -960,7 +960,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         // Okay, got the manifest info we need...
                         try {
                             PackageInfo pkgInfo =
-                                    backupManagerService.mPackageManager.getPackageInfo(
+                                    backupManagerService.getPackageManager().getPackageInfo(
                                             info.packageName, PackageManager.GET_SIGNATURES);
                             // Fall through to IGNORE if the app explicitly disallows backup
                             final int flags = pkgInfo.applicationInfo.flags;

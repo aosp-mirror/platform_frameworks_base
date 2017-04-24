@@ -40,7 +40,7 @@ public class PerformClearTask implements Runnable {
     public void run() {
         try {
             // Clear the on-device backup state to ensure a full backup next time
-            File stateDir = new File(backupManagerService.mBaseStateDir,
+            File stateDir = new File(backupManagerService.getBaseStateDir(),
                     mTransport.transportDirName());
             File stateFile = new File(stateDir, mPackage.packageName);
             stateFile.delete();
@@ -62,7 +62,7 @@ public class PerformClearTask implements Runnable {
             }
 
             // Last but not least, release the cpu
-            backupManagerService.mWakelock.release();
+            backupManagerService.getWakelock().release();
         }
     }
 }

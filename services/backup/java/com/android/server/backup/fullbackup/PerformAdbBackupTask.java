@@ -118,7 +118,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         for (String pkgName : pkgNames) {
             if (!set.containsKey(pkgName)) {
                 try {
-                    PackageInfo info = backupManagerService.mPackageManager.getPackageInfo(pkgName,
+                    PackageInfo info = backupManagerService.getPackageManager().getPackageInfo(pkgName,
                             PackageManager.GET_SIGNATURES);
                     set.put(pkgName, info);
                 } catch (NameNotFoundException e) {
@@ -141,7 +141,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
 
         // the master key is random for each backup
         byte[] masterPw = new byte[256 / 8];
-        backupManagerService.mRng.nextBytes(masterPw);
+        backupManagerService.getRng().nextBytes(masterPw);
         byte[] checksumSalt = backupManagerService
                 .randomBytes(RefactoredBackupManagerService.PBKDF2_SALT_SIZE);
 
@@ -233,7 +233,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         // doAllApps supersedes the package set if any
         if (mAllApps) {
             List<PackageInfo> allPackages =
-                    backupManagerService.mPackageManager.getInstalledPackages(
+                    backupManagerService.getPackageManager().getInstalledPackages(
                             PackageManager.GET_SIGNATURES);
             for (int i = 0; i < allPackages.size(); i++) {
                 PackageInfo pkg = allPackages.get(i);
@@ -387,7 +387,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             // Shared storage if requested
             if (mIncludeShared) {
                 try {
-                    pkg = backupManagerService.mPackageManager.getPackageInfo(
+                    pkg = backupManagerService.getPackageManager().getPackageInfo(
                             RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE, 0);
                     backupQueue.add(pkg);
                 } catch (NameNotFoundException e) {
@@ -437,9 +437,9 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                     KeyValueAdbBackupEngine kvBackupEngine =
                             new KeyValueAdbBackupEngine(out, keyValuePackage,
                                     backupManagerService,
-                                    backupManagerService.mPackageManager,
-                                    backupManagerService.mBaseStateDir,
-                                    backupManagerService.mDataDir);
+                                    backupManagerService.getPackageManager(),
+                                    backupManagerService.getBaseStateDir(),
+                                    backupManagerService.getDataDir());
                     sendOnBackupPackage(keyValuePackage.packageName);
                     kvBackupEngine.backupOnePackage();
                 }
@@ -470,7 +470,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             if (RefactoredBackupManagerService.DEBUG) {
                 Slog.d(RefactoredBackupManagerService.TAG, "Full backup pass complete.");
             }
-            backupManagerService.mWakelock.release();
+            backupManagerService.getWakelock().release();
         }
     }
 
