@@ -273,6 +273,15 @@ interface ITelephony {
      */
     boolean handlePinMmi(String dialString);
 
+
+    /**
+     * Handles USSD commands.
+     *
+     * @param ussdRequest the USSD command to be executed.
+     * @param wrappedCallback receives a callback result.
+     */
+    void handleUssdRequest(String ussdRequest, in ResultReceiver wrappedCallback);
+
     /**
      * Handles PIN MMI commands (PIN/PIN2/PUK/PUK2), which are initiated
      * without SEND (so <code>dial</code> is not appropriate) for
