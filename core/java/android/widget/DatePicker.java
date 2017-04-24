@@ -764,8 +764,6 @@ public class DatePicker extends FrameLayout {
         void onValidationChanged(boolean valid);
     }
 
-    // TODO(b/33197203): add unit/CTS tests for autofill methods (and make sure they handle enable)
-
     @Override
     public void dispatchProvideAutofillStructure(ViewStructure structure, int flags) {
         // This view is self-sufficient for autofill, so it needs to call

@@ -117,7 +117,7 @@ final class FillUi {
             final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             content.measure(widthMeasureSpec, heightMeasureSpec);
             decor.setOnClickListener(v -> mCallback.onResponsePicked(response));
-            // TODO(b/33197203 , b/36660292): temporary limiting maximum height and minimum width
+            // TODO(b/37567439): temporary limiting maximum height and minimum width
             mContentWidth = Math.max(content.getMeasuredWidth(), 1000);
             mContentHeight = Math.min(content.getMeasuredHeight(), 500);
 

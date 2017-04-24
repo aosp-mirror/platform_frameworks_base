@@ -120,8 +120,6 @@ final class AutofillManagerServiceImpl {
      * <p>They're kept until the {@link AutofillService} finished handling a request, an error
      * occurs, or the session times out.
      */
-    // TODO(b/33197203): need to make sure service is bound while callback is pending and/or
-    // use WeakReference
     @GuardedBy("mLock")
     private final SparseArray<Session> mSessions = new SparseArray<>();
 
@@ -159,14 +157,11 @@ final class AutofillManagerServiceImpl {
                     Slog.w(TAG, "no server session for " + sessionId);
                     return;
                 }
-                // TODO(b/33197203): since service is fetching the data (to use for save later),
-                // we should optimize what's sent (for example, remove layout containers,
-                // color / font info, etc...)
                 session.setStructureLocked(structure);
             }
 
 
-            // TODO(b/33197203, b/33269702): Must fetch the data so it's available later on
+            // TODO(b/35708678): Must fetch the data so it's available later on
             // handleSave(), even if if the activity is gone by then, but structure.ensureData()
             // gives a ONE_WAY warning because system_service could block on app calls.
             // We need to change AssistStructure so it provides a "one-way" writeToParcel()
@@ -176,8 +171,8 @@ final class AutofillManagerServiceImpl {
             // Sanitize structure before it's sent to service.
             structure.sanitizeForParceling(true);
 
-            // TODO(b/33197203): Need to pipe the bundle
-            FillRequest request = new FillRequest(structure, null, session.mFlags);
+            // This is the first request, hence there is no Bundle to be sent as clientState
+            final FillRequest request = new FillRequest(structure, null, session.mFlags);
             session.mRemoteFillService.onFillRequest(request);
         }
     };
@@ -398,13 +393,6 @@ final class AutofillManagerServiceImpl {
                 mInfo.getServiceInfo().getComponentName(), packageName);
         mSessions.put(newSession.id, newSession);
 
-        /*
-         * TODO(b/33197203): apply security checks below:
-         * - checks if disabled by secure settings / device policy
-         * - log operation using noteOp()
-         * - check flags
-         * - display disclosure if needed
-         */
         try {
             final Bundle receiverExtras = new Bundle();
             receiverExtras.putInt(EXTRA_SESSION_ID, sessionId);

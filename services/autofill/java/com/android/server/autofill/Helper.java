@@ -24,7 +24,8 @@ import java.util.Set;
 
 final class Helper {
 
-    static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
+    // TODO(b/36141126): set to false and remove guard from places that should always be on
+    static final boolean DEBUG = true;
     static final boolean VERBOSE = false;
 
     static void append(StringBuilder builder, Bundle bundle) {

@@ -574,8 +574,6 @@ public abstract class CompoundButton extends Button implements Checkable {
         stream.addProperty("checked", isChecked());
     }
 
-    // TODO(b/33197203): add unit/CTS tests for autofill methods (and make sure they handle enable)
-
     @Override
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         super.onProvideAutofillStructure(structure, flags);
