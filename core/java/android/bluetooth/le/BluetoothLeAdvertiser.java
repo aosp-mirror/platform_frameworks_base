@@ -22,7 +22,6 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
-import android.bluetooth.le.IAdvertiserCallback;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
