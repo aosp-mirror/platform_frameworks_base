@@ -3,6 +3,7 @@ package com.android.server.vr;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.app.ActivityManagerInternal;
+import android.app.CompatibilityDisplayProperties;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -35,9 +36,9 @@ class CompatibilityDisplay {
     private final static boolean DEBUG = false;
 
     // TODO: Go over these values and figure out what is best
-    private final static int HEIGHT = 1800;
-    private final static int WIDTH = 1400;
-    private final static int DPI = 320;
+    private int mVirtualDisplayHeight;
+    private int mVirtualDisplayWidth;
+    private int mVirtualDisplayDpi;
     private final static int STOP_VIRTUAL_DISPLAY_DELAY_MILLIS = 2000;
 
     private final static String DEBUG_ACTION_SET_MODE =
@@ -48,6 +49,28 @@ class CompatibilityDisplay {
             "com.android.server.vr.CompatibilityDisplay.SET_SURFACE";
     private final static String DEBUG_EXTRA_SURFACE =
             "com.android.server.vr.CompatibilityDisplay.EXTRA_SURFACE";
+
+    /**
+     * The default width of the VR virtual display
+     */
+    public static final int DEFAULT_VR_DISPLAY_WIDTH = 1400;
+
+    /**
+     * The default height of the VR virtual display
+     */
+    public static final int DEFAULT_VR_DISPLAY_HEIGHT = 1800;
+
+    /**
+     * The default height of the VR virtual dpi.
+     */
+    public static final int DEFAULT_VR_DISPLAY_DPI = 320;
+
+    /**
+     * The minimum height, width and dpi of VR virtual display.
+     */
+    public static final int MIN_VR_DISPLAY_WIDTH = 1;
+    public static final int MIN_VR_DISPLAY_HEIGHT = 1;
+    public static final int MIN_VR_DISPLAY_DPI = 1;
 
     private final ActivityManagerInternal mActivityManagerInternal;
     private final DisplayManager mDisplayManager;
@@ -81,6 +104,9 @@ class CompatibilityDisplay {
         mDisplayManager = displayManager;
         mActivityManagerInternal = activityManagerInternal;
         mVrManager = vrManager;
+        mVirtualDisplayWidth = DEFAULT_VR_DISPLAY_WIDTH;
+        mVirtualDisplayHeight = DEFAULT_VR_DISPLAY_HEIGHT;
+        mVirtualDisplayDpi = DEFAULT_VR_DISPLAY_DPI;
     }
 
     /**
@@ -164,6 +190,47 @@ class CompatibilityDisplay {
     }
 
     /**
+     * Sets the resolution and DPI of the compatibility virtual display used to display
+     * 2D applications in VR mode.
+     *
+     * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
+     *
+     * @param compatDisplayProperties Properties of the virtual display for 2D applications
+     * in VR mode.
+     */
+    public void setVirtualDisplayProperties(CompatibilityDisplayProperties compatDisplayProperties) {
+        synchronized(mVdLock) {
+            if (DEBUG) {
+                Log.i(TAG, "VD setVirtualDisplayProperties: res = " +
+                        compatDisplayProperties.getWidth() + "X" + compatDisplayProperties.getHeight() +
+                        ", dpi = " + compatDisplayProperties.getDpi());
+            }
+
+            if (compatDisplayProperties.getWidth() < MIN_VR_DISPLAY_WIDTH ||
+                compatDisplayProperties.getHeight() < MIN_VR_DISPLAY_HEIGHT ||
+                compatDisplayProperties.getDpi() < MIN_VR_DISPLAY_DPI) {
+                throw new IllegalArgumentException (
+                        "Illegal argument: height, width, dpi cannot be negative. res = " +
+                        compatDisplayProperties.getWidth() + "X" + compatDisplayProperties.getHeight() +
+                        ", dpi = " + compatDisplayProperties.getDpi());
+            }
+
+            mVirtualDisplayWidth = compatDisplayProperties.getWidth();
+            mVirtualDisplayHeight = compatDisplayProperties.getHeight();
+            mVirtualDisplayDpi = compatDisplayProperties.getDpi();
+
+            if (mVirtualDisplay != null) {
+                mVirtualDisplay.resize(mVirtualDisplayWidth, mVirtualDisplayHeight,
+                    mVirtualDisplayDpi);
+                ImageReader oldImageReader = mImageReader;
+                mImageReader = null;
+                startImageReader();
+                oldImageReader.close();
+            }
+        }
+    }
+
+    /**
      * Returns the virtual display ID if one currently exists, otherwise returns
      * {@link INVALID_DISPLAY_ID}.
      *
@@ -174,7 +241,7 @@ class CompatibilityDisplay {
             if (mVirtualDisplay != null) {
                 int virtualDisplayId = mVirtualDisplay.getDisplay().getDisplayId();
                 if (DEBUG) {
-                    Log.e(TAG, "VD id: " + virtualDisplayId);
+                    Log.i(TAG, "VD id: " + virtualDisplayId);
                 }
                 return virtualDisplayId;
             }
@@ -201,8 +268,9 @@ class CompatibilityDisplay {
                 return;
             }
 
-            mVirtualDisplay = mDisplayManager.createVirtualDisplay("VR 2D Display", WIDTH, HEIGHT,
-                    DPI, null /* Surface */, 0 /* flags */);
+            mVirtualDisplay = mDisplayManager.createVirtualDisplay("VR 2D Display",
+                    mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi,
+                    null /* Surface */, 0 /* flags */);
 
             if (mVirtualDisplay != null) {
                 mActivityManagerInternal.setVrCompatibilityDisplayId(
@@ -216,9 +284,7 @@ class CompatibilityDisplay {
             }
         }
 
-        if (DEBUG) {
-            Log.d(TAG, "VD created: " + mVirtualDisplay);
-        }
+        Log.i(TAG, "VD created: " + mVirtualDisplay);
     }
 
     /**
@@ -281,8 +347,10 @@ class CompatibilityDisplay {
      */
     private void startImageReader() {
         if (mImageReader == null) {
-            mImageReader = ImageReader.newInstance(WIDTH, HEIGHT, PixelFormat.RGBA_8888,
-                2 /* maxImages */);
+            mImageReader = ImageReader.newInstance(mVirtualDisplayWidth, mVirtualDisplayHeight,
+                PixelFormat.RGBA_8888, 2 /* maxImages */);
+            Log.i(TAG, "VD startImageReader: res = " + mVirtualDisplayWidth + "X" +
+                    mVirtualDisplayHeight + ", dpi = " + mVirtualDisplayDpi);
         }
         synchronized (mVdLock) {
             setSurfaceLocked(mImageReader.getSurface());
