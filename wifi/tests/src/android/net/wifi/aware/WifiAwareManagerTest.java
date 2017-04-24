@@ -687,8 +687,6 @@ public class WifiAwareManagerTest {
         collector.checkThat("mSubscribeType", subscribeConfig.mSubscribeType,
                 equalTo(SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE));
         collector.checkThat("mTtlSec", subscribeConfig.mTtlSec, equalTo(0));
-        collector.checkThat("mMatchStyle", subscribeConfig.mMatchStyle,
-                equalTo(SubscribeConfig.MATCH_STYLE_ALL));
         collector.checkThat("mEnableTerminateNotification",
                 subscribeConfig.mEnableTerminateNotification, equalTo(true));
     }
@@ -701,14 +699,13 @@ public class WifiAwareManagerTest {
         final int subscribeType = SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE;
         final int subscribeCount = 10;
         final int subscribeTtl = 15;
-        final int matchStyle = SubscribeConfig.MATCH_STYLE_FIRST_ONLY;
         final boolean enableTerminateNotification = false;
 
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
-                .setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
+                .setTtlSec(subscribeTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         collector.checkThat("mServiceName", serviceName.getBytes(),
@@ -719,7 +716,6 @@ public class WifiAwareManagerTest {
         collector.checkThat("mSubscribeType", subscribeType,
                 equalTo(subscribeConfig.mSubscribeType));
         collector.checkThat("mTtlSec", subscribeTtl, equalTo(subscribeConfig.mTtlSec));
-        collector.checkThat("mMatchStyle", matchStyle, equalTo(subscribeConfig.mMatchStyle));
         collector.checkThat("mEnableTerminateNotification", enableTerminateNotification,
                 equalTo(subscribeConfig.mEnableTerminateNotification));
     }
@@ -730,16 +726,14 @@ public class WifiAwareManagerTest {
         final String serviceSpecificInfo = "long arbitrary string with some info";
         final byte[] matchFilter = { 1, 16, 1, 22 };
         final int subscribeType = SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE;
-        final int subscribeCount = 10;
         final int subscribeTtl = 15;
-        final int matchStyle = SubscribeConfig.MATCH_STYLE_FIRST_ONLY;
         final boolean enableTerminateNotification = true;
 
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().setServiceName(serviceName)
                 .setServiceSpecificInfo(serviceSpecificInfo.getBytes()).setMatchFilter(
                         new TlvBufferUtils.TlvIterable(0, 1, matchFilter).toList())
                 .setSubscribeType(subscribeType)
-                .setTtlSec(subscribeTtl).setMatchStyle(matchStyle)
+                .setTtlSec(subscribeTtl)
                 .setTerminateNotificationEnabled(enableTerminateNotification).build();
 
         Parcel parcelW = Parcel.obtain();
@@ -763,14 +757,6 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSubscribeConfigBuilderNegativeTtl() {
         new SubscribeConfig.Builder().setTtlSec(-100);
-    }
-
-    /**
-     * Validate that a bad match style configuration throws an exception.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testSubscribeConfigBuilderBadMatchStyle() {
-        new SubscribeConfig.Builder().setMatchStyle(10);
     }
 
     /*
