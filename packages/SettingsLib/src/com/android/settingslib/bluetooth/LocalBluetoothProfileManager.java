@@ -32,7 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
 import android.util.Log;
-import com.android.settingslib.R;
+import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
