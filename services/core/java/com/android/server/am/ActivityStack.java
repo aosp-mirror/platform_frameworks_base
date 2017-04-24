@@ -1407,7 +1407,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 } else if ((!prev.visible && !hasVisibleBehindActivity())
                         || mService.isSleepingOrShuttingDownLocked()) {
                     // If we were visible then resumeTopActivities will release resources before
-                    // stopping.
+                    // stopping. Also, set visibility to false to flush any client hide that might have
+                    // been deferred.
+                    prev.setVisibility(false);
                     addToStopping(prev, true /* scheduleIdle */, false /* idleDelayed */);
                 }
             } else {
@@ -2024,11 +2026,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         try {
             final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
                     "makeInvisible", true /* noThrow */, true /* beforeStopping */);
-            // We don't want to call setVisible(false) to avoid notifying the client of this
-            // intermittent invisible state if it can enter Pip and isn't stopped or stopping.
-            if (!canEnterPictureInPicture || r.state == STOPPING || r.state == STOPPED) {
-                r.setVisible(false);
-            }
+            // Defer telling the client it is hidden if it can enter Pip and isn't current stopped
+            // or stopping. This gives it a chance to enter Pip in onPause().
+            final boolean deferHidingClient = canEnterPictureInPicture
+                    && r.state != STOPPING && r.state != STOPPED;
+            r.setVisible(false, deferHidingClient);
 
             switch (r.state) {
                 case STOPPING:
@@ -2053,15 +2055,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (visibleBehind == r) {
                         releaseBackgroundResources(r);
                     } else {
-                        // If this activity is in a state where it can currently enter
-                        // picture-in-picture, then don't immediately schedule the idle now in case
-                        // the activity tries to enterPictureInPictureMode() later. Otherwise,
-                        // we will try and stop the activity next time idle is processed.
-
-                        if (canEnterPictureInPicture) {
-                            // We set r.visible=false so that Stop will later call setVisible for us
-                            r.visible = false;
-                        }
                         addToStopping(r, true /* scheduleIdle */,
                                 canEnterPictureInPicture /* idleDelayed */);
                     }
@@ -2343,20 +2336,22 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         mStackSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
-        final boolean prevCanPip = prev != null && prev.checkEnterPictureInPictureState(
-                "resumeTopActivity", true /* noThrow */, userLeaving /* beforeStopping */);
+        boolean lastResumedCanPip = false;
+        final ActivityStack lastFocusedStack = mStackSupervisor.getLastStack();
+        if (lastFocusedStack != null && lastFocusedStack != this) {
+            // So, why aren't we using prev here??? See the param comment on the method. prev doesn't
+            // represent the last resumed activity. However, the last focus stack does if it isn't null.
+            final ActivityRecord lastResumed = lastFocusedStack.mResumedActivity;
+            lastResumedCanPip = lastResumed != null && lastResumed.checkEnterPictureInPictureState(
+                    "resumeTopActivity", true /* noThrow */, userLeaving /* beforeStopping */);
+        }
         // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous activity
         // to be paused, while at the same time resuming the new resume activity only if the
         // previous activity can't go into Pip since we want to give Pip activities a chance to
         // enter Pip before resuming the next activity.
-        final boolean resumeWhilePausing = (next.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0;
-        // TODO: This would be go to have however, the various call points that pass in
-        // prev need to be corrected first. In some cases the prev is equal to the next e.g. launch
-        // an app from home. And, is come other cases it is null e.g. press home button after
-        // launching an app. The doc on the method says prev. is null expect for the case we are
-        // coming from pause. We need to see if that is a valid thing and also if all the code in
-        // this method using prev. are setup to function like that.
-        //&& !prevCanPip;
+        final boolean resumeWhilePausing = (next.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0
+                && !lastResumedCanPip;
+
         boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving, next, false);
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,

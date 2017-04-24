@@ -1568,17 +1568,21 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void setVisibility(boolean visible) {
-        mWindowContainerController.setVisibility(visible);
+        mWindowContainerController.setVisibility(visible, false /* deferHidingClient */);
+    }
+
+    void setVisible(boolean newVisible) {
+        setVisible(newVisible, false /* deferHidingClient */);
     }
 
     // TODO: Look into merging with #setVisibility()
-    void setVisible(boolean newVisible) {
+    void setVisible(boolean newVisible, boolean deferHidingClient) {
         visible = newVisible;
         if (!visible && mUpdateTaskThumbnailWhenHidden) {
             updateThumbnailLocked(screenshotActivityLocked(), null /* description */);
             mUpdateTaskThumbnailWhenHidden = false;
         }
-        mWindowContainerController.setVisibility(visible);
+        mWindowContainerController.setVisibility(visible, deferHidingClient);
         final ArrayList<ActivityContainer> containers = mChildContainers;
         for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
             final ActivityContainer container = containers.get(containerNdx);
