@@ -3648,7 +3648,7 @@ public class NotificationManagerService extends SystemService {
             if (DBG) Slog.v(TAG, "Interrupting!");
 
             Uri soundUri = record.getSound();
-            hasValidSound = (soundUri != null);
+            hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
             long[] vibration = record.getVibration();
             // Demote sound to vibration if vibration missing & phone in vibration mode.
             if (vibration == null
