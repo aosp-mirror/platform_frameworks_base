@@ -45,6 +45,26 @@ public class VrManager {
     }
 
     /**
+     * Sets the resolution and DPI of the compatibility virtual display used to display 2D
+     * applications in VR mode.
+     *
+     * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
+     *
+     * @param {@link android.app.CompatibilityDisplayProperties} properties to be set to the
+     * virtual display for 2D applications in VR mode.
+     *
+     * {@hide}
+     */
+    public void setCompatibilityDisplayProperties(
+            CompatibilityDisplayProperties compatDisplayProp) {
+        try {
+            mService.setCompatibilityDisplayProperties(compatDisplayProp);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Initiate connection for system controller data.
      *
      * @param fd Controller data file descriptor.
