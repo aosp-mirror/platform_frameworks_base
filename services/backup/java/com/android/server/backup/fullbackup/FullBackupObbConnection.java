@@ -50,12 +50,12 @@ public class FullBackupObbConnection implements ServiceConnection {
         Intent obbIntent = new Intent().setComponent(new ComponentName(
                 "com.android.sharedstoragebackup",
                 "com.android.sharedstoragebackup.ObbBackupService"));
-        backupManagerService.mContext.bindServiceAsUser(
+        backupManagerService.getContext().bindServiceAsUser(
                 obbIntent, this, Context.BIND_AUTO_CREATE, UserHandle.SYSTEM);
     }
 
     public void tearDown() {
-        backupManagerService.mContext.unbindService(this);
+        backupManagerService.getContext().unbindService(this);
     }
 
     public boolean backupObbs(PackageInfo pkg, OutputStream out) {
@@ -71,7 +71,7 @@ public class FullBackupObbConnection implements ServiceConnection {
                             RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
                             null, RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
             mService.backupObbs(pkg.packageName, pipes[1], token,
-                    backupManagerService.mBackupManagerBinder);
+                    backupManagerService.getBackupManagerBinder());
             RefactoredBackupManagerService.routeSocketDataToOutput(pipes[0], out);
             success = backupManagerService.waitUntilOperationComplete(token);
         } catch (Exception e) {

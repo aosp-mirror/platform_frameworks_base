@@ -34,24 +34,24 @@ public class ProvisionedObserver extends ContentObserver {
     }
 
     public void onChange(boolean selfChange) {
-        final boolean wasProvisioned = backupManagerService.mProvisioned;
+        final boolean wasProvisioned = backupManagerService.isProvisioned();
         final boolean isProvisioned = backupManagerService.deviceIsProvisioned();
         // latch: never unprovision
-        backupManagerService.mProvisioned = wasProvisioned || isProvisioned;
+        backupManagerService.setProvisioned(wasProvisioned || isProvisioned);
         if (RefactoredBackupManagerService.MORE_DEBUG) {
             Slog.d(RefactoredBackupManagerService.TAG, "Provisioning change: was=" + wasProvisioned
-                    + " is=" + isProvisioned + " now=" + backupManagerService.mProvisioned);
+                    + " is=" + isProvisioned + " now=" + backupManagerService.isProvisioned());
         }
 
-        synchronized (backupManagerService.mQueueLock) {
-            if (backupManagerService.mProvisioned && !wasProvisioned
-                    && backupManagerService.mEnabled) {
+        synchronized (backupManagerService.getQueueLock()) {
+            if (backupManagerService.isProvisioned() && !wasProvisioned
+                    && backupManagerService.isEnabled()) {
                 // we're now good to go, so start the backup alarms
                 if (RefactoredBackupManagerService.MORE_DEBUG) {
                     Slog.d(RefactoredBackupManagerService.TAG,
                             "Now provisioned, so starting backups");
                 }
-                KeyValueBackupJob.schedule(backupManagerService.mContext);
+                KeyValueBackupJob.schedule(backupManagerService.getContext());
                 backupManagerService.scheduleNextFullBackupJob(0);
             }
         }

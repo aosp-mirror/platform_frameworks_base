@@ -129,7 +129,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
         for (String pkg : whichPackages) {
             try {
-                PackageInfo info = backupManagerService.mPackageManager.getPackageInfo(pkg,
+                PackageInfo info = backupManagerService.getPackageManager().getPackageInfo(pkg,
                         PackageManager.GET_SIGNATURES);
                 mCurrentPackage = info;
                 if (!RefactoredBackupManagerService.appIsEligibleForBackup(info.applicationInfo)) {
@@ -192,9 +192,9 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     }
 
     private void registerTask() {
-        synchronized (backupManagerService.mCurrentOpLock) {
+        synchronized (backupManagerService.getCurrentOpLock()) {
             Slog.d(TAG, "backupmanager pftbt token=" + Integer.toHexString(mCurrentOpToken));
-            backupManagerService.mCurrentOperations.put(mCurrentOpToken, new Operation(
+            backupManagerService.getCurrentOperations().put(mCurrentOpToken, new Operation(
                     RefactoredBackupManagerService.OP_PENDING, this,
                     RefactoredBackupManagerService.OP_TYPE_BACKUP));
         }
@@ -257,14 +257,15 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         int backupRunStatus = BackupManager.SUCCESS;
 
         try {
-            if (!backupManagerService.mEnabled || !backupManagerService.mProvisioned) {
+            if (!backupManagerService.isEnabled() || !backupManagerService.isProvisioned()) {
                 // Backups are globally disabled, so don't proceed.
                 if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.i(TAG, "full backup requested but enabled=" + backupManagerService.mEnabled
-                            + " provisioned=" + backupManagerService.mProvisioned + "; ignoring");
+                    Slog.i(TAG, "full backup requested but enabled=" + backupManagerService
+                            .isEnabled()
+                            + " provisioned=" + backupManagerService.isProvisioned() + "; ignoring");
                 }
                 int monitoringEvent;
-                if (!backupManagerService.mEnabled) {
+                if (!backupManagerService.isEnabled()) {
                     monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED;
                 } else {
                     monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
@@ -278,7 +279,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 return;
             }
 
-            mTransport = backupManagerService.mTransportManager.getCurrentTransportBinder();
+            mTransport = backupManagerService.getTransportManager().getCurrentTransportBinder();
             if (mTransport == null) {
                 Slog.w(TAG, "Transport not present; full data backup not performed");
                 backupRunStatus = BackupManager.ERROR_TRANSPORT_ABORTED;
@@ -529,7 +530,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     Slog.i(TAG, "Unbinding agent in " + packageName);
                     backupManagerService.addBackupTrace("unbinding " + packageName);
                     try {
-                        backupManagerService.mActivityManager.unbindBackupAgent(
+                        backupManagerService.getActivityManager().unbindBackupAgent(
                                 currentPackage.applicationInfo);
                     } catch (RemoteException e) { /* can't happen; activity manager is local */ }
                 }
@@ -565,8 +566,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 mJob.finishBackupPass();
             }
 
-            synchronized (backupManagerService.mQueueLock) {
-                backupManagerService.mRunningFullBackupTask = null;
+            synchronized (backupManagerService.getQueueLock()) {
+                backupManagerService.setRunningFullBackupTask(null);
             }
 
             mLatch.countDown();
@@ -578,7 +579,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             }
 
             Slog.i(RefactoredBackupManagerService.TAG, "Full data backup pass finished.");
-            backupManagerService.mWakelock.release();
+            backupManagerService.getWakelock().release();
         }
     }
 
@@ -634,7 +635,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
                 }
                 agent.doMeasureFullBackup(mQuota, mCurrentOpToken,
-                        backupManagerService.mBackupManagerBinder);
+                        backupManagerService.getBackupManagerBinder());
 
                 // Now wait to get our result back.  If this backstop timeout is reached without
                 // the latch being thrown, flow will continue as though a result or "normal"
@@ -736,16 +737,16 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         }
 
         void registerTask() {
-            synchronized (backupManagerService.mCurrentOpLock) {
-                backupManagerService.mCurrentOperations.put(mCurrentOpToken, new Operation(
+            synchronized (backupManagerService.getCurrentOpLock()) {
+                backupManagerService.getCurrentOperations().put(mCurrentOpToken, new Operation(
                         RefactoredBackupManagerService.OP_PENDING, this,
                         RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT));
             }
         }
 
         void unregisterTask() {
-            synchronized (backupManagerService.mCurrentOpLock) {
-                backupManagerService.mCurrentOperations.remove(mCurrentOpToken);
+            synchronized (backupManagerService.getCurrentOpLock()) {
+                backupManagerService.getCurrentOperations().remove(mCurrentOpToken);
             }
         }
 

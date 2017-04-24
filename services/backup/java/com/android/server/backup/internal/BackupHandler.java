@@ -67,38 +67,38 @@ public class BackupHandler extends Handler {
 
         switch (msg.what) {
             case RefactoredBackupManagerService.MSG_RUN_BACKUP: {
-                backupManagerService.mLastBackupPass = System.currentTimeMillis();
+                backupManagerService.setLastBackupPass(System.currentTimeMillis());
 
                 IBackupTransport transport =
-                        backupManagerService.mTransportManager.getCurrentTransportBinder();
+                        backupManagerService.getTransportManager().getCurrentTransportBinder();
                 if (transport == null) {
                     Slog.v(RefactoredBackupManagerService.TAG,
                             "Backup requested but no transport available");
-                    synchronized (backupManagerService.mQueueLock) {
-                        backupManagerService.mBackupRunning = false;
+                    synchronized (backupManagerService.getQueueLock()) {
+                        backupManagerService.setBackupRunning(false);
                     }
-                    backupManagerService.mWakelock.release();
+                    backupManagerService.getWakelock().release();
                     break;
                 }
 
                 // snapshot the pending-backup set and work on that
                 ArrayList<BackupRequest> queue = new ArrayList<>();
-                File oldJournal = backupManagerService.mJournal;
-                synchronized (backupManagerService.mQueueLock) {
+                File oldJournal = backupManagerService.getJournal();
+                synchronized (backupManagerService.getQueueLock()) {
                     // Do we have any work to do?  Construct the work queue
                     // then release the synchronization lock to actually run
                     // the backup.
-                    if (backupManagerService.mPendingBackups.size() > 0) {
-                        for (BackupRequest b : backupManagerService.mPendingBackups.values()) {
+                    if (backupManagerService.getPendingBackups().size() > 0) {
+                        for (BackupRequest b : backupManagerService.getPendingBackups().values()) {
                             queue.add(b);
                         }
                         if (RefactoredBackupManagerService.DEBUG) {
                             Slog.v(RefactoredBackupManagerService.TAG, "clearing pending backups");
                         }
-                        backupManagerService.mPendingBackups.clear();
+                        backupManagerService.getPendingBackups().clear();
 
                         // Start a new backup-queue journal file too
-                        backupManagerService.mJournal = null;
+                        backupManagerService.setJournal(null);
 
                     }
                 }
@@ -136,10 +136,10 @@ public class BackupHandler extends Handler {
 
                 if (!staged) {
                     // if we didn't actually hand off the wakelock, rewind until next time
-                    synchronized (backupManagerService.mQueueLock) {
-                        backupManagerService.mBackupRunning = false;
+                    synchronized (backupManagerService.getQueueLock()) {
+                        backupManagerService.setBackupRunning(false);
                     }
-                    backupManagerService.mWakelock.release();
+                    backupManagerService.getWakelock().release();
                 }
                 break;
             }
@@ -201,20 +201,20 @@ public class BackupHandler extends Handler {
                         params.observer, params.monitor, params.token, params.pkgInfo,
                         params.pmToken, params.isSystemRestore, params.filterSet);
 
-                synchronized (backupManagerService.mPendingRestores) {
-                    if (backupManagerService.mIsRestoreInProgress) {
+                synchronized (backupManagerService.getPendingRestores()) {
+                    if (backupManagerService.isRestoreInProgress()) {
                         if (RefactoredBackupManagerService.DEBUG) {
                             Slog.d(RefactoredBackupManagerService.TAG,
                                     "Restore in progress, queueing.");
                         }
-                        backupManagerService.mPendingRestores.add(task);
+                        backupManagerService.getPendingRestores().add(task);
                         // This task will be picked up and executed when the the currently running
                         // restore task finishes.
                     } else {
                         if (RefactoredBackupManagerService.DEBUG) {
                             Slog.d(RefactoredBackupManagerService.TAG, "Starting restore.");
                         }
-                        backupManagerService.mIsRestoreInProgress = true;
+                        backupManagerService.setRestoreInProgress(true);
                         Message restoreMsg = obtainMessage(
                                 RefactoredBackupManagerService.MSG_BACKUP_RESTORE_STEP, task);
                         sendMessage(restoreMsg);
@@ -253,9 +253,9 @@ public class BackupHandler extends Handler {
                 HashSet<String> queue;
 
                 // Snapshot the pending-init queue and work on that
-                synchronized (backupManagerService.mQueueLock) {
-                    queue = new HashSet<>(backupManagerService.mPendingInits);
-                    backupManagerService.mPendingInits.clear();
+                synchronized (backupManagerService.getQueueLock()) {
+                    queue = new HashSet<>(backupManagerService.getPendingInits());
+                    backupManagerService.getPendingInits().clear();
                 }
 
                 (new PerformInitializeTask(backupManagerService, queue)).run();
@@ -263,11 +263,11 @@ public class BackupHandler extends Handler {
             }
 
             case RefactoredBackupManagerService.MSG_RETRY_INIT: {
-                synchronized (backupManagerService.mQueueLock) {
+                synchronized (backupManagerService.getQueueLock()) {
                     backupManagerService.recordInitPendingLocked(msg.arg1 != 0, (String) msg.obj);
-                    backupManagerService.mAlarmManager.set(AlarmManager.RTC_WAKEUP,
+                    backupManagerService.getAlarmManager().set(AlarmManager.RTC_WAKEUP,
                             System.currentTimeMillis(),
-                            backupManagerService.mRunInitIntent);
+                            backupManagerService.getRunInitIntent());
                 }
                 break;
             }
@@ -307,7 +307,7 @@ public class BackupHandler extends Handler {
                             RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT,
                             RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL);
 
-                    backupManagerService.mWakelock.release();
+                    backupManagerService.getWakelock().release();
                 }
                 break;
             }
@@ -322,24 +322,25 @@ public class BackupHandler extends Handler {
 
             case RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT: {
                 synchronized (backupManagerService) {
-                    if (backupManagerService.mActiveRestoreSession != null) {
+                    if (backupManagerService.getActiveRestoreSession() != null) {
                         // Client app left the restore session dangling.  We know that it
                         // can't be in the middle of an actual restore operation because
                         // the timeout is suspended while a restore is in progress.  Clean
                         // up now.
                         Slog.w(RefactoredBackupManagerService.TAG,
                                 "Restore session timed out; aborting");
-                        backupManagerService.mActiveRestoreSession.markTimedOut();
-                        post(backupManagerService.mActiveRestoreSession.new EndRestoreRunnable(
-                                backupManagerService, backupManagerService.mActiveRestoreSession));
+                        backupManagerService.getActiveRestoreSession().markTimedOut();
+                        post(backupManagerService.getActiveRestoreSession().new EndRestoreRunnable(
+                                backupManagerService,
+                                backupManagerService.getActiveRestoreSession()));
                     }
                 }
                 break;
             }
 
             case RefactoredBackupManagerService.MSG_FULL_CONFIRMATION_TIMEOUT: {
-                synchronized (backupManagerService.mAdbBackupRestoreConfirmations) {
-                    AdbParams params = backupManagerService.mAdbBackupRestoreConfirmations.get(
+                synchronized (backupManagerService.getAdbBackupRestoreConfirmations()) {
+                    AdbParams params = backupManagerService.getAdbBackupRestoreConfirmations().get(
                             msg.arg1);
                     if (params != null) {
                         Slog.i(RefactoredBackupManagerService.TAG,
@@ -349,7 +350,7 @@ public class BackupHandler extends Handler {
                         backupManagerService.signalAdbBackupRestoreCompletion(params);
 
                         // Remove the token from the set
-                        backupManagerService.mAdbBackupRestoreConfirmations.delete(msg.arg1);
+                        backupManagerService.getAdbBackupRestoreConfirmations().delete(msg.arg1);
 
                         // Report a timeout to the observer, if any
                         if (params.observer != null) {
@@ -369,7 +370,7 @@ public class BackupHandler extends Handler {
 
             case RefactoredBackupManagerService.MSG_WIDGET_BROADCAST: {
                 final Intent intent = (Intent) msg.obj;
-                backupManagerService.mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+                backupManagerService.getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
                 break;
             }
 
@@ -383,8 +384,8 @@ public class BackupHandler extends Handler {
                 for (String packageName : params.kvPackages) {
                     kvQueue.add(new BackupRequest(packageName));
                 }
-                backupManagerService.mBackupRunning = true;
-                backupManagerService.mWakelock.acquire();
+                backupManagerService.setBackupRunning(true);
+                backupManagerService.getWakelock().acquire();
 
                 PerformBackupTask pbt = new PerformBackupTask(
                         backupManagerService,

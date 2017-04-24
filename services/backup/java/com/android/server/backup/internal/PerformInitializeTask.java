@@ -44,7 +44,7 @@ public class PerformInitializeTask implements Runnable {
         try {
             for (String transportName : mQueue) {
                 IBackupTransport transport =
-                        backupManagerService.mTransportManager.getTransportBinder(transportName);
+                        backupManagerService.getTransportManager().getTransportBinder(transportName);
                 if (transport == null) {
                     Slog.e(
                             RefactoredBackupManagerService.TAG,
@@ -68,10 +68,10 @@ public class PerformInitializeTask implements Runnable {
                     int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
                     EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                     backupManagerService
-                            .resetBackupState(new File(backupManagerService.mBaseStateDir,
+                            .resetBackupState(new File(backupManagerService.getBaseStateDir(),
                                     transport.transportDirName()));
                     EventLog.writeEvent(EventLogTags.BACKUP_SUCCESS, 0, millis);
-                    synchronized (backupManagerService.mQueueLock) {
+                    synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.recordInitPendingLocked(false, transportName);
                     }
                 } else {
@@ -80,23 +80,23 @@ public class PerformInitializeTask implements Runnable {
                     Slog.e(RefactoredBackupManagerService.TAG,
                             "Transport error in initializeDevice()");
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
-                    synchronized (backupManagerService.mQueueLock) {
+                    synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.recordInitPendingLocked(true, transportName);
                     }
                     // do this via another alarm to make sure of the wakelock states
                     long delay = transport.requestBackupTime();
                     Slog.w(RefactoredBackupManagerService.TAG,
                             "Init failed on " + transportName + " resched in " + delay);
-                    backupManagerService.mAlarmManager.set(AlarmManager.RTC_WAKEUP,
+                    backupManagerService.getAlarmManager().set(AlarmManager.RTC_WAKEUP,
                             System.currentTimeMillis() + delay,
-                            backupManagerService.mRunInitIntent);
+                            backupManagerService.getRunInitIntent());
                 }
             }
         } catch (Exception e) {
             Slog.e(RefactoredBackupManagerService.TAG, "Unexpected error performing init", e);
         } finally {
             // Done; release the wakelock
-            backupManagerService.mWakelock.release();
+            backupManagerService.getWakelock().release();
         }
     }
 }
