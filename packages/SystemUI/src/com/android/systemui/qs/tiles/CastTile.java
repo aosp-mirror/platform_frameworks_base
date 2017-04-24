@@ -16,8 +16,14 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.support.v7.app.MediaRouteChooserDialog;
@@ -61,6 +67,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
     private final ActivityStarter mActivityStarter;
+    private Dialog mDialog;
 
     public CastTile(QSHost host) {
         super(host);
@@ -128,9 +135,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             Context context = new ContextThemeWrapper(mContext,
                     R.style.Theme_AppCompat_Light_Dialog_Alert);
             if (mState.value) {
-                MediaRouteControllerDialog dialog = new MediaRouteControllerDialog(context);
-                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
-                dialog.show();
+                mDialog = new MediaRouteControllerDialog(context);
             } else {
                 // Instead of showing detail, show standard media routing UI.
                 MediaRouteChooserDialog dialog = new MediaRouteChooserDialog(context);
@@ -138,11 +143,19 @@ public class CastTile extends QSTileImpl<BooleanState> {
                         .addControlCategory(MediaControlIntent.CATEGORY_LIVE_VIDEO)
                         .build();
                 dialog.setRouteSelector(selector);
-                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
-                dialog.show();
+                mDialog = dialog;
             }
+            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+            mDialog.show();
+            registerReceiver();
             mHost.collapsePanels();
         });
+    }
+
+    private void registerReceiver() {
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.CURRENT,
+                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null, null);
+        mDialog.setOnDismissListener(dialog -> mContext.unregisterReceiver(mReceiver));
     }
 
     @Override
@@ -207,6 +220,15 @@ public class CastTile extends QSTileImpl<BooleanState> {
         @Override
         public void onKeyguardShowingChanged() {
             refreshState();
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mDialog != null) {
+                mDialog.dismiss();
+            }
         }
     };
 
