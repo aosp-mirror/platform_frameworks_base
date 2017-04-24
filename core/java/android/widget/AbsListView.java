@@ -7088,7 +7088,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int size = scrapViews.size();
             if (size > 0) {
                 // See if we still have a view for this position or ID.
-                for (int i = 0; i < size; i++) {
+                // Traverse backwards to find the most recently used scrap view
+                for (int i = size - 1; i >= 0; i--) {
                     final View view = scrapViews.get(i);
                     final AbsListView.LayoutParams params =
                             (AbsListView.LayoutParams) view.getLayoutParams();
