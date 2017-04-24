@@ -99,11 +99,7 @@ public class NsdService extends INsdManager.Stub {
             ContentObserver contentObserver = new ContentObserver(this.getHandler()) {
                 @Override
                 public void onChange(boolean selfChange) {
-                    if (isNsdEnabled()) {
-                        mNsdStateMachine.sendMessage(NsdManager.ENABLE);
-                    } else {
-                        mNsdStateMachine.sendMessage(NsdManager.DISABLE);
-                    }
+                    notifyEnabled(isNsdEnabled());
                 }
             };
 
@@ -117,11 +113,8 @@ public class NsdService extends INsdManager.Stub {
             addState(mDefaultState);
                 addState(mDisabledState, mDefaultState);
                 addState(mEnabledState, mDefaultState);
-            if (isNsdEnabled()) {
-                setInitialState(mEnabledState);
-            } else {
-                setInitialState(mDisabledState);
-            }
+            State initialState = isNsdEnabled() ? mEnabledState : mDisabledState;
+            setInitialState(initialState);
             setLogRecSize(25);
             registerForNsdSetting();
         }
@@ -570,25 +563,22 @@ public class NsdService extends INsdManager.Stub {
         return new Messenger(mNsdStateMachine.getHandler());
     }
 
-    public void setEnabled(boolean enable) {
+    public void setEnabled(boolean isEnabled) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "NsdService");
-        mNsdSettings.putEnabledStatus(enable);
-        if (enable) {
-            mNsdStateMachine.sendMessage(NsdManager.ENABLE);
-        } else {
-            mNsdStateMachine.sendMessage(NsdManager.DISABLE);
-        }
+        mNsdSettings.putEnabledStatus(isEnabled);
+        notifyEnabled(isEnabled);
     }
 
-    private void sendNsdStateChangeBroadcast(boolean enabled) {
+    private void notifyEnabled(boolean isEnabled) {
+        mNsdStateMachine.sendMessage(isEnabled ? NsdManager.ENABLE : NsdManager.DISABLE);
+    }
+
+    private void sendNsdStateChangeBroadcast(boolean isEnabled) {
         final Intent intent = new Intent(NsdManager.ACTION_NSD_STATE_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        if (enabled) {
-            intent.putExtra(NsdManager.EXTRA_NSD_STATE, NsdManager.NSD_STATE_ENABLED);
-        } else {
-            intent.putExtra(NsdManager.EXTRA_NSD_STATE, NsdManager.NSD_STATE_DISABLED);
-        }
+        int nsdState = isEnabled ? NsdManager.NSD_STATE_ENABLED : NsdManager.NSD_STATE_DISABLED;
+        intent.putExtra(NsdManager.EXTRA_NSD_STATE, nsdState);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
