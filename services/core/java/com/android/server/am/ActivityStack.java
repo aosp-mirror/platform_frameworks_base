@@ -23,6 +23,7 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
@@ -798,6 +799,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     final boolean isHomeStack() {
         return mStackId == HOME_STACK_ID;
+    }
+
+    final boolean isRecentsStack() {
+        return mStackId == RECENTS_STACK_ID;
     }
 
     final boolean isHomeOrRecentsStack() {
