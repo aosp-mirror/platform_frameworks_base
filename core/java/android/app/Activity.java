@@ -5841,7 +5841,7 @@ public class Activity extends ContextThemeWrapper
      * @return Returns the single SharedPreferences instance that can be used
      *         to retrieve and modify the preference values.
      */
-    public SharedPreferences getPreferences(int mode) {
+    public SharedPreferences getPreferences(@Context.PreferencesMode int mode) {
         return getSharedPreferences(getLocalClassName(), mode);
     }
 

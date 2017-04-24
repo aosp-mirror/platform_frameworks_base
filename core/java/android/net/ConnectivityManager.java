@@ -17,6 +17,7 @@ package android.net;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -742,8 +743,6 @@ public class ConnectivityManager {
 
     /**
      * Retrieves the current preferred network type.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an integer representing the preferred network type
      *
@@ -753,6 +752,7 @@ public class ConnectivityManager {
      *             the networks to describe their precedence.
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public int getNetworkPreference() {
         return TYPE_NONE;
     }
@@ -763,12 +763,11 @@ public class ConnectivityManager {
      * You should always check {@link NetworkInfo#isConnected()} before initiating
      * network traffic. This may return {@code null} when there is no default
      * network.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return a {@link NetworkInfo} object for the current default network
      *        or {@code null} if no default network is currently active
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public NetworkInfo getActiveNetworkInfo() {
         try {
             return mService.getActiveNetworkInfo();
@@ -783,12 +782,11 @@ public class ConnectivityManager {
      * network disconnects, the returned {@code Network} object will no longer
      * be usable.  This will return {@code null} when there is no default
      * network.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return a {@link Network} object for the current default network or
      *        {@code null} if no default network is currently active
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public Network getActiveNetwork() {
         try {
             return mService.getActiveNetwork();
@@ -803,14 +801,13 @@ public class ConnectivityManager {
      * network disconnects, the returned {@code Network} object will no longer
      * be usable.  This will return {@code null} when there is no default
      * network for the UID.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
      *
      * @return a {@link Network} object for the current default network for the
      *         given UID or {@code null} if no default network is currently active
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public Network getActiveNetworkForUid(int uid) {
         return getActiveNetworkForUid(uid, false);
     }
@@ -871,8 +868,6 @@ public class ConnectivityManager {
      * Returns details about the currently active default data network
      * for a given uid.  This is for internal use only to avoid spying
      * other apps.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}
      *
      * @return a {@link NetworkInfo} object for the current default network
      *        for the given uid or {@code null} if no default network is
@@ -880,6 +875,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public NetworkInfo getActiveNetworkInfoForUid(int uid) {
         return getActiveNetworkInfoForUid(uid, false);
     }
@@ -896,8 +892,6 @@ public class ConnectivityManager {
     /**
      * Returns connection status information about a particular
      * network type.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param networkType integer specifying which networkType in
      *        which you're interested.
@@ -910,6 +904,7 @@ public class ConnectivityManager {
      *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public NetworkInfo getNetworkInfo(int networkType) {
         try {
             return mService.getNetworkInfo(networkType);
@@ -921,8 +916,6 @@ public class ConnectivityManager {
     /**
      * Returns connection status information about a particular
      * Network.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param network {@link Network} specifying which network
      *        in which you're interested.
@@ -930,6 +923,7 @@ public class ConnectivityManager {
      *        network or {@code null} if the {@code Network}
      *        is not valid.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public NetworkInfo getNetworkInfo(Network network) {
         return getNetworkInfoForUid(network, Process.myUid(), false);
     }
@@ -946,8 +940,6 @@ public class ConnectivityManager {
     /**
      * Returns connection status information about all network
      * types supported by the device.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of {@link NetworkInfo} objects.  Check each
      * {@link NetworkInfo#getType} for which type each applies.
@@ -957,6 +949,7 @@ public class ConnectivityManager {
      *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public NetworkInfo[] getAllNetworkInfo() {
         try {
             return mService.getAllNetworkInfo();
@@ -969,15 +962,13 @@ public class ConnectivityManager {
      * Returns the {@link Network} object currently serving a given type, or
      * null if the given type is not connected.
      *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
-     *
      * @hide
      * @deprecated This method does not support multiple connected networks
      *             of the same type. Use {@link #getAllNetworks} and
      *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public Network getNetworkForType(int networkType) {
         try {
             return mService.getNetworkForType(networkType);
@@ -989,11 +980,10 @@ public class ConnectivityManager {
     /**
      * Returns an array of all {@link Network} currently tracked by the
      * framework.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of {@link Network} objects.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public Network[] getAllNetworks() {
         try {
             return mService.getAllNetworks();
@@ -1017,8 +1007,6 @@ public class ConnectivityManager {
 
     /**
      * Returns the IP information for the current default network.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return a {@link LinkProperties} object describing the IP info
      *        for the current default network, or {@code null} if there
@@ -1026,6 +1014,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public LinkProperties getActiveLinkProperties() {
         try {
             return mService.getActiveLinkProperties();
@@ -1036,8 +1025,6 @@ public class ConnectivityManager {
 
     /**
      * Returns the IP information for a given network type.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param networkType the network type of interest.
      * @return a {@link LinkProperties} object describing the IP info
@@ -1051,6 +1038,7 @@ public class ConnectivityManager {
      *             {@link #getLinkProperties(android.net.Network)} instead.
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public LinkProperties getLinkProperties(int networkType) {
         try {
             return mService.getLinkPropertiesForType(networkType);
@@ -1062,12 +1050,11 @@ public class ConnectivityManager {
     /**
      * Get the {@link LinkProperties} for the given {@link Network}.  This
      * will return {@code null} if the network is unknown.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param network The {@link Network} object identifying the network in question.
      * @return The {@link LinkProperties} for the network, or {@code null}.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public LinkProperties getLinkProperties(Network network) {
         try {
             return mService.getLinkProperties(network);
@@ -1079,12 +1066,11 @@ public class ConnectivityManager {
     /**
      * Get the {@link android.net.NetworkCapabilities} for the given {@link Network}.  This
      * will return {@code null} if the network is unknown.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param network The {@link Network} object identifying the network in question.
      * @return The {@link android.net.NetworkCapabilities} for the network, or {@code null}.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public NetworkCapabilities getNetworkCapabilities(Network network) {
         try {
             return mService.getNetworkCapabilities(network);
@@ -1727,11 +1713,9 @@ public class ConnectivityManager {
      * network is active. Quota status can change rapidly, so these values
      * shouldn't be cached.
      *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
-     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
         try {
             return mService.getActiveNetworkQuotaInfo();
@@ -1935,13 +1919,12 @@ public class ConnectivityManager {
     /**
      * Get the set of tetherable, available interfaces.  This list is limited by
      * device configuration and current interface existence.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of 0 or more Strings of tetherable interface names.
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public String[] getTetherableIfaces() {
         try {
             return mService.getTetherableIfaces();
@@ -1952,13 +1935,12 @@ public class ConnectivityManager {
 
     /**
      * Get the set of tethered interfaces.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of 0 or more String of currently tethered interface names.
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public String[] getTetheredIfaces() {
         try {
             return mService.getTetheredIfaces();
@@ -1974,14 +1956,13 @@ public class ConnectivityManager {
      * may cause them to reset to the available state.
      * {@link ConnectivityManager#getLastTetherError} can be used to get more
      * information on the cause of the errors.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of 0 or more String indicating the interface names
      *        which failed to tether.
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public String[] getTetheringErroredIfaces() {
         try {
             return mService.getTetheringErroredIfaces();
@@ -2070,14 +2051,13 @@ public class ConnectivityManager {
      * Check if the device allows for tethering.  It may be disabled via
      * {@code ro.tether.denied} system property, Settings.TETHER_SUPPORTED or
      * due to device configuration.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return a boolean - {@code true} indicating Tethering is supported.
      *
      * {@hide}
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public boolean isTetheringSupported() {
         try {
             return mService.isTetheringSupported();
@@ -2185,14 +2165,13 @@ public class ConnectivityManager {
      * Get the list of regular expressions that define any tetherable
      * USB network interfaces.  If USB tethering is not supported by the
      * device, this list should be empty.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable usb interfaces.
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public String[] getTetherableUsbRegexs() {
         try {
             return mService.getTetherableUsbRegexs();
@@ -2205,14 +2184,13 @@ public class ConnectivityManager {
      * Get the list of regular expressions that define any tetherable
      * Wifi network interfaces.  If Wifi tethering is not supported by the
      * device, this list should be empty.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable wifi interfaces.
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public String[] getTetherableWifiRegexs() {
         try {
             return mService.getTetherableWifiRegexs();
@@ -2225,14 +2203,13 @@ public class ConnectivityManager {
      * Get the list of regular expressions that define any tetherable
      * Bluetooth network interfaces.  If Bluetooth tethering is not supported by the
      * device, this list should be empty.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable bluetooth interfaces.
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public String[] getTetherableBluetoothRegexs() {
         try {
             return mService.getTetherableBluetoothRegexs();
@@ -2296,8 +2273,6 @@ public class ConnectivityManager {
     /**
      * Get a more detailed error code after a Tethering or Untethering
      * request asynchronously failed.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param iface The name of the interface of interest
      * @return error The error code of the last error tethering or untethering the named
@@ -2305,6 +2280,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public int getLastTetherError(String iface) {
         try {
             return mService.getLastTetherError(iface);
@@ -2378,13 +2354,12 @@ public class ConnectivityManager {
      * for typical HTTP proxies - they are general network dependent.  However if you're
      * doing something unusual like general internal filtering this may be useful.  On
      * a private network where the proxy is not accessible, you may break HTTP using this.
-     * <p>This method requires the caller to hold the permission
-     * android.Manifest.permission#CONNECTIVITY_INTERNAL.
      *
      * @param p A {@link ProxyInfo} object defining the new global
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public void setGlobalProxy(ProxyInfo p) {
         try {
             mService.setGlobalProxy(p);
@@ -2450,14 +2425,13 @@ public class ConnectivityManager {
      * hardware supports it.  For example a GSM phone without a SIM
      * should still return {@code true} for mobile data, but a wifi only
      * tablet would return {@code false}.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param networkType The network type we'd like to check
      * @return {@code true} if supported, else {@code false}
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public boolean isNetworkSupported(int networkType) {
         try {
             return mService.isNetworkSupported(networkType);
@@ -2473,12 +2447,11 @@ public class ConnectivityManager {
      * battery/performance issues. You should check this before doing large
      * data transfers, and warn the user or delay the operation until another
      * network is available.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @return {@code true} if large transfers should be avoided, otherwise
      *        {@code false}.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public boolean isActiveNetworkMetered() {
         try {
             return mService.isActiveNetworkMetered();
@@ -2557,13 +2530,12 @@ public class ConnectivityManager {
 
     /**
      * Set the value for enabling/disabling airplane mode
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
      *
      * @param enable whether to enable airplane mode or not
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public void setAirplaneMode(boolean enable) {
         try {
             mService.setAirplaneMode(enable);
@@ -3233,14 +3205,13 @@ public class ConnectivityManager {
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkRequest}.  The callbacks will continue to be called until
      * either the application exits or link #unregisterNetworkCallback(NetworkCallback)} is called.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
      *                        networks change state.
      *                        The callback is invoked on the default internal Handler.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerNetworkCallback(NetworkRequest request, NetworkCallback networkCallback) {
         registerNetworkCallback(request, networkCallback, getDefaultHandler());
     }
@@ -3249,14 +3220,13 @@ public class ConnectivityManager {
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkRequest}.  The callbacks will continue to be called until
      * either the application exits or link #unregisterNetworkCallback(NetworkCallback)} is called.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
      *                        networks change state.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerNetworkCallback(
             NetworkRequest request, NetworkCallback networkCallback, Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
@@ -3288,13 +3258,12 @@ public class ConnectivityManager {
      * <p>
      * The request may be released normally by calling
      * {@link #unregisterNetworkCallback(android.app.PendingIntent)}.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @param request {@link NetworkRequest} describing this request.
      * @param operation Action to perform when the network is available (corresponds
      *                  to the {@link NetworkCallback#onAvailable} call.  Typically
      *                  comes from {@link PendingIntent#getBroadcast}. Cannot be null.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerNetworkCallback(NetworkRequest request, PendingIntent operation) {
         checkPendingIntent(operation);
         try {
@@ -3308,13 +3277,12 @@ public class ConnectivityManager {
      * Registers to receive notifications about changes in the system default network. The callbacks
      * will continue to be called until either the application exits or
      * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param networkCallback The {@link NetworkCallback} that the system will call as the
      *                        system default network changes.
      *                        The callback is invoked on the default internal Handler.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerDefaultNetworkCallback(NetworkCallback networkCallback) {
         registerDefaultNetworkCallback(networkCallback, getDefaultHandler());
     }
@@ -3323,13 +3291,12 @@ public class ConnectivityManager {
      * Registers to receive notifications about changes in the system default network. The callbacks
      * will continue to be called until either the application exits or
      * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param networkCallback The {@link NetworkCallback} that the system will call as the
      *                        system default network changes.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerDefaultNetworkCallback(NetworkCallback networkCallback, Handler handler) {
         // This works because if the NetworkCapabilities are null,
         // ConnectivityService takes them from the default request.
@@ -3423,15 +3390,13 @@ public class ConnectivityManager {
      * {@code always} is true, then the choice is remembered, so that the next time the user
      * connects to this network, the system will switch to it.
      *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}
-     *
      * @param network The network to accept.
      * @param accept Whether to accept the network even if unvalidated.
      * @param always Whether to remember this choice in the future.
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
         try {
             mService.setAcceptUnvalidated(network, accept, always);
@@ -3446,13 +3411,11 @@ public class ConnectivityManager {
      * {@code config_networkAvoidBadWifi} configuration variable is set to 0 and the {@code
      * NETWORK_AVOID_BAD_WIFI setting is unset}.
      *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}
-     *
      * @param network The network to accept.
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public void setAvoidUnvalidated(Network network) {
         try {
             mService.setAvoidUnvalidated(network);
@@ -3513,15 +3476,13 @@ public class ConnectivityManager {
      * for multipath data transfer on this network when it is not the system default network.
      * Applications desiring to use multipath network protocols should call this method before
      * each such operation.
-     * <p>
-     * This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @param network The network on which the application desires to use multipath data.
      *                If {@code null}, this method will return the a preference that will generally
      *                apply to metered networks.
      * @return a bitwise OR of zero or more of the  {@code MULTIPATH_PREFERENCE_*} constants.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public @MultipathPreference int getMultipathPreference(Network network) {
         try {
             return mService.getMultipathPreference(network);

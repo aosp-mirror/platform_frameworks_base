@@ -85,6 +85,37 @@ import java.lang.annotation.RetentionPolicy;
  * broadcasting and receiving intents, etc.
  */
 public abstract class Context {
+    /** @hide */
+    @IntDef(flag = true, prefix = { "MODE_" }, value = {
+            MODE_PRIVATE,
+            MODE_WORLD_READABLE,
+            MODE_WORLD_WRITEABLE,
+            MODE_APPEND,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FileMode {}
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "MODE_" }, value = {
+            MODE_PRIVATE,
+            MODE_WORLD_READABLE,
+            MODE_WORLD_WRITEABLE,
+            MODE_MULTI_PROCESS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PreferencesMode {}
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "MODE_" }, value = {
+            MODE_PRIVATE,
+            MODE_WORLD_READABLE,
+            MODE_WORLD_WRITEABLE,
+            MODE_ENABLE_WRITE_AHEAD_LOGGING,
+            MODE_NO_LOCALIZED_COLLATORS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DatabaseMode {}
+
     /**
      * File creation mode: the default mode, where the created file can only
      * be accessed by the calling application (or all applications sharing the
@@ -720,15 +751,14 @@ public abstract class Context {
      * @param name Desired preferences file. If a preferences file by this name
      * does not exist, it will be created when you retrieve an
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation.
+     * @param mode Operating mode.
      *
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
      *
      * @see #MODE_PRIVATE
      */
-    public abstract SharedPreferences getSharedPreferences(String name, int mode);
+    public abstract SharedPreferences getSharedPreferences(String name, @PreferencesMode int mode);
 
     /**
      * Retrieve and hold the contents of the preferences file, returning
@@ -740,8 +770,7 @@ public abstract class Context {
      * @param file Desired preferences file. If a preferences file by this name
      * does not exist, it will be created when you retrieve an
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation.
+     * @param mode Operating mode.
      *
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
@@ -750,7 +779,7 @@ public abstract class Context {
      * @see #MODE_PRIVATE
      * @removed
      */
-    public abstract SharedPreferences getSharedPreferences(File file, int mode);
+    public abstract SharedPreferences getSharedPreferences(File file, @PreferencesMode int mode);
 
     /**
      * Move an existing shared preferences file from the given source storage
@@ -805,9 +834,7 @@ public abstract class Context {
      *
      * @param name The name of the file to open; can not contain path
      *            separators.
-     * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
-     *            default operation. Use {@link #MODE_APPEND} to append to an
-     *            existing file.
+     * @param mode Operating mode.
      * @return The resulting {@link FileOutputStream}.
      * @see #MODE_APPEND
      * @see #MODE_PRIVATE
@@ -816,7 +843,7 @@ public abstract class Context {
      * @see #deleteFile
      * @see java.io.FileOutputStream#FileOutputStream(String)
      */
-    public abstract FileOutputStream openFileOutput(String name, int mode)
+    public abstract FileOutputStream openFileOutput(String name, @FileMode int mode)
         throws FileNotFoundException;
 
     /**
@@ -1413,26 +1440,21 @@ public abstract class Context {
      *
      * @param name Name of the directory to retrieve.  This is a directory
      * that is created as part of your application data.
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation.
+     * @param mode Operating mode.
      *
      * @return A {@link File} object for the requested directory.  The directory
      * will have been created if it does not already exist.
      *
      * @see #openFileOutput(String, int)
      */
-    public abstract File getDir(String name, int mode);
+    public abstract File getDir(String name, @FileMode int mode);
 
     /**
      * Open a new private SQLiteDatabase associated with this Context's
      * application package. Create the database file if it doesn't exist.
      *
      * @param name The name (unique in the application package) of the database.
-     * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
-     *            default operation. Use
-     *            {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead
-     *            logging by default. Use {@link #MODE_NO_LOCALIZED_COLLATORS}
-     *            to disable localized collators.
+     * @param mode Operating mode.
      * @param factory An optional factory class that is called to instantiate a
      *            cursor when query is called.
      * @return The contents of a newly created database with the given name.
@@ -1444,7 +1466,7 @@ public abstract class Context {
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
-            int mode, CursorFactory factory);
+            @DatabaseMode int mode, CursorFactory factory);
 
     /**
      * Open a new private SQLiteDatabase associated with this Context's
@@ -1455,11 +1477,7 @@ public abstract class Context {
      * </p>
      *
      * @param name The name (unique in the application package) of the database.
-     * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
-     *            default operation. Use
-     *            {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead
-     *            logging by default. Use {@link #MODE_NO_LOCALIZED_COLLATORS}
-     *            to disable localized collators.
+     * @param mode Operating mode.
      * @param factory An optional factory class that is called to instantiate a
      *            cursor when query is called.
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when
@@ -1475,7 +1493,7 @@ public abstract class Context {
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
-            int mode, CursorFactory factory,
+            @DatabaseMode int mode, CursorFactory factory,
             @Nullable DatabaseErrorHandler errorHandler);
 
     /**
@@ -1777,9 +1795,9 @@ public abstract class Context {
      * @see #startActivity(Intent)
      * @see #startIntentSender(IntentSender, Intent, int, int, int, Bundle)
      */
-    public abstract void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
-            throws IntentSender.SendIntentException;
+    public abstract void startIntentSender(IntentSender intent, @Nullable Intent fillInIntent,
+            @Intent.MutableFlags int flagsMask, @Intent.MutableFlags int flagsValues,
+            int extraFlags) throws IntentSender.SendIntentException;
 
     /**
      * Like {@link #startActivity(Intent, Bundle)}, but taking a IntentSender
@@ -1806,9 +1824,9 @@ public abstract class Context {
      * @see #startActivity(Intent, Bundle)
      * @see #startIntentSender(IntentSender, Intent, int, int, int)
      */
-    public abstract void startIntentSender(IntentSender intent,
-            @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
-            Bundle options) throws IntentSender.SendIntentException;
+    public abstract void startIntentSender(IntentSender intent, @Nullable Intent fillInIntent,
+            @Intent.MutableFlags int flagsMask, @Intent.MutableFlags int flagsValues,
+            int extraFlags, @Nullable Bundle options) throws IntentSender.SendIntentException;
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers.  This
@@ -2192,10 +2210,6 @@ public abstract class Context {
      * all other ways, this behaves the same as
      * {@link #sendBroadcast(Intent)}.
      *
-     * <p>You must hold the {@link android.Manifest.permission#BROADCAST_STICKY}
-     * permission in order to use this API.  If you do not hold that
-     * permission, {@link SecurityException} will be thrown.
-     *
      * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
      * can access them), no protection (anyone can modify them), and many other problems.
      * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
@@ -2210,6 +2224,7 @@ public abstract class Context {
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY)
     public abstract void sendStickyBroadcast(@RequiresPermission Intent intent);
 
     /**
@@ -2259,6 +2274,7 @@ public abstract class Context {
      * @see android.app.Activity#RESULT_OK
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY)
     public abstract void sendStickyOrderedBroadcast(@RequiresPermission Intent intent,
             BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
@@ -2267,10 +2283,6 @@ public abstract class Context {
     /**
      * <p>Remove the data previously sent with {@link #sendStickyBroadcast},
      * so that it is as if the sticky broadcast had never happened.
-     *
-     * <p>You must hold the {@link android.Manifest.permission#BROADCAST_STICKY}
-     * permission in order to use this API.  If you do not hold that
-     * permission, {@link SecurityException} will be thrown.
      *
      * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
      * can access them), no protection (anyone can modify them), and many other problems.
@@ -2283,6 +2295,7 @@ public abstract class Context {
      * @see #sendStickyBroadcast
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY)
     public abstract void removeStickyBroadcast(@RequiresPermission Intent intent);
 
     /**
@@ -3048,7 +3061,7 @@ public abstract class Context {
      * @see android.os.HardwarePropertiesManager
      * @see #HARDWARE_PROPERTIES_SERVICE
      */
-    public abstract Object getSystemService(@ServiceName @NonNull String name);
+    public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
 
     /**
      * Return the handle to a system-level service by class.
@@ -3078,7 +3091,7 @@ public abstract class Context {
      * @return The service or null if the class is not a supported system service.
      */
     @SuppressWarnings("unchecked")
-    public final <T> T getSystemService(Class<T> serviceClass) {
+    public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
         // perform a lookup by class alone.  We must first map the class to its
         // service name then invoke the string-based method.
@@ -3092,7 +3105,7 @@ public abstract class Context {
      * @param serviceClass The class of the desired service.
      * @return The service name or null if the class is not a supported system service.
      */
-    public abstract String getSystemServiceName(Class<?> serviceClass);
+    public abstract @Nullable String getSystemServiceName(@NonNull Class<?> serviceClass);
 
     /**
      * Use with {@link #getSystemService} to retrieve a
@@ -4192,10 +4205,12 @@ public abstract class Context {
      * @see #checkCallingUriPermission
      */
     @CheckResult(suggest="#enforceUriPermission(Uri,int,int,String)")
+    @PackageManager.PermissionResult
     public abstract int checkUriPermission(Uri uri, int pid, int uid,
             @Intent.AccessUriMode int modeFlags);
 
     /** @hide */
+    @PackageManager.PermissionResult
     public abstract int checkUriPermission(Uri uri, int pid, int uid,
             @Intent.AccessUriMode int modeFlags, IBinder callerToken);
 
@@ -4219,6 +4234,7 @@ public abstract class Context {
      * @see #checkUriPermission(Uri, int, int, int)
      */
     @CheckResult(suggest="#enforceCallingUriPermission(Uri,int,String)")
+    @PackageManager.PermissionResult
     public abstract int checkCallingUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
 
     /**
@@ -4237,6 +4253,7 @@ public abstract class Context {
      * @see #checkCallingUriPermission
      */
     @CheckResult(suggest="#enforceCallingOrSelfUriPermission(Uri,int,String)")
+    @PackageManager.PermissionResult
     public abstract int checkCallingOrSelfUriPermission(Uri uri,
             @Intent.AccessUriMode int modeFlags);
 
@@ -4261,6 +4278,7 @@ public abstract class Context {
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      */
     @CheckResult(suggest="#enforceUriPermission(Uri,String,String,int,int,int,String)")
+    @PackageManager.PermissionResult
     public abstract int checkUriPermission(@Nullable Uri uri, @Nullable String readPermission,
             @Nullable String writePermission, int pid, int uid,
             @Intent.AccessUriMode int modeFlags);
@@ -4347,8 +4365,14 @@ public abstract class Context {
             @Nullable String message);
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {CONTEXT_INCLUDE_CODE, CONTEXT_IGNORE_SECURITY, CONTEXT_RESTRICTED})
+    @IntDef(flag = true, prefix = { "CONTEXT_" }, value = {
+            CONTEXT_INCLUDE_CODE,
+            CONTEXT_IGNORE_SECURITY,
+            CONTEXT_RESTRICTED,
+            CONTEXT_DEVICE_PROTECTED_STORAGE,
+            CONTEXT_CREDENTIAL_PROTECTED_STORAGE,
+            CONTEXT_REGISTER_PACKAGE,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CreatePackageOptions {}
 
@@ -4420,8 +4444,7 @@ public abstract class Context {
      * {@link #CONTEXT_INCLUDE_CODE} for more information}.
      *
      * @param packageName Name of the application's package.
-     * @param flags Option flags, one of {@link #CONTEXT_INCLUDE_CODE}
-     *              or {@link #CONTEXT_IGNORE_SECURITY}.
+     * @param flags Option flags.
      *
      * @return A {@link Context} for the application.
      *
@@ -4440,7 +4463,7 @@ public abstract class Context {
      * @hide
      */
     public abstract Context createPackageContextAsUser(
-            String packageName, int flags, UserHandle user)
+            String packageName, @CreatePackageOptions int flags, UserHandle user)
             throws PackageManager.NameNotFoundException;
 
     /**
@@ -4449,7 +4472,7 @@ public abstract class Context {
      * @hide
      */
     public abstract Context createApplicationContext(ApplicationInfo application,
-            int flags) throws PackageManager.NameNotFoundException;
+            @CreatePackageOptions int flags) throws PackageManager.NameNotFoundException;
 
     /**
      * Return a new Context object for the given split name. The new Context has a ClassLoader and

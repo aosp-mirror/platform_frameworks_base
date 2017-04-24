@@ -2366,6 +2366,14 @@ public class ActivityManager {
         }
     }
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "MOVE_TASK_" }, value = {
+            MOVE_TASK_WITH_HOME,
+            MOVE_TASK_NO_USER_ACTION,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MoveTaskFlags {}
+
     /**
      * Flag for {@link #moveTaskToFront(int, int)}: also move the "home"
      * activity along with the task, so it is positioned immediately behind
@@ -2386,28 +2394,26 @@ public class ActivityManager {
      *
      * @param taskId The identifier of the task to be moved, as found in
      * {@link RunningTaskInfo} or {@link RecentTaskInfo}.
-     * @param flags Additional operational flags, 0 or more of
-     * {@link #MOVE_TASK_WITH_HOME}, {@link #MOVE_TASK_NO_USER_ACTION}.
+     * @param flags Additional operational flags.
      */
-    public void moveTaskToFront(int taskId, int flags) {
+    @RequiresPermission(android.Manifest.permission.REORDER_TASKS)
+    public void moveTaskToFront(int taskId, @MoveTaskFlags int flags) {
         moveTaskToFront(taskId, flags, null);
     }
 
     /**
      * Ask that the task associated with a given task ID be moved to the
-     * front of the stack, so it is now visible to the user.  Requires that
-     * the caller hold permission {@link android.Manifest.permission#REORDER_TASKS}
-     * or a SecurityException will be thrown.
+     * front of the stack, so it is now visible to the user.
      *
      * @param taskId The identifier of the task to be moved, as found in
      * {@link RunningTaskInfo} or {@link RecentTaskInfo}.
-     * @param flags Additional operational flags, 0 or more of
-     * {@link #MOVE_TASK_WITH_HOME}, {@link #MOVE_TASK_NO_USER_ACTION}.
+     * @param flags Additional operational flags.
      * @param options Additional options for the operation, either null or
      * as per {@link Context#startActivity(Intent, android.os.Bundle)
      * Context.startActivity(Intent, Bundle)}.
      */
-    public void moveTaskToFront(int taskId, int flags, Bundle options) {
+    @RequiresPermission(android.Manifest.permission.REORDER_TASKS)
+    public void moveTaskToFront(int taskId, @MoveTaskFlags int flags, Bundle options) {
         try {
             getService().moveTaskToFront(taskId, flags, options);
         } catch (RemoteException e) {
@@ -3653,13 +3659,10 @@ public class ActivityManager {
      * processes to reclaim memory; the system will take care of restarting
      * these processes in the future as needed.
      *
-     * <p>You must hold the permission
-     * {@link android.Manifest.permission#KILL_BACKGROUND_PROCESSES} to be able to
-     * call this method.
-     *
      * @param packageName The name of the package whose processes are to
      * be killed.
      */
+    @RequiresPermission(Manifest.permission.KILL_BACKGROUND_PROCESSES)
     public void killBackgroundProcesses(String packageName) {
         try {
             getService().killBackgroundProcesses(packageName,
@@ -4031,13 +4034,13 @@ public class ActivityManager {
      * Perform a system dump of various state associated with the given application
      * package name.  This call blocks while the dump is being performed, so should
      * not be done on a UI thread.  The data will be written to the given file
-     * descriptor as text.  An application must hold the
-     * {@link android.Manifest.permission#DUMP} permission to make this call.
+     * descriptor as text.
      * @param fd The file descriptor that the dump should be written to.  The file
      * descriptor is <em>not</em> closed by this function; the caller continues to
      * own it.
      * @param packageName The name of the package that is to be dumped.
      */
+    @RequiresPermission(Manifest.permission.DUMP)
     public void dumpPackageState(FileDescriptor fd, String packageName) {
         dumpPackageStateStatic(fd, packageName);
     }
