@@ -1470,7 +1470,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
             }
-            if (win.mAppToken == null || !win.mAppToken.clientHidden) {
+            if (win.mAppToken == null || !win.mAppToken.isClientHidden()) {
                 res |= WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
             }
 
@@ -1950,7 +1950,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
-                            || !win.mAppToken.clientHidden)) {
+                            || !win.mAppToken.isClientHidden())) {
                 result = win.relayoutVisibleWindow(mergedConfiguration, result, attrChanges,
                         oldVisibility);
                 try {

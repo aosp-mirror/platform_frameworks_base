@@ -126,7 +126,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean hiddenRequested;
 
     // Have we told the window clients to hide themselves?
-    boolean clientHidden;
+    private boolean mClientHidden;
+
+    // If true we will defer setting mClientHidden to true and reporting to the client that it is
+    // hidden.
+    boolean mDeferHidingClient;
 
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
@@ -307,16 +311,25 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    boolean isClientHidden() {
+        return mClientHidden;
+    }
+
+    void setClientHidden(boolean hideClient) {
+        if (mClientHidden == hideClient || (hideClient && mDeferHidingClient)) {
+            return;
+        }
+        mClientHidden = hideClient;
+        sendAppVisibilityToClients();
+    }
+
     boolean setVisibility(WindowManager.LayoutParams lp,
             boolean visible, int transit, boolean performLayout, boolean isVoiceInteraction) {
 
         boolean delayed = false;
         inPendingTransaction = false;
 
-        if (clientHidden == visible) {
-            clientHidden = !visible;
-            sendAppVisibilityToClients();
-        }
+        setClientHidden(!visible);
 
         // Allow for state changes and animation to be applied if:
         // * token is transitioning visibility state
@@ -1143,10 +1156,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 hidden = false;
                 hiddenRequested = false;
             }
-            if (clientHidden != fromToken.clientHidden) {
-                clientHidden = fromToken.clientHidden;
-                sendAppVisibilityToClients();
-            }
+            setClientHidden(fromToken.mClientHidden);
             fromToken.mAppAnimator.transferCurrentAnimation(
                     mAppAnimator, tStartingWindow.mWinAnimator);
 
@@ -1511,10 +1521,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         pw.print(prefix); pw.print("task="); pw.println(getTask());
         pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);
                 pw.print(" mOrientation="); pw.println(mOrientation);
-        pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
-                pw.print(" clientHidden="); pw.print(clientHidden);
-                pw.print(" reportedDrawn="); pw.print(reportedDrawn);
-                pw.print(" reportedVisible="); pw.println(reportedVisible);
+        pw.println(prefix + "hiddenRequested=" + hiddenRequested + " mClientHidden=" + mClientHidden
+            + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
+            + " reportedDrawn=" + reportedDrawn + " reportedVisible=" + reportedVisible);
         if (paused) {
             pw.print(prefix); pw.print("paused="); pw.println(paused);
         }

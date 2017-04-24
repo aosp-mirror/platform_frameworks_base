@@ -323,7 +323,7 @@ public class AppWindowContainerController
         }
     }
 
-    public void setVisibility(boolean visible) {
+    public void setVisibility(boolean visible, boolean deferHidingClient) {
         synchronized(mWindowMap) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: "
@@ -342,6 +342,7 @@ public class AppWindowContainerController
             mService.mClosingApps.remove(wtoken);
             wtoken.waitingToShow = false;
             wtoken.hiddenRequested = !visible;
+            wtoken.mDeferHidingClient = deferHidingClient;
 
             if (!visible) {
                 // If the app is dead while it was visible, we kept its dead window on screen.
@@ -368,15 +369,12 @@ public class AppWindowContainerController
                         wtoken.waitingToShow = true;
                     }
 
-                    if (wtoken.clientHidden) {
-                        // In the case where we are making an app visible
-                        // but holding off for a transition, we still need
-                        // to tell the client to make its windows visible so
-                        // they get drawn.  Otherwise, we will wait on
-                        // performing the transition until all windows have
-                        // been drawn, they never will be, and we are sad.
-                        wtoken.clientHidden = false;
-                        wtoken.sendAppVisibilityToClients();
+                    if (wtoken.isClientHidden()) {
+                        // In the case where we are making an app visible but holding off for a
+                        // transition, we still need to tell the client to make its windows visible
+                        // so they get drawn. Otherwise, we will wait on performing the transition
+                        // until all windows have been drawn, they never will be, and we are sad.
+                        wtoken.setClientHidden(false);
                     }
                 }
                 wtoken.requestUpdateWallpaperIfNeeded();
