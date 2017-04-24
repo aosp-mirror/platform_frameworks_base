@@ -21,6 +21,7 @@
      for different hardware and product builds. -->
 <resources>
     <integer name="quick_settings_num_rows">2</integer>
+    <integer name="quick_settings_num_rows_portrait">3</integer>
 
     <bool name="quick_settings_show_full_alarm">true</bool>
 </resources>
