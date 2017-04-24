@@ -96,7 +96,7 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getFullCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getNonProfileGuidedCompilerFilter;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
@@ -536,9 +536,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_INSTALL = 2;
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
-    public static final int REASON_FORCED_DEXOPT = 5;
 
-    public static final int REASON_LAST = REASON_FORCED_DEXOPT;
+    public static final int REASON_LAST = REASON_AB_OTA;
 
     /** All dangerous permission names in the same order as the events in MetricsEvent */
     private static final List<String> ALL_DANGEROUS_PERMISSIONS = Arrays.asList(
@@ -8580,14 +8579,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mDexManager.notifyDexLoad(ai, dexPaths, loaderIsa, userId);
     }
 
-    // TODO: this is not used nor needed. Delete it.
-    @Override
-    public boolean performDexOptIfNeeded(String packageName) {
-        int dexOptStatus = performDexOptTraced(packageName,
-                false /* checkProfiles */, getFullCompilerFilter(), false /* force */);
-        return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
-    }
-
     @Override
     public boolean performDexOpt(String packageName,
             boolean checkProfiles, int compileReason, boolean force) {
@@ -8864,10 +8855,10 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mInstallLock) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
-            // Whoever is calling forceDexOpt wants a fully compiled package.
+            // Whoever is calling forceDexOpt wants a compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
             final int res = performDexOptInternalWithDependenciesLI(pkg,
-                    false /* checkProfiles */, getCompilerFilterForReason(REASON_FORCED_DEXOPT),
+                    false /* checkProfiles */, getDefaultCompilerFilter(),
                     true /* force */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
