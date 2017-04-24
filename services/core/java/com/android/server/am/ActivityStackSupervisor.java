@@ -3025,8 +3025,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                if (!r.isApplicationActivity() && !stack.isHomeOrRecentsStack()) {
-                    if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping stack: (home activity) " + stack);
+                if (!checkActivityBelongsInStack(r, stack)) {
+                    if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping stack: (mismatch activity/stack) "
+                            + stack);
                     continue;
                 }
                 if (!stack.mActivityContainer.isEligibleForNewTasks()) {
@@ -3051,6 +3052,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         if (DEBUG_TASKS && affinityMatch == null) Slog.d(TAG_TASKS, "No task found");
         return affinityMatch;
+    }
+
+    /**
+     * Checks that for the given activity {@param r}, its activity type matches the {@param stack}
+     * type.
+     */
+    private boolean checkActivityBelongsInStack(ActivityRecord r, ActivityStack stack) {
+        if (r.isHomeActivity()) {
+            return stack.isHomeStack();
+        } else if (r.isRecentsActivity()) {
+            return stack.isRecentsStack();
+        } else if (r.isAssistantActivity()) {
+            return stack.isAssistantStack();
+        }
+        return true;
     }
 
     ActivityRecord findActivityLocked(Intent intent, ActivityInfo info,
