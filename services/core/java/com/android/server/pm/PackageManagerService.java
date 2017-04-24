@@ -7672,6 +7672,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 // instant application; filter out non-exposed provider
                 if (instantAppPkgName != null
+                        && !isInstantApp
                         && (provider.info.flags & ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0) {
                     return null;
                 }
