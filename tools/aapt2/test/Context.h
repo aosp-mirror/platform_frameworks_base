@@ -35,9 +35,17 @@ class Context : public IAaptContext {
  public:
   Context() : name_mangler_({}), symbols_(&name_mangler_), min_sdk_version_(0) {}
 
-  SymbolTable* GetExternalSymbols() override { return &symbols_; }
+  PackageType GetPackageType() override {
+    return package_type_;
+  }
 
-  IDiagnostics* GetDiagnostics() override { return &diagnostics_; }
+  SymbolTable* GetExternalSymbols() override {
+    return &symbols_;
+  }
+
+  IDiagnostics* GetDiagnostics() override {
+    return &diagnostics_;
+  }
 
   const std::string& GetCompilationPackage() override {
     CHECK(bool(compilation_package_)) << "package name not set";
@@ -49,17 +57,24 @@ class Context : public IAaptContext {
     return package_id_.value();
   }
 
-  NameMangler* GetNameMangler() override { return &name_mangler_; }
+  NameMangler* GetNameMangler() override {
+    return &name_mangler_;
+  }
 
-  bool IsVerbose() override { return false; }
+  bool IsVerbose() override {
+    return false;
+  }
 
-  int GetMinSdkVersion() override { return min_sdk_version_; }
+  int GetMinSdkVersion() override {
+    return min_sdk_version_;
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Context);
 
   friend class ContextBuilder;
 
+  PackageType package_type_ = PackageType::kApp;
   Maybe<std::string> compilation_package_;
   Maybe<uint8_t> package_id_;
   StdErrDiagnostics diagnostics_;
@@ -70,6 +85,11 @@ class Context : public IAaptContext {
 
 class ContextBuilder {
  public:
+  ContextBuilder& SetPackageType(PackageType type) {
+    context_->package_type_ = type;
+    return *this;
+  }
+
   ContextBuilder& SetCompilationPackage(const android::StringPiece& package) {
     context_->compilation_package_ = package.to_string();
     return *this;
@@ -123,15 +143,16 @@ class StaticSymbolSourceBuilder {
     return *this;
   }
 
-  std::unique_ptr<ISymbolSource> Build() { return std::move(symbol_source_); }
+  std::unique_ptr<ISymbolSource> Build() {
+    return std::move(symbol_source_);
+  }
 
  private:
   class StaticSymbolSource : public ISymbolSource {
    public:
     StaticSymbolSource() = default;
 
-    std::unique_ptr<SymbolTable::Symbol> FindByName(
-        const ResourceName& name) override {
+    std::unique_ptr<SymbolTable::Symbol> FindByName(const ResourceName& name) override {
       auto iter = name_map_.find(name);
       if (iter != name_map_.end()) {
         return CloneSymbol(iter->second);
@@ -153,12 +174,10 @@ class StaticSymbolSourceBuilder {
 
    private:
     std::unique_ptr<SymbolTable::Symbol> CloneSymbol(SymbolTable::Symbol* sym) {
-      std::unique_ptr<SymbolTable::Symbol> clone =
-          util::make_unique<SymbolTable::Symbol>();
+      std::unique_ptr<SymbolTable::Symbol> clone = util::make_unique<SymbolTable::Symbol>();
       clone->id = sym->id;
       if (sym->attribute) {
-        clone->attribute =
-            std::unique_ptr<Attribute>(sym->attribute->Clone(nullptr));
+        clone->attribute = std::unique_ptr<Attribute>(sym->attribute->Clone(nullptr));
       }
       clone->is_public = sym->is_public;
       return clone;
@@ -167,8 +186,7 @@ class StaticSymbolSourceBuilder {
     DISALLOW_COPY_AND_ASSIGN(StaticSymbolSource);
   };
 
-  std::unique_ptr<StaticSymbolSource> symbol_source_ =
-      util::make_unique<StaticSymbolSource>();
+  std::unique_ptr<StaticSymbolSource> symbol_source_ = util::make_unique<StaticSymbolSource>();
 };
 
 }  // namespace test

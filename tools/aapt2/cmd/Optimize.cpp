@@ -59,6 +59,14 @@ struct OptimizeOptions {
 
 class OptimizeContext : public IAaptContext {
  public:
+  OptimizeContext() = default;
+
+  PackageType GetPackageType() override {
+    // Not important here. Using anything other than kApp adds EXTRA validation, which we want to
+    // avoid.
+    return PackageType::kApp;
+  }
+
   IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
@@ -99,6 +107,8 @@ class OptimizeContext : public IAaptContext {
   }
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(OptimizeContext);
+
   StdErrDiagnostics diagnostics_;
   bool verbose_ = false;
   int sdk_version_ = 0;
