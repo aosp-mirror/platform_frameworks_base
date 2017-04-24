@@ -162,10 +162,9 @@ public final class NotificationChannel implements Parcelable {
      *             broadcast. The recommended maximum length is 40 characters; the value may be
      *             truncated if it is too long.
      * @param importance The importance of the channel. This controls how interruptive notifications
-     *                   posted to this channel are. See e.g.
-     *                   {@link NotificationManager#IMPORTANCE_DEFAULT}.
+     *                   posted to this channel are.
      */
-    public NotificationChannel(String id, CharSequence name, int importance) {
+    public NotificationChannel(String id, CharSequence name, @Importance int importance) {
         this.mId = getTrimmedString(id);
         this.mName = name != null ? getTrimmedString(name.toString()) : null;
         this.mImportance = importance;

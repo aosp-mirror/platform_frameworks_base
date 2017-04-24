@@ -19,6 +19,8 @@ package android.content;
 import android.annotation.AnyRes;
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -4903,6 +4905,96 @@ public class Intent implements Parcelable, Cloneable {
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)) != 0;
     }
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_GRANT_READ_URI_PERMISSION,
+            FLAG_GRANT_WRITE_URI_PERMISSION,
+            FLAG_FROM_BACKGROUND,
+            FLAG_DEBUG_LOG_RESOLUTION,
+            FLAG_EXCLUDE_STOPPED_PACKAGES,
+            FLAG_INCLUDE_STOPPED_PACKAGES,
+            FLAG_GRANT_PERSISTABLE_URI_PERMISSION,
+            FLAG_GRANT_PREFIX_URI_PERMISSION,
+            FLAG_DEBUG_TRIAGED_MISSING,
+            FLAG_IGNORE_EPHEMERAL,
+            FLAG_ACTIVITY_NO_HISTORY,
+            FLAG_ACTIVITY_SINGLE_TOP,
+            FLAG_ACTIVITY_NEW_TASK,
+            FLAG_ACTIVITY_MULTIPLE_TASK,
+            FLAG_ACTIVITY_CLEAR_TOP,
+            FLAG_ACTIVITY_FORWARD_RESULT,
+            FLAG_ACTIVITY_PREVIOUS_IS_TOP,
+            FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS,
+            FLAG_ACTIVITY_BROUGHT_TO_FRONT,
+            FLAG_ACTIVITY_RESET_TASK_IF_NEEDED,
+            FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY,
+            FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET,
+            FLAG_ACTIVITY_NEW_DOCUMENT,
+            FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET,
+            FLAG_ACTIVITY_NO_USER_ACTION,
+            FLAG_ACTIVITY_REORDER_TO_FRONT,
+            FLAG_ACTIVITY_NO_ANIMATION,
+            FLAG_ACTIVITY_CLEAR_TASK,
+            FLAG_ACTIVITY_TASK_ON_HOME,
+            FLAG_ACTIVITY_RETAIN_IN_RECENTS,
+            FLAG_ACTIVITY_LAUNCH_ADJACENT,
+            FLAG_RECEIVER_REGISTERED_ONLY,
+            FLAG_RECEIVER_REPLACE_PENDING,
+            FLAG_RECEIVER_FOREGROUND,
+            FLAG_RECEIVER_NO_ABORT,
+            FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT,
+            FLAG_RECEIVER_BOOT_UPGRADE,
+            FLAG_RECEIVER_INCLUDE_BACKGROUND,
+            FLAG_RECEIVER_EXCLUDE_BACKGROUND,
+            FLAG_RECEIVER_FROM_SHELL,
+            FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_FROM_BACKGROUND,
+            FLAG_DEBUG_LOG_RESOLUTION,
+            FLAG_EXCLUDE_STOPPED_PACKAGES,
+            FLAG_INCLUDE_STOPPED_PACKAGES,
+            FLAG_DEBUG_TRIAGED_MISSING,
+            FLAG_IGNORE_EPHEMERAL,
+            FLAG_ACTIVITY_NO_HISTORY,
+            FLAG_ACTIVITY_SINGLE_TOP,
+            FLAG_ACTIVITY_NEW_TASK,
+            FLAG_ACTIVITY_MULTIPLE_TASK,
+            FLAG_ACTIVITY_CLEAR_TOP,
+            FLAG_ACTIVITY_FORWARD_RESULT,
+            FLAG_ACTIVITY_PREVIOUS_IS_TOP,
+            FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS,
+            FLAG_ACTIVITY_BROUGHT_TO_FRONT,
+            FLAG_ACTIVITY_RESET_TASK_IF_NEEDED,
+            FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY,
+            FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET,
+            FLAG_ACTIVITY_NEW_DOCUMENT,
+            FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET,
+            FLAG_ACTIVITY_NO_USER_ACTION,
+            FLAG_ACTIVITY_REORDER_TO_FRONT,
+            FLAG_ACTIVITY_NO_ANIMATION,
+            FLAG_ACTIVITY_CLEAR_TASK,
+            FLAG_ACTIVITY_TASK_ON_HOME,
+            FLAG_ACTIVITY_RETAIN_IN_RECENTS,
+            FLAG_ACTIVITY_LAUNCH_ADJACENT,
+            FLAG_RECEIVER_REGISTERED_ONLY,
+            FLAG_RECEIVER_REPLACE_PENDING,
+            FLAG_RECEIVER_FOREGROUND,
+            FLAG_RECEIVER_NO_ABORT,
+            FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT,
+            FLAG_RECEIVER_BOOT_UPGRADE,
+            FLAG_RECEIVER_INCLUDE_BACKGROUND,
+            FLAG_RECEIVER_EXCLUDE_BACKGROUND,
+            FLAG_RECEIVER_FROM_SHELL,
+            FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MutableFlags {}
+
     /**
      * If set, the recipient of this Intent will be granted permission to
      * perform read operations on the URI in the Intent's data and any URIs
@@ -5369,6 +5461,15 @@ public class Intent implements Parcelable, Cloneable {
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "URI_" }, value = {
+            URI_ALLOW_UNSAFE,
+            URI_ANDROID_APP_SCHEME,
+            URI_INTENT_SCHEME,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UriFlags {}
+
     /**
      * Flag for use with {@link #toUri} and {@link #parseUri}: the URI string
      * always has the "intent:" scheme.  This syntax can be used when you want
@@ -5538,7 +5639,7 @@ public class Intent implements Parcelable, Cloneable {
      * Make a clone of only the parts of the Intent that are relevant for
      * filter matching: the action, data, type, component, and categories.
      */
-    public Intent cloneFilter() {
+    public @NonNull Intent cloneFilter() {
         return new Intent(this, false);
     }
 
@@ -5727,8 +5828,7 @@ public class Intent implements Parcelable, Cloneable {
      * the scheme and full path.
      *
      * @param uri The URI to turn into an Intent.
-     * @param flags Additional processing flags.  Either 0,
-     * {@link #URI_INTENT_SCHEME}, or {@link #URI_ANDROID_APP_SCHEME}.
+     * @param flags Additional processing flags.
      *
      * @return Intent The newly created Intent object.
      *
@@ -5738,7 +5838,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #toUri
      */
-    public static Intent parseUri(String uri, int flags) throws URISyntaxException {
+    public static Intent parseUri(String uri, @UriFlags int flags) throws URISyntaxException {
         int i = 0;
         try {
             final boolean androidApp = uri.startsWith("android-app:");
@@ -6568,7 +6668,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #setAction
      */
-    public String getAction() {
+    public @Nullable String getAction() {
         return mAction;
     }
 
@@ -6583,7 +6683,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getScheme
      * @see #setData
      */
-    public Uri getData() {
+    public @Nullable Uri getData() {
         return mData;
     }
 
@@ -6591,7 +6691,7 @@ public class Intent implements Parcelable, Cloneable {
      * The same as {@link #getData()}, but returns the URI as an encoded
      * String.
      */
-    public String getDataString() {
+    public @Nullable String getDataString() {
         return mData != null ? mData.toString() : null;
     }
 
@@ -6607,7 +6707,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #getData
      */
-    public String getScheme() {
+    public @Nullable String getScheme() {
         return mData != null ? mData.getScheme() : null;
     }
 
@@ -6621,7 +6721,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #resolveType(ContentResolver)
      * @see #setType
      */
-    public String getType() {
+    public @Nullable String getType() {
         return mType;
     }
 
@@ -6636,7 +6736,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getType
      * @see #resolveType(ContentResolver)
      */
-    public String resolveType(Context context) {
+    public @Nullable String resolveType(@NonNull Context context) {
         return resolveType(context.getContentResolver());
     }
 
@@ -6654,7 +6754,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getType
      * @see #resolveType(Context)
      */
-    public String resolveType(ContentResolver resolver) {
+    public @Nullable String resolveType(@NonNull ContentResolver resolver) {
         if (mType != null) {
             return mType;
         }
@@ -6678,7 +6778,7 @@ public class Intent implements Parcelable, Cloneable {
      * @return The MIME type of this intent, or null if it is unknown or not
      *         needed.
      */
-    public String resolveTypeIfNeeded(ContentResolver resolver) {
+    public @Nullable String resolveTypeIfNeeded(@NonNull ContentResolver resolver) {
         if (mComponent != null) {
             return mType;
         }
@@ -6718,7 +6818,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #setSelector
      */
-    public Intent getSelector() {
+    public @Nullable Intent getSelector() {
         return mSelector;
     }
 
@@ -6728,7 +6828,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #setClipData
      */
-    public ClipData getClipData() {
+    public @Nullable ClipData getClipData() {
         return mClipData;
     }
 
@@ -6754,7 +6854,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param loader a ClassLoader, or null to use the default loader
      * at the time of unmarshalling.
      */
-    public void setExtrasClassLoader(ClassLoader loader) {
+    public void setExtrasClassLoader(@Nullable ClassLoader loader) {
         if (mExtras != null) {
             mExtras.setClassLoader(loader);
         }
@@ -7275,7 +7375,7 @@ public class Intent implements Parcelable, Cloneable {
      * @return the map of all extras previously added with putExtra(),
      * or null if none have been added.
      */
-    public Bundle getExtras() {
+    public @Nullable Bundle getExtras() {
         return (mExtras != null)
                 ? new Bundle(mExtras)
                 : null;
@@ -7296,11 +7396,12 @@ public class Intent implements Parcelable, Cloneable {
      * normally just set them with {@link #setFlags} and let the system
      * take the appropriate action with them.
      *
-     * @return int The currently set flags.
-     *
+     * @return The currently set flags.
      * @see #setFlags
+     * @see #addFlags
+     * @see #removeFlags
      */
-    public int getFlags() {
+    public @Flags int getFlags() {
         return mFlags;
     }
 
@@ -7320,7 +7421,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #resolveActivity
      * @see #setPackage
      */
-    public String getPackage() {
+    public @Nullable String getPackage() {
         return mPackage;
     }
 
@@ -7335,7 +7436,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #resolveActivity
      * @see #setComponent
      */
-    public ComponentName getComponent() {
+    public @Nullable ComponentName getComponent() {
         return mComponent;
     }
 
@@ -7344,7 +7445,7 @@ public class Intent implements Parcelable, Cloneable {
      * used as a hint to the receiver for animations and the like.  Null means that there
      * is no source bounds.
      */
-    public Rect getSourceBounds() {
+    public @Nullable Rect getSourceBounds() {
         return mSourceBounds;
     }
 
@@ -7395,7 +7496,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getComponent
      * @see #resolveActivityInfo
      */
-    public ComponentName resolveActivity(PackageManager pm) {
+    public ComponentName resolveActivity(@NonNull PackageManager pm) {
         if (mComponent != null) {
             return mComponent;
         }
@@ -7427,7 +7528,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #resolveActivity
      */
-    public ActivityInfo resolveActivityInfo(PackageManager pm, int flags) {
+    public ActivityInfo resolveActivityInfo(@NonNull PackageManager pm,
+            @PackageManager.ComponentInfoFlags int flags) {
         ActivityInfo ai = null;
         if (mComponent != null) {
             try {
@@ -7453,7 +7555,8 @@ public class Intent implements Parcelable, Cloneable {
      * there are no matches.
      * @hide
      */
-    public ComponentName resolveSystemService(PackageManager pm, int flags) {
+    public @Nullable ComponentName resolveSystemService(@NonNull PackageManager pm,
+            @PackageManager.ComponentInfoFlags int flags) {
         if (mComponent != null) {
             return mComponent;
         }
@@ -7490,7 +7593,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #getAction
      */
-    public Intent setAction(String action) {
+    public @NonNull Intent setAction(@Nullable String action) {
         mAction = action != null ? action.intern() : null;
         return this;
     }
@@ -7516,7 +7619,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setDataAndNormalize
      * @see android.net.Uri#normalizeScheme()
      */
-    public Intent setData(Uri data) {
+    public @NonNull Intent setData(@Nullable Uri data) {
         mData = data;
         mType = null;
         return this;
@@ -7544,7 +7647,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setType
      * @see android.net.Uri#normalizeScheme
      */
-    public Intent setDataAndNormalize(Uri data) {
+    public @NonNull Intent setDataAndNormalize(@NonNull Uri data) {
         return setData(data.normalizeScheme());
     }
 
@@ -7573,7 +7676,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setDataAndType
      * @see #normalizeMimeType
      */
-    public Intent setType(String type) {
+    public @NonNull Intent setType(@Nullable String type) {
         mData = null;
         mType = type;
         return this;
@@ -7604,7 +7707,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setData
      * @see #normalizeMimeType
      */
-    public Intent setTypeAndNormalize(String type) {
+    public @NonNull Intent setTypeAndNormalize(@Nullable String type) {
         return setType(normalizeMimeType(type));
     }
 
@@ -7633,7 +7736,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see android.net.Uri#normalizeScheme
      * @see #setDataAndTypeAndNormalize
      */
-    public Intent setDataAndType(Uri data, String type) {
+    public @NonNull Intent setDataAndType(@Nullable Uri data, @Nullable String type) {
         mData = data;
         mType = type;
         return this;
@@ -7664,7 +7767,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #normalizeMimeType
      * @see android.net.Uri#normalizeScheme
      */
-    public Intent setDataAndTypeAndNormalize(Uri data, String type) {
+    public @NonNull Intent setDataAndTypeAndNormalize(@NonNull Uri data, @Nullable String type) {
         return setDataAndType(data.normalizeScheme(), normalizeMimeType(type));
     }
 
@@ -7684,7 +7787,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #hasCategory
      * @see #removeCategory
      */
-    public Intent addCategory(String category) {
+    public @NonNull Intent addCategory(String category) {
         if (mCategories == null) {
             mCategories = new ArraySet<String>();
         }
@@ -7739,7 +7842,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param selector The desired selector Intent; set to null to not use
      * a special selector.
      */
-    public void setSelector(Intent selector) {
+    public void setSelector(@Nullable Intent selector) {
         if (selector == this) {
             throw new IllegalArgumentException(
                     "Intent being set as a selector of itself");
@@ -7778,7 +7881,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @param clip The new clip to set.  May be null to clear the current clip.
      */
-    public void setClipData(ClipData clip) {
+    public void setClipData(@Nullable ClipData clip) {
         mClipData = clip;
     }
 
@@ -7811,7 +7914,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getBooleanExtra(String, boolean)
      */
-    public Intent putExtra(String name, boolean value) {
+    public @NonNull Intent putExtra(String name, boolean value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7834,7 +7937,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getByteExtra(String, byte)
      */
-    public Intent putExtra(String name, byte value) {
+    public @NonNull Intent putExtra(String name, byte value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7857,7 +7960,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharExtra(String, char)
      */
-    public Intent putExtra(String name, char value) {
+    public @NonNull Intent putExtra(String name, char value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7880,7 +7983,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getShortExtra(String, short)
      */
-    public Intent putExtra(String name, short value) {
+    public @NonNull Intent putExtra(String name, short value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7903,7 +8006,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getIntExtra(String, int)
      */
-    public Intent putExtra(String name, int value) {
+    public @NonNull Intent putExtra(String name, int value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7926,7 +8029,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getLongExtra(String, long)
      */
-    public Intent putExtra(String name, long value) {
+    public @NonNull Intent putExtra(String name, long value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7949,7 +8052,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getFloatExtra(String, float)
      */
-    public Intent putExtra(String name, float value) {
+    public @NonNull Intent putExtra(String name, float value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7972,7 +8075,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getDoubleExtra(String, double)
      */
-    public Intent putExtra(String name, double value) {
+    public @NonNull Intent putExtra(String name, double value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -7995,7 +8098,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getStringExtra(String)
      */
-    public Intent putExtra(String name, String value) {
+    public @NonNull Intent putExtra(String name, String value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8018,7 +8121,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharSequenceExtra(String)
      */
-    public Intent putExtra(String name, CharSequence value) {
+    public @NonNull Intent putExtra(String name, CharSequence value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8041,7 +8144,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getParcelableExtra(String)
      */
-    public Intent putExtra(String name, Parcelable value) {
+    public @NonNull Intent putExtra(String name, Parcelable value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8064,7 +8167,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getParcelableArrayExtra(String)
      */
-    public Intent putExtra(String name, Parcelable[] value) {
+    public @NonNull Intent putExtra(String name, Parcelable[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8087,7 +8190,8 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getParcelableArrayListExtra(String)
      */
-    public Intent putParcelableArrayListExtra(String name, ArrayList<? extends Parcelable> value) {
+    public @NonNull Intent putParcelableArrayListExtra(String name,
+            ArrayList<? extends Parcelable> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8110,7 +8214,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getIntegerArrayListExtra(String)
      */
-    public Intent putIntegerArrayListExtra(String name, ArrayList<Integer> value) {
+    public @NonNull Intent putIntegerArrayListExtra(String name, ArrayList<Integer> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8133,7 +8237,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getStringArrayListExtra(String)
      */
-    public Intent putStringArrayListExtra(String name, ArrayList<String> value) {
+    public @NonNull Intent putStringArrayListExtra(String name, ArrayList<String> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8156,7 +8260,8 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharSequenceArrayListExtra(String)
      */
-    public Intent putCharSequenceArrayListExtra(String name, ArrayList<CharSequence> value) {
+    public @NonNull Intent putCharSequenceArrayListExtra(String name,
+            ArrayList<CharSequence> value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8179,7 +8284,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getSerializableExtra(String)
      */
-    public Intent putExtra(String name, Serializable value) {
+    public @NonNull Intent putExtra(String name, Serializable value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8202,7 +8307,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getBooleanArrayExtra(String)
      */
-    public Intent putExtra(String name, boolean[] value) {
+    public @NonNull Intent putExtra(String name, boolean[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8225,7 +8330,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getByteArrayExtra(String)
      */
-    public Intent putExtra(String name, byte[] value) {
+    public @NonNull Intent putExtra(String name, byte[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8248,7 +8353,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getShortArrayExtra(String)
      */
-    public Intent putExtra(String name, short[] value) {
+    public @NonNull Intent putExtra(String name, short[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8271,7 +8376,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharArrayExtra(String)
      */
-    public Intent putExtra(String name, char[] value) {
+    public @NonNull Intent putExtra(String name, char[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8294,7 +8399,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getIntArrayExtra(String)
      */
-    public Intent putExtra(String name, int[] value) {
+    public @NonNull Intent putExtra(String name, int[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8317,7 +8422,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getLongArrayExtra(String)
      */
-    public Intent putExtra(String name, long[] value) {
+    public @NonNull Intent putExtra(String name, long[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8340,7 +8445,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getFloatArrayExtra(String)
      */
-    public Intent putExtra(String name, float[] value) {
+    public @NonNull Intent putExtra(String name, float[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8363,7 +8468,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getDoubleArrayExtra(String)
      */
-    public Intent putExtra(String name, double[] value) {
+    public @NonNull Intent putExtra(String name, double[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8386,7 +8491,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getStringArrayExtra(String)
      */
-    public Intent putExtra(String name, String[] value) {
+    public @NonNull Intent putExtra(String name, String[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8409,7 +8514,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getCharSequenceArrayExtra(String)
      */
-    public Intent putExtra(String name, CharSequence[] value) {
+    public @NonNull Intent putExtra(String name, CharSequence[] value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8432,7 +8537,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      * @see #getBundleExtra(String)
      */
-    public Intent putExtra(String name, Bundle value) {
+    public @NonNull Intent putExtra(String name, Bundle value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8459,7 +8564,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @Deprecated
-    public Intent putExtra(String name, IBinder value) {
+    public @NonNull Intent putExtra(String name, IBinder value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8474,7 +8579,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #putExtra
      */
-    public Intent putExtras(Intent src) {
+    public @NonNull Intent putExtras(@NonNull Intent src) {
         if (src.mExtras != null) {
             if (mExtras == null) {
                 mExtras = new Bundle(src.mExtras);
@@ -8495,7 +8600,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #putExtra
      * @see #removeExtra
      */
-    public Intent putExtras(Bundle extras) {
+    public @NonNull Intent putExtras(@NonNull Bundle extras) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -8510,7 +8615,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param src The exact extras contained in this Intent are copied
      * into the target intent, replacing any that were previously there.
      */
-    public Intent replaceExtras(Intent src) {
+    public @NonNull Intent replaceExtras(@NonNull Intent src) {
         mExtras = src.mExtras != null ? new Bundle(src.mExtras) : null;
         return this;
     }
@@ -8522,7 +8627,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param extras The new set of extras in the Intent, or null to erase
      * all extras.
      */
-    public Intent replaceExtras(Bundle extras) {
+    public @NonNull Intent replaceExtras(@NonNull Bundle extras) {
         mExtras = extras != null ? new Bundle(extras) : null;
         return this;
     }
@@ -8555,41 +8660,13 @@ public class Intent implements Parcelable, Cloneable {
      * the behavior of your application.
      *
      * @param flags The desired flags.
-     *
      * @return Returns the same Intent object, for chaining multiple calls
      * into a single statement.
-     *
      * @see #getFlags
      * @see #addFlags
      * @see #removeFlags
-     *
-     * @see #FLAG_GRANT_READ_URI_PERMISSION
-     * @see #FLAG_GRANT_WRITE_URI_PERMISSION
-     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-     * @see #FLAG_GRANT_PREFIX_URI_PERMISSION
-     * @see #FLAG_DEBUG_LOG_RESOLUTION
-     * @see #FLAG_FROM_BACKGROUND
-     * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
-     * @see #FLAG_ACTIVITY_CLEAR_TASK
-     * @see #FLAG_ACTIVITY_CLEAR_TOP
-     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
-     * @see #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-     * @see #FLAG_ACTIVITY_FORWARD_RESULT
-     * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-     * @see #FLAG_ACTIVITY_MULTIPLE_TASK
-     * @see #FLAG_ACTIVITY_NEW_DOCUMENT
-     * @see #FLAG_ACTIVITY_NEW_TASK
-     * @see #FLAG_ACTIVITY_NO_ANIMATION
-     * @see #FLAG_ACTIVITY_NO_HISTORY
-     * @see #FLAG_ACTIVITY_NO_USER_ACTION
-     * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
-     * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-     * @see #FLAG_ACTIVITY_REORDER_TO_FRONT
-     * @see #FLAG_ACTIVITY_SINGLE_TOP
-     * @see #FLAG_ACTIVITY_TASK_ON_HOME
-     * @see #FLAG_RECEIVER_REGISTERED_ONLY
      */
-    public Intent setFlags(int flags) {
+    public @NonNull Intent setFlags(@Flags int flags) {
         mFlags = flags;
         return this;
     }
@@ -8600,36 +8677,11 @@ public class Intent implements Parcelable, Cloneable {
      * @param flags The new flags to set.
      * @return Returns the same Intent object, for chaining multiple calls into
      *         a single statement.
-     * @see #setFlags(int)
-     * @see #removeFlags(int)
-     *
-     * @see #FLAG_GRANT_READ_URI_PERMISSION
-     * @see #FLAG_GRANT_WRITE_URI_PERMISSION
-     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-     * @see #FLAG_GRANT_PREFIX_URI_PERMISSION
-     * @see #FLAG_DEBUG_LOG_RESOLUTION
-     * @see #FLAG_FROM_BACKGROUND
-     * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
-     * @see #FLAG_ACTIVITY_CLEAR_TASK
-     * @see #FLAG_ACTIVITY_CLEAR_TOP
-     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
-     * @see #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-     * @see #FLAG_ACTIVITY_FORWARD_RESULT
-     * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-     * @see #FLAG_ACTIVITY_MULTIPLE_TASK
-     * @see #FLAG_ACTIVITY_NEW_DOCUMENT
-     * @see #FLAG_ACTIVITY_NEW_TASK
-     * @see #FLAG_ACTIVITY_NO_ANIMATION
-     * @see #FLAG_ACTIVITY_NO_HISTORY
-     * @see #FLAG_ACTIVITY_NO_USER_ACTION
-     * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
-     * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-     * @see #FLAG_ACTIVITY_REORDER_TO_FRONT
-     * @see #FLAG_ACTIVITY_SINGLE_TOP
-     * @see #FLAG_ACTIVITY_TASK_ON_HOME
-     * @see #FLAG_RECEIVER_REGISTERED_ONLY
+     * @see #setFlags
+     * @see #getFlags
+     * @see #removeFlags
      */
-    public Intent addFlags(int flags) {
+    public @NonNull Intent addFlags(@Flags int flags) {
         mFlags |= flags;
         return this;
     }
@@ -8638,36 +8690,11 @@ public class Intent implements Parcelable, Cloneable {
      * Remove these flags from the intent.
      *
      * @param flags The flags to remove.
-     * @see #setFlags(int)
-     * @see #addFlags(int)
-     *
-     * @see #FLAG_GRANT_READ_URI_PERMISSION
-     * @see #FLAG_GRANT_WRITE_URI_PERMISSION
-     * @see #FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-     * @see #FLAG_GRANT_PREFIX_URI_PERMISSION
-     * @see #FLAG_DEBUG_LOG_RESOLUTION
-     * @see #FLAG_FROM_BACKGROUND
-     * @see #FLAG_ACTIVITY_BROUGHT_TO_FRONT
-     * @see #FLAG_ACTIVITY_CLEAR_TASK
-     * @see #FLAG_ACTIVITY_CLEAR_TOP
-     * @see #FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
-     * @see #FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-     * @see #FLAG_ACTIVITY_FORWARD_RESULT
-     * @see #FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-     * @see #FLAG_ACTIVITY_MULTIPLE_TASK
-     * @see #FLAG_ACTIVITY_NEW_DOCUMENT
-     * @see #FLAG_ACTIVITY_NEW_TASK
-     * @see #FLAG_ACTIVITY_NO_ANIMATION
-     * @see #FLAG_ACTIVITY_NO_HISTORY
-     * @see #FLAG_ACTIVITY_NO_USER_ACTION
-     * @see #FLAG_ACTIVITY_PREVIOUS_IS_TOP
-     * @see #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-     * @see #FLAG_ACTIVITY_REORDER_TO_FRONT
-     * @see #FLAG_ACTIVITY_SINGLE_TOP
-     * @see #FLAG_ACTIVITY_TASK_ON_HOME
-     * @see #FLAG_RECEIVER_REGISTERED_ONLY
+     * @see #setFlags
+     * @see #getFlags
+     * @see #addFlags
      */
-    public void removeFlags(int flags) {
+    public void removeFlags(@Flags int flags) {
         mFlags &= ~flags;
     }
 
@@ -8687,7 +8714,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getPackage
      * @see #resolveActivity
      */
-    public Intent setPackage(String packageName) {
+    public @NonNull Intent setPackage(@Nullable String packageName) {
         if (packageName != null && mSelector != null) {
             throw new IllegalArgumentException(
                     "Can't set package name when selector is already set");
@@ -8719,7 +8746,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getComponent
      * @see #resolveActivity
      */
-    public Intent setComponent(ComponentName component) {
+    public @NonNull Intent setComponent(@Nullable ComponentName component) {
         mComponent = component;
         return this;
     }
@@ -8739,7 +8766,8 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setComponent
      * @see #setClass
      */
-    public Intent setClassName(Context packageContext, String className) {
+    public @NonNull Intent setClassName(@NonNull Context packageContext,
+            @NonNull String className) {
         mComponent = new ComponentName(packageContext, className);
         return this;
     }
@@ -8759,7 +8787,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setComponent
      * @see #setClass
      */
-    public Intent setClassName(String packageName, String className) {
+    public @NonNull Intent setClassName(@NonNull String packageName, @NonNull String className) {
         mComponent = new ComponentName(packageName, className);
         return this;
     }
@@ -8778,7 +8806,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #setComponent
      */
-    public Intent setClass(Context packageContext, Class<?> cls) {
+    public @NonNull Intent setClass(@NonNull Context packageContext, @NonNull Class<?> cls) {
         mComponent = new ComponentName(packageContext, cls);
         return this;
     }
@@ -8788,7 +8816,7 @@ public class Intent implements Parcelable, Cloneable {
      * used as a hint to the receiver for animations and the like.  Null means that there
      * is no source bounds.
      */
-    public void setSourceBounds(Rect r) {
+    public void setSourceBounds(@Nullable Rect r) {
         if (r != null) {
             mSourceBounds = new Rect(r);
         } else {
@@ -8909,7 +8937,7 @@ public class Intent implements Parcelable, Cloneable {
      * changed.
      */
     @FillInFlags
-    public int fillIn(Intent other, @FillInFlags int flags) {
+    public int fillIn(@NonNull Intent other, @FillInFlags int flags) {
         int changes = 0;
         boolean mayHaveCopiedUris = false;
         if (other.mAction != null
@@ -9257,13 +9285,12 @@ public class Intent implements Parcelable, Cloneable {
      * <p>You can convert the returned string back to an Intent with
      * {@link #getIntent}.
      *
-     * @param flags Additional operating flags.  Either 0,
-     * {@link #URI_INTENT_SCHEME}, or {@link #URI_ANDROID_APP_SCHEME}.
+     * @param flags Additional operating flags.
      *
      * @return Returns a URI encoding URI string describing the entire contents
      * of the Intent.
      */
-    public String toUri(int flags) {
+    public String toUri(@UriFlags int flags) {
         StringBuilder uri = new StringBuilder(128);
         if ((flags&URI_ANDROID_APP_SCHEME) != 0) {
             if (mPackage == null) {
@@ -9530,7 +9557,8 @@ public class Intent implements Parcelable, Cloneable {
      * @throws XmlPullParserException If there was an XML parsing error.
      * @throws IOException If there was an I/O error.
      */
-    public static Intent parseIntent(Resources resources, XmlPullParser parser, AttributeSet attrs)
+    public static @NonNull Intent parseIntent(@NonNull Resources resources,
+            @NonNull XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
         Intent intent = new Intent();
 
@@ -9677,7 +9705,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #setType
      * @see #setTypeAndNormalize
      */
-    public static String normalizeMimeType(String type) {
+    public static @Nullable String normalizeMimeType(@Nullable String type) {
         if (type == null) {
             return null;
         }
