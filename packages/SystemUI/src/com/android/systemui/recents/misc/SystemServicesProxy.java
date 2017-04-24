@@ -149,6 +149,10 @@ public class SystemServicesProxy {
      * to reduce IPC calls from system services. These callbacks will be called on the main thread.
      */
     public abstract static class TaskStackListener {
+        /**
+         * NOTE: This call is made of the thread that the binder call comes in on.
+         */
+        public void onTaskStackChangedBackground() { }
         public void onTaskStackChanged() { }
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
         public void onActivityPinned(String packageName) { }
@@ -187,8 +191,20 @@ public class SystemServicesProxy {
      * This simply passes callbacks to listeners through {@link H}.
      * */
     private android.app.TaskStackListener mTaskStackListener = new android.app.TaskStackListener() {
+
+        private final List<SystemServicesProxy.TaskStackListener> mTmpListeners = new ArrayList<>();
+
         @Override
         public void onTaskStackChanged() throws RemoteException {
+            // Call the task changed callback for the non-ui thread listeners first
+            synchronized (mTaskStackListeners) {
+                mTmpListeners.clear();
+                mTmpListeners.addAll(mTaskStackListeners);
+            }
+            for (int i = mTmpListeners.size() - 1; i >= 0; i--) {
+                mTmpListeners.get(i).onTaskStackChangedBackground();
+            }
+
             mHandler.removeMessages(H.ON_TASK_STACK_CHANGED);
             mHandler.sendEmptyMessage(H.ON_TASK_STACK_CHANGED);
         }
@@ -309,10 +325,7 @@ public class SystemServicesProxy {
      * Returns the single instance of the {@link SystemServicesProxy}.
      * This should only be called on the main thread.
      */
-    public static SystemServicesProxy getInstance(Context context) {
-        if (!Looper.getMainLooper().isCurrentThread()) {
-            throw new RuntimeException("Must be called on the UI thread");
-        }
+    public static synchronized SystemServicesProxy getInstance(Context context) {
         if (sSystemServicesProxy == null) {
             sSystemServicesProxy = new SystemServicesProxy(context);
         }
@@ -1136,13 +1149,15 @@ public class SystemServicesProxy {
     public void registerTaskStackListener(TaskStackListener listener) {
         if (mIam == null) return;
 
-        mTaskStackListeners.add(listener);
-        if (mTaskStackListeners.size() == 1) {
-            // Register mTaskStackListener to IActivityManager only once if needed.
-            try {
-                mIam.registerTaskStackListener(mTaskStackListener);
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to call registerTaskStackListener", e);
+        synchronized (mTaskStackListeners) {
+            mTaskStackListeners.add(listener);
+            if (mTaskStackListeners.size() == 1) {
+                // Register mTaskStackListener to IActivityManager only once if needed.
+                try {
+                    mIam.registerTaskStackListener(mTaskStackListener);
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to call registerTaskStackListener", e);
+                }
             }
         }
     }
@@ -1245,74 +1260,76 @@ public class SystemServicesProxy {
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case ON_TASK_STACK_CHANGED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onTaskStackChanged();
+            synchronized (mTaskStackListeners) {
+                switch (msg.what) {
+                    case ON_TASK_STACK_CHANGED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskStackChanged();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_TASK_SNAPSHOT_CHANGED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
-                                (TaskSnapshot) msg.obj);
+                    case ON_TASK_SNAPSHOT_CHANGED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
+                                    (TaskSnapshot) msg.obj);
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_ACTIVITY_PINNED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onActivityPinned((String) msg.obj);
+                    case ON_ACTIVITY_PINNED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityPinned((String) msg.obj);
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_ACTIVITY_UNPINNED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onActivityUnpinned();
+                    case ON_ACTIVITY_UNPINNED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityUnpinned();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onPinnedActivityRestartAttempt();
+                    case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onPinnedActivityRestartAttempt();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_PINNED_STACK_ANIMATION_STARTED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onPinnedStackAnimationStarted();
+                    case ON_PINNED_STACK_ANIMATION_STARTED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onPinnedStackAnimationStarted();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_PINNED_STACK_ANIMATION_ENDED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onPinnedStackAnimationEnded();
+                    case ON_PINNED_STACK_ANIMATION_ENDED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onPinnedStackAnimationEnded();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_ACTIVITY_FORCED_RESIZABLE: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onActivityForcedResizable(
-                                (String) msg.obj, msg.arg1, msg.arg2);
+                    case ON_ACTIVITY_FORCED_RESIZABLE: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityForcedResizable(
+                                    (String) msg.obj, msg.arg1, msg.arg2);
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_ACTIVITY_DISMISSING_DOCKED_STACK: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onActivityDismissingDockedStack();
+                    case ON_ACTIVITY_DISMISSING_DOCKED_STACK: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityDismissingDockedStack();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onActivityLaunchOnSecondaryDisplayFailed();
+                    case ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityLaunchOnSecondaryDisplayFailed();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case ON_TASK_PROFILE_LOCKED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onTaskProfileLocked(msg.arg1, msg.arg2);
+                    case ON_TASK_PROFILE_LOCKED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskProfileLocked(msg.arg1, msg.arg2);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
