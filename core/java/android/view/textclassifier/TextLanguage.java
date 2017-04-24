@@ -28,6 +28,7 @@ import java.util.Locale;
 
 /**
  * Specifies detected languages for a section of text indicated by a start and end index.
+ * @hide
  */
 public final class TextLanguage {
 
