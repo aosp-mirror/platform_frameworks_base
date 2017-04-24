@@ -539,16 +539,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     false, mOverlayToken, null, oldUserId);
         }
 
-        if (!mVrModeEnabled) {
-            return;
-        }
-
         // Apply the restrictions for the current user based on vr state
         String[] exemptions = (exemptedPackage == null) ? new String[0] :
                 new String[] { exemptedPackage };
 
         appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                true, mOverlayToken, exemptions, newUserId);
+                mVrModeEnabled, mOverlayToken, exemptions, newUserId);
     }
 
     private void updateDependentAppOpsLocked(String newVrServicePackage, int newUserId,
