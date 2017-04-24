@@ -22,6 +22,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.SuppressAutoDoc;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -131,6 +132,7 @@ import java.util.function.DoubleUnaryOperator;
  */
 @AnyThread
 @SuppressWarnings("StaticInitializerReferencesSubClass")
+@SuppressAutoDoc
 public abstract class ColorSpace {
     /**
      * Standard CIE 1931 2° illuminant A, encoded in xyY.
