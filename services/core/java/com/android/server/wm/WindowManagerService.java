@@ -5035,6 +5035,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (callback != null) {
                         callback.run();
                     }
+                    break;
                 }
                 case NEW_ANIMATOR_SCALE: {
                     float scale = getCurrentAnimatorScale();
@@ -5087,6 +5088,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
+                break;
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     synchronized (mWindowMap) {
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
@@ -5104,6 +5106,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mWindowReplacementTimeouts.clear();
                     }
                 }
+                break;
                 case NOTIFY_APP_TRANSITION_STARTING: {
                     mAmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj);
                 }
