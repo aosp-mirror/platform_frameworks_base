@@ -2698,7 +2698,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " win.mWindowRemovalAllowed=" + mWindowRemovalAllowed
                     + " win.mRemoveOnExit=" + mRemoveOnExit);
             if (!cleanupOnResume || mRemoveOnExit) {
-                destroyOrSaveSurface();
+                destroyOrSaveSurfaceUnchecked();
             }
             if (mRemoveOnExit) {
                 removeImmediately();
@@ -2713,7 +2713,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return destroyedSomething;
     }
 
-    void destroyOrSaveSurface() {
+    // Destroy or save the application surface without checking
+    // various indicators of whether the client has released the surface.
+    // This is in general unsafe, and most callers should use {@link #destroySurface}
+    void destroyOrSaveSurfaceUnchecked() {
         mSurfaceSaved = shouldSaveSurface();
         if (mSurfaceSaved) {
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
