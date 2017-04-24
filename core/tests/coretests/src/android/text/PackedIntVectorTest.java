@@ -16,17 +16,23 @@
 
 package android.text;
 
-import android.support.test.filters.SmallTest;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.TestCase;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * PackedIntVectorTest tests the features of android.util.PackedIntVector.
  */
-public class PackedIntVectorTest extends TestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class PackedIntVectorTest {
 
-    @SmallTest
-    public void testBasic() throws Exception {
+    @Test
+    public void testBasic() {
         for (int width = 0; width < 10; width++) {
             PackedIntVector p = new PackedIntVector(width);
             int[] ins = new int[width];
