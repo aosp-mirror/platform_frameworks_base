@@ -18,6 +18,8 @@ package android.provider;
 
 import com.android.internal.R;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -2164,6 +2166,7 @@ public class Contacts {
              * @deprecated Do not use. This is not supported.
              */
             @Deprecated
+            @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
             public static final String FILTER_CONTACTS_ACTION =
                     "com.android.contacts.action.FILTER_CONTACTS";
 
