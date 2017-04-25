@@ -134,6 +134,23 @@ final class RemoteFillService implements DeathRecipient {
         mCallbacks.onServiceDied(this);
     }
 
+    /**
+     * Cancel the currently pending request.
+     *
+     * <p>This can be used when the request is unnecessary or will be superceeded by a request that
+     * will soon be queued.
+     */
+    public void cancelCurrentRequest() {
+        if (mDestroyed) {
+            return;
+        }
+
+        if (mPendingRequest != null) {
+            mPendingRequest.cancel();
+            mPendingRequest = null;
+        }
+    }
+
     public void onFillRequest(@NonNull FillRequest request) {
         cancelScheduledUnbind();
         final PendingFillRequest pendingRequest = new PendingFillRequest(request, this);

@@ -39,8 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)
  */
 public final class FillRequest implements Parcelable {
-    private static AtomicInteger sIdCounter = new AtomicInteger();
-
     /**
      * Indicates autofill was explicitly requested by the user.
      */
@@ -58,12 +56,6 @@ public final class FillRequest implements Parcelable {
     private final @NonNull AssistStructure mStructure;
     private final @Nullable Bundle mClientState;
 
-    /** @hide */
-    public FillRequest(@NonNull AssistStructure structure,
-            @Nullable Bundle clientState, @RequestFlags int flags) {
-        this(sIdCounter.incrementAndGet(), structure, clientState, flags);
-    }
-
     private FillRequest(@NonNull Parcel parcel) {
         mId = parcel.readInt();
         mStructure = parcel.readParcelable(null);
@@ -71,7 +63,8 @@ public final class FillRequest implements Parcelable {
         mFlags = parcel.readInt();
     }
 
-    private FillRequest(int id, @NonNull AssistStructure structure,
+    /** @hide */
+    public FillRequest(int id, @NonNull AssistStructure structure,
             @Nullable Bundle clientState, @RequestFlags int flags) {
         mId = id;
         mFlags = Preconditions.checkFlagsArgument(flags, FLAG_MANUAL_REQUEST);
