@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -507,9 +508,18 @@ interface ITelephony {
     VisualVoicemailSmsFilterSettings getVisualVoicemailSmsFilterSettings(String callingPackage,
             int subId);
 
-    // Get settings set by the package, requires READ_PRIVILEGED_PHONE_STATE permission
-    VisualVoicemailSmsFilterSettings getSystemVisualVoicemailSmsFilterSettings(String packageName,
-            int subId);
+    /**
+     *  Get settings set by the current default dialer, Internal use only.
+     *  Requires READ_PRIVILEGED_PHONE_STATE permission.
+     */
+    VisualVoicemailSmsFilterSettings getActiveVisualVoicemailSmsFilterSettings(int subId);
+
+    /**
+     * Send a visual voicemail SMS. Internal use only.
+     * Requires caller to be the default dialer and have SEND_SMS permission
+     */
+    oneway void sendVisualVoicemailSmsForSubscriber(in String callingPackage, in int subId,
+            in String number, in int port, in String text, in PendingIntent sentIntent);
 
     /**
      * Returns the network type for data transmission
