@@ -1,7 +1,6 @@
 package android.app {
 
   public class Notification implements android.os.Parcelable {
-    method public deprecated int getBadgeIcon();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
   }
 
