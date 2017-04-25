@@ -1180,7 +1180,7 @@ public final class BroadcastQueue {
                 skip = true;
             }
             if (!skip && r.callerInstantApp
-                    && (info.activityInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0
+                    && (info.activityInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) == 0
                     && r.callingUid != info.activityInfo.applicationInfo.uid) {
                 Slog.w(TAG, "Instant App Denial: receiving "
                         + r.intent
