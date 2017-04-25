@@ -361,6 +361,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         expandedIcon.setStaticDrawableColor(color);
     }
 
+    @Override
+    public boolean isDimmable() {
+        if (!getShowingLayout().isDimmable()) {
+            return false;
+        }
+        return super.isDimmable();
+    }
+
     private void updateLimits() {
         for (NotificationContentView l : mLayouts) {
             updateLimitsForView(l);

@@ -55,4 +55,9 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     mActions);
         }
     }
+
+    @Override
+    public boolean isDimmable() {
+        return false;
+    }
 }
