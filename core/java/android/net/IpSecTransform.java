@@ -45,6 +45,8 @@ import java.net.InetAddress;
  *
  * <p>An IpSecTransform may either represent a tunnel mode transform that operates on a wide array
  * of traffic or may represent a transport mode transform operating on a Socket or Sockets.
+ *
+ * @hide
  */
 public final class IpSecTransform implements AutoCloseable {
     private static final String TAG = "IpSecTransform";
