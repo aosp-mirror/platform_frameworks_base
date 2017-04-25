@@ -19,6 +19,7 @@ package android.net.wifi.aware;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -115,9 +116,18 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
      */
     public final String passphrase;
 
+    /**
+     * The UID of the process initializing this network specifier. Validated by receiver using
+     * checkUidIfNecessary() and is used by satisfiedBy() to determine whether matches the
+     * offered network.
+     *
+     * @hide
+     */
+    public final int requestorUid;
+
     /** @hide */
     public WifiAwareNetworkSpecifier(int type, int role, int clientId, int sessionId, int peerId,
-            byte[] peerMac, byte[] pmk, String passphrase) {
+            byte[] peerMac, byte[] pmk, String passphrase, int requestorUid) {
         this.type = type;
         this.role = role;
         this.clientId = clientId;
@@ -126,6 +136,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         this.peerMac = peerMac;
         this.pmk = pmk;
         this.passphrase = passphrase;
+        this.requestorUid = requestorUid;
     }
 
     public static final Creator<WifiAwareNetworkSpecifier> CREATOR =
@@ -140,7 +151,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                         in.readInt(), // peerId
                         in.createByteArray(), // peerMac
                         in.createByteArray(), // pmk
-                        in.readString()); // passphrase
+                        in.readString(), // passphrase
+                        in.readInt()); // requestorUid
                 }
 
                 @Override
@@ -164,6 +176,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         dest.writeByteArray(peerMac);
         dest.writeByteArray(pmk);
         dest.writeString(passphrase);
+        dest.writeInt(requestorUid);
     }
 
     /** @hide */
@@ -186,6 +199,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         result = 31 * result + Arrays.hashCode(peerMac);
         result = 31 * result + Arrays.hashCode(pmk);
         result = 31 * result + Objects.hashCode(passphrase);
+        result = 31 * result + requestorUid;
 
         return result;
     }
@@ -210,7 +224,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 && peerId == lhs.peerId
                 && Arrays.equals(peerMac, lhs.peerMac)
                 && Arrays.equals(pmk, lhs.pmk)
-                && Objects.equals(passphrase, lhs.passphrase);
+                && Objects.equals(passphrase, lhs.passphrase)
+                && requestorUid == lhs.requestorUid;
     }
 
     /** @hide */
@@ -228,7 +243,16 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 .append(", pmk=").append((pmk == null) ? "<null>" : "<non-null>")
                 // masking PII
                 .append(", passphrase=").append((passphrase == null) ? "<null>" : "<non-null>")
+                .append(", requestorUid=").append(requestorUid)
                 .append("]");
         return sb.toString();
+    }
+
+    /** @hide */
+    @Override
+    public void assertValidFromUid(int requestorUid) {
+        if (this.requestorUid != requestorUid) {
+            throw new SecurityException("mismatched UIDs");
+        }
     }
 }

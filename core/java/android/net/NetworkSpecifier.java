@@ -33,4 +33,20 @@ public abstract class NetworkSpecifier {
      * @hide
      */
     public abstract boolean satisfiedBy(NetworkSpecifier other);
+
+    /**
+     * Optional method which can be overriden by concrete implementations of NetworkSpecifier to
+     * check a self-reported UID. A concrete implementation may contain a UID which would be self-
+     * reported by the caller (since NetworkSpecifier implementations should be non-mutable). This
+     * function is called by ConnectivityService and is passed the actual UID of the caller -
+     * allowing the verification of the self-reported UID. In cases of mismatch the implementation
+     * should throw a SecurityException.
+     *
+     * @param requestorUid The UID of the requestor as obtained from its binder.
+     *
+     * @hide
+     */
+    public void assertValidFromUid(int requestorUid) {
+        // empty
+    }
 }

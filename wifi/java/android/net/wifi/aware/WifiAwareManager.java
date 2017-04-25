@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
@@ -453,7 +454,8 @@ public class WifiAwareManager {
                 peerHandle != null ? peerHandle.peerId : 0, // 0 is an invalid peer ID
                 null, // peerMac (not used in this method)
                 pmk,
-                passphrase);
+                passphrase,
+                Process.myUid());
     }
 
     /** @hide */
@@ -490,7 +492,8 @@ public class WifiAwareManager {
                 0, // 0 is an invalid peer ID
                 peer,
                 pmk,
-                passphrase);
+                passphrase,
+                Process.myUid());
     }
 
     private static class WifiAwareEventCallbackProxy extends IWifiAwareEventCallback.Stub {
