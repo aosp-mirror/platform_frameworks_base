@@ -22,6 +22,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.times;
@@ -80,6 +81,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
@@ -2443,7 +2445,6 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testGetAccountsByFeaturesError() throws Exception {
         unlockSystemUser();
-
         mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
         mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_ERROR, "p12", null);
 
@@ -2511,28 +2512,37 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         updateBroadcastCounters(2);
         assertEquals(mVisibleAccountsChangedBroadcasts, 0); // broadcast was not sent
         assertEquals(mLoginAccountsChangedBroadcasts, 2);
-        assertEquals(mAccountRemovedBroadcasts, 0);
     }
 
     @SmallTest
     public void testRegisterAccountListenerWithAddingTwoAccounts() throws Exception {
         unlockSystemUser();
+
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put(AccountManagerServiceTestFixtures.CALLER_PACKAGE,
+            AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+
         mAms.registerAccountListener(
             new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
-            "testpackage"); // opPackageName
-        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+            AccountManagerServiceTestFixtures.CALLER_PACKAGE);
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null, visibility);
         mAms.unregisterAccountListener(
             new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
-            "testpackage"); // opPackageName
-        mAms.addAccountExplicitly(
-            AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p11", null);
+            AccountManagerServiceTestFixtures.CALLER_PACKAGE);
+
+        addAccountRemovedReceiver(AccountManagerServiceTestFixtures.CALLER_PACKAGE);
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p11", null, visibility);
 
         updateBroadcastCounters(3);
         assertEquals(mVisibleAccountsChangedBroadcasts, 1);
         assertEquals(mLoginAccountsChangedBroadcasts, 2);
+        assertEquals(mAccountRemovedBroadcasts, 0);
 
         mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS);
-        mAms.registerAccountListener( null /* accountTypes */, "testpackage");
+        mAms.registerAccountListener( null /* accountTypes */,
+            AccountManagerServiceTestFixtures.CALLER_PACKAGE);
         mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE);
 
         updateBroadcastCounters(8);
@@ -2544,6 +2554,13 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testRegisterAccountListenerForThreePackages() throws Exception {
         unlockSystemUser();
+
+        addAccountRemovedReceiver("testpackage1");
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put("testpackage1", AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+        visibility.put("testpackage2", AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+        visibility.put("testpackage3", AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+
         mAms.registerAccountListener(
             new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
             "testpackage1"); // opPackageName
@@ -2553,7 +2570,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mAms.registerAccountListener(
             new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
             "testpackage3"); // opPackageName
-        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null, visibility);
         updateBroadcastCounters(4);
         assertEquals(mVisibleAccountsChangedBroadcasts, 3);
         assertEquals(mLoginAccountsChangedBroadcasts, 1);
@@ -2572,10 +2590,44 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mAms.addAccountExplicitly(
             AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS_TYPE_2, "p11", null);
 
-        updateBroadcastCounters(9);
+        updateBroadcastCounters(8);
         assertEquals(mVisibleAccountsChangedBroadcasts, 5);
         assertEquals(mLoginAccountsChangedBroadcasts, 3);
         assertEquals(mAccountRemovedBroadcasts, 1);
+    }
+
+    @SmallTest
+    public void testRegisterAccountListenerForAddingAccountWithVisibility() throws Exception {
+        unlockSystemUser();
+
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put("testpackage1", AccountManager.VISIBILITY_NOT_VISIBLE);
+        visibility.put("testpackage2", AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE);
+        visibility.put("testpackage3", AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+
+        addAccountRemovedReceiver("testpackage1");
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage1"); // opPackageName
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage2"); // opPackageName
+        mAms.registerAccountListener(
+            new String [] {AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1},
+            "testpackage3"); // opPackageName
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null, visibility);
+
+        updateBroadcastCounters(2);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 1);
+        assertEquals(mLoginAccountsChangedBroadcasts, 1);
+
+        mAms.removeAccountInternal(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS);
+
+        updateBroadcastCounters(4);
+        assertEquals(mVisibleAccountsChangedBroadcasts, 2);
+        assertEquals(mLoginAccountsChangedBroadcasts, 2);
+        assertEquals(mAccountRemovedBroadcasts, 0); // account was never visible.
     }
 
     @SmallTest
@@ -2609,19 +2661,29 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mLoginAccountsChangedBroadcasts = 0;
         mAccountRemovedBroadcasts = 0;
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mMockContext, times(expectedBroadcasts)).sendBroadcastAsUser(captor.capture(),
+        verify(mMockContext, atLeast(expectedBroadcasts)).sendBroadcastAsUser(captor.capture(),
             any(UserHandle.class));
         for (Intent intent : captor.getAllValues()) {
             if (AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED.equals(intent.getAction())) {
                 mVisibleAccountsChangedBroadcasts++;
-            }
-            if (AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION.equals(intent.getAction())) {
+            } else if (AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION.equals(intent.getAction())) {
                 mLoginAccountsChangedBroadcasts++;
-            }
-            if (AccountManager.ACTION_ACCOUNT_REMOVED.equals(intent.getAction())) {
+            } else if (AccountManager.ACTION_ACCOUNT_REMOVED.equals(intent.getAction())) {
                 mAccountRemovedBroadcasts++;
             }
         }
+    }
+
+    private void addAccountRemovedReceiver(String packageName) {
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.applicationInfo =  new ApplicationInfo();
+        resolveInfo.activityInfo.applicationInfo.packageName = packageName;
+
+        List<ResolveInfo> accountRemovedReceivers = new ArrayList<>();
+        accountRemovedReceivers.add(resolveInfo);
+        when(mMockPackageManager.queryBroadcastReceiversAsUser(any(Intent.class), anyInt(),
+            anyInt())).thenReturn(accountRemovedReceivers);
     }
 
     @SmallTest
