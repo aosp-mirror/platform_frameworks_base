@@ -1,5 +1,6 @@
 /*
-** Copyright 2017, The Android Open Source Project
+**
+** Copyright 2016, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,19 +17,4 @@
 
 package android.telephony.mbms;
 
-import android.telephony.mbms.DownloadRequest;
-import android.telephony.mbms.FileInfo;
-
-/**
- * The optional interface used by download clients to track progress.
- * @hide
- */
-interface IDownloadListener
-{
-    /**
-     * Gives progress callbacks for a given DownloadRequest.  Includes a FileInfo
-     * as the list of files may not have been known at request-time.
-     */
-    void progress(in DownloadRequest request, in FileInfo fileInfo, int downloadSize,
-            int currentSize, int decodedPercent);
-}
+parcelable UriPathPair;

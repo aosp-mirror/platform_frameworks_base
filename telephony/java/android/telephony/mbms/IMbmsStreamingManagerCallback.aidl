@@ -24,7 +24,7 @@ import java.util.List;
  * The interface the clients top-level streaming listener will satisfy.
  * @hide
  */
-interface IMbmsStreamingManagerListener
+interface IMbmsStreamingManagerCallback
 {
     void error(int errorCode, String message);
 

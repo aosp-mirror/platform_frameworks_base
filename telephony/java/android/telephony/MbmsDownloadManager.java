@@ -16,14 +16,16 @@
 
 package android.telephony;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.net.Uri;
-import android.telephony.mbms.DownloadListener;
+import android.os.RemoteException;
+import android.telephony.mbms.DownloadCallback;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.DownloadStatus;
-import android.telephony.mbms.FileServiceInfo;
-import android.telephony.mbms.IMbmsDownloadManagerListener;
+import android.telephony.mbms.IMbmsDownloadManagerCallback;
+import android.telephony.mbms.MbmsInitializationException;
+import android.telephony.mbms.vendor.IMbmsDownloadService;
+import android.util.Log;
 
 import java.util.List;
 
@@ -31,8 +33,134 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 /** @hide */
 public class MbmsDownloadManager {
+    private static final String LOG_TAG = MbmsDownloadManager.class.getSimpleName();
+
+    /**
+     * The MBMS middleware should send this when a download of single file has completed or
+     * failed. Mandatory extras are
+     * {@link #EXTRA_RESULT}
+     * {@link #EXTRA_INFO}
+     * {@link #EXTRA_REQUEST}
+     * {@link #EXTRA_TEMP_LIST}
+     * {@link #EXTRA_FINAL_URI}
+     *
+     * TODO: future systemapi
+     */
+    public static final String ACTION_DOWNLOAD_RESULT_INTERNAL =
+            "android.telephony.mbms.action.DOWNLOAD_RESULT_INTERNAL";
+
+    /**
+     * The MBMS middleware should send this when it wishes to request {@code content://} URIs to
+     * serve as temp files for downloads or when it wishes to resume paused downloads. Mandatory
+     * extras are
+     * {@link #EXTRA_REQUEST}
+     *
+     * Optional extras are
+     * {@link #EXTRA_FD_COUNT} (0 if not present)
+     * {@link #EXTRA_PAUSED_LIST} (empty if not present)
+     *
+     * TODO: future systemapi
+     */
+    public static final String ACTION_FILE_DESCRIPTOR_REQUEST =
+            "android.telephony.mbms.action.FILE_DESCRIPTOR_REQUEST";
+
+    /**
+     * The MBMS middleware should send this when it wishes to clean up temp  files in the app's
+     * filesystem. Mandatory extras are:
+     * {@link #EXTRA_TEMP_FILES_IN_USE}
+     *
+     * TODO: future systemapi
+     */
+    public static final String ACTION_CLEANUP =
+            "android.telephony.mbms.action.CLEANUP";
+
+    /**
+     * Integer extra indicating the result code of the download.
+     * TODO: put in link to error list
+     * TODO: future systemapi (here and and all extras)
+     */
+    public static final String EXTRA_RESULT = "android.telephony.mbms.extra.RESULT";
+
+    /**
+     * Extra containing the {@link android.telephony.mbms.FileInfo} for which the download result
+     * is for. Must not be null.
+     */
+    public static final String EXTRA_INFO = "android.telephony.mbms.extra.INFO";
+
+    /**
+     * Extra containing the {@link DownloadRequest} for which the download result or file
+     * descriptor request is for. Must not be null.
+     */
+    public static final String EXTRA_REQUEST = "android.telephony.mbms.extra.REQUEST";
+
+    /**
+     * Extra containing a {@link List} of {@link Uri}s that were used as temp files for this
+     * completed file. These {@link Uri}s should have scheme {@code file://}, and the temp
+     * files will be deleted upon receipt of the intent.
+     * May be null.
+     */
+    public static final String EXTRA_TEMP_LIST = "android.telephony.mbms.extra.TEMP_LIST";
+
+    /**
+     * Extra containing a single {@link Uri} indicating the path to the temp file in which the
+     * decoded downloaded file resides. Must not be null.
+     */
+    public static final String EXTRA_FINAL_URI = "android.telephony.mbms.extra.FINAL_URI";
+
+    /**
+     * Extra containing an integer indicating the number of temp files requested.
+     */
+    public static final String EXTRA_FD_COUNT = "android.telephony.mbms.extra.FD_COUNT";
+
+    /**
+     * Extra containing a list of {@link Uri}s that the middleware is requesting access to via
+     * {@link #ACTION_FILE_DESCRIPTOR_REQUEST} in order to resume downloading. These {@link Uri}s
+     * should have scheme {@code file://}.
+     */
+    public static final String EXTRA_PAUSED_LIST = "android.telephony.mbms.extra.PAUSED_LIST";
+
+    /**
+     * Extra containing a list of {@link android.telephony.mbms.UriPathPair}s, used in the
+     * response to {@link #ACTION_FILE_DESCRIPTOR_REQUEST}. These are temp files that are meant
+     * to be used for new file downloads.
+     */
+    public static final String EXTRA_FREE_URI_LIST = "android.telephony.mbms.extra.FREE_URI_LIST";
+
+    /**
+     * Extra containing a list of {@link android.telephony.mbms.UriPathPair}s, used in the
+     * response to {@link #ACTION_FILE_DESCRIPTOR_REQUEST}. These
+     * {@link android.telephony.mbms.UriPathPair}s contain {@code content://} URIs that provide
+     * access to previously paused downloads.
+     */
+    public static final String EXTRA_PAUSED_URI_LIST =
+            "android.telephony.mbms.extra.PAUSED_URI_LIST";
+
+    /**
+     * Extra containing a list of {@link Uri}s indicating temp files which the middleware is
+     * still using.
+     */
+    public static final String EXTRA_TEMP_FILES_IN_USE =
+            "android.telephony.mbms.extra.TEMP_FILES_IN_USE";
+
+    public static final int RESULT_SUCCESSFUL = 1;
+    public static final int RESULT_CANCELLED  = 2;
+    public static final int RESULT_EXPIRED    = 3;
+    // TODO - more results!
+
     private final Context mContext;
     private int mSubId = INVALID_SUBSCRIPTION_ID;
+
+    private IMbmsDownloadService mService;
+    private final IMbmsDownloadManagerCallback mCallback;
+    private final String mDownloadAppName;
+
+    private MbmsDownloadManager(Context context, IMbmsDownloadManagerCallback callback,
+            String downloadAppName, int subId) {
+        mContext = context;
+        mCallback = callback;
+        mDownloadAppName = downloadAppName;
+        mSubId = subId;
+    }
 
     /**
      * Create a new MbmsDownloadManager using the system default data subscription ID.
@@ -42,9 +170,13 @@ public class MbmsDownloadManager {
      *
      * @hide
      */
-    public MbmsDownloadManager(Context context, IMbmsDownloadManagerListener listener,
-            String downloadAppName) {
-        mContext = context;
+    public static MbmsDownloadManager createManager(Context context,
+            IMbmsDownloadManagerCallback listener, String downloadAppName)
+            throws MbmsInitializationException{
+        MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, downloadAppName,
+                SubscriptionManager.getDefaultSubscriptionId());
+        mdm.bindAndInitialize();
+        return mdm;
     }
 
     /**
@@ -55,9 +187,23 @@ public class MbmsDownloadManager {
      *
      * @hide
      */
-    public MbmsDownloadManager(Context context, IMbmsDownloadManagerListener listener,
-            String downloadAppName, int subId) {
-        mContext = context;
+
+    public static MbmsDownloadManager createManager(Context context,
+            IMbmsDownloadManagerCallback listener, String downloadAppName, int subId)
+            throws MbmsInitializationException {
+        MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, downloadAppName,
+                subId);
+        mdm.bindAndInitialize();
+        return mdm;
+    }
+
+    private void bindAndInitialize() throws MbmsInitializationException {
+        // TODO: bind
+        try {
+            mService.initialize(mDownloadAppName, mSubId, mCallback);
+        } catch (RemoteException e) {
+            throw new MbmsInitializationException(0); // TODO: proper error code
+        }
     }
 
     /**
@@ -84,31 +230,9 @@ public class MbmsDownloadManager {
     }
 
 
-    public static final String EXTRA_REQUEST         = "extraRequest";
-
-    public static final int RESULT_SUCCESSFUL = 1;
-    public static final int RESULT_CANCELLED  = 2;
-    public static final int RESULT_EXPIRED    = 3;
-    // TODO - more results!
-
-    public static final String EXTRA_RESULT          = "extraResult";
-    public static final String EXTRA_URI             = "extraDownloadedUri";
-
     /**
      * Requests a future download.
      * returns a token which may be used to cancel a download.
-     * fileServiceInfo indicates what FileService to download from
-     * source indicates which file to download from the given FileService.  This is
-     *     an optional field - it may be null or empty to indicate download everything from
-     *     the FileService.
-     * destination is a file URI for where in the apps accessible storage locations to write
-     *     the content.  This URI may be used to store temporary data and should not be
-     *     accessed until the PendingIntent is called indicating success.
-     * resultIntent is sent when each file is completed and when the request is concluded
-     *     either via TTL expiration, cancel or error.
-     *     This intent is sent with three extras: a {@link DownloadRequest} typed extra called
-     *     {@link #EXTRA_REQUEST}, an Integer called {@link #EXTRA_RESULT} for the result code
-     *     and a {@link Uri} called {@link #EXTRA_URI} to the resulting file (if successful).
      * downloadListener is an optional callback object which can be used to get progress reports
      *     of a currently occuring download.  Note this can only run while the calling app
      *     is running, so future downloads will simply result in resultIntents being sent
@@ -118,7 +242,7 @@ public class MbmsDownloadManager {
      *
      * Asynchronous errors through the listener include any of the errors
      */
-    public DownloadRequest download(DownloadRequest downloadRequest, DownloadListener listener) {
+    public DownloadRequest download(DownloadRequest downloadRequest, DownloadCallback listener) {
         return null;
     }
 
@@ -168,7 +292,7 @@ public class MbmsDownloadManager {
     }
 
     /**
-     * Resets middleware knowldge regarding this download request.
+     * Resets middleware knowledge regarding this download request.
      *
      * This state consists of knowledge of what files have already been downloaded.
      * Normally the middleware won't download files who's hash matches previously downloaded
@@ -187,5 +311,15 @@ public class MbmsDownloadManager {
     }
 
     public void dispose() {
+        try {
+            if (mService != null) {
+                mService.dispose(mDownloadAppName, mSubId);
+            } else {
+                Log.i(LOG_TAG, "Service already dead");
+            }
+        } catch (RemoteException e) {
+            // Ignore
+            Log.i(LOG_TAG, "Remote exception while disposing of service");
+        }
     }
 }
