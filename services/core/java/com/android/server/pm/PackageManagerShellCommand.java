@@ -1454,10 +1454,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -f: force compilation even if not needed");
         pw.println("      -m: select compilation mode");
         pw.println("          MODE is one of the dex2oat compiler filters:");
-        pw.println("            verify-none");
-        pw.println("            verify-at-runtime");
-        pw.println("            verify-profile");
-        pw.println("            interpret-only");
+        pw.println("            assume-verified");
+        pw.println("            extract");
+        pw.println("            verify");
+        pw.println("            quicken");
         pw.println("            space-profile");
         pw.println("            space");
         pw.println("            speed-profile");
