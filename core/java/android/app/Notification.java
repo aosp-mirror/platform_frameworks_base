@@ -4994,6 +4994,22 @@ public class Notification implements Parcelable
         return false;
     }
 
+
+    /**
+     * @return true if this is a media notification
+     *
+     * @hide
+     */
+    public boolean isMediaNotification() {
+        Class<? extends Style> style = getNotificationStyle();
+        if (MediaStyle.class.equals(style)) {
+            return true;
+        } else if (DecoratedMediaCustomViewStyle.class.equals(style)) {
+            return true;
+        }
+        return false;
+    }
+
     private boolean hasLargeIcon() {
         return mLargeIcon != null || largeIcon != null;
     }
