@@ -17,9 +17,9 @@
 
 package android.hardware.usb;
 
-import com.android.internal.util.Preconditions;
-
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +29,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
 
@@ -109,6 +111,7 @@ public class UsbManager {
      * for the attached device
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_DEVICE_ATTACHED =
             "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 
@@ -121,6 +124,7 @@ public class UsbManager {
      * for the detached device
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_DEVICE_DETACHED =
             "android.hardware.usb.action.USB_DEVICE_DETACHED";
 
@@ -133,6 +137,7 @@ public class UsbManager {
      * for the attached accessory
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_ACCESSORY_ATTACHED =
             "android.hardware.usb.action.USB_ACCESSORY_ATTACHED";
 
@@ -145,6 +150,7 @@ public class UsbManager {
      * for the attached accessory that was detached
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_ACCESSORY_DETACHED =
             "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
 

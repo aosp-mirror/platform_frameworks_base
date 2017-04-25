@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.util.Log;
 
@@ -67,6 +69,7 @@ public class DropBoxManager {
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DROPBOX_ENTRY_ADDED =
         "android.intent.action.DROPBOX_ENTRY_ADDED";
 
