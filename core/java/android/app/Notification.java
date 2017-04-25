@@ -1106,6 +1106,45 @@ public class Notification implements Parcelable
     private String mShortcutId;
     private CharSequence mSettingsText;
 
+    /** @hide */
+    @IntDef(prefix = { "GROUP_ALERT_" }, value = {
+            GROUP_ALERT_ALL, GROUP_ALERT_CHILDREN, GROUP_ALERT_SUMMARY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GroupAlertBehavior {}
+
+    /**
+     * Constant for {@link Builder#setGroupAlertBehavior(int)}, meaning that all notifications in a
+     * group with sound or vibration ought to make sound or vibrate (respectively), so this
+     * notification will not be muted when it is in a group.
+     */
+    public static final int GROUP_ALERT_ALL = 0;
+
+    /**
+     * Constant for {@link Builder#setGroupAlertBehavior(int)}, meaning that all children
+     * notification in a group should be silenced (no sound or vibration) even if they are posted
+     * to a {@link NotificationChannel} that has sound and/or vibration. Use this constant to
+     * mute this notification if this notification is a group child.
+     *
+     * <p> For example, you might want to use this constant if you post a number of children
+     * notifications at once (say, after a periodic sync), and only need to notify the user
+     * audibly once.
+     */
+    public static final int GROUP_ALERT_SUMMARY = 1;
+
+    /**
+     * Constant for {@link Builder#setGroupAlertBehavior(int)}, meaning that the summary
+     * notification in a group should be silenced (no sound or vibration) even if they are
+     * posted to a {@link NotificationChannel} that has sound and/or vibration. Use this constant
+     * to mute this notification if this notification is a group summary.
+     *
+     * <p>For example, you might want to use this constant if only the children notifications
+     * in your group have content and the summary is only used to visually group notifications.
+     */
+    public static final int GROUP_ALERT_CHILDREN = 2;
+
+    private int mGroupAlertBehavior = GROUP_ALERT_ALL;
+
     /**
      * If this notification is being shown as a badge, always show as a number.
      */
@@ -1878,6 +1917,8 @@ public class Notification implements Parcelable
         if (parcel.readInt() != 0) {
             mSettingsText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         }
+
+        mGroupAlertBehavior = parcel.readInt();
     }
 
     @Override
@@ -1990,6 +2031,7 @@ public class Notification implements Parcelable
         that.mShortcutId = this.mShortcutId;
         that.mBadgeIcon = this.mBadgeIcon;
         that.mSettingsText = this.mSettingsText;
+        that.mGroupAlertBehavior = this.mGroupAlertBehavior;
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
@@ -2266,6 +2308,8 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
+
+        parcel.writeInt(mGroupAlertBehavior);
     }
 
     /**
@@ -2471,17 +2515,6 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @removed
-     * Returns what icon should be shown for this notification if it is being displayed in a
-     * Launcher that supports badging. Will be one of {@link #BADGE_ICON_NONE},
-     * {@link #BADGE_ICON_SMALL}, or {@link #BADGE_ICON_LARGE}.
-     */
-    @Deprecated
-    public int getBadgeIcon() {
-        return mBadgeIcon;
-    }
-
-    /**
      * Returns what icon should be shown for this notification if it is being displayed in a
      * Launcher that supports badging. Will be one of {@link #BADGE_ICON_NONE},
      * {@link #BADGE_ICON_SMALL}, or {@link #BADGE_ICON_LARGE}.
@@ -2503,6 +2536,15 @@ public class Notification implements Parcelable
      */
     public CharSequence getSettingsText() {
         return mSettingsText;
+    }
+
+    /**
+     * Returns which type of notifications in a group are responsible for audibly alerting the
+     * user. See {@link #GROUP_ALERT_ALL}, {@link #GROUP_ALERT_CHILDREN},
+     * {@link #GROUP_ALERT_SUMMARY}.
+     */
+    public @GroupAlertBehavior int getGroupAlertBehavior() {
+        return mGroupAlertBehavior;
     }
 
     /**
@@ -2749,6 +2791,19 @@ public class Notification implements Parcelable
          */
         public Builder setBadgeIconType(int icon) {
             mN.mBadgeIcon = icon;
+            return this;
+        }
+
+        /**
+         * Sets the group alert behavior for this notification. Use this method to mute this
+         * notification if alerts for this notification's group should be handled by a different
+         * notification. This is only applicable for notifications that belong to a
+         * {@link #setGroup(String) group}.
+         *
+         * <p> The default value is {@link #GROUP_ALERT_ALL}.</p>
+         */
+        public Builder setGroupAlertBehavior(@GroupAlertBehavior int groupAlertBehavior) {
+            mN.mGroupAlertBehavior = groupAlertBehavior;
             return this;
         }
 
