@@ -95,9 +95,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     public static final int CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 0x00000002;
 
     /**
-     * Capability: This accessibility service can request enhanced web accessibility
-     * enhancements. For example, installing scripts to make app content more accessible.
-     * @see android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
+     * @deprecated No longer used
      */
     public static final int CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000004;
 
@@ -237,22 +235,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 0x0000004;
 
     /**
-     * This flag requests from the system to enable web accessibility enhancing
-     * extensions. Such extensions aim to provide improved accessibility support
-     * for content presented in a {@link android.webkit.WebView}. An example of such
-     * an extension is injecting JavaScript from a secure source. The system will enable
-     * enhanced web accessibility if there is at least one accessibility service
-     * that has this flag set. Hence, clearing this flag does not guarantee that the
-     * device will not have enhanced web accessibility enabled since there may be
-     * another enabled service that requested it.
-     * <p>
-     * Services that want to set this flag have to declare this capability
-     * in their meta-data by setting the attribute {@link android.R.attr
-     * #canRequestEnhancedWebAccessibility canRequestEnhancedWebAccessibility} to
-     * true, otherwise this flag will be ignored. For how to declare the meta-data
-     * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
-     * </p>
-     * @see android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
+     * @deprecated No longer used
      */
     public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000008;
 
@@ -526,10 +509,6 @@ public class AccessibilityServiceInfo implements Parcelable {
                 mCapabilities |= CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION;
             }
             if (asAttributes.getBoolean(com.android.internal.R.styleable
-                        .AccessibilityService_canRequestEnhancedWebAccessibility, false)) {
-                    mCapabilities |= CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY;
-            }
-            if (asAttributes.getBoolean(com.android.internal.R.styleable
                     .AccessibilityService_canRequestFilterKeyEvents, false)) {
                 mCapabilities |= CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS;
             }
@@ -659,7 +638,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
      * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
-     * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
      * @see #CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS
      * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
      * @see #CAPABILITY_CAN_PERFORM_GESTURES
@@ -676,7 +654,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
      * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
-     * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
      * @see #CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS
      * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
      * @see #CAPABILITY_CAN_PERFORM_GESTURES
@@ -1074,10 +1051,6 @@ public class AccessibilityServiceInfo implements Parcelable {
                     new CapabilityInfo(CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION,
                             R.string.capability_title_canRequestTouchExploration,
                             R.string.capability_desc_canRequestTouchExploration));
-            sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
-                    new CapabilityInfo(CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
-                            R.string.capability_title_canRequestEnhancedWebAccessibility,
-                            R.string.capability_desc_canRequestEnhancedWebAccessibility));
             sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
                     new CapabilityInfo(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
                             R.string.capability_title_canRequestFilterKeyEvents,

@@ -775,7 +775,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if ((flags & UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES) == 0) {
                 // Set the temporary state, and use it instead of settings
                 userState.mIsTouchExplorationEnabled = false;
-                userState.mIsEnhancedWebAccessibilityEnabled = false;
                 userState.mIsDisplayMagnificationEnabled = false;
                 userState.mIsNavBarMagnificationEnabled = false;
                 userState.mIsAutoclickEnabled = false;
@@ -826,7 +825,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
 
             userState.mIsTouchExplorationEnabled = touchExplorationEnabled;
-            userState.mIsEnhancedWebAccessibilityEnabled = false;
             userState.mIsDisplayMagnificationEnabled = false;
             userState.mIsNavBarMagnificationEnabled = false;
             userState.mIsAutoclickEnabled = false;
@@ -1727,7 +1725,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateFilterKeyEventsLocked(userState);
         updateTouchExplorationLocked(userState);
         updatePerformGesturesLocked(userState);
-        updateEnhancedWebAccessibilityLocked(userState);
         updateDisplayDaltonizerLocked(userState);
         updateDisplayInversionLocked(userState);
         updateMagnificationLocked(userState);
@@ -1846,7 +1843,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         somethingChanged |= readTouchExplorationGrantedAccessibilityServicesLocked(userState);
         somethingChanged |= readTouchExplorationEnabledSettingLocked(userState);
         somethingChanged |= readHighTextContrastEnabledSettingLocked(userState);
-        somethingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
         somethingChanged |= readMagnificationEnabledSettingsLocked(userState);
         somethingChanged |= readAutoclickEnabledSettingLocked(userState);
         somethingChanged |= readAccessibilityShortcutSettingLocked(userState);
@@ -1905,17 +1901,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return true;
         }
         return false;
-    }
-
-    private boolean readEnhancedWebAccessibilityEnabledChangedLocked(UserState userState) {
-         final boolean enhancedWeAccessibilityEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION,
-                0, userState.mUserId) == 1;
-         if (enhancedWeAccessibilityEnabled != userState.mIsEnhancedWebAccessibilityEnabled) {
-             userState.mIsEnhancedWebAccessibilityEnabled = enhancedWeAccessibilityEnabled;
-             return true;
-         }
-         return false;
     }
 
     private boolean readHighTextContrastEnabledSettingLocked(UserState userState) {
@@ -2080,40 +2065,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION) != 0) {
                 return true;
             }
-        }
-        return false;
-    }
-
-    private void updateEnhancedWebAccessibilityLocked(UserState userState) {
-        boolean enabled = false;
-        final int serviceCount = userState.mBoundServices.size();
-        for (int i = 0; i < serviceCount; i++) {
-            Service service = userState.mBoundServices.get(i);
-            if (canRequestAndRequestsEnhancedWebAccessibilityLocked(service)) {
-                enabled = true;
-                break;
-            }
-        }
-        if (enabled != userState.mIsEnhancedWebAccessibilityEnabled) {
-            userState.mIsEnhancedWebAccessibilityEnabled = enabled;
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, enabled ? 1 : 0,
-                        userState.mUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
-    private boolean canRequestAndRequestsEnhancedWebAccessibilityLocked(Service service) {
-        if (!service.canReceiveEventsLocked() || !service.mRequestEnhancedWebAccessibility ) {
-            return false;
-        }
-        if (service.mIsAutomation || (service.mAccessibilityServiceInfo.getCapabilities()
-               & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0) {
-            return true;
         }
         return false;
     }
@@ -2697,8 +2648,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mRequestTouchExplorationMode;
 
-        boolean mRequestEnhancedWebAccessibility;
-
         boolean mRequestFilterKeyEvents;
 
         boolean mRetrieveInteractiveWindows;
@@ -2854,8 +2803,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             mRequestTouchExplorationMode = (info.flags
                     & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
-            mRequestEnhancedWebAccessibility = (info.flags
-                    & AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0;
             mRequestFilterKeyEvents = (info.flags
                     & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
             mRetrieveInteractiveWindows = (info.flags
@@ -4933,7 +4880,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public boolean mIsTouchExplorationEnabled;
         public boolean mIsTextHighContrastEnabled;
-        public boolean mIsEnhancedWebAccessibilityEnabled;
         public boolean mIsDisplayMagnificationEnabled;
         public boolean mIsNavBarMagnificationEnabled;
         public boolean mIsAutoclickEnabled;
@@ -5002,7 +4948,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mEnabledServices.clear();
             mTouchExplorationGrantedServices.clear();
             mIsTouchExplorationEnabled = false;
-            mIsEnhancedWebAccessibilityEnabled = false;
             mIsDisplayMagnificationEnabled = false;
             mIsNavBarMagnificationEnabled = false;
             mServiceAssignedToAccessibilityButton = null;
@@ -5051,9 +4996,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mTouchExplorationGrantedAccessibilityServicesUri = Settings.Secure
                 .getUriFor(Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
 
-        private final Uri mEnhancedWebAccessibilityUri = Settings.Secure
-                .getUriFor(Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION);
-
         private final Uri mDisplayInversionEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
 
@@ -5092,8 +5034,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mTouchExplorationGrantedAccessibilityServicesUri,
-                    false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(mEnhancedWebAccessibilityUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mDisplayInversionEnabledUri, false, this, UserHandle.USER_ALL);
@@ -5142,10 +5082,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 } else if (mTouchExplorationGrantedAccessibilityServicesUri.equals(uri)) {
                     if (readTouchExplorationGrantedAccessibilityServicesLocked(userState)) {
-                        onUserStateChangedLocked(userState);
-                    }
-                } else if (mEnhancedWebAccessibilityUri.equals(uri)) {
-                    if (readEnhancedWebAccessibilityEnabledChangedLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mDisplayDaltonizerEnabledUri.equals(uri)
