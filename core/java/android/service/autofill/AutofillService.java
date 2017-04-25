@@ -223,9 +223,11 @@ public abstract class AutofillService extends Service {
      * @hide
      */
     @Deprecated
-    public abstract void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
+    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
             int flags, @NonNull CancellationSignal cancellationSignal,
-            @NonNull FillCallback callback);
+            @NonNull FillCallback callback) {
+
+    }
 
     /**
      * Called when user requests service to save the fields of an {@link Activity}.
@@ -260,8 +262,10 @@ public abstract class AutofillService extends Service {
      * @hide
      */
     @Deprecated
-    public abstract void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
-            @NonNull SaveCallback callback);
+    public void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
+            @NonNull SaveCallback callback) {
+
+    }
 
     /**
      * Called when the Android system disconnects from the service.

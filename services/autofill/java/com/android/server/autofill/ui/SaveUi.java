@@ -159,19 +159,20 @@ final class SaveUi {
         }
 
         final TextView noButton = view.findViewById(R.id.autofill_save_no);
-        if (info.getNegativeActionTitle() != null) {
-            noButton.setText(info.getNegativeActionTitle());
-            noButton.setOnClickListener((v) -> mListener.onCancel(
-                    info.getNegativeActionListener()));
+        if (info.getNegativeActionStyle() == SaveInfo.NEGATIVE_BUTTON_STYLE_REJECT) {
+            noButton.setText(R.string.save_password_notnow);
         } else {
-            noButton.setOnClickListener((v) -> mListener.onCancel(null));
+            noButton.setText(R.string.autofill_save_no);
         }
+        noButton.setOnClickListener((v) -> mListener.onCancel(
+                info.getNegativeActionListener()));
 
         final View yesButton = view.findViewById(R.id.autofill_save_yes);
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
         final View closeButton = view.findViewById(R.id.autofill_save_close);
-        closeButton.setOnClickListener((v) -> mListener.onCancel(null));
+        closeButton.setOnClickListener((v) -> mListener.onCancel(
+                info.getNegativeActionListener()));
 
         mDialog = new Dialog(context, R.style.Theme_Material_Panel);
         mDialog.setContentView(view);
