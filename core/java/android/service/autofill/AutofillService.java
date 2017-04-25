@@ -210,6 +210,8 @@ public abstract class AutofillService extends Service {
      *     this to notify you that the fill result is no longer needed and you should stop
      *     handling this fill request in order to save resources.
      * @param callback object used to notify the result of the request.
+     *
+     * @hide
      */
     @Deprecated
     public abstract void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
@@ -248,6 +250,8 @@ public abstract class AutofillService extends Service {
      *        conserve resources.
      *        See {@link FillResponse} for examples of multiple-sections requests.
      * @param callback object used to notify the result of the request.
+     *
+     * @hide
      */
     @Deprecated
     public abstract void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
@@ -261,6 +265,7 @@ public abstract class AutofillService extends Service {
     public void onDisconnected() {
     }
 
+    /** @hide */
     @Deprecated
     public final void disableSelf() {
         getSystemService(AutofillManager.class).disableOwnedAutofillServices();
