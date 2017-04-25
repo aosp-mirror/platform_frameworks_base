@@ -17,6 +17,7 @@ package com.android.settingslib.drawer;
 
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -27,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -117,14 +117,6 @@ public class SettingsDrawerActivity extends Activity {
         super.onPause();
     }
 
-    /**
-     * Gets the name of the intent action of the default setting app. Used to launch setting app
-     * when Settings Home is clicked.
-     */
-    public String getSettingAction() {
-        return Settings.ACTION_SETTINGS;
-    }
-
     public void addCategoryListener(CategoryListener listener) {
         mCategoryListeners.add(listener);
     }
@@ -142,7 +134,7 @@ public class SettingsDrawerActivity extends Activity {
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
-        final ViewGroup parent = (ViewGroup) findViewById(R.id.content_frame);
+        final ViewGroup parent = findViewById(R.id.content_frame);
         if (parent != null) {
             parent.removeAllViews();
         }
@@ -159,11 +151,14 @@ public class SettingsDrawerActivity extends Activity {
         ((ViewGroup) findViewById(R.id.content_frame)).addView(view, params);
     }
 
-    public void showMenuIcon() {
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+    private void showMenuIcon() {
+        final ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
-    protected void onCategoriesChanged() {
+    private void onCategoriesChanged() {
         final int N = mCategoryListeners.size();
         for (int i = 0; i < N; i++) {
             mCategoryListeners.get(i).onCategoriesChanged();
