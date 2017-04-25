@@ -162,6 +162,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IntArray;
+import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -1443,17 +1444,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // a Binder interface which would create a new Configuration. Consequently we have to
             // always create a new Configuration here.
 
-            final Configuration globalConfiguration =
-                new Configuration(mService.getGlobalConfiguration());
-            r.setLastReportedGlobalConfiguration(globalConfiguration);
-            final Configuration mergedOverrideConfiguration =
-                new Configuration(r.getMergedOverrideConfiguration());
-            r.setLastReportedMergedOverrideConfiguration(mergedOverrideConfiguration);
+            final MergedConfiguration mergedConfiguration = new MergedConfiguration(
+                    mService.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
+            r.setLastReportedConfiguration(mergedConfiguration);
 
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
-                    globalConfiguration,
-                    mergedOverrideConfiguration, r.compat,
+                    // TODO: Have this take the merged configuration instead of separate global and
+                    // override configs.
+                    mergedConfiguration.getGlobalConfiguration(),
+                    mergedConfiguration.getOverrideConfiguration(), r.compat,
                     r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
                     r.persistentState, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profilerInfo);

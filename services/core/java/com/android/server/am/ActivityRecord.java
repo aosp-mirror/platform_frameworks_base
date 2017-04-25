@@ -62,6 +62,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.EMPTY;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
@@ -139,6 +141,7 @@ import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.AppTransitionAnimationSpec;
@@ -240,13 +243,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     long pauseTime;         // last time we started pausing the activity
     long launchTickTime;    // base time for launch tick messages
-    // TODO: Refactor mLastReportedConfiguration and mLastReportedOverrideConfiguration to use a
-    // MergedConfiguration object for clarity.
-    private Configuration mLastReportedConfiguration; // configuration activity was last running in
-    // Overridden configuration by the activity task
-    // WARNING: Reference points to {@link TaskRecord#getMergedOverrideConfig}, so its internal
-    // state should never be altered directly.
-    private Configuration mLastReportedOverrideConfiguration;
+    // Last configuration reported to the activity in the client process.
+    private MergedConfiguration mLastReportedConfiguration;
     private int mLastReportedDisplayId;
     CompatibilityInfo compat;// last used compatibility mode
     ActivityRecord resultTo; // who started this entry, so will get our reply
@@ -344,10 +342,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     /**
      * Temp configs used in {@link #ensureActivityConfigurationLocked(int, boolean)}
      */
-    private final Configuration mTmpConfig1 = new Configuration();
-    private final Configuration mTmpConfig2 = new Configuration();
-    private final Configuration mTmpConfig3 = new Configuration();
-    private final Point mTmpPoint = new Point();
+    private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
 
     private static String startingWindowStateToString(int state) {
@@ -398,10 +393,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
                 pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
-        pw.print(prefix); pw.print("mLastReportedConfiguration=");
-                pw.println(mLastReportedConfiguration);
-        pw.print(prefix); pw.print("mLastReportedOverrideConfiguration=");
-                pw.println(mLastReportedOverrideConfiguration);
+        pw.println(prefix + "mLastReportedConfigurations:");
+        mLastReportedConfiguration.dump(pw, prefix + " ");
+
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
         if (!getOverrideConfiguration().equals(EMPTY)) {
             pw.println(prefix + "OverrideConfiguration=" + getOverrideConfiguration());
@@ -799,8 +793,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         resolvedType = _resolvedType;
         componentSpecified = _componentSpecified;
         rootVoiceInteraction = _rootVoiceInteraction;
-        mLastReportedConfiguration = new Configuration(_configuration);
-        mLastReportedOverrideConfiguration = new Configuration();
+        mLastReportedConfiguration = new MergedConfiguration(_configuration);
         resultTo = _resultTo;
         resultWho = _resultWho;
         requestCode = _reqCode;
@@ -2195,15 +2188,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * global configuration is sent to the client for this activity.
      */
     void setLastReportedGlobalConfiguration(@NonNull Configuration config) {
-        mLastReportedConfiguration.setTo(config);
+        mLastReportedConfiguration.setGlobalConfiguration(config);
     }
 
     /**
-     * Set the last reported merged override configuration to the client. Should be called whenever
+     * Set the last reported configuration to the client. Should be called whenever
      * a new merged configuration is sent to the client for this activity.
      */
-    void setLastReportedMergedOverrideConfiguration(@NonNull Configuration config) {
-        mLastReportedOverrideConfiguration.setTo(config);
+    void setLastReportedConfiguration(@NonNull MergedConfiguration config) {
+        mLastReportedConfiguration.setTo(config);
     }
 
     /** Call when override config was sent to the Window Manager to update internal records. */
@@ -2211,7 +2204,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     // we should only set this when we actually report to the activity which is what the method
     // setLastReportedMergedOverrideConfiguration() does. Investigate if this is really needed.
     void onOverrideConfigurationSent() {
-        mLastReportedOverrideConfiguration.setTo(getMergedOverrideConfiguration());
+        mLastReportedConfiguration.setOverrideConfiguration(getMergedOverrideConfiguration());
     }
 
     @Override
@@ -2227,18 +2220,20 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
-    private boolean updateOverrideConfiguration() {
+    private void updateOverrideConfiguration() {
+        mTmpConfig.unset();
         computeBounds(mTmpBounds);
         if (mTmpBounds.equals(mBounds)) {
-            return false;
+            return;
         }
+
         mBounds.set(mTmpBounds);
         // Bounds changed...update configuration to match.
-        mTmpConfig1.unset();
-        task.computeOverrideConfiguration(mTmpConfig1, mBounds, null /* insetBounds */,
-                false /* overrideWidth */, false /* overrideHeight */);
-        onOverrideConfigurationChanged(mTmpConfig1);
-        return true;
+        if (!mBounds.isEmpty()) {
+            task.computeOverrideConfiguration(mTmpConfig, mBounds, null /* insetBounds */,
+                    false /* overrideWidth */, false /* overrideHeight */);
+        }
+        onOverrideConfigurationChanged(mTmpConfig);
     }
 
     /**
@@ -2266,12 +2261,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         int maxActivityHeight = containingAppHeight;
 
         if (containingAppWidth < containingAppHeight) {
-            // Width is the shorter side, so we use that to figure-out what the max. height should
-            // be given the aspect ratio.
+            // Width is the shorter side, so we use that to figure-out what the max. height
+            // should be given the aspect ratio.
             maxActivityHeight = (int) ((maxActivityWidth * maxAspectRatio) + 0.5f);
         } else {
-            // Height is the shorter side, so we use that to figure-out what the max. width should
-            // be given the aspect ratio.
+            // Height is the shorter side, so we use that to figure-out what the max. width
+            // should be given the aspect ratio.
             maxActivityWidth = (int) ((maxActivityHeight * maxAspectRatio) + 0.5f);
         }
 
@@ -2341,9 +2336,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // nothing to do.  We test the full configuration instead of the global and merged override
         // configurations because there are cases (like moving a task to the pinned stack) where
         // the combine configurations are equal, but would otherwise differ in the override config
-        mTmpConfig1.setTo(mLastReportedConfiguration);
-        mTmpConfig1.updateFrom(mLastReportedOverrideConfiguration);
-        if (getConfiguration().equals(mTmpConfig1) && !forceNewConfig && !displayChanged) {
+        mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
+        if (getConfiguration().equals(mTmpConfig) && !forceNewConfig && !displayChanged) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration & display unchanged in " + this);
             return true;
@@ -2354,18 +2348,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         // Find changes between last reported merged configuration and the current one. This is used
         // to decide whether to relaunch an activity or just report a configuration change.
-        final int changes = getConfigurationChanges(mTmpConfig1);
-
-        // Preserve configuration used to generate this set of configuration changes.
-        mTmpConfig3.setTo(mTmpConfig1);
+        final int changes = getConfigurationChanges(mTmpConfig);
 
         // Update last reported values.
-        final Configuration newGlobalConfig = service.getGlobalConfiguration();
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
-        mTmpConfig1.setTo(mLastReportedConfiguration);
-        mTmpConfig2.setTo(mLastReportedOverrideConfiguration);
-        mLastReportedConfiguration.setTo(newGlobalConfig);
-        mLastReportedOverrideConfiguration.setTo(newMergedOverrideConfig);
+        mLastReportedConfiguration.setConfiguration(service.getGlobalConfiguration(),
+                newMergedOverrideConfig);
 
         if (changes == 0 && !forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
@@ -2399,10 +2387,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 "Checking to restart " + info.name + ": changed=0x"
                         + Integer.toHexString(changes) + ", handles=0x"
                         + Integer.toHexString(info.getRealConfigChanged())
-                        + ", newGlobalConfig=" + newGlobalConfig
-                        + ", newMergedOverrideConfig=" + newMergedOverrideConfig);
+                        + ", mLastReportedConfiguration=" + mLastReportedConfiguration);
 
-        if (shouldRelaunchLocked(changes, mTmpConfig3) || forceNewConfig) {
+        if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
             startFreezingScreenLocked(app, globalChanges);
