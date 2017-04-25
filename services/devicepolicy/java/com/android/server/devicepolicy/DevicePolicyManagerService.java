@@ -10016,14 +10016,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        if (ids == null) {
+            throw new IllegalArgumentException("ids must not be null");
+        }
+        for (String id : ids) {
+            if (TextUtils.isEmpty(id)) {
+                throw new IllegalArgumentException("ids must not contain empty string");
+            }
+        }
 
-        Preconditions.checkNotNull(admin);
-        Preconditions.checkCollectionElementsNotNull(ids, "ids");
-
-        final Set<String> affiliationIds = new ArraySet<String>(ids);
-        Preconditions.checkArgument(
-                !affiliationIds.contains(""), "ids must not contain empty strings");
-
+        final Set<String> affiliationIds = new ArraySet<>(ids);
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
