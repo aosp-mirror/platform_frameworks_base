@@ -37,7 +37,8 @@ import org.junit.runner.RunWith;
 
 /** Tests that ensure appropriate settings are backed up. */
 @RunWith(AndroidJUnit4.class)
-@Presubmit
+// TODO(b/37684646): Can re-enable pre-submit once test is fixed.
+//@Presubmit
 @SmallTest
 public class SettingsBackupTest {
 
