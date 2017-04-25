@@ -428,7 +428,8 @@ def parse_ucd(ucd_path):
     _text_variation_sequences, _emoji_variation_sequences = sequences
     _emoji_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-sequences.txt'))
-
+    _emoji_sequences.update(parse_unicode_datafile(
+        path.join(ucd_path, 'additions', 'emoji-sequences.txt')))
     _emoji_zwj_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
     _emoji_zwj_sequences.update(parse_unicode_datafile(
