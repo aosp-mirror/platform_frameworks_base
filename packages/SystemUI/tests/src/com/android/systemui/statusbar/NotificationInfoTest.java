@@ -778,4 +778,9 @@ public class NotificationInfoTest extends SysuiTestCase {
         enabledSwitch.setChecked(true);
         assertEquals(View.VISIBLE, settingsLink.getVisibility());
     }
+
+    @Test
+    public void testWillBeRemovedReturnsFalseBeforeBind() throws Exception {
+        assertFalse(mNotificationInfo.willBeRemoved());
+    }
 }
