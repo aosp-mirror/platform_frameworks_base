@@ -66,10 +66,6 @@ public abstract class AutofillService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.autofill";
 
-    // Internal extras
-    /** @hide */
-    public static final String EXTRA_SESSION_ID = "android.service.autofill.extra.SESSION_ID";
-
     // Handler messages.
     private static final int MSG_CONNECT = 1;
     private static final int MSG_DISCONNECT = 2;
