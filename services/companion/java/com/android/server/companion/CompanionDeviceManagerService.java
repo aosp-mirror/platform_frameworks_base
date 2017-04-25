@@ -36,6 +36,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.NetworkPolicyManager;
@@ -203,13 +204,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             checkNotNull(request, "Request cannot be null");
             checkNotNull(callback, "Callback cannot be null");
             checkCallerIsSystemOr(callingPackage);
+            int userId = getCallingUserId();
+            checkUsesFeature(callingPackage, userId);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                //TODO bindServiceAsUser
-                getContext().bindService(
+                getContext().bindServiceAsUser(
                         new Intent().setComponent(SERVICE_TO_BIND_TO),
                         createServiceConnection(request, callback, callingPackage),
-                        Context.BIND_AUTO_CREATE);
+                        Context.BIND_AUTO_CREATE,
+                        UserHandle.of(userId));
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -219,6 +222,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public List<String> getAssociations(String callingPackage, int userId)
                 throws RemoteException {
             checkCallerIsSystemOr(callingPackage, userId);
+            checkUsesFeature(callingPackage, getCallingUserId());
             return CollectionUtils.map(
                     readAllAssociations(userId, callingPackage),
                     a -> a.deviceAddress);
@@ -230,6 +234,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 throws RemoteException {
             checkNotNull(deviceMacAddress);
             checkCallerIsSystemOr(callingPackage);
+            checkUsesFeature(callingPackage, getCallingUserId());
             updateAssociations(associations -> CollectionUtils.remove(associations,
                     new Association(getCallingUserId(), deviceMacAddress, callingPackage)));
         }
@@ -282,11 +287,24 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
             checkCallerIsSystemOr(callingPackage);
-            checkState(!ArrayUtils.isEmpty(readAllAssociations(getCallingUserId(), callingPackage)),
+            int userId = getCallingUserId();
+            checkState(!ArrayUtils.isEmpty(readAllAssociations(userId, callingPackage)),
                     "App must have an association before calling this API");
+            checkUsesFeature(callingPackage, userId);
+        }
+
+        private void checkUsesFeature(String pkg, int userId) {
+            FeatureInfo[] reqFeatures = getPackageInfo(pkg, userId).reqFeatures;
+            String requiredFeature = PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
+            int numFeatures = ArrayUtils.size(reqFeatures);
+            for (int i = 0; i < numFeatures; i++) {
+                if (requiredFeature.equals(reqFeatures[i].name)) return;
+            }
+            throw new IllegalStateException("Must declare uses-feature "
+                    + requiredFeature
+                    + " in manifest to use this API");
         }
     }
-
 
     private int getCallingUserId() {
         return UserHandle.getUserId(Binder.getCallingUid());
@@ -398,7 +416,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         return Binder.withCleanCallingIdentity(() -> {
             try {
                 return getContext().getPackageManager().getPackageInfoAsUser(
-                        packageName, PackageManager.GET_PERMISSIONS, userId);
+                        packageName,
+                        PackageManager.GET_PERMISSIONS | PackageManager.GET_CONFIGURATIONS,
+                        userId);
             } catch (PackageManager.NameNotFoundException e) {
                 Slog.e(LOG_TAG, "Failed to get PackageInfo for package " + packageName, e);
                 return null;
