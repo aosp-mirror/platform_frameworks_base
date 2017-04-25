@@ -712,12 +712,13 @@ public class AppWidgetManager {
      *
      * @param profile The profile for which to get providers. Passing null is equivalent
      *        to querying for only the calling user.
-     * @return The installed providers.
+     * @return The installed providers, or an empty list if none are found for the given user.
      *
      * @see android.os.Process#myUserHandle()
      * @see android.os.UserManager#getUserProfiles()
      */
-    public List<AppWidgetProviderInfo> getInstalledProvidersForProfile(@Nullable UserHandle profile) {
+    public @NonNull List<AppWidgetProviderInfo> getInstalledProvidersForProfile(
+            @Nullable UserHandle profile) {
         if (mService == null) {
             return Collections.emptyList();
         }
@@ -735,13 +736,20 @@ public class AppWidgetManager {
      *        equivalent to {@link #getInstalledProvidersForProfile(UserHandle)}.
      * @param profile The profile for which to get providers. Passing null is equivalent
      *        to querying for only the calling user.
-     * @return The installed providers.
+     * @return The installed providers, or an empty list if none are found for the given
+     *         package and user.
+     * @throws NullPointerException if the provided package name is null
      *
      * @see android.os.Process#myUserHandle()
      * @see android.os.UserManager#getUserProfiles()
      */
-    public List<AppWidgetProviderInfo> getInstalledProvidersForPackage(@Nullable String packageName,
-            @Nullable UserHandle profile) {
+    public @NonNull List<AppWidgetProviderInfo> getInstalledProvidersForPackage(
+            @NonNull String packageName, @Nullable UserHandle profile) {
+        if (packageName == null) {
+            throw new NullPointerException("A non-null package must be passed to this method. " +
+                    "If you want all widgets regardless of package, see " +
+                    "getInstalledProvidersForProfile(UserHandle)");
+        }
         if (mService == null) {
             return Collections.emptyList();
         }
