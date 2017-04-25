@@ -432,15 +432,6 @@ public final class NetworkCapabilities implements Parcelable {
         "WIFI_AWARE"
     };
 
-    private static final String[] TRANSPORT_NAMES = {
-        "CELLULAR",
-        "WIFI",
-        "BLUETOOTH",
-        "ETHERNET",
-        "VPN",
-        "WIFI_AWARE"
-    };
-
     /**
      * Adds the given transport type to this {@code NetworkCapability} instance.
      * Multiple transports may be applied sequentially.  Note that when searching
