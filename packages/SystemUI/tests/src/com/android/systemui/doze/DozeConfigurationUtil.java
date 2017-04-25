@@ -33,7 +33,6 @@ public class DozeConfigurationUtil {
         DozeParameters params = mock(DozeParameters.class, noDefaultAnswer(doneHolder));
 
         when(params.getPulseOnSigMotion()).thenReturn(false);
-        when(params.getSensorsWakeUpFully()).thenReturn(false);
         when(params.getPickupVibrationThreshold()).thenReturn(0);
         when(params.getProxCheckBeforePulse()).thenReturn(true);
         when(params.getPickupSubtypePerformsProxCheck(anyInt())).thenReturn(true);
