@@ -103,8 +103,10 @@ public class RecentsTaskLoadPlan {
     /**
      * An optimization to preload the raw list of tasks. The raw tasks are saved in least-recent
      * to most-recent order.
+     *
+     * Note: Do not lock, callers should synchronize on the loader before making this call.
      */
-    public synchronized void preloadRawTasks(boolean includeFrontMostExcludedTask) {
+    void preloadRawTasks(boolean includeFrontMostExcludedTask) {
         int currentUserId = UserHandle.USER_CURRENT;
         updateCurrentQuietProfilesCache(currentUserId);
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -123,8 +125,11 @@ public class RecentsTaskLoadPlan {
      * The tasks will be ordered by:
      * - least-recent to most-recent stack tasks
      * - least-recent to most-recent freeform tasks
+     *
+     * Note: Do not lock, since this can be calling back to the loader, which separately also drives
+     * this call (callers should synchronize on the loader before making this call).
      */
-    public synchronized void preloadPlan(RecentsTaskLoader loader, int runningTaskId,
+    void preloadPlan(RecentsTaskLoader loader, int runningTaskId,
             boolean includeFrontMostExcludedTask) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
@@ -223,8 +228,11 @@ public class RecentsTaskLoadPlan {
 
     /**
      * Called to apply the actual loading based on the specified conditions.
+     *
+     * Note: Do not lock, since this can be calling back to the loader, which separately also drives
+     * this call (callers should synchronize on the loader before making this call).
      */
-    public synchronized void executePlan(Options opts, RecentsTaskLoader loader) {
+    void executePlan(Options opts, RecentsTaskLoader loader) {
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.
