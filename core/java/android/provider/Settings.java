@@ -8380,16 +8380,6 @@ public final class Settings {
                 "network_recommendations_package";
 
         /**
-         * Value to specify if the Wi-Fi Framework should defer to
-         * {@link com.android.server.NetworkScoreService} for evaluating saved open networks.
-         *
-         * Type: int (0 for false, 1 for true)
-         * @hide
-         */
-        @SystemApi
-        public static final String CURATE_SAVED_OPEN_NETWORKS = "curate_saved_open_networks";
-
-        /**
          * The package name of the application that connect and secures high quality open wifi
          * networks automatically.
          *
@@ -8404,6 +8394,7 @@ public final class Settings {
          *
          * Type: long
          * @hide
+         * @deprecated to be removed
          */
         public static final String NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS =
                 "network_recommendation_request_timeout_ms";
@@ -9913,7 +9904,6 @@ public final class Settings {
             CHARGING_SOUNDS_ENABLED,
             USB_MASS_STORAGE_ENABLED,
             NETWORK_RECOMMENDATIONS_ENABLED,
-            CURATE_SAVED_OPEN_NETWORKS,
             WIFI_WAKEUP_ENABLED,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             USE_OPEN_WIFI_PACKAGE,

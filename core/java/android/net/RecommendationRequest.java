@@ -30,6 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
  *
  * @see {@link NetworkScoreManager#requestRecommendation(RecommendationRequest)}.
  * @hide
+ * @deprecated to be removed.
  */
 @SystemApi
 public final class RecommendationRequest implements Parcelable {
@@ -43,6 +44,7 @@ public final class RecommendationRequest implements Parcelable {
     /**
      * Builder class for constructing {@link RecommendationRequest} instances.
      * @hide
+     * @deprecated to be removed.
      */
     @SystemApi
     public static final class Builder {
