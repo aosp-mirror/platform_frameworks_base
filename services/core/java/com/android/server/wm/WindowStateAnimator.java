@@ -341,7 +341,7 @@ class WindowStateAnimator {
             mAnimation.cancel();
             mAnimation = null;
             mLocalAnimating = false;
-            mWin.destroyOrSaveSurface();
+            mWin.destroyOrSaveSurfaceUnchecked();
         }
     }
 
