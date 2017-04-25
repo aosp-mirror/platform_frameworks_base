@@ -50,12 +50,14 @@ public class ViewGroup_Delegate {
             // the outline obtained is correct.
             child.setBackgroundBounds();
             ViewOutlineProvider outlineProvider = child.getOutlineProvider();
-            Outline outline = child.mAttachInfo.mTmpOutline;
-            outlineProvider.getOutline(child, outline);
-            if (outline.mPath != null || (outline.mRect != null && !outline.mRect.isEmpty())) {
-                int restoreTo = transformCanvas(thisVG, canvas, child);
-                drawShadow(thisVG, canvas, child, outline);
-                canvas.restoreToCount(restoreTo);
+            if (outlineProvider != null) {
+                Outline outline = child.mAttachInfo.mTmpOutline;
+                outlineProvider.getOutline(child, outline);
+                if (outline.mPath != null || (outline.mRect != null && !outline.mRect.isEmpty())) {
+                    int restoreTo = transformCanvas(thisVG, canvas, child);
+                    drawShadow(thisVG, canvas, child, outline);
+                    canvas.restoreToCount(restoreTo);
+                }
             }
         }
         return thisVG.drawChild_Original(canvas, child, drawingTime);
