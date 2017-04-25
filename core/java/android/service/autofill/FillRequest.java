@@ -19,16 +19,16 @@ package android.service.autofill;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.assist.AssistStructure;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
 
 /**
  * This class represents a request to an {@link AutofillService autofill provider}
@@ -56,22 +56,24 @@ public final class FillRequest implements Parcelable {
 
     private final int mId;
     private final @RequestFlags int mFlags;
-    private final @NonNull AssistStructure mStructure;
+    private final @NonNull ArrayList<FillContext> mContexts;
     private final @Nullable Bundle mClientState;
 
     private FillRequest(@NonNull Parcel parcel) {
         mId = parcel.readInt();
-        mStructure = parcel.readParcelable(null);
+        mContexts = new ArrayList<>();
+        parcel.readParcelableList(mContexts, null);
+
         mClientState = parcel.readBundle();
         mFlags = parcel.readInt();
     }
 
     /** @hide */
-    public FillRequest(int id, @NonNull AssistStructure structure,
+    public FillRequest(int id, @NonNull ArrayList<FillContext> contexts,
             @Nullable Bundle clientState, @RequestFlags int flags) {
         mId = id;
         mFlags = Preconditions.checkFlagsArgument(flags, FLAG_MANUAL_REQUEST);
-        mStructure = Preconditions.checkNotNull(structure, "structure");
+        mContexts = Preconditions.checkCollectionElementsNotNull(contexts, "contexts");
         mClientState = clientState;
     }
 
@@ -92,10 +94,10 @@ public final class FillRequest implements Parcelable {
     }
 
     /**
-     * @return The structure capturing the UI state.
+     * @return The contexts associated with each previous fill request.
      */
-    public @NonNull AssistStructure getStructure() {
-        return mStructure;
+    public @NonNull ArrayList<FillContext> getFillContexts() {
+        return mContexts;
     }
 
     /**
@@ -120,7 +122,7 @@ public final class FillRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mId);
-        parcel.writeParcelable(mStructure, flags);
+        parcel.writeParcelableList(mContexts, flags);
         parcel.writeBundle(mClientState);
         parcel.writeInt(mFlags);
     }

@@ -204,6 +204,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.d(TAG, "New structure for requestId " + requestId + ": " + structure);
             }
 
+            final FillRequest request;
             synchronized (mLock) {
                 // TODO(b/35708678): Must fetch the data so it's available later on handleSave(),
                 // even if if the activity is gone by then, but structure .ensureData() gives a
@@ -215,17 +216,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // Sanitize structure before it's sent to service.
                 structure.sanitizeForParceling(true);
 
-                fillStructureWithAllowedValues(structure);
-
                 if (mContexts == null) {
                     mContexts = new ArrayList<>(1);
                 }
                 mContexts.add(new FillContext(requestId, structure));
 
                 cancelCurrentRequestLocked();
+
+                final int numContexts = mContexts.size();
+                for (int i = 0; i < numContexts; i++) {
+                    fillStructureWithAllowedValues(mContexts.get(i).getStructure());
+                }
+
+                request = new FillRequest(requestId, mContexts, mClientState, mFlags);
             }
 
-            FillRequest request = new FillRequest(requestId, structure, mClientState, mFlags);
             mRemoteFillService.onFillRequest(request);
         }
     };
