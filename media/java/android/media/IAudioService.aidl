@@ -121,7 +121,7 @@ interface IAudioService {
 
     int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
-            IAudioPolicyCallback pcb);
+            IAudioPolicyCallback pcb, int sdk);
 
     int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa,
             in String callingPackageName);

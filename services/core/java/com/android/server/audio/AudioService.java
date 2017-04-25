@@ -5669,7 +5669,7 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
-            IAudioPolicyCallback pcb) {
+            IAudioPolicyCallback pcb, int sdk) {
         // permission checks
         if ((flags & AudioManager.AUDIOFOCUS_FLAG_LOCK) == AudioManager.AUDIOFOCUS_FLAG_LOCK) {
             if (AudioSystem.IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
@@ -5690,7 +5690,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
-                clientId, callingPackageName, flags);
+                clientId, callingPackageName, flags, sdk);
     }
 
     public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa,
