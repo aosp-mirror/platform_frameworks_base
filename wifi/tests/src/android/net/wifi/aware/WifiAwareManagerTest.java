@@ -150,7 +150,7 @@ public class WifiAwareManagerTest {
         inOrder.verify(mockAwareService).publish(eq(clientId), eq(publishConfig), any());
 
         // (3) disconnect
-        session.destroy();
+        session.close();
         inOrder.verify(mockAwareService).disconnect(eq(clientId), eq(binder.getValue()));
 
         // (4) try publishing again - fails silently
@@ -329,7 +329,7 @@ public class WifiAwareManagerTest {
         inOrder.verify(mockSessionCallback).onSessionConfigFailed();
 
         // (5) terminate
-        publishSession.getValue().destroy();
+        publishSession.getValue().close();
         mMockLooper.dispatchAll();
         inOrder.verify(mockAwareService).terminateSession(clientId, sessionId);
 
@@ -466,7 +466,7 @@ public class WifiAwareManagerTest {
         inOrder.verify(mockSessionCallback).onSessionConfigFailed();
 
         // (5) terminate
-        subscribeSession.getValue().destroy();
+        subscribeSession.getValue().close();
         mMockLooper.dispatchAll();
         inOrder.verify(mockAwareService).terminateSession(clientId, sessionId);
 
