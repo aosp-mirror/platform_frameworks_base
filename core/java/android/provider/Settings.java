@@ -1398,6 +1398,26 @@ public final class Settings {
     public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS
             = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
 
+    /**
+     * Activity Action: Show screen that let user select its Autofill Service.
+     * <p>
+     * Input: Intent's data URI set with an application name, using the
+     * "package" schema (like "package:com.my.app").
+     *
+     * <p>
+     * Output: {@link android.app.Activity#RESULT_OK} if user selected an Autofill Service belonging
+     * to the caller package.
+     *
+     * <p>
+     * <b>NOTE: </b> applications should call
+     * {@link android.view.autofill.AutofillManager#hasEnabledAutofillServices()} and
+     * {@link android.view.autofill.AutofillManager#isAutofillSupported()} first, and only
+     * broadcast this intent if they return {@code false} and {@code true} respectively.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE =
+            "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
+
     // End of Intent actions for Settings
 
     /**

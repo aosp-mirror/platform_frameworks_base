@@ -44,4 +44,6 @@ interface IAutoFillManager {
     void setAuthenticationResult(in Bundle data, int sessionId, int userId);
     void setHasCallback(int sessionId, int userId, boolean hasIt);
     void disableOwnedAutofillServices(int userId);
+    boolean isServiceSupported(int userId);
+    boolean isServiceEnabled(int userId, String packageName);
 }
