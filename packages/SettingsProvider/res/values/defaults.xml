@@ -94,48 +94,8 @@
     <!-- Default for Settings.Secure.SYNC_PARENT_SOUNDS -->
     <bool name="def_sync_parent_sounds">true</bool>
 
-    <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION -->
-    <bool name="def_accessibility_script_injection">false</bool>
-
     <!-- Default for Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD -->
     <bool name="def_accessibility_speak_password">true</bool>
-
-    <!-- Default for Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS -->
-    <string name="def_accessibility_web_content_key_bindings" translatable="false">
-            <!-- DPAD/Trackball UP - traverse previous on current axis and send an event. -->
-            0x13=0x01000100;
-            <!-- DPAD/Trackball DOWN - traverse next on current axis and send an event. -->
-            0x14=0x01010100;
-            <!-- DPAD/Trackball LEFT - traverse previous on the character navigation axis and send event. -->
-            0x15=0x02000001;
-            <!-- DPAD/Trackball RIGHT - traverse next on the character navigation axis end send event. -->
-            0x16=0x02010001;
-            <!-- Alt+DPAD/Trackball UP - go to the top of the document. -->
-            0x200000013=0x02000601;
-            <!-- Alt+DPAD/Trackball DOWN - go to the bottom of the document. -->
-            0x200000014=0x02010601;
-            <!-- Alt+DPAD/Trackball LEFT - transition from an axis to another and sends an event.-->
-            <!-- Axis transitions: 2 -> 1; -->
-            0x200000015=0x03020101;
-            <!-- Alt+DPAD/Trackball RIGHT - transition from an axis to another and sends an event. -->
-            <!-- Axis transitions:  1 -> 2; -->
-            0x200000016=0x03010201;
-            <!-- Alt+g - go to the previous heading and send an event. -->
-            0x200000023=0x02000301;
-            <!-- Alt+h - go to the next heading and send an event. -->
-            0x200000024=0x02010301;
-            <!-- Alt+COMMA - transition to sentence navigation axis and send an event. -->
-            <!-- Axis transitions:  7 -> 2; -->
-            0x200000037=0x03070201;
-            <!-- Alt+PERIOD - transition to default web view behavior axis and send an event. -->
-            <!-- Axis transitions:  0 -> 7; 1 - > 7; 2 -> 7; -->
-            0x200000038=0x03000701:0x03010701:0x03020701;
-    </string>
-
-    <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION_URL -->
-    <string name="def_accessibility_screen_reader_url" translatable="false">
-        https://ssl.gstatic.com/accessibility/javascript/android/AndroidVox_v1.js
-    </string>
 
     <!-- Default for Settings.Secure.TOUCH_EXPLORATION_ENABLED -->
     <bool name="def_touch_exploration_enabled">false</bool>
