@@ -39,7 +39,7 @@ public class MbmsStreamingManager {
      * Create a new MbmsStreamingManager using the system default data subscription ID.
      *
      * Note that this call will bind a remote service and that may take a bit.  This
-     * may throw an IllegalArgumentException.
+     * may throw an IllegalArgumentException or RemoteException.
      */
     public MbmsStreamingManager(Context context, IMbmsStreamingManagerListener listener,
             String streamingAppName) {
@@ -47,10 +47,10 @@ public class MbmsStreamingManager {
     }
 
     /**
-     * Create a new MbmsStreamingManager using the give subscription ID.
+     * Create a new MbmsStreamingManager using the given subscription ID.
      *
      * Note that this call will bind a remote service and that may take a bit.  This
-     * may throw an IllegalArgumentException.
+     * may throw an IllegalArgumentException or RemoteException.
      */
     public MbmsStreamingManager(Context context, IMbmsStreamingManagerListener listener,
                     String streamingAppName, int subId) {
@@ -72,10 +72,17 @@ public class MbmsStreamingManager {
      * the app and the carrier.
      *
      * Multiple calls replace the list of serviceClasses of interest.
-     * The return value is a success/error-code with the following possible values:
+     *
+     * May throw an IllegalArgumentException or RemoteException.
+     *
+     * Synchronous responses include
      * <li>SUCCESS</li>
-     * <li>NO_MIDDLEWARE</li>
-     * <li>QUEUE_LIMIT</li>
+     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
+     *
+     * Asynchronous errors through the listener include any of the errors except
+     * <li>ERROR_MSDC_UNABLE_TO_)START_SERVICE</li>
+     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
+     * <li>ERROR_MSDC_END_OF_SESSION</li>
      */
     public int getStreamingServices(List<String> classList) {
         return 0;
@@ -85,6 +92,9 @@ public class MbmsStreamingManager {
      * Starts streaming a requested service, reporting status to the indicated listener.
      * Returns an object used to control that stream.
      *
+     * May throw an IllegalArgumentException or RemoteException.
+     *
+     * Asynchronous errors through the listener include any of the errors
      */
     public StreamingService startStreaming(StreamingServiceInfo serviceInfo,
             IStreamingServiceListener listener) {
@@ -96,10 +106,17 @@ public class MbmsStreamingManager {
      * on this given subId.  Results are returned asynchronously through the previously
      * registered callback.
      *
+     * May throw a RemoteException.
+     *
      * The return value is a success/error-code with the following possible values:
      * <li>SUCCESS</li>
-     * <li>NO_MIDDLEWARE</li>
-     * <li>QUEU_LIMIT</li>
+     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
+     *
+     * Asynchronous errors through the listener include any of the errors except
+     * <li>ERROR_UNABLED_TO_START_SERVICE</li>
+     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
+     * <li>ERROR_MSDC_END_OF_SESSION</li>
+     *
      */
     public int getActiveStreamingServices() {
         return 0;
