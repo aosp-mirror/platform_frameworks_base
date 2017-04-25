@@ -2219,11 +2219,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     /** Returns the bounds that should be used to launch this task. */
     Rect getLaunchBounds() {
-        // If we're over lockscreen, forget about stack bounds and use fullscreen.
-        if (mService.mStackSupervisor.mKeyguardController.isKeyguardShowing()) {
-            return null;
-        }
-
         if (mStack == null) {
             return null;
         }
