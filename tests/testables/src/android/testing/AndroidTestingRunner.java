@@ -18,7 +18,7 @@ import android.support.test.internal.runner.junit4.statement.RunAfters;
 import android.support.test.internal.runner.junit4.statement.RunBefores;
 import android.support.test.internal.runner.junit4.statement.UiThreadStatement;
 
-import android.testing.TestableLooper.LooperStatement;
+import android.testing.TestableLooper.LooperFrameworkMethod;
 import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.After;
@@ -30,6 +30,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,28 +50,21 @@ public class AndroidTestingRunner extends BlockJUnit4ClassRunner {
 
     @Override
     protected Statement methodInvoker(FrameworkMethod method, Object test) {
-        return shouldRunOnUiThread(method) ? new UiThreadStatement(
-                methodInvokerInt(method, test), true) : methodInvokerInt(method, test);
-    }
-
-    protected Statement methodInvokerInt(FrameworkMethod method, Object test) {
-        RunWithLooper annotation = method.getAnnotation(RunWithLooper.class);
-        if (annotation == null) annotation = mKlass.getAnnotation(RunWithLooper.class);
-        if (annotation != null) {
-            return new LooperStatement(super.methodInvoker(method, test),
-                    annotation.setAsMainLooper(), test);
-        }
-        return super.methodInvoker(method, test);
+        method = looperWrap(method, test, method);
+        final Statement statement = super.methodInvoker(method, test);
+        return shouldRunOnUiThread(method) ? new UiThreadStatement(statement, true) : statement;
     }
 
     protected Statement withBefores(FrameworkMethod method, Object target, Statement statement) {
-        List befores = this.getTestClass().getAnnotatedMethods(Before.class);
+        List befores = looperWrap(method, target,
+                this.getTestClass().getAnnotatedMethods(Before.class));
         return befores.isEmpty() ? statement : new RunBefores(method, statement,
                 befores, target);
     }
 
     protected Statement withAfters(FrameworkMethod method, Object target, Statement statement) {
-        List afters = this.getTestClass().getAnnotatedMethods(After.class);
+        List afters = looperWrap(method, target,
+                this.getTestClass().getAnnotatedMethods(After.class));
         return afters.isEmpty() ? statement : new RunAfters(method, statement, afters,
                 target);
     }
@@ -86,6 +80,30 @@ public class AndroidTestingRunner extends BlockJUnit4ClassRunner {
 
     private long getTimeout(Test annotation) {
         return annotation == null ? 0L : annotation.timeout();
+    }
+
+    protected List<FrameworkMethod> looperWrap(FrameworkMethod method, Object test,
+            List<FrameworkMethod> methods) {
+        RunWithLooper annotation = method.getAnnotation(RunWithLooper.class);
+        if (annotation == null) annotation = mKlass.getAnnotation(RunWithLooper.class);
+        if (annotation != null) {
+            methods = new ArrayList<>(methods);
+            for (int i = 0; i < methods.size(); i++) {
+                methods.set(i, LooperFrameworkMethod.get(methods.get(i),
+                        annotation.setAsMainLooper(), test));
+            }
+        }
+        return methods;
+    }
+
+    protected FrameworkMethod looperWrap(FrameworkMethod method, Object test,
+            FrameworkMethod base) {
+        RunWithLooper annotation = method.getAnnotation(RunWithLooper.class);
+        if (annotation == null) annotation = mKlass.getAnnotation(RunWithLooper.class);
+        if (annotation != null) {
+            return LooperFrameworkMethod.get(base, annotation.setAsMainLooper(), test);
+        }
+        return base;
     }
 
     public boolean shouldRunOnUiThread(FrameworkMethod method) {
