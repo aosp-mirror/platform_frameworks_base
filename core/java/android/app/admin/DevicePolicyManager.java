@@ -7761,6 +7761,8 @@ public class DevicePolicyManager {
      *
      * <p> Backup service is off by default when device owner is present.
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled {@code true} to enable the backup service, {@code false} to disable it.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setBackupServiceEnabled(@NonNull ComponentName admin, boolean enabled) {
