@@ -89,8 +89,9 @@ public final class SystemUpdateInfo implements Parcelable {
     }
 
     /**
-     * Gets time when the update was first available.
-     * @return Time as given by {@link System#currentTimeMillis()}
+     * Gets time when the update was first available in milliseconds since midnight, January 1,
+     * 1970 UTC.
+     * @return Time in milliseconds as given by {@link System#currentTimeMillis()}
      */
     public long getReceivedTime() {
         return mReceivedTime;
