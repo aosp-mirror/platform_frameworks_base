@@ -16,25 +16,18 @@
 
 package com.android.server;
 
-import static android.net.NetworkRecommendationProvider.EXTRA_RECOMMENDATION_RESULT;
-import static android.net.NetworkRecommendationProvider.EXTRA_SEQUENCE;
 import static android.net.NetworkScoreManager.CACHE_FILTER_NONE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -55,8 +48,6 @@ import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppData;
-import android.net.RecommendationRequest;
-import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
 import android.net.Uri;
 import android.net.WifiKey;
@@ -69,13 +60,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -145,9 +134,6 @@ public class NetworkScoreServiceTest {
 
     private ContentResolver mContentResolver;
     private NetworkScoreService mNetworkScoreService;
-    private RecommendationRequest mRecommendationRequest;
-    private RemoteCallback mRemoteCallback;
-    private OnResultListener mOnResultListener;
     private HandlerThread mHandlerThread;
     private List<ScanResult> mScanResults;
 
@@ -177,13 +163,6 @@ public class NetworkScoreServiceTest {
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = "NetworkScoreServiceTest_SSID";
         configuration.BSSID = "NetworkScoreServiceTest_BSSID";
-        mRecommendationRequest = new RecommendationRequest.Builder()
-            .setDefaultWifiConfig(configuration).build();
-        mOnResultListener = new OnResultListener();
-        mRemoteCallback = new RemoteCallback(mOnResultListener);
-        Settings.Global.putLong(mContentResolver,
-                Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS, -1L);
-        mNetworkScoreService.refreshRecommendationRequestTimeoutMs();
         populateScanResults();
     }
 
@@ -215,7 +194,6 @@ public class NetworkScoreServiceTest {
         verify(mNetworkScorerAppManager).updateState();
         verify(mNetworkScorerAppManager).migrateNetworkScorerAppSettingIfNeeded();
         verify(mServiceConnection).bind(mContext);
-
     }
 
     @Test
@@ -256,160 +234,6 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testRequestRecommendation_noPermission() throws Exception {
-        doThrow(new SecurityException()).when(mContext)
-            .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES),
-                anyString());
-        try {
-            mNetworkScoreService.requestRecommendation(mRecommendationRequest);
-            fail("REQUEST_NETWORK_SCORES not enforced.");
-        } catch (SecurityException e) {
-            // expected
-        }
-    }
-
-    @Test
-    public void testRequestRecommendation_mainThread() throws Exception {
-        when(mContext.getMainLooper()).thenReturn(Looper.myLooper());
-        try {
-            mNetworkScoreService.requestRecommendation(mRecommendationRequest);
-            fail("requestRecommendation run on main thread.");
-        } catch (RuntimeException e) {
-            // expected
-        }
-    }
-
-    @Test
-    public void testRequestRecommendation_providerNotConnected() throws Exception {
-        when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
-
-        final RecommendationResult result =
-                mNetworkScoreService.requestRecommendation(mRecommendationRequest);
-        assertNotNull(result);
-        assertEquals(mRecommendationRequest.getDefaultWifiConfig(),
-                result.getWifiConfiguration());
-    }
-
-    @Test
-    public void testRequestRecommendation_providerThrowsRemoteException() throws Exception {
-        when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
-        doThrow(new RemoteException()).when(mRecommendationProvider)
-                .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
-                        anyInt());
-        mNetworkScoreService.onUserUnlocked(0);
-
-        final RecommendationResult result =
-                mNetworkScoreService.requestRecommendation(mRecommendationRequest);
-        assertNotNull(result);
-        assertEquals(mRecommendationRequest.getDefaultWifiConfig(),
-                result.getWifiConfiguration());
-    }
-
-    @Test
-    public void testRequestRecommendation_resultReturned() throws Exception {
-        when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
-        final WifiConfiguration wifiConfiguration = new WifiConfiguration();
-        wifiConfiguration.SSID = "testRequestRecommendation_resultReturned_SSID";
-        wifiConfiguration.BSSID = "testRequestRecommendation_resultReturned_BSSID";
-        final RecommendationResult providerResult = RecommendationResult
-                .createConnectRecommendation(wifiConfiguration);
-        final Bundle bundle = new Bundle();
-        bundle.putParcelable(EXTRA_RECOMMENDATION_RESULT, providerResult);
-        doAnswer(invocation -> {
-            bundle.putInt(EXTRA_SEQUENCE, invocation.getArgument(2));
-            invocation.<IRemoteCallback>getArgument(1).sendResult(bundle);
-            return null;
-        }).when(mRecommendationProvider)
-                .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
-                        anyInt());
-        mNetworkScoreService.onUserUnlocked(0);
-
-        final RecommendationResult result =
-                mNetworkScoreService.requestRecommendation(mRecommendationRequest);
-        assertNotNull(result);
-        assertEquals(providerResult.getWifiConfiguration().SSID,
-                result.getWifiConfiguration().SSID);
-        assertEquals(providerResult.getWifiConfiguration().BSSID,
-                result.getWifiConfiguration().BSSID);
-    }
-
-    @Test
-    public void testRequestRecommendationAsync_noPermission() throws Exception {
-        doThrow(new SecurityException()).when(mContext)
-                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES),
-                        anyString());
-        try {
-            mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
-                    mRemoteCallback);
-            fail("REQUEST_NETWORK_SCORES not enforced.");
-        } catch (SecurityException e) {
-            // expected
-        }
-    }
-
-    @Test
-    public void testRequestRecommendationAsync_providerNotConnected() throws Exception {
-        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
-                mRemoteCallback);
-        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
-        assertTrue(callbackRan);
-        verifyZeroInteractions(mRecommendationProvider);
-    }
-
-    @Test
-    public void testRequestRecommendationAsync_requestTimesOut() throws Exception {
-        mNetworkScoreService.onUserUnlocked(0);
-        Settings.Global.putLong(mContentResolver,
-                Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS, 1L);
-        mNetworkScoreService.refreshRecommendationRequestTimeoutMs();
-        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
-                mRemoteCallback);
-        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
-        assertTrue(callbackRan);
-        verify(mRecommendationProvider).requestRecommendation(eq(mRecommendationRequest),
-                isA(IRemoteCallback.Stub.class), anyInt());
-
-        assertTrue(mOnResultListener.receivedBundle.containsKey(EXTRA_RECOMMENDATION_RESULT));
-        RecommendationResult result =
-                mOnResultListener.receivedBundle.getParcelable(EXTRA_RECOMMENDATION_RESULT);
-        assertTrue(result.hasRecommendation());
-        assertEquals(mRecommendationRequest.getDefaultWifiConfig().SSID,
-                result.getWifiConfiguration().SSID);
-    }
-
-    @Test
-    public void testRequestRecommendationAsync_requestSucceeds() throws Exception {
-        mNetworkScoreService.onUserUnlocked(0);
-        final Bundle bundle = new Bundle();
-        doAnswer(invocation -> {
-            invocation.<IRemoteCallback>getArgument(1).sendResult(bundle);
-            return null;
-        }).when(mRecommendationProvider)
-                .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
-                        anyInt());
-
-        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
-                mRemoteCallback);
-        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
-        assertTrue(callbackRan);
-        // If it's not the same instance then something else ran the callback.
-        assertSame(bundle, mOnResultListener.receivedBundle);
-    }
-
-    @Test
-    public void testRequestRecommendationAsync_requestThrowsRemoteException() throws Exception {
-        mNetworkScoreService.onUserUnlocked(0);
-        doThrow(new RemoteException()).when(mRecommendationProvider)
-                .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
-                        anyInt());
-
-        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
-                mRemoteCallback);
-        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
-        assertTrue(callbackRan);
-    }
-
-    @Test
     public void dispatchingContentObserver_nullUri() throws Exception {
         NetworkScoreService.DispatchingContentObserver observer =
                 new NetworkScoreService.DispatchingContentObserver(mContext, null /*handler*/);
@@ -432,15 +256,6 @@ public class NetworkScoreServiceTest {
         final boolean msgHandled = handler.latch.await(3, TimeUnit.SECONDS);
         assertTrue(msgHandled);
         assertEquals(expectedWhat, handler.receivedWhat);
-    }
-
-    @Test
-    public void oneTimeCallback_multipleCallbacks() throws Exception {
-        NetworkScoreService.OneTimeCallback callback =
-                new NetworkScoreService.OneTimeCallback(mRemoteCallback);
-        callback.sendResult(null);
-        callback.sendResult(null);
-        assertEquals(1, mOnResultListener.resultCount);
     }
 
     @Test
@@ -1086,19 +901,6 @@ public class NetworkScoreServiceTest {
                 USE_WIFI_ENABLE_ACTIVITY_COMP, NETWORK_AVAILABLE_NOTIFICATION_CHANNEL_ID);
         when(mServiceConnection.getAppData()).thenReturn(appData);
         mNetworkScoreService.onUserUnlocked(0);
-    }
-
-    private static class OnResultListener implements RemoteCallback.OnResultListener {
-        private final CountDownLatch countDownLatch = new CountDownLatch(1);
-        private int resultCount;
-        private Bundle receivedBundle;
-
-        @Override
-        public void onResult(Bundle result) {
-            countDownLatch.countDown();
-            resultCount++;
-            receivedBundle = result;
-        }
     }
 
     private static class CountDownHandler extends Handler {
