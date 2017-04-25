@@ -234,6 +234,7 @@ LOCAL_STATIC_LIBRARIES := \
     libseccomp_policy \
     libselinux \
     libcrypto \
+    libgrallocusage \
 
 LOCAL_SHARED_LIBRARIES := \
     libmemtrack \
