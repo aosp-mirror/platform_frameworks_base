@@ -878,6 +878,30 @@ public class TelephonyManager {
     public static final String VVM_TYPE_CVVM = "vvm_type_cvvm";
 
     /**
+     * Key in bundle returned by {@link #getVisualVoicemailPackageName()}, indicating whether visual
+     * voicemail was enabled or disabled by the user. If the user never explicitly changed this
+     * setting, this key will not exist.
+     *
+     * @see #getVisualVoicemailSettings()
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL =
+            "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
+
+    /**
+     * Key in bundle returned by {@link #getVisualVoicemailPackageName()}, indicating the voicemail
+     * access PIN scrambled during the auto provisioning process. The user is expected to reset
+     * their PIN if this value is not {@code null}.
+     *
+     * @see #getVisualVoicemailSettings()
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING =
+            "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+
+    /**
      * @hide
      */
     public static final String USSD_RESPONSE = "USSD_RESPONSE";
@@ -2747,6 +2771,33 @@ public class TelephonyManager {
         return false;
     }
 
+    /**
+     * Returns an opaque bundle of settings formerly used by the visual voicemail client for the
+     * subscription ID pinned to the TelephonyManager, or {@code null} if the subscription ID is
+     * invalid. This method allows the system dialer to migrate settings out of the pre-O visual
+     * voicemail client in telephony.
+     *
+     * <p>Requires the caller to be the system dialer.
+     *
+     * @see #KEY_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL
+     * @see #KEY_VOICEMAIL_SCRAMBLED_PIN_STRING
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public Bundle getVisualVoicemailSettings(){
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony
+                        .getVisualVoicemailSettings(mContext.getOpPackageName(), mSubId);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
+    }
 
     /**
      * Returns the package responsible of processing visual voicemail for the subscription ID pinned
