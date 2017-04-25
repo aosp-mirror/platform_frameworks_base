@@ -14118,9 +14118,6 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             boolean result = mSettings.setDefaultBrowserPackageNameLPw(packageName, userId);
             if (packageName != null) {
-                result |= updateIntentVerificationStatus(packageName,
-                        PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
-                        userId);
                 mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowserLPr(
                         packageName, userId);
             }
@@ -18589,6 +18586,7 @@ public class PackageManagerService extends IPackageManager.Stub
             destroyAppDataLIF(pkg, userId,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             destroyAppProfilesLIF(pkg, userId);
+            clearDefaultBrowserIfNeededForUser(ps.name, userId);
             removeKeystoreDataIfNeeded(nextUserId, ps.appId);
             schedulePackageCleaning(ps.name, nextUserId, false);
             synchronized (mPackages) {
@@ -19310,12 +19308,18 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /** Clears state for all users, and touches intent filter verification policy */
     void clearDefaultBrowserIfNeeded(String packageName) {
         for (int oneUserId : sUserManager.getUserIds()) {
-            String defaultBrowserPackageName = getDefaultBrowserPackageName(oneUserId);
-            if (TextUtils.isEmpty(defaultBrowserPackageName)) continue;
+            clearDefaultBrowserIfNeededForUser(packageName, oneUserId);
+        }
+    }
+
+    private void clearDefaultBrowserIfNeededForUser(String packageName, int userId) {
+        final String defaultBrowserPackageName = getDefaultBrowserPackageName(userId);
+        if (!TextUtils.isEmpty(defaultBrowserPackageName)) {
             if (packageName.equals(defaultBrowserPackageName)) {
-                setDefaultBrowserPackageName(null, oneUserId);
+                setDefaultBrowserPackageName(null, userId);
             }
         }
     }
