@@ -4271,7 +4271,7 @@ public class PackageParser {
         boolean visibleToEphemeral =
                 sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToInstantApps, false);
         if (visibleToEphemeral) {
-            a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+            a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
             owner.visibleToInstantApps = true;
         }
 
@@ -4313,9 +4313,17 @@ public class PackageParser {
                     a.intents.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
+                final int visibility = visibleToEphemeral
+                        ? IntentFilter.VISIBILITY_EXPLICIT
+                        : !receiver && isImplicitlyExposedIntent(intent)
+                                ? IntentFilter.VISIBILITY_IMPLICIT
+                                : IntentFilter.VISIBILITY_NONE;
+                intent.setVisibilityToInstantApp(visibility);
                 if (intent.isVisibleToInstantApp()) {
-                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                }
+                if (intent.isImplicitlyVisibleToInstantApp()) {
+                    a.info.flags |= ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP;
                 }
                 if (LOG_UNSAFE_BROADCASTS && receiver
                         && (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O)) {
@@ -4346,9 +4354,17 @@ public class PackageParser {
                     owner.preferredActivityFilters.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
+                final int visibility = visibleToEphemeral
+                        ? IntentFilter.VISIBILITY_EXPLICIT
+                        : !receiver && isImplicitlyExposedIntent(intent)
+                                ? IntentFilter.VISIBILITY_IMPLICIT
+                                : IntentFilter.VISIBILITY_NONE;
+                intent.setVisibilityToInstantApp(visibility);
                 if (intent.isVisibleToInstantApp()) {
-                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                }
+                if (intent.isImplicitlyVisibleToInstantApp()) {
+                    a.info.flags |= ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP;
                 }
             } else if (parser.getName().equals("meta-data")) {
                 if ((a.metaData = parseMetaData(res, parser, a.metaData,
@@ -4358,16 +4374,18 @@ public class PackageParser {
                 // we don't have an attribute [or it's false], but, we have meta-data
                 if (!visibleToEphemeral && a.metaData.getBoolean(META_DATA_INSTANT_APPS)) {
                     visibleToEphemeral = true; // set in case there are more intent filters
-                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                    a.info.flags &= ~ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP;
                     owner.visibleToInstantApps = true;
                     // cycle through any filters already seen
                     for (int i = a.intents.size() - 1; i >= 0; --i) {
-                        a.intents.get(i).setVisibleToInstantApp(true /*visibleToInstantApp*/);
+                        a.intents.get(i)
+                                .setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
                     }
                     if (owner.preferredActivityFilters != null) {
                         for (int i = owner.preferredActivityFilters.size() - 1; i >= 0; --i) {
                             owner.preferredActivityFilters.get(i)
-                                    .setVisibleToInstantApp(true /*visibleToInstantApp*/);
+                                    .setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
                         }
                     }
                 }
@@ -4645,7 +4663,7 @@ public class PackageParser {
 
         // TODO add visibleToInstantApps attribute to activity alias
         final boolean visibleToEphemeral =
-                ((a.info.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) != 0);
+                ((a.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0);
 
         sa.recycle();
 
@@ -4673,13 +4691,20 @@ public class PackageParser {
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
-                    intent.setVisibleToInstantApp(
-                            visibleToEphemeral || isImplicitlyExposedIntent(intent));
                     a.intents.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
+                final int visibility = visibleToEphemeral
+                        ? IntentFilter.VISIBILITY_EXPLICIT
+                        : isImplicitlyExposedIntent(intent)
+                                ? IntentFilter.VISIBILITY_IMPLICIT
+                                : IntentFilter.VISIBILITY_NONE;
+                intent.setVisibilityToInstantApp(visibility);
                 if (intent.isVisibleToInstantApp()) {
-                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
+                }
+                if (intent.isImplicitlyVisibleToInstantApp()) {
+                    a.info.flags |= ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP;
                 }
             } else if (parser.getName().equals("meta-data")) {
                 if ((a.metaData=parseMetaData(res, parser, a.metaData,
@@ -4822,7 +4847,7 @@ public class PackageParser {
         final boolean visibleToEphemeral =
                 sa.getBoolean(R.styleable.AndroidManifestProvider_visibleToInstantApps, false);
         if (visibleToEphemeral) {
-            p.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+            p.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP;
             owner.visibleToInstantApps = true;
         }
 
@@ -4874,12 +4899,11 @@ public class PackageParser {
                         intent, outError)) {
                     return false;
                 }
-                outInfo.intents.add(intent);
-                // adjust provider flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
-                if (intent.isVisibleToInstantApp()) {
-                    outInfo.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                if (visibleToEphemeral) {
+                    intent.setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
+                    outInfo.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                 }
+                outInfo.intents.add(intent);
 
             } else if (parser.getName().equals("meta-data")) {
                 if ((outInfo.metaData=parseMetaData(res, parser,
@@ -4889,11 +4913,12 @@ public class PackageParser {
                 // we don't have an attribute [or it's false], but, we have meta-data
                 if (!visibleToEphemeral && outInfo.metaData.getBoolean(META_DATA_INSTANT_APPS)) {
                     visibleToEphemeral = true; // set in case there are more intent filters
-                    outInfo.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    outInfo.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                     owner.visibleToInstantApps = true;
                     // cycle through any filters already seen
                     for (int i = outInfo.intents.size() - 1; i >= 0; --i) {
-                        outInfo.intents.get(i).setVisibleToInstantApp(true /*visibleToInstantApp*/);
+                        outInfo.intents.get(i)
+                                .setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
                     }
                 }
 
@@ -5149,7 +5174,7 @@ public class PackageParser {
         boolean visibleToEphemeral =
                 sa.getBoolean(R.styleable.AndroidManifestService_visibleToInstantApps, false);
         if (visibleToEphemeral) {
-            s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+            s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_INSTANT_APP;
             owner.visibleToInstantApps = true;
         }
 
@@ -5180,10 +5205,9 @@ public class PackageParser {
                         intent, outError)) {
                     return null;
                 }
-                // adjust activity flags when we implicitly expose it via a browsable filter
-                intent.setVisibleToInstantApp(visibleToEphemeral || isImplicitlyExposedIntent(intent));
-                if (intent.isVisibleToInstantApp()) {
-                    s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                if (visibleToEphemeral) {
+                    intent.setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
+                    s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                 }
                 s.intents.add(intent);
             } else if (parser.getName().equals("meta-data")) {
@@ -5194,11 +5218,12 @@ public class PackageParser {
                 // we don't have an attribute [or it's false], but, we have meta-data
                 if (!visibleToEphemeral && s.metaData.getBoolean(META_DATA_INSTANT_APPS)) {
                     visibleToEphemeral = true; // set in case there are more intent filters
-                    s.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                    s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                     owner.visibleToInstantApps = true;
                     // cycle through any filters already seen
                     for (int i = s.intents.size() - 1; i >= 0; --i) {
-                        s.intents.get(i).setVisibleToInstantApp(true /*visibleToInstantApp*/);
+                        s.intents.get(i)
+                                .setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
                     }
                 }
             } else {

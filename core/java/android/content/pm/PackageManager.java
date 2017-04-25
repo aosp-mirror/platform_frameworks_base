@@ -461,10 +461,18 @@ public abstract class PackageManager {
 
     /**
      * Internal {@link PackageInfo} flag: include only components that are exposed to
-     * ephemeral apps.
+     * instant apps. Matched components may have been either explicitly or implicitly
+     * exposed.
      * @hide
      */
     public static final int MATCH_VISIBLE_TO_INSTANT_APP_ONLY = 0x01000000;
+
+    /**
+     * Internal {@link PackageInfo} flag: include only components that have been
+     * explicitly exposed to instant apps.
+     * @hide
+     */
+    public static final int MATCH_EXPLICITLY_VISIBLE_ONLY = 0x02000000;
 
     /**
      * Internal flag used to indicate that a system component has done their

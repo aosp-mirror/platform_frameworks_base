@@ -79,7 +79,7 @@ public final class ProviderInfo extends ComponentInfo
      * Bit in {@link #flags} indicating if the provider is visible to ephemeral applications.
      * @hide
      */
-    public static final int FLAG_VISIBLE_TO_EPHEMERAL = 0x100000;
+    public static final int FLAG_VISIBLE_TO_INSTANT_APP = 0x100000;
 
     /**
      * Bit in {@link #flags}: If set, a single instance of the provider will
