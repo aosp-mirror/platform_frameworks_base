@@ -40,6 +40,7 @@ public class WebViewZygote {
 
     private static final String WEBVIEW_ZYGOTE_SERVICE_32 = "webview_zygote32";
     private static final String WEBVIEW_ZYGOTE_SERVICE_64 = "webview_zygote64";
+    private static final String WEBVIEW_ZYGOTE_SOCKET = "webview_zygote";
 
     /**
      * Lock object that protects all other static members.
@@ -202,7 +203,7 @@ public class WebViewZygote {
         }
 
         try {
-            sZygote = new ZygoteProcess("webview_zygote", null);
+            sZygote = new ZygoteProcess(WEBVIEW_ZYGOTE_SOCKET, null);
 
             // All the work below is usually done by LoadedApk, but the zygote can't talk to
             // PackageManager or construct a LoadedApk since it's single-threaded pre-fork, so
@@ -217,12 +218,35 @@ public class WebViewZygote {
             final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
                     TextUtils.join(File.pathSeparator, zipPaths);
 
+            waitForZygote();
+
             Log.d(LOGTAG, "Preloading package " + zip + " " + librarySearchPath);
             sZygote.preloadPackageForAbi(zip, librarySearchPath, sPackageCacheKey,
                                          Build.SUPPORTED_ABIS[0]);
         } catch (Exception e) {
             Log.e(LOGTAG, "Error connecting to " + serviceName, e);
             sZygote = null;
+        }
+    }
+
+    /**
+     * Wait until a connection to the Zygote can be established.
+     */
+    private static void waitForZygote() {
+        while (true) {
+            try {
+                final ZygoteProcess.ZygoteState zs =
+                        ZygoteProcess.ZygoteState.connect(WEBVIEW_ZYGOTE_SOCKET);
+                zs.close();
+                break;
+            } catch (IOException ioe) {
+                Log.w(LOGTAG, "Got error connecting to zygote, retrying. msg= " + ioe.getMessage());
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+            }
         }
     }
 }
