@@ -1386,7 +1386,11 @@ final class Settings {
         if (userId == UserHandle.USER_ALL) {
             return false;
         }
-        mDefaultBrowserApp.put(userId, packageName);
+        if (packageName != null) {
+            mDefaultBrowserApp.put(userId, packageName);
+        } else {
+            mDefaultBrowserApp.remove(userId);
+        }
         writePackageRestrictionsLPr(userId);
         return true;
     }
