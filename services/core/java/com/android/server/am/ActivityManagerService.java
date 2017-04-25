@@ -411,6 +411,7 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -7818,10 +7819,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized(this) {
                 final ActivityStack stack = ActivityRecord.getStackLocked(token);
-                if (stack == null) {
+                if (stack == null || stack.mStackId != PINNED_STACK_ID) {
                     return false;
                 }
-                return stack.mStackId == PINNED_STACK_ID;
+
+                // If we are animating to fullscreen then we have already dispatched the PIP mode
+                // changed, so we should reflect that check here as well.
+                final PinnedStackWindowController windowController =
+                        ((PinnedActivityStack) stack).getWindowContainerController();
+                return !windowController.isAnimatingBoundsToFullscreen();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
