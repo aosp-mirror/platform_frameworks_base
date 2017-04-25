@@ -118,6 +118,9 @@ public final class CompanionDeviceManager {
      * association is no longer relevant to avoid unnecessary battery and/or data drain resulting
      * from special privileges that the association provides</p>
      *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
      * @param request specific details about this request
      * @param callback will be called once there's at least one device found for user to choose from
      * @param handler A handler to control which thread the callback will be delivered on, or null,
@@ -160,6 +163,9 @@ public final class CompanionDeviceManager {
     }
 
     /**
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
      * @return a list of MAC addresses of devices that have been previously associated with the
      * current app. You can use these with {@link #disassociate}
      */
@@ -184,6 +190,9 @@ public final class CompanionDeviceManager {
      * association is no longer relevant to avoid unnecessary battery and/or data drain resulting
      * from special privileges that the association provides</p>
      *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
      * @param deviceMacAddress the MAC address of device to disassociate from this app
      */
     public void disassociate(@NonNull String deviceMacAddress) {
@@ -206,6 +215,9 @@ public final class CompanionDeviceManager {
      * are allowed.
      *
      * Your app must have an association with a device before calling this API
+     *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      */
     public void requestNotificationAccess(ComponentName component) {
         if (!checkFeaturePresent()) {
@@ -225,6 +237,9 @@ public final class CompanionDeviceManager {
      * {@link NotificationListenerService}
      *
      * Your app must have an association with a device before calling this API
+     *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      *
      * @param component the name of the component
      * @return whether the given component has the notification listener permission
