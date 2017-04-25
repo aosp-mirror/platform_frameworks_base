@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.FontListParser;
 import android.graphics.fonts.FontRequest;
-import android.graphics.fonts.FontResult;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import android.net.Uri;
@@ -102,8 +101,6 @@ public class Typeface {
             new LongSparseArray<>(3);
     @GuardedBy("sLock")
     private static FontsContract sFontsContract;
-    @GuardedBy("sLock")
-    private static Handler sHandler;
 
     /**
      * Cache for Typeface objects dynamically loaded from assets. Currently max size is 16.
@@ -205,16 +202,9 @@ public class Typeface {
     public static Typeface createFromResources(
             FamilyResourceEntry entry, AssetManager mgr, String path) {
         if (sFallbackFonts != null) {
-            Typeface typeface = findFromCache(mgr, path);
-            if (typeface != null) return typeface;
-
             if (entry instanceof ProviderResourceEntry) {
                 final ProviderResourceEntry providerEntry = (ProviderResourceEntry) entry;
                 // Downloadable font
-                typeface = findFromCache(providerEntry.getAuthority(), providerEntry.getQuery());
-                if (typeface != null) {
-                    return typeface;
-                }
                 List<List<String>> givenCerts = providerEntry.getCerts();
                 List<List<byte[]>> certs = new ArrayList<>();
                 if (givenCerts != null) {
@@ -229,10 +219,14 @@ public class Typeface {
                 }
                 // Downloaded font and it wasn't cached, request it again and return a
                 // default font instead (nothing we can do now).
-                create(new FontRequest(providerEntry.getAuthority(), providerEntry.getPackage(),
-                        providerEntry.getQuery(), certs), NO_OP_REQUEST_CALLBACK);
-                return DEFAULT;
+                FontRequest request = new FontRequest(providerEntry.getAuthority(),
+                        providerEntry.getPackage(), providerEntry.getQuery(), certs);
+                Typeface typeface = sFontsContract.getFontOrWarmUpCache(request);
+                return typeface == null ? DEFAULT : typeface;
             }
+
+            Typeface typeface = findFromCache(mgr, path);
+            if (typeface != null) return typeface;
 
             // family is FontFamilyFilesResourceEntry
             final FontFamilyFilesResourceEntry filesEntry =
@@ -291,213 +285,9 @@ public class Typeface {
         synchronized (sLock) {
             if (sFontsContract == null) {
                 sFontsContract = new FontsContract(context);
-                sHandler = new Handler();
             }
         }
     }
-
-    /**
-     * Create a typeface object given a font request. The font will be asynchronously fetched,
-     * therefore the result is delivered to the given callback. See {@link FontRequest}.
-     * Only one of the methods in callback will be invoked, depending on whether the request
-     * succeeds or fails. These calls will happen on the main thread.
-     * @param request A {@link FontRequest} object that identifies the provider and query for the
-     *                request. May not be null.
-     * @param callback A callback that will be triggered when results are obtained. May not be null.
-     */
-    @Deprecated
-    public static void create(@NonNull FontRequest request, @NonNull FontRequestCallback callback) {
-        // Check the cache first
-        // TODO: would the developer want to avoid a cache hit and always ask for the freshest
-        // result?
-        Typeface cachedTypeface = findFromCache(
-                request.getProviderAuthority(), request.getQuery());
-        if (cachedTypeface != null) {
-            sHandler.post(() -> callback.onTypefaceRetrieved(cachedTypeface));
-            return;
-        }
-        synchronized (sLock) {
-            if (sFontsContract == null) {
-                throw new RuntimeException("Context not initialized, can't query provider");
-            }
-            final ResultReceiver receiver = new ResultReceiver(null) {
-                @Override
-                public void onReceiveResult(int resultCode, Bundle resultData) {
-                    sHandler.post(() -> receiveResult(request, callback, resultCode, resultData));
-                }
-            };
-            sFontsContract.getFont(request, receiver);
-        }
-    }
-
-    private static Typeface findFromCache(String providerAuthority, String query) {
-        synchronized (sDynamicTypefaceCache) {
-            final String key = createProviderUid(providerAuthority, query);
-            Typeface typeface = sDynamicTypefaceCache.get(key);
-            if (typeface != null) {
-                return typeface;
-            }
-        }
-        return null;
-    }
-
-    private static void receiveResult(FontRequest request, FontRequestCallback callback,
-            int resultCode, Bundle resultData) {
-        Typeface cachedTypeface = findFromCache(
-                request.getProviderAuthority(), request.getQuery());
-        if (cachedTypeface != null) {
-            // We already know the result.
-            // Probably the requester requests the same font again in a short interval.
-            callback.onTypefaceRetrieved(cachedTypeface);
-            return;
-        }
-        if (resultCode != FontsContract.Columns.RESULT_CODE_OK) {
-            callback.onTypefaceRequestFailed(resultCode);
-            return;
-        }
-        if (resultData == null) {
-            callback.onTypefaceRequestFailed(
-                    FontRequestCallback.FAIL_REASON_FONT_NOT_FOUND);
-            return;
-        }
-        List<FontResult> resultList =
-                resultData.getParcelableArrayList(FontsContract.PARCEL_FONT_RESULTS);
-        if (resultList == null || resultList.isEmpty()) {
-            callback.onTypefaceRequestFailed(
-                    FontRequestCallback.FAIL_REASON_FONT_NOT_FOUND);
-            return;
-        }
-        FontFamily fontFamily = new FontFamily();
-        for (int i = 0; i < resultList.size(); ++i) {
-            FontResult result = resultList.get(i);
-            ParcelFileDescriptor fd = result.getFileDescriptor();
-            if (fd == null) {
-                callback.onTypefaceRequestFailed(
-                        FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
-                return;
-            }
-            try (FileInputStream is = new FileInputStream(fd.getFileDescriptor())) {
-                FileChannel fileChannel = is.getChannel();
-                long fontSize = fileChannel.size();
-                ByteBuffer fontBuffer = fileChannel.map(
-                        FileChannel.MapMode.READ_ONLY, 0, fontSize);
-                int weight = result.getWeight();
-                int italic = result.getItalic() ? STYLE_ITALIC : STYLE_NORMAL;
-                FontVariationAxis[] axes = null;
-                try {
-                    axes = FontVariationAxis.fromFontVariationSettings(
-                            result.getFontVariationSettings());
-                } catch (FontVariationAxis.InvalidFormatException e) {
-                    // TODO: Nice to pass FontVariationAxis[] directly instead of string.
-                }
-                if (!fontFamily.addFontFromBuffer(fontBuffer, result.getTtcIndex(),
-                        axes, weight, italic)) {
-                    Log.e(TAG, "Error creating font " + request.getQuery());
-                    callback.onTypefaceRequestFailed(
-                            FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
-                    return;
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Error reading font " + request.getQuery(), e);
-                callback.onTypefaceRequestFailed(
-                        FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
-                return;
-            } finally {
-                IoUtils.closeQuietly(fd);
-            }
-        }
-        if (!fontFamily.freeze()) {
-            callback.onTypefaceRequestFailed(
-                    FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
-            return;
-        }
-        Typeface typeface = Typeface.createFromFamiliesWithDefault(
-                new FontFamily[] { fontFamily },
-                RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
-        synchronized (sDynamicTypefaceCache) {
-            String key = createProviderUid(request.getProviderAuthority(), request.getQuery());
-            sDynamicTypefaceCache.put(key, typeface);
-        }
-        callback.onTypefaceRetrieved(typeface);
-    }
-
-    /**
-     * Interface used to receive asynchronously fetched typefaces.
-     */
-    @Deprecated
-    public interface FontRequestCallback {
-        /**
-         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
-         * provider was not found on the device.
-         */
-        int FAIL_REASON_PROVIDER_NOT_FOUND = FontsContract.RESULT_CODE_PROVIDER_NOT_FOUND;
-        /**
-         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
-         * provider must be authenticated and the given certificates do not match its signature.
-         */
-        int FAIL_REASON_WRONG_CERTIFICATES = FontsContract.RESULT_CODE_WRONG_CERTIFICATES;
-        /**
-         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
-         * returned by the provider was not loaded properly.
-         */
-        int FAIL_REASON_FONT_LOAD_ERROR = -3;
-        /**
-         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
-         * provider did not return any results for the given query.
-         */
-        int FAIL_REASON_FONT_NOT_FOUND = FontsContract.Columns.RESULT_CODE_FONT_NOT_FOUND;
-        /**
-         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
-         * provider found the queried font, but it is currently unavailable.
-         */
-        int FAIL_REASON_FONT_UNAVAILABLE = FontsContract.Columns.RESULT_CODE_FONT_UNAVAILABLE;
-        /**
-         * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
-         * query was not supported by the provider.
-         */
-        int FAIL_REASON_MALFORMED_QUERY = FontsContract.Columns.RESULT_CODE_MALFORMED_QUERY;
-
-        /** @hide */
-        @IntDef({ FAIL_REASON_PROVIDER_NOT_FOUND, FAIL_REASON_FONT_LOAD_ERROR,
-                FAIL_REASON_FONT_NOT_FOUND, FAIL_REASON_FONT_UNAVAILABLE,
-                FAIL_REASON_MALFORMED_QUERY })
-        @Retention(RetentionPolicy.SOURCE)
-        @interface FontRequestFailReason {}
-
-        /**
-         * Called then a Typeface request done via {@link Typeface#create(FontRequest,
-         * FontRequestCallback)} is complete. Note that this method will not be called if
-         * {@link #onTypefaceRequestFailed(int)} is called instead.
-         * @param typeface  The Typeface object retrieved.
-         */
-        void onTypefaceRetrieved(Typeface typeface);
-
-        /**
-         * Called when a Typeface request done via {@link Typeface#create(FontRequest,
-         * FontRequestCallback)} fails.
-         * @param reason May be one of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
-         *               {@link #FAIL_REASON_FONT_NOT_FOUND},
-         *               {@link #FAIL_REASON_FONT_LOAD_ERROR},
-         *               {@link #FAIL_REASON_FONT_UNAVAILABLE} or
-         *               {@link #FAIL_REASON_MALFORMED_QUERY} if returned by the system. May also be
-         *               a positive value greater than 0 defined by the font provider as an
-         *               additional error code. Refer to the provider's documentation for more
-         *               information on possible returned error codes.
-         */
-        void onTypefaceRequestFailed(@FontRequestFailReason int reason);
-    }
-
-    private static final FontRequestCallback NO_OP_REQUEST_CALLBACK = new FontRequestCallback() {
-        @Override
-        public void onTypefaceRetrieved(Typeface typeface) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onTypefaceRequestFailed(@FontRequestFailReason int reason) {
-            // Do nothing.
-        }
-    };
 
     /**
      * A builder class for creating new Typeface instance.
