@@ -60,8 +60,8 @@ public final class AutoFillUI {
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     public interface AutoFillUiCallback {
-        void authenticate(@NonNull IntentSender intent, @Nullable Bundle extras);
-        void fill(@NonNull Dataset dataset);
+        void authenticate(int requestId, @NonNull IntentSender intent, @Nullable Bundle extras);
+        void fill(int requestId, @NonNull Dataset dataset);
         void save();
         void cancelSave();
         void requestShowFillUi(AutofillId id, int width, int height,
@@ -161,8 +161,8 @@ public final class AutoFillUI {
                     log.setType(MetricsProto.MetricsEvent.TYPE_DETAIL);
                     hideFillUiUiThread();
                     if (mCallback != null) {
-                        mCallback.authenticate(response.getAuthentication(),
-                                response.getClientState());
+                        mCallback.authenticate(response.getRequestId(),
+                                response.getAuthentication(), response.getClientState());
                     }
                 }
 
@@ -171,7 +171,7 @@ public final class AutoFillUI {
                     log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
                     hideFillUiUiThread();
                     if (mCallback != null) {
-                        mCallback.fill(dataset);
+                        mCallback.fill(response.getRequestId(), dataset);
                     }
                 }
 

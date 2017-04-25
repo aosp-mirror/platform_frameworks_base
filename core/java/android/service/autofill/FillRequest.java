@@ -45,6 +45,9 @@ public final class FillRequest implements Parcelable {
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
     /** @hide */
+    public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
+
+    /** @hide */
     @IntDef(
         flag = true,
         value = {FLAG_MANUAL_REQUEST})
