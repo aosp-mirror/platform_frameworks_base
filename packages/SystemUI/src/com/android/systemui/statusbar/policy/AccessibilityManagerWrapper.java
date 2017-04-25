@@ -19,7 +19,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 
 /**
- * For mocking because AccessibilyManager is final for some reason...
+ * For mocking because AccessibilityManager is final for some reason...
  */
 public class AccessibilityManagerWrapper implements
         CallbackController<AccessibilityServicesStateChangeListener> {
@@ -32,7 +32,7 @@ public class AccessibilityManagerWrapper implements
 
     @Override
     public void addCallback(AccessibilityServicesStateChangeListener listener) {
-        mAccessibilityManager.addAccessibilityServicesStateChangeListener(listener);
+        mAccessibilityManager.addAccessibilityServicesStateChangeListener(listener, null);
     }
 
     @Override

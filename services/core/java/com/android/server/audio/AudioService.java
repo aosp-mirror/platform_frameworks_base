@@ -6044,8 +6044,8 @@ public class AudioService extends IAudioService.Stub
                 (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         updateDefaultStreamOverrideDelay(accessibilityManager.isTouchExplorationEnabled());
         updateA11yVolumeAlias(accessibilityManager.isAccessibilityVolumeStreamActive());
-        accessibilityManager.addTouchExplorationStateChangeListener(this);
-        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
+        accessibilityManager.addTouchExplorationStateChangeListener(this, null);
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this, null);
     }
 
     //---------------------------------------------------------------------------------
