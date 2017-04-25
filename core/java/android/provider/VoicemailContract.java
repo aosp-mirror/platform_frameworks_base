@@ -107,15 +107,7 @@ public class VoicemailContract {
 
     /**
      * Broadcast intent to inform a new visual voicemail SMS has been received. This intent will
-     * only be delivered to the voicemail client. The intent will have the following extra values:
-     *
-     * <ul>
-     *   <li><em>{@link #EXTRA_VOICEMAIL_SMS_TYPE}</em> - (String) The event type of the SMS. Common
-     *   values are "SYNC" or "STATUS"</li>
-     *   <li><em>{@link #EXTRA_VOICEMAIL_SMS_DATA}</em> - (Bundle) The fields sent by the SMS</li>
-     *   <li><em>{@link #EXTRA_VOICEMAIL_SMS_SUBID}</em> - (Integer) The subscription ID of the
-     *   phone account that received the SMS</li>
-     * </ul>
+     * only be delivered to the telephony service. {@link #EXTRA_VOICEMAIL_SMS} will be included.
      */
     /** @hide */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -123,42 +115,11 @@ public class VoicemailContract {
             "android.intent.action.VOICEMAIL_SMS_RECEIVED";
 
     /**
-     * Optional extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to
-     * indicate the event type of the SMS. Common values are "SYNC" or "STATUS". The extra will not
-     * exist if the framework cannot parse the SMS as voicemail but the carrier pattern indicates
-     * it is.
-     */
-    /** @hide */
-    public static final String EXTRA_VOICEMAIL_SMS_PREFIX =
-            "com.android.voicemail.extra.VOICEMAIL_SMS_PREFIX";
-
-    /**
-     * Optional extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to
-     * indicate the fields sent by the SMS. The extra will not exist if the framework cannot
-     * parse the SMS as voicemail but the carrier pattern indicates it is.
-     */
-    /** @hide */
-    public static final String EXTRA_VOICEMAIL_SMS_FIELDS =
-            "com.android.voicemail.extra.VOICEMAIL_SMS_FIELDS";
-
-    /**
-     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate the
-     * message body of the SMS. This extra is included if the framework cannot
-     * parse the SMS as voicemail but the carrier pattern indicates it is.
-     */
-    /**
+     * Extra in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} indicating the content of the SMS.
+     *
      * @hide
      */
-    public static final String EXTRA_VOICEMAIL_SMS_MESSAGE_BODY =
-        "com.android.voicemail.extra.VOICEMAIL_SMS_MESSAGE_BODY";
-
-    /**
-     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate he
-     * subscription ID of the phone account that received the SMS.
-     */
-    /** @hide */
-    public static final String EXTRA_VOICEMAIL_SMS_SUBID =
-            "com.android.voicemail.extra.VOICEMAIL_SMS_SUBID";
+    public static final String EXTRA_VOICEMAIL_SMS = "android.provider.extra.VOICEMAIL_SMS";
 
     /**
      * Extra included in {@link Intent#ACTION_PROVIDER_CHANGED} broadcast intents to indicate if the

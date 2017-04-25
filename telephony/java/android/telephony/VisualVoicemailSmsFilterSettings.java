@@ -15,9 +15,13 @@
  */
 package android.telephony;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.telecom.PhoneAccountHandle;
+import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,31 +32,26 @@ import java.util.List;
  * <p>[clientPrefix]:[prefix]:([key]=[value];)*
  *
  * <p>will be regarded as a visual voicemail SMS, and removed before reaching the SMS provider. The
- * intent {@link android.provider.VoicemailContract#ACTION_VOICEMAIL_SMS_RECEIVED} will then be sent
- * to the default dialer with the information extracted from the SMS.
+ * {@link VisualVoicemailService} in the current default dialer will be bound and
+ * {@link VisualVoicemailService#onSmsReceived(VisualVoicemailTask, VisualVoicemailSms)}
+ * will called with the information extracted from the SMS.
  *
  * <p>Use {@link android.telephony.VisualVoicemailSmsFilterSettings.Builder} to construct this
  * class.
  *
- * @see android.telephony.TelephonyManager#enableVisualVoicemailSmsFilter
- *
- * @hide
+ * @see VisualVoicemailService#setSmsFilterSettings(Context, PhoneAccountHandle, VisualVoicemailSmsFilterSettings)
  */
-public class VisualVoicemailSmsFilterSettings implements Parcelable {
+public final class VisualVoicemailSmsFilterSettings implements Parcelable {
 
 
     /**
      * The visual voicemail SMS message does not have to be a data SMS, and can be directed to any
      * port.
-     *
-     * @hide
      */
     public static final int DESTINATION_PORT_ANY = -1;
 
     /**
      * The visual voicemail SMS message can be directed to any port, but must be a data SMS.
-     *
-     * @hide
      */
     public static final int DESTINATION_PORT_DATA_SMS = -2;
 
@@ -62,8 +61,6 @@ public class VisualVoicemailSmsFilterSettings implements Parcelable {
 
     /**
      * Builder class for {@link VisualVoicemailSmsFilterSettings} objects.
-     *
-     * @hide
      */
     public static class Builder {
 
@@ -169,6 +166,15 @@ public class VisualVoicemailSmsFilterSettings implements Parcelable {
         dest.writeString(clientPrefix);
         dest.writeStringList(originatingNumbers);
         dest.writeInt(destinationPort);
+    }
+
+    @Override
+    public String toString(){
+        return "[VisualVoicemailSmsFilterSettings "
+                + "clientPrefix=" + clientPrefix
+                + ", originatingNumbers=" + originatingNumbers
+                + ", destinationPort=" + destinationPort
+                + "]";
     }
 
 }
