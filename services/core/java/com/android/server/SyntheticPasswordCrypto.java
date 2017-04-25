@@ -139,12 +139,14 @@ public class SyntheticPasswordCrypto {
             keyStore.load(null);
             KeyProtection.Builder builder = new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setCriticalToDeviceEncryption(true);
             if (sid != 0) {
                 builder.setUserAuthenticationRequired(true)
                         .setBoundToSpecificSecureUserId(sid)
                         .setUserAuthenticationValidityDurationSeconds(USER_AUTHENTICATION_VALIDITY);
             }
+
             keyStore.setEntry(keyAlias,
                     new KeyStore.SecretKeyEntry(secretKey),
                     builder.build());

@@ -227,6 +227,7 @@ public final class KeyProtection implements ProtectionParameter {
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final long mBoundToSecureUserId;
+    private final boolean mCriticalToDeviceEncryption;
 
     private KeyProtection(
             Date keyValidityStart,
@@ -242,7 +243,8 @@ public final class KeyProtection implements ProtectionParameter {
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
-            long boundToSecureUserId) {
+            long boundToSecureUserId,
+            boolean criticalToDeviceEncryption) {
         mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
         mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
@@ -259,6 +261,7 @@ public final class KeyProtection implements ProtectionParameter {
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mBoundToSecureUserId = boundToSecureUserId;
+        mCriticalToDeviceEncryption = criticalToDeviceEncryption;
     }
 
     /**
@@ -458,6 +461,16 @@ public final class KeyProtection implements ProtectionParameter {
     }
 
     /**
+     * Return whether this key is critical to the device encryption flow.
+     *
+     * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+     * @hide
+     */
+    public boolean isCriticalToDeviceEncryption() {
+        return mCriticalToDeviceEncryption;
+    }
+
+    /**
      * Builder of {@link KeyProtection} instances.
      */
     public final static class Builder {
@@ -477,6 +490,7 @@ public final class KeyProtection implements ProtectionParameter {
         private boolean mInvalidatedByBiometricEnrollment = true;
 
         private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
+        private boolean mCriticalToDeviceEncryption = false;
         /**
          * Creates a new instance of the {@code Builder}.
          *
@@ -817,6 +831,20 @@ public final class KeyProtection implements ProtectionParameter {
         }
 
         /**
+         * Set whether this key is critical to the device encryption flow
+         *
+         * This is a special flag only available to system servers to indicate the current key
+         * is part of the device encryption flow.
+         *
+         * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+         * @hide
+         */
+        public Builder setCriticalToDeviceEncryption(boolean critical) {
+            mCriticalToDeviceEncryption = critical;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@link KeyProtection}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -837,7 +865,8 @@ public final class KeyProtection implements ProtectionParameter {
                     mUserAuthenticationValidityDurationSeconds,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
-                    mBoundToSecureUserId);
+                    mBoundToSecureUserId,
+                    mCriticalToDeviceEncryption);
         }
     }
 }
