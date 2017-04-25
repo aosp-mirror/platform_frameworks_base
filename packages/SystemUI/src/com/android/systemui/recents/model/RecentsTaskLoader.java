@@ -630,6 +630,9 @@ public class RecentsTaskLoader {
         writer.print(prefix); writer.println(TAG);
         writer.print(prefix); writer.println("Icon Cache");
         mIconCache.dump(innerPrefix, writer);
+        writer.print(prefix); writer.println("Thumbnail Cache");
         mThumbnailCache.dump(innerPrefix, writer);
+        writer.print(prefix); writer.println("Temp Thumbnail Cache");
+        mTempCache.dump(innerPrefix, writer);
     }
 }

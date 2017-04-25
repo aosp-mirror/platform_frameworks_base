@@ -1711,6 +1711,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    private void clearPrefetchingTask() {
+        if (mPrefetchingTask != null) {
+            Recents.getTaskLoader().unloadTaskData(mPrefetchingTask);
+        }
+        mPrefetchingTask = null;
+    }
+
     /**** TaskViewCallbacks Implementation ****/
 
     @Override
@@ -2200,6 +2207,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public final void onBusEvent(RecentsVisibilityChangedEvent event) {
         if (!event.visible && mTaskViewFocusFrame != null) {
             mTaskViewFocusFrame.moveGridTaskViewFocus(null);
+        }
+        if (!event.visible) {
+            List<TaskView> taskViews = new ArrayList<>(getTaskViews());
+            for (int i = 0; i < taskViews.size(); i++) {
+                mViewPool.returnViewToPool(taskViews.get(i));
+            }
+            clearPrefetchingTask();
         }
     }
 
