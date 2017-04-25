@@ -666,8 +666,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     }
                 }
             }
-            if ((!winAnimator.isAnimationStarting() && !winAnimator.isWaitingForOpening()) ||
-                    winAnimator.isDummyAnimation()) {
+            final TaskStack stack = w.getStack();
+            if ((!winAnimator.isAnimationStarting() && !winAnimator.isWaitingForOpening())
+                    || (stack != null && stack.isAnimatingBounds())) {
                 // Updates the shown frame before we set up the surface. This is needed
                 // because the resizing could change the top-left position (in addition to
                 // size) of the window. setSurfaceBoundariesLocked uses mShownPosition to
@@ -675,7 +676,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 //
                 // If an animation is being started, we can't call this method because the
                 // animation hasn't processed its initial transformation yet, but in general
-                // we do want to update the position if the window is animating.
+                // we do want to update the position if the window is animating. We make an exception
+                // for the bounds animating state, where an application may have been waiting
+                // for an exit animation to start, but instead enters PiP. We need to ensure
+                // we always recompute the top-left in this case.
                 winAnimator.computeShownFrameLocked();
             }
             winAnimator.setSurfaceBoundariesLocked(mTmpRecoveringMemory /* recoveringMemory */);
