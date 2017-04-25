@@ -37,7 +37,9 @@ public class StreamingService {
     }
 
     /**
-     * Retreive the Uri used to play this stream
+     * Retreive the Uri used to play this stream.
+     *
+     * This may throw a RemoteException.
      */
     public Uri getPlaybackUri() {
         return null;
@@ -52,6 +54,8 @@ public class StreamingService {
 
     /**
      * Retreive the current state of this stream.
+     *
+     * This may throw a RemoteException.
      */
     public int getState() {
         return STATE_STOPPED;
@@ -59,12 +63,19 @@ public class StreamingService {
 
     /**
      * Stop streaming this service.  Terminal.
+     *
+     * This may throw a RemoteException.
      */
     public void stopStreaming() {
     }
 
     /**
      * Switch this stream to a different service.  Used for smooth transitions.
+     *
+     * This may throw a RemoteException.
+     *
+     * Asynchronous errors through the listener include any of the errors except
+     * <li>ERROR_MSDC_UNABLE_TO_INITIALIZE</li>
      */
     public void switchStream(StreamingServiceInfo streamingServiceInfo) {
     }
