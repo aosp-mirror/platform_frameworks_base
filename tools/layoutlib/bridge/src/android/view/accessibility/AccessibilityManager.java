@@ -18,8 +18,10 @@ package android.view.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
+import android.os.Handler;
 import android.view.IWindow;
 import android.view.View;
 
@@ -206,6 +208,18 @@ public final class AccessibilityManager {
         return true;
     }
 
+    /**
+     * Registers an {@link AccessibilityStateChangeListener} for changes in
+     * the global accessibility state of the system. If the listener has already been registered,
+     * the handler used to call it back is updated.
+     *
+     * @param listener The listener.
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
+     */
+    public void addAccessibilityStateChangeListener(
+            @NonNull AccessibilityStateChangeListener listener, @Nullable Handler handler) {}
+
     public boolean removeAccessibilityStateChangeListener(
             AccessibilityStateChangeListener listener) {
         return true;
@@ -224,6 +238,18 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Registers an {@link TouchExplorationStateChangeListener} for changes in
+     * the global touch exploration state of the system. If the listener has already been
+     * registered, the handler used to call it back is updated.
+     *
+     * @param listener The listener.
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
+     */
+    public void addTouchExplorationStateChangeListener(
+            @NonNull TouchExplorationStateChangeListener listener, @Nullable Handler handler) {}
+
+    /**
      * Unregisters a {@link TouchExplorationStateChangeListener}.
      *
      * @param listener The listener.
@@ -239,25 +265,21 @@ public final class AccessibilityManager {
      * the global high text contrast state of the system.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
      *
+     * @hide
      */
-    public boolean addHighTextContrastStateChangeListener(
-            @NonNull HighTextContrastChangeListener listener) {
-        return true;
-    }
+    public void addHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener, @Nullable Handler handler) {}
 
     /**
      * Unregisters a {@link HighTextContrastChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
      *
+     * @hide
      */
-    public boolean removeHighTextContrastStateChangeListener(
-            @NonNull HighTextContrastChangeListener listener) {
-        return true;
-    }
+    public void removeHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener) {}
 
     /**
      * Sets the current state and notifies listeners, if necessary.
