@@ -56,6 +56,10 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ইন্টারনেট সংযোগ শেয়ার করা হচ্ছে"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"বার্তা অ্যাক্সেস"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"সিম -এর অ্যাক্সেস"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"মিডিয়া অডিওতে সংযুক্ত রয়েছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ফোন অডিওতে সংযুক্ত"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ফাইল স্থানান্তর সার্ভারের সঙ্গে সংযুক্ত"</string>

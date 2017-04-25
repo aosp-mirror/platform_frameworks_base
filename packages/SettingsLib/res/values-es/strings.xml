@@ -56,6 +56,10 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Compartir conexión a Internet"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Acceso a mensajes"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Acceso a tarjeta SIM"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Conectado al audio del medio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Conectado al audio del teléfono"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Conectado con el servidor de transferencia de archivos"</string>
@@ -172,7 +176,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permitir siempre búsquedas de Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datos móviles siempre activos"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inhabilitar volumen absoluto"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Habilitar sonido dentro de la banda"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Habilitar tono de llamada por Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP del Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona la versión AVRCP del Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Códec de audio por Bluetooth"</string>
@@ -231,7 +235,7 @@
     <string name="media_category" msgid="4388305075496848353">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Supervisión"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modo estricto"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Parpadear si las aplicaciones tardan mucho en el thread principal"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Parpadear si las aplicaciones tardan mucho en el subproceso principal"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Ubicación del puntero"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Superponer los datos de las pulsaciones en la pantalla"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>

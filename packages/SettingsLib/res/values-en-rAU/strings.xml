@@ -56,6 +56,10 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Internet connection sharing"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Message Access"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM Access"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Connected to media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Connected to phone audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Connected to file-transfer server"</string>
