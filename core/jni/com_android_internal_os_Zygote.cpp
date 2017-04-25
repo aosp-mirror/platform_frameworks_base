@@ -685,11 +685,14 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
 
     // Grant CAP_WAKE_ALARM to the Bluetooth process.
     // Additionally, allow bluetooth to open packet sockets so it can start the DHCP client.
+    // Grant CAP_SYS_NICE to allow Bluetooth to set RT priority for
+    // audio-related threads.
     // TODO: consider making such functionality an RPC to netd.
     if (multiuser_get_app_id(uid) == AID_BLUETOOTH) {
       capabilities |= (1LL << CAP_WAKE_ALARM);
       capabilities |= (1LL << CAP_NET_RAW);
       capabilities |= (1LL << CAP_NET_BIND_SERVICE);
+      capabilities |= (1LL << CAP_SYS_NICE);
     }
 
     // Grant CAP_BLOCK_SUSPEND to processes that belong to GID "wakelock"

@@ -20,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.ISchedulingPolicyService;
 import android.os.Process;
+import android.util.Log;
 
 /**
  * The implementation of the scheduling policy service interface.
@@ -50,16 +51,24 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         // since if not the case then the getThreadGroupLeader() test will also fail.
         if (!isPermitted() || prio < PRIORITY_MIN ||
                 prio > PRIORITY_MAX || Process.getThreadGroupLeader(tid) != pid) {
-            return PackageManager.PERMISSION_DENIED;
+           return PackageManager.PERMISSION_DENIED;
+        }
+        if (Binder.getCallingUid() != Process.BLUETOOTH_UID) {
+            try {
+                // make good use of our CAP_SYS_NICE capability
+                Process.setThreadGroup(tid, !isForApp ?
+                  Process.THREAD_GROUP_AUDIO_SYS : Process.THREAD_GROUP_AUDIO_APP);
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Failed setThreadGroup: " + e);
+                return PackageManager.PERMISSION_DENIED;
+           }
         }
         try {
-            // make good use of our CAP_SYS_NICE capability
-            Process.setThreadGroup(tid, !isForApp ?
-                    Process.THREAD_GROUP_AUDIO_SYS : Process.THREAD_GROUP_AUDIO_APP);
             // must be in this order or it fails the schedulability constraint
             Process.setThreadScheduler(tid, Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK,
-                prio);
+                                       prio);
         } catch (RuntimeException e) {
+            Log.e(TAG, "Failed setThreadScheduler: " + e);
             return PackageManager.PERMISSION_DENIED;
         }
         return PackageManager.PERMISSION_GRANTED;
@@ -74,6 +83,7 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         switch (Binder.getCallingUid()) {
         case Process.AUDIOSERVER_UID: // fastcapture, fastmixer
         case Process.CAMERASERVER_UID: // camera high frame rate recording
+        case Process.BLUETOOTH_UID: // Bluetooth audio playback
             return true;
         default:
             return false;
