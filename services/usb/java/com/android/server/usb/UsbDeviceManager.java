@@ -843,18 +843,20 @@ public class UsbDeviceManager {
 
                     updateUsbNotification();
                     updateAdbNotification();
+                    if (mBootCompleted) {
+                        Slog.i(TAG, "update state " + mConnected + " " + mConfigured);
+                        updateUsbStateBroadcastIfNeeded(false);
+                    }
                     if (UsbManager.containsFunction(mCurrentFunctions,
                             UsbManager.USB_FUNCTION_ACCESSORY)) {
                         updateCurrentAccessory();
                     }
                     if (mBootCompleted) {
-                        Slog.i(TAG, "update state " + mConnected + " " + mConfigured);
                         if (!mConnected) {
                             // restore defaults when USB is disconnected
                             Slog.i(TAG, "Disconnect, setting usb functions to null");
                             setEnabledFunctions(null, false, false);
                         }
-                        updateUsbStateBroadcastIfNeeded(false);
                         updateUsbFunctions();
                     } else {
                         mPendingBootBroadcast = true;
