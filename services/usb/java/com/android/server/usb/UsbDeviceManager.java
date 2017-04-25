@@ -1076,7 +1076,7 @@ public class UsbDeviceManager {
                                     .setContentIntent(pi)
                                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                                     .extend(new Notification.TvExtender()
-                                            .setChannel(ADB_NOTIFICATION_CHANNEL_ID_TV))
+                                            .setChannelId(ADB_NOTIFICATION_CHANNEL_ID_TV))
                                     .build();
                     mAdbNotificationShown = true;
                     mNotificationManager.notifyAsUser(null, id, notification,
