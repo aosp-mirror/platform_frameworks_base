@@ -56,6 +56,10 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Accès aux messages"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Accès à la carte SIM"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Connecté aux paramètres audio du média"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Connecté à l\'audio du téléphone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Connexion au serveur de transfert de fichiers"</string>
@@ -325,7 +329,7 @@
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> : <xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la charge complète"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Inconnu"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Batterie en charge"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Charge en cours…"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"en cours de charge"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"N\'est pas en charge"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"N\'est pas en charge"</string>
