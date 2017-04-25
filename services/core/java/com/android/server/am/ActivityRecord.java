@@ -274,11 +274,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                                         // completed
     boolean preserveWindowOnDeferredRelaunch; // activity windows are preserved on deferred relaunch
     int configChangeFlags;  // which config values have changed
-    boolean keysPaused;     // has key dispatching been paused for it?
+    private boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
     boolean visible;        // does this activity's window need to be shown?
     boolean visibleIgnoringKeyguard; // is this activity visible, ignoring the fact that Keyguard
                                      // might hide this activity?
+    private boolean mDeferHidingClient; // If true we told WM to defer reporting to the client
+                                        // process that it is hidden.
     boolean sleeping;       // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
     boolean idle;           // has the activity gone idle?
@@ -522,6 +524,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     if (lastVisibleTime == 0) pw.print("0");
                     else TimeUtils.formatDuration(lastVisibleTime, now, pw);
                     pw.println();
+        }
+        if (mDeferHidingClient) {
+            pw.println(prefix + "mDeferHidingClient=" + mDeferHidingClient);
         }
         if (deferRelaunchUntilPaused || configChangeFlags != 0) {
             pw.print(prefix); pw.print("deferRelaunchUntilPaused="); pw.print(deferRelaunchUntilPaused);
@@ -1567,22 +1572,31 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return mWindowContainerController.screenshotApplications(getDisplayId(), w, h, scale);
     }
 
-    void setVisibility(boolean visible) {
-        mWindowContainerController.setVisibility(visible, false /* deferHidingClient */);
+    void setDeferHidingClient(boolean deferHidingClient) {
+        if (mDeferHidingClient == deferHidingClient) {
+            return;
+        }
+        mDeferHidingClient = deferHidingClient;
+        if (!mDeferHidingClient && !visible) {
+            // Hiding the client is no longer deferred and the app isn't visible still, go ahead and
+            // update the visibility.
+            setVisibility(false);
+        }
     }
 
-    void setVisible(boolean newVisible) {
-        setVisible(newVisible, false /* deferHidingClient */);
+    void setVisibility(boolean visible) {
+        mWindowContainerController.setVisibility(visible, mDeferHidingClient);
     }
 
     // TODO: Look into merging with #setVisibility()
-    void setVisible(boolean newVisible, boolean deferHidingClient) {
+    void setVisible(boolean newVisible) {
         visible = newVisible;
+        mDeferHidingClient = !visible && mDeferHidingClient;
         if (!visible && mUpdateTaskThumbnailWhenHidden) {
             updateThumbnailLocked(screenshotActivityLocked(), null /* description */);
             mUpdateTaskThumbnailWhenHidden = false;
         }
-        mWindowContainerController.setVisibility(visible, deferHidingClient);
+        setVisibility(visible);
         final ArrayList<ActivityContainer> containers = mChildContainers;
         for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
             final ActivityContainer container = containers.get(containerNdx);

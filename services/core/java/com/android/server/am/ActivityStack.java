@@ -1406,10 +1406,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     prev.state = STOPPING;
                 } else if ((!prev.visible && !hasVisibleBehindActivity())
                         || mService.isSleepingOrShuttingDownLocked()) {
+                    // Clear out any deferred client hide we might currently have.
+                    prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before
-                    // stopping. Also, set visibility to false to flush any client hide that might have
-                    // been deferred.
-                    prev.setVisibility(false);
+                    // stopping.
                     addToStopping(prev, true /* scheduleIdle */, false /* idleDelayed */);
                 }
             } else {
@@ -2030,7 +2030,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // or stopping. This gives it a chance to enter Pip in onPause().
             final boolean deferHidingClient = canEnterPictureInPicture
                     && r.state != STOPPING && r.state != STOPPED;
-            r.setVisible(false, deferHidingClient);
+            r.setDeferHidingClient(deferHidingClient);
+            r.setVisible(false);
 
             switch (r.state) {
                 case STOPPING:
