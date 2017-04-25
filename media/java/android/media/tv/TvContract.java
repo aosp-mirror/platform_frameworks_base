@@ -429,7 +429,7 @@ public final class TvContract {
     public static final String PARAM_BROWSABLE_ONLY = "browsable_only";
 
     /**
-     * A optional query, update or delete URI parameter that allows the caller to specify canonical
+     * An optional query, update or delete URI parameter that allows the caller to specify canonical
      * genre to filter programs.
      * @hide
      */
@@ -442,6 +442,13 @@ public final class TvContract {
      * @hide
      */
     public static final String PARAM_PREVIEW = "preview";
+
+    /**
+     * An optional query, update or delete URI parameter that allows the caller to specify package
+     * name to filter channels.
+     * @hide
+     */
+    public static final String PARAM_PACKAGE = "package";
 
     /**
      * Builds an ID that uniquely identifies a TV input service.
