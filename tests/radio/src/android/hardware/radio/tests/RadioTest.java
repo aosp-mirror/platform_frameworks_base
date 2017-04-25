@@ -29,9 +29,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * A test for broadcast radio API.
@@ -44,9 +51,15 @@ public class RadioTest {
     private RadioManager mRadioManager;
     private RadioTuner mRadioTuner;
     private final List<RadioManager.ModuleProperties> mModules = new ArrayList<>();
+    @Mock private RadioTuner.Callback mCallback;
+
+    RadioManager.AmBandDescriptor mAmBandDescriptor;
+    RadioManager.FmBandDescriptor mFmBandDescriptor;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
         // check if radio is supported and skip the test if it's not
         PackageManager packageManager = mContext.getPackageManager();
         boolean isRadioSupported = packageManager.hasSystemFeature(PackageManager.FEATURE_RADIO);
@@ -70,36 +83,55 @@ public class RadioTest {
         }
     }
 
-    private void openTuner(RadioTuner.Callback callback) {
+    private void openTuner() {
         assertNull(mRadioTuner);
 
         // find FM band and build its config
         RadioManager.ModuleProperties module = mModules.get(0);
-        RadioManager.FmBandDescriptor fmBandDescriptor = null;
         for (RadioManager.BandDescriptor band : module.getBands()) {
+            if (band.getType() == RadioManager.BAND_AM) {
+                mAmBandDescriptor = (RadioManager.AmBandDescriptor)band;
+            }
             if (band.getType() == RadioManager.BAND_FM) {
-                fmBandDescriptor = (RadioManager.FmBandDescriptor)band;
-                break;
+                mFmBandDescriptor = (RadioManager.FmBandDescriptor)band;
             }
         }
-        assertNotNull(fmBandDescriptor);
+        assertNotNull(mAmBandDescriptor);
+        assertNotNull(mFmBandDescriptor);
         RadioManager.BandConfig fmBandConfig =
-            new RadioManager.FmBandConfig.Builder(fmBandDescriptor).build();
+            new RadioManager.FmBandConfig.Builder(mFmBandDescriptor).build();
 
-        mRadioTuner = mRadioManager.openTuner(module.getId(), fmBandConfig, true, callback, null);
+        mRadioTuner = mRadioManager.openTuner(module.getId(), fmBandConfig, true, mCallback, null);
         assertNotNull(mRadioTuner);
     }
 
     @Test
     public void testOpenTuner() {
-        openTuner(new RadioTuner.Callback() {});
+        openTuner();
+        verify(mCallback, never()).onError(anyInt());
     }
 
     @Test
     public void testReopenTuner() {
-        openTuner(new RadioTuner.Callback() {});
+        openTuner();
         mRadioTuner.close();
         mRadioTuner = null;
-        openTuner(new RadioTuner.Callback() {});
+        openTuner();
+        verify(mCallback, never()).onError(anyInt());
+    }
+
+    @Test
+    @org.junit.Ignore("setConfiguration is not implemented yet")
+    public void testSetAndGetConfiguration() {
+        openTuner();
+
+        RadioManager.BandConfig amBandConfig =
+            new RadioManager.AmBandConfig.Builder(mAmBandDescriptor).build();
+        mRadioTuner.setConfiguration(amBandConfig);
+
+        verify(mCallback, times(1)).onConfigurationChanged(any());
+        verify(mCallback, never()).onError(anyInt());
+
+        // TODO(b/36863239): implement "get" too
     }
 }

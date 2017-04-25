@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Bundle;
@@ -599,7 +600,7 @@ public class AssistStructure implements Parcelable {
         String mIdType;
         String mIdEntry;
 
-        // TODO(b/33197203): once we have more flags, it might be better to store the individual
+        // TODO: once we have more flags, it might be better to store the individual
         // fields (viewId and childId) of the field.
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
@@ -638,7 +639,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
         static final int FLAGS_OPAQUE = 0x00008000;
 
-        // TODO(b/33197203): autofill data is made of many fields and ideally we should verify
+        // TODO: autofill data is made of many fields and ideally we should verify
         // one-by-one to optimize what's sent over, but there isn't enough flag bits for that, we'd
         // need to create a 'flags2' or 'autoFillFlags' field and add these flags there.
         // So, to keep thinkg simpler for now, let's just use on flag for all of them...
@@ -666,7 +667,7 @@ public class AssistStructure implements Parcelable {
 
         ViewNodeText mText;
         int mInputType;
-        String mUrl;
+        String mWebDomain;
         Bundle mExtras;
         LocaleList mLocaleList;
 
@@ -743,7 +744,7 @@ public class AssistStructure implements Parcelable {
                 mInputType = in.readInt();
             }
             if ((flags&FLAGS_HAS_URL) != 0) {
-                mUrl = in.readString();
+                mWebDomain = in.readString();
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
                 mLocaleList = in.readParcelable(null);
@@ -805,7 +806,7 @@ public class AssistStructure implements Parcelable {
             if (mInputType != 0) {
                 flags |= FLAGS_HAS_INPUT_TYPE;
             }
-            if (mUrl != null) {
+            if (mWebDomain != null) {
                 flags |= FLAGS_HAS_URL;
             }
             if (mLocaleList != null) {
@@ -900,7 +901,7 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mInputType);
             }
             if ((flags&FLAGS_HAS_URL) != 0) {
-                out.writeString(mUrl);
+                out.writeString(mWebDomain);
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
                 out.writeParcelable(mLocaleList, 0);
@@ -1042,8 +1043,6 @@ public class AssistStructure implements Parcelable {
          */
         public void updateAutofillValue(AutofillValue value) {
             mAutofillValue = value;
-            // TODO(b/33197203, b/33802548): decide whether to set text as well (so it would work
-            // with "legacy" views) or just the autofill value
             if (value.isText()) {
                 mText.mText = value.getTextValue();
             }
@@ -1237,17 +1236,20 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Returns the URL represented by this view.
+         * Returns the domain of the HTML document represented by this view.
          *
          * <p>Typically used when the view associated with the view is a container for an HTML
          * document.
          *
          * <strong>WARNING:</strong> a {@link android.service.autofill.AutofillService} should only
-         * use this URL for Autofill purposes when it trusts the app generating it (i.e., the app
+         * use this domain for Autofill purposes when it trusts the app generating it (i.e., the app
          * defined by {@link AssistStructure#getActivityComponent()}).
+         *
+         * @return domain-only part of the document. For example, if the full URL is
+         * {@code http://my.site/login?user=my_user}, it returns {@code my.site}.
          */
-        @Nullable public String getUrl() {
-            return mUrl;
+        @Nullable public String getWebDomain() {
+            return mWebDomain;
         }
 
         /**
@@ -1724,7 +1726,18 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setUrl(String url) {
-            mNode.mUrl = url;
+            if (url == null) return;
+
+            setWebDomain(url);
+        }
+
+        @Override
+        public void setWebDomain(@Nullable String domain) {
+            if (domain == null) {
+                mNode.mWebDomain = null;
+                return;
+            }
+            mNode.mWebDomain = Uri.parse(domain).getHost();
         }
 
         @Override
@@ -1946,9 +1959,9 @@ public class AssistStructure implements Parcelable {
             Log.i(TAG, prefix + "  Text color fg: #" + Integer.toHexString(node.getTextColor())
                     + ", bg: #" + Integer.toHexString(node.getTextBackgroundColor()));
         }
-        CharSequence url = node.getUrl();
-        if (url != null) {
-            Log.i(TAG, prefix + "  URL: " + url);
+        String webDomain = node.getWebDomain();
+        if (webDomain != null) {
+            Log.i(TAG, prefix + "  Web domain: " + webDomain);
         }
         HtmlInfo htmlInfo = node.getHtmlInfo();
         if (htmlInfo != null) {

@@ -21,6 +21,7 @@ import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.CompatibilityDisplayProperties;
 import android.app.NotificationManager;
 import android.annotation.NonNull;
 import android.content.ComponentName;
@@ -427,6 +428,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
+        public void setCompatibilityDisplayProperties(
+                CompatibilityDisplayProperties compatDisplayProp) {
+            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
+            VrManagerService.this.setCompatibilityDisplayProperties(compatDisplayProp);
+        }
+
+        @Override
         public int getCompatibilityDisplayId() {
             return VrManagerService.this.getCompatibilityDisplayId();
         }
@@ -541,6 +549,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
+        public void setCompatibilityDisplayProperties(
+            CompatibilityDisplayProperties compatDisplayProp) {
+            VrManagerService.this.setCompatibilityDisplayProperties(compatDisplayProp);
+        }
+
+        @Override
         public int getCompatibilityDisplayId() {
             return VrManagerService.this.getCompatibilityDisplayId();
         }
@@ -642,16 +656,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     false, mOverlayToken, null, oldUserId);
         }
 
-        if (!mVrModeEnabled) {
-            return;
-        }
-
         // Apply the restrictions for the current user based on vr state
         String[] exemptions = (exemptedPackage == null) ? new String[0] :
                 new String[] { exemptedPackage };
 
         appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                true, mOverlayToken, exemptions, newUserId);
+                mVrModeEnabled, mOverlayToken, exemptions, newUserId);
     }
 
     private void updateDependentAppOpsLocked(String newVrServicePackage, int newUserId,
@@ -1104,6 +1114,15 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 setVrMode(false, null, 0, null);
             }
         }
+    }
+
+    public void setCompatibilityDisplayProperties(
+        CompatibilityDisplayProperties compatDisplayProp) {
+        if (mCompatibilityDisplay != null) {
+            mCompatibilityDisplay.setVirtualDisplayProperties(compatDisplayProp);
+            return;
+        }
+        Slog.w(TAG, "CompatibilityDisplay is null!");
     }
 
     private int getCompatibilityDisplayId() {

@@ -474,15 +474,6 @@ interface IPackageManager {
     void notifyDexLoad(String loadingPackageName, in List<String> dexPaths, String loaderIsa);
 
     /**
-     * Ask the package manager to perform dex-opt (if needed) on the given
-     * package if it already hasn't done so.
-     *
-     * In most cases, apps are dexopted in advance and this function will
-     * be a no-op.
-     */
-    boolean performDexOptIfNeeded(String packageName);
-
-    /**
      * Ask the package manager to perform a dex-opt for the given reason. The package
      * manager will map the reason to a compiler filter according to the current system
      * configuration.

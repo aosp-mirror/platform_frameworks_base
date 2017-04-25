@@ -88,11 +88,7 @@ public class Linkify {
      *  {@link android.webkit.WebView#findAddress(String) findAddress()} method in
      *  {@link android.webkit.WebView} for finding addresses, which has various
      *  limitations.
-     *
-     *  @deprecated See {@link android.webkit.WebView#findAddress(String) findAddress()}
-     *  for more explanation.
      */
-    @Deprecated
     public static final int MAP_ADDRESSES = 0x08;
 
     /**

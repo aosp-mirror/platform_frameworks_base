@@ -19,6 +19,7 @@ package com.android.server.radio;
 import android.content.Context;
 import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
+import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.util.Slog;
 
@@ -47,7 +48,8 @@ public class RadioService extends SystemService {
 
     private native long nativeInit();
     private native void nativeFinalize(long nativeContext);
-    private native Tuner openTunerNative(long nativeContext, boolean withAudio);
+    private native Tuner nativeOpenTuner(long nativeContext, int moduleId,
+            RadioManager.BandConfig config, boolean withAudio, ITunerCallback callback);
 
     @Override
     public void onStart() {
@@ -57,8 +59,13 @@ public class RadioService extends SystemService {
 
     private class RadioServiceImpl extends IRadioService.Stub {
         @Override
-        public ITuner openTuner(boolean withAudio) {
-            return openTunerNative(mNativeContext, withAudio);
+        public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
+                boolean withAudio, ITunerCallback callback) {
+            // TODO(b/36863239): add death monitoring for binder
+            if (callback == null) {
+                throw new IllegalArgumentException("Callback must not be empty");
+            }
+            return nativeOpenTuner(mNativeContext, moduleId, bandConfig, withAudio, callback);
         }
     }
 }

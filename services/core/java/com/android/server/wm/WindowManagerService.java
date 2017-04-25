@@ -1470,7 +1470,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
             }
-            if (win.mAppToken == null || !win.mAppToken.clientHidden) {
+            if (win.mAppToken == null || !win.mAppToken.isClientHidden()) {
                 res |= WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
             }
 
@@ -1950,7 +1950,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
-                            || !win.mAppToken.clientHidden)) {
+                            || !win.mAppToken.isClientHidden())) {
                 result = win.relayoutVisibleWindow(mergedConfiguration, result, attrChanges,
                         oldVisibility);
                 try {
@@ -5035,6 +5035,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (callback != null) {
                         callback.run();
                     }
+                    break;
                 }
                 case NEW_ANIMATOR_SCALE: {
                     float scale = getCurrentAnimatorScale();
@@ -5087,6 +5088,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
+                break;
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     synchronized (mWindowMap) {
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
@@ -5104,6 +5106,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mWindowReplacementTimeouts.clear();
                     }
                 }
+                break;
                 case NOTIFY_APP_TRANSITION_STARTING: {
                     mAmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj);
                 }
@@ -5606,22 +5609,19 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState win = mWindowMap.get(client);
         if (localLOGV) Slog.v(TAG_WM, "Looking up client " + client + ": " + win);
         if (win == null) {
-            RuntimeException ex = new IllegalArgumentException(
-                    "Requested window " + client + " does not exist");
             if (throwOnError) {
-                throw ex;
+                throw new IllegalArgumentException(
+                        "Requested window " + client + " does not exist");
             }
-            Slog.w(TAG_WM, "Failed looking up window", ex);
+            Slog.w(TAG_WM, "Failed looking up window callers=" + Debug.getCallers(3));
             return null;
         }
         if (session != null && win.mSession != session) {
-            RuntimeException ex = new IllegalArgumentException(
-                    "Requested window " + client + " is in session " +
-                    win.mSession + ", not " + session);
             if (throwOnError) {
-                throw ex;
+                throw new IllegalArgumentException("Requested window " + client + " is in session "
+                        + win.mSession + ", not " + session);
             }
-            Slog.w(TAG_WM, "Failed looking up window", ex);
+            Slog.w(TAG_WM, "Failed looking up window callers=" + Debug.getCallers(3));
             return null;
         }
 

@@ -16,7 +16,9 @@
 
 package com.android.server.radio;
 
+import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
+import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.util.Slog;
 
@@ -27,7 +29,11 @@ class Tuner extends ITuner.Stub {
     /**
      * This field is used by native code, do not access or modify.
      */
-    private final long mNativeContext = nativeInit();
+    private final long mNativeContext;
+
+    Tuner(@NonNull ITunerCallback clientCallback) {
+        mNativeContext = nativeInit(clientCallback);
+    }
 
     @Override
     protected void finalize() throws Throwable {
@@ -35,11 +41,14 @@ class Tuner extends ITuner.Stub {
         super.finalize();
     }
 
-    private native long nativeInit();
+    private native long nativeInit(ITunerCallback clientCallback);
     private native void nativeFinalize(long nativeContext);
+    private native void nativeClose(long nativeContext);
 
     @Override
-    public native void close();
+    public void close() {
+        nativeClose(mNativeContext);
+    }
 
     @Override
     public int getProgramInformation(RadioManager.ProgramInfo[] infoOut) {

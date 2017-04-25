@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.util.LruCache;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -243,7 +244,9 @@ public class RecentsTaskLoader {
     private final TaskResourceLoadQueue mLoadQueue;
     private final BackgroundTaskLoader mLoader;
     private final HighResThumbnailLoader mHighResThumbnailLoader;
+    @GuardedBy("this")
     private final TaskKeyStrongCache<ThumbnailData> mThumbnailCache = new TaskKeyStrongCache<>();
+    @GuardedBy("this")
     private final TaskKeyStrongCache<ThumbnailData> mTempCache = new TaskKeyStrongCache<>();
     private final int mMaxThumbnailCacheSize;
     private final int mMaxIconCacheSize;
@@ -318,14 +321,20 @@ public class RecentsTaskLoader {
         return plan;
     }
 
+    /** Preloads raw recents tasks using the specified plan to store the output. */
+    public synchronized void preloadRawTasks(RecentsTaskLoadPlan plan,
+            boolean includeFrontMostExcludedTask) {
+        plan.preloadRawTasks(includeFrontMostExcludedTask);
+    }
+
     /** Preloads recents tasks using the specified plan to store the output. */
-    public void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId,
+    public synchronized void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId,
             boolean includeFrontMostExcludedTask) {
         plan.preloadPlan(this, runningTaskId, includeFrontMostExcludedTask);
     }
 
     /** Begins loading the heavy task data according to the specified options. */
-    public void loadTasks(Context context, RecentsTaskLoadPlan plan,
+    public synchronized void loadTasks(Context context, RecentsTaskLoadPlan plan,
             RecentsTaskLoadPlan.Options opts) {
         if (opts == null) {
             throw new RuntimeException("Requires load options");
@@ -380,8 +389,7 @@ public class RecentsTaskLoader {
      * Handles signals from the system, trimming memory when requested to prevent us from running
      * out of memory.
      */
-    public void onTrimMemory(int level) {
-        RecentsConfiguration config = Recents.getConfiguration();
+    public synchronized void onTrimMemory(int level) {
         switch (level) {
             case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
                 // Stop the loader immediately when the UI is no longer visible
@@ -516,7 +524,7 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached thumbnail if the task key is not expired, updating the cache if it is.
      */
-    ThumbnailData getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached,
+    synchronized ThumbnailData getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached,
             boolean storeInCache) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
@@ -616,7 +624,7 @@ public class RecentsTaskLoader {
         }
     }
 
-    public void dump(String prefix, PrintWriter writer) {
+    public synchronized void dump(String prefix, PrintWriter writer) {
         String innerPrefix = prefix + "  ";
 
         writer.print(prefix); writer.println(TAG);

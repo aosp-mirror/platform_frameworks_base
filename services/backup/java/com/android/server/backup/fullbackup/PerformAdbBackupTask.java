@@ -30,6 +30,8 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueAdbBackupEngine;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.PasswordUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -118,7 +120,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         for (String pkgName : pkgNames) {
             if (!set.containsKey(pkgName)) {
                 try {
-                    PackageInfo info = backupManagerService.mPackageManager.getPackageInfo(pkgName,
+                    PackageInfo info = backupManagerService.getPackageManager().getPackageInfo(
+                            pkgName,
                             PackageManager.GET_SIGNATURES);
                     set.put(pkgName, info);
                 } catch (NameNotFoundException e) {
@@ -133,17 +136,17 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             OutputStream ofstream) throws Exception {
         // User key will be used to encrypt the master key.
         byte[] newUserSalt = backupManagerService
-                .randomBytes(RefactoredBackupManagerService.PBKDF2_SALT_SIZE);
-        SecretKey userKey = backupManagerService
+                .randomBytes(PasswordUtils.PBKDF2_SALT_SIZE);
+        SecretKey userKey = PasswordUtils
                 .buildPasswordKey(RefactoredBackupManagerService.PBKDF_CURRENT, mEncryptPassword,
                         newUserSalt,
-                        RefactoredBackupManagerService.PBKDF2_HASH_ROUNDS);
+                        PasswordUtils.PBKDF2_HASH_ROUNDS);
 
         // the master key is random for each backup
         byte[] masterPw = new byte[256 / 8];
-        backupManagerService.mRng.nextBytes(masterPw);
+        backupManagerService.getRng().nextBytes(masterPw);
         byte[] checksumSalt = backupManagerService
-                .randomBytes(RefactoredBackupManagerService.PBKDF2_SALT_SIZE);
+                .randomBytes(PasswordUtils.PBKDF2_SALT_SIZE);
 
         // primary encryption of the datastream with the random key
         Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -152,16 +155,16 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         OutputStream finalOutput = new CipherOutputStream(ofstream, c);
 
         // line 4: name of encryption algorithm
-        headerbuf.append(RefactoredBackupManagerService.ENCRYPTION_ALGORITHM_NAME);
+        headerbuf.append(PasswordUtils.ENCRYPTION_ALGORITHM_NAME);
         headerbuf.append('\n');
         // line 5: user password salt [hex]
-        headerbuf.append(backupManagerService.byteArrayToHex(newUserSalt));
+        headerbuf.append(PasswordUtils.byteArrayToHex(newUserSalt));
         headerbuf.append('\n');
         // line 6: master key checksum salt [hex]
-        headerbuf.append(backupManagerService.byteArrayToHex(checksumSalt));
+        headerbuf.append(PasswordUtils.byteArrayToHex(checksumSalt));
         headerbuf.append('\n');
         // line 7: number of PBKDF2 rounds used [decimal]
-        headerbuf.append(RefactoredBackupManagerService.PBKDF2_HASH_ROUNDS);
+        headerbuf.append(PasswordUtils.PBKDF2_HASH_ROUNDS);
         headerbuf.append('\n');
 
         // line 8: IV of the user key [hex]
@@ -169,7 +172,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         mkC.init(Cipher.ENCRYPT_MODE, userKey);
 
         byte[] IV = mkC.getIV();
-        headerbuf.append(backupManagerService.byteArrayToHex(IV));
+        headerbuf.append(PasswordUtils.byteArrayToHex(IV));
         headerbuf.append('\n');
 
         // line 9: master IV + key blob, encrypted by the user key [hex].  Blob format:
@@ -184,10 +187,10 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         // stated number of PBKDF2 rounds
         IV = c.getIV();
         byte[] mk = masterKeySpec.getEncoded();
-        byte[] checksum = backupManagerService
+        byte[] checksum = PasswordUtils
                 .makeKeyChecksum(RefactoredBackupManagerService.PBKDF_CURRENT,
                         masterKeySpec.getEncoded(),
-                        checksumSalt, RefactoredBackupManagerService.PBKDF2_HASH_ROUNDS);
+                        checksumSalt, PasswordUtils.PBKDF2_HASH_ROUNDS);
 
         ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
                 + checksum.length + 3);
@@ -200,7 +203,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         mkOut.write(checksum);
         mkOut.flush();
         byte[] encryptedMk = mkC.doFinal(blob.toByteArray());
-        headerbuf.append(backupManagerService.byteArrayToHex(encryptedMk));
+        headerbuf.append(PasswordUtils.byteArrayToHex(encryptedMk));
         headerbuf.append('\n');
 
         return finalOutput;
@@ -233,7 +236,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         // doAllApps supersedes the package set if any
         if (mAllApps) {
             List<PackageInfo> allPackages =
-                    backupManagerService.mPackageManager.getInstalledPackages(
+                    backupManagerService.getPackageManager().getInstalledPackages(
                             PackageManager.GET_SIGNATURES);
             for (int i = 0; i < allPackages.size(); i++) {
                 PackageInfo pkg = allPackages.get(i);
@@ -282,14 +285,14 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
         while (iter.hasNext()) {
             PackageInfo pkg = iter.next().getValue();
-            if (!RefactoredBackupManagerService.appIsEligibleForBackup(pkg.applicationInfo)
-                    || RefactoredBackupManagerService.appIsStopped(pkg.applicationInfo)) {
+            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo)
+                    || AppBackupUtils.appIsStopped(pkg.applicationInfo)) {
                 iter.remove();
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(RefactoredBackupManagerService.TAG, "Package " + pkg.packageName
                             + " is not eligible for backup, removing.");
                 }
-            } else if (RefactoredBackupManagerService.appIsKeyValueOnly(pkg)) {
+            } else if (AppBackupUtils.appIsKeyValueOnly(pkg)) {
                 iter.remove();
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(RefactoredBackupManagerService.TAG, "Package " + pkg.packageName
@@ -387,7 +390,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             // Shared storage if requested
             if (mIncludeShared) {
                 try {
-                    pkg = backupManagerService.mPackageManager.getPackageInfo(
+                    pkg = backupManagerService.getPackageManager().getPackageInfo(
                             RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE, 0);
                     backupQueue.add(pkg);
                 } catch (NameNotFoundException e) {
@@ -437,9 +440,9 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                     KeyValueAdbBackupEngine kvBackupEngine =
                             new KeyValueAdbBackupEngine(out, keyValuePackage,
                                     backupManagerService,
-                                    backupManagerService.mPackageManager,
-                                    backupManagerService.mBaseStateDir,
-                                    backupManagerService.mDataDir);
+                                    backupManagerService.getPackageManager(),
+                                    backupManagerService.getBaseStateDir(),
+                                    backupManagerService.getDataDir());
                     sendOnBackupPackage(keyValuePackage.packageName);
                     kvBackupEngine.backupOnePackage();
                 }
@@ -470,7 +473,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             if (RefactoredBackupManagerService.DEBUG) {
                 Slog.d(RefactoredBackupManagerService.TAG, "Full backup pass complete.");
             }
-            backupManagerService.mWakelock.release();
+            backupManagerService.getWakelock().release();
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.bluetooth.le;
 
-import android.bluetooth.le.AdvertiseSettings;
+package android.app;
 
-/**
- * Callback definitions for interacting with Advertiser
- * @hide
- */
-oneway interface IAdvertiserCallback {
-    void onAdvertiserRegistered(in int status, in int advertiserId);
-
-    void onMultiAdvertiseCallback(in int status, boolean isStart,
-                                  in AdvertiseSettings advertiseSettings);
-}
+/** @hide */
+parcelable CompatibilityDisplayProperties;

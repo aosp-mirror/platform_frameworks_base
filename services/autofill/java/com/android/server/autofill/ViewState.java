@@ -61,7 +61,7 @@ final class ViewState {
     public static final int STATE_STARTED_PARTITION = 0x20;
     /** User select a dataset in this view, but service must authenticate first. */
     public static final int STATE_WAITING_DATASET_AUTH = 0x40;
-    // TODO(b/33197203 , b/35707731): temporary workaround until partitioning supports auth
+    // TODO(b/37424539): temporary workaround until partitioning supports auth
     public static final int STATE_WAITING_RESPONSE_AUTH = 0x80;
 
     public final AutofillId id;
@@ -151,9 +151,9 @@ final class ViewState {
         mState &= ~state;
     }
 
-    // TODO(b/33197203): need to refactor / rename / document this method to make it clear that
-    // it can change  the value and update the UI; similarly, should replace code that
-    // directly sets mAutoFilLValue to use encapsulation.
+    // TODO: refactor / rename / document this method (and maybeCallOnFillReady) to make it clear
+    // that it can change the value and update the UI; similarly, should replace code that
+    // directly sets mAutofillValue to use encapsulation.
     void update(@Nullable AutofillValue autofillValue, @Nullable Rect virtualBounds) {
         if (autofillValue != null) {
             mCurrentValue = autofillValue;

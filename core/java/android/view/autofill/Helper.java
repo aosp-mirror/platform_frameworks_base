@@ -25,7 +25,8 @@ import java.util.Set;
 /** @hide */
 public final class Helper {
 
-    public static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
+    // TODO(b/36141126): set to false and remove guard from places that should always be on
+    public static final boolean DEBUG = true;
     public static final boolean VERBOSE = false;
     public static final String REDACTED = "[REDACTED]";
 

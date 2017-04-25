@@ -16,7 +16,12 @@
 
 package com.android.server.autofill;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.assist.AssistStructure;
+import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
+import android.view.autofill.AutofillId;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -24,7 +29,8 @@ import java.util.Set;
 
 final class Helper {
 
-    static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
+    // TODO(b/36141126): set to false and remove guard from places that should always be on
+    static final boolean DEBUG = true;
     static final boolean VERBOSE = false;
 
     static void append(StringBuilder builder, Bundle bundle) {
@@ -51,5 +57,38 @@ final class Helper {
 
     private Helper() {
         throw new UnsupportedOperationException("contains static members only");
+    }
+
+    static ViewNode findViewNodeById(@NonNull AssistStructure structure, @NonNull AutofillId id) {
+        final int size = structure.getWindowNodeCount();
+        for (int i = 0; i < size; i++) {
+            final AssistStructure.WindowNode window = structure.getWindowNodeAt(i);
+            final ViewNode root = window.getRootViewNode();
+            if (id.equals(root.getAutofillId())) {
+                return root;
+            }
+            final ViewNode child = findViewNodeById(root, id);
+            if (child != null) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    static ViewNode findViewNodeById(@NonNull ViewNode parent, @NonNull AutofillId id) {
+        final int childrenSize = parent.getChildCount();
+        if (childrenSize > 0) {
+            for (int i = 0; i < childrenSize; i++) {
+                final ViewNode child = parent.getChildAt(i);
+                if (id.equals(child.getAutofillId())) {
+                    return child;
+                }
+                final ViewNode grandChild = findViewNodeById(child, id);
+                if (grandChild != null && id.equals(grandChild.getAutofillId())) {
+                    return grandChild;
+                }
+            }
+        }
+        return null;
     }
 }

@@ -143,7 +143,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothGatt.aidl \
 	core/java/android/bluetooth/IBluetoothGattCallback.aidl \
 	core/java/android/bluetooth/IBluetoothGattServerCallback.aidl \
-	core/java/android/bluetooth/le/IAdvertiserCallback.aidl \
 	core/java/android/bluetooth/le/IAdvertisingSetCallback.aidl \
 	core/java/android/bluetooth/le/IPeriodicAdvertisingCallback.aidl \
 	core/java/android/bluetooth/le/IScannerCallback.aidl \
@@ -218,6 +217,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/location/IContextHubService.aidl \
 	core/java/android/hardware/radio/IRadioService.aidl \
 	core/java/android/hardware/radio/ITuner.aidl \
+	core/java/android/hardware/radio/ITunerCallback.aidl \
 	core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl \
 	core/java/android/hardware/usb/IUsbManager.aidl \
 	core/java/android/net/ICaptivePortal.aidl \
@@ -932,7 +932,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	ext \
 	icu4j \
 	framework \
-	telephony-common \
 	voip-common
 
 framework_docs_LOCAL_JAVA_LIBRARIES := \

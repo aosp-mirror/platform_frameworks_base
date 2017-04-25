@@ -1399,7 +1399,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return true if the window should be considered while evaluating allDrawn flags.
      */
     boolean mightAffectAllDrawn(boolean visibleOnly) {
-        final boolean isViewVisible = (mAppToken == null || !mAppToken.clientHidden)
+        final boolean isViewVisible = (mAppToken == null || !mAppToken.isClientHidden())
                 && (mViewVisibility == View.VISIBLE) && !mWindowRemovalAllowed;
         return (isOnScreen() && (!visibleOnly || isViewVisible)
                 || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION
@@ -2312,7 +2312,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * interacts with it.
      */
     boolean shouldKeepVisibleDeadAppWindow() {
-        if (!isWinVisibleLw() || mAppToken == null || mAppToken.clientHidden) {
+        if (!isWinVisibleLw() || mAppToken == null || mAppToken.isClientHidden()) {
             // Not a visible app window or the app isn't dead.
             return false;
         }
@@ -2570,10 +2570,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void sendAppVisibilityToClients() {
         super.sendAppVisibilityToClients();
 
-        final boolean clientHidden = mAppToken.clientHidden;
+        final boolean clientHidden = mAppToken.isClientHidden();
         if (mAttrs.type == TYPE_APPLICATION_STARTING && clientHidden) {
             // Don't hide the starting window.
             return;
+        }
+
+        if (clientHidden) {
+            // Once we are notifying the client that it's visibility has changed, we need to prevent
+            // it from destroying child surfaces until the animation has finished. We do this by
+            // detaching any surface control the client added from the client.
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final WindowState c = mChildren.get(i);
+                c.mWinAnimator.detachChildren();
+            }
+
+            mWinAnimator.detachChildren();
         }
 
         try {

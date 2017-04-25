@@ -144,6 +144,11 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
 
 class DumpContext : public IAaptContext {
  public:
+  PackageType GetPackageType() override {
+    // Doesn't matter.
+    return PackageType::kApp;
+  }
+
   IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }

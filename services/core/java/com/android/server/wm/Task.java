@@ -439,7 +439,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (token.mIsExiting || token.clientHidden || token.hiddenRequested) {
+            if (token.mIsExiting || token.isClientHidden() || token.hiddenRequested) {
                 continue;
             }
             final WindowState win = token.findMainWindow();
@@ -607,7 +607,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (!token.mIsExiting && !token.clientHidden && !token.hiddenRequested) {
+            if (!token.mIsExiting && !token.isClientHidden() && !token.hiddenRequested) {
                 return token;
             }
         }

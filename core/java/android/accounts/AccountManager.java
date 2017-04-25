@@ -345,7 +345,13 @@ public class AccountManager {
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
 
     /**
-     * Action sent as a broadcast Intent by the AccountsService when any account is removed.
+     * Action sent as a broadcast Intent by the AccountsService when any account is removed
+     * or renamed. Only applications which were able to see the account will receive the intent.
+     * Intent extra will include the following fields:
+     * <ul>
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the removed account
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
+     * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @BroadcastBehavior(includeBackground = true)

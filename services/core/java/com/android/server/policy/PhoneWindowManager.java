@@ -5493,9 +5493,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private boolean setKeyguardOccludedLw(boolean isOccluded, boolean force) {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "setKeyguardOccluded occluded=" + isOccluded);
-        boolean wasOccluded = mKeyguardOccluded;
-        boolean showing = mKeyguardDelegate.isShowing();
-        if (wasOccluded && !isOccluded && showing) {
+        final boolean wasOccluded = mKeyguardOccluded;
+        final boolean showing = mKeyguardDelegate.isShowing();
+        final boolean changed = wasOccluded != isOccluded || force;
+        if (!isOccluded && changed && showing) {
             mKeyguardOccluded = false;
             mKeyguardDelegate.setOccluded(false, true /* animate */);
             if (mStatusBar != null) {
@@ -5505,7 +5506,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
             return true;
-        } else if (!wasOccluded && isOccluded && showing) {
+        } else if (isOccluded && changed && showing) {
             mKeyguardOccluded = true;
             mKeyguardDelegate.setOccluded(true, false /* animate */);
             if (mStatusBar != null) {
@@ -5513,7 +5514,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBar.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
             }
             return true;
-        } else if (wasOccluded != isOccluded) {
+        } else if (changed) {
             mKeyguardOccluded = isOccluded;
             mKeyguardDelegate.setOccluded(isOccluded, false /* animate */);
             return false;

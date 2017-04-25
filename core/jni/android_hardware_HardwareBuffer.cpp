@@ -34,6 +34,7 @@
 #include <private/gui/ComposerService.h>
 
 #include <hardware/gralloc1.h>
+#include <grallocusage/GrallocUsageConversion.h>
 
 #include "core_jni_helpers.h"
 
@@ -85,7 +86,7 @@ static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
             &producerUsage, &consumerUsage, usage, 0);
 
     sp<GraphicBuffer> buffer = new GraphicBuffer(width, height, pixelFormat, layers,
-            producerUsage, consumerUsage,
+            android_convertGralloc1To0Usage(producerUsage, consumerUsage),
             std::string("HardwareBuffer pid [") + std::to_string(getpid()) +"]");
     status_t error = buffer->initCheck();
     if (error < 0) {

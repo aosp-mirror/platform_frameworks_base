@@ -35,8 +35,8 @@ public class RunBackupReceiver extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         if (RefactoredBackupManagerService.RUN_BACKUP_ACTION.equals(intent.getAction())) {
-            synchronized (backupManagerService.mQueueLock) {
-                if (backupManagerService.mPendingInits.size() > 0) {
+            synchronized (backupManagerService.getQueueLock()) {
+                if (backupManagerService.getPendingInits().size() > 0) {
                     // If there are pending init operations, we process those
                     // and then settle into the usual periodic backup schedule.
                     if (RefactoredBackupManagerService.MORE_DEBUG) {
@@ -44,9 +44,9 @@ public class RunBackupReceiver extends BroadcastReceiver {
                                 "Init pending at scheduled backup");
                     }
                     try {
-                        backupManagerService.mAlarmManager.cancel(
-                                backupManagerService.mRunInitIntent);
-                        backupManagerService.mRunInitIntent.send();
+                        backupManagerService.getAlarmManager().cancel(
+                                backupManagerService.getRunInitIntent());
+                        backupManagerService.getRunInitIntent().send();
                     } catch (PendingIntent.CanceledException ce) {
                         Slog.e(RefactoredBackupManagerService.TAG, "Run init intent cancelled");
                         // can't really do more than bail here
@@ -54,20 +54,20 @@ public class RunBackupReceiver extends BroadcastReceiver {
                 } else {
                     // Don't run backups now if we're disabled or not yet
                     // fully set up.
-                    if (backupManagerService.mEnabled && backupManagerService.mProvisioned) {
-                        if (!backupManagerService.mBackupRunning) {
+                    if (backupManagerService.isEnabled() && backupManagerService.isProvisioned()) {
+                        if (!backupManagerService.isBackupRunning()) {
                             if (RefactoredBackupManagerService.DEBUG) {
                                 Slog.v(RefactoredBackupManagerService.TAG, "Running a backup pass");
                             }
 
                             // Acquire the wakelock and pass it to the backup thread.  it will
                             // be released once backup concludes.
-                            backupManagerService.mBackupRunning = true;
-                            backupManagerService.mWakelock.acquire();
+                            backupManagerService.setBackupRunning(true);
+                            backupManagerService.getWakelock().acquire();
 
-                            Message msg = backupManagerService.mBackupHandler.obtainMessage(
+                            Message msg = backupManagerService.getBackupHandler().obtainMessage(
                                     RefactoredBackupManagerService.MSG_RUN_BACKUP);
-                            backupManagerService.mBackupHandler.sendMessage(msg);
+                            backupManagerService.getBackupHandler().sendMessage(msg);
                         } else {
                             Slog.i(RefactoredBackupManagerService.TAG,
                                     "Backup time but one already running");
@@ -75,8 +75,8 @@ public class RunBackupReceiver extends BroadcastReceiver {
                     } else {
                         Slog.w(
                                 RefactoredBackupManagerService.TAG,
-                                "Backup pass but e=" + backupManagerService.mEnabled + " p="
-                                        + backupManagerService.mProvisioned);
+                                "Backup pass but e=" + backupManagerService.isEnabled() + " p="
+                                        + backupManagerService.isProvisioned());
                     }
                 }
             }

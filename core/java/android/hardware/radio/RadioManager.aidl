@@ -18,3 +18,6 @@ package android.hardware.radio;
 
 /** @hide */
 parcelable RadioManager.ProgramInfo;
+
+/** @hide */
+parcelable RadioManager.BandConfig;

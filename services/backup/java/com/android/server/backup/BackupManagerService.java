@@ -2622,8 +2622,12 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 // Can't delete op from mCurrentOperations here. waitUntilOperationComplete may be
                 // called after we receive cancel here. We need this op's state there.
 
-                // Remove all pending timeout messages for this operation type.
-                mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
+                // Remove all pending timeout messages of types OP_TYPE_BACKUP_WAIT and
+                // OP_TYPE_RESTORE_WAIT. On the other hand, OP_TYPE_BACKUP cannot time out and
+                // doesn't require cancellation.
+                if (op.type == OP_TYPE_BACKUP_WAIT || op.type == OP_TYPE_RESTORE_WAIT) {
+                    mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
+                }
             }
             mCurrentOpLock.notifyAll();
         }
@@ -9163,6 +9167,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         // state RESTORE_FINISHED : provide the "no more data" signpost callback at the end
         private void restoreFinished() {
+            if (DEBUG) {
+                Slog.d(TAG, "restoreFinished packageName=" + mCurrentPackage.packageName);
+            }
             try {
                 prepareOperationTimeout(mEphemeralOpToken, TIMEOUT_RESTORE_FINISHED_INTERVAL, this,
                         OP_TYPE_RESTORE_WAIT);

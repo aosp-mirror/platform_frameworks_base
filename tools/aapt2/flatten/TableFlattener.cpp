@@ -230,15 +230,18 @@ class PackageFlattener {
     ResTable_package* pkg_header = pkg_writer.StartChunk<ResTable_package>(RES_TABLE_PACKAGE_TYPE);
     pkg_header->id = util::HostToDevice32(package_->id.value());
 
-    if (package_->name.size() >= arraysize(pkg_header->name)) {
+    // AAPT truncated the package name, so do the same.
+    // Shared libraries require full package names, so don't truncate theirs.
+    if (context_->GetPackageType() != PackageType::kApp &&
+        package_->name.size() >= arraysize(pkg_header->name)) {
       diag_->Error(DiagMessage() << "package name '" << package_->name
-                                 << "' is too long");
+                                 << "' is too long. "
+                                    "Shared libraries cannot have truncated package names");
       return false;
     }
 
     // Copy the package name in device endianness.
-    strcpy16_htod(pkg_header->name, arraysize(pkg_header->name),
-                  util::Utf8ToUtf16(package_->name));
+    strcpy16_htod(pkg_header->name, arraysize(pkg_header->name), util::Utf8ToUtf16(package_->name));
 
     // Serialize the types. We do this now so that our type and key strings
     // are populated. We write those first.

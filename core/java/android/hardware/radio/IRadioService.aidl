@@ -17,6 +17,8 @@
 package android.hardware.radio;
 
 import android.hardware.radio.ITuner;
+import android.hardware.radio.ITunerCallback;
+import android.hardware.radio.RadioManager;
 
 /**
  * API to the broadcast radio service.
@@ -24,5 +26,6 @@ import android.hardware.radio.ITuner;
  * {@hide}
  */
 interface IRadioService {
-    ITuner openTuner(boolean withAudio);
+    ITuner openTuner(int moduleId, in RadioManager.BandConfig bandConfig, boolean withAudio,
+            in ITunerCallback callback);
 }

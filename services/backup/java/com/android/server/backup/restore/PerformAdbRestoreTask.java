@@ -41,6 +41,8 @@ import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
+import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.PasswordUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -102,7 +104,7 @@ public class PerformAdbRestoreTask implements Runnable {
         @Override
         public void run() {
             try {
-                mAgent.doRestoreFinished(mToken, backupManagerService.mBackupManagerBinder);
+                mAgent.doRestoreFinished(mToken, backupManagerService.getBackupManagerBinder());
             } catch (RemoteException e) {
                 // never happens; this is used only for local binder calls
             }
@@ -134,7 +136,7 @@ public class PerformAdbRestoreTask implements Runnable {
         mLatchObject = latch;
         mAgent = null;
         mPackageManagerBackupAgent = new PackageManagerBackupAgent(
-                backupManagerService.mPackageManager);
+                backupManagerService.getPackageManager());
         mAgentPackage = null;
         mTargetApp = null;
         mObbConnection = new FullBackupObbConnection(backupManagerService);
@@ -171,7 +173,7 @@ public class PerformAdbRestoreTask implements Runnable {
             try {
                 mAgent.doRestoreFile(mSocket, mInfo.size, mInfo.type,
                         mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
-                        mToken, backupManagerService.mBackupManagerBinder);
+                        mToken, backupManagerService.getBackupManagerBinder());
             } catch (RemoteException e) {
                 // never happens; this is used strictly for local binder calls
             }
@@ -291,7 +293,7 @@ public class PerformAdbRestoreTask implements Runnable {
             mObbConnection.tearDown();
             sendEndRestore();
             Slog.d(RefactoredBackupManagerService.TAG, "Full restore pass complete.");
-            backupManagerService.mWakelock.release();
+            backupManagerService.getWakelock().release();
         }
     }
 
@@ -314,15 +316,15 @@ public class PerformAdbRestoreTask implements Runnable {
 
         try {
             Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKey userKey = backupManagerService
+            SecretKey userKey = PasswordUtils
                     .buildPasswordKey(algorithm, mDecryptPassword, userSalt,
                             rounds);
-            byte[] IV = backupManagerService.hexToByteArray(userIvHex);
+            byte[] IV = PasswordUtils.hexToByteArray(userIvHex);
             IvParameterSpec ivSpec = new IvParameterSpec(IV);
             c.init(Cipher.DECRYPT_MODE,
                     new SecretKeySpec(userKey.getEncoded(), "AES"),
                     ivSpec);
-            byte[] mkCipher = backupManagerService.hexToByteArray(masterKeyBlobHex);
+            byte[] mkCipher = PasswordUtils.hexToByteArray(masterKeyBlobHex);
             byte[] mkBlob = c.doFinal(mkCipher);
 
             // first, the master key IV
@@ -341,7 +343,7 @@ public class PerformAdbRestoreTask implements Runnable {
                     offset, offset + len);
 
             // now validate the decrypted master key against the checksum
-            byte[] calculatedCk = backupManagerService.makeKeyChecksum(algorithm, mk, ckSalt,
+            byte[] calculatedCk = PasswordUtils.makeKeyChecksum(algorithm, mk, ckSalt,
                     rounds);
             if (Arrays.equals(calculatedCk, mkChecksum)) {
                 ivSpec = new IvParameterSpec(IV);
@@ -391,13 +393,13 @@ public class PerformAdbRestoreTask implements Runnable {
             InputStream rawInStream) {
         InputStream result = null;
         try {
-            if (encryptionName.equals(RefactoredBackupManagerService.ENCRYPTION_ALGORITHM_NAME)) {
+            if (encryptionName.equals(PasswordUtils.ENCRYPTION_ALGORITHM_NAME)) {
 
                 String userSaltHex = readHeaderLine(rawInStream); // 5
-                byte[] userSalt = backupManagerService.hexToByteArray(userSaltHex);
+                byte[] userSalt = PasswordUtils.hexToByteArray(userSaltHex);
 
                 String ckSaltHex = readHeaderLine(rawInStream); // 6
-                byte[] ckSalt = backupManagerService.hexToByteArray(ckSaltHex);
+                byte[] ckSalt = PasswordUtils.hexToByteArray(ckSaltHex);
 
                 int rounds = Integer.parseInt(readHeaderLine(rawInStream)); // 7
                 String userIvHex = readHeaderLine(rawInStream); // 8
@@ -556,8 +558,9 @@ public class PerformAdbRestoreTask implements Runnable {
                         }
 
                         try {
-                            mTargetApp = backupManagerService.mPackageManager.getApplicationInfo(
-                                    pkg, 0);
+                            mTargetApp =
+                                    backupManagerService.getPackageManager().getApplicationInfo(
+                                            pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
                             // need to clear it first.  Check that.
@@ -639,7 +642,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                 mObbConnection.restoreObbFile(pkg, mPipes[0],
                                         info.size, info.type, info.path, info.mode,
                                         info.mtime, token,
-                                        backupManagerService.mBackupManagerBinder);
+                                        backupManagerService.getBackupManagerBinder());
                             } else if (FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)) {
                                 if (RefactoredBackupManagerService.DEBUG) {
                                     Slog.d(RefactoredBackupManagerService.TAG,
@@ -649,7 +652,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                 KeyValueAdbRestoreEngine restoreEngine =
                                         new KeyValueAdbRestoreEngine(
                                                 backupManagerService,
-                                                backupManagerService.mDataDir, info, mPipes[0],
+                                                backupManagerService.getDataDir(), info, mPipes[0],
                                                 mAgent, token);
                                 new Thread(restoreEngine, "restore-key-value-runner").start();
                             } else {
@@ -671,7 +674,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                 } else {
                                     mAgent.doRestoreFile(mPipes[0], info.size, info.type,
                                             info.domain, info.path, info.mode, info.mtime,
-                                            token, backupManagerService.mBackupManagerBinder);
+                                            token, backupManagerService.getBackupManagerBinder());
                                 }
                             }
                         } catch (IOException e) {
@@ -735,7 +738,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                 Slog.d(RefactoredBackupManagerService.TAG,
                                         "Agent failure restoring " + pkg + "; now ignoring");
                             }
-                            backupManagerService.mBackupHandler.removeMessages(
+                            backupManagerService.getBackupHandler().removeMessages(
                                     RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp, false);
@@ -817,14 +820,15 @@ public class PerformAdbRestoreTask implements Runnable {
                         Runnable runner = new RestoreFinishedRunnable(mAgent, token);
                         new Thread(runner, "restore-sys-finished-runner").start();
                     } else {
-                        mAgent.doRestoreFinished(token, backupManagerService.mBackupManagerBinder);
+                        mAgent.doRestoreFinished(token,
+                                backupManagerService.getBackupManagerBinder());
                     }
 
                     latch.await();
                 }
 
                 // unbind and tidy up even on timeout or failure, just in case
-                backupManagerService.mActivityManager.unbindBackupAgent(app);
+                backupManagerService.getActivityManager().unbindBackupAgent(app);
 
                 // The agent was running with a stub Application object, so shut it down.
                 // !!! We hardcode the confirmation UI's package name here rather than use a
@@ -834,7 +838,8 @@ public class PerformAdbRestoreTask implements Runnable {
                     if (RefactoredBackupManagerService.DEBUG) {
                         Slog.d(RefactoredBackupManagerService.TAG, "Killing host process");
                     }
-                    backupManagerService.mActivityManager.killApplicationProcess(app.processName,
+                    backupManagerService.getActivityManager().killApplicationProcess(
+                            app.processName,
                             app.uid);
                 } else {
                     if (RefactoredBackupManagerService.DEBUG) {
@@ -933,7 +938,7 @@ public class PerformAdbRestoreTask implements Runnable {
 
         // The file content is an .apk file.  Copy it out to a staging location and
         // attempt to install it.
-        File apkFile = new File(backupManagerService.mDataDir, info.packageName);
+        File apkFile = new File(backupManagerService.getDataDir(), info.packageName);
         try {
             FileOutputStream apkStream = new FileOutputStream(apkFile);
             byte[] buffer = new byte[32 * 1024];
@@ -955,7 +960,7 @@ public class PerformAdbRestoreTask implements Runnable {
             // Now install it
             Uri packageUri = Uri.fromFile(apkFile);
             mInstallObserver.reset();
-            backupManagerService.mPackageManager.installPackage(packageUri, mInstallObserver,
+            backupManagerService.getPackageManager().installPackage(packageUri, mInstallObserver,
                     PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
                     installerPackage);
             mInstallObserver.waitForCompletion();
@@ -980,7 +985,7 @@ public class PerformAdbRestoreTask implements Runnable {
                     uninstall = true;
                 } else {
                     try {
-                        PackageInfo pkg = backupManagerService.mPackageManager.getPackageInfo(
+                        PackageInfo pkg = backupManagerService.getPackageManager().getPackageInfo(
                                 info.packageName,
                                 PackageManager.GET_SIGNATURES);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
@@ -993,7 +998,7 @@ public class PerformAdbRestoreTask implements Runnable {
                         } else {
                             // So far so good -- do the signatures match the manifest?
                             Signature[] sigs = mManifestSignatures.get(info.packageName);
-                            if (RefactoredBackupManagerService.signaturesMatch(sigs, pkg)) {
+                            if (AppBackupUtils.signaturesMatch(sigs, pkg)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
                                 if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
@@ -1023,7 +1028,7 @@ public class PerformAdbRestoreTask implements Runnable {
                 // that we just installed.
                 if (uninstall) {
                     mDeleteObserver.reset();
-                    backupManagerService.mPackageManager.deletePackage(
+                    backupManagerService.getPackageManager().deletePackage(
                             mInstallObserver.mPackageName,
                             mDeleteObserver, 0);
                     mDeleteObserver.waitForCompletion();
@@ -1170,7 +1175,7 @@ public class PerformAdbRestoreTask implements Runnable {
                         // Okay, got the manifest info we need...
                         try {
                             PackageInfo pkgInfo =
-                                    backupManagerService.mPackageManager.getPackageInfo(
+                                    backupManagerService.getPackageManager().getPackageInfo(
                                             info.packageName, PackageManager.GET_SIGNATURES);
                             // Fall through to IGNORE if the app explicitly disallows backup
                             final int flags = pkgInfo.applicationInfo.flags;
@@ -1187,7 +1192,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                     // such packages are signed with the platform cert instead of
                                     // the app developer's cert, so they're different on every
                                     // device.
-                                    if (RefactoredBackupManagerService.signaturesMatch(sigs,
+                                    if (AppBackupUtils.signaturesMatch(sigs,
                                             pkgInfo)) {
                                         if ((pkgInfo.applicationInfo.flags
                                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {

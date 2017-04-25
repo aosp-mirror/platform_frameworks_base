@@ -50,8 +50,8 @@ import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
-import com.android.settingslib.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -1276,8 +1276,7 @@ public class ApplicationsState {
                     return true;
                 } else {
                     this.mounted = false;
-                    this.icon = context.getDrawable(
-                            com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon);
+                    this.icon = context.getDrawable(R.drawable.sym_app_on_sd_unavailable_icon);
                 }
             } else if (!this.mounted) {
                 // If the app wasn't mounted but is now mounted, reload

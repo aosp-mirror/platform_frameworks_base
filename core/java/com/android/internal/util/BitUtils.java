@@ -21,10 +21,16 @@ import android.annotation.Nullable;
 
 import libcore.util.Objects;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class BitUtils {
+/**
+ * A utility class for handling unsigned integers and unsigned arithmetics, as well as syntactic
+ * sugar methods for ByteBuffer. Useful for networking and packet manipulations.
+ * {@hide}
+ */
+public final class BitUtils {
     private BitUtils() {}
 
     public static boolean maskedEquals(long a, long b, long mask) {
@@ -75,5 +81,47 @@ public class BitUtils {
             packed |= (1 << b);
         }
         return packed;
+    }
+
+    public static int uint8(byte b) {
+        return b & 0xff;
+    }
+
+    public static int uint16(short s) {
+        return s & 0xffff;
+    }
+
+    public static long uint32(int i) {
+        return i & 0xffffffffL;
+    }
+
+    public static int bytesToBEInt(byte[] bytes) {
+        return (uint8(bytes[0]) << 24)
+                + (uint8(bytes[1]) << 16)
+                + (uint8(bytes[2]) << 8)
+                + (uint8(bytes[3]));
+    }
+
+    public static int bytesToLEInt(byte[] bytes) {
+        return Integer.reverseBytes(bytesToBEInt(bytes));
+    }
+
+    public static int getUint8(ByteBuffer buffer, int position) {
+        return uint8(buffer.get(position));
+    }
+
+    public static int getUint16(ByteBuffer buffer, int position) {
+        return uint16(buffer.getShort(position));
+    }
+
+    public static long getUint32(ByteBuffer buffer, int position) {
+        return uint32(buffer.getInt(position));
+    }
+
+    public static void put(ByteBuffer buffer, int position, byte[] bytes) {
+        final int original = buffer.position();
+        buffer.position(position);
+        buffer.put(bytes);
+        buffer.position(original);
     }
 }

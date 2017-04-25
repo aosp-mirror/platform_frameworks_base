@@ -91,6 +91,9 @@ public abstract class InstantAppResolverService extends Service {
             @Override
             public void getInstantAppResolveInfoList(
                     int digestPrefix[], String token, int sequence, IRemoteCallback callback) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.v(TAG, "[" + token + "] Phase1 called; posting");
+                }
                 final SomeArgs args = SomeArgs.obtain();
                 args.arg1 = callback;
                 args.arg2 = digestPrefix;
@@ -103,6 +106,9 @@ public abstract class InstantAppResolverService extends Service {
             @Override
             public void getInstantAppIntentFilterList(
                     int digestPrefix[], String token, String hostName, IRemoteCallback callback) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.v(TAG, "[" + token + "] Phase2 called; posting");
+                }
                 final SomeArgs args = SomeArgs.obtain();
                 args.arg1 = callback;
                 args.arg2 = digestPrefix;
@@ -140,7 +146,7 @@ public abstract class InstantAppResolverService extends Service {
     void _onGetInstantAppResolveInfo(int[] digestPrefix, String token,
             InstantAppResolutionCallback callback) {
         if (DEBUG_EPHEMERAL) {
-            Slog.d(TAG, "Instant resolver; getInstantAppResolveInfo;"
+            Slog.d(TAG, "[" + token + "] Phase1 request;"
                     + " prefix: " + Arrays.toString(digestPrefix));
         }
         onGetInstantAppResolveInfo(digestPrefix, token, callback);
@@ -149,7 +155,7 @@ public abstract class InstantAppResolverService extends Service {
     void _onGetInstantAppIntentFilter(int digestPrefix[], String token, String hostName,
             InstantAppResolutionCallback callback) {
         if (DEBUG_EPHEMERAL) {
-            Slog.d(TAG, "Instant resolver; getInstantAppIntentFilter;"
+            Slog.d(TAG, "[" + token + "] Phase2 request;"
                     + " prefix: " + Arrays.toString(digestPrefix));
         }
         onGetInstantAppIntentFilter(digestPrefix, token, callback);

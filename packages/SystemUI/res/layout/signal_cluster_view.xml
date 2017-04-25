@@ -32,6 +32,7 @@
         android:layout_width="wrap_content"
         android:paddingEnd="6dp"
         android:src="@drawable/stat_sys_vpn_ic"
+        android:contentDescription="@string/accessibility_vpn_on"
         />
     <FrameLayout
         android:id="@+id/ethernet_combo"

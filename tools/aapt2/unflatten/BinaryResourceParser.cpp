@@ -22,6 +22,7 @@
 
 #include "android-base/logging.h"
 #include "android-base/macros.h"
+#include "android-base/stringprintf.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/TypeWrappers.h"
 
@@ -36,6 +37,8 @@
 namespace aapt {
 
 using namespace android;
+
+using android::base::StringPrintf;
 
 namespace {
 
@@ -87,26 +90,35 @@ BinaryResourceParser::BinaryResourceParser(IAaptContext* context, ResourceTable*
 bool BinaryResourceParser::Parse() {
   ResChunkPullParser parser(data_, data_len_);
 
-  bool error = false;
-  while (ResChunkPullParser::IsGoodEvent(parser.Next())) {
-    if (parser.chunk()->type != android::RES_TABLE_TYPE) {
-      context_->GetDiagnostics()->Warn(DiagMessage(source_)
-                                       << "unknown chunk of type '"
-                                       << (int)parser.chunk()->type << "'");
-      continue;
-    }
-
-    if (!ParseTable(parser.chunk())) {
-      error = true;
-    }
-  }
-
-  if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-    context_->GetDiagnostics()->Error(
-        DiagMessage(source_) << "corrupt resource table: " << parser.error());
+  if (!ResChunkPullParser::IsGoodEvent(parser.Next())) {
+    context_->GetDiagnostics()->Error(DiagMessage(source_)
+                                      << "corrupt resources.arsc: " << parser.error());
     return false;
   }
-  return !error;
+
+  if (parser.chunk()->type != android::RES_TABLE_TYPE) {
+    context_->GetDiagnostics()->Error(DiagMessage(source_)
+                                      << StringPrintf("unknown chunk of type 0x%02x",
+                                                      (int)parser.chunk()->type));
+    return false;
+  }
+
+  if (!ParseTable(parser.chunk())) {
+    return false;
+  }
+
+  if (parser.Next() != ResChunkPullParser::Event::kEndDocument) {
+    if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
+      context_->GetDiagnostics()->Warn(
+          DiagMessage(source_) << "invalid chunk trailing RES_TABLE_TYPE: " << parser.error());
+    } else {
+      context_->GetDiagnostics()->Warn(
+          DiagMessage(source_) << StringPrintf(
+              "unexpected chunk of type 0x%02x trailing RES_TABLE_TYPE",
+              (int)parser.chunk()->type));
+    }
+  }
+  return true;
 }
 
 /**

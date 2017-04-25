@@ -95,6 +95,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     // change.
     private boolean mReparenting;
 
+    // True if we are current in the process of removing this app token from the display
+    private boolean mRemovingFromDisplay = false;
+
     // The input dispatching timeout for this application token in nanoseconds.
     long mInputDispatchingTimeoutNanos;
 
@@ -126,7 +129,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean hiddenRequested;
 
     // Have we told the window clients to hide themselves?
-    boolean clientHidden;
+    private boolean mClientHidden;
+
+    // If true we will defer setting mClientHidden to true and reporting to the client that it is
+    // hidden.
+    boolean mDeferHidingClient;
 
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
@@ -174,6 +181,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
     private boolean mDisbalePreviewScreenshots;
+
+    Task mLastParent;
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -307,16 +316,25 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    boolean isClientHidden() {
+        return mClientHidden;
+    }
+
+    void setClientHidden(boolean hideClient) {
+        if (mClientHidden == hideClient || (hideClient && mDeferHidingClient)) {
+            return;
+        }
+        mClientHidden = hideClient;
+        sendAppVisibilityToClients();
+    }
+
     boolean setVisibility(WindowManager.LayoutParams lp,
             boolean visible, int transit, boolean performLayout, boolean isVoiceInteraction) {
 
         boolean delayed = false;
         inPendingTransaction = false;
 
-        if (clientHidden == visible) {
-            clientHidden = !visible;
-            sendAppVisibilityToClients();
-        }
+        setClientHidden(!visible);
 
         // Allow for state changes and animation to be applied if:
         // * token is transitioning visibility state
@@ -465,6 +483,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
+    void removeImmediately() {
+        onRemovedFromDisplay();
+        super.removeImmediately();
+    }
+
+    @Override
     void removeIfPossible() {
         mIsExiting = false;
         removeAllWindowsIfPossible();
@@ -480,6 +504,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void onRemovedFromDisplay() {
+        if (mRemovingFromDisplay) {
+            return;
+        }
+        mRemovingFromDisplay = true;
+
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + this);
 
         boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
@@ -512,12 +541,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             mService.mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
-        final TaskStack stack = getTask().mStack;
+        final TaskStack stack = getStack();
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
             if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM,
                     "removeAppToken make exiting: " + this);
-            stack.mExitingAppTokens.add(this);
+            if (stack != null) {
+                stack.mExitingAppTokens.add(this);
+            }
             mIsExiting = true;
         } else {
             // Make sure there is no animation running on this token, so any windows associated
@@ -540,6 +571,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (!delayed) {
             updateReportedVisibilityLocked();
         }
+
+        mRemovingFromDisplay = false;
     }
 
     void clearAnimatingFlags() {
@@ -725,19 +758,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void onParentSet() {
         super.onParentSet();
 
+        final Task task = getTask();
+
         // When the associated task is {@code null}, the {@link AppWindowToken} can no longer
         // access visual elements like the {@link DisplayContent}. We must remove any associations
         // such as animations.
         if (!mReparenting) {
-            final Task task = getTask();
             if (task == null) {
                 // It is possible we have been marked as a closing app earlier. We must remove ourselves
                 // from this list so we do not participate in any future animations.
                 mService.mClosingApps.remove(this);
-            } else if (task.mStack != null) {
+            } else if (mLastParent != null && mLastParent.mStack != null) {
                 task.mStack.mExitingAppTokens.remove(this);
             }
         }
+        mLastParent = task;
     }
 
     void postWindowRemoveStartingWindowCleanup(WindowState win) {
@@ -1143,10 +1178,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 hidden = false;
                 hiddenRequested = false;
             }
-            if (clientHidden != fromToken.clientHidden) {
-                clientHidden = fromToken.clientHidden;
-                sendAppVisibilityToClients();
-            }
+            setClientHidden(fromToken.mClientHidden);
             fromToken.mAppAnimator.transferCurrentAnimation(
                     mAppAnimator, tStartingWindow.mWinAnimator);
 
@@ -1511,10 +1543,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         pw.print(prefix); pw.print("task="); pw.println(getTask());
         pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);
                 pw.print(" mOrientation="); pw.println(mOrientation);
-        pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
-                pw.print(" clientHidden="); pw.print(clientHidden);
-                pw.print(" reportedDrawn="); pw.print(reportedDrawn);
-                pw.print(" reportedVisible="); pw.println(reportedVisible);
+        pw.println(prefix + "hiddenRequested=" + hiddenRequested + " mClientHidden=" + mClientHidden
+            + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
+            + " reportedDrawn=" + reportedDrawn + " reportedVisible=" + reportedVisible);
         if (paused) {
             pw.print(prefix); pw.print("paused="); pw.println(paused);
         }
@@ -1557,6 +1588,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (getController() != null) {
             pw.print(prefix); pw.print("controller="); pw.println(getController());
+        }
+        if (mRemovingFromDisplay) {
+            pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);
         }
     }
 

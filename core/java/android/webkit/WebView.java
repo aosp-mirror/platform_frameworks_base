@@ -1731,14 +1731,7 @@ public class WebView extends AbsoluteLayout
      *
      * @param addr the string to search for addresses
      * @return the address, or if no address is found, null
-     *
-     * @deprecated findAddress is deprecated. It only supports a subset of US
-     * addresses and has a high false positive rate. Calling findAddress also causes
-     * WebView to be loaded into the app, which significantly increases memory usage
-     * if the app doesn't already use WebView. Use {@link TextClassifier} instead for
-     * classifying text and finding addresses.
      */
-    @Deprecated
     public static String findAddress(String addr) {
         // TODO: Rewrite this in Java so it is not needed to start up chromium
         // Could also be deprecated

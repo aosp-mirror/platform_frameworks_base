@@ -59,6 +59,8 @@ import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
+import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BackupManagerMonitorUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -160,7 +162,7 @@ public class FullRestoreEngine extends RestoreEngine {
             try {
                 mAgent.doRestoreFile(mSocket, mInfo.size, mInfo.type,
                         mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
-                        mToken, backupManagerService.mBackupManagerBinder);
+                        mToken, backupManagerService.getBackupManagerBinder());
             } catch (RemoteException e) {
                 // never happens; this is used strictly for local binder calls
             }
@@ -338,7 +340,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
 
                         try {
-                            mTargetApp = backupManagerService.mPackageManager.getApplicationInfo(
+                            mTargetApp = backupManagerService.getPackageManager().getApplicationInfo(
                                     pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
@@ -419,7 +421,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                 mObbConnection.restoreObbFile(pkg, mPipes[0],
                                         info.size, info.type, info.path, info.mode,
                                         info.mtime, mEphemeralOpToken,
-                                        backupManagerService.mBackupManagerBinder);
+                                        backupManagerService.getBackupManagerBinder());
                             } else {
                                 if (RefactoredBackupManagerService.MORE_DEBUG) {
                                     Slog.d(RefactoredBackupManagerService.TAG,
@@ -440,7 +442,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                     mAgent.doRestoreFile(mPipes[0], info.size, info.type,
                                             info.domain, info.path, info.mode, info.mtime,
                                             mEphemeralOpToken,
-                                            backupManagerService.mBackupManagerBinder);
+                                            backupManagerService.getBackupManagerBinder());
                                 }
                             }
                         } catch (IOException e) {
@@ -509,7 +511,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         if (!agentSuccess) {
                             Slog.w(RefactoredBackupManagerService.TAG,
                                     "Agent failure; ending restore");
-                            backupManagerService.mBackupHandler.removeMessages(
+                            backupManagerService.getBackupHandler().removeMessages(
                                     RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp);
@@ -693,7 +695,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
         // The file content is an .apk file.  Copy it out to a staging location and
         // attempt to install it.
-        File apkFile = new File(backupManagerService.mDataDir, info.packageName);
+        File apkFile = new File(backupManagerService.getDataDir(), info.packageName);
         try {
             FileOutputStream apkStream = new FileOutputStream(apkFile);
             byte[] buffer = new byte[32 * 1024];
@@ -715,7 +717,7 @@ public class FullRestoreEngine extends RestoreEngine {
             // Now install it
             Uri packageUri = Uri.fromFile(apkFile);
             mInstallObserver.reset();
-            backupManagerService.mPackageManager.installPackage(packageUri, mInstallObserver,
+            backupManagerService.getPackageManager().installPackage(packageUri, mInstallObserver,
                     PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
                     installerPackage);
             mInstallObserver.waitForCompletion();
@@ -740,7 +742,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     uninstall = true;
                 } else {
                     try {
-                        PackageInfo pkg = backupManagerService.mPackageManager.getPackageInfo(
+                        PackageInfo pkg = backupManagerService.getPackageManager().getPackageInfo(
                                 info.packageName,
                                 PackageManager.GET_SIGNATURES);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
@@ -753,7 +755,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         } else {
                             // So far so good -- do the signatures match the manifest?
                             Signature[] sigs = mManifestSignatures.get(info.packageName);
-                            if (RefactoredBackupManagerService.signaturesMatch(sigs, pkg)) {
+                            if (AppBackupUtils.signaturesMatch(sigs, pkg)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
                                 if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
@@ -783,7 +785,7 @@ public class FullRestoreEngine extends RestoreEngine {
                 // that we just installed.
                 if (uninstall) {
                     mDeleteObserver.reset();
-                    backupManagerService.mPackageManager.deletePackage(
+                    backupManagerService.getPackageManager().deletePackage(
                             mInstallObserver.mPackageName,
                             mDeleteObserver, 0);
                     mDeleteObserver.waitForCompletion();
@@ -883,7 +885,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
                 monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
                         BackupManagerMonitor.EXTRA_LOG_WIDGET_PACKAGE_NAME, pkg);
-                mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                         BackupManagerMonitor.LOG_EVENT_ID_WIDGET_METADATA_MISMATCH,
                         null,
                         LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -897,7 +899,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             info.packageName);
             monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
                     EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
-            mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                     BackupManagerMonitor.LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION,
                     null,
                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -960,7 +962,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         // Okay, got the manifest info we need...
                         try {
                             PackageInfo pkgInfo =
-                                    backupManagerService.mPackageManager.getPackageInfo(
+                                    backupManagerService.getPackageManager().getPackageInfo(
                                             info.packageName, PackageManager.GET_SIGNATURES);
                             // Fall through to IGNORE if the app explicitly disallows backup
                             final int flags = pkgInfo.applicationInfo.flags;
@@ -977,13 +979,13 @@ public class FullRestoreEngine extends RestoreEngine {
                                     // such packages are signed with the platform cert instead of
                                     // the app developer's cert, so they're different on every
                                     // device.
-                                    if (RefactoredBackupManagerService.signaturesMatch(sigs,
+                                    if (AppBackupUtils.signaturesMatch(sigs,
                                             pkgInfo)) {
                                         if ((pkgInfo.applicationInfo.flags
                                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
                                             Slog.i(RefactoredBackupManagerService.TAG,
                                                     "Package has restoreAnyVersion; taking data");
-                                            mMonitor = RefactoredBackupManagerService.monitorEvent(
+                                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
                                                     mMonitor,
                                                     LOG_EVENT_ID_RESTORE_ANY_VERSION,
                                                     pkgInfo,
@@ -994,7 +996,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                             Slog.i(RefactoredBackupManagerService.TAG,
                                                     "Sig + version match; taking data");
                                             policy = RestorePolicy.ACCEPT;
-                                            mMonitor = RefactoredBackupManagerService.monitorEvent(
+                                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
                                                     mMonitor,
                                                     LOG_EVENT_ID_VERSIONS_MATCH,
                                                     pkgInfo,
@@ -1016,7 +1018,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                                 Slog.i(RefactoredBackupManagerService.TAG,
                                                         "Data requires newer version "
                                                                 + version + "; ignoring");
-                                                mMonitor = RefactoredBackupManagerService
+                                                mMonitor = BackupManagerMonitorUtils
                                                         .monitorEvent(mMonitor,
                                                                 LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER,
                                                                 pkgInfo,
@@ -1035,7 +1037,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                                 "Restore manifest signatures do not match "
                                                         + "installed application for "
                                                         + info.packageName);
-                                        mMonitor = RefactoredBackupManagerService.monitorEvent(
+                                        mMonitor = BackupManagerMonitorUtils.monitorEvent(
                                                 mMonitor,
                                                 LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH,
                                                 pkgInfo,
@@ -1046,7 +1048,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                     Slog.w(RefactoredBackupManagerService.TAG,
                                             "Package " + info.packageName
                                                     + " is system level with no agent");
-                                    mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                                             LOG_EVENT_ID_SYSTEM_APP_NO_AGENT,
                                             pkgInfo,
                                             LOG_EVENT_CATEGORY_AGENT,
@@ -1058,7 +1060,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                             "Restore manifest from "
                                                     + info.packageName + " but allowBackup=false");
                                 }
-                                mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                                         LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE,
                                         pkgInfo,
                                         LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -1083,7 +1085,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             monitoringExtras = backupManagerService.putMonitoringExtra(
                                     monitoringExtras,
                                     EXTRA_LOG_POLICY_ALLOW_APKS, mAllowApks);
-                            mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                                     LOG_EVENT_ID_APK_NOT_INSTALLED,
                                     null,
                                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -1094,7 +1096,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             Slog.i(RefactoredBackupManagerService.TAG,
                                     "Cannot restore package " + info.packageName
                                             + " without the matching .apk");
-                            mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                                     LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK,
                                     null,
                                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -1105,7 +1107,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         Slog.i(RefactoredBackupManagerService.TAG,
                                 "Missing signature on backed-up package "
                                         + info.packageName);
-                        mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                        mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                                 LOG_EVENT_ID_MISSING_SIGNATURE,
                                 null,
                                 LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -1120,7 +1122,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
                     monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
                             EXTRA_LOG_MANIFEST_PACKAGE_NAME, manifestPackage);
-                    mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                             LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE,
                             null,
                             LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -1134,7 +1136,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
                 monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
                         EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
-                mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                         BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_VERSION,
                         null,
                         LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -1144,7 +1146,7 @@ public class FullRestoreEngine extends RestoreEngine {
         } catch (NumberFormatException e) {
             Slog.w(RefactoredBackupManagerService.TAG,
                     "Corrupt restore manifest for package " + info.packageName);
-            mMonitor = RefactoredBackupManagerService.monitorEvent(mMonitor,
+            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                     BackupManagerMonitor.LOG_EVENT_ID_CORRUPT_MANIFEST,
                     null,
                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,

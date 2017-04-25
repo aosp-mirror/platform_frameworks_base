@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.view.MenuItem;
+import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;

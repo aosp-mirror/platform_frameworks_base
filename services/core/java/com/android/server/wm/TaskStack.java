@@ -733,10 +733,17 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         outTempTaskBounds.setEmpty();
 
         // When the home stack is resizable, should always have the same stack and task bounds
-        if (mStackId == HOME_STACK_ID && findHomeTask().isResizeable()) {
-            // Calculate the home stack bounds when in docked mode
-            getDisplayContent().mDividerControllerLocked
-                    .getHomeStackBoundsInDockedMode(outStackBounds);
+        if (mStackId == HOME_STACK_ID) {
+            if (findHomeTask().isResizeable()) {
+                // Calculate the home stack bounds when in docked mode and the home stack is
+                // resizeable.
+                getDisplayContent().mDividerControllerLocked
+                        .getHomeStackBoundsInDockedMode(outStackBounds);
+            } else {
+                // Home stack isn't resizeable, so don't specify stack bounds.
+                outStackBounds.setEmpty();
+            }
+
             outTempTaskBounds.set(outStackBounds);
             return;
         }

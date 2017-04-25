@@ -696,9 +696,6 @@ public class Activity extends ContextThemeWrapper
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
-    // TODO(b/33197203): set to false once stable
-    private static final boolean DEBUG_AUTO_FILL = true;
-
     /** Standard activity result: operation canceled. */
     public static final int RESULT_CANCELED    = 0;
     /** Standard activity result: operation succeeded. */
@@ -5844,7 +5841,7 @@ public class Activity extends ContextThemeWrapper
      * @return Returns the single SharedPreferences instance that can be used
      *         to retrieve and modify the preference values.
      */
-    public SharedPreferences getPreferences(int mode) {
+    public SharedPreferences getPreferences(@Context.PreferencesMode int mode) {
         return getSharedPreferences(getLocalClassName(), mode);
     }
 
@@ -7323,6 +7320,7 @@ public class Activity extends ContextThemeWrapper
      * @return True if caption is displayed on content, false if it pushes the content down.
      *
      * @see #setOverlayWithDecorCaptionEnabled(boolean)
+     * @hide
      */
     public boolean isOverlayWithDecorCaptionEnabled() {
         return mWindow.isOverlayWithDecorCaptionEnabled();
@@ -7334,6 +7332,7 @@ public class Activity extends ContextThemeWrapper
      * This affects only freeform windows since they display the caption and only the main
      * window of the activity. The caption is used to drag the window around and also shows
      * maximize and close action buttons.
+     * @hide
      */
     public void setOverlayWithDecorCaptionEnabled(boolean enabled) {
         mWindow.setOverlayWithDecorCaptionEnabled(enabled);

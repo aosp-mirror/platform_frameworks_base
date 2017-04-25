@@ -16,6 +16,7 @@ package android.telecom;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,6 +47,7 @@ import java.util.List;
  * permissions declared in its manifest file. Where permissions apply, they are noted in the method
  * descriptions.
  */
+@SuppressAutoDoc
 public class TelecomManager {
 
     /**
