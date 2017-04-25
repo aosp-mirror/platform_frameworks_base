@@ -26,6 +26,8 @@ import android.graphics.drawable.Icon;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 
+import com.android.systemui.R;
+
 import java.util.List;
 
 /**
@@ -41,6 +43,8 @@ public class MediaNotificationProcessor {
     private static final float BLACK_MAX_LIGHTNESS = 0.08f;
     private static final float WHITE_MIN_LIGHTNESS = 0.92f;
     private static final int RESIZE_BITMAP_AREA = 150 * 150;
+    private final ImageGradientColorizer mColorizer;
+    private final Context mContext;
     private float[] mFilteredBackgroundHsl = null;
     private Palette.Filter mBlackWhiteFilter = (rgb, hsl) -> !isWhiteOrBlack(hsl);
 
@@ -48,10 +52,13 @@ public class MediaNotificationProcessor {
      * The context of the notification. This is the app context of the package posting the
      * notification.
      */
-    private final Context mContext;
+    private final Context mPackageContext;
+    private boolean mIsLowPriority;
 
-    public MediaNotificationProcessor(Context context) {
+    public MediaNotificationProcessor(Context context, Context packageContext) {
         mContext = context;
+        mPackageContext = packageContext;
+        mColorizer = new ImageGradientColorizer();
     }
 
     /**
@@ -64,114 +71,124 @@ public class MediaNotificationProcessor {
     public void processNotification(Notification notification, Notification.Builder builder) {
         Icon largeIcon = notification.getLargeIcon();
         Bitmap bitmap = null;
+        Drawable drawable = null;
         if (largeIcon != null) {
-            Drawable drawable = largeIcon.loadDrawable(mContext);
-            int width = drawable.getIntrinsicWidth();
-            int height = drawable.getIntrinsicHeight();
-            int area = width * height;
-            if (area > RESIZE_BITMAP_AREA) {
-                double factor = Math.sqrt((float) RESIZE_BITMAP_AREA / area);
-                width = (int) (factor * width);
-                height = (int) (factor * height);
-            }
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, width, height);
-            drawable.draw(canvas);
-        }
-        if (bitmap != null) {
-            // for the background we only take the left side of the image to ensure
-            // a smooth transition
-            Palette.Builder paletteBuilder = Palette.from(bitmap)
-                    .setRegion(0, 0, bitmap.getWidth() / 2, bitmap.getHeight())
-                    .clearFilters() // we want all colors, red / white / black ones too!
-                    .resizeBitmapArea(RESIZE_BITMAP_AREA);
-            Palette palette = paletteBuilder.generate();
-            int backgroundColor = findBackgroundColorAndFilter(palette);
-            // we want the full region again
-            paletteBuilder.setRegion(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            if (mFilteredBackgroundHsl != null) {
-                paletteBuilder.addFilter((rgb, hsl) -> {
-                    // at least 10 degrees hue difference
-                    float diff = Math.abs(hsl[0] - mFilteredBackgroundHsl[0]);
-                    return diff > 10 && diff < 350;
-                });
-            }
-            paletteBuilder.addFilter(mBlackWhiteFilter);
-            palette = paletteBuilder.generate();
-            int foregroundColor;
-            if (ColorUtils.calculateLuminance(backgroundColor) > 0.5) {
-                Palette.Swatch first = palette.getDarkVibrantSwatch();
-                Palette.Swatch second = palette.getVibrantSwatch();
-                if (first != null && second != null) {
-                    int firstPopulation = first.getPopulation();
-                    int secondPopulation = second.getPopulation();
-                    if (firstPopulation / secondPopulation
-                            < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
-                        foregroundColor = second.getRgb();
-                    } else {
-                        foregroundColor = first.getRgb();
-                    }
-                } else if (first != null) {
-                    foregroundColor = first.getRgb();
-                } else if (second != null) {
-                    foregroundColor = second.getRgb();
-                } else {
-                    first = palette.getMutedSwatch();
-                    second = palette.getDarkMutedSwatch();
+            drawable = largeIcon.loadDrawable(mPackageContext);
+            int backgroundColor = 0;
+            if (notification.isColorizedMedia()) {
+                int width = drawable.getIntrinsicWidth();
+                int height = drawable.getIntrinsicHeight();
+                int area = width * height;
+                if (area > RESIZE_BITMAP_AREA) {
+                    double factor = Math.sqrt((float) RESIZE_BITMAP_AREA / area);
+                    width = (int) (factor * width);
+                    height = (int) (factor * height);
+                }
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                drawable.setBounds(0, 0, width, height);
+                drawable.draw(canvas);
+
+                // for the background we only take the left side of the image to ensure
+                // a smooth transition
+                Palette.Builder paletteBuilder = Palette.from(bitmap)
+                        .setRegion(0, 0, bitmap.getWidth() / 2, bitmap.getHeight())
+                        .clearFilters() // we want all colors, red / white / black ones too!
+                        .resizeBitmapArea(RESIZE_BITMAP_AREA);
+                Palette palette = paletteBuilder.generate();
+                backgroundColor = findBackgroundColorAndFilter(palette);
+                // we want the full region again
+                paletteBuilder.setRegion(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                if (mFilteredBackgroundHsl != null) {
+                    paletteBuilder.addFilter((rgb, hsl) -> {
+                        // at least 10 degrees hue difference
+                        float diff = Math.abs(hsl[0] - mFilteredBackgroundHsl[0]);
+                        return diff > 10 && diff < 350;
+                    });
+                }
+                paletteBuilder.addFilter(mBlackWhiteFilter);
+                palette = paletteBuilder.generate();
+                int foregroundColor;
+                if (ColorUtils.calculateLuminance(backgroundColor) > 0.5) {
+                    Palette.Swatch first = palette.getDarkVibrantSwatch();
+                    Palette.Swatch second = palette.getVibrantSwatch();
                     if (first != null && second != null) {
-                        float firstSaturation = first.getHsl()[1];
-                        float secondSaturation = second.getHsl()[1];
-                        if (firstSaturation > secondSaturation) {
-                            foregroundColor = first.getRgb();
-                        } else {
+                        int firstPopulation = first.getPopulation();
+                        int secondPopulation = second.getPopulation();
+                        if (firstPopulation / secondPopulation
+                                < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
                             foregroundColor = second.getRgb();
+                        } else {
+                            foregroundColor = first.getRgb();
                         }
                     } else if (first != null) {
                         foregroundColor = first.getRgb();
                     } else if (second != null) {
                         foregroundColor = second.getRgb();
                     } else {
-                        foregroundColor = Color.BLACK;
+                        first = palette.getMutedSwatch();
+                        second = palette.getDarkMutedSwatch();
+                        if (first != null && second != null) {
+                            float firstSaturation = first.getHsl()[1];
+                            float secondSaturation = second.getHsl()[1];
+                            if (firstSaturation > secondSaturation) {
+                                foregroundColor = first.getRgb();
+                            } else {
+                                foregroundColor = second.getRgb();
+                            }
+                        } else if (first != null) {
+                            foregroundColor = first.getRgb();
+                        } else if (second != null) {
+                            foregroundColor = second.getRgb();
+                        } else {
+                            foregroundColor = Color.BLACK;
+                        }
+                    }
+                } else {
+                    Palette.Swatch first = palette.getLightVibrantSwatch();
+                    Palette.Swatch second = palette.getVibrantSwatch();
+                    if (first != null && second != null) {
+                        int firstPopulation = first.getPopulation();
+                        int secondPopulation = second.getPopulation();
+                        if (firstPopulation / secondPopulation
+                                < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
+                            foregroundColor = second.getRgb();
+                        } else {
+                            foregroundColor = first.getRgb();
+                        }
+                    } else if (first != null) {
+                        foregroundColor = first.getRgb();
+                    } else if (second != null) {
+                        foregroundColor = second.getRgb();
+                    } else {
+                        first = palette.getMutedSwatch();
+                        second = palette.getLightMutedSwatch();
+                        if (first != null && second != null) {
+                            float firstSaturation = first.getHsl()[1];
+                            float secondSaturation = second.getHsl()[1];
+                            if (firstSaturation > secondSaturation) {
+                                foregroundColor = first.getRgb();
+                            } else {
+                                foregroundColor = second.getRgb();
+                            }
+                        } else if (first != null) {
+                            foregroundColor = first.getRgb();
+                        } else if (second != null) {
+                            foregroundColor = second.getRgb();
+                        } else {
+                            foregroundColor = Color.WHITE;
+                        }
                     }
                 }
+                builder.setColorPalette(backgroundColor, foregroundColor);
             } else {
-                Palette.Swatch first = palette.getLightVibrantSwatch();
-                Palette.Swatch second = palette.getVibrantSwatch();
-                if (first != null && second != null) {
-                    int firstPopulation = first.getPopulation();
-                    int secondPopulation = second.getPopulation();
-                    if (firstPopulation / secondPopulation
-                            < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
-                        foregroundColor = second.getRgb();
-                    } else {
-                        foregroundColor = first.getRgb();
-                    }
-                } else if (first != null) {
-                    foregroundColor = first.getRgb();
-                } else if (second != null) {
-                    foregroundColor = second.getRgb();
-                } else {
-                    first = palette.getMutedSwatch();
-                    second = palette.getLightMutedSwatch();
-                    if (first != null && second != null) {
-                        float firstSaturation = first.getHsl()[1];
-                        float secondSaturation = second.getHsl()[1];
-                        if (firstSaturation > secondSaturation) {
-                            foregroundColor = first.getRgb();
-                        } else {
-                            foregroundColor = second.getRgb();
-                        }
-                    } else if (first != null) {
-                        foregroundColor = first.getRgb();
-                    } else if (second != null) {
-                        foregroundColor = second.getRgb();
-                    } else {
-                        foregroundColor = Color.WHITE;
-                    }
-                }
+                int id = mIsLowPriority
+                        ? R.color.notification_material_background_low_priority_color
+                        : R.color.notification_material_background_color;
+                backgroundColor = mContext.getColor(id);
             }
-            builder.setColorPalette(backgroundColor, foregroundColor);
+            Bitmap colorized = mColorizer.colorize(drawable, backgroundColor);
+            builder.setLargeIcon(Icon.createWithBitmap(colorized));
         }
     }
 
@@ -234,5 +251,9 @@ public class MediaNotificationProcessor {
      */
     private boolean isWhite(float[] hslColor) {
         return hslColor[2] >= WHITE_MIN_LIGHTNESS;
+    }
+
+    public void setIsLowPriority(boolean isLowPriority) {
+        mIsLowPriority = isLowPriority;
     }
 }
