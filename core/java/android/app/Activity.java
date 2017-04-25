@@ -2039,35 +2039,27 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Puts the activity in picture-in-picture mode if possible in the current system state. Any
-     * prior calls to {@link #setPictureInPictureArgs(PictureInPictureArgs)} will still apply when
-     * entering picture-in-picture through this call.
+     * prior calls to {@link #setPictureInPictureParams(PictureInPictureParams)} will still apply
+     * when entering picture-in-picture through this call.
      *
-     * @see #enterPictureInPictureMode(PictureInPictureArgs)
+     * @see #enterPictureInPictureMode(PictureInPictureParams)
      * @see android.R.attr#supportsPictureInPicture
      */
+    @Deprecated
     public void enterPictureInPictureMode() {
-        enterPictureInPictureMode(new PictureInPictureArgs());
+        enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
     }
 
     /**
-     * Puts the activity in picture-in-picture mode if possible in the current system state with
-     * explicit given arguments. Only the set parameters in {@param args} will override prior calls
-     * {@link #setPictureInPictureArgs(PictureInPictureArgs)}.
-     *
-     * The system may disallow entering picture-in-picture in various cases, including when the
-     * activity is not visible.
-     *
-     * @see android.R.attr#supportsPictureInPicture
-     *
-     * @param args the explicit non-null arguments to use when entering picture-in-picture.
-     * @return whether the system successfully entered picture-in-picture.
+     * TO BE REMOVED
      */
+    @Deprecated
     public boolean enterPictureInPictureMode(@NonNull PictureInPictureArgs args) {
         try {
             if (args == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture args");
             }
-            updatePictureInPictureArgsForContentInsets(args);
+            updatePictureInPictureParamsForContentInsets(args);
             return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, args);
         } catch (RemoteException e) {
             return false;
@@ -2075,34 +2067,84 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Puts the activity in picture-in-picture mode if possible in the current system state. The
+     * set parameters in {@param params} will be combined with the parameters from prior calls to
+     * {@link #setPictureInPictureParams(PictureInPictureParams)}.
+     *
+     * The system may disallow entering picture-in-picture in various cases, including when the
+     * activity is not visible, if the screen is locked or if the user has an activity pinned.
+     *
+     * @see android.R.attr#supportsPictureInPicture
+     * @see PictureInPictureParams
+     *
+     * @param params non-null parameters to be combined with previously set parameters when entering
+     * picture-in-picture.
+     *
+     * @return true if the system puts this activity into picture-in-picture mode or was already
+     * in picture-in-picture mode (@see {@link #isInPictureInPictureMode())
+     */
+    public boolean enterPictureInPictureMode(@NonNull PictureInPictureParams params) {
+        try {
+            if (params == null) {
+                throw new IllegalArgumentException("Expected non-null picture-in-picture params");
+            }
+            updatePictureInPictureParamsForContentInsets(params);
+            return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, params);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * TO BE REMOVED
+     */
+    public void setPictureInPictureArgs(@NonNull PictureInPictureArgs args) {
+        setPictureInPictureParams(args);
+    }
+
+    /**
      * Updates the properties of the picture-in-picture activity, or sets it to be used later when
      * {@link #enterPictureInPictureMode()} is called.
      *
-     * @param args the new properties of the picture-in-picture.
+     * @param params the new parameters for the picture-in-picture.
      */
-    public void setPictureInPictureArgs(@NonNull PictureInPictureArgs args) {
+    public void setPictureInPictureParams(@NonNull PictureInPictureParams params) {
         try {
-            if (args == null) {
-                throw new IllegalArgumentException("Expected non-null picture-in-picture args");
+            if (params == null) {
+                throw new IllegalArgumentException("Expected non-null picture-in-picture params");
             }
-            updatePictureInPictureArgsForContentInsets(args);
-            ActivityManagerNative.getDefault().setPictureInPictureArgs(mToken, args);
+            updatePictureInPictureParamsForContentInsets(params);
+            ActivityManagerNative.getDefault().setPictureInPictureParams(mToken, params);
         } catch (RemoteException e) {
         }
     }
 
     /**
-     * Updates the provided {@param args} with the last known content insets for this activity, to
+     * Return the number of actions that will be displayed in the picture-in-picture UI when the
+     * user interacts with the activity currently in picture-in-picture mode. This number may change
+     * if the global configuration changes (ie. if the device is plugged into an external display),
+     * but will always be larger than three.
+     */
+    public int getMaxNumPictureInPictureActions() {
+        try {
+            return ActivityManagerNative.getDefault().getMaxNumPictureInPictureActions(mToken);
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Updates the provided {@param params} with the last known content insets for this activity, to
      * be used with the source hint rect for the transition into PiP.
      */
-    private void updatePictureInPictureArgsForContentInsets(PictureInPictureArgs args) {
-        if (args != null && args.hasSourceBoundsHint() && getWindow() != null &&
+    private void updatePictureInPictureParamsForContentInsets(PictureInPictureParams params) {
+        if (params != null && params.hasSourceBoundsHint() && getWindow() != null &&
                 getWindow().peekDecorView() != null &&
                 getWindow().peekDecorView().getViewRootImpl() != null) {
-            args.setSourceRectHintInsets(
+            params.setSourceRectHintInsets(
                     getWindow().peekDecorView().getViewRootImpl().getLastContentInsets());
         } else {
-            args.setSourceRectHintInsets(null);
+            params.setSourceRectHintInsets(null);
         }
     }
 
