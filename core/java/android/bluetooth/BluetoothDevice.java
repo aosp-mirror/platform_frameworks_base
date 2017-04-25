@@ -595,32 +595,38 @@ public final class BluetoothDevice implements Parcelable {
     public static final int TRANSPORT_LE = 2;
 
     /**
-     * Bluetooth LE 1M PHY.
+     * Bluetooth LE 1M PHY. Used to refer to LE 1M Physical Channel for advertising, scanning or
+     * connection.
      */
     public static final int PHY_LE_1M = 1;
 
     /**
-     * Bluetooth LE 2M PHY.
+     * Bluetooth LE 2M PHY. Used to refer to LE 2M Physical Channel for advertising, scanning or
+     * connection.
      */
     public static final int PHY_LE_2M = 2;
 
     /**
-     * Bluetooth LE Coded PHY.
+     * Bluetooth LE Coded PHY. Used to refer to LE Coded Physical Channel for advertising, scanning
+     * or connection.
      */
     public static final int PHY_LE_CODED = 3;
 
     /**
-     * Bluetooth LE 1M PHY mask.
+     * Bluetooth LE 1M PHY mask. Used to specify LE 1M Physical Channel as one of many available
+     * options in a bitmask.
      */
     public static final int PHY_LE_1M_MASK = 1;
 
     /**
-     * Bluetooth LE 2M PHY mask.
+     * Bluetooth LE 2M PHY mask. Used to specify LE 2M Physical Channel as one of many available
+     * options in a bitmask.
      */
     public static final int PHY_LE_2M_MASK = 2;
 
     /**
-     * Bluetooth LE Coded PHY mask.
+     * Bluetooth LE Coded PHY mask. Used to specify LE Coded Physical Channel as one of many
+     * available options in a bitmask.
      */
     public static final int PHY_LE_CODED_MASK = 4;
 
