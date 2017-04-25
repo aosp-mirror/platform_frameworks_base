@@ -155,10 +155,6 @@ public class PluginInstanceManager<T extends Plugin> {
                 new ComponentName(info.mPackage, info.mClass),
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
-        final String pkg = info.mPackage;
-        final Intent intent = new Intent(PluginManager.PLUGIN_CHANGED,
-                pkg != null ? Uri.fromParts("package", pkg, null) : null);
-        mContext.sendBroadcast(intent);
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
