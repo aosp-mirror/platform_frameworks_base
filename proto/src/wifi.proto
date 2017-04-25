@@ -276,6 +276,42 @@ message WifiLog {
 
   // Count of saved Passpoint providers device has ever connected to.
   optional int32 num_passpoint_providers_successfully_connected = 63;
+
+  // Histogram counting instances of scans with N many ScanResults with unique ssids
+  repeated NumConnectableNetworksBucket total_ssids_in_scan_histogram = 64;
+
+  // Histogram counting instances of scans with N many ScanResults/bssids
+  repeated NumConnectableNetworksBucket total_bssids_in_scan_histogram = 65;
+
+  // Histogram counting instances of scans with N many unique open ssids
+  repeated NumConnectableNetworksBucket available_open_ssids_in_scan_histogram = 66;
+
+  // Histogram counting instances of scans with N many bssids for open networks
+  repeated NumConnectableNetworksBucket available_open_bssids_in_scan_histogram = 67;
+
+  // Histogram counting instances of scans with N many unique ssids for saved networks
+  repeated NumConnectableNetworksBucket available_saved_ssids_in_scan_histogram = 68;
+
+  // Histogram counting instances of scans with N many bssids for saved networks
+  repeated NumConnectableNetworksBucket available_saved_bssids_in_scan_histogram = 69;
+
+  // Histogram counting instances of scans with N many unique SSIDs for open or saved networks
+  repeated NumConnectableNetworksBucket available_open_or_saved_ssids_in_scan_histogram = 70;
+
+  // Histogram counting instances of scans with N many BSSIDs for open or saved networks
+  repeated NumConnectableNetworksBucket available_open_or_saved_bssids_in_scan_histogram = 71;
+
+  // Histogram counting instances of scans with N many ScanResults matching unique saved passpoint providers
+  repeated NumConnectableNetworksBucket available_saved_passpoint_provider_profiles_in_scan_histogram = 72;
+
+  // Histogram counting instances of scans with N many ScanResults BSSIDs matching a saved passpoint provider
+  repeated NumConnectableNetworksBucket available_saved_passpoint_provider_bssids_in_scan_histogram = 73;
+
+  // Counts the number of AllSingleScanLister.onResult calls with a full band scan result
+  optional int32 full_band_all_single_scan_listener_results = 74;
+
+  // Counts the number of AllSingleScanLister.onResult calls with a partial (channels) scan result
+  optional int32 partial_all_single_scan_listener_results = 75;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -883,3 +919,11 @@ message WifiAwareLog {
   }
 }
 
+// Data point used to build 'Number of Connectable Network' histograms
+message NumConnectableNetworksBucket {
+  // Number of connectable networks seen in a scan result
+  optional int32 num_connectable_networks = 1 [default = 0];
+
+  // Number of scan results with num_connectable_networks
+  optional int32 count = 2 [default = 0];
+}
