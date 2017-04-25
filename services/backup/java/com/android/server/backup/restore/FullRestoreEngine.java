@@ -61,6 +61,7 @@ import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.TarBackupReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -199,12 +200,20 @@ public class FullRestoreEngine extends RestoreEngine {
             return false;
         }
 
+        TarBackupReader tarBackupReader = new TarBackupReader(instream,
+                new TarBackupReader.BytesReadListener() {
+                    @Override
+                    public void onBytesRead(long bytesRead) {
+                        mBytes += bytesRead;
+                    }
+                });
+
         FileMetadata info;
         try {
             if (RefactoredBackupManagerService.MORE_DEBUG) {
                 Slog.v(RefactoredBackupManagerService.TAG, "Reading tar header for restoring file");
             }
-            info = readTarHeaders(instream);
+            info = tarBackupReader.readTarHeaders();
             if (info != null) {
                 if (RefactoredBackupManagerService.MORE_DEBUG) {
                     dumpFileMetadata(info);
@@ -252,13 +261,13 @@ public class FullRestoreEngine extends RestoreEngine {
                     // We've read only the manifest content itself at this point,
                     // so consume the footer before looping around to the next
                     // input file
-                    skipTarPadding(info.size, instream);
+                    tarBackupReader.skipTarPadding(info.size);
                     sendOnRestorePackage(pkg);
                 } else if (info.path.equals(
                         RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
                     // Metadata blobs!
                     readMetadata(info, instream);
-                    skipTarPadding(info.size, instream);
+                    tarBackupReader.skipTarPadding(info.size);
                 } else {
                     // Non-manifest, so it's actual file data.  Is this a package
                     // we're ignoring?
@@ -287,7 +296,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                 // At this point we've consumed this file entry
                                 // ourselves, so just strip the tar footer and
                                 // go on to the next file in the input stream
-                                skipTarPadding(info.size, instream);
+                                tarBackupReader.skipTarPadding(info.size);
                                 return true;
                             } else {
                                 // File data before (or without) the apk.  We can't
@@ -340,8 +349,9 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
 
                         try {
-                            mTargetApp = backupManagerService.getPackageManager().getApplicationInfo(
-                                    pkg, 0);
+                            mTargetApp =
+                                    backupManagerService.getPackageManager().getApplicationInfo(
+                                            pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
                             // need to clear it first.  Check that.
@@ -498,7 +508,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
                             // done sending that file!  Now we just need to consume
                             // the delta from info.size to the end of block.
-                            skipTarPadding(info.size, instream);
+                            tarBackupReader.skipTarPadding(info.size);
 
                             // and now that we've sent it all, wait for the remote
                             // side to acknowledge receipt
@@ -802,25 +812,6 @@ public class FullRestoreEngine extends RestoreEngine {
         return okay;
     }
 
-    // Given an actual file content size, consume the post-content padding mandated
-    // by the tar format.
-    void skipTarPadding(long size, InputStream instream) throws IOException {
-        long partial = (size + 512) % 512;
-        if (partial > 0) {
-            final int needed = 512 - (int) partial;
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.i(RefactoredBackupManagerService.TAG,
-                        "Skipping tar padding: " + needed + " bytes");
-            }
-            byte[] buffer = new byte[needed];
-            if (readExactly(instream, buffer, 0, needed) == needed) {
-                mBytes += needed;
-            } else {
-                throw new IOException("Unexpected EOF in padding");
-            }
-        }
-    }
-
     // Read a widget metadata file, returning the restored blob
     void readMetadata(FileMetadata info, InputStream instream) throws IOException {
         // Fail on suspiciously large widget dump files
@@ -829,17 +820,17 @@ public class FullRestoreEngine extends RestoreEngine {
         }
 
         byte[] buffer = new byte[(int) info.size];
-        if (readExactly(instream, buffer, 0, (int) info.size) == info.size) {
+        if (TarBackupReader.readExactly(instream, buffer, 0, (int) info.size) == info.size) {
             mBytes += info.size;
         } else {
             throw new IOException("Unexpected EOF in widget data");
         }
 
         String[] str = new String[1];
-        int offset = extractLine(buffer, 0, str);
+        int offset = TarBackupReader.extractLine(buffer, 0, str);
         int version = Integer.parseInt(str[0]);
         if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
-            offset = extractLine(buffer, offset, str);
+            offset = TarBackupReader.extractLine(buffer, offset, str);
             final String pkg = str[0];
             if (info.packageName.equals(pkg)) {
                 // Data checks out -- the rest of the buffer is a concatenation of
@@ -921,7 +912,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     "   readAppManifest() looking for " + info.size + " bytes, "
                             + mBytes + " already consumed");
         }
-        if (readExactly(instream, buffer, 0, (int) info.size) == info.size) {
+        if (TarBackupReader.readExactly(instream, buffer, 0, (int) info.size) == info.size) {
             mBytes += info.size;
         } else {
             throw new IOException("Unexpected EOF in manifest");
@@ -932,29 +923,29 @@ public class FullRestoreEngine extends RestoreEngine {
         int offset = 0;
 
         try {
-            offset = extractLine(buffer, offset, str);
+            offset = TarBackupReader.extractLine(buffer, offset, str);
             int version = Integer.parseInt(str[0]);
             if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
-                offset = extractLine(buffer, offset, str);
+                offset = TarBackupReader.extractLine(buffer, offset, str);
                 String manifestPackage = str[0];
                 // TODO: handle <original-package>
                 if (manifestPackage.equals(info.packageName)) {
-                    offset = extractLine(buffer, offset, str);
+                    offset = TarBackupReader.extractLine(buffer, offset, str);
                     version = Integer.parseInt(str[0]);  // app version
-                    offset = extractLine(buffer, offset, str);
+                    offset = TarBackupReader.extractLine(buffer, offset, str);
                     // This is the platform version, which we don't use, but we parse it
                     // as a safety against corruption in the manifest.
                     Integer.parseInt(str[0]);
-                    offset = extractLine(buffer, offset, str);
+                    offset = TarBackupReader.extractLine(buffer, offset, str);
                     info.installerPackageName = (str[0].length() > 0) ? str[0] : null;
-                    offset = extractLine(buffer, offset, str);
+                    offset = TarBackupReader.extractLine(buffer, offset, str);
                     boolean hasApk = str[0].equals("1");
-                    offset = extractLine(buffer, offset, str);
+                    offset = TarBackupReader.extractLine(buffer, offset, str);
                     int numSigs = Integer.parseInt(str[0]);
                     if (numSigs > 0) {
                         Signature[] sigs = new Signature[numSigs];
                         for (int i = 0; i < numSigs; i++) {
-                            offset = extractLine(buffer, offset, str);
+                            offset = TarBackupReader.extractLine(buffer, offset, str);
                             sigs[i] = new Signature(str[0]);
                         }
                         mManifestSignatures.put(info.packageName, sigs);
@@ -1025,9 +1016,9 @@ public class FullRestoreEngine extends RestoreEngine {
                                                                 LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                                                                 backupManagerService
                                                                         .putMonitoringExtra(
-                                                                        null,
-                                                                        EXTRA_LOG_OLD_VERSION,
-                                                                        version));
+                                                                                null,
+                                                                                EXTRA_LOG_OLD_VERSION,
+                                                                                version));
 
                                                 policy = RestorePolicy.IGNORE;
                                             }
@@ -1159,28 +1150,6 @@ public class FullRestoreEngine extends RestoreEngine {
         return policy;
     }
 
-    // Builds a line from a byte buffer starting at 'offset', and returns
-    // the index of the next unconsumed data in the buffer.
-    int extractLine(byte[] buffer, int offset, String[] outStr) throws IOException {
-        final int end = buffer.length;
-        if (offset >= end) {
-            throw new IOException("Incomplete data");
-        }
-
-        int pos;
-        for (pos = offset; pos < end; pos++) {
-            byte c = buffer[pos];
-            // at LF we declare end of line, and return the next char as the
-            // starting point for the next time through
-            if (c == '\n') {
-                break;
-            }
-        }
-        outStr[0] = new String(buffer, offset, pos - offset);
-        pos++;  // may be pointing an extra byte past the end but that's okay
-        return pos;
-    }
-
     void dumpFileMetadata(FileMetadata info) {
         if (RefactoredBackupManagerService.MORE_DEBUG) {
             StringBuilder b = new StringBuilder(128);
@@ -1209,143 +1178,6 @@ public class FullRestoreEngine extends RestoreEngine {
 
             Slog.i(RefactoredBackupManagerService.TAG, b.toString());
         }
-    }
-
-    // Consume a tar file header block [sequence] and accumulate the relevant metadata
-    FileMetadata readTarHeaders(InputStream instream) throws IOException {
-        byte[] block = new byte[512];
-        FileMetadata info = null;
-
-        boolean gotHeader = readTarHeader(instream, block);
-        if (gotHeader) {
-            try {
-                // okay, presume we're okay, and extract the various metadata
-                info = new FileMetadata();
-                info.size = extractRadix(block,
-                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_FILESIZE,
-                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_FILESIZE,
-                        RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
-                info.mtime = extractRadix(block,
-                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_MODTIME,
-                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_MODTIME,
-                        RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
-                info.mode = extractRadix(block,
-                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_MODE,
-                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_MODE,
-                        RefactoredBackupManagerService.TAR_HEADER_LONG_RADIX);
-
-                info.path = extractString(block,
-                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_PATH_PREFIX,
-                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_PATH_PREFIX);
-                String path = extractString(block,
-                        RefactoredBackupManagerService.TAR_HEADER_OFFSET_PATH,
-                        RefactoredBackupManagerService.TAR_HEADER_LENGTH_PATH);
-                if (path.length() > 0) {
-                    if (info.path.length() > 0) {
-                        info.path += '/';
-                    }
-                    info.path += path;
-                }
-
-                // tar link indicator field: 1 byte at offset 156 in the header.
-                int typeChar = block[RefactoredBackupManagerService.TAR_HEADER_OFFSET_TYPE_CHAR];
-                if (typeChar == 'x') {
-                    // pax extended header, so we need to read that
-                    gotHeader = readPaxExtendedHeader(instream, info);
-                    if (gotHeader) {
-                        // and after a pax extended header comes another real header -- read
-                        // that to find the real file type
-                        gotHeader = readTarHeader(instream, block);
-                    }
-                    if (!gotHeader) {
-                        throw new IOException("Bad or missing pax header");
-                    }
-
-                    typeChar = block[RefactoredBackupManagerService.TAR_HEADER_OFFSET_TYPE_CHAR];
-                }
-
-                switch (typeChar) {
-                    case '0':
-                        info.type = BackupAgent.TYPE_FILE;
-                        break;
-                    case '5': {
-                        info.type = BackupAgent.TYPE_DIRECTORY;
-                        if (info.size != 0) {
-                            Slog.w(RefactoredBackupManagerService.TAG,
-                                    "Directory entry with nonzero size in header");
-                            info.size = 0;
-                        }
-                        break;
-                    }
-                    case 0: {
-                        // presume EOF
-                        if (RefactoredBackupManagerService.MORE_DEBUG) {
-                            Slog.w(RefactoredBackupManagerService.TAG,
-                                    "Saw type=0 in tar header block, info=" + info);
-                        }
-                        return null;
-                    }
-                    default: {
-                        Slog.e(RefactoredBackupManagerService.TAG,
-                                "Unknown tar entity type: " + typeChar);
-                        throw new IOException("Unknown entity type " + typeChar);
-                    }
-                }
-
-                // Parse out the path
-                //
-                // first: apps/shared/unrecognized
-                if (FullBackup.SHARED_PREFIX.regionMatches(0,
-                        info.path, 0, FullBackup.SHARED_PREFIX.length())) {
-                    // File in shared storage.  !!! TODO: implement this.
-                    info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
-                    info.packageName = RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-                    info.domain = FullBackup.SHARED_STORAGE_TOKEN;
-                    if (RefactoredBackupManagerService.DEBUG) {
-                        Slog.i(RefactoredBackupManagerService.TAG,
-                                "File in shared storage: " + info.path);
-                    }
-                } else if (FullBackup.APPS_PREFIX.regionMatches(0,
-                        info.path, 0, FullBackup.APPS_PREFIX.length())) {
-                    // App content!  Parse out the package name and domain
-
-                    // strip the apps/ prefix
-                    info.path = info.path.substring(FullBackup.APPS_PREFIX.length());
-
-                    // extract the package name
-                    int slash = info.path.indexOf('/');
-                    if (slash < 0) {
-                        throw new IOException("Illegal semantic path in " + info.path);
-                    }
-                    info.packageName = info.path.substring(0, slash);
-                    info.path = info.path.substring(slash + 1);
-
-                    // if it's a manifest or metadata payload we're done, otherwise parse
-                    // out the domain into which the file will be restored
-                    if (!info.path.equals(RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME)
-                            && !info.path.equals(
-                            RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
-                        slash = info.path.indexOf('/');
-                        if (slash < 0) {
-                            throw new IOException("Illegal semantic path in non-manifest "
-                                    + info.path);
-                        }
-                        info.domain = info.path.substring(0, slash);
-                        info.path = info.path.substring(slash + 1);
-                    }
-                }
-            } catch (IOException e) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.e(RefactoredBackupManagerService.TAG,
-                            "Parse error in header: " + e.getMessage());
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
-                        HEXLOG(block);
-                    }
-                }
-                throw e;
-            }
-        }
-        return info;
     }
 
     private boolean isRestorableFile(FileMetadata info) {
@@ -1380,158 +1212,6 @@ public class FullRestoreEngine extends RestoreEngine {
 
         // Otherwise we think this file is good to go
         return true;
-    }
-
-    private void HEXLOG(byte[] block) {
-        int offset = 0;
-        int todo = block.length;
-        StringBuilder buf = new StringBuilder(64);
-        while (todo > 0) {
-            buf.append(String.format("%04x   ", offset));
-            int numThisLine = (todo > 16) ? 16 : todo;
-            for (int i = 0; i < numThisLine; i++) {
-                buf.append(String.format("%02x ", block[offset + i]));
-            }
-            Slog.i("hexdump", buf.toString());
-            buf.setLength(0);
-            todo -= numThisLine;
-            offset += numThisLine;
-        }
-    }
-
-    // Read exactly the given number of bytes into a buffer at the stated offset.
-    // Returns false if EOF is encountered before the requested number of bytes
-    // could be read.
-    int readExactly(InputStream in, byte[] buffer, int offset, int size)
-            throws IOException {
-        if (size <= 0) {
-            throw new IllegalArgumentException("size must be > 0");
-        }
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.i(RefactoredBackupManagerService.TAG, "  ... readExactly(" + size + ") called");
-        }
-        int soFar = 0;
-        while (soFar < size) {
-            int nRead = in.read(buffer, offset + soFar, size - soFar);
-            if (nRead <= 0) {
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "- wanted exactly " + size + " but got only " + soFar);
-                }
-                break;
-            }
-            soFar += nRead;
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.v(RefactoredBackupManagerService.TAG,
-                        "   + got " + nRead + "; now wanting " + (size - soFar));
-            }
-        }
-        return soFar;
-    }
-
-    boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
-        final int got = readExactly(instream, block, 0, 512);
-        if (got == 0) {
-            return false;     // Clean EOF
-        }
-        if (got < 512) {
-            throw new IOException("Unable to read full block header");
-        }
-        mBytes += 512;
-        return true;
-    }
-
-    // overwrites 'info' fields based on the pax extended header
-    boolean readPaxExtendedHeader(InputStream instream, FileMetadata info)
-            throws IOException {
-        // We should never see a pax extended header larger than this
-        if (info.size > 32 * 1024) {
-            Slog.w(RefactoredBackupManagerService.TAG,
-                    "Suspiciously large pax header size " + info.size
-                            + " - aborting");
-            throw new IOException("Sanity failure: pax header size " + info.size);
-        }
-
-        // read whole blocks, not just the content size
-        int numBlocks = (int) ((info.size + 511) >> 9);
-        byte[] data = new byte[numBlocks * 512];
-        if (readExactly(instream, data, 0, data.length) < data.length) {
-            throw new IOException("Unable to read full pax header");
-        }
-        mBytes += data.length;
-
-        final int contentSize = (int) info.size;
-        int offset = 0;
-        do {
-            // extract the line at 'offset'
-            int eol = offset + 1;
-            while (eol < contentSize && data[eol] != ' ') {
-                eol++;
-            }
-            if (eol >= contentSize) {
-                // error: we just hit EOD looking for the end of the size field
-                throw new IOException("Invalid pax data");
-            }
-            // eol points to the space between the count and the key
-            int linelen = (int) extractRadix(data, offset, eol - offset, 10);
-            int key = eol + 1;  // start of key=value
-            eol = offset + linelen - 1; // trailing LF
-            int value;
-            for (value = key + 1; data[value] != '=' && value <= eol; value++) {
-                ;
-            }
-            if (value > eol) {
-                throw new IOException("Invalid pax declaration");
-            }
-
-            // pax requires that key/value strings be in UTF-8
-            String keyStr = new String(data, key, value - key, "UTF-8");
-            // -1 to strip the trailing LF
-            String valStr = new String(data, value + 1, eol - value - 1, "UTF-8");
-
-            if ("path".equals(keyStr)) {
-                info.path = valStr;
-            } else if ("size".equals(keyStr)) {
-                info.size = Long.parseLong(valStr);
-            } else {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.i(RefactoredBackupManagerService.TAG, "Unhandled pax key: " + key);
-                }
-            }
-
-            offset += linelen;
-        } while (offset < contentSize);
-
-        return true;
-    }
-
-    long extractRadix(byte[] data, int offset, int maxChars, int radix)
-            throws IOException {
-        long value = 0;
-        final int end = offset + maxChars;
-        for (int i = offset; i < end; i++) {
-            final byte b = data[i];
-            // Numeric fields in tar can terminate with either NUL or SPC
-            if (b == 0 || b == ' ') {
-                break;
-            }
-            if (b < '0' || b > ('0' + radix - 1)) {
-                throw new IOException("Invalid number in header: '" + (char) b
-                        + "' for radix " + radix);
-            }
-            value = radix * value + (b - '0');
-        }
-        return value;
-    }
-
-    String extractString(byte[] data, int offset, int maxChars) throws IOException {
-        final int end = offset + maxChars;
-        int eos = offset;
-        // tar string fields terminate early with a NUL
-        while (eos < end && data[eos] != 0) {
-            eos++;
-        }
-        return new String(data, offset, eos - offset, "US-ASCII");
     }
 
     void sendStartRestore() {
