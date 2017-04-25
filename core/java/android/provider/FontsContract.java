@@ -105,14 +105,6 @@ public class FontsContract {
          */
         public static final String VARIATION_SETTINGS = "font_variation_settings";
         /**
-         * DO NOT USE THIS COLUMN.
-         * This column is kept for preventing demo apps.
-         * TODO: Remove once nobody uses this column.
-         * @hide
-         * @removed
-         */
-        public static final String STYLE = "font_style";
-        /**
          * Constant used to request data from a font provider. The cursor returned from the query
          * should have this column populated with the int weight for the resulting font. This value
          * should be between 100 and 900. The most common values are 400 for regular weight and 700
@@ -159,38 +151,24 @@ public class FontsContract {
         public static final int RESULT_CODE_MALFORMED_QUERY = 3;
     }
 
-    /**
-     * Constant used to identify the List of {@link ParcelFileDescriptor} item in the Bundle
-     * returned to the ResultReceiver in getFont.
-     * @hide
-     */
-    public static final String PARCEL_FONT_RESULTS = "font_results";
-    // Error codes internal to the system, which can not come from a provider. To keep the number
-    // space open for new provider codes, these should all be negative numbers.
-    /** @hide */
-    public static final int RESULT_CODE_PROVIDER_NOT_FOUND = -1;
-    /** @hide */
-    public static final int RESULT_CODE_WRONG_CERTIFICATES = -2;
-    // Note -3 is used by Typeface to indicate the font failed to load.
+    private static final Object sLock = new Object();
+    @GuardedBy("sLock")
+    private static Handler sHandler;
+    @GuardedBy("sLock")
+    private static HandlerThread sThread;
+    @GuardedBy("sLock")
+    private static Set<String> sInQueueSet;
 
-    private static final int THREAD_RENEWAL_THRESHOLD_MS = 10000;
-
-    private final Context mContext;
-    private final PackageManager mPackageManager;
-    private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private Handler mHandler;
-    @GuardedBy("mLock")
-    private HandlerThread mThread;
-    @GuardedBy("mLock")
-    private Set<String> mInQueueSet;
+    private volatile static Context sContext;  // set once in setApplicationContextForResources
 
     private static final LruCache<String, Typeface> sTypefaceCache = new LruCache<>(16);
 
+    private FontsContract() {
+    }
+
     /** @hide */
-    public FontsContract(Context context) {
-        mContext = context.getApplicationContext();
-        mPackageManager = mContext.getPackageManager();
+    public static void setApplicationContextForResources(Context context) {
+        sContext = context.getApplicationContext();
     }
 
     /**
@@ -323,24 +301,27 @@ public class FontsContract {
         }
     }
 
+    private static final int THREAD_RENEWAL_THRESHOLD_MS = 10000;
+
     // We use a background thread to post the content resolving work for all requests on. This
     // thread should be quit/stopped after all requests are done.
-    private final Runnable mReplaceDispatcherThreadRunnable = new Runnable() {
+    // TODO: Factor out to other class. Consider to switch MessageQueue.IdleHandler.
+    private static final Runnable sReplaceDispatcherThreadRunnable = new Runnable() {
         @Override
         public void run() {
-            synchronized (mLock) {
-                if (mThread != null) {
-                    mThread.quitSafely();
-                    mThread = null;
-                    mHandler = null;
-                    mInQueueSet = null;
+            synchronized (sLock) {
+                if (sThread != null) {
+                    sThread.quitSafely();
+                    sThread = null;
+                    sHandler = null;
+                    sInQueueSet = null;
                 }
             }
         }
     };
 
     /** @hide */
-    public Typeface getFontOrWarmUpCache(FontRequest request) {
+    public static Typeface getFontOrWarmUpCache(FontRequest request) {
         final String id = request.getIdentifier();
         Typeface cachedTypeface = sTypefaceCache.get(id);
         if (cachedTypeface != null) {
@@ -350,25 +331,25 @@ public class FontsContract {
         // Unfortunately the typeface is not available at this time, but requesting from the font
         // provider takes too much time. For now, request the font data to ensure it is in the cache
         // next time and return.
-        synchronized (mLock) {
-            if (mHandler == null) {
-                mThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
-                mThread.start();
-                mHandler = new Handler(mThread.getLooper());
-                mInQueueSet = new ArraySet<String>();
+        synchronized (sLock) {
+            if (sHandler == null) {
+                sThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
+                sThread.start();
+                sHandler = new Handler(sThread.getLooper());
+                sInQueueSet = new ArraySet<>();
             }
-            if (mInQueueSet.contains(id)) {
+            if (sInQueueSet.contains(id)) {
                 return null;  // Already requested.
             }
-            mInQueueSet.add(id);
-            mHandler.post(() -> {
-                synchronized (mLock) {
-                    mInQueueSet.remove(id);
+            sInQueueSet.add(id);
+            sHandler.post(() -> {
+                synchronized (sLock) {
+                    sInQueueSet.remove(id);
                 }
                 try {
-                    FontFamilyResult result = fetchFonts(mContext, null, request);
+                    FontFamilyResult result = fetchFonts(sContext, null, request);
                     if (result.getStatusCode() == FontFamilyResult.STATUS_OK) {
-                        Typeface typeface = buildTypeface(mContext, null, result.getFonts());
+                        Typeface typeface = buildTypeface(sContext, null, result.getFonts());
                         if (typeface != null) {
                             sTypefaceCache.put(id, typeface);
                         }
@@ -377,8 +358,8 @@ public class FontsContract {
                     // Ignore.
                 }
             });
-            mHandler.removeCallbacks(mReplaceDispatcherThreadRunnable);
-            mHandler.postDelayed(mReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
+            sHandler.removeCallbacks(sReplaceDispatcherThreadRunnable);
+            sHandler.postDelayed(sReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
         }
         return null;
     }
@@ -391,12 +372,12 @@ public class FontsContract {
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
          * provider was not found on the device.
          */
-        public static final int FAIL_REASON_PROVIDER_NOT_FOUND = RESULT_CODE_PROVIDER_NOT_FOUND;
+        public static final int FAIL_REASON_PROVIDER_NOT_FOUND = -1;
         /**
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
          * provider must be authenticated and the given certificates do not match its signature.
          */
-        public static final int FAIL_REASON_WRONG_CERTIFICATES = RESULT_CODE_WRONG_CERTIFICATES;
+        public static final int FAIL_REASON_WRONG_CERTIFICATES = -2;
         /**
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
          * returned by the provider was not loaded properly.
@@ -767,7 +748,7 @@ public class FontsContract {
                 .build();
         try (Cursor cursor = context.getContentResolver().query(uri, new String[] { Columns._ID,
                         Columns.FILE_ID, Columns.TTC_INDEX, Columns.VARIATION_SETTINGS,
-                        Columns.STYLE, Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
+                        Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
                 "query = ?", new String[] { request.getQuery() }, null, cancellationSignal);) {
             // TODO: Should we restrict the amount of fonts that can be returned?
             // TODO: Write documentation explaining that all results should be from the same family.
@@ -780,7 +761,6 @@ public class FontsContract {
                 final int vsColumnIndex = cursor.getColumnIndex(Columns.VARIATION_SETTINGS);
                 final int weightColumnIndex = cursor.getColumnIndex(Columns.WEIGHT);
                 final int italicColumnIndex = cursor.getColumnIndex(Columns.ITALIC);
-                final int styleColumnIndex = cursor.getColumnIndex(Columns.STYLE);
                 while (cursor.moveToNext()) {
                     int resultCode = resultCodeColumnIndex != -1
                             ? cursor.getInt(resultCodeColumnIndex) : Columns.RESULT_CODE_OK;
@@ -797,17 +777,11 @@ public class FontsContract {
                         long id = cursor.getLong(fileIdColumnIndex);
                         fileUri = ContentUris.withAppendedId(fileBaseUri, id);
                     }
-                    // TODO: Stop using STYLE column and enforce WEIGHT/ITALIC column.
                     int weight;
                     boolean italic;
                     if (weightColumnIndex != -1 && italicColumnIndex != -1) {
                         weight = cursor.getInt(weightColumnIndex);
                         italic = cursor.getInt(italicColumnIndex) == 1;
-                    } else if (styleColumnIndex != -1) {
-                        final int style = cursor.getInt(styleColumnIndex);
-                        weight = (style & Typeface.BOLD) != 0 ?
-                                Typeface.Builder.BOLD_WEIGHT : Typeface.Builder.NORMAL_WEIGHT;
-                        italic = (style & Typeface.ITALIC) != 0;
                     } else {
                         weight = Typeface.Builder.NORMAL_WEIGHT;
                         italic = false;
