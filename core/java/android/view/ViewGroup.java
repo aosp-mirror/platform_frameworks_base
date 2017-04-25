@@ -5822,34 +5822,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Quick invalidation method that simply transforms the dirty rect into the parent's
-     * coordinate system, pruning the invalidation if the parent has already been invalidated.
-     *
-     * @hide
-     */
-    protected ViewParent damageChildInParent(int left, int top, final Rect dirty) {
-        if ((mPrivateFlags & PFLAG_DRAWN) != 0
-                || (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) != 0) {
-            dirty.offset(left - mScrollX, top - mScrollY);
-            if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0) {
-                dirty.union(0, 0, mRight - mLeft, mBottom - mTop);
-            }
-
-            if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0 ||
-                    dirty.intersect(0, 0, mRight - mLeft, mBottom - mTop)) {
-
-                if (!getMatrix().isIdentity()) {
-                    transformRect(dirty);
-                }
-
-                return mParent;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Offset a rectangle that is in a descendant's coordinate
      * space into our coordinate space.
      * @param descendant A descendant of this view
