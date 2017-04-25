@@ -57,7 +57,7 @@ public final class PlaybackActivityMonitor
                 .setCurve(new float[] { 0.f, 1.f } /* times */,
                     new float[] { 1.f, 0.2f } /* volumes */)
                 .setOptionFlags(VolumeShaper.Configuration.OPTION_FLAG_CLOCK_TIME)
-                .setDurationMillis(MediaFocusControl.getFocusRampTimeMs(
+                .setDuration(MediaFocusControl.getFocusRampTimeMs(
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
                     new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION)
                             .build()))
