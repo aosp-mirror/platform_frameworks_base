@@ -33,7 +33,6 @@ import android.content.pm.Signature;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontRequest;
-import android.graphics.fonts.FontResult;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +42,7 @@ import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ResultReceiver;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -64,6 +64,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility class to deal with Font ContentProviders.
@@ -181,6 +182,8 @@ public class FontsContract {
     private Handler mHandler;
     @GuardedBy("mLock")
     private HandlerThread mThread;
+    @GuardedBy("mLock")
+    private Set<String> mInQueueSet;
 
     private static final LruCache<String, Typeface> sTypefaceCache = new LruCache<>(16);
 
@@ -330,81 +333,54 @@ public class FontsContract {
                     mThread.quitSafely();
                     mThread = null;
                     mHandler = null;
+                    mInQueueSet = null;
                 }
             }
         }
     };
 
     /** @hide */
-    public void getFont(FontRequest request, ResultReceiver receiver) {
+    public Typeface getFontOrWarmUpCache(FontRequest request) {
+        final String id = request.getIdentifier();
+        Typeface cachedTypeface = sTypefaceCache.get(id);
+        if (cachedTypeface != null) {
+            return cachedTypeface;
+        }
+
+        // Unfortunately the typeface is not available at this time, but requesting from the font
+        // provider takes too much time. For now, request the font data to ensure it is in the cache
+        // next time and return.
         synchronized (mLock) {
             if (mHandler == null) {
                 mThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
                 mThread.start();
                 mHandler = new Handler(mThread.getLooper());
+                mInQueueSet = new ArraySet<String>();
             }
+            if (mInQueueSet.contains(id)) {
+                return null;  // Already requested.
+            }
+            mInQueueSet.add(id);
             mHandler.post(() -> {
-                ProviderInfo providerInfo;
-                try {
-                    providerInfo = getProvider(mPackageManager, request);
-                    if (providerInfo == null) {
-                        receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-                        return;
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                    receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-                    return;
+                synchronized (mLock) {
+                    mInQueueSet.remove(id);
                 }
-                FontInfo[] fonts;
                 try {
-                    fonts = getFontFromProvider(mContext, request, providerInfo.authority,
-                            null /* cancellation signal */);
-                } catch (InvalidFormatException e) {
-                    receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-                    return;
-                }
-
-                ArrayList<FontResult> result = new ArrayList<>();
-                int resultCode = -1;
-                for (FontInfo font : fonts) {
-                    try {
-                        resultCode = font.getResultCode();
-                        if (resultCode != Columns.RESULT_CODE_OK) {
-                            if (resultCode < 0) {
-                                // Negative values are reserved for the internal errors.
-                                resultCode = Columns.RESULT_CODE_FONT_NOT_FOUND;
-                            }
-                            for (int i = 0; i < result.size(); ++i) {
-                                try {
-                                    result.get(i).getFileDescriptor().close();
-                                } catch (IOException e) {
-                                    // Ignore, as we are closing fds for cleanup.
-                                }
-                            }
-                            receiver.send(resultCode, null);
-                            return;
+                    FontFamilyResult result = fetchFonts(mContext, null, request);
+                    if (result.getStatusCode() == FontFamilyResult.STATUS_OK) {
+                        Typeface typeface = buildTypeface(mContext, null, result.getFonts());
+                        if (typeface != null) {
+                            sTypefaceCache.put(id, typeface);
                         }
-                        ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(
-                                font.getUri(), "r");
-                        result.add(new FontResult(pfd, font.getTtcIndex(),
-                                FontVariationAxis.toFontVariationSettings(font.getAxes()),
-                                font.getWeight(), font.isItalic()));
-                    } catch (FileNotFoundException e) {
-                        Log.e(TAG, "FileNotFoundException raised when interacting with content "
-                                + "provider " + providerInfo.authority, e);
                     }
+                } catch (NameNotFoundException e) {
+                    // Ignore.
                 }
-                if (!result.isEmpty()) {
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList(PARCEL_FONT_RESULTS, result);
-                    receiver.send(Columns.RESULT_CODE_OK, bundle);
-                    return;
-                }
-                receiver.send(Columns.RESULT_CODE_FONT_NOT_FOUND, null);
             });
             mHandler.removeCallbacks(mReplaceDispatcherThreadRunnable);
             mHandler.postDelayed(mReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
         }
+        return null;
     }
 
     /**
@@ -452,16 +428,14 @@ public class FontsContract {
         public FontRequestCallback() {}
 
         /**
-         * Called then a Typeface request done via {@link Typeface#create(FontRequest,
-         * FontRequestCallback)} is complete. Note that this method will not be called if
-         * {@link #onTypefaceRequestFailed(int)} is called instead.
+         * Called then a Typeface request done via {@link #requestFont} is complete. Note that this
+         * method will not be called if {@link #onTypefaceRequestFailed(int)} is called instead.
          * @param typeface  The Typeface object retrieved.
          */
         public void onTypefaceRetrieved(Typeface typeface) {}
 
         /**
-         * Called when a Typeface request done via {@link Typeface#create(FontRequest,
-         * FontRequestCallback)} fails.
+         * Called when a Typeface request done via {@link #requestFont}} fails.
          * @param reason One of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_LOAD_ERROR},
