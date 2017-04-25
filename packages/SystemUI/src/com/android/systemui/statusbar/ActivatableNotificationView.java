@@ -172,6 +172,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private int mOverrideTint;
     private float mOverrideAmount;
     private boolean mShadowHidden;
+    private boolean mWasActivatedOnDown;
+    /**
+     * Similar to mDimmed but is also true if it's not dimmable but should be
+     */
+    private boolean mNeedsDimming;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -223,7 +228,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mDimmed && !mActivated && ev.getActionMasked() == MotionEvent.ACTION_DOWN
+        if (mNeedsDimming && !mActivated && ev.getActionMasked() == MotionEvent.ACTION_DOWN
                 && disallowSingleClick(ev) && !isTouchExplorationEnabled()) {
             return true;
         }
@@ -245,7 +250,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result;
-        if (mDimmed && !isTouchExplorationEnabled() && isInteractive()) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            mWasActivatedOnDown = mActivated;
+        }
+        if ((mNeedsDimming && !mActivated) && !isTouchExplorationEnabled() && isInteractive()) {
             boolean wasActivated = mActivated;
             result = handleTouchEventDimmed(event);
             if (wasActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
@@ -282,7 +290,19 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private boolean handleTouchEventDimmed(MotionEvent event) {
+        if (mNeedsDimming && !mDimmed) {
+            // We're actually dimmed, but our content isn't dimmable, let's ensure we have a ripple
+            super.onTouchEvent(event);
+        }
         return mDoubleTapHelper.onTouchEvent(event, getActualHeight());
+    }
+
+    @Override
+    public boolean performClick() {
+        if (mWasActivatedOnDown || !mNeedsDimming) {
+            return super.performClick();
+        }
+        return false;
     }
 
     private void makeActive() {
@@ -296,6 +316,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void startActivateAnimation(final boolean reverse) {
         if (!isAttachedToWindow()) {
+            return;
+        }
+        if (!isDimmable()) {
             return;
         }
         int widthHalf = mBackgroundNormal.getWidth()/2;
@@ -371,6 +394,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     public void setDimmed(boolean dimmed, boolean fade) {
+        mNeedsDimming = dimmed;
+        dimmed &= isDimmable();
         if (mDimmed != dimmed) {
             mDimmed = dimmed;
             resetBackgroundAlpha();
@@ -380,6 +405,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 updateBackground();
             }
         }
+    }
+
+    public boolean isDimmable() {
+        return true;
     }
 
     public void setDark(boolean dark, boolean fade, long delay) {
