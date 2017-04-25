@@ -1518,7 +1518,8 @@ public class DevicePolicyManager {
      * Service action: Action for a service that device owner and profile owner can optionally
      * own.  If a device owner or a profile owner has such a service, the system tries to keep
      * a bound connection to it, in order to keep their process always running.
-     * The service must not be exported.
+     * The service must be protected with the {@link android.Manifest.permission#BIND_DEVICE_ADMIN}
+     * permission.
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String ACTION_DEVICE_ADMIN_SERVICE
