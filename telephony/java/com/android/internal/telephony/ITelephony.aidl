@@ -277,10 +277,11 @@ interface ITelephony {
     /**
      * Handles USSD commands.
      *
+     * @param subId The subscription to use.
      * @param ussdRequest the USSD command to be executed.
      * @param wrappedCallback receives a callback result.
      */
-    void handleUssdRequest(String ussdRequest, in ResultReceiver wrappedCallback);
+    void handleUssdRequest(int subId, String ussdRequest, in ResultReceiver wrappedCallback);
 
     /**
      * Handles PIN MMI commands (PIN/PIN2/PUK/PUK2), which are initiated
