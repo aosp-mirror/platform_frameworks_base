@@ -1081,7 +1081,8 @@ public final class AutofillManager {
         return view;
     }
 
-    private boolean hasAutofillFeature() {
+    /** @hide */
+    public boolean hasAutofillFeature() {
         return mService != null;
     }
 
