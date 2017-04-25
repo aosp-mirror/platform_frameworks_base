@@ -313,7 +313,7 @@ public final class SubscribeConfig implements Parcelable {
          * {@link DiscoverySessionCallback#onSessionTerminated()}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link DiscoverySession#destroy()} is
+         *     Session will be terminated when {@link DiscoverySession#close()} is
          *     called.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.

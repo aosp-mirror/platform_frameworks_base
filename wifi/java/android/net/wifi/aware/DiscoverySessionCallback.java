@@ -84,7 +84,7 @@ public class DiscoverySessionCallback {
 
     /**
      * Called when a discovery session (publish or subscribe) terminates. Termination may be due
-     * to user-request (either directly through {@link DiscoverySession#destroy()} or
+     * to user-request (either directly through {@link DiscoverySession#close()} or
      * application-specified expiration, e.g. {@link PublishConfig.Builder#setTtlSec(int)}
      * or {@link SubscribeConfig.Builder#setTtlSec(int)}).
      */
