@@ -1993,6 +1993,40 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testNetworkSpecifierUidSpoofSecurityException() {
+        class UidAwareNetworkSpecifier extends NetworkSpecifier implements Parcelable {
+            @Override
+            public boolean satisfiedBy(NetworkSpecifier other) {
+                return true;
+            }
+
+            @Override
+            public void assertValidFromUid(int requestorUid) {
+                throw new SecurityException("failure");
+            }
+
+            @Override
+            public int describeContents() { return 0; }
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {}
+        }
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+
+        UidAwareNetworkSpecifier networkSpecifier = new UidAwareNetworkSpecifier();
+        NetworkRequest networkRequest = newWifiRequestBuilder().setNetworkSpecifier(
+                networkSpecifier).build();
+        TestNetworkCallback networkCallback = new TestNetworkCallback();
+        try {
+            mCm.requestNetwork(networkRequest, networkCallback);
+            fail("Network request with spoofed UID did not throw a SecurityException");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    @SmallTest
     public void testRegisterDefaultNetworkCallback() throws Exception {
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(defaultNetworkCallback);
