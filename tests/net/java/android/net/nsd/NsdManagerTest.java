@@ -18,6 +18,7 @@ package android.net.nsd;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.reset;
@@ -41,6 +42,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -101,7 +104,71 @@ public class NsdManagerTest {
 
         verify(listener1, timeout(mTimeoutMs).times(1)).onServiceResolved(reply);
         verify(listener2, timeout(mTimeoutMs).times(1)).onServiceResolved(reply);
-   }
+    }
+
+    @Test
+    public void testInvalidCalls() {
+        NsdManager manager = new NsdManager(mContext, mService);
+
+        NsdManager.RegistrationListener listener1 = mock(NsdManager.RegistrationListener.class);
+        NsdManager.DiscoveryListener listener2 = mock(NsdManager.DiscoveryListener.class);
+        NsdManager.ResolveListener listener3 = mock(NsdManager.ResolveListener.class);
+
+        NsdServiceInfo invalidService = new NsdServiceInfo(null, null);
+        NsdServiceInfo validService = new NsdServiceInfo("a_name", "a_type");
+        validService.setPort(2222);
+
+        int protocol = NsdManager.PROTOCOL_DNS_SD;
+
+        // Service registration
+        //  - invalid arguments
+        mustFail(() -> { manager.unregisterService(null); });
+        mustFail(() -> { manager.registerService(null, -1, null); });
+        mustFail(() -> { manager.registerService(null, protocol, listener1); });
+        mustFail(() -> { manager.registerService(invalidService, protocol, listener1); });
+        mustFail(() -> { manager.registerService(validService, -1, listener1); });
+        mustFail(() -> { manager.registerService(validService, protocol, null); });
+        manager.registerService(validService, protocol, listener1);
+        //  - listener already registered
+        mustFail(() -> { manager.registerService(validService, protocol, listener1); });
+        manager.unregisterService(listener1);
+        // TODO: make listener immediately reusable
+        //mustFail(() -> { manager.unregisterService(listener1); });
+        //manager.registerService(validService, protocol, listener1);
+
+        // Discover service
+        //  - invalid arguments
+        mustFail(() -> { manager.stopServiceDiscovery(null); });
+        mustFail(() -> { manager.discoverServices(null, -1, null); });
+        mustFail(() -> { manager.discoverServices(null, protocol, listener2); });
+        mustFail(() -> { manager.discoverServices("a_service", -1, listener2); });
+        mustFail(() -> { manager.discoverServices("a_service", protocol, null); });
+        manager.discoverServices("a_service", protocol, listener2);
+        //  - listener already registered
+        mustFail(() -> { manager.discoverServices("another_service", protocol, listener2); });
+        manager.stopServiceDiscovery(listener2);
+        // TODO: make listener immediately reusable
+        //mustFail(() -> { manager.stopServiceDiscovery(listener2); });
+        //manager.discoverServices("another_service", protocol, listener2);
+
+        // Resolver service
+        //  - invalid arguments
+        mustFail(() -> { manager.resolveService(null, null); });
+        mustFail(() -> { manager.resolveService(null, listener3); });
+        mustFail(() -> { manager.resolveService(invalidService, listener3); });
+        mustFail(() -> { manager.resolveService(validService, null); });
+        manager.resolveService(validService, listener3);
+        //  - listener already registered:w
+        mustFail(() -> { manager.resolveService(validService, listener3); });
+    }
+
+    public void mustFail(Runnable fn) {
+        try {
+            fn.run();
+            fail();
+        } catch (Exception expected) {
+        }
+    }
 
     NsdManager makeManager() {
         NsdManager manager = new NsdManager(mContext, mService);
