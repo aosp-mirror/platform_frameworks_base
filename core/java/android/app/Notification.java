@@ -1251,7 +1251,7 @@ public class Notification implements Parcelable
          * action is sent. These remote inputs are guaranteed to return true on a call to
          * {@link RemoteInput#isDataOnly}.
          *
-         * May return null if no data-only remote inputs were added.
+         * Returns null if there are no data-only remote inputs.
          *
          * This method exists so that legacy RemoteInput collectors that pre-date the addition
          * of non-textual RemoteInputs do not access these remote inputs.
