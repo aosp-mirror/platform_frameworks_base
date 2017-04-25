@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
 import android.os.Parcel;
@@ -412,17 +413,33 @@ public class ActivityInfo extends ComponentInfo
     public static final int FLAG_ALWAYS_FOCUSABLE = 0x40000;
 
     /**
-     * Bit in {@link #flags} indicating if the activity is visible to ephemeral applications.
+     * Bit in {@link #flags} indicating if the activity is visible to instant
+     * applications. The activity is visible if it's either implicitly or
+     * explicitly exposed.
      * @hide
      */
-    public static final int FLAG_VISIBLE_TO_EPHEMERAL = 0x100000;
+    public static final int FLAG_VISIBLE_TO_INSTANT_APP = 0x100000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity is implicitly visible
+     * to instant applications. Implicitly visible activities are those that
+     * implement certain intent-filters:
+     * <ul>
+     * <li>action {@link Intent#CATEGORY_BROWSABLE}</li>
+     * <li>action {@link Intent#ACTION_SEND}</li>
+     * <li>action {@link Intent#ACTION_SENDTO}</li>
+     * <li>action {@link Intent#ACTION_SEND_MULTIPLE}</li>
+     * </ul>
+     * @hide
+     */
+    public static final int FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP = 0x200000;
 
     /**
      * Bit in {@link #flags} indicating if the activity supports picture-in-picture mode.
      * See {@link android.R.attr#supportsPictureInPicture}.
      * @hide
      */
-    public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x200000;
+    public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000;
 
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen

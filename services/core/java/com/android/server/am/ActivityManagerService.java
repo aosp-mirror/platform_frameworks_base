@@ -11261,9 +11261,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     holder.provider = null;
                     return holder;
                 }
-                // Don't expose instant app providers
-                if (cpr.appInfo.isInstantApp()) {
-                    return null;
+                // Don't expose providers between normal apps and instant apps
+                try {
+                    if (AppGlobals.getPackageManager()
+                            .resolveContentProvider(name, 0 /*flags*/, userId) == null) {
+                        return null;
+                    }
+                } catch (RemoteException e) {
                 }
 
                 final long origId = Binder.clearCallingIdentity();
