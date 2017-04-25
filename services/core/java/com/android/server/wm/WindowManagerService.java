@@ -2141,7 +2141,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInputMethodWindow == win) {
                 setInputMethodWindowLocked(null);
             }
-            win.destroyOrSaveSurface();
+            boolean stopped = win.mAppToken != null ? win.mAppToken.mAppStopped : false;
+            // We set mDestroying=true so AppWindowToken#notifyAppStopped in-to destroy surfaces
+            // will later actually destroy the surface if we do not do so here. Normally we leave
+            // this to the exit animation.
+            win.mDestroying = true;
+            win.destroySurface(false, stopped);
         }
         // TODO(multidisplay): Magnification is supported only for the default display.
         if (mAccessibilityController != null && win.getDisplayId() == DEFAULT_DISPLAY) {
