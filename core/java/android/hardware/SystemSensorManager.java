@@ -322,7 +322,10 @@ public class SystemSensorManager extends SensorManager {
 
         if (sensor.getReportingMode() == Sensor.REPORTING_MODE_ONE_SHOT) {
             synchronized(mTriggerListeners) {
-                for (TriggerEventListener l: mTriggerListeners.keySet()) {
+                HashMap<TriggerEventListener, TriggerEventQueue> triggerListeners =
+                    new HashMap<TriggerEventListener, TriggerEventQueue>(mTriggerListeners);
+
+                for (TriggerEventListener l: triggerListeners.keySet()) {
                     if (DEBUG_DYNAMIC_SENSOR){
                         Log.i(TAG, "removed trigger listener" + l.toString() +
                                    " due to sensor disconnection");
@@ -332,7 +335,10 @@ public class SystemSensorManager extends SensorManager {
             }
         } else {
             synchronized(mSensorListeners) {
-                for (SensorEventListener l: mSensorListeners.keySet()) {
+                HashMap<SensorEventListener, SensorEventQueue> sensorListeners =
+                    new HashMap<SensorEventListener, SensorEventQueue>(mSensorListeners);
+
+                for (SensorEventListener l: sensorListeners.keySet()) {
                     if (DEBUG_DYNAMIC_SENSOR){
                         Log.i(TAG, "removed event listener" + l.toString() +
                                    " due to sensor disconnection");
