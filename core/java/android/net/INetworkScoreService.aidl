@@ -19,10 +19,7 @@ package android.net;
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
 import android.net.NetworkScorerAppData;
-import android.net.RecommendationRequest;
-import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
-import android.os.RemoteCallback;
 
 /**
  * A service for updating network scores from a network scorer application.
@@ -81,16 +78,6 @@ interface INetworkScoreService
     void unregisterNetworkScoreCache(int networkType, INetworkScoreCache scoreCache);
 
     /**
-     * Request a recommendation for the best network to connect to
-     * taking into account the inputs from the {@link RecommendationRequest}.
-     *
-     * @param request a {@link RecommendationRequest} instance containing the details of the request
-     * @return a {@link RecommendationResult} containing the recommended network to connect to
-     * @throws SecurityException if the caller is not the system
-     */
-    RecommendationResult requestRecommendation(in RecommendationRequest request);
-
-    /**
      * Request scoring for networks.
      *
      * Implementations should delegate to the registered network recommendation provider or
@@ -119,18 +106,6 @@ interface INetworkScoreService
      *         scorer.
      */
     String getActiveScorerPackage();
-    
-    /**
-     * Request a recommendation for the best network to connect to
-     * taking into account the inputs from the {@link RecommendationRequest}.
-     *
-     * @param request a {@link RecommendationRequest} instance containing the details of the request
-     * @param remoteCallback a {@link RemoteCallback} instance to invoke when the recommendation
-     *                       is available.
-     * @throws SecurityException if the caller is not the system
-     */
-    oneway void requestRecommendationAsync(in RecommendationRequest request,
-                                           in RemoteCallback remoteCallback);
 
     /**
      * Returns metadata about the active scorer or <code>null</code> if there is no active scorer.
