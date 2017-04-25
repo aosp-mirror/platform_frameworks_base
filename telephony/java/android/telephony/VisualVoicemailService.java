@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.MainThread;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -199,7 +200,8 @@ public abstract class VisualVoicemailService extends Service {
 
     /**
      * Called when a SMS matching the {@link VisualVoicemailSmsFilterSettings} set by
-     * {@link #setSmsFilterSettings(Context, PhoneAccountHandle, VisualVoicemailSmsFilterSettings)}
+     * {@link TelephonyManager#setVisualVoicemailSmsFilterSettings(VisualVoicemailSmsFilterSettings)
+     * }
      * is received.
      *
      * @param task The task representing this event. {@link VisualVoicemailTask#finish()} must be
@@ -240,8 +242,11 @@ public abstract class VisualVoicemailService extends Service {
      *
      * @param phoneAccountHandle The account to apply the settings to.
      * @param settings The settings for the filter, or {@code null} to disable the filter.
+     *
+     * @hide
      */
-    public final static void setSmsFilterSettings(Context context,
+    @SystemApi
+    public static final void setSmsFilterSettings(Context context,
             PhoneAccountHandle phoneAccountHandle,
             VisualVoicemailSmsFilterSettings settings) {
         TelephonyManager telephonyManager = context.getSystemService(TelephonyManager.class);
@@ -269,8 +274,11 @@ public abstract class VisualVoicemailService extends Service {
      *
      * @see SmsManager#sendDataMessage(String, String, short, byte[], PendingIntent, PendingIntent)
      * @see SmsManager#sendTextMessage(String, String, String, PendingIntent, PendingIntent)
+     *
+     * @hide
      */
-    public final static void sendVisualVoicemailSms(Context context,
+    @SystemApi
+    public static final void sendVisualVoicemailSms(Context context,
             PhoneAccountHandle phoneAccountHandle, String number,
             short port, String text, PendingIntent sentIntent) {
         TelephonyManager telephonyManager = context.getSystemService(TelephonyManager.class);
