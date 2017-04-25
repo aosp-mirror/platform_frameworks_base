@@ -2332,10 +2332,18 @@
         <attr name="importantForAutofill">
             <!-- Let the Android System use its heuristics to determine if the view is important for autofill. -->
             <flag name="auto" value="0" />
-            <!-- Hint the Android System that this view is important for autofill. -->
+            <!-- Hint the Android System that this view is important for autofill,
+                  and its children (if any) will be traversed.. -->
             <flag name="yes" value="0x1" />
-            <!-- Hint the Android System that this view is *not* important for autofill. -->
+            <!-- Hint the Android System that this view is *not* important for autofill,
+                  but its children (if any) will be traversed.. -->
             <flag name="no" value="0x2" />
+            <!-- Hint the Android System that this view is important for autofill,
+                 but its children (if any) will not be traversed. -->
+            <flag name="yesExcludeDescendants" value="0x4" />
+            <!-- Hint the Android System that this view is *not* important for autofill,
+                 and its children (if any) will not be traversed. -->
+            <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
         <!-- Boolean that controls whether a view can take focus while in touch mode.
