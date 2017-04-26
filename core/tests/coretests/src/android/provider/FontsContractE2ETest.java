@@ -120,7 +120,7 @@ public class FontsContractE2ETest {
         inst.runOnMainSync(() -> {
             FontRequest request = new FontRequest(
                     AUTHORITY, PACKAGE, "singleFontFamily", SIGNATURE);
-            FontsContract.requestFont(ctx, request, callback, new Handler());
+            FontsContract.requestFonts(ctx, request, new Handler(), null, callback);
         });
         inst.waitForIdleSync();
         assertEquals(1, callback.getSuccessCallCount());
@@ -131,7 +131,7 @@ public class FontsContractE2ETest {
         inst.runOnMainSync(() -> {
             FontRequest request = new FontRequest(
                     AUTHORITY, PACKAGE, "singleFontFamily", SIGNATURE);
-            FontsContract.requestFont(ctx, request, callback2, new Handler());
+            FontsContract.requestFonts(ctx, request, new Handler(), null, callback2);
         });
         inst.waitForIdleSync();
         assertEquals(1, callback2.getSuccessCallCount());
@@ -142,7 +142,7 @@ public class FontsContractE2ETest {
         inst.runOnMainSync(() -> {
             FontRequest request = new FontRequest(
                     AUTHORITY, PACKAGE, "singleFontFamily2", SIGNATURE);
-            FontsContract.requestFont(ctx, request, callback3, new Handler());
+            FontsContract.requestFonts(ctx, request, new Handler(), null, callback3);
         });
         inst.waitForIdleSync();
         assertEquals(1, callback3.getSuccessCallCount());
