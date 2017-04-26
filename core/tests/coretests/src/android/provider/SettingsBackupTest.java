@@ -73,6 +73,8 @@ public class SettingsBackupTest {
                     Settings.System.USER_ROTATION, // backup candidate?
                     Settings.System.VIBRATE_IN_SILENT, // deprecated?
                     Settings.System.VIBRATE_ON, // candidate for backup?
+                    Settings.System.VOLUME_ACCESSIBILITY, // used internally, changing value will
+                                                          // not change volume
                     Settings.System.VOLUME_ALARM, // deprecated since API 2?
                     Settings.System.VOLUME_BLUETOOTH_SCO, // deprecated since API 2?
                     Settings.System.VOLUME_MASTER, // candidate for backup?
@@ -123,6 +125,7 @@ public class SettingsBackupTest {
                     Settings.Global.CAPTIVE_PORTAL_HTTPS_URL,
                     Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
                     Settings.Global.CAPTIVE_PORTAL_MODE,
+                    Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
                     Settings.Global.CAPTIVE_PORTAL_SERVER,
                     Settings.Global.CAPTIVE_PORTAL_USE_HTTPS,
                     Settings.Global.CAPTIVE_PORTAL_USER_AGENT,
@@ -209,6 +212,8 @@ public class SettingsBackupTest {
                     Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
+                    Settings.Global.LANG_ID_UPDATE_CONTENT_URL,
+                    Settings.Global.LANG_ID_UPDATE_METADATA_URL,
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                     Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
@@ -302,6 +307,8 @@ public class SettingsBackupTest {
                     Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
                     Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
+                    Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
+                    Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
                     Settings.Global.SMS_OUTGOING_CHECK_INTERVAL_MS,
                     Settings.Global.SMS_OUTGOING_CHECK_MAX_COUNT,
                     Settings.Global.SMS_SHORT_CODE_CONFIRMATION,
@@ -388,7 +395,6 @@ public class SettingsBackupTest {
                  Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
-                 Settings.Secure.AUTOFILL_SERVICE,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
