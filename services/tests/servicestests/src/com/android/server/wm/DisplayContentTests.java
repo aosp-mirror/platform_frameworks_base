@@ -52,74 +52,74 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testForAllWindows() throws Exception {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
-                sDisplayContent, "exiting app");
+                mDisplayContent, "exiting app");
         final AppWindowToken exitingAppToken = exitingAppWindow.mAppToken;
         exitingAppToken.mIsExiting = true;
         exitingAppToken.getTask().mStack.mExitingAppTokens.add(exitingAppToken);
 
         assertForAllWindowsOrder(Arrays.asList(
-                sWallpaperWindow,
+                mWallpaperWindow,
                 exitingAppWindow,
-                sChildAppWindowBelow,
-                sAppWindow,
-                sChildAppWindowAbove,
-                sDockedDividerWindow,
-                sStatusBarWindow,
-                sNavBarWindow,
-                sImeWindow,
-                sImeDialogWindow));
+                mChildAppWindowBelow,
+                mAppWindow,
+                mChildAppWindowAbove,
+                mDockedDividerWindow,
+                mStatusBarWindow,
+                mNavBarWindow,
+                mImeWindow,
+                mImeDialogWindow));
     }
 
     @Test
     public void testForAllWindows_WithAppImeTarget() throws Exception {
         final WindowState imeAppTarget =
-                createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "imeAppTarget");
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
 
         sWm.mInputMethodTarget = imeAppTarget;
 
         assertForAllWindowsOrder(Arrays.asList(
-                sWallpaperWindow,
-                sChildAppWindowBelow,
-                sAppWindow,
-                sChildAppWindowAbove,
+                mWallpaperWindow,
+                mChildAppWindowBelow,
+                mAppWindow,
+                mChildAppWindowAbove,
                 imeAppTarget,
-                sImeWindow,
-                sImeDialogWindow,
-                sDockedDividerWindow,
-                sStatusBarWindow,
-                sNavBarWindow));
+                mImeWindow,
+                mImeDialogWindow,
+                mDockedDividerWindow,
+                mStatusBarWindow,
+                mNavBarWindow));
     }
 
     @Test
     public void testForAllWindows_WithChildWindowImeTarget() throws Exception {
-        sWm.mInputMethodTarget = sChildAppWindowAbove;
+        sWm.mInputMethodTarget = mChildAppWindowAbove;
 
         assertForAllWindowsOrder(Arrays.asList(
-                sWallpaperWindow,
-                sChildAppWindowBelow,
-                sAppWindow,
-                sChildAppWindowAbove,
-                sImeWindow,
-                sImeDialogWindow,
-                sDockedDividerWindow,
-                sStatusBarWindow,
-                sNavBarWindow));
+                mWallpaperWindow,
+                mChildAppWindowBelow,
+                mAppWindow,
+                mChildAppWindowAbove,
+                mImeWindow,
+                mImeDialogWindow,
+                mDockedDividerWindow,
+                mStatusBarWindow,
+                mNavBarWindow));
     }
 
     @Test
     public void testForAllWindows_WithStatusBarImeTarget() throws Exception {
-        sWm.mInputMethodTarget = sStatusBarWindow;
+        sWm.mInputMethodTarget = mStatusBarWindow;
 
         assertForAllWindowsOrder(Arrays.asList(
-                sWallpaperWindow,
-                sChildAppWindowBelow,
-                sAppWindow,
-                sChildAppWindowAbove,
-                sDockedDividerWindow,
-                sStatusBarWindow,
-                sImeWindow,
-                sImeDialogWindow,
-                sNavBarWindow));
+                mWallpaperWindow,
+                mChildAppWindowBelow,
+                mAppWindow,
+                mChildAppWindowAbove,
+                mDockedDividerWindow,
+                mStatusBarWindow,
+                mImeWindow,
+                mImeDialogWindow,
+                mNavBarWindow));
     }
 
     @Test
@@ -127,28 +127,28 @@ public class DisplayContentTests extends WindowTestsBase {
         // This window is set-up to be z-ordered between some windows that go in the same token like
         // the nav bar and status bar.
         final WindowState voiceInteractionWindow = createWindow(null, TYPE_VOICE_INTERACTION,
-                sDisplayContent, "voiceInteractionWindow");
+                mDisplayContent, "voiceInteractionWindow");
 
         assertForAllWindowsOrder(Arrays.asList(
-                sWallpaperWindow,
-                sChildAppWindowBelow,
-                sAppWindow,
-                sChildAppWindowAbove,
-                sDockedDividerWindow,
+                mWallpaperWindow,
+                mChildAppWindowBelow,
+                mAppWindow,
+                mChildAppWindowAbove,
+                mDockedDividerWindow,
                 voiceInteractionWindow,
-                sStatusBarWindow,
-                sNavBarWindow,
-                sImeWindow,
-                sImeDialogWindow));
+                mStatusBarWindow,
+                mNavBarWindow,
+                mImeWindow,
+                mImeDialogWindow));
     }
 
     @Test
     public void testComputeImeTarget() throws Exception {
         // Verify that an app window can be an ime target.
-        final WindowState appWin = createWindow(null, TYPE_APPLICATION, sDisplayContent, "appWin");
+        final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
         appWin.setHasSurface(true);
         assertTrue(appWin.canBeImeTarget());
-        WindowState imeTarget = sDisplayContent.computeImeTarget(false /* updateImeTarget */);
+        WindowState imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
         assertEquals(appWin, imeTarget);
 
         // Verify that an child window can be an ime target.
@@ -156,7 +156,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 TYPE_APPLICATION_ATTACHED_DIALOG, "childWin");
         childWin.setHasSurface(true);
         assertTrue(childWin.canBeImeTarget());
-        imeTarget = sDisplayContent.computeImeTarget(false /* updateImeTarget */);
+        imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
         assertEquals(childWin, imeTarget);
     }
 
@@ -182,12 +182,12 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, token.getDisplayContent());
 
         // Move stack to first display.
-        sDisplayContent.moveStackToDisplay(stack, true /* onTop */);
-        assertEquals(sDisplayContent.getDisplayId(), stack.getDisplayContent().getDisplayId());
-        assertEquals(sDisplayContent, stack.getParent().getParent());
-        assertEquals(sDisplayContent, stack.getDisplayContent());
-        assertEquals(sDisplayContent, task.getDisplayContent());
-        assertEquals(sDisplayContent, token.getDisplayContent());
+        mDisplayContent.moveStackToDisplay(stack, true /* onTop */);
+        assertEquals(mDisplayContent.getDisplayId(), stack.getDisplayContent().getDisplayId());
+        assertEquals(mDisplayContent, stack.getParent().getParent());
+        assertEquals(mDisplayContent, stack.getDisplayContent());
+        assertEquals(mDisplayContent, task.getDisplayContent());
+        assertEquals(mDisplayContent, token.getDisplayContent());
     }
 
     /**
@@ -195,8 +195,8 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testDisplayOverrideConfigUpdate() throws Exception {
-        final int displayId = sDisplayContent.getDisplayId();
-        final Configuration currentOverrideConfig = sDisplayContent.getOverrideConfiguration();
+        final int displayId = mDisplayContent.getDisplayId();
+        final Configuration currentOverrideConfig = mDisplayContent.getOverrideConfiguration();
 
         // Create new, slightly changed override configuration and apply it to the display.
         final Configuration newOverrideConfig = new Configuration(currentOverrideConfig);
@@ -206,7 +206,7 @@ public class DisplayContentTests extends WindowTestsBase {
         sWm.setNewDisplayOverrideConfiguration(newOverrideConfig, displayId);
 
         // Check that override config is applied.
-        assertEquals(newOverrideConfig, sDisplayContent.getOverrideConfiguration());
+        assertEquals(newOverrideConfig, mDisplayContent.getOverrideConfiguration());
     }
 
     /**
@@ -214,7 +214,7 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testDefaultDisplayOverrideConfigUpdate() throws Exception {
-        final Configuration currentConfig = sDisplayContent.getConfiguration();
+        final Configuration currentConfig = mDisplayContent.getConfiguration();
 
         // Create new, slightly changed override configuration and apply it to the display.
         final Configuration newOverrideConfig = new Configuration(currentConfig);
@@ -239,7 +239,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testFocusedWindowMultipleDisplays() throws Exception {
         // Create a focusable window and check that focus is calcualted correctly
         final WindowState window1 =
-                createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "window1");
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "window1");
         assertEquals(window1, sWm.mRoot.computeFocusedWindow());
 
         // Check that a new display doesn't affect focus
@@ -264,30 +264,30 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseHeight = 2560;
         final int baseDensity = 300;
 
-        sDisplayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        mDisplayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
 
         final int maxWidth = 300;
         final int resultingHeight = (maxWidth * baseHeight) / baseWidth;
         final int resultingDensity = (maxWidth * baseDensity) / baseWidth;
 
-        sDisplayContent.setMaxUiWidth(maxWidth);
-        verifySizes(sDisplayContent, maxWidth, resultingHeight, resultingDensity);
+        mDisplayContent.setMaxUiWidth(maxWidth);
+        verifySizes(mDisplayContent, maxWidth, resultingHeight, resultingDensity);
 
         // Assert setting values again does not change;
-        sDisplayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
-        verifySizes(sDisplayContent, maxWidth, resultingHeight, resultingDensity);
+        mDisplayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        verifySizes(mDisplayContent, maxWidth, resultingHeight, resultingDensity);
 
         final int smallerWidth = 200;
         final int smallerHeight = 400;
         final int smallerDensity = 100;
 
         // Specify smaller dimension, verify that it is honored
-        sDisplayContent.updateBaseDisplayMetrics(smallerWidth, smallerHeight, smallerDensity);
-        verifySizes(sDisplayContent, smallerWidth, smallerHeight, smallerDensity);
+        mDisplayContent.updateBaseDisplayMetrics(smallerWidth, smallerHeight, smallerDensity);
+        verifySizes(mDisplayContent, smallerWidth, smallerHeight, smallerDensity);
 
         // Verify that setting the max width to a greater value than the base width has no effect
-        sDisplayContent.setMaxUiWidth(maxWidth);
-        verifySizes(sDisplayContent, smallerWidth, smallerHeight, smallerDensity);
+        mDisplayContent.setMaxUiWidth(maxWidth);
+        verifySizes(mDisplayContent, smallerWidth, smallerHeight, smallerDensity);
     }
 
     /**
@@ -295,17 +295,17 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testPinnedStackLocation() {
-        createStackControllerOnStackOnDisplay(PINNED_STACK_ID, sDisplayContent);
-        final int initialStackCount = sDisplayContent.getStackCount();
+        createStackControllerOnStackOnDisplay(PINNED_STACK_ID, mDisplayContent);
+        final int initialStackCount = mDisplayContent.getStackCount();
         // Ensure that the pinned stack was placed at the end
-        assertEquals(initialStackCount - 1, sDisplayContent.getStaskPosById(PINNED_STACK_ID));
+        assertEquals(initialStackCount - 1, mDisplayContent.getStaskPosById(PINNED_STACK_ID));
         // By default, this should try to create a new stack on top
-        createTaskStackOnDisplay(sDisplayContent);
-        final int afterStackCount = sDisplayContent.getStackCount();
+        createTaskStackOnDisplay(mDisplayContent);
+        final int afterStackCount = mDisplayContent.getStackCount();
         // Make sure the stack count has increased
         assertEquals(initialStackCount + 1, afterStackCount);
         // Ensure that the pinned stack is still on top
-        assertEquals(afterStackCount - 1, sDisplayContent.getStaskPosById(PINNED_STACK_ID));
+        assertEquals(afterStackCount - 1, mDisplayContent.getStaskPosById(PINNED_STACK_ID));
     }
 
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
@@ -319,7 +319,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final LinkedList<WindowState> actualWindows = new LinkedList();
 
         // Test forward traversal.
-        sDisplayContent.forAllWindows(actualWindows::addLast, false /* traverseTopToBottom */);
+        mDisplayContent.forAllWindows(actualWindows::addLast, false /* traverseTopToBottom */);
         assertEquals(expectedWindows.size(), actualWindows.size());
         for (WindowState w : expectedWindows) {
             assertEquals(w, actualWindows.pollFirst());
@@ -327,7 +327,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(actualWindows.isEmpty());
 
         // Test backward traversal.
-        sDisplayContent.forAllWindows(actualWindows::addLast, true /* traverseTopToBottom */);
+        mDisplayContent.forAllWindows(actualWindows::addLast, true /* traverseTopToBottom */);
         assertEquals(expectedWindows.size(), actualWindows.size());
         for (WindowState w : expectedWindows) {
             assertEquals(w, actualWindows.pollLast());
