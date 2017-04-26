@@ -99,11 +99,7 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     private void onSensor(int pulseReason, boolean sensorPerformedProxCheck) {
-        if (mDozeParameters.getSensorsWakeUpFully()) {
-            mMachine.wakeUp();
-        } else {
-            requestPulse(pulseReason, sensorPerformedProxCheck);
-        }
+        requestPulse(pulseReason, sensorPerformedProxCheck);
 
         if (pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP) {
             final long timeSinceNotification =
