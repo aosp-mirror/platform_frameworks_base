@@ -16,6 +16,8 @@
 
 package android.service.autofill;
 
+import static android.view.autofill.Helper.DEBUG;
+
 import android.annotation.NonNull;
 import android.app.assist.AssistStructure;
 import android.os.Bundle;
@@ -68,6 +70,15 @@ public final class FillContext implements Parcelable {
      */
     public AssistStructure getStructure() {
         return mStructure;
+    }
+
+    @Override
+    public String toString() {
+        if (!DEBUG) {
+            return super.toString();
+        } else {
+            return "FillContext [mRequestId=" + mRequestId + "]";
+        }
     }
 
     @Override

@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
+
 import static com.android.server.autofill.Helper.DEBUG;
 
 import android.annotation.NonNull;
@@ -88,7 +90,7 @@ final class RemoteFillService implements DeathRecipient {
 
     public interface FillServiceCallbacks {
         void onFillRequestSuccess(@Nullable FillResponse response, int serviceUid,
-                @NonNull String servicePackageName, int requestId);
+                @NonNull String servicePackageName);
         void onFillRequestFailure(@Nullable CharSequence message,
                 @NonNull String servicePackageName);
         void onSaveRequestSuccess(@NonNull String servicePackageName);
@@ -139,16 +141,26 @@ final class RemoteFillService implements DeathRecipient {
      *
      * <p>This can be used when the request is unnecessary or will be superceeded by a request that
      * will soon be queued.
+     *
+     * @return the id of the canceled request, or {@link FillRequest#INVALID_REQUEST_ID} if no
+     *         {@link PendingFillRequest} was canceled.
      */
-    public void cancelCurrentRequest() {
+    public int cancelCurrentRequest() {
         if (mDestroyed) {
-            return;
+            return INVALID_REQUEST_ID;
         }
 
+        int requestId = INVALID_REQUEST_ID;
         if (mPendingRequest != null) {
+            if (mPendingRequest instanceof PendingFillRequest) {
+                requestId = ((PendingFillRequest) mPendingRequest).mRequest.getId();
+            }
+
             mPendingRequest.cancel();
             mPendingRequest = null;
         }
+
+        return requestId;
     }
 
     public void onFillRequest(@NonNull FillRequest request) {
@@ -269,11 +281,11 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     private void dispatchOnFillRequestSuccess(PendingRequest pendingRequest,
-            int callingUid, FillResponse response, int requestId) {
+            int callingUid, FillResponse response) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
                 mCallbacks.onFillRequestSuccess(response, callingUid,
-                        mComponentName.getPackageName(), requestId);
+                        mComponentName.getPackageName());
             }
         });
     }
@@ -437,11 +449,11 @@ final class RemoteFillService implements DeathRecipient {
                 }
 
                 @Override
-                public void onSuccess(FillResponse response, int requestId) {
+                public void onSuccess(FillResponse response) {
                     RemoteFillService remoteService = mWeakService.get();
                     if (remoteService != null) {
                         remoteService.dispatchOnFillRequestSuccess(
-                                PendingFillRequest.this, getCallingUid(), response, requestId);
+                                PendingFillRequest.this, getCallingUid(), response);
                     }
                 }
 
