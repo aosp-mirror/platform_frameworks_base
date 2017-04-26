@@ -32,7 +32,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.Signature;
 import android.database.Cursor;
 import android.graphics.Typeface;
-import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
 import android.os.Bundle;

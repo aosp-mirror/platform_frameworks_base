@@ -32,7 +32,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.Signature;
 import android.database.MatrixCursor;
-import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import android.graphics.fonts.FontVariationAxis;
 import android.provider.FontsContract.FontInfo;
