@@ -214,7 +214,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
             verifyLastQsMobileDataIndicators(true,
                     testStrength,
-                    TelephonyIcons.ICON_1X, false, false);
+                    TelephonyIcons.QS_DATA_1X, false, false);
         }
     }
 
@@ -434,7 +434,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
       verifyLastQsMobileDataIndicators(true /* visible */,
               DEFAULT_LEVEL /* icon */,
-              DEFAULT_ICON /* typeIcon */,
+              DEFAULT_QS_ICON /* typeIcon */,
               false /* dataIn */,
               true /* dataOut */);
     }

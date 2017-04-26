@@ -244,8 +244,7 @@ public class MobileSignalController extends SignalController<
             return SignalDrawable.getCarrierChangeState(getNumLevels());
         } else if (mCurrentState.connected) {
             return SignalDrawable.getState(mCurrentState.level, getNumLevels(),
-                    mCurrentState.inetCondition == 0 ||
-                            (mCurrentState.dataDisabled && mCurrentState.userSetup));
+                    mCurrentState.inetCondition == 0);
         } else if (mCurrentState.enabled) {
             return SignalDrawable.getEmptyState(getNumLevels());
         } else {
@@ -264,14 +263,24 @@ public class MobileSignalController extends SignalController<
 
         String contentDescription = getStringIfExists(getContentDescription());
         String dataContentDescription = getStringIfExists(icons.mDataContentDescription);
-        final boolean dataDisabled = mCurrentState.dataDisabled
+        final boolean dataDisabled = mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
                 && mCurrentState.userSetup;
 
         // Show icon in QS when we are connected or data is disabled.
-        boolean showDataIcon = mCurrentState.dataConnected;
+        boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
         IconState statusIcon = new IconState(mCurrentState.enabled && !mCurrentState.airplaneMode,
                 getCurrentIconId(), contentDescription);
 
+        int qsTypeIcon = 0;
+        IconState qsIcon = null;
+        String description = null;
+        // Only send data sim callbacks to QS.
+        if (mCurrentState.dataSim) {
+            qsTypeIcon = showDataIcon ? icons.mQsDataType : 0;
+            qsIcon = new IconState(mCurrentState.enabled
+                    && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
+            description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
+        }
         boolean activityIn = mCurrentState.dataConnected
                 && !mCurrentState.carrierNetworkChangeMode
                 && mCurrentState.activityIn;
@@ -280,10 +289,9 @@ public class MobileSignalController extends SignalController<
                 && mCurrentState.activityOut;
         showDataIcon &= mCurrentState.isDefault || dataDisabled;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
-        callback.setMobileDataIndicators(statusIcon, typeIcon,
-                activityIn, activityOut, dataContentDescription,
-                mSubscriptionInfo.getSubscriptionId(), mCurrentState.roaming,
-                mCurrentState.isEmergency);
+        callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
+                activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
+                mSubscriptionInfo.getSubscriptionId(), mCurrentState.roaming);
     }
 
     @Override
@@ -430,14 +438,14 @@ public class MobileSignalController extends SignalController<
         } else {
             mCurrentState.iconGroup = mDefaultIcons;
         }
-        mCurrentState.dataDisabled = isDataDisabled();
         mCurrentState.dataConnected = mCurrentState.connected
-                && mDataState == TelephonyManager.DATA_CONNECTED
-                && !mCurrentState.dataDisabled;
+                && mDataState == TelephonyManager.DATA_CONNECTED;
 
         mCurrentState.roaming = isRoaming();
         if (isCarrierNetworkChangeActive()) {
             mCurrentState.iconGroup = TelephonyIcons.CARRIER_NETWORK_CHANGE;
+        } else if (isDataDisabled()) {
+            mCurrentState.iconGroup = TelephonyIcons.DATA_DISABLED;
         }
         if (isEmergencyOnly() != mCurrentState.isEmergency) {
             mCurrentState.isEmergency = isEmergencyOnly();
@@ -569,7 +577,6 @@ public class MobileSignalController extends SignalController<
         boolean isDefault;
         boolean userSetup;
         boolean roaming;
-        boolean dataDisabled;
 
         @Override
         public void copyFrom(State s) {
@@ -585,7 +592,6 @@ public class MobileSignalController extends SignalController<
             carrierNetworkChangeMode = state.carrierNetworkChangeMode;
             userSetup = state.userSetup;
             roaming = state.roaming;
-            dataDisabled = state.dataDisabled;
         }
 
         @Override
@@ -603,7 +609,6 @@ public class MobileSignalController extends SignalController<
             builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode)
                     .append(',');
             builder.append("userSetup=").append(userSetup);
-            builder.append("dataDisabled=").append(dataDisabled);
         }
 
         @Override
@@ -618,7 +623,6 @@ public class MobileSignalController extends SignalController<
                     && ((MobileState) o).carrierNetworkChangeMode == carrierNetworkChangeMode
                     && ((MobileState) o).userSetup == userSetup
                     && ((MobileState) o).isDefault == isDefault
-                    && ((MobileState) o).dataDisabled == dataDisabled
                     && ((MobileState) o).roaming == roaming;
         }
     }

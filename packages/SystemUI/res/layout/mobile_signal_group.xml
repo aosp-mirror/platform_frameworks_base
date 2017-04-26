@@ -63,21 +63,20 @@
             systemui:hasOverlappingRendering="false"
             />
         <ImageView
-            android:id="@+id/mobile_roaming"
+            android:id="@+id/mobile_type"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:src="@drawable/stat_sys_roaming"
-            android:contentDescription="@string/accessibility_data_connection_roaming"
-            android:visibility="gone"
             />
         <ImageView
-            android:id="@+id/mobile_type"
+            android:id="@+id/mobile_roaming"
             android:layout_width="wrap_content"
             android:layout_height="17dp"
-            android:paddingStart="19dp"
+            android:paddingStart="22dp"
             android:paddingTop="1.5dp"
             android:paddingBottom="3dp"
             android:scaleType="fitCenter"
+            android:src="@drawable/stat_sys_roaming"
+            android:contentDescription="@string/accessibility_data_connection_roaming"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>
