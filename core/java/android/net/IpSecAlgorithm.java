@@ -24,6 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * IpSecAlgorithm specifies a single algorithm that can be applied to an IpSec Transform. Refer to
  * RFC 4301.
+ *
+ * @hide
  */
 public final class IpSecAlgorithm implements Parcelable {
 
