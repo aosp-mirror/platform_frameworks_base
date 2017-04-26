@@ -157,6 +157,8 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobildata er slått av"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-internettdeling."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flymodus."</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Mangler SIM-kort."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Bytting av operatørnettverk."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Åpne informasjon om batteriet"</string>
@@ -427,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Jobbprofilen er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Den personlige profilen er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Enheten er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Enhetsadministrasjon"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilovervåking"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Nettverksovervåking"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -437,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Koble fra VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Se retningslinjer"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Enheten din administreres av <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministratoren kan overvåke og administrere innstillinger, bedriftstilgang, apper, data som er tilknyttet enheten, og enhetens posisjonsinformasjon.\n\nKontakt administratoren for å få mer informasjon."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Enheten din administreres av organisasjonen din.\n\nAdministratoren kan overvåke og administrere innstillinger, bedriftstilgang, apper, data som er tilknyttet enheten, og enhetens posisjonsinformasjon.\n\nKontakt administratoren for å få mer informasjon."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Organisasjonen din installerte en sertifiseringsinstans på denne enheten. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Organisasjonen din installerte en sertifiseringsinstans i jobbprofilen din. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"En sertifiseringsinstans er installert på denne enheten. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Administratoren din har slått på loggføring av nettverk, som overvåker trafikken på enheten din."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Du er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Du er koblet til <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Jobbprofilen din er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-poster, apper og nettsteder."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Den personlige profilen din er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Enheten din administreres av <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -645,7 +642,7 @@
     <string name="nav_bar_default" msgid="8587114043070993007">"(standard)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Utklippstavle"</item>
-    <item msgid="5742013440802239414">"Nøkkelkode"</item>
+    <item msgid="5742013440802239414">"Tastkode"</item>
     <item msgid="8802889973626281575">"Bytteknapp for tastatur"</item>
     <item msgid="8175437057325747277">"Ingen"</item>
   </string-array>
@@ -661,8 +658,8 @@
     <string name="adjust_button_width" msgid="6138616087197632947">"Juster bredden på knappen"</string>
     <string name="clipboard" msgid="1313879395099896312">"Utklippstavle"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Spesialtilpasset navigasjonsknapp"</string>
-    <string name="left_keycode" msgid="2010948862498918135">"Venstre-nøkkelkode"</string>
-    <string name="right_keycode" msgid="708447961000848163">"Høyre-nøkkelkode"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Venstre-tastkode"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Høyre-tastkode"</string>
     <string name="left_icon" msgid="3096287125959387541">"Venstre-ikon"</string>
     <string name="right_icon" msgid="3952104823293824311">"Høyre-ikon"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dra for å legge til fliser"</string>
@@ -703,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-varsel: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen støtter ikke delt skjerm."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Åpne innstillingene."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Åpner hurtiginnstillingene."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Lukk hurtiginnstillingene."</string>
@@ -752,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Du trenger ikke å installere instant-apper."</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Gå til nettstedet"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobildata"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi er av"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth er av"</string>

@@ -152,15 +152,14 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM карта жок."</string>
-    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобилдик Интернет"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобилдик Интернет күйгүзүлгөн"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобилдик Интернет өчүрүлгөн"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth аркылуу интернет бөлүшүү."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Учак тартиби."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM-карта жок"</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM карта жок"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Оператор тармагы өзгөртүлүүдө."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Батареянын чоо-жайын ачуу"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батарея <xliff:g id="NUMBER">%d</xliff:g> пайыз."</string>
@@ -200,7 +199,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Учак режими күйүк."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Учак режими өчүрүлдү."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Учак режими күйгүзүлдү."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Тынчымды алба деген күйүк, артыкчылыктуулар гана."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Тынчымды алба режими иштетилген. Шашылыш эскертмелер гана көрүнөт."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Тынчымды албагыла, жымжырт болсун."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Тынчымды алба деген күйүк, ойготкучтар гана."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Тынчымды алба."</string>
@@ -242,11 +241,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Кубатталууда"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дайындары тындырылды."</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дайындары тындырылды"</string>
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Мобилдик Интернет кызматы тындырылды"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Дайындар тындырылды"</string>
-    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Трафик сиз койгон чекке жетти. Эми мобилдик Интернетти колдоно албайсыз.\n\nЭгер улантсаңыз, дайындарды өткөрүү үчүн акы алынышы мүмкүн."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Улантуу"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Интернет байланыш жок"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi байланышта"</string>
@@ -271,7 +268,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Көшөгө"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Тынчымды алба"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Артыкчылык гана"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Шашылыш эскертмелер гана"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ойготкучтар гана"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Тымтырс"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -319,8 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Туташуу чекити"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Эскертмелер"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Кол чырак"</string>
-    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобилдик Интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын колдонулушу"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Калган дайындар"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Чектен ашты"</string>
@@ -357,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Издөө"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үчүн жогору жылмыштырыңыз."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үчүн солго жылмыштырыңыз."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Көрсөтүлгөн эскертүүлөрдөн, эскерткичтерден, окуялардан жана чалуучулардан тышкары башка үндөр жана дирилдөөлөр тынчыңызды албайт."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Эскертүүлөрдөн, жылнаамадагы иш-чараларды эстеткичтерден жана белгиленген байланыштардын чалууларынан тышкары башка үндөр жана дирилдөөлөр тынчыңызды албайт."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Ыңгайлаштыруу"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү сыяктуу нерселердин баары өчүрүлөт. Бирок телефон чала бересиз."</string>
-    <string name="zen_silence_introduction" msgid="3137882381093271568">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү сыяктуу нерселердин БААРЫ өчүрүлөт."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү өчүрүлөт. Бирок телефон менен сүйлөшө бересиз."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү өчүрүлөт."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ачуу үчүн кайра таптап коюңуз"</string>
@@ -372,7 +368,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Сүрөтчөнү серпип камерага өтүңүз"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Толук жымжырттык талап кылынат. Бул экрандагыны окугучтарды да тынчтандырат."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Тымтырс"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Артыкчылык гана"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Шашылыш эскертмелер гана"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкучтар гана"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Тым-\nтырс"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Артыкчылыктуу\nгана"</string>
@@ -433,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Жумуш профили <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташкан"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Жеке профиль <xliff:g id="VPN_APP">%1$s</xliff:g> тармагына туташкан"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Түзмөк <xliff:g id="VPN_APP">%1$s</xliff:g> тармагына туташкан"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Түзмөктү башкаруу"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Профилди көзөмөлдөө"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Тармакка көз салуу"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN\'ди өчүрүү"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN\'ди ажыратуу"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Саясаттарды карап көрүү"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Түзмөгүңүздү <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> башкарат.\n\nАдминистраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу дайындарды жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат.\n\nКөбүрөөк маалымат алуу үчүн администраторуңузга кайрылыңыз."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Түзмөгүңүздү уюмуңуз башкарат.\n\nАдминистраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу дайындарды жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат.\n\nКөбүрөөк маалымат алуу үчүн администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Ишканаңыз бул түзмөккө тастыктоочу борборду орнотту. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Ишканаңыз жумуш профилиңизге тастыктоочу борборду орнотту. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Бул түзмөктө тастыктоочу борбор орнотулган. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Администраторуңуз түзмөгүңүздөгү трафикти көзөмөлдөөчү тармактын таржымалын каттоо функциясын иштетти."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди тескей турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди көзөмөлдөй турган <xliff:g id="VPN_APP_0">%1$s</xliff:g> жана <xliff:g id="VPN_APP_1">%2$s</xliff:g> колдонмолоруна туташып турасыз."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Жумуш профилиңиз электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактык аракеттериңизди көзөмөлдөй турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турат."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Жеке профилиңиз электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди көзөмөлдөй турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турат."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Түзмөгүңүз <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> тарабынан башкарылат."</string>
@@ -569,12 +560,9 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> жана дагы <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> жана дагы <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
-    <skip />
-    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
-    <skip />
-    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
-    <skip />
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары ачылды"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары жабылды"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Бул каналдан келген эскертмелерге уруксат берүү"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"Бардык категориялар"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"Ыңгайлаштыруу: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -712,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> эскертмеси: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Колдонмодо экран бөлүнбөшү мүмкүн."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Колдонмодо экран бөлүнбөйт."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ыкчам жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Ыкчам жөндөөлөрдү жабуу."</string>
@@ -730,14 +722,10 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Сүрөт ичиндеги сүрөт менюсу"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> – сүрөт ичиндеги сүрөт"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
-    <!-- no translation found for pip_play (1417176722760265888) -->
-    <skip />
-    <!-- no translation found for pip_pause (8881063404466476571) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
-    <skip />
+    <string name="pip_play" msgid="1417176722760265888">"Ойнотуу"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"Тындыруу"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"Кийинкисине өткөрүп жиберүү"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"Мурункусуна өткөрүп жиберүү"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"Телефон ысыгандыктан өчүрүлдү"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"Телефонуңуз кадимкидей иштеп жатат"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Телефонуңуз өтө ысып кеткендиктен, аны муздатуу үчүн өчүрүлдү. Эми телефонуңуз кадимкидей иштеп жатат.\n\nТелефонуңуз төмөнкү шарттарда ысып кетиши мүмкүн:\n	• Ашыкча ресурс короткон колдонмолорду (оюндар, видео же чабыттоо колдонмолору) пайдалансаңыз \n	• Ири көлөмдөгү файлдарды жүктөп алсаңыз же берсеңиз\n	• Телефонуңузду жогорку температураларда пайдалансаңыз"</string>
@@ -765,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Ыкчам ачылуучу колдонмолор"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Ыкчам ачылуучу колдонмолорду орнотуу талап кылынбайт."</string>
     <string name="app_info" msgid="6856026610594615344">"Колдонмо тууралуу"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Интернетке өтүү"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Мобилдик дайындар"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi өчүк"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth өчүк"</string>
