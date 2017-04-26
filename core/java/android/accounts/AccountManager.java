@@ -376,7 +376,7 @@ public class AccountManager {
      * {@link #VISIBILITY_USER_MANAGED_NOT_VISIBLE} is used.
      */
     public static final String PACKAGE_NAME_KEY_LEGACY_VISIBLE =
-            "android.accounts.key_legacy_visible";
+        "android:accounts:key_legacy_visible";
 
     /**
      * Key to set visibility for applications which satisfy one of the following conditions:
@@ -395,7 +395,7 @@ public class AccountManager {
      * {@link #VISIBILITY_USER_MANAGED_VISIBLE} is used.
      */
     public static final String PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE =
-            "android.accounts.key_legacy_not_visible";
+            "android:accounts:key_legacy_not_visible";
 
     /**
      * @hide

@@ -576,6 +576,22 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
+            if (AccountManager.PACKAGE_NAME_KEY_LEGACY_VISIBLE.equals(packageName)) {
+                int visibility = getAccountVisibilityFromCache(account, packageName, accounts);
+                if (AccountManager.VISIBILITY_UNDEFINED != visibility) {
+                    return visibility;
+                } else {
+                   return AccountManager.VISIBILITY_USER_MANAGED_VISIBLE;
+                }
+            }
+            if (AccountManager.PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE.equals(packageName)) {
+                int visibility = getAccountVisibilityFromCache(account, packageName, accounts);
+                if (AccountManager.VISIBILITY_UNDEFINED != visibility) {
+                    return visibility;
+                } else {
+                   return AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE;
+                }
+            }
             return resolveAccountVisibility(account, packageName, accounts);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -639,11 +655,6 @@ public class AccountManagerService
         // Authenticator can not restrict visibility to itself.
         if (signatureCheckResult == SIGNATURE_CHECK_UID_MATCH) {
             return AccountManager.VISIBILITY_VISIBLE; // Authenticator can always see the account
-        }
-
-        if (isSpecialPackageKey(packageName)) {
-            Log.d(TAG, "Package name is forbidden: " + packageName);
-            return AccountManager.VISIBILITY_NOT_VISIBLE;
         }
 
         // Return stored value if it was set.
