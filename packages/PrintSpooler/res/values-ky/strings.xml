@@ -66,7 +66,7 @@
     <string name="could_not_create_file" msgid="3425025039427448443">"Файл түзүлбөй койду"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"Басып чыгаруу кызматтарынын айрымы өчүрүлгөн"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Принтерлер изделүүдө"</string>
-    <string name="print_no_print_services" msgid="8561247706423327966">"Принтер-кызматтары иштетилген эмес"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"Принтер кызматтары иштетилген эмес"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Принтерлер табылган жок"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Принтерлер кошулбай жатат"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"Принтер кошуу үчүн тандаңыз"</string>
@@ -87,7 +87,7 @@
     <string name="restart" msgid="2472034227037808749">"Кайра баштоо"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Принтер менен байланыш жок"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"белгисиз"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> колдонулсунбу?"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> колдоносузбу?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Принтерге жеткиче документиңиз бир же андан көп серверлерден өтүшү мүмкүн."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Кара-ак"</item>
