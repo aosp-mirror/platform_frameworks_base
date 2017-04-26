@@ -54,7 +54,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -682,7 +681,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     String mNoTransactionsBecause;
     boolean mHavePendingDeferredStart;
 
-    // Temporary vars for optimizing execution of BackStackRecords:
+    // Temporary vars for removing redundant operations in BackStackRecords:
     ArrayList<BackStackRecord> mTmpRecords;
     ArrayList<Boolean> mTmpIsPop;
     ArrayList<Fragment> mTmpAddedFragments;
@@ -853,7 +852,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         if (executePop) {
             mExecutingActions = true;
             try {
-                optimizeAndExecuteOps(mTmpRecords, mTmpIsPop);
+                removeRedundantOperationsAndExecute(mTmpRecords, mTmpIsPop);
             } finally {
                 cleanupExec();
             }
@@ -2002,7 +2001,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         if (action.generateOps(mTmpRecords, mTmpIsPop)) {
             mExecutingActions = true;
             try {
-                optimizeAndExecuteOps(mTmpRecords, mTmpIsPop);
+                removeRedundantOperationsAndExecute(mTmpRecords, mTmpIsPop);
             } finally {
                 cleanupExec();
             }
@@ -2032,7 +2031,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         while (generateOpsForPendingActions(mTmpRecords, mTmpIsPop)) {
             mExecutingActions = true;
             try {
-                optimizeAndExecuteOps(mTmpRecords, mTmpIsPop);
+                removeRedundantOperationsAndExecute(mTmpRecords, mTmpIsPop);
             } finally {
                 cleanupExec();
             }
@@ -2080,19 +2079,20 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     /**
-     * Optimizes BackStackRecord operations. This method merges operations of proximate records
-     * that allow optimization. See {@link FragmentTransaction#setAllowOptimization(boolean)}.
+     * Remove redundant BackStackRecord operations and executes them. This method merges operations
+     * of proximate records that allow reordering. See
+     * {@link FragmentTransaction#setReorderingAllowed(boolean)}.
      * <p>
      * For example, a transaction that adds to the back stack and then another that pops that
-     * back stack record will be optimized.
+     * back stack record will be optimized to remove the unnecessary operation.
      * <p>
      * Likewise, two transactions committed that are executed at the same time will be optimized
-     * as well as two pop operations executed together.
+     * to remove the redundant operations as well as two pop operations executed together.
      *
      * @param records The records pending execution
      * @param isRecordPop The direction that these records are being run.
      */
-    private void optimizeAndExecuteOps(ArrayList<BackStackRecord> records,
+    private void removeRedundantOperationsAndExecute(ArrayList<BackStackRecord> records,
             ArrayList<Boolean> isRecordPop) {
         if (records == null || records.isEmpty()) {
             return;
@@ -2108,24 +2108,25 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         final int numRecords = records.size();
         int startIndex = 0;
         for (int recordNum = 0; recordNum < numRecords; recordNum++) {
-            final boolean canOptimize = records.get(recordNum).mAllowOptimization;
-            if (!canOptimize) {
+            final boolean canReorder = records.get(recordNum).mReorderingAllowed;
+            if (!canReorder) {
                 // execute all previous transactions
                 if (startIndex != recordNum) {
                     executeOpsTogether(records, isRecordPop, startIndex, recordNum);
                 }
-                // execute all unoptimized pop operations together or one add operation
-                int optimizeEnd = recordNum + 1;
+                // execute all pop operations that don't allow reordering together or
+                // one add operation
+                int reorderingEnd = recordNum + 1;
                 if (isRecordPop.get(recordNum)) {
-                    while (optimizeEnd < numRecords
-                            && isRecordPop.get(optimizeEnd)
-                            && !records.get(optimizeEnd).mAllowOptimization) {
-                        optimizeEnd++;
+                    while (reorderingEnd < numRecords
+                            && isRecordPop.get(reorderingEnd)
+                            && !records.get(reorderingEnd).mReorderingAllowed) {
+                        reorderingEnd++;
                     }
                 }
-                executeOpsTogether(records, isRecordPop, recordNum, optimizeEnd);
-                startIndex = optimizeEnd;
-                recordNum = optimizeEnd - 1;
+                executeOpsTogether(records, isRecordPop, recordNum, reorderingEnd);
+                startIndex = reorderingEnd;
+                recordNum = reorderingEnd - 1;
             }
         }
         if (startIndex != numRecords) {
@@ -2134,16 +2135,16 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     /**
-     * Optimizes a subset of a list of BackStackRecords, all of which either allow optimization or
-     * do not allow optimization.
-     * @param records A list of BackStackRecords that are to be optimized
+     * Executes a subset of a list of BackStackRecords, all of which either allow reordering or
+     * do not allow ordering.
+     * @param records A list of BackStackRecords that are to be executed together
      * @param isRecordPop The direction that these records are being run.
-     * @param startIndex The index of the first record in <code>records</code> to be optimized
-     * @param endIndex One more than the final record index in <code>records</code> to optimize.
+     * @param startIndex The index of the first record in <code>records</code> to be executed
+     * @param endIndex One more than the final record index in <code>records</code> to executed.
      */
     private void executeOpsTogether(ArrayList<BackStackRecord> records,
             ArrayList<Boolean> isRecordPop, int startIndex, int endIndex) {
-        final boolean allowOptimization = records.get(startIndex).mAllowOptimization;
+        final boolean allowReordering = records.get(startIndex).mReorderingAllowed;
         boolean addToBackStack = false;
         if (mTmpAddedFragments == null) {
             mTmpAddedFragments = new ArrayList<>();
@@ -2166,14 +2167,14 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
         mTmpAddedFragments.clear();
 
-        if (!allowOptimization) {
+        if (!allowReordering) {
             FragmentTransition.startTransitions(this, records, isRecordPop, startIndex, endIndex,
                     false);
         }
         executeOps(records, isRecordPop, startIndex, endIndex);
 
         int postponeIndex = endIndex;
-        if (allowOptimization) {
+        if (allowReordering) {
             ArraySet<Fragment> addedFragments = new ArraySet<>();
             addAddedFragments(addedFragments);
             postponeIndex = postponePostponableTransactions(records, isRecordPop,
@@ -2181,7 +2182,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             makeRemovedFragmentsInvisible(addedFragments);
         }
 
-        if (postponeIndex != startIndex && allowOptimization) {
+        if (postponeIndex != startIndex && allowReordering) {
             // need to run something now
             FragmentTransition.startTransitions(this, records, isRecordPop, startIndex,
                     postponeIndex, true);
