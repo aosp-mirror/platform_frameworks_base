@@ -21,8 +21,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.Settings;
 import android.view.View;
@@ -36,7 +34,6 @@ import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.utils.du.DUActionUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
-import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSDetailItemsList;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.DetailAdapter;
@@ -50,8 +47,6 @@ public class NavigationBarTile extends QSTile<QSTile.State> {
     private static final String NAVBAR_MODE_VALUES_NAME = "systemui_navbar_mode_values";
     private static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
     private static final String NAVBAR_SETTINGS = "com.android.settings.Settings$NavigationSettingsActivity";
-    private static final String FLING_SETTINGS = "com.android.settings.Settings$FlingSettingsActivity";
-    private static final String SMARTBAR_SETTINGS = "com.android.settings.Settings$SmartbarSettingsActivity";
 
     private String[] mEntries, mValues;
     private boolean mShowingDetail;
@@ -136,13 +131,6 @@ public class NavigationBarTile extends QSTile<QSTile.State> {
         MetricsLogger.action(mContext, getMetricsCategory());
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.NAVIGATION_BAR_VISIBLE, navbarEnabled() ? 0 : 1);
-    }
-
-    @Override
-    protected void handleSecondaryClick() {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setClassName(SETTINGS_PACKAGE_NAME, NAVBAR_SETTINGS);
-        mHost.startActivityDismissingKeyguard(intent);
     }
 
     @Override
