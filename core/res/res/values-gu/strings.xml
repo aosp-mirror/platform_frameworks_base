@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"તમારા કૅરિઅરે આ સ્થાને વૉઇસ અને કટોકટીના કૉલ અસ્થાયી રૂપે સસ્પેન્ડ કર્યા છે"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"નેટવર્ક પર પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"રિસેપ્શનને બહેતર બનાવવા માટે, સિસ્ટમ &gt; નેટવર્ક અને ઇન્ટરનેટ &gt; મોબાઇલ નેટવર્ક &gt; પસંદગીનો નેટવર્ક પ્રકારમાં પસંદ કરેલો પ્રકાર બદલવાનો પ્રયાસ કરો."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"ચેતવણીઓ"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"કૉલ ફૉર્વર્ડિંગ"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"કટોકટી કૉલબૅક મોડ"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"મોબાઇલ ડેટા ચેતવણીઓ"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS સંદેશા"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"વૉઇસમેઇલ સંદેશા"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi કૉલિંગ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"પીઅરે TTY મોડ પૂર્ણની વિનંતી કરી"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"પીઅરે TTY મોડ HCO ની વિનંતી કરી"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"પીઅરે TTY મોડ VCO ની વિનંતી કરી"</string>
@@ -1733,11 +1740,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"સમય દાખલ કરવા માટે ટેક્સ્ટ ઇનપુટ મોડમાં સ્વિચ કરો."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"સમય દાખલ કરવા માટે ઘડિયાળ મોડમાં સ્વિચ કરો."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"સ્વતઃભરણના વિકલ્પો"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"કન્ટેન્ટ સ્વતઃ ભરી શકાતું નથી"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> માં સાચવીએ?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> ને <xliff:g id="LABEL">%2$s</xliff:g> માં સાચવીએ?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="LABEL">%3$s</xliff:g>માં <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> સાચવીએ?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="LABEL">%4$s</xliff:g>માં <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> સાચવીએ?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;માં સાચવીએ?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>ને &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;માં સાચવીએ?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> અને <xliff:g id="TYPE_1">%2$s</xliff:g>ને &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;માં સાચવીએ?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> અને <xliff:g id="TYPE_2">%3$s</xliff:g>ને &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;માં સાચવીએ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"સાચવો"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"નહીં આભાર"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"પાસવર્ડ"</string>

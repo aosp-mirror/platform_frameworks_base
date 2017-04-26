@@ -99,6 +99,20 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"आपल्या वाहकाने या स्थानावर व्हॉइस आणि आणीबाणी कॉल तात्पुरते निलंबित केले आहेत"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कवर पोहोचूू शकत नाही"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रिसेप्शन सुधारण्यासाठी प्रणाली &gt; नेटवर्क आणि इंटरनेट &gt; मोबाइल नेटवर्क &gt; प्राधान्य दिलेला नेटवर्क प्रकार येथे निवडलेला प्रकार बदलून पहा."</string>
+    <!-- no translation found for notification_channel_network_alert (4427736684338074967) -->
+    <skip />
+    <!-- no translation found for notification_channel_call_forward (2419697808481833249) -->
+    <skip />
+    <!-- no translation found for notification_channel_emergency_callback (6686166232265733921) -->
+    <skip />
+    <!-- no translation found for notification_channel_mobile_data_alert (6130875231721406231) -->
+    <skip />
+    <!-- no translation found for notification_channel_sms (3441746047346135073) -->
+    <skip />
+    <!-- no translation found for notification_channel_voice_mail (3954099424160511919) -->
+    <skip />
+    <!-- no translation found for notification_channel_wfc (2130802501654254801) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"समवयस्क व्यक्तीने TTY मोड पूर्ण ची विनंती केली"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
@@ -1733,11 +1747,17 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"वेळ इनपुटसाठी मजकूर इनपुट मोडवर स्विच करा."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"वेळ इनपुटसाठी घड्याळ मोडवर स्विच करा."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"स्वयं-भरण पर्याय"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"सामग्रींची स्‍वयं-भरणा करता येणार नाही"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> वर जतन करायचे?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> वर <xliff:g id="TYPE">%1$s</xliff:g> जतन करायचे?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="LABEL">%3$s</xliff:g> वर <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> जतन करायचे का?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="LABEL">%4$s</xliff:g> वर <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> जतन करायचे का?"</string>
+    <!-- no translation found for autofill_save_title (3345527308992082601) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_type (8637809388029313305) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_2types (5214035651838265325) -->
+    <skip />
+    <!-- no translation found for autofill_save_title_with_3types (6943161834231458441) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"जतन करा"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"नाही धन्यवाद"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"संकेतशब्द"</string>

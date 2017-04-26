@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operadoreak aldi baterako eten ditu ahots- eta larrialdi-deiak kokapen honetan"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ezin da konektatu sarera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Seinalea hobea izan dadin, aldatu hautatutako sare mota Sistema &gt; Sareak eta Internet &gt; Sare mugikorrak &gt; Sare mota hobetsia atalean."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Abisuak"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Dei-desbideratzea"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Larrialdi-deiak soilik jasotzeko modua"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Datu mugikorren abisuak"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mezuak"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Erantzungailuko mezuak"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi bidezko deiak"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Beste gailuak TTY osagarria HCO moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Beste gailuak TTY osagarria VCO moduan erabiltzea eskatu du"</string>
@@ -1733,11 +1740,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Aldatu testu modura ordua zehazteko."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Aldatu erloju modura ordua zehazteko."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Betetze automatikoaren aukerak"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Ezin dira bete automatikoki eremuak"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> zerbitzuan gorde?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> zerbitzuan gorde nahi duzu <xliff:g id="TYPE">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g> eta <xliff:g id="TYPE_1">%2$s</xliff:g> gorde nahi dituzu <xliff:g id="LABEL">%3$s</xliff:g> behar denean erabiltzeko?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> eta <xliff:g id="TYPE_2">%3$s</xliff:g> gorde nahi dituzu <xliff:g id="LABEL">%4$s</xliff:g> behar denean erabiltzeko?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi duzu?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi duzu?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> eta <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi dituzu?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> eta <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi dituzu?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Gorde"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ez, eskerrik asko"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"pasahitza"</string>

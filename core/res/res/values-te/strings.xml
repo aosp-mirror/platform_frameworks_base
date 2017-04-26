@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"మీ క్యారియర్ ఈ స్థానంలో వాయిస్ మరియు అత్యవసర కాల్‌లను తాత్కాలికంగా నిలిపివేసింది"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"నెట్‌వర్క్‌ను చేరుకోలేరు"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"స్వీకరణను మెరుగుపరచాలంటే, సిస్టమ్ &gt; నెట్‌వర్క్ &amp; ఇంటర్నెట్ &gt; మొబైల్ నెట్‌వర్క్‌లు &gt; ప్రాధాన్య నెట్‌వర్క్ రకంలో మీరు ఎంచుకున్న రకాన్ని మార్చి ప్రయత్నించండి."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"హెచ్చరికలు"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"కాల్ ఫార్వార్డింగ్"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"మొబైల్ డేటా హెచ్చరికలు"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS సందేశాలు"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"వాయిస్ మెయిల్ సందేశాలు"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi కాలింగ్"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
@@ -1733,11 +1740,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"సమయాన్ని నమోదు చేయడం కోసం వచన నమోదు మోడ్‌కి మారండి."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"సమయాన్ని నమోదు చేయడం కోసం గడియారం మోడ్‌కు మారండి."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"స్వీయ పూరింపు ఎంపికలు"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"కంటెంట్‌లను స్వీయ పూరింపు చేయడం సాధ్యపడదు"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>కు సేవ్ చేయాలా?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>ని <xliff:g id="LABEL">%2$s</xliff:g>కు సేవ్ చేయాలా?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>లను <xliff:g id="LABEL">%3$s</xliff:g>కు సేవ్ చేయాలా?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>లను <xliff:g id="LABEL">%4$s</xliff:g>కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>ని &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> మరియు <xliff:g id="TYPE_1">%2$s</xliff:g>లను &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, మరియు <xliff:g id="TYPE_2">%3$s</xliff:g>లను &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"సేవ్ చేయి"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"వద్దు, ధన్యవాదాలు"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"పాస్‌వర్డ్"</string>

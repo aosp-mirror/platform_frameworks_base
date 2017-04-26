@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ഈ ലൊക്കേഷനിൽ നിങ്ങളുടെ കാരിയർ വോയ്സ് കോളുകളും അടിയന്തിര കോളുകളും തൽക്കാലം നിർത്തിവച്ചിരിക്കുകയാണ്"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യാനാവുന്നില്ല"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"സ്വീകരണം മെച്ചപ്പെടുത്തുന്നതിന് സിസ്റ്റം &gt; നെറ്റ്‌വർക്കും ഇന്റർനെറ്റും &gt; മൊബൈൽ നെറ്റ്‌വർക്കുകൾ &gt; തിരഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് തരം എന്നതിൽ തിരഞ്ഞെടുത്തിരിക്കുന്ന തരം മാറ്റിക്കൊണ്ട് ശ്രമിച്ചുനോക്കുക."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"അലേർട്ടുകൾ"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"കോൾ ഫോർവേഡിംഗ്"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"അടിയന്തര കോൾബാക്ക് മോഡ്"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"മൊബൈൽ ഡാറ്റ അലേർട്ടുകൾ"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS സന്ദേശങ്ങൾ"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"വോയ്‌സ്‌മെയിൽ സന്ദേശങ്ങൾ"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"വൈഫൈ കോളിംഗ്"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
@@ -1733,11 +1740,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ഉള്ളടക്കങ്ങൾ സ്വയമേവ പൂരിപ്പിക്കാൻ കഴിയില്ല"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> എന്നിവ <xliff:g id="LABEL">%3$s</xliff:g> എന്നതിൽ സംരക്ഷിക്കട്ടെ?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> എന്നിവ <xliff:g id="LABEL">%4$s</xliff:g> എന്നതിൽ സംരക്ഷിക്കട്ടെ?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> എന്നതിനെ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> എന്നിവ&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> എന്നിവ&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"സംരക്ഷിക്കുക"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"വേണ്ട, നന്ദി"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"പാസ്‌വേഡ്"</string>

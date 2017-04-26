@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"El teu operador de telefonia mòbil ha suspès temporalment les trucades de veu i d\'emergència en aquesta ubicació"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No es pot accedir a la xarxa"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Per millorar la recepció, prova de canviar-ne el tipus a Sistema &gt; Xarxa i Internet &gt; Xarxes de telefonia mòbil &gt; Tipus de xarxa preferit."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desviació de trucades"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Mode de devolució de trucada d\'emergència"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertes de dades mòbils"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"Missatges SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Missatges de veu"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Trucades per Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"L\'altre dispositiu ha sol·licitat el mode TTY COMPLET."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"L\'altre dispositiu ha sol·licitat el mode TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"L\'altre dispositiu ha sol·licitat el mode TTY VCO."</string>
@@ -288,8 +295,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"És possible que s\'instal·lin scripts perquè el contingut de les aplicacions sigui més accessible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el text que escrius"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclou dades personals com ara números de targetes de crèdit i contrasenyes."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controla l\'ampliació de la pantalla"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el nivell i el posicionament del zoom de la pantalla."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar l\'ampliació de la pantalla"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el nivell i la posició del zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Utilitza gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Pot tocar, lliscar, pessigar i utilitzar altres gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos al sensor d\'empremtes digitals"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Canvia al mode d\'introducció de text per introduir l\'hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Canvia al mode de rellotge per introduir l\'hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcions d\'emplenament automàtic"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"El contingut no es pot emplenar automàticament"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Vols desar-ho a <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Vols desar la informació del camp <xliff:g id="TYPE">%1$s</xliff:g> a <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Vols desar <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> a <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Vols desar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> a <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Vols desar-ho a <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vols desar <xliff:g id="TYPE">%1$s</xliff:g> a <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Vols desar <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> a <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Vols desar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> a <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Desa"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, gràcies"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"contrasenya"</string>
