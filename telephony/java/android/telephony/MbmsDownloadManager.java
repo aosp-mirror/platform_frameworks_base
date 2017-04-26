@@ -35,35 +35,29 @@ public class MbmsDownloadManager {
     private int mSubId = INVALID_SUBSCRIPTION_ID;
 
     /**
-     * should use createManager to create/initialize a copy
+     * Create a new MbmsDownloadManager using the system default data subscription ID.
+     *
+     * Note that this call will bind a remote service and that may take a bit.  This
+     * may throw an Illegal ArgumentException or RemoteException.
+     *
      * @hide
      */
-    public MbmsDownloadManager(Context context) {
+    public MbmsDownloadManager(Context context, IMbmsDownloadManagerListener listener,
+            String downloadAppName) {
         mContext = context;
     }
 
-    public static MbmsDownloadManager createManager(Context context,
-            IMbmsDownloadManagerListener listener, String downloadAppName) {
-//        MbmsDownloadManager mdm = context.getSystemService(Context.MBMS_DOWNLOAD_SERVICE);
-//        if (mdm == null) return mdm;
-//        mdm.initialize(listener, downloadAppName,
-//                SubscriptionManager.getDefaultSubscriptionId());
-//        return mdm;
-        return null;
-    }
-
-    public static MbmsDownloadManager createManager(Context context,
-            IMbmsDownloadManagerListener listener, String downloadAppName, int subId) {
-//        MbmsDownloadManager mdm = context.getSystemService(Context.MBMS_DOWNLOAD_SERVICE);
-//        if (mdm == null) return mdm;
-//        mdm.initialize(listener, downloadAppName, subId);
-//        return mdm;
-        return null;
-    }
-
-    private void initialize(IMbmsDownloadManagerListener listener, String downloadAppName,
-            int subId) {
-        // assert all empty and set
+    /**
+     * Create a new MbmsDownloadManager using the given subscription ID.
+     *
+     * Note that this call will bind a remote service and that may take a bit.  This
+     * may throw an Illegal ArgumentException or RemoteException.
+     *
+     * @hide
+     */
+    public MbmsDownloadManager(Context context, IMbmsDownloadManagerListener listener,
+            String downloadAppName, int subId) {
+        mContext = context;
     }
 
     /**
@@ -71,6 +65,19 @@ public class MbmsDownloadManager {
      * They may occur at times far in the future.
      * servicesClasses lets the app filter on types of files and is opaque data between
      *     the app and the carrier
+     *
+     * Multiple calls replace trhe list of serviceClasses of interest.
+     *
+     * May throw an IllegalArgumentException or RemoteException.
+     *
+     * Synchronous responses include
+     * <li>SUCCESS</li>
+     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
+     *
+     * Asynchronous errors through the listener include any of the errors except
+     * <li>ERROR_MSDC_UNABLE_TO_)START_SERVICE</li>
+     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
+     * <li>ERROR_MSDC_END_OF_SESSION</li>
      */
     public int getFileServices(List<String> serviceClasses) {
         return 0;
@@ -106,15 +113,39 @@ public class MbmsDownloadManager {
      *     of a currently occuring download.  Note this can only run while the calling app
      *     is running, so future downloads will simply result in resultIntents being sent
      *     for completed or errored-out downloads.  A NULL indicates no callbacks are needed.
+     *
+     * May throw an IllegalArgumentException or RemoteExcpetion.
+     *
+     * Asynchronous errors through the listener include any of the errors
      */
     public DownloadRequest download(DownloadRequest downloadRequest, DownloadListener listener) {
         return null;
     }
 
+    /**
+     * Returns a list DownloadRequests that originated from this application (UID).
+     *
+     * May throw a RemoteException.
+     *
+     * Asynchronous errors through the listener include any of the errors except
+     * <li>ERROR_UNABLED_TO_START_SERVICE</li>
+     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
+     * <li>ERROR_MSDC_END_OF_SESSION</li>
+     */
     public List<DownloadRequest> listPendingDownloads() {
         return null;
     }
 
+    /**
+     * Attempts to cancel the specified DownloadRequest.
+     *
+     * May throw a RemoteException.
+     *
+     * Synchronous responses may include
+     * <li>SUCCESS</li>
+     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
+     * <li>ERROR_MSDC_UNKNOWN_REQUEST</li>
+     */
     public int cancelDownload(DownloadRequest downloadRequest) {
         return 0;
     }
@@ -127,6 +158,10 @@ public class MbmsDownloadManager {
      * Future downloads include counts of files with pending repair operations, counts of
      * files with future downloads and indication of scheduled download times with unknown
      * file details.
+     *
+     * May throw an IllegalArgumentException or RemoteException.
+     *
+     * If the DownloadRequest is unknown the results will be null.
      */
     public DownloadStatus getDownloadStatus(DownloadRequest downloadRequest) {
         return null;
@@ -140,8 +175,15 @@ public class MbmsDownloadManager {
      * content, even if that content has since been deleted.  If this function is called
      * repeated content will be downloaded again when available.  This does not interrupt
      * in-progress downloads.
+     *
+     * May throw an IllegalArgumentException or RemoteException.
+     *
+     * <li>SUCCESS</li>
+     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
+     * <li>ERROR_MSDC_UNKNOWN_REQUEST</li>
      */
-    public void resetDownloadKnowledge(DownloadRequest downloadRequest) {
+    public int resetDownloadKnowledge(DownloadRequest downloadRequest) {
+        return 0;
     }
 
     public void dispose() {
