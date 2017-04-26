@@ -172,6 +172,9 @@ public class BugreportProgressService extends Service {
     private static final int CAPPED_PROGRESS = 9900;
     private static final int CAPPED_MAX = 10000;
 
+    /** Show the progress log every this percent. */
+    private static final int LOG_PROGRESS_STEP = 10;
+
     /**
      * Delay before a screenshot is taken.
      * <p>
@@ -225,6 +228,8 @@ public class BugreportProgressService extends Service {
     private static final Bundle sNotificationBundle = new Bundle();
 
     private boolean mIsWatch;
+
+    private int mLastProgressPercent;
 
     @Override
     public void onCreate() {
@@ -512,8 +517,15 @@ public class BugreportProgressService extends Service {
             builder.setContentIntent(infoPendingIntent)
                 .setActions(infoAction, screenshotAction, cancelAction);
         }
+        // Show a debug log, every LOG_PROGRESS_STEP percent.
+        final int progress = (info.progress * 100) / info.max;
 
-        Log.d(TAG, "Sending 'Progress' notification for id " + info.id + ": " + percentageText);
+        if ((info.progress == 0) || (info.progress >= 100) ||
+                ((progress / LOG_PROGRESS_STEP) != (mLastProgressPercent / LOG_PROGRESS_STEP))) {
+            Log.d(TAG, "Progress #" + info.id + ": " + percentageText);
+        }
+        mLastProgressPercent = progress;
+
         sendForegroundabledNotification(info.id, builder.build());
     }
 
