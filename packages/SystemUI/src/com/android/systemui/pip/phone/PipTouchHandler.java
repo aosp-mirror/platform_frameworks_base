@@ -58,6 +58,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private static final String TAG = "PipTouchHandler";
 
     private static final String TUNER_KEY_MINIMIZE = "pip_minimize";
+    private static final String TUNER_KEY_FLING_DISMISS = "pip_fling_dismiss";
 
     // These values are used for metrics and should never change
     private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
@@ -114,6 +115,8 @@ public class PipTouchHandler implements TunerService.Tunable {
 
     // Allow the PIP to be dragged to the edge of the screen to be minimized.
     private boolean mEnableMinimize = false;
+    // Allow the PIP to be flung from anywhere on the screen to the bottom to be dismissed.
+    private boolean mEnableFlingToDismiss = false;
 
     // Behaviour states
     private int mMenuState;
@@ -195,6 +198,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
         // Register any tuner settings changes
         Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_MINIMIZE);
+        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_FLING_DISMISS);
 
         // Register the listener for input consumer touch events
         inputConsumerController.setTouchListener(this::handleTouchEvent);
@@ -238,14 +242,12 @@ public class PipTouchHandler implements TunerService.Tunable {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (newValue == null) {
-            // Reset back to default
-            mEnableMinimize = false;
-            return;
-        }
         switch (key) {
             case TUNER_KEY_MINIMIZE:
-                mEnableMinimize = Integer.parseInt(newValue) != 0;
+                mEnableMinimize = newValue == null ? false : Integer.parseInt(newValue) != 0;
+                break;
+            case TUNER_KEY_FLING_DISMISS:
+                mEnableFlingToDismiss = newValue == null ? false : Integer.parseInt(newValue) != 0;
                 break;
         }
     }
@@ -631,8 +633,12 @@ public class PipTouchHandler implements TunerService.Tunable {
             final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
             final float velocity = PointF.length(vel.x, vel.y);
             final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
-            final boolean isFlingToBot = isFling
-                    && !isHorizontal && mMovementWithinDismiss && vel.y > 0;
+            final boolean isUpWithinDimiss = mEnableFlingToDismiss
+                    && touchState.getLastTouchPosition().y >= mMovementBounds.bottom
+                    && mMotionHelper.isGestureToDismissArea(mMotionHelper.getBounds(), vel.x,
+                            vel.y, isFling);
+            final boolean isFlingToBot = isFling && vel.y > 0 && !isHorizontal
+                    && (mMovementWithinDismiss || isUpWithinDimiss);
             if (ENABLE_DISMISS_DRAG_TO_EDGE) {
                 try {
                     mHandler.removeCallbacks(mShowDismissAffordance);
