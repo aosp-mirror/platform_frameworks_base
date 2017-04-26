@@ -29,26 +29,73 @@ import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
 import java.io.File;
-import java.nio.file.Files;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
+import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.android.internal.annotations.GuardedBy;
 
 public class MockFontProvider extends ContentProvider {
     final static String AUTHORITY = "android.provider.fonts.font";
 
+    private static final long BLOCKING_TIMEOUT_MS = 10000;  // 10 sec
+    private static final Lock sLock = new ReentrantLock();
+    private static final Condition sCond = sLock.newCondition();
+    @GuardedBy("sLock")
+    private static boolean sSignaled;
+
+    private static void blockUntilSignal() {
+        long remaining = TimeUnit.MILLISECONDS.toNanos(BLOCKING_TIMEOUT_MS);
+        sLock.lock();
+        try {
+            sSignaled = false;
+            while (!sSignaled) {
+                try {
+                    remaining = sCond.awaitNanos(remaining);
+                } catch (InterruptedException e) {
+                    // do nothing.
+                }
+                if (sSignaled) {
+                    return;
+                }
+                if (remaining <= 0) {
+                    // Timed out
+                    throw new RuntimeException("Timeout during waiting");
+                }
+            }
+        } finally {
+            sLock.unlock();
+        }
+    }
+
+    public static void unblock() {
+        sLock.lock();
+        try {
+            sSignaled = true;
+            sCond.signal();
+        } finally {
+            sLock.unlock();
+        }
+    }
+
     final static String[] FONT_FILES = {
         "samplefont1.ttf",
     };
+    private static final int NO_FILE_ID = 255;
     private static final int SAMPLE_FONT_FILE_0_ID = 0;
-    private static final int SAMPLE_FONT_FILE_1_ID = 1;
 
     static class Font {
         public Font(int id, int fileId, int ttcIndex, String varSettings, int weight, int italic,
@@ -99,6 +146,9 @@ public class MockFontProvider extends ContentProvider {
         private int mResultCode;
     };
 
+    public static final String BLOCKING_QUERY = "queryBlockingQuery";
+    public static final String NULL_FD_QUERY = "nullFdQuery";
+
     private static Map<String, Font[]> QUERY_MAP;
     static {
         HashMap<String, Font[]> map = new HashMap<>();
@@ -110,6 +160,14 @@ public class MockFontProvider extends ContentProvider {
 
         map.put("singleFontFamily2", new Font[] {
             new Font(id++, SAMPLE_FONT_FILE_0_ID, 0, null, 700, 0, Columns.RESULT_CODE_OK),
+        });
+
+        map.put(BLOCKING_QUERY, new Font[] {
+            new Font(id++, SAMPLE_FONT_FILE_0_ID, 0, null, 700, 0, Columns.RESULT_CODE_OK),
+        });
+
+        map.put(NULL_FD_QUERY, new Font[] {
+            new Font(id++, NO_FILE_ID, 0, null, 700, 0, Columns.RESULT_CODE_OK),
         });
 
         QUERY_MAP = Collections.unmodifiableMap(map);
@@ -160,12 +218,14 @@ public class MockFontProvider extends ContentProvider {
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) {
         final int id = (int)ContentUris.parseId(uri);
+        if (id == NO_FILE_ID) {
+            return null;
+        }
         final File targetFile = getCopiedFile(getContext(), FONT_FILES[id]);
         try {
             return ParcelFileDescriptor.open(targetFile, ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(
-                    "Failed to found font file. You might forget call prepareFontFiles in setUp");
+            return null;
         }
     }
 
@@ -182,7 +242,11 @@ public class MockFontProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
-        return buildCursor(QUERY_MAP.get(selectionArgs[0]));
+        final String query = selectionArgs[0];
+        if (query.equals(BLOCKING_QUERY)) {
+            blockUntilSignal();
+        }
+        return buildCursor(QUERY_MAP.get(query));
     }
 
     @Override
