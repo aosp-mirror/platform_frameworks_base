@@ -65,15 +65,15 @@ final class ViewState {
     public static final int STATE_WAITING_RESPONSE_AUTH = 0x80;
 
     public final AutofillId id;
+
     private final Listener mListener;
     private final Session mSession;
-    private FillResponse mResponse;
 
+    private FillResponse mResponse;
     private AutofillValue mInitialValue;
     private AutofillValue mCurrentValue;
     private AutofillValue mAutofilledValue;
     private Rect mVirtualBounds;
-
     private int mState;
 
     ViewState(Session session, AutofillId id, AutofillValue value, Listener listener, int state) {
