@@ -9304,6 +9304,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void notifyAutoFillManagerAfterTextChangedIfNeeded() {
+        // It is important to not check whether the view is important for autofill
+        // since the user can trigger autofill manually on not important views.
         if (!isAutofillable()) {
             return;
         }
@@ -9314,6 +9316,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             afm.notifyValueChanged(TextView.this);
         }
+    }
+
+    private boolean isAutofillable() {
+        // It is important to not check whether the view is important for autofill
+        // since the user can trigger autofill manually on not important views.
+        return getAutofillType() != AUTOFILL_TYPE_NONE;
     }
 
     void updateAfterEdit() {
@@ -10192,6 +10200,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean canRequestAutofill() {
+        if (!isAutofillable()) {
+            return false;
+        }
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
             return afm.isEnabled();
