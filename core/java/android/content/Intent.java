@@ -4311,9 +4311,10 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Annotations should describe the major components or topics of the content. It is up to
      * apps initiating {@link #ACTION_CHOOSER} to learn and add annotations. Annotations should be
      * learned in advance, e.g., when creating or saving content, to avoid increasing latency to
-     * start {@link #ACTION_CHOOSER}. Performance on customized annotations can suffer, if they are
-     * rarely used for {@link #ACTION_CHOOSER} in the past 14 days. Therefore, it is recommended to
-     * use the following annotations when applicable.</p>
+     * start {@link #ACTION_CHOOSER}. Names of customized annotations should not contain the colon
+     * character. Performance on customized annotations can suffer, if they are rarely used for
+     * {@link #ACTION_CHOOSER} in the past 14 days. Therefore, it is recommended to use the
+     * following annotations when applicable.</p>
      * <ul>
      *     <li>"product" represents that the topic of the content is mainly about products, e.g.,
      *     health & beauty, and office supplies.</li>
