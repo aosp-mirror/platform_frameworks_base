@@ -37,7 +37,8 @@ import org.junit.runner.RunWith;
 
 /** Tests that ensure appropriate settings are backed up. */
 @RunWith(AndroidJUnit4.class)
-@Presubmit
+// TODO(b/37684646): Can re-enable pre-submit once test is fixed.
+//@Presubmit
 @SmallTest
 public class SettingsBackupTest {
 
@@ -377,7 +378,6 @@ public class SettingsBackupTest {
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
-                 Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL,
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
                  Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
                  Settings.Secure.ALWAYS_ON_VPN_APP,

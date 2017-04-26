@@ -659,6 +659,39 @@ public final class AutofillManager {
         }
     }
 
+    /**
+     * Returns {@code true} if the calling application provides a {@link AutofillService} that is
+     * enabled for the current user, or {@code false} otherwise.
+     */
+    public boolean hasEnabledAutofillServices() {
+        if (mService == null) return false;
+
+        try {
+            return mService.isServiceEnabled(mContext.getUserId(), mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if Autofill is supported for this user.
+     *
+     * <p>Autofill is typically supported, but it could be unsupported in cases like:
+     * <ol>
+     *     <li>Low-end devices.
+     *     <li>Device policy rules that forbid its usage.
+     * </ol>
+     */
+    public boolean isAutofillSupported() {
+        if (mService == null) return false;
+
+        try {
+            return mService.isServiceSupported(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private AutofillClient getClientLocked() {
         if (mContext instanceof AutofillClient) {
             return (AutofillClient) mContext;

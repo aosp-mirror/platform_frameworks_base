@@ -21,6 +21,8 @@ import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.PrintWriter;
+
 /**
  * Container that holds global and override config and their merge product.
  * Merged configuration updates automatically whenever global or override configs are updated via
@@ -39,6 +41,10 @@ public class MergedConfiguration implements Parcelable {
 
     public MergedConfiguration(Configuration globalConfig, Configuration overrideConfig) {
         setConfiguration(globalConfig, overrideConfig);
+    }
+
+    public MergedConfiguration(Configuration globalConfig) {
+        setGlobalConfiguration(globalConfig);
     }
 
     public MergedConfiguration(MergedConfiguration mergedConfiguration) {
@@ -93,6 +99,36 @@ public class MergedConfiguration implements Parcelable {
     }
 
     /**
+     * Update global configurations.
+     * Merged configuration will automatically be updated.
+     * @param globalConfig New global configuration.
+     */
+    public void setGlobalConfiguration(Configuration globalConfig) {
+        mGlobalConfig.setTo(globalConfig);
+        updateMergedConfig();
+    }
+
+    /**
+     * Update override configurations.
+     * Merged configuration will automatically be updated.
+     * @param overrideConfig New override configuration.
+     */
+    public void setOverrideConfiguration(Configuration overrideConfig) {
+        mOverrideConfig.setTo(overrideConfig);
+        updateMergedConfig();
+    }
+
+    public void setTo(MergedConfiguration config) {
+        setConfiguration(config.mGlobalConfig, config.mOverrideConfig);
+    }
+
+    public void unset() {
+        mGlobalConfig.unset();
+        mOverrideConfig.unset();
+        updateMergedConfig();
+    }
+
+    /**
      * @return Stored global configuration value.
      */
     @NonNull
@@ -118,5 +154,15 @@ public class MergedConfiguration implements Parcelable {
     private void updateMergedConfig() {
         mMergedConfig.setTo(mGlobalConfig);
         mMergedConfig.updateFrom(mOverrideConfig);
+    }
+
+    @Override
+    public String toString() {
+        return "{mGlobalConfig=" + mGlobalConfig + " mOverrideConfig=" + mOverrideConfig + "}";
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "mGlobalConfig=" + mGlobalConfig);
+        pw.println(prefix + "mOverrideConfig=" + mOverrideConfig);
     }
 }

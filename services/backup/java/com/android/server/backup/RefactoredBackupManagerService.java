@@ -178,19 +178,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public static final int BACKUP_METADATA_VERSION = 1;
     public static final int BACKUP_WIDGET_METADATA_TOKEN = 0x01FFED01;
 
-    public static final int TAR_HEADER_LONG_RADIX = 8;
-    public static final int TAR_HEADER_OFFSET_FILESIZE = 124;
-    public static final int TAR_HEADER_LENGTH_FILESIZE = 12;
-    public static final int TAR_HEADER_OFFSET_MODTIME = 136;
-    public static final int TAR_HEADER_LENGTH_MODTIME = 12;
-    public static final int TAR_HEADER_OFFSET_MODE = 100;
-    public static final int TAR_HEADER_LENGTH_MODE = 8;
-    public static final int TAR_HEADER_OFFSET_PATH_PREFIX = 345;
-    public static final int TAR_HEADER_LENGTH_PATH_PREFIX = 155;
-    public static final int TAR_HEADER_OFFSET_PATH = 0;
-    public static final int TAR_HEADER_LENGTH_PATH = 100;
-    public static final int TAR_HEADER_OFFSET_TYPE_CHAR = 156;
-
     private static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
     public static final String SETTINGS_PACKAGE = "com.android.providers.settings";

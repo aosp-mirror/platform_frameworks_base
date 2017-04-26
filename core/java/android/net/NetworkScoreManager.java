@@ -428,14 +428,11 @@ public class NetworkScoreManager {
      * @throws SecurityException if the caller does not hold the
      *         {@link android.Manifest.permission#REQUEST_NETWORK_SCORES} permission.
      * @hide
+     * @deprecated to be removed.
      */
     public RecommendationResult requestRecommendation(RecommendationRequest request)
             throws SecurityException {
-        try {
-            return mService.requestRecommendation(request);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return null;
     }
 
     /**
@@ -451,44 +448,5 @@ public class NetworkScoreManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Request a recommendation for which network to connect to.
-     *
-     * <p>The callback will be run on the thread associated with provided {@link Handler}.
-     *
-     * @param request a {@link RecommendationRequest} instance containing additional
-     *                request details
-     * @param handler a {@link Handler} instance representing the thread to complete the future on.
-     *                If null the responding binder thread will be used.
-     * @return a {@link CompletableFuture} instance that will eventually receive the
-     *         {@link RecommendationResult}.
-     * @throws SecurityException
-     * @hide
-     */
-    public CompletableFuture<RecommendationResult> requestRecommendation(
-            final @NonNull RecommendationRequest request,
-            final @Nullable Handler handler) {
-        Preconditions.checkNotNull(request, "RecommendationRequest cannot be null.");
-
-        final CompletableFuture<RecommendationResult> futureResult =
-                new CompletableFuture<>();
-
-        RemoteCallback remoteCallback = new RemoteCallback(new RemoteCallback.OnResultListener() {
-            @Override
-            public void onResult(Bundle data) {
-                RecommendationResult result = data.getParcelable(EXTRA_RECOMMENDATION_RESULT);
-                futureResult.complete(result);
-            }
-        }, handler);
-
-        try {
-            mService.requestRecommendationAsync(request, remoteCallback);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
-        return futureResult;
     }
 }

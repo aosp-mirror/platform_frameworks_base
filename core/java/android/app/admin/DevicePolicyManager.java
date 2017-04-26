@@ -1518,7 +1518,8 @@ public class DevicePolicyManager {
      * Service action: Action for a service that device owner and profile owner can optionally
      * own.  If a device owner or a profile owner has such a service, the system tries to keep
      * a bound connection to it, in order to keep their process always running.
-     * The service must not be exported.
+     * The service must be protected with the {@link android.Manifest.permission#BIND_DEVICE_ADMIN}
+     * permission.
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String ACTION_DEVICE_ADMIN_SERVICE
@@ -2972,9 +2973,9 @@ public class DevicePolicyManager {
      * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param timeoutMs The new timeout, after which the user will have to unlock with strong
-     *         authentication method. A value of 0 means the admin is not participating in
-     *         controlling the timeout.
+     * @param timeoutMs The new timeout in milliseconds, after which the user will have to unlock
+     *         with strong authentication method. A value of 0 means the admin is not participating
+     *         in controlling the timeout.
      *         The minimum and maximum timeouts are platform-defined and are typically 1 hour and
      *         72 hours, respectively. Though discouraged, the admin may choose to require strong
      *         auth at all times using {@link #KEYGUARD_DISABLE_FINGERPRINT} and/or
@@ -3004,7 +3005,7 @@ public class DevicePolicyManager {
      *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      *         accross all participating admins.
-     * @return The timeout or 0 if not configured for the provided admin.
+     * @return The timeout in milliseconds or 0 if not configured for the provided admin.
      */
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin) {
         return getRequiredStrongAuthTimeout(admin, myUserId());
@@ -7761,6 +7762,8 @@ public class DevicePolicyManager {
      *
      * <p> Backup service is off by default when device owner is present.
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled {@code true} to enable the backup service, {@code false} to disable it.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setBackupServiceEnabled(@NonNull ComponentName admin, boolean enabled) {

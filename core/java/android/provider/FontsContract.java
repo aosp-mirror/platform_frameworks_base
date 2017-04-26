@@ -33,7 +33,6 @@ import android.content.pm.Signature;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontRequest;
-import android.graphics.fonts.FontResult;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +42,7 @@ import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ResultReceiver;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -64,6 +64,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility class to deal with Font ContentProviders.
@@ -103,14 +104,6 @@ public class FontsContract {
          * font.
          */
         public static final String VARIATION_SETTINGS = "font_variation_settings";
-        /**
-         * DO NOT USE THIS COLUMN.
-         * This column is kept for preventing demo apps.
-         * TODO: Remove once nobody uses this column.
-         * @hide
-         * @removed
-         */
-        public static final String STYLE = "font_style";
         /**
          * Constant used to request data from a font provider. The cursor returned from the query
          * should have this column populated with the int weight for the resulting font. This value
@@ -158,36 +151,24 @@ public class FontsContract {
         public static final int RESULT_CODE_MALFORMED_QUERY = 3;
     }
 
-    /**
-     * Constant used to identify the List of {@link ParcelFileDescriptor} item in the Bundle
-     * returned to the ResultReceiver in getFont.
-     * @hide
-     */
-    public static final String PARCEL_FONT_RESULTS = "font_results";
-    // Error codes internal to the system, which can not come from a provider. To keep the number
-    // space open for new provider codes, these should all be negative numbers.
-    /** @hide */
-    public static final int RESULT_CODE_PROVIDER_NOT_FOUND = -1;
-    /** @hide */
-    public static final int RESULT_CODE_WRONG_CERTIFICATES = -2;
-    // Note -3 is used by Typeface to indicate the font failed to load.
+    private static final Object sLock = new Object();
+    @GuardedBy("sLock")
+    private static Handler sHandler;
+    @GuardedBy("sLock")
+    private static HandlerThread sThread;
+    @GuardedBy("sLock")
+    private static Set<String> sInQueueSet;
 
-    private static final int THREAD_RENEWAL_THRESHOLD_MS = 10000;
-
-    private final Context mContext;
-    private final PackageManager mPackageManager;
-    private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private Handler mHandler;
-    @GuardedBy("mLock")
-    private HandlerThread mThread;
+    private volatile static Context sContext;  // set once in setApplicationContextForResources
 
     private static final LruCache<String, Typeface> sTypefaceCache = new LruCache<>(16);
 
+    private FontsContract() {
+    }
+
     /** @hide */
-    public FontsContract(Context context) {
-        mContext = context.getApplicationContext();
-        mPackageManager = mContext.getPackageManager();
+    public static void setApplicationContextForResources(Context context) {
+        sContext = context.getApplicationContext();
     }
 
     /**
@@ -320,91 +301,67 @@ public class FontsContract {
         }
     }
 
+    private static final int THREAD_RENEWAL_THRESHOLD_MS = 10000;
+
     // We use a background thread to post the content resolving work for all requests on. This
     // thread should be quit/stopped after all requests are done.
-    private final Runnable mReplaceDispatcherThreadRunnable = new Runnable() {
+    // TODO: Factor out to other class. Consider to switch MessageQueue.IdleHandler.
+    private static final Runnable sReplaceDispatcherThreadRunnable = new Runnable() {
         @Override
         public void run() {
-            synchronized (mLock) {
-                if (mThread != null) {
-                    mThread.quitSafely();
-                    mThread = null;
-                    mHandler = null;
+            synchronized (sLock) {
+                if (sThread != null) {
+                    sThread.quitSafely();
+                    sThread = null;
+                    sHandler = null;
+                    sInQueueSet = null;
                 }
             }
         }
     };
 
     /** @hide */
-    public void getFont(FontRequest request, ResultReceiver receiver) {
-        synchronized (mLock) {
-            if (mHandler == null) {
-                mThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
-                mThread.start();
-                mHandler = new Handler(mThread.getLooper());
-            }
-            mHandler.post(() -> {
-                ProviderInfo providerInfo;
-                try {
-                    providerInfo = getProvider(mPackageManager, request);
-                    if (providerInfo == null) {
-                        receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-                        return;
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                    receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-                    return;
-                }
-                FontInfo[] fonts;
-                try {
-                    fonts = getFontFromProvider(mContext, request, providerInfo.authority,
-                            null /* cancellation signal */);
-                } catch (InvalidFormatException e) {
-                    receiver.send(RESULT_CODE_PROVIDER_NOT_FOUND, null);
-                    return;
-                }
-
-                ArrayList<FontResult> result = new ArrayList<>();
-                int resultCode = -1;
-                for (FontInfo font : fonts) {
-                    try {
-                        resultCode = font.getResultCode();
-                        if (resultCode != Columns.RESULT_CODE_OK) {
-                            if (resultCode < 0) {
-                                // Negative values are reserved for the internal errors.
-                                resultCode = Columns.RESULT_CODE_FONT_NOT_FOUND;
-                            }
-                            for (int i = 0; i < result.size(); ++i) {
-                                try {
-                                    result.get(i).getFileDescriptor().close();
-                                } catch (IOException e) {
-                                    // Ignore, as we are closing fds for cleanup.
-                                }
-                            }
-                            receiver.send(resultCode, null);
-                            return;
-                        }
-                        ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(
-                                font.getUri(), "r");
-                        result.add(new FontResult(pfd, font.getTtcIndex(),
-                                FontVariationAxis.toFontVariationSettings(font.getAxes()),
-                                font.getWeight(), font.isItalic()));
-                    } catch (FileNotFoundException e) {
-                        Log.e(TAG, "FileNotFoundException raised when interacting with content "
-                                + "provider " + providerInfo.authority, e);
-                    }
-                }
-                if (!result.isEmpty()) {
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList(PARCEL_FONT_RESULTS, result);
-                    receiver.send(Columns.RESULT_CODE_OK, bundle);
-                    return;
-                }
-                receiver.send(Columns.RESULT_CODE_FONT_NOT_FOUND, null);
-            });
-            mHandler.removeCallbacks(mReplaceDispatcherThreadRunnable);
-            mHandler.postDelayed(mReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
+    public static Typeface getFontOrWarmUpCache(FontRequest request) {
+        final String id = request.getIdentifier();
+        Typeface cachedTypeface = sTypefaceCache.get(id);
+        if (cachedTypeface != null) {
+            return cachedTypeface;
         }
+
+        // Unfortunately the typeface is not available at this time, but requesting from the font
+        // provider takes too much time. For now, request the font data to ensure it is in the cache
+        // next time and return.
+        synchronized (sLock) {
+            if (sHandler == null) {
+                sThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
+                sThread.start();
+                sHandler = new Handler(sThread.getLooper());
+                sInQueueSet = new ArraySet<>();
+            }
+            if (sInQueueSet.contains(id)) {
+                return null;  // Already requested.
+            }
+            sInQueueSet.add(id);
+            sHandler.post(() -> {
+                synchronized (sLock) {
+                    sInQueueSet.remove(id);
+                }
+                try {
+                    FontFamilyResult result = fetchFonts(sContext, null, request);
+                    if (result.getStatusCode() == FontFamilyResult.STATUS_OK) {
+                        Typeface typeface = buildTypeface(sContext, null, result.getFonts());
+                        if (typeface != null) {
+                            sTypefaceCache.put(id, typeface);
+                        }
+                    }
+                } catch (NameNotFoundException e) {
+                    // Ignore.
+                }
+            });
+            sHandler.removeCallbacks(sReplaceDispatcherThreadRunnable);
+            sHandler.postDelayed(sReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
+        }
+        return null;
     }
 
     /**
@@ -415,12 +372,12 @@ public class FontsContract {
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
          * provider was not found on the device.
          */
-        public static final int FAIL_REASON_PROVIDER_NOT_FOUND = RESULT_CODE_PROVIDER_NOT_FOUND;
+        public static final int FAIL_REASON_PROVIDER_NOT_FOUND = -1;
         /**
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given
          * provider must be authenticated and the given certificates do not match its signature.
          */
-        public static final int FAIL_REASON_WRONG_CERTIFICATES = RESULT_CODE_WRONG_CERTIFICATES;
+        public static final int FAIL_REASON_WRONG_CERTIFICATES = -2;
         /**
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the font
          * returned by the provider was not loaded properly.
@@ -452,16 +409,14 @@ public class FontsContract {
         public FontRequestCallback() {}
 
         /**
-         * Called then a Typeface request done via {@link Typeface#create(FontRequest,
-         * FontRequestCallback)} is complete. Note that this method will not be called if
-         * {@link #onTypefaceRequestFailed(int)} is called instead.
+         * Called then a Typeface request done via {@link #requestFont} is complete. Note that this
+         * method will not be called if {@link #onTypefaceRequestFailed(int)} is called instead.
          * @param typeface  The Typeface object retrieved.
          */
         public void onTypefaceRetrieved(Typeface typeface) {}
 
         /**
-         * Called when a Typeface request done via {@link Typeface#create(FontRequest,
-         * FontRequestCallback)} fails.
+         * Called when a Typeface request done via {@link #requestFont}} fails.
          * @param reason One of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_LOAD_ERROR},
@@ -793,7 +748,7 @@ public class FontsContract {
                 .build();
         try (Cursor cursor = context.getContentResolver().query(uri, new String[] { Columns._ID,
                         Columns.FILE_ID, Columns.TTC_INDEX, Columns.VARIATION_SETTINGS,
-                        Columns.STYLE, Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
+                        Columns.WEIGHT, Columns.ITALIC, Columns.RESULT_CODE },
                 "query = ?", new String[] { request.getQuery() }, null, cancellationSignal);) {
             // TODO: Should we restrict the amount of fonts that can be returned?
             // TODO: Write documentation explaining that all results should be from the same family.
@@ -806,7 +761,6 @@ public class FontsContract {
                 final int vsColumnIndex = cursor.getColumnIndex(Columns.VARIATION_SETTINGS);
                 final int weightColumnIndex = cursor.getColumnIndex(Columns.WEIGHT);
                 final int italicColumnIndex = cursor.getColumnIndex(Columns.ITALIC);
-                final int styleColumnIndex = cursor.getColumnIndex(Columns.STYLE);
                 while (cursor.moveToNext()) {
                     int resultCode = resultCodeColumnIndex != -1
                             ? cursor.getInt(resultCodeColumnIndex) : Columns.RESULT_CODE_OK;
@@ -823,17 +777,11 @@ public class FontsContract {
                         long id = cursor.getLong(fileIdColumnIndex);
                         fileUri = ContentUris.withAppendedId(fileBaseUri, id);
                     }
-                    // TODO: Stop using STYLE column and enforce WEIGHT/ITALIC column.
                     int weight;
                     boolean italic;
                     if (weightColumnIndex != -1 && italicColumnIndex != -1) {
                         weight = cursor.getInt(weightColumnIndex);
                         italic = cursor.getInt(italicColumnIndex) == 1;
-                    } else if (styleColumnIndex != -1) {
-                        final int style = cursor.getInt(styleColumnIndex);
-                        weight = (style & Typeface.BOLD) != 0 ?
-                                Typeface.Builder.BOLD_WEIGHT : Typeface.Builder.NORMAL_WEIGHT;
-                        italic = (style & Typeface.ITALIC) != 0;
                     } else {
                         weight = Typeface.Builder.NORMAL_WEIGHT;
                         italic = false;

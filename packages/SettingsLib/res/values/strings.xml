@@ -130,6 +130,12 @@
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the SAP profile (sharing SIM card). -->
     <string name="bluetooth_profile_sap">SIM Access</string>
 
+    <!-- Bluetooth settings. The user-visible string for the setting controlling whether to use a high-quality codec if the device supports it, along with the name of the codec (eg AAC, LDAC, aptX) -->
+    <string name="bluetooth_profile_a2dp_high_quality">Use high quality audio: <xliff:g id="codec_name">%1$s</xliff:g></string>
+
+    <!-- Bluetooth settings. Similar to bluetooth_profile_a2dp_high_quality, but used when the device supports high quality audio but we don't know which codec that will be used. -->
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">Use high quality audio</string>
+
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the headset checkbox preference when headset is connected. -->

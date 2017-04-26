@@ -1498,6 +1498,7 @@ public final class MediaStore {
              * May also contain the extra EXTRA_MAX_BYTES.
              * @see #EXTRA_MAX_BYTES
              */
+            @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
             public static final String RECORD_SOUND_ACTION =
                     "android.provider.MediaStore.RECORD_SOUND";
 

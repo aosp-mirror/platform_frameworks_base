@@ -1,7 +1,6 @@
 package android.app {
 
   public class Notification implements android.os.Parcelable {
-    method public deprecated int getBadgeIcon();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
   }
 
@@ -349,10 +348,6 @@ package android.provider {
     field public static final deprecated java.lang.String SYNC4 = "stream_item_sync4";
     field public static final deprecated java.lang.String TEXT = "text";
     field public static final deprecated java.lang.String TIMESTAMP = "timestamp";
-  }
-
-  public static final class FontsContract.Columns implements android.provider.BaseColumns {
-    field public static final java.lang.String STYLE = "font_style";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {

@@ -1399,6 +1399,7 @@ public class Intent implements Parcelable, Cloneable {
      *  <p>Input: nothing
      *  <p>Output: nothing
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_FACTORY_TEST = "android.intent.action.FACTORY_TEST";
 
     /**
@@ -2061,6 +2062,7 @@ public class Intent implements Parcelable, Cloneable {
      * temporary system dialog to dismiss.  Some examples of temporary system
      * dialogs are the notification window-shade and the recent tasks dialog.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     /**
      * Broadcast Action: Trigger the download and eventual installation
@@ -2590,6 +2592,7 @@ public class Intent implements Parcelable, Cloneable {
      * @deprecated replaced by android.os.storage.StorageEventListener
      */
     @Deprecated
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UMS_CONNECTED = "android.intent.action.UMS_CONNECTED";
 
     /**
@@ -2600,6 +2603,7 @@ public class Intent implements Parcelable, Cloneable {
      * @deprecated replaced by android.os.storage.StorageEventListener
      */
     @Deprecated
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UMS_DISCONNECTED = "android.intent.action.UMS_DISCONNECTED";
 
     /**

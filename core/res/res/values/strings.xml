@@ -713,13 +713,6 @@
     <string name="capability_desc_canRequestTouchExploration">Tapped items will be spoken aloud
         and the screen can be explored using gestures.</string>
 
-    <!-- Title for the capability of an accessibility service to request enhanced web accessibility. -->
-    <string name="capability_title_canRequestEnhancedWebAccessibility">Turn on enhanced web
-        accessibility</string>
-    <!-- Description for the capability of an accessibility service to request enhanced web accessibility. -->
-    <string name="capability_desc_canRequestEnhancedWebAccessibility">Scripts may be installed to
-        make app content more accessible.</string>
-
     <!-- Title for the capability of an accessibility service to request to filter key events. -->
     <string name="capability_title_canRequestFilterKeyEvents">Observe text you type</string>
     <!-- Description for the capability of an accessibility service to request to filter key events. -->

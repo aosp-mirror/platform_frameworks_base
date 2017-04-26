@@ -73,6 +73,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Entry point service for autofill management.
@@ -479,6 +480,22 @@ public final class AutofillManagerService extends SystemService {
                 if (service != null) {
                     service.disableOwnedAutofillServicesLocked(Binder.getCallingUid());
                 }
+            }
+        }
+
+        @Override
+        public boolean isServiceSupported(int userId) {
+            synchronized (mLock) {
+                return !mDisabledUsers.get(userId);
+            }
+        }
+
+        @Override
+        public boolean isServiceEnabled(int userId, String packageName) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service == null) return false;
+                return Objects.equals(packageName, service.getPackageName());
             }
         }
 

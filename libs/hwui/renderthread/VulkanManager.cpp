@@ -54,7 +54,8 @@ void VulkanManager::initialize() {
 
     auto canPresent = [](VkInstance, VkPhysicalDevice, uint32_t) { return true; };
 
-    mBackendContext.reset(GrVkBackendContext::Create(&mPresentQueueIndex, canPresent));
+    mBackendContext.reset(GrVkBackendContext::Create(vkGetInstanceProcAddr, vkGetDeviceProcAddr,
+            &mPresentQueueIndex, canPresent));
 
     // Get all the addresses of needed vulkan functions
     VkInstance instance = mBackendContext->fInstance;

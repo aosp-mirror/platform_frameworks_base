@@ -411,6 +411,7 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -7818,10 +7819,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized(this) {
                 final ActivityStack stack = ActivityRecord.getStackLocked(token);
-                if (stack == null) {
+                if (stack == null || stack.mStackId != PINNED_STACK_ID) {
                     return false;
                 }
-                return stack.mStackId == PINNED_STACK_ID;
+
+                // If we are animating to fullscreen then we have already dispatched the PIP mode
+                // changed, so we should reflect that check here as well.
+                final PinnedStackWindowController windowController =
+                        ((PinnedActivityStack) stack).getWindowContainerController();
+                return !windowController.isAnimatingBoundsToFullscreen();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -11255,9 +11261,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     holder.provider = null;
                     return holder;
                 }
-                // Don't expose instant app providers
-                if (cpr.appInfo.isInstantApp()) {
-                    return null;
+                // Don't expose providers between normal apps and instant apps
+                try {
+                    if (AppGlobals.getPackageManager()
+                            .resolveContentProvider(name, 0 /*flags*/, userId) == null) {
+                        return null;
+                    }
+                } catch (RemoteException e) {
                 }
 
                 final long origId = Binder.clearCallingIdentity();
@@ -19147,6 +19157,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case android.security.KeyChain.ACTION_TRUST_STORE_CHANGED:
                     mHandler.sendEmptyMessage(HANDLE_TRUST_STORAGE_UPDATE_MSG);
                     break;
+                case "com.android.launcher.action.INSTALL_SHORTCUT":
+                    // As of O, we no longer support this broadcasts, even for pre-O apps.
+                    // Apps should now be using ShortcutManager.pinRequestShortcut().
+                    Log.w(TAG, "Broadcast " + action
+                            + " no longer supported. It will not be delivered.");
+                    return ActivityManager.BROADCAST_SUCCESS;
             }
 
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||

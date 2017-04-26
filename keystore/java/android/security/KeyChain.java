@@ -17,7 +17,9 @@ package android.security;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.annotation.WorkerThread;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -199,12 +201,14 @@ public final class KeyChain {
      * {@link Build.VERSION_CODES#N_MR1} will only receive this broadcast if they register for it
      * at runtime.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
 
     /**
      * Broadcast Action: Indicates the contents of the keychain has changed. Sent when a KeyChain
      * entry is added, modified or removed.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_KEYCHAIN_CHANGED = "android.security.action.KEYCHAIN_CHANGED";
 
     /**
@@ -216,6 +220,7 @@ public final class KeyChain {
      * <li>A CA is added or removed from the trust store</li>
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TRUST_STORE_CHANGED =
             "android.security.action.TRUST_STORE_CHANGED";
 
@@ -223,6 +228,7 @@ public final class KeyChain {
      * Broadcast Action: Indicates that the access permissions for a private key have changed.
      *
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_KEY_ACCESS_CHANGED =
             "android.security.action.KEY_ACCESS_CHANGED";
 

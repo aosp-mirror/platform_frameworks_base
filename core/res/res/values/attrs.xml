@@ -2332,10 +2332,18 @@
         <attr name="importantForAutofill">
             <!-- Let the Android System use its heuristics to determine if the view is important for autofill. -->
             <flag name="auto" value="0" />
-            <!-- Hint the Android System that this view is important for autofill. -->
+            <!-- Hint the Android System that this view is important for autofill,
+                  and its children (if any) will be traversed.. -->
             <flag name="yes" value="0x1" />
-            <!-- Hint the Android System that this view is *not* important for autofill. -->
+            <!-- Hint the Android System that this view is *not* important for autofill,
+                  but its children (if any) will be traversed.. -->
             <flag name="no" value="0x2" />
+            <!-- Hint the Android System that this view is important for autofill,
+                 but its children (if any) will not be traversed. -->
+            <flag name="yesExcludeDescendants" value="0x4" />
+            <!-- Hint the Android System that this view is *not* important for autofill,
+                 and its children (if any) will not be traversed. -->
+            <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
         <!-- Boolean that controls whether a view can take focus while in touch mode.
@@ -3426,7 +3434,9 @@
             <flag name="flagIncludeNotImportantViews" value="0x00000002" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE}. -->
             <flag name="flagRequestTouchExplorationMode" value="0x00000004" />
-            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY}. -->
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY}.
+                 Not used by the framework.
+            -->
             <flag name="flagRequestEnhancedWebAccessibility" value="0x00000008" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}. -->
             <flag name="flagReportViewIds" value="0x00000010" />
@@ -3457,12 +3467,8 @@
          -->
         <attr name="canRequestTouchExplorationMode" format="boolean" />
         <!-- Attribute whether the accessibility service wants to be able to request enhanced
-             web accessibility enhancements. For example, installing scripts to make app
-             content more accessible.
-             <p>
-             Required to allow setting the {@link android.accessibilityservice
-             #AccessibilityServiceInfo#FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY} flag.
-             </p>
+             web accessibility enhancements.
+             {@deprecated Not used by the framework}
          -->
         <attr name="canRequestEnhancedWebAccessibility" format="boolean" />
         <!-- Attribute whether the accessibility service wants to be able to request to

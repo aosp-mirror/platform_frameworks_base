@@ -39,6 +39,7 @@ import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -58,13 +59,22 @@ public class GestureLauncherService extends SystemService {
      * Time in milliseconds in which the power button must be pressed twice so it will be considered
      * as a camera launch.
      */
-    private static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
+    @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
+
+    /**
+     * Interval in milliseconds in which the power button must be depressed in succession to be
+     * considered part of an extended sequence of taps. Note that this is a looser threshold than
+     * the camera launch gesture, because the purpose of this threshold is to measure the
+     * frequency of consecutive taps, for evaluation for future gestures.
+     */
+    @VisibleForTesting static final long POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS = 500;
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
 
     private Sensor mCameraLaunchSensor;
     private Context mContext;
+    private final MetricsLogger mMetricsLogger;
 
     /** The wake lock held when a gesture is detected. */
     private WakeLock mWakeLock;
@@ -106,10 +116,17 @@ public class GestureLauncherService extends SystemService {
      */
     private boolean mCameraDoubleTapPowerEnabled;
     private long mLastPowerDown;
+    private int mPowerButtonConsecutiveTaps;
 
     public GestureLauncherService(Context context) {
+        this(context, new MetricsLogger());
+    }
+
+    @VisibleForTesting
+    GestureLauncherService(Context context, MetricsLogger metricsLogger) {
         super(context);
         mContext = context;
+        mMetricsLogger = metricsLogger;
     }
 
     public void onStart() {
@@ -155,7 +172,8 @@ public class GestureLauncherService extends SystemService {
         }
     }
 
-    private void updateCameraDoubleTapPowerEnabled() {
+    @VisibleForTesting
+    void updateCameraDoubleTapPowerEnabled() {
         boolean enabled = isCameraDoubleTapPowerSettingEnabled(mContext, mUserId);
         synchronized (this) {
             mCameraDoubleTapPowerEnabled = enabled;
@@ -256,27 +274,37 @@ public class GestureLauncherService extends SystemService {
             MutableBoolean outLaunched) {
         boolean launched = false;
         boolean intercept = false;
-        long doubleTapInterval;
+        long powerTapInterval;
         synchronized (this) {
-            doubleTapInterval = event.getEventTime() - mLastPowerDown;
+            powerTapInterval = event.getEventTime() - mLastPowerDown;
             if (mCameraDoubleTapPowerEnabled
-                    && doubleTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
+                    && powerTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
                 launched = true;
                 intercept = interactive;
+                mPowerButtonConsecutiveTaps++;
+            } else if (powerTapInterval < POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS) {
+                mPowerButtonConsecutiveTaps++;
+            } else {
+                mPowerButtonConsecutiveTaps = 1;
             }
             mLastPowerDown = event.getEventTime();
         }
+        if (DBG && mPowerButtonConsecutiveTaps > 1) {
+            Slog.i(TAG, Long.valueOf(mPowerButtonConsecutiveTaps) +
+                    " consecutive power button taps detected");
+        }
         if (launched) {
             Slog.i(TAG, "Power button double tap gesture detected, launching camera. Interval="
-                    + doubleTapInterval + "ms");
+                    + powerTapInterval + "ms");
             launched = handleCameraLaunchGesture(false /* useWakelock */,
                     StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
             if (launched) {
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
-                        (int) doubleTapInterval);
+                mMetricsLogger.action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
+                        (int) powerTapInterval);
             }
         }
-        MetricsLogger.histogram(mContext, "power_double_tap_interval", (int) doubleTapInterval);
+        mMetricsLogger.histogram("power_consecutive_short_tap_count", mPowerButtonConsecutiveTaps);
+        mMetricsLogger.histogram("power_double_tap_interval", (int) powerTapInterval);
         outLaunched.value = launched;
         return intercept && launched;
     }
@@ -284,7 +312,8 @@ public class GestureLauncherService extends SystemService {
     /**
      * @return true if camera was launched, false otherwise.
      */
-    private boolean handleCameraLaunchGesture(boolean useWakelock, int source) {
+    @VisibleForTesting
+    boolean handleCameraLaunchGesture(boolean useWakelock, int source) {
         boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
         if (!userSetupComplete) {
@@ -344,7 +373,7 @@ public class GestureLauncherService extends SystemService {
                 }
                 if (handleCameraLaunchGesture(true /* useWakelock */,
                         StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)) {
-                    MetricsLogger.action(mContext, MetricsEvent.ACTION_WIGGLE_CAMERA_GESTURE);
+                    mMetricsLogger.action(MetricsEvent.ACTION_WIGGLE_CAMERA_GESTURE);
                     trackCameraLaunchEvent(event);
                 }
                 return;

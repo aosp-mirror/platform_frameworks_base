@@ -61,6 +61,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -1263,16 +1264,20 @@ public class SystemServicesProxy {
             synchronized (mTaskStackListeners) {
                 switch (msg.what) {
                     case ON_TASK_STACK_CHANGED: {
+                    Trace.beginSection("onTaskStackChanged");
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onTaskStackChanged();
                         }
+                    Trace.endSection();
                         break;
                     }
                     case ON_TASK_SNAPSHOT_CHANGED: {
+                    Trace.beginSection("onTaskSnapshotChanged");
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
                                     (TaskSnapshot) msg.obj);
                         }
+                    Trace.endSection();
                         break;
                     }
                     case ON_ACTIVITY_PINNED: {

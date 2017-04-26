@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
@@ -115,10 +116,12 @@ public class DeviceAdminServiceController {
                 return null;
             }
             final ServiceInfo si = list.get(0).serviceInfo;
-            if (si.exported) {
-                Log.e(TAG, "DeviceAdminService must not be exported: '"
+
+            if (!permission.BIND_DEVICE_ADMIN.equals(si.permission)) {
+                Log.e(TAG, "DeviceAdminService "
                         + si.getComponentName().flattenToShortString()
-                        + "' will be ignored.");
+                        + " must be protected with " + permission.BIND_DEVICE_ADMIN
+                        + ".");
                 return null;
             }
             return si;

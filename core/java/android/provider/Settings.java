@@ -1398,6 +1398,26 @@ public final class Settings {
     public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS
             = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
 
+    /**
+     * Activity Action: Show screen that let user select its Autofill Service.
+     * <p>
+     * Input: Intent's data URI set with an application name, using the
+     * "package" schema (like "package:com.my.app").
+     *
+     * <p>
+     * Output: {@link android.app.Activity#RESULT_OK} if user selected an Autofill Service belonging
+     * to the caller package.
+     *
+     * <p>
+     * <b>NOTE: </b> applications should call
+     * {@link android.view.autofill.AutofillManager#hasEnabledAutofillServices()} and
+     * {@link android.view.autofill.AutofillManager#isAutofillSupported()} first, and only
+     * broadcast this intent if they return {@code false} and {@code true} respectively.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE =
+            "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
+
     // End of Intent actions for Settings
 
     /**
@@ -5555,76 +5575,6 @@ public final class Settings {
                 "high_text_contrast_enabled";
 
         /**
-         * If injection of accessibility enhancing JavaScript screen-reader
-         * is enabled.
-         * <p>
-         *   Note: The JavaScript based screen-reader is served by the
-         *   Google infrastructure and enable users with disabilities to
-         *   efficiently navigate in and explore web content.
-         * </p>
-         * <p>
-         *   This property represents a boolean value.
-         * </p>
-         * @hide
-         */
-        public static final String ACCESSIBILITY_SCRIPT_INJECTION =
-            "accessibility_script_injection";
-
-        /**
-         * The URL for the injected JavaScript based screen-reader used
-         * for providing accessibility of content in WebView.
-         * <p>
-         *   Note: The JavaScript based screen-reader is served by the
-         *   Google infrastructure and enable users with disabilities to
-         *   efficiently navigate in and explore web content.
-         * </p>
-         * <p>
-         *   This property represents a string value.
-         * </p>
-         * @hide
-         */
-        public static final String ACCESSIBILITY_SCREEN_READER_URL =
-            "accessibility_script_injection_url";
-
-        /**
-         * Key bindings for navigation in built-in accessibility support for web content.
-         * <p>
-         *   Note: These key bindings are for the built-in accessibility navigation for
-         *   web content which is used as a fall back solution if JavaScript in a WebView
-         *   is not enabled or the user has not opted-in script injection from Google.
-         * </p>
-         * <p>
-         *   The bindings are separated by semi-colon. A binding is a mapping from
-         *   a key to a sequence of actions (for more details look at
-         *   android.webkit.AccessibilityInjector). A key is represented as the hexademical
-         *   string representation of an integer obtained from a meta state (optional) shifted
-         *   sixteen times left and bitwise ored with a key code. An action is represented
-         *   as a hexademical string representation of an integer where the first two digits
-         *   are navigation action index, the second, the third, and the fourth digit pairs
-         *   represent the action arguments. The separate actions in a binding are colon
-         *   separated. The key and the action sequence it maps to are separated by equals.
-         * </p>
-         * <p>
-         *   For example, the binding below maps the DPAD right button to traverse the
-         *   current navigation axis once without firing an accessibility event and to
-         *   perform the same traversal again but to fire an event:
-         *   <code>
-         *     0x16=0x01000100:0x01000101;
-         *   </code>
-         * </p>
-         * <p>
-         *   The goal of this binding is to enable dynamic rebinding of keys to
-         *   navigation actions for web content without requiring a framework change.
-         * </p>
-         * <p>
-         *   This property represents a string value.
-         * </p>
-         * @hide
-         */
-        public static final String ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS =
-            "accessibility_web_content_key_bindings";
-
-        /**
          * Setting that specifies whether the display magnification is enabled via a system-wide
          * triple tap gesture. Display magnifications allows the user to zoom in the display content
          * and is targeted to low vision users. The current magnification scale is controlled by
@@ -7001,9 +6951,8 @@ public final class Settings {
             ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
+            AUTOFILL_SERVICE,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-            ACCESSIBILITY_SCRIPT_INJECTION,
-            ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
             ENABLED_ACCESSIBILITY_SERVICES,
             ENABLED_NOTIFICATION_LISTENERS,
             ENABLED_VR_LISTENERS,
@@ -8360,16 +8309,6 @@ public final class Settings {
                 "network_recommendations_package";
 
         /**
-         * Value to specify if the Wi-Fi Framework should defer to
-         * {@link com.android.server.NetworkScoreService} for evaluating saved open networks.
-         *
-         * Type: int (0 for false, 1 for true)
-         * @hide
-         */
-        @SystemApi
-        public static final String CURATE_SAVED_OPEN_NETWORKS = "curate_saved_open_networks";
-
-        /**
          * The package name of the application that connect and secures high quality open wifi
          * networks automatically.
          *
@@ -8384,6 +8323,7 @@ public final class Settings {
          *
          * Type: long
          * @hide
+         * @deprecated to be removed
          */
         public static final String NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS =
                 "network_recommendation_request_timeout_ms";
@@ -9893,7 +9833,6 @@ public final class Settings {
             CHARGING_SOUNDS_ENABLED,
             USB_MASS_STORAGE_ENABLED,
             NETWORK_RECOMMENDATIONS_ENABLED,
-            CURATE_SAVED_OPEN_NETWORKS,
             WIFI_WAKEUP_ENABLED,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             USE_OPEN_WIFI_PACKAGE,

@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
@@ -33,6 +34,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -283,9 +286,22 @@ public class IntentFilter implements Parcelable {
     private static final int STATE_VERIFIED            = 0x00001000;
 
     private int mVerifyState;
-
+    /** @hide */
+    public static final int VISIBILITY_NONE = 0;
+    /** @hide */
+    public static final int VISIBILITY_EXPLICIT = 1;
+    /** @hide */
+    public static final int VISIBILITY_IMPLICIT = 2;
+    /** @hide */
+    @IntDef(prefix = { "VISIBILITY_" }, value = {
+            VISIBILITY_NONE,
+            VISIBILITY_EXPLICIT,
+            VISIBILITY_IMPLICIT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstantAppVisibility {}
     /** Whether or not the intent filter is visible to instant apps. */
-    private boolean mVisibleToInstantApp;
+    private @InstantAppVisibility int mInstantAppVisibility;
     // These functions are the start of more optimized code for managing
     // the string sets...  not yet implemented.
 
@@ -452,7 +468,7 @@ public class IntentFilter implements Parcelable {
         }
         mHasPartialTypes = o.mHasPartialTypes;
         mVerifyState = o.mVerifyState;
-        mVisibleToInstantApp = o.mVisibleToInstantApp;
+        mInstantAppVisibility = o.mInstantAppVisibility;
     }
 
     /**
@@ -655,12 +671,24 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    public void setVisibleToInstantApp(boolean visibleToInstantApp) {
-        mVisibleToInstantApp = visibleToInstantApp;
+    public void setVisibilityToInstantApp(@InstantAppVisibility int visibility) {
+        mInstantAppVisibility = visibility;
+    }
+    /** @hide */
+    public @InstantAppVisibility int getVisibilityToInstantApp() {
+        return mInstantAppVisibility;
     }
     /** @hide */
     public boolean isVisibleToInstantApp() {
-        return mVisibleToInstantApp;
+        return mInstantAppVisibility != VISIBILITY_NONE;
+    }
+    /** @hide */
+    public boolean isExplicitlyVisibleToInstantApp() {
+        return mInstantAppVisibility == VISIBILITY_EXPLICIT;
+    }
+    /** @hide */
+    public boolean isImplicitlyVisibleToInstantApp() {
+        return mInstantAppVisibility == VISIBILITY_IMPLICIT;
     }
 
     /**
@@ -1859,7 +1887,7 @@ public class IntentFilter implements Parcelable {
         dest.writeInt(mPriority);
         dest.writeInt(mHasPartialTypes ? 1 : 0);
         dest.writeInt(getAutoVerify() ? 1 : 0);
-        dest.writeInt(isVisibleToInstantApp() ? 1 : 0);
+        dest.writeInt(mInstantAppVisibility);
     }
 
     /**
@@ -1928,7 +1956,7 @@ public class IntentFilter implements Parcelable {
         mPriority = source.readInt();
         mHasPartialTypes = source.readInt() > 0;
         setAutoVerify(source.readInt() > 0);
-        setVisibleToInstantApp(source.readInt() > 0);
+        setVisibilityToInstantApp(source.readInt());
     }
 
     private final boolean findMimeType(String type) {

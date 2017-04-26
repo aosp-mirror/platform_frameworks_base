@@ -3659,10 +3659,7 @@ public class NotificationManagerService extends SystemService {
             }
             hasValidVibrate = vibration != null;
 
-            // We can alert, and we're allowed to alert, but if the developer asked us to only do
-            // it once, and we already have, then don't.
-            if (!(record.isUpdate
-                    && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0)) {
+            if (!shouldMuteNotificationLocked(record)) {
 
                 sendAccessibilityEvent(notification, record.sbn.getPackageName());
                 if (hasValidSound) {
@@ -3714,6 +3711,24 @@ public class NotificationManagerService extends SystemService {
                         buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
             }
         }
+    }
+
+    boolean shouldMuteNotificationLocked(final NotificationRecord record) {
+        final Notification notification = record.getNotification();
+        if(record.isUpdate
+                && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0) {
+            return true;
+        }
+        if (record.sbn.isGroup()) {
+            if (notification.isGroupSummary()
+                    && notification.getGroupAlertBehavior() == Notification.GROUP_ALERT_CHILDREN) {
+                return true;
+            } else if (notification.isGroupChild()
+                    && notification.getGroupAlertBehavior() == Notification.GROUP_ALERT_SUMMARY) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean playSound(final NotificationRecord record, Uri soundUri) {

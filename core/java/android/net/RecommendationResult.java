@@ -31,6 +31,7 @@ import com.android.internal.util.Preconditions;
  *
  * @see {@link NetworkScoreManager#requestRecommendation(RecommendationRequest)}.
  * @hide
+ * @deprecated to be removed.
  */
 @SystemApi
 public final class RecommendationResult implements Parcelable {
