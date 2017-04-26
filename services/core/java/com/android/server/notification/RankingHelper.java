@@ -33,7 +33,6 @@ import android.content.pm.ParceledListSlice;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -508,6 +507,14 @@ public class RankingHelper implements RankingConfig {
         updateConfig();
     }
 
+    int getPackagePriority(String pkg, int uid) {
+        return getOrCreateRecord(pkg, uid).priority;
+    }
+
+    int getPackageVisibility(String pkg, int uid) {
+        return getOrCreateRecord(pkg, uid).visibility;
+    }
+
     @Override
     public void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromTargetApp) {
@@ -607,6 +614,16 @@ public class RankingHelper implements RankingConfig {
             updatedChannel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
         }
         r.channels.put(updatedChannel.getId(), updatedChannel);
+
+        if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(updatedChannel.getId())) {
+            // copy settings to app level so they are inherited by new channels
+            // when the app migrates
+            r.importance = updatedChannel.getImportance();
+            r.priority = updatedChannel.canBypassDnd()
+                    ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT;
+            r.visibility = updatedChannel.getLockscreenVisibility();
+            r.showBadge = updatedChannel.canShowBadge();
+        }
 
         MetricsLogger.action(getChannelLog(updatedChannel, pkg));
         updateConfig();
