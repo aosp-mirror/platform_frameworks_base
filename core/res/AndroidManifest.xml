@@ -1803,7 +1803,7 @@
 
     <!-- @hide Allows an application to set display offsets for the screen.
          This permission is not available to third party applications. -->
-    <permission android:name="android.permission.SET_DISPLAY_OFFSET"
+    <permission android:name="com.android.permission.SET_DISPLAY_OFFSET"
         android:protectionLevel="signature|privileged" />
 
     <!-- ================================== -->
