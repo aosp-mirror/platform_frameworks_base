@@ -382,9 +382,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      *                    the adjusted bounds's top.
      */
     void alignToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
-        // Task override config might be empty, while display or stack override config isn't, so
-        // we have to check merged override config here.
-        if (!isResizeable() || Configuration.EMPTY.equals(getMergedOverrideConfiguration())) {
+        if (!isResizeable() || Configuration.EMPTY.equals(getOverrideConfiguration())) {
             return;
         }
 
