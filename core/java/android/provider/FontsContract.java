@@ -487,11 +487,15 @@ public class FontsContract {
      * @param context A context to be used for fetching from font provider.
      * @param request A {@link FontRequest} object that identifies the provider and query for the
      *                request. May not be null.
-     * @param callback A callback that will be triggered when results are obtained. May not be null.
      * @param handler A handler to be processed the font fetching.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none. If
+     *                           the operation is canceled, then {@link
+     *                           android.os.OperationCanceledException} will be thrown.
+     * @param callback A callback that will be triggered when results are obtained. May not be null.
      */
-    public static void requestFont(@NonNull Context context, @NonNull FontRequest request,
-            @NonNull FontRequestCallback callback, @NonNull Handler handler) {
+    public static void requestFonts(@NonNull Context context, @NonNull FontRequest request,
+            @NonNull Handler handler, @Nullable CancellationSignal cancellationSignal,
+            @NonNull FontRequestCallback callback) {
 
         final Handler callerThreadHandler = new Handler();
         final Typeface cachedTypeface = sTypefaceCache.get(request.getIdentifier());
@@ -503,7 +507,7 @@ public class FontsContract {
         handler.post(() -> {
             FontFamilyResult result;
             try {
-                result = fetchFonts(context, null /* cancellation signal */, request);
+                result = fetchFonts(context, cancellationSignal, request);
             } catch (NameNotFoundException e) {
                 callerThreadHandler.post(() -> callback.onTypefaceRequestFailed(
                         FontRequestCallback.FAIL_REASON_PROVIDER_NOT_FOUND));
@@ -558,7 +562,7 @@ public class FontsContract {
                 }
             }
 
-            final Typeface typeface = buildTypeface(context, null /* cancellation signal */, fonts);
+            final Typeface typeface = buildTypeface(context, cancellationSignal, fonts);
             if (typeface == null) {
                 // Something went wrong during reading font files. This happens if the given font
                 // file is an unsupported font type.
