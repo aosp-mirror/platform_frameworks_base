@@ -34,6 +34,7 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.MediaSessionManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -2483,13 +2484,21 @@ public class AudioManager {
         registerAudioFocusRequest(afr);
         final IAudioService service = getService();
         final int status;
+        int sdk;
+        try {
+            sdk = getContext().getApplicationInfo().targetSdkVersion;
+        } catch (NullPointerException e) {
+            // some tests don't have a Context
+            sdk = Build.VERSION.SDK_INT;
+        }
         try {
             status = service.requestAudioFocus(afr.getAudioAttributes(),
                     afr.getFocusGain(), mICallBack,
                     mAudioFocusDispatcher,
                     getIdForAudioFocusListener(afr.getOnAudioFocusChangeListener()),
                     getContext().getOpPackageName() /* package name */, afr.getFlags(),
-                    ap != null ? ap.cb() : null);
+                    ap != null ? ap.cb() : null,
+                    sdk);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2515,7 +2524,7 @@ public class AudioManager {
                     AudioSystem.IN_VOICE_COMM_FOCUS_ID,
                     getContext().getOpPackageName(),
                     AUDIOFOCUS_FLAG_LOCK,
-                    null /* policy token */);
+                    null /* policy token */, 0 /* sdk n/a here*/);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
