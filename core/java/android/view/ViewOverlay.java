@@ -330,20 +330,20 @@ public class ViewOverlay {
 
         @Override
         public void onDescendantInvalidated(@NonNull View child, @NonNull View target) {
-            if (mHostView != null && mHostView.getParent() != null) {
-                mHostView.getParent().onDescendantInvalidated(mHostView, target);
-            }
-        }
+            if (mHostView != null) {
+                if (mHostView instanceof ViewGroup) {
+                    // Propagate invalidate through the host...
+                    ((ViewGroup) mHostView).onDescendantInvalidated(mHostView, target);
 
-        /**
-         * @hide
-         */
-        @Override
-        protected ViewParent damageChildInParent(int left, int top, Rect dirty) {
-            if (mHostView instanceof ViewGroup) {
-                return ((ViewGroup) mHostView).damageChildInParent(left, top, dirty);
+                    // ...and also this view, since it will hold the descendant, and must later
+                    // propagate the calls to update display lists if dirty
+                    super.onDescendantInvalidated(child, target);
+                } else {
+                    // Can't use onDescendantInvalidated because host isn't a ViewGroup - fall back
+                    // to invalidating.
+                    invalidate();
+                }
             }
-            return null;
         }
 
         @Override
