@@ -14,33 +14,32 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_TUNER_H
-#define _ANDROID_SERVER_RADIO_TUNER_H
+#ifndef _ANDROID_SERVER_RADIO_CONVERT_H
+#define _ANDROID_SERVER_RADIO_CONVERT_H
 
+#include "JavaRef.h"
 #include "com_android_server_radio_types.h"
 
-#include <android/hardware/broadcastradio/1.1/ITuner.h>
-#include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
+#include <android/hardware/broadcastradio/1.1/types.h>
 #include <jni.h>
-#include <utils/StrongPointer.h>
 
 namespace android {
 
-void register_android_server_radio_Tuner(JavaVM *vm, JNIEnv *env);
+void register_android_server_radio_convert(JNIEnv *env);
 
 namespace server {
 namespace radio {
-namespace Tuner {
+namespace convert {
 
-void setHalTuner(JNIEnv *env, jobject obj, sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
+namespace V1_0 = hardware::broadcastradio::V1_0;
+namespace V1_1 = hardware::broadcastradio::V1_1;
 
-sp<hardware::broadcastradio::V1_1::ITunerCallback> getNativeCallback(JNIEnv *env, jobject obj);
+JavaRef BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
+V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
 
-Region getRegion(JNIEnv *env, jobject obj);
-
-} // namespace Tuner
+} // namespace convert
 } // namespace radio
 } // namespace server
 } // namespace android
 
-#endif // _ANDROID_SERVER_RADIO_TUNER_H
+#endif // _ANDROID_SERVER_RADIO_CONVERT_H

@@ -20,6 +20,7 @@
 #include "com_android_server_radio_RadioService.h"
 
 #include "com_android_server_radio_Tuner.h"
+#include "com_android_server_radio_convert.h"
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <core_jni_helpers.h>
@@ -132,13 +133,15 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
         return nullptr;
     }
 
-    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback);
+    Region region;
+    BandConfig bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
+
+    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback, region);
     if (tuner == nullptr) {
         ALOGE("Unable to create new tuner object.");
         return nullptr;
     }
 
-    BandConfig bandConfigHal = {};  // TODO(b/36863239): convert from bandConfig
     auto tunerCb = Tuner::getNativeCallback(env, tuner);
     Result halResult;
     sp<ITuner> halTuner = nullptr;
@@ -176,10 +179,12 @@ static const JNINativeMethod gRadioServiceMethods[] = {
 void register_android_server_radio_RadioService(JNIEnv *env) {
     using namespace server::radio::RadioService;
 
+    register_android_server_radio_convert(env);
+
     auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
     gTunerClass = MakeGlobalRefOrDie(env, tunerClass);
     gTunerCstor = GetMethodIDOrDie(env, tunerClass, "<init>",
-            "(Landroid/hardware/radio/ITunerCallback;)V");
+            "(Landroid/hardware/radio/ITunerCallback;I)V");
 
     auto serviceClass = FindClassOrDie(env, "com/android/server/radio/RadioService");
     gServiceClass = MakeGlobalRefOrDie(env, serviceClass);

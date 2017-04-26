@@ -31,7 +31,10 @@ class Tuner extends ITuner.Stub {
      */
     private final long mNativeContext;
 
-    Tuner(@NonNull ITunerCallback clientCallback) {
+    private int mRegion;
+
+    Tuner(@NonNull ITunerCallback clientCallback, int region) {
+        mRegion = region;
         mNativeContext = nativeInit(clientCallback);
     }
 
