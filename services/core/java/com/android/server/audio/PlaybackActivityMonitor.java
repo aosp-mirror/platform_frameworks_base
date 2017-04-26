@@ -308,10 +308,17 @@ public final class PlaybackActivityMonitor
                 {
                     if (mDuckedPlayers.contains(new Integer(piid))) {
                         if (DEBUG) { Log.v(TAG, "player " + piid + " already ducked"); }
+                    } else if (MediaFocusControl.ENFORCE_DUCKING
+                            && MediaFocusControl.ENFORCE_DUCKING_FOR_NEW
+                            && loser.getSdkTarget() <= MediaFocusControl.DUCKING_IN_APP_SDK_LEVEL) {
+                        // legacy behavior, apps used to be notified when they should be ducking
+                        if (DEBUG) { Log.v(TAG, "not ducking player " + piid + ": old SDK"); }
+                        return false;
                     } else if (apc.getAudioAttributes().getContentType() ==
                             AudioAttributes.CONTENT_TYPE_SPEECH) {
                         // the player is speaking, ducking will make the speech unintelligible
                         // so let the app handle it instead
+                        if (DEBUG) { Log.v(TAG, "not ducking player " + piid + ": SPEECH"); }
                         return false;
                     } else if (apc.getPlayerType()
                             == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {

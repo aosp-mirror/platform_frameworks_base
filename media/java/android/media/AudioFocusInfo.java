@@ -33,6 +33,7 @@ public final class AudioFocusInfo implements Parcelable {
     private final int mClientUid;
     private final String mClientId;
     private final String mPackageName;
+    private final int mSdkTarget;
     private int mGainRequest;
     private int mLossReceived;
     private int mFlags;
@@ -49,7 +50,7 @@ public final class AudioFocusInfo implements Parcelable {
      * @hide
      */
     public AudioFocusInfo(AudioAttributes aa, int clientUid, String clientId, String packageName,
-            int gainRequest, int lossReceived, int flags) {
+            int gainRequest, int lossReceived, int flags, int sdk) {
         mAttributes = aa == null ? new AudioAttributes.Builder().build() : aa;
         mClientUid = clientUid;
         mClientId = clientId == null ? "" : clientId;
@@ -57,6 +58,7 @@ public final class AudioFocusInfo implements Parcelable {
         mGainRequest = gainRequest;
         mLossReceived = lossReceived;
         mFlags = flags;
+        mSdkTarget = sdk;
     }
 
 
@@ -97,6 +99,9 @@ public final class AudioFocusInfo implements Parcelable {
     public int getLossReceived() { return mLossReceived; }
 
     /** @hide */
+    public int getSdkTarget() { return mSdkTarget; }
+
+    /** @hide */
     public void clearLossReceived() { mLossReceived = 0; }
 
     /**
@@ -122,6 +127,7 @@ public final class AudioFocusInfo implements Parcelable {
         dest.writeInt(mGainRequest);
         dest.writeInt(mLossReceived);
         dest.writeInt(mFlags);
+        dest.writeInt(mSdkTarget);
     }
 
     @SystemApi
@@ -161,6 +167,9 @@ public final class AudioFocusInfo implements Parcelable {
         if (mFlags != other.mFlags) {
             return false;
         }
+        if (mSdkTarget != other.mSdkTarget) {
+            return false;
+        }
         return true;
     }
 
@@ -175,7 +184,8 @@ public final class AudioFocusInfo implements Parcelable {
                     in.readString(), //String packageName
                     in.readInt(), //int gainRequest
                     in.readInt(), //int lossReceived
-                    in.readInt() //int flags
+                    in.readInt(), //int flags
+                    in.readInt()  //int sdkTarget
                     );
         }
 

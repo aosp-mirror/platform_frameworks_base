@@ -27,6 +27,7 @@ import android.media.IAudioFocusDispatcher;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -55,6 +56,17 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * that they lost focus for most use cases.
      */
     static final boolean ENFORCE_DUCKING = true;
+    /**
+     * set to true to the framework enforces ducking itself only with apps above a given SDK
+     * target level. Is ignored if ENFORCE_DUCKING is false.
+     */
+    static final boolean ENFORCE_DUCKING_FOR_NEW = true;
+    /**
+     * the SDK level (included) up to which the framework doesn't enforce ducking itself. Is ignored
+     * if ENFORCE_DUCKING_FOR_NEW is false;
+     */
+    // automatic ducking was introduced for Android O
+    static final int DUCKING_IN_APP_SDK_LEVEL = Build.VERSION_CODES.N_MR1;
     /**
      * set to true so the framework enforces muting media/game itself when the device is ringing
      * or in a call.
@@ -629,7 +641,8 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
     /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int, int) */
     protected int requestAudioFocus(AudioAttributes aa, int focusChangeHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags) {
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
+            int sdk) {
         Log.i(TAG, " AudioFocus  requestAudioFocus() from uid/pid " + Binder.getCallingUid()
                 + "/" + Binder.getCallingPid()
                 + " clientId=" + clientId
@@ -656,7 +669,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 // construct AudioFocusInfo as it will be communicated to audio focus policy
                 afiForExtPolicy = new AudioFocusInfo(aa, Binder.getCallingUid(),
                         clientId, callingPackageName, focusChangeHint, 0 /*lossReceived*/,
-                        flags);
+                        flags, sdk);
             } else {
                 afiForExtPolicy = null;
             }
@@ -722,7 +735,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             removeFocusStackEntry(clientId, false /* signal */, false /*notifyFocusFollowers*/);
 
             final FocusRequester nfr = new FocusRequester(aa, focusChangeHint, flags, fd, cb,
-                    clientId, afdh, callingPackageName, Binder.getCallingUid(), this);
+                    clientId, afdh, callingPackageName, Binder.getCallingUid(), this, sdk);
             if (focusGrantDelayed) {
                 // focusGrantDelayed being true implies we can't reassign focus right now
                 // which implies the focus stack is not empty.
@@ -767,7 +780,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 if (mFocusPolicy != null) {
                     final AudioFocusInfo afi = new AudioFocusInfo(aa, Binder.getCallingUid(),
                             clientId, callingPackageName, 0 /*gainRequest*/, 0 /*lossReceived*/,
-                            0 /*flags*/);
+                            0 /*flags*/, 0 /* sdk n/a here*/);
                     if (notifyExtFocusPolicyFocusAbandon_syncAf(afi)) {
                         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
                     }
