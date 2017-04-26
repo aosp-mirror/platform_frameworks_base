@@ -583,6 +583,9 @@ public class SyntheticPasswordManager {
             sid = GateKeeper.INVALID_SECURE_USER_ID;
             applicationId = transformUnderWeaverSecret(pwdToken, weaverSecret);
         } else {
+            // In case GK enrollment leaves persistent state around (in RPMB), this will nuke them
+            // to prevent them from accumulating and causing problems.
+            gatekeeper.clearSecureUserId(fakeUid(userId));
             // GateKeeper based user password
             GateKeeperResponse response = gatekeeper.enroll(fakeUid(userId), null, null,
                     passwordTokenToGkInput(pwdToken));
