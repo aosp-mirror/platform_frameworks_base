@@ -65,6 +65,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Utility class to deal with Font ContentProviders.
@@ -303,6 +309,8 @@ public class FontsContract {
 
     private static final int THREAD_RENEWAL_THRESHOLD_MS = 10000;
 
+    private static final long SYNC_FONT_FETCH_TIMEOUT_MS = 500;
+
     // We use a background thread to post the content resolving work for all requests on. This
     // thread should be quit/stopped after all requests are done.
     // TODO: Factor out to other class. Consider to switch MessageQueue.IdleHandler.
@@ -314,14 +322,13 @@ public class FontsContract {
                     sThread.quitSafely();
                     sThread = null;
                     sHandler = null;
-                    sInQueueSet = null;
                 }
             }
         }
     };
 
     /** @hide */
-    public static Typeface getFontOrWarmUpCache(FontRequest request) {
+    public static Typeface getFontSync(FontRequest request) {
         final String id = request.getIdentifier();
         Typeface cachedTypeface = sTypefaceCache.get(id);
         if (cachedTypeface != null) {
@@ -336,16 +343,14 @@ public class FontsContract {
                 sThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
                 sThread.start();
                 sHandler = new Handler(sThread.getLooper());
-                sInQueueSet = new ArraySet<>();
             }
-            if (sInQueueSet.contains(id)) {
-                return null;  // Already requested.
-            }
-            sInQueueSet.add(id);
+            final Lock lock = new ReentrantLock();
+            final Condition cond = lock.newCondition();
+            final AtomicReference<Typeface> holder = new AtomicReference<>();
+            final AtomicBoolean waiting = new AtomicBoolean(true);
+            final AtomicBoolean timeout = new AtomicBoolean(false);
+
             sHandler.post(() -> {
-                synchronized (sLock) {
-                    sInQueueSet.remove(id);
-                }
                 try {
                     FontFamilyResult result = fetchFonts(sContext, null, request);
                     if (result.getStatusCode() == FontFamilyResult.STATUS_OK) {
@@ -353,15 +358,50 @@ public class FontsContract {
                         if (typeface != null) {
                             sTypefaceCache.put(id, typeface);
                         }
+                        holder.set(typeface);
                     }
                 } catch (NameNotFoundException e) {
                     // Ignore.
                 }
+                lock.lock();
+                try {
+                    if (!timeout.get()) {
+                      waiting.set(false);
+                      cond.signal();
+                    }
+                } finally {
+                    lock.unlock();
+                }
             });
             sHandler.removeCallbacks(sReplaceDispatcherThreadRunnable);
             sHandler.postDelayed(sReplaceDispatcherThreadRunnable, THREAD_RENEWAL_THRESHOLD_MS);
+
+            long remaining = TimeUnit.MILLISECONDS.toNanos(SYNC_FONT_FETCH_TIMEOUT_MS);
+            lock.lock();
+            try {
+                if (!waiting.get()) {
+                    return holder.get();
+                }
+                for (;;) {
+                    try {
+                        remaining = cond.awaitNanos(remaining);
+                    } catch (InterruptedException e) {
+                        // do nothing.
+                    }
+                    if (!waiting.get()) {
+                        return holder.get();
+                    }
+                    if (remaining <= 0) {
+                        timeout.set(true);
+                        Log.w(TAG, "Remote font fetch timed out: " +
+                                request.getProviderAuthority() + "/" + request.getQuery());
+                        return null;
+                    }
+                }
+            } finally {
+                lock.unlock();
+            }
         }
-        return null;
     }
 
     /**
@@ -590,6 +630,9 @@ public class FontsContract {
         }
         final Map<Uri, ByteBuffer> uriBuffer =
                 prepareFontData(context, fonts, cancellationSignal);
+        if (uriBuffer.isEmpty()) {
+            return null;
+        }
         return new Typeface.Builder(fonts, uriBuffer)
             .setFallback(fallbackFontName)
             .setWeight(weight)
@@ -617,6 +660,9 @@ public class FontsContract {
         }
         final Map<Uri, ByteBuffer> uriBuffer =
                 prepareFontData(context, fonts, cancellationSignal);
+        if (uriBuffer.isEmpty()) {
+            return null;
+        }
         return new Typeface.Builder(fonts, uriBuffer).build();
     }
 
@@ -647,11 +693,17 @@ public class FontsContract {
 
             ByteBuffer buffer = null;
             try (final ParcelFileDescriptor pfd =
-                    resolver.openFileDescriptor(uri, "r", cancellationSignal);
-                    final FileInputStream fis = new FileInputStream(pfd.getFileDescriptor())) {
-                final FileChannel fileChannel = fis.getChannel();
-                final long size = fileChannel.size();
-                buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, size);
+                    resolver.openFileDescriptor(uri, "r", cancellationSignal)) {
+                if (pfd != null) {
+                    try (final FileInputStream fis =
+                            new FileInputStream(pfd.getFileDescriptor())) {
+                        final FileChannel fileChannel = fis.getChannel();
+                        final long size = fileChannel.size();
+                        buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, size);
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
             } catch (IOException e) {
                 // ignore
             }

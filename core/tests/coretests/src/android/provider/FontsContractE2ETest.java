@@ -18,27 +18,28 @@ package android.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import android.app.Instrumentation;
-import android.content.pm.Signature;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageInfo;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontRequest;
-import android.provider.FontsContract;
+import android.os.Handler;
+import android.provider.FontsContract.Columns;
 import android.provider.FontsContract.FontFamilyResult;
 import android.provider.FontsContract.FontInfo;
-import android.provider.FontsContract.Columns;
+import android.provider.FontsContract;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.os.Handler;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -171,5 +172,32 @@ public class FontsContractE2ETest {
 
         // Neighter fetchFonts nor buildTypeface should cache the Typeface.
         assertNotSame(typeface, typeface2);
+    }
+
+    @Test
+    public void typefaceNullFdTest() throws NameNotFoundException {
+        Instrumentation inst = InstrumentationRegistry.getInstrumentation();
+        Context ctx = inst.getTargetContext();
+
+        FontRequest request = new FontRequest(
+                AUTHORITY, PACKAGE, MockFontProvider.NULL_FD_QUERY, SIGNATURE);
+        FontFamilyResult result = FontsContract.fetchFonts(
+                ctx, null /* cancellation signal */, request);
+        assertNull(FontsContract.buildTypeface(
+                ctx, null /* cancellation signal */, result.getFonts()));
+    }
+
+    @Test
+    public void getFontSyncTest() {
+        FontRequest request = new FontRequest(AUTHORITY, PACKAGE, "singleFontFamily", SIGNATURE);
+        assertNotNull(FontsContract.getFontSync(request));
+    }
+
+    @Test
+    public void getFontSyncTest_timeout() {
+        FontRequest request = new FontRequest(
+                AUTHORITY, PACKAGE, MockFontProvider.BLOCKING_QUERY, SIGNATURE);
+        assertNull(FontsContract.getFontSync(request));
+        MockFontProvider.unblock();
     }
 }
