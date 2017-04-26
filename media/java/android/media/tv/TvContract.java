@@ -19,8 +19,10 @@ package android.media.tv;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -90,6 +92,7 @@ public final class TvContract {
      * @hide
      */
     @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CHANNEL_BROWSABLE_REQUESTED =
             "android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED";
 
@@ -105,6 +108,7 @@ public final class TvContract {
      *     integer.</li>
      * </ul>
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_CHANNEL_BROWSABLE =
             "android.media.tv.action.REQUEST_CHANNEL_BROWSABLE";
 
@@ -119,6 +123,7 @@ public final class TvContract {
      *     <li>{@link #EXTRA_PREVIEW_PROGRAM_ID}: the disabled preview program ID.</li>
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PREVIEW_PROGRAM_BROWSABLE_DISABLED =
             "android.media.tv.action.PREVIEW_PROGRAM_BROWSABLE_DISABLED";
 
@@ -133,6 +138,7 @@ public final class TvContract {
      *     <li>{@link #EXTRA_WATCH_NEXT_PROGRAM_ID}: the disabled "watch next" program ID.</li>
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED =
             "android.media.tv.action.WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED";
 
@@ -146,6 +152,7 @@ public final class TvContract {
      *     <li>{@link #EXTRA_WATCH_NEXT_PROGRAM_ID}: the ID of the new watch next program.</li>
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT =
             "android.media.tv.action.PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT";
 
@@ -163,6 +170,7 @@ public final class TvContract {
      *         <code>AndroidManifest.xml</code>.</li>
      * </ul>
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_INITIALIZE_PROGRAMS =
             "android.media.tv.action.INITIALIZE_PROGRAMS";
 

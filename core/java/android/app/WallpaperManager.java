@@ -20,7 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RawRes;
+import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -103,6 +105,7 @@ public class WallpaperManager {
      * <p>Output: RESULT_OK if user decided to crop/set the wallpaper, RESULT_CANCEL otherwise
      * Activities that support this intent should specify a MIME filter of "image/*"
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CROP_AND_SET_WALLPAPER =
             "android.service.wallpaper.CROP_AND_SET_WALLPAPER";
 

@@ -17,6 +17,8 @@
 package android.provider;
 
 import android.accounts.Account;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -8401,6 +8403,7 @@ public final class ContactsContract {
          * Action used to launch the system contacts application and bring up a QuickContact dialog
          * for the provided {@link Contacts} entry.
          */
+        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
         public static final String ACTION_QUICK_CONTACT =
                 "android.provider.action.QUICK_CONTACT";
 
@@ -8924,6 +8927,7 @@ public final class ContactsContract {
          * @see #METADATA_ACCOUNT_TYPE
          * @see #METADATA_MIMETYPE
          */
+        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
         public static final String ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS =
                 "android.provider.action.VOICE_SEND_MESSAGE_TO_CONTACTS";
 
