@@ -465,6 +465,26 @@ public class PipMotionHelper {
     }
 
     /**
+     * @return whether the gesture it towards the dismiss area based on the velocity when
+     *         dismissing.
+     */
+    public boolean isGestureToDismissArea(Rect pipBounds, float velX, float velY,
+            boolean isFling) {
+        Point endpoint = getDismissEndPoint(pipBounds, velX, velY, isFling);
+        // Center the point
+        endpoint.x += pipBounds.width() / 2;
+        endpoint.y += pipBounds.height() / 2;
+
+        // The dismiss area is the middle third of the screen, half the PIP's height from the bottom
+        Point size = new Point();
+        mContext.getDisplay().getRealSize(size);
+        final int left = size.x / 3;
+        Rect dismissArea = new Rect(left, size.y - (pipBounds.height() / 2), left * 2,
+                size.y + pipBounds.height());
+        return dismissArea.contains(endpoint.x, endpoint.y);
+    }
+
+    /**
      * @return the distance between points {@param p1} and {@param p2}.
      */
     private float distanceBetweenRectOffsets(Rect r1, Rect r2) {
