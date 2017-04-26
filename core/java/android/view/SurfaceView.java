@@ -711,6 +711,10 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     mTranslator.translateRectInAppWindowToScreen(mScreenRect);
                 }
 
+                if (mSurfaceControl == null) {
+                    return;
+                }
+
                 if (!isHardwareAccelerated() || !mRtHandlingPositionUpdates) {
                     try {
                         if (DEBUG) Log.d(TAG, String.format("%d updateSurfacePosition UI, " +
