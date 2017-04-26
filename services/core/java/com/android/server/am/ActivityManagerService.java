@@ -1478,12 +1478,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             = new ProcessMap<ArrayList<ProcessRecord>>();
 
     /**
-     * This is set if we had to do a delayed dexopt of an app before launching
-     * it, to increase the ANR timeouts in that case.
-     */
-    boolean mDidDexOpt;
-
-    /**
      * Set if the systemServer made a call to enterSafeMode.
      */
     boolean mSafeMode;
@@ -1965,13 +1959,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case SERVICE_TIMEOUT_MSG: {
-                if (mDidDexOpt) {
-                    mDidDexOpt = false;
-                    Message nmsg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
-                    nmsg.obj = msg.obj;
-                    mHandler.sendMessageDelayed(nmsg, ActiveServices.SERVICE_TIMEOUT);
-                    return;
-                }
                 mServices.serviceTimeout((ProcessRecord)msg.obj);
             } break;
             case SERVICE_FOREGROUND_TIMEOUT_MSG: {
@@ -2047,13 +2034,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case PROC_START_TIMEOUT_MSG: {
-                if (mDidDexOpt) {
-                    mDidDexOpt = false;
-                    Message nmsg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
-                    nmsg.obj = msg.obj;
-                    mHandler.sendMessageDelayed(nmsg, PROC_START_TIMEOUT);
-                    return;
-                }
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
@@ -12792,12 +12772,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (proc != null) {
             synchronized (this) {
                 if (proc.debugging) {
-                    return false;
-                }
-
-                if (mDidDexOpt) {
-                    // Give more time since we were dexopting.
-                    mDidDexOpt = false;
                     return false;
                 }
 
