@@ -41,7 +41,7 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer() throws Exception {
         final WindowTestUtils.TestTaskWindowContainerController taskController =
-                new WindowTestUtils.TestTaskWindowContainerController();
+                new WindowTestUtils.TestTaskWindowContainerController(this);
         final WindowTestUtils.TestAppWindowContainerController appController =
                 new WindowTestUtils.TestAppWindowContainerController(taskController);
 
@@ -54,7 +54,7 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer_deferRemoval() throws Exception {
         final WindowTestUtils.TestTaskWindowContainerController taskController =
-                new WindowTestUtils.TestTaskWindowContainerController();
+                new WindowTestUtils.TestTaskWindowContainerController(this);
         final WindowTestUtils.TestAppWindowContainerController appController =
                 new WindowTestUtils.TestAppWindowContainerController(taskController);
 
@@ -79,11 +79,11 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
     @Test
     public void testReparent() throws Exception {
         final StackWindowController stackController1 =
-                createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTaskWindowContainerController taskController =
                 new WindowTestUtils.TestTaskWindowContainerController(stackController1);
         final StackWindowController stackController2 =
-                createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTaskWindowContainerController taskController2 =
                 new WindowTestUtils.TestTaskWindowContainerController(stackController2);
 
@@ -96,7 +96,7 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
         assertTrue("Should not be able to reparent to the same parent", gotException);
 
         final StackWindowController stackController3 =
-                createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnDisplay(mDisplayContent);
         stackController3.setContainer(null);
         gotException = false;
         try {
@@ -117,13 +117,13 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
     public void testReparent_BetweenDisplays() throws Exception {
         // Create first stack on primary display.
         final StackWindowController stack1Controller =
-                createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnDisplay(mDisplayContent);
         final TaskStack stack1 = stack1Controller.mContainer;
         final WindowTestUtils.TestTaskWindowContainerController taskController =
                 new WindowTestUtils.TestTaskWindowContainerController(stack1Controller);
         final WindowTestUtils.TestTask task1 = (WindowTestUtils.TestTask) taskController.mContainer;
         task1.mOnDisplayChangedCalled = false;
-        assertEquals(sDisplayContent, stack1.getDisplayContent());
+        assertEquals(mDisplayContent, stack1.getDisplayContent());
 
         // Create second display and put second stack on it.
         final DisplayContent dc = createNewDisplay();

@@ -22,16 +22,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.graphics.Rect;
-import android.os.Binder;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static com.android.server.wm.TaskPositioner.MIN_ASPECT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
@@ -61,7 +57,7 @@ public class TaskPositionerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        final Display display = sDisplayContent.getDisplay();
+        final Display display = mDisplayContent.getDisplay();
         final DisplayMetrics dm = new DisplayMetrics();
         display.getMetrics(dm);
 

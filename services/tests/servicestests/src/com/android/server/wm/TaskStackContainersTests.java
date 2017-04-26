@@ -51,12 +51,13 @@ public class TaskStackContainersTests extends WindowTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mPinnedStack = new StackWindowController(PINNED_STACK_ID, null,
-                sDisplayContent.getDisplayId(), true /* onTop */, new Rect(), sWm).mContainer;
+                mDisplayContent.getDisplayId(), true /* onTop */, new Rect(), sWm).mContainer;
 
         // Stack should contain visible app window to be considered visible.
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);
         assertFalse(mPinnedStack.isVisible());
-        final WindowTestUtils.TestAppWindowToken pinnedApp = new WindowTestUtils.TestAppWindowToken(sDisplayContent);
+        final WindowTestUtils.TestAppWindowToken pinnedApp = new WindowTestUtils.TestAppWindowToken(
+                mDisplayContent);
         pinnedTask.addChild(pinnedApp, 0 /* addPos */);
         assertTrue(mPinnedStack.isVisible());
     }
@@ -69,8 +70,8 @@ public class TaskStackContainersTests extends WindowTestsBase {
     @Test
     public void testStackPositionChildAt() throws Exception {
         // Test that always-on-top stack can't be moved to position other than top.
-        final TaskStack stack1 = createTaskStackOnDisplay(sDisplayContent);
-        final TaskStack stack2 = createTaskStackOnDisplay(sDisplayContent);
+        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final TaskStack stack2 = createTaskStackOnDisplay(mDisplayContent);
 
         final WindowContainer taskStackContainer = stack1.getParent();
 
@@ -94,7 +95,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
     @Test
     public void testStackPositionBelowPinnedStack() throws Exception {
         // Test that no stack can be above pinned stack.
-        final TaskStack stack1 = createTaskStackOnDisplay(sDisplayContent);
+        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
 
         final WindowContainer taskStackContainer = stack1.getParent();
 

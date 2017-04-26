@@ -75,12 +75,12 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     @Test
     public void testGetSnapshotMode() throws Exception {
         final WindowState disabledWindow = createWindow(null,
-                FIRST_APPLICATION_WINDOW, sDisplayContent, "disabledWindow");
+                FIRST_APPLICATION_WINDOW, mDisplayContent, "disabledWindow");
         disabledWindow.mAppToken.setDisablePreviewSnapshots(true);
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 sWm.mTaskSnapshotController.getSnapshotMode(disabledWindow.getTask()));
         final WindowState normalWindow = createWindow(null,
-                FIRST_APPLICATION_WINDOW, sDisplayContent, "normalWindow");
+                FIRST_APPLICATION_WINDOW, mDisplayContent, "normalWindow");
         assertEquals(SNAPSHOT_MODE_REAL,
                 sWm.mTaskSnapshotController.getSnapshotMode(normalWindow.getTask()));
     }

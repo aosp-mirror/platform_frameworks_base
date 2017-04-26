@@ -42,7 +42,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer() throws Exception {
         final StackWindowController stackController =
-                createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTaskWindowContainerController taskController =
                 new WindowTestUtils.TestTaskWindowContainerController(stackController);
 
@@ -62,7 +62,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer_deferRemoval() throws Exception {
         final StackWindowController stackController =
-                createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTaskWindowContainerController taskController =
                 new WindowTestUtils.TestTaskWindowContainerController(stackController);
 
@@ -89,7 +89,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
     public void testReparent() throws Exception {
         // Create first stack on primary display.
         final StackWindowController stack1Controller =
-                createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnDisplay(mDisplayContent);
         final TaskStack stack1 = stack1Controller.mContainer;
         final WindowTestUtils.TestTaskWindowContainerController taskController =
                 new WindowTestUtils.TestTaskWindowContainerController(stack1Controller);
