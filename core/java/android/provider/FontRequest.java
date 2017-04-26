@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.graphics.fonts;
+package android.provider;
 
 import android.annotation.NonNull;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Base64;
 
 import com.android.internal.util.Preconditions;
@@ -29,7 +27,7 @@ import java.util.List;
 /**
  * Information about a font request that may be sent to a Font Provider.
  */
-public final class FontRequest implements Parcelable {
+public final class FontRequest {
     private final String mProviderAuthority;
     private final String mProviderPackage;
     private final String mQuery;
@@ -113,42 +111,6 @@ public final class FontRequest implements Parcelable {
     public String getIdentifier() {
         return mIdentifier;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mProviderAuthority);
-        dest.writeString(mProviderPackage);
-        dest.writeString(mQuery);
-        dest.writeList(mCertificates);
-    }
-
-    private FontRequest(Parcel in) {
-        mProviderAuthority = in.readString();
-        mProviderPackage = in.readString();
-        mQuery = in.readString();
-        mCertificates = new ArrayList<>();
-        in.readList(mCertificates, null);
-        mIdentifier = new StringBuilder(mProviderAuthority).append("-").append(mProviderPackage)
-                .append("-").append(mQuery).toString();
-    }
-
-    public static final Parcelable.Creator<FontRequest> CREATOR =
-            new Parcelable.Creator<FontRequest>() {
-                @Override
-                public FontRequest createFromParcel(Parcel in) {
-                    return new FontRequest(in);
-                }
-
-                @Override
-                public FontRequest[] newArray(int size) {
-                    return new FontRequest[size];
-                }
-            };
 
     @Override
     public String toString() {
