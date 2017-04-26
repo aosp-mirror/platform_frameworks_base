@@ -402,7 +402,7 @@ public class TelephonyIntents {
      * <ul>
      *   <li>apnType</li><dd>A string with the apn type.</dd>
      *   <li>redirectionUrl</li><dd>redirection url string</dd>
-     *   <li>subId</dt><li>Sub Id which associated the data connection failure.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data connection failure.</dd>
      * </ul>
      * <p class="note">This is a protected intent that can only be sent by the system.</p>
      */
@@ -415,7 +415,7 @@ public class TelephonyIntents {
      * <ul>
      *   <li>apnType</li><dd>A string with the apn type.</dd>
      *   <li>errorCode</li><dd>A integer with dataFailCause.</dd>
-     *   <li>subId</dt><li>Sub Id which associated the data connection failure.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data connection failure.</dd>
      * </ul>
      * <p class="note">This is a protected intent that can only be sent by the system. </p>
      */
@@ -432,12 +432,24 @@ public class TelephonyIntents {
      *                        IPV4V6)</dd>
      *   <li>pcoId</li><dd>An integer indicating the pco id for the data.</dd>
      *   <li>pcoValue</li><dd>A byte array of pco data read from modem.</dd>
-     *   <li>subId</dt><li>Sub Id which associated the data connection.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data connection.</dd>
      * </ul>
      * <p class="note">This is a protected intent that can only be sent by the system. </p>
      */
     public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE =
             "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";
+
+    /**
+     * <p>Broadcast Action: when framework reset all carrier actions on sim load or absent.
+     * intended for carrier apps clean up (clear UI e.g.) and only sent to the specified carrier app
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>subId</li><dd>Sub Id which associated the data connection failure.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     */
+    public static final String ACTION_CARRIER_SIGNAL_RESET =
+            "com.android.internal.telephony.CARRIER_SIGNAL_RESET";
 
     // CARRIER_SIGNAL_ACTION extra keys
     public static final String EXTRA_REDIRECTION_URL_KEY = "redirectionUrl";
