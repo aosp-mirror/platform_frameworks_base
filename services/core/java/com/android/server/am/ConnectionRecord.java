@@ -74,6 +74,9 @@ final class ConnectionRecord {
         if ((flags&Context.BIND_NOT_FOREGROUND) != 0) {
             sb.append("!FG ");
         }
+        if ((flags&Context.BIND_IMPORTANT_BACKGROUND) != 0) {
+            sb.append("IMPB ");
+        }
         if ((flags&Context.BIND_ABOVE_CLIENT) != 0) {
             sb.append("ABCLT ");
         }

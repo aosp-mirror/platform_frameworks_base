@@ -3952,6 +3952,11 @@ message MetricsEvent {
     // internal platform metrics use.
     RESERVED_FOR_LOGBUILDER_UID = 943;
 
+    // OPEN: Running background apps notification > List of background apps
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O
+    RUNNING_BACKGROUND_APPS_DIALOG = 944;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.

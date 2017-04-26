@@ -31,10 +31,12 @@ import java.util.Set;
 
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.app.NotificationManager;
 import android.app.ServiceStartArgs;
 import android.content.IIntentSender;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadObjectException;
@@ -43,10 +45,14 @@ import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.SystemProperties;
 import android.os.TransactionTooLargeException;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.R;
 import com.android.internal.app.procstats.ServiceState;
+import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
@@ -101,32 +107,6 @@ public final class ActiveServices {
     // calling startForeground() before we ANR + stop it.
     static final int SERVICE_START_FOREGROUND_TIMEOUT = 5*1000;
 
-    // How long a service needs to be running until restarting its process
-    // is no longer considered to be a relaunch of the service.
-    static final int SERVICE_RESTART_DURATION = 1*1000;
-
-    // How long a service needs to be running until it will start back at
-    // SERVICE_RESTART_DURATION after being killed.
-    static final int SERVICE_RESET_RUN_DURATION = 60*1000;
-
-    // Multiplying factor to increase restart duration time by, for each time
-    // a service is killed before it has run for SERVICE_RESET_RUN_DURATION.
-    static final int SERVICE_RESTART_DURATION_FACTOR = 4;
-
-    // The minimum amount of time between restarting services that we allow.
-    // That is, when multiple services are restarting, we won't allow each
-    // to restart less than this amount of time from the last one.
-    static final int SERVICE_MIN_RESTART_TIME_BETWEEN = 10*1000;
-
-    // Maximum amount of time for there to be no activity on a service before
-    // we consider it non-essential and allow its process to go on the
-    // LRU background list.
-    static final int MAX_SERVICE_INACTIVITY = 30*60*1000;
-
-    // How long we wait for a background started service to stop itself before
-    // allowing the next pending start to run.
-    static final int BG_START_TIMEOUT = 15*1000;
-
     final ActivityManagerService mAm;
 
     // Maximum number of services that we allow to start in the background
@@ -162,6 +142,11 @@ public final class ActiveServices {
     /** Temporary list for holding the results of calls to {@link #collectPackageServicesLocked} */
     private ArrayList<ServiceRecord> mTmpCollectionResults = null;
 
+    /**
+     * For keeping ActiveForegroundApps retaining state while the screen is off.
+     */
+    boolean mScreenOn = true;
+
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
 
@@ -176,9 +161,23 @@ public final class ActiveServices {
     };
 
     /**
+     * Information about an app that is currently running one or more foreground services.
+     * (This mapps directly to the running apps we show in the notification.)
+     */
+    static final class ActiveForegroundApp {
+        String mPackageName;
+        CharSequence mLabel;
+        boolean mShownWhileScreenOn;
+        long mStartTime;
+        long mStartVisibleTime;
+        long mEndTime;
+        int mNumActive;
+    }
+
+    /**
      * Information about services for a single user.
      */
-    class ServiceMap extends Handler {
+    final class ServiceMap extends Handler {
         final int mUserId;
         final ArrayMap<ComponentName, ServiceRecord> mServicesByName = new ArrayMap<>();
         final ArrayMap<Intent.FilterComparison, ServiceRecord> mServicesByIntent = new ArrayMap<>();
@@ -196,7 +195,11 @@ public final class ActiveServices {
 
         final ArrayList<ServiceRecord> mStartingBackground = new ArrayList<>();
 
+        final ArrayMap<String, ActiveForegroundApp> mActiveForegroundApps = new ArrayMap<>();
+        boolean mActiveForegroundAppsChanged;
+
         static final int MSG_BG_START_TIMEOUT = 1;
+        static final int MSG_UPDATE_FOREGROUND_APPS = 2;
 
         ServiceMap(Looper looper, int userId) {
             super(looper);
@@ -210,6 +213,9 @@ public final class ActiveServices {
                     synchronized (mAm) {
                         rescheduleDelayedStartsLocked();
                     }
+                } break;
+                case MSG_UPDATE_FOREGROUND_APPS: {
+                    updateForegroundApps(this);
                 } break;
             }
         }
@@ -528,7 +534,7 @@ public final class ActiveServices {
         if (r.startRequested && addToStarting) {
             boolean first = smap.mStartingBackground.size() == 0;
             smap.mStartingBackground.add(r);
-            r.startingBgTimeout = SystemClock.uptimeMillis() + BG_START_TIMEOUT;
+            r.startingBgTimeout = SystemClock.uptimeMillis() + mAm.mConstants.BG_START_TIMEOUT;
             if (DEBUG_DELAYED_SERVICE) {
                 RuntimeException here = new RuntimeException("here");
                 here.fillInStackTrace();
@@ -716,6 +722,171 @@ public final class ActiveServices {
         }
     }
 
+    void updateForegroundApps(ServiceMap smap) {
+        // This is called from the handler without the lock held.
+        ArrayList<ActiveForegroundApp> active = null;
+        synchronized (mAm) {
+            final long now = SystemClock.elapsedRealtime();
+            final long nowPlusMin = now + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME;
+            if (smap != null) {
+                for (int i = smap.mActiveForegroundApps.size()-1; i >= 0; i--) {
+                    ActiveForegroundApp aa = smap.mActiveForegroundApps.valueAt(i);
+                    if (aa.mEndTime != 0 && (mScreenOn || aa.mShownWhileScreenOn)) {
+                        if (aa.mEndTime < (aa.mStartVisibleTime
+                                + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME)) {
+                            // Check to see if this should still be displayed...  we continue
+                            // until it has been shown for at least the timeout duration.
+                            if (nowPlusMin >= aa.mStartVisibleTime) {
+                                // All over!
+                                smap.mActiveForegroundApps.removeAt(i);
+                                smap.mActiveForegroundAppsChanged = true;
+                                continue;
+                            }
+                        } else {
+                            // This was up for longer than the timeout, so just remove immediately.
+                            smap.mActiveForegroundApps.removeAt(i);
+                            smap.mActiveForegroundAppsChanged = true;
+                            continue;
+                        }
+                    }
+                    if (active == null) {
+                        active = new ArrayList<>();
+                    }
+                    active.add(aa);
+                }
+            }
+            if (!smap.mActiveForegroundAppsChanged) {
+                return;
+            }
+            smap.mActiveForegroundAppsChanged = false;
+        }
+
+        final NotificationManager nm = (NotificationManager) mAm.mContext.getSystemService(
+                Context.NOTIFICATION_SERVICE);
+        final Context context = mAm.mContext;
+
+        if (active != null) {
+            for (int i = 0; i < active.size(); i++) {
+                ActiveForegroundApp aa = active.get(i);
+                if (aa.mLabel == null) {
+                    PackageManager pm = context.getPackageManager();
+                    try {
+                        ApplicationInfo ai = pm.getApplicationInfoAsUser(aa.mPackageName,
+                                PackageManager.MATCH_KNOWN_PACKAGES, smap.mUserId);
+                        aa.mLabel = ai.loadLabel(pm);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        aa.mLabel = aa.mPackageName;
+                    }
+                }
+            }
+
+            Intent intent;
+            String title;
+            String msg;
+            if (active.size() == 1) {
+                intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.setData(Uri.fromParts("package", active.get(0).mPackageName, null));
+                title = context.getString(
+                        R.string.foreground_service_app_in_background, active.get(0).mLabel);
+                msg = context.getString(R.string.foreground_service_tap_for_details);
+            } else {
+                intent = new Intent(Settings.ACTION_FOREGROUND_SERVICES_SETTINGS);
+                String[] pkgs = new String[active.size()];
+                for (int i = 0; i < active.size(); i++) {
+                    pkgs[i] = active.get(i).mPackageName;
+                }
+                intent.putExtra("packages", pkgs);
+                title = context.getString(
+                        R.string.foreground_service_apps_in_background, active.size());
+                msg =  active.get(0).mLabel.toString();
+                for (int i = 1; i < active.size(); i++) {
+                    msg = context.getString(R.string.foreground_service_multiple_separator,
+                            msg, active.get(i).mLabel);
+                }
+            }
+            Notification.Builder n =
+                    new Notification.Builder(context,
+                            SystemNotificationChannels.FOREGROUND_SERVICE)
+                            .setSmallIcon(R.drawable.ic_check_circle_24px)
+                            .setOngoing(true)
+                            .setShowWhen(false)
+                            .setColor(context.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(msg)
+                            .setContentIntent(
+                                    PendingIntent.getActivityAsUser(context, 0, intent,
+                                            PendingIntent.FLAG_UPDATE_CURRENT,
+                                            null, new UserHandle(smap.mUserId)));
+            nm.notifyAsUser(null, SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICES,
+                    n.build(), new UserHandle(smap.mUserId));
+        } else {
+            nm.cancelAsUser(null, SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICES,
+                    new UserHandle(smap.mUserId));
+        }
+    }
+
+    private void requestUpdateActiveForegroundAppsLocked(ServiceMap smap, long time) {
+        Message msg = smap.obtainMessage(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
+        if (time != 0) {
+            smap.sendMessageAtTime(msg, time);
+        } else {
+            smap.mActiveForegroundAppsChanged = true;
+            smap.sendMessage(msg);
+        }
+    }
+
+    private void decActiveForegroundAppLocked(ServiceMap smap, ServiceRecord r) {
+        ActiveForegroundApp active = smap.mActiveForegroundApps.get(r.packageName);
+        if (active != null) {
+            active.mNumActive--;
+            if (active.mNumActive <= 0) {
+                active.mEndTime = SystemClock.elapsedRealtime();
+                if (active.mEndTime >= (active.mStartVisibleTime
+                        + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME)) {
+                    // Have been active for long enough that we will remove it immediately.
+                    smap.mActiveForegroundApps.remove(r.packageName);
+                    smap.mActiveForegroundAppsChanged = true;
+                    requestUpdateActiveForegroundAppsLocked(smap, 0);
+                } else {
+                    requestUpdateActiveForegroundAppsLocked(smap, active.mStartVisibleTime
+                            + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME);
+                }
+            }
+        }
+    }
+
+    void updateScreenStateLocked(boolean screenOn) {
+        if (mScreenOn != screenOn) {
+            mScreenOn = screenOn;
+
+            // If screen is turning on, then we now reset the start time of any foreground
+            // services that were started while the screen was off.
+            if (screenOn) {
+                final long nowElapsed = SystemClock.elapsedRealtime();
+                for (int i = mServiceMap.size()-1; i >= 0; i--) {
+                    ServiceMap smap = mServiceMap.valueAt(i);
+                    boolean changed = false;
+                    for (int j = smap.mActiveForegroundApps.size()-1; j >= 0; j--) {
+                        ActiveForegroundApp active = smap.mActiveForegroundApps.valueAt(j);
+                        if (!active.mShownWhileScreenOn) {
+                            changed = true;
+                            active.mShownWhileScreenOn = mScreenOn;
+                            active.mStartVisibleTime = nowElapsed;
+                            if (active.mEndTime != 0) {
+                                active.mEndTime = nowElapsed;
+                            }
+                        }
+                    }
+                    if (changed) {
+                        requestUpdateActiveForegroundAppsLocked(smap,
+                                nowElapsed + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME);
+                    }
+                }
+            }
+        }
+    }
+
     private void setServiceForegroundInnerLocked(ServiceRecord r, int id,
             Notification notification, int flags) {
         if (id != 0) {
@@ -770,7 +941,23 @@ public final class ActiveServices {
             }
             notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
             r.foregroundNoti = notification;
-            r.isForeground = true;
+            if (!r.isForeground) {
+                final ServiceMap smap = getServiceMapLocked(r.userId);
+                if (smap != null) {
+                    ActiveForegroundApp active = smap.mActiveForegroundApps.get(r.packageName);
+                    if (active == null) {
+                        active = new ActiveForegroundApp();
+                        active.mPackageName = r.packageName;
+                        active.mShownWhileScreenOn = mScreenOn;
+                        active.mStartTime = active.mStartVisibleTime
+                                = SystemClock.elapsedRealtime();
+                        smap.mActiveForegroundApps.put(r.packageName, active);
+                        requestUpdateActiveForegroundAppsLocked(smap, 0);
+                    }
+                    active.mNumActive++;
+                }
+                r.isForeground = true;
+            }
             r.postNotification();
             if (r.app != null) {
                 updateServiceForegroundLocked(r.app, true);
@@ -780,6 +967,10 @@ public final class ActiveServices {
                                  PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
         } else {
             if (r.isForeground) {
+                final ServiceMap smap = getServiceMapLocked(r.userId);
+                if (smap != null) {
+                    decActiveForegroundAppLocked(smap, r);
+                }
                 r.isForeground = false;
                 if (r.app != null) {
                     mAm.updateLruProcessLocked(r.app, false, null);
@@ -1561,8 +1752,8 @@ public final class ActiveServices {
 
         if ((r.serviceInfo.applicationInfo.flags
                 &ApplicationInfo.FLAG_PERSISTENT) == 0) {
-            long minDuration = SERVICE_RESTART_DURATION;
-            long resetTime = SERVICE_RESET_RUN_DURATION;
+            long minDuration = mAm.mConstants.SERVICE_RESTART_DURATION;
+            long resetTime = mAm.mConstants.SERVICE_RESET_RUN_DURATION;
 
             // Any delivered but not yet finished starts should be put back
             // on the pending list.
@@ -1603,7 +1794,7 @@ public final class ActiveServices {
                     r.restartCount = 1;
                     r.restartDelay = minDuration;
                 } else {
-                    r.restartDelay *= SERVICE_RESTART_DURATION_FACTOR;
+                    r.restartDelay *= mAm.mConstants.SERVICE_RESTART_DURATION_FACTOR;
                     if (r.restartDelay < minDuration) {
                         r.restartDelay = minDuration;
                     }
@@ -1617,13 +1808,12 @@ public final class ActiveServices {
             boolean repeat;
             do {
                 repeat = false;
+                final long restartTimeBetween = mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN;
                 for (int i=mRestartingServices.size()-1; i>=0; i--) {
                     ServiceRecord r2 = mRestartingServices.get(i);
-                    if (r2 != r && r.nextRestartTime
-                            >= (r2.nextRestartTime-SERVICE_MIN_RESTART_TIME_BETWEEN)
-                            && r.nextRestartTime
-                            < (r2.nextRestartTime+SERVICE_MIN_RESTART_TIME_BETWEEN)) {
-                        r.nextRestartTime = r2.nextRestartTime + SERVICE_MIN_RESTART_TIME_BETWEEN;
+                    if (r2 != r && r.nextRestartTime >= (r2.nextRestartTime-restartTimeBetween)
+                            && r.nextRestartTime < (r2.nextRestartTime+restartTimeBetween)) {
+                        r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
                         r.restartDelay = r.nextRestartTime - now;
                         repeat = true;
                         break;
@@ -2174,6 +2364,9 @@ public final class ActiveServices {
         }
 
         cancelForegroundNotificationLocked(r);
+        if (r.isForeground) {
+            decActiveForegroundAppLocked(smap, r);
+        }
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;
@@ -2610,6 +2803,22 @@ public final class ActiveServices {
             mTmpCollectionResults.clear();
         }
         return didSomething;
+    }
+
+    void removeUninstalledPackageLocked(String packageName, int userId) {
+        ServiceMap smap = mServiceMap.get(userId);
+        if (smap != null && smap.mActiveForegroundApps.size() > 0) {
+            for (int i = smap.mActiveForegroundApps.size(); i >= 0; i--) {
+                ActiveForegroundApp aa = smap.mActiveForegroundApps.valueAt(i);
+                if (aa.mPackageName.equals(packageName)) {
+                    smap.mActiveForegroundApps.removeAt(i);
+                    smap.mActiveForegroundAppsChanged = true;
+                }
+            }
+            if (smap.mActiveForegroundAppsChanged) {
+                requestUpdateActiveForegroundAppsLocked(smap, 0);
+            }
+        }
     }
 
     void cleanUpRemovedTaskLocked(TaskRecord tr, ComponentName component, Intent baseIntent) {
@@ -3390,6 +3599,55 @@ public final class ActiveServices {
                         }
                         pw.print("  * "); pw.println(cr);
                         cr.dump(pw, "    ");
+                    }
+                }
+            }
+
+            if (matcher.all) {
+                final long nowElapsed = SystemClock.elapsedRealtime();
+                final int[] users = mAm.mUserController.getUsers();
+                for (int user : users) {
+                    boolean printedUser = false;
+                    ServiceMap smap = mServiceMap.get(user);
+                    if (smap == null) {
+                        continue;
+                    }
+                    for (int i = smap.mActiveForegroundApps.size() - 1; i >= 0; i--) {
+                        ActiveForegroundApp aa = smap.mActiveForegroundApps.valueAt(i);
+                        if (dumpPackage != null && !dumpPackage.equals(aa.mPackageName)) {
+                            continue;
+                        }
+                        if (!printedUser) {
+                            printedUser = true;
+                            printedAnything = true;
+                            if (needSep) pw.println();
+                            needSep = true;
+                            pw.print("Active foreground apps - user ");
+                            pw.print(user);
+                            pw.println(":");
+                        }
+                        pw.print("  #");
+                        pw.print(i);
+                        pw.print(": ");
+                        pw.println(aa.mPackageName);
+                        if (aa.mLabel != null) {
+                            pw.print("    mLabel=");
+                            pw.println(aa.mLabel);
+                        }
+                        pw.print("    mNumActive=");
+                        pw.print(aa.mNumActive);
+                        pw.print(" mShownWhileScreenOn=");
+                        pw.println(aa.mShownWhileScreenOn);
+                        pw.print("    mStartTime=");
+                        TimeUtils.formatDuration(aa.mStartTime - nowElapsed, pw);
+                        pw.print(" mStartVisibleTime=");
+                        TimeUtils.formatDuration(aa.mStartVisibleTime - nowElapsed, pw);
+                        pw.println();
+                        if (aa.mEndTime != 0) {
+                            pw.print("    mEndTime=");
+                            TimeUtils.formatDuration(aa.mEndTime - nowElapsed, pw);
+                            pw.println();
+                        }
                     }
                 }
             }

@@ -2030,4 +2030,10 @@
     <!-- Do Not Disturb button to change the current settings [CHAR LIMIT=20] -->
     <string name="qs_dnd_replace">Replace</string>
 
+    <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
+    <string name="running_foreground_services_title">Apps running in background</string>
+
+    <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
+    <string name="running_foreground_services_msg">Tap for details on battery and data usage</string>
+
 </resources>
