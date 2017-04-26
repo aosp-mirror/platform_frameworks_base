@@ -5641,14 +5641,24 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // so tear down any ongoing backup task right away.
     @Override
     public void endFullBackup() {
-        synchronized (mQueueLock) {
-            if (mRunningFullBackupTask != null) {
-                if (DEBUG_SCHEDULING) {
-                    Slog.i(TAG, "Telling running backup to stop");
+        // offload the mRunningFullBackupTask.handleCancel() call to another thread,
+        // as we might have to wait for mCancelLock
+        Runnable endFullBackupRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PerformFullTransportBackupTask pftbt = null;
+                synchronized (mQueueLock) {
+                    if (mRunningFullBackupTask != null) {
+                        if (DEBUG_SCHEDULING) {
+                            Slog.i(TAG, "Telling running backup to stop");
+                        }
+                        pftbt = mRunningFullBackupTask;
+                    }
                 }
-                mRunningFullBackupTask.handleCancel(true);
+                pftbt.handleCancel(true);
             }
-        }
+        };
+        new Thread(endFullBackupRunnable, "end-full-backup").start();
     }
 
     // ----- Restore infrastructure -----
