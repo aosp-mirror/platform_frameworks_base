@@ -220,24 +220,6 @@ public final class AutofillManagerService extends SystemService {
     }
 
     // Called by Shell command.
-    void requestSaveForUser(int userId) {
-        Slog.i(TAG, "requestSaveForUser(): " + userId);
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-        final IBinder activityToken = getTopActivityForUser();
-        if (activityToken != null) {
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service == null) {
-                    Log.w(TAG, "handleSaveForUser(): no cached service for userId " + userId);
-                    return;
-                }
-
-                service.requestSaveForUserLocked(activityToken);
-            }
-        }
-    }
-
-    // Called by Shell command.
     void destroySessions(int userId, IResultReceiver receiver) {
         Slog.i(TAG, "destroySessions() for userId " + userId);
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
