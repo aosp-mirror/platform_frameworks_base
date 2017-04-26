@@ -524,6 +524,7 @@ public class TimePicker extends FrameLayout {
         // This view is self-sufficient for autofill, so it needs to call
         // onProvideAutoFillStructure() to fill itself, but it does not need to call
         // dispatchProvideAutoFillStructure() to fill its children.
+        structure.setAutofillId(getAutofillId());
         onProvideAutofillStructure(structure, flags);
     }
 

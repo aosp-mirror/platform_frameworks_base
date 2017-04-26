@@ -100,6 +100,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
@@ -1068,9 +1069,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY = "creditCardExpirationDay";
 
     /**
-     * Hintd for the autofill services that describes the content of the view.
+     * Hints for the autofill services that describes the content of the view.
      */
     private @Nullable String[] mAutofillHints;
+
+    /**
+     * Autofill id, lazily created on calls to {@link #getAutofillId()}.
+     */
+    private AutofillId mAutofillId;
 
     /** @hide */
     @IntDef({
@@ -7276,13 +7282,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p>This method already provides most of what's needed for autofill, but should be overridden
      * when:
-     * <ol>
-     * <li>The view contents does not include PII (Personally Identifiable Information), so it
+     * <ul>
+     *   <li>The view contents does not include PII (Personally Identifiable Information), so it
      * can call {@link ViewStructure#setDataIsSensitive(boolean)} passing {@code false}.
-     * <li>It must set fields such {@link ViewStructure#setText(CharSequence)},
+     *   <li>It must set fields such {@link ViewStructure#setText(CharSequence)},
      * {@link ViewStructure#setAutofillOptions(CharSequence[])},
-     * or {@link ViewStructure#setUrl(String)}.
-     * </ol>
+     * or {@link ViewStructure#setWebDomain(String)}.
+     * </ul>
      *
      * @param structure Fill in with structured view data. The default implementation
      * fills in all data that can be inferred from the view itself.
@@ -7290,12 +7296,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         onProvideStructureForAssistOrAutofill(structure, true);
-    }
-
-    private void setAutofillId(ViewStructure structure) {
-        // The autofill id needs to be unique, but its value doesn't matter,
-        // so it's better to reuse the accessibility id to save space.
-        structure.setAutofillId(getAccessibilityViewId());
     }
 
     private void onProvideStructureForAssistOrAutofill(ViewStructure structure,
@@ -7317,7 +7317,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (forAutofill) {
-            setAutofillId(structure);
             final @AutofillType int autofillType = getAutofillType();
             // Don't need to fill autofill info if view does not support it.
             // For example, only TextViews that are editable support autofill
@@ -7418,10 +7417,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param flags optional flags (currently {@code 0}).
      */
     public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
-        // TODO(b/36171235): need a way to let apps set the ViewStructure without forcing them
-        // to call super() (in case they override both this method and dispatchProvide....
-        // Perhaps the best solution would simply make setAutofillId(ViewStructure) public.
-        setAutofillId(structure);
     }
 
     /**
@@ -7467,6 +7462,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param values map of values to be autofilled, keyed by virtual child id.
      */
     public void autofill(@NonNull @SuppressWarnings("unused") SparseArray<AutofillValue> values) {
+    }
+
+    /**
+     * Gets the unique identifier of this view on the screen for Autofill purposes.
+     *
+     * @return The View's Autofill id.
+     */
+    public final AutofillId getAutofillId() {
+        if (mAutofillId == null) {
+            // The autofill id needs to be unique, but its value doesn't matter,
+            // so it's better to reuse the accessibility id to save space.
+            mAutofillId = new AutofillId(getAccessibilityViewId());
+        }
+        return mAutofillId;
     }
 
     /**
@@ -7705,16 +7714,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Dispatch creation of {@link ViewStructure} down the hierarchy.
      *
-     * <p>The structure must be filled according to the request type, which is set in the
-     * {@code flags} parameter - see the documentation on each flag for more details.
+     * <p>The default implementation does the following:
      *
-     * <p>The default implementation calls {@link #onProvideAutofillStructure(ViewStructure, int)}
-     * and {@link #onProvideAutofillVirtualStructure(ViewStructure, int)}.
+     * <ul>
+     *   <li>Sets the {@link AutofillId} in the structure.
+     *   <li>Calls {@link #onProvideAutofillStructure(ViewStructure, int)}.
+     *   <li>Calls {@link #onProvideAutofillVirtualStructure(ViewStructure, int)}.
+     * </ul>
+     *
+     * <p>When overridden, it must either call
+     * {@code super.dispatchProvideAutofillStructure(structure, flags)} or explicitly
+     * set the {@link AutofillId} in the structure (for example, by calling
+     * {@code structure.setAutofillId(getAutofillId())}).
      *
      * @param structure Fill in with structured view data.
      * @param flags optional flags (currently {@code 0}).
      */
-    public void dispatchProvideAutofillStructure(ViewStructure structure, int flags) {
+    public void dispatchProvideAutofillStructure(@NonNull ViewStructure structure, int flags) {
         dispatchProvideStructureForAssistOrAutofill(structure, true);
     }
 
@@ -7723,7 +7739,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean blocked = forAutofill ? isAutofillBlocked() : isAssistBlocked();
         if (!blocked) {
             if (forAutofill) {
-                setAutofillId(structure);
+                structure.setAutofillId(getAutofillId());
                 // NOTE: flags are not currently supported, hence 0
                 onProvideAutofillStructure(structure, 0);
                 onProvideAutofillVirtualStructure(structure, 0);
