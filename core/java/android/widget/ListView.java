@@ -67,11 +67,77 @@ import java.util.function.Predicate;
 
 
 /**
- * A view that shows items in a vertically scrolling list. The items
- * come from the {@link ListAdapter} associated with this view.
+ * <p>Displays a vertically-scrollable collection of views, where each view is positioned
+ * immediatelybelow the previous view in the list.  For a more modern, flexible, and performant
+ * approach to displaying lists, use {@link android.support.v7.widget.RecyclerView}.</p>
  *
- * <p>See the <a href="{@docRoot}guide/topics/ui/layout/listview.html">List View</a>
- * guide.</p>
+ * <p>To display a list, you can include a list view in your layout XML file:</p>
+ *
+ * <pre>&lt;ListView
+ *      android:id="@+id/list_view"
+ *      android:layout_width="match_parent"
+ *      android:layout_height="match_parent" /&gt;</pre>
+ *
+ * <p>A list view is an <a href="{@docRoot}guide/topics/ui/declaring-layout.html#AdapterViews">
+ * adapter view</a> that does not know the details, such as type and contents, of the views it
+ * contains. Instead list view requests views on demand from a {@link ListAdapter} as needed,
+ * such as to display new views as the user scrolls up or down.</p>
+ *
+ * <p>In order to display items in the list, call {@link #setAdapter(ListAdapter adapter)}
+ * to associate an adapter with the list.  For a simple example, see the discussion of filling an
+ * adapter view with text in the
+ * <a href="{@docRoot}guide/topics/ui/declaring-layout.html#FillingTheLayout">
+ * Layouts</a> guide.</p>
+ *
+ * <p>To display a more custom view for each item in your dataset, implement a ListAdapter.
+ * For example, extend {@link BaseAdapter} and create and configure the view for each data item in
+ * {@code getView(...)}:</p>
+ *
+ *  <pre>private class MyAdapter extends BaseAdapter {
+ *
+ *      // override other abstract methods here
+ *
+ *      &#64;Override
+ *      public View getView(int position, View convertView, ViewGroup container) {
+ *          if (convertView == null) {
+ *              convertView = getLayoutInflater().inflate(R.layout.list_item, container, false);
+ *          }
+ *
+ *          ((TextView) convertView.findViewById(android.R.id.text1))
+ *                  .setText(getItem(position));
+ *          return convertView;
+ *      }
+ *  }</pre>
+ *
+ * <p class="note">ListView attempts to reuse view objects in order to improve performance and
+ * avoid a lag in response to user scrolls.  To take advantage of this feature, check if the
+ * {@code convertView} provided to {@code getView(...)} is null before creating or inflating a new
+ * view object.  See
+ * <a href="{@docRoot}training/improving-layouts/smooth-scrolling.html">
+ * Making ListView Scrolling Smooth</a> for more ways to ensure a smooth user experience.</p>
+ *
+ * <p>For a more complete example of creating a custom adapter, see the
+ * <a href="{@docRoot}samples/CustomChoiceList/index.html">
+ *     Custom Choice List</a> sample app.</p>
+ *
+ * <p>To specify an action when a user clicks or taps on a single list item, see
+ * <a href="{@docRoot}guide/topics/ui/declaring-layout.html#HandlingUserSelections">
+ *     Handling click events</a>.</p>
+ *
+ * <p>To learn how to populate a list view with a CursorAdapter, see the discussion of filling an
+ * adapter view with text in the
+ * <a href="{@docRoot}guide/topics/ui/declaring-layout.html#FillingTheLayout">
+ * Layouts</a> guide.
+ * See <a href="{@docRoot}guide/topics/ui/layout/listview.html">
+ *     Using a Loader</a>
+ * to learn how to avoid blocking the main thread when using a cursor.</p>
+ *
+ * <p class="note">Note, many examples use {@link android.app.ListActivity ListActivity}
+ * or {@link android.app.ListFragment ListFragment}
+ * to display a list view. Instead, favor the more flexible approach when writing your own app:
+ * use a more generic Activity subclass or Fragment subclass and add a list view to the layout
+ * or view hierarchy directly.  This approach gives you more direct control of the
+ * list view and adapter.</p>
  *
  * @attr ref android.R.styleable#ListView_entries
  * @attr ref android.R.styleable#ListView_divider
