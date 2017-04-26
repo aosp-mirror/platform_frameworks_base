@@ -3141,10 +3141,15 @@ public class ActivityManager {
          * before {@link Build.VERSION_CODES#O}.  Since the {@link Build.VERSION_CODES#O} SDK,
          * the value of {@link #IMPORTANCE_PERCEPTIBLE} has been fixed.
          *
-         * @deprecated Use {@link #IMPORTANCE_PERCEPTIBLE} instead.
+         * <p>The system will return this value instead of {@link #IMPORTANCE_PERCEPTIBLE}
+         * on Android versions below {@link Build.VERSION_CODES#O}.
+         *
+         * <p>On Android version {@link Build.VERSION_CODES#O} and later, this value will still be
+         * returned for apps with the target API level below {@link Build.VERSION_CODES#O}.
+         * For apps targeting version {@link Build.VERSION_CODES#O} and later,
+         * the correct value {@link #IMPORTANCE_PERCEPTIBLE} will be returned.
          */
-        @Deprecated
-        public static final int IMPORTANCE_PERCEPTIBLE_DEPRECATED = 130;
+        public static final int IMPORTANCE_PERCEPTIBLE_PRE_26 = 130;
 
         /**
          * Constant for {@link #importance}: This process is not something the user
@@ -3158,11 +3163,17 @@ public class ActivityManager {
          * before {@link Build.VERSION_CODES#O}.  Since the {@link Build.VERSION_CODES#O} SDK,
          * the value of {@link #IMPORTANCE_CANT_SAVE_STATE} has been fixed.
          *
-         * @deprecated Use {@link #IMPORTANCE_CANT_SAVE_STATE} instead.
+         * <p>The system will return this value instead of {@link #IMPORTANCE_CANT_SAVE_STATE}
+         * on Android versions below {@link Build.VERSION_CODES#O}.
+         *
+         * <p>On Android version {@link Build.VERSION_CODES#O} after, this value will still be
+         * returned for apps with the target API level below {@link Build.VERSION_CODES#O}.
+         * For apps targeting version {@link Build.VERSION_CODES#O} and later,
+         * the correct value {@link #IMPORTANCE_CANT_SAVE_STATE} will be returned.
+         *
          * @hide
          */
-        @Deprecated
-        public static final int IMPORTANCE_CANT_SAVE_STATE_DEPRECATED = 170;
+        public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
         /**
          * Constant for {@link #importance}: This process is running an
@@ -3242,15 +3253,25 @@ public class ActivityManager {
          */
         public static @Importance int procStateToImportanceForClient(int procState,
                 Context clientContext) {
+            return procStateToImportanceForTargetSdk(procState,
+                    clientContext.getApplicationInfo().targetSdkVersion);
+        }
+
+        /**
+         * See {@link #procStateToImportanceForClient}.
+         * @hide
+         */
+        public static @Importance int procStateToImportanceForTargetSdk(int procState,
+                int targetSdkVersion) {
             final int importance = procStateToImportance(procState);
 
             // For pre O apps, convert to the old, wrong values.
-            if (clientContext.getApplicationInfo().targetSdkVersion < VERSION_CODES.O) {
+            if (targetSdkVersion < VERSION_CODES.O) {
                 switch (importance) {
                     case IMPORTANCE_PERCEPTIBLE:
-                        return IMPORTANCE_PERCEPTIBLE_DEPRECATED;
+                        return IMPORTANCE_PERCEPTIBLE_PRE_26;
                     case IMPORTANCE_CANT_SAVE_STATE:
-                        return IMPORTANCE_CANT_SAVE_STATE_DEPRECATED;
+                        return IMPORTANCE_CANT_SAVE_STATE_PRE_26;
                 }
             }
             return importance;

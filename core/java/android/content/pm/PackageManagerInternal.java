@@ -333,4 +333,9 @@ public abstract class PackageManagerInternal {
      * @param isolatedUid isolated uid that is no longer being used.
      */
     public abstract void removeIsolatedUid(int isolatedUid);
+
+    /**
+     * Return the taget SDK version for the app with the given UID.
+     */
+    public abstract int getUidTargetSdkVersion(int uid);
 }

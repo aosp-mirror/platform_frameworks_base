@@ -14622,8 +14622,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     static int procStateToImportance(int procState, int memAdj,
-            ActivityManager.RunningAppProcessInfo currApp) {
-        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportance(procState);
+            ActivityManager.RunningAppProcessInfo currApp,
+            int clientTargetSdk) {
+        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportanceForTargetSdk(
+                procState, clientTargetSdk);
         if (imp == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
             currApp.lru = memAdj;
         } else {
@@ -14633,7 +14635,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void fillInProcMemInfo(ProcessRecord app,
-            ActivityManager.RunningAppProcessInfo outInfo) {
+            ActivityManager.RunningAppProcessInfo outInfo,
+            int clientTargetSdk) {
         outInfo.pid = app.pid;
         outInfo.uid = app.info.uid;
         if (mHeavyWeightProcess == app) {
@@ -14648,7 +14651,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         outInfo.lastTrimLevel = app.trimMemoryLevel;
         int adj = app.curAdj;
         int procState = app.curProcState;
-        outInfo.importance = procStateToImportance(procState, adj, outInfo);
+        outInfo.importance = procStateToImportance(procState, adj, outInfo, clientTargetSdk);
         outInfo.importanceReasonCode = app.adjTypeCode;
         outInfo.processState = app.curProcState;
     }
@@ -14658,6 +14661,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("getRunningAppProcesses");
 
         final int callingUid = Binder.getCallingUid();
+        final int clientTargetSdk = mPackageManagerInt.getUidTargetSdkVersion(callingUid);
 
         // Lazy instantiation of list
         List<ActivityManager.RunningAppProcessInfo> runList = null;
@@ -14680,7 +14684,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ActivityManager.RunningAppProcessInfo currApp =
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
-                    fillInProcMemInfo(app, currApp);
+                    fillInProcMemInfo(app, currApp, clientTargetSdk);
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
                         currApp.importanceReasonImportance =
@@ -14736,12 +14740,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outInfo) {
         enforceNotIsolatedCaller("getMyMemoryState");
+
+        final int callingUid = Binder.getCallingUid();
+        final int clientTargetSdk = mPackageManagerInt.getUidTargetSdkVersion(callingUid);
+
         synchronized (this) {
             ProcessRecord proc;
             synchronized (mPidsSelfLocked) {
                 proc = mPidsSelfLocked.get(Binder.getCallingPid());
             }
-            fillInProcMemInfo(proc, outInfo);
+            fillInProcMemInfo(proc, outInfo, clientTargetSdk);
         }
     }
 
