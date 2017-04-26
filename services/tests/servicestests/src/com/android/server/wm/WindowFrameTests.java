@@ -96,8 +96,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        final Context context = InstrumentationRegistry.getTargetContext();
-        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
+        super.setUp();
 
         // Just any non zero value.
         sWm.mSystemDecorLayer = 10000;

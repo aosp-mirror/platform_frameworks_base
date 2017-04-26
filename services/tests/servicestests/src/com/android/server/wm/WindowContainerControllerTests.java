@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
