@@ -500,10 +500,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                             + " > installed version " + mCurrentPackage.versionCode;
                     Slog.w(RefactoredBackupManagerService.TAG,
                             "Package " + pkgName + ": " + message);
-                    Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
+                    Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
                             metaInfo.versionCode);
-                    monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
+                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY, false);
                     mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                             BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
@@ -521,10 +521,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                                         + " > installed version " + mCurrentPackage.versionCode
                                         + " but restoreAnyVersion");
                     }
-                    Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
+                    Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
                             metaInfo.versionCode);
-                    monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
+                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY, true);
                     mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                             BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
