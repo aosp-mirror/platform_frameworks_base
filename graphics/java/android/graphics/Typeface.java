@@ -27,7 +27,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.FontListParser;
 import android.graphics.fonts.FontRequest;
@@ -99,8 +98,6 @@ public class Typeface {
     static Typeface[] sDefaults;
     private static final LongSparseArray<SparseArray<Typeface>> sTypefaceCache =
             new LongSparseArray<>(3);
-    @GuardedBy("sLock")
-    private static FontsContract sFontsContract;
 
     /**
      * Cache for Typeface objects dynamically loaded from assets. Currently max size is 16.
@@ -221,7 +218,7 @@ public class Typeface {
                 // default font instead (nothing we can do now).
                 FontRequest request = new FontRequest(providerEntry.getAuthority(),
                         providerEntry.getPackage(), providerEntry.getQuery(), certs);
-                Typeface typeface = sFontsContract.getFontOrWarmUpCache(request);
+                Typeface typeface = FontsContract.getFontOrWarmUpCache(request);
                 return typeface == null ? DEFAULT : typeface;
             }
 
@@ -274,19 +271,6 @@ public class Typeface {
             }
         }
         return null;
-    }
-
-    /**
-     * Set the application context so we can generate font requests from the provider. This should
-     * be called from ActivityThread when the application binds, as we preload fonts.
-     * @hide
-     */
-    public static void setApplicationContext(Context context) {
-        synchronized (sLock) {
-            if (sFontsContract == null) {
-                sFontsContract = new FontsContract(context);
-            }
-        }
     }
 
     /**
