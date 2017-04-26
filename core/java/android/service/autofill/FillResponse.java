@@ -16,6 +16,7 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.Helper.DEBUG;
 
 import android.annotation.NonNull;
@@ -138,6 +139,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable IntentSender mAuthentication;
     private final @Nullable AutofillId[] mAuthenticationIds;
     private final @Nullable AutofillId[] mIgnoredIds;
+    private int mRequestId;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
@@ -147,6 +149,7 @@ public final class FillResponse implements Parcelable {
         mAuthentication = builder.mAuthentication;
         mAuthenticationIds = builder.mAuthenticationIds;
         mIgnoredIds = builder.mIgnoredIds;
+        mRequestId = INVALID_REQUEST_ID;
     }
 
     /** @hide */
@@ -182,6 +185,24 @@ public final class FillResponse implements Parcelable {
     /** @hide */
     public @Nullable AutofillId[] getIgnoredIds() {
         return mIgnoredIds;
+    }
+
+    /**
+     * Associates a {@link FillResponse} to a request.
+     *
+     * <p>Set inside of the {@link FillCallback} code, not the {@link AutofillService}.
+     *
+     * @param requestId The id of the request to associate the response to.
+     *
+     * @hide
+     */
+    public void setRequestId(int requestId) {
+        mRequestId = requestId;
+    }
+
+    /** @hide */
+    public int getRequestId() {
+        return mRequestId;
     }
 
     /**
@@ -376,7 +397,8 @@ public final class FillResponse implements Parcelable {
         if (!DEBUG) return super.toString();
 
         return new StringBuilder(
-                "FillResponse: [datasets=").append(mDatasets)
+                "FillResponse : [mRequestId=" + mRequestId)
+                .append(", datasets=").append(mDatasets)
                 .append(", saveInfo=").append(mSaveInfo)
                 .append(", clientState=").append(mClientState != null)
                 .append(", hasPresentation=").append(mPresentation != null)
@@ -385,6 +407,7 @@ public final class FillResponse implements Parcelable {
                         ? mAuthenticationIds.length : "N/A")
                 .append(", ignoredIdsSize=").append(mIgnoredIds != null
                     ? mIgnoredIds.length : "N/A")
+                .append("]")
                 .toString();
     }
 
@@ -406,6 +429,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelableArray(mIgnoredIds, flags);
+        parcel.writeInt(mRequestId);
     }
 
     public static final Parcelable.Creator<FillResponse> CREATOR =
@@ -426,7 +450,11 @@ public final class FillResponse implements Parcelable {
             builder.setAuthentication(parcel.readParcelableArray(null, AutofillId.class),
                     parcel.readParcelable(null), parcel.readParcelable(null));
             builder.setIgnoredIds(parcel.readParcelableArray(null, AutofillId.class));
-            return builder.build();
+            final FillResponse response = builder.build();
+
+            response.setRequestId(parcel.readInt());
+
+            return response;
         }
 
         @Override

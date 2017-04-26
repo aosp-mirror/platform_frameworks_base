@@ -34,6 +34,7 @@ import android.view.autofill.AutofillManager;
 
 import com.android.internal.os.SomeArgs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -118,8 +119,10 @@ public abstract class AutofillService extends Service {
                 try {
                     onFillRequest(request, cancellation, fillCallback);
                 } catch (AbstractMethodError e) {
-                    onFillRequest(request.getStructure(), request.getClientState(),
-                            request.getFlags(), cancellation, fillCallback);
+                    final ArrayList<FillContext> contexts = request.getFillContexts();
+                    onFillRequest(contexts.get(contexts.size() - 1).getStructure(),
+                            request.getClientState(), request.getFlags(), cancellation,
+                            fillCallback);
                 }
                 break;
             } case MSG_ON_SAVE_REQUEST: {
