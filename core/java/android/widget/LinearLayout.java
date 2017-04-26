@@ -235,9 +235,9 @@ public class LinearLayout extends ViewGroup {
 
         mUseLargestChild = a.getBoolean(R.styleable.LinearLayout_measureWithLargestChild, false);
 
-        setDividerDrawable(a.getDrawable(R.styleable.LinearLayout_divider));
         mShowDividers = a.getInt(R.styleable.LinearLayout_showDividers, SHOW_DIVIDER_NONE);
         mDividerPadding = a.getDimensionPixelSize(R.styleable.LinearLayout_dividerPadding, 0);
+        setDividerDrawable(a.getDrawable(R.styleable.LinearLayout_divider));
 
         final int version = context.getApplicationInfo().targetSdkVersion;
         mAllowInconsistentMeasurement = version <= Build.VERSION_CODES.M;
