@@ -218,7 +218,7 @@ public class Typeface {
                 // default font instead (nothing we can do now).
                 FontRequest request = new FontRequest(providerEntry.getAuthority(),
                         providerEntry.getPackage(), providerEntry.getQuery(), certs);
-                Typeface typeface = FontsContract.getFontOrWarmUpCache(request);
+                Typeface typeface = FontsContract.getFontSync(request);
                 return typeface == null ? DEFAULT : typeface;
             }
 
