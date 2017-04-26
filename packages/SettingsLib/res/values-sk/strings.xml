@@ -56,6 +56,10 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Zdieľanie pripojenia na Internet"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Prístup ku správam"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Prístup k SIM karte"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Pripojené ku zvukovému médiu"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Pripojené ku zvuku telefónu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Pripojené na server pre prenos údajov"</string>
@@ -92,7 +96,7 @@
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"Zdieľané pripojenie cez USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prenosný prístupový bod"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Pripojenie cez Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Zdieľanie dát. pripojenia"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Zdieľané pripojenie"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Zdieľané pripojenie a prenosný hotspot"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Všetky pracovné aplikácie"</string>
     <string name="user_guest" msgid="8475274842845401871">"Hosť"</string>
