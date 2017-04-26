@@ -157,6 +157,8 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Datos móviles desactivados"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartir por Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hay tarjeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambiando red de operador."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir detalles de la batería"</string>
@@ -429,8 +431,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Perfil de trabajo conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Perfil personal conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Dispositivo conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Administración de dispositivos"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Supervisión del perfil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Supervisión de red"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -439,18 +440,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Inhabilitar VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconectar VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Ver políticas"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"El dispositivo está administrado por <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nEl administrador puede supervisar y gestionar los ajustes, el acceso corporativo, las aplicaciones, los datos asociados a este dispositivo y su información de ubicación.\n\nPara obtener más información, ponte en contacto con el administrador."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"El dispositivo está administrado por tu organización.\n\nEl administrador puede supervisar y gestionar los ajustes, el acceso corporativo, las aplicaciones, los datos asociados a este dispositivo y su información de ubicación.\n\nPara obtener más información, ponte en contacto con el administrador."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Tu organización ha instalado una entidad de certificación en este dispositivo. Es posible que se supervise o se modifique tu tráfico de red seguro."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Tu organización ha instalado una entidad de certificación en tu perfil de trabajo. Es posible que se supervise o se modifique tu tráfico de red seguro."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Se ha instalado una entidad de certificación en este dispositivo. Es posible que se supervise o se modifique tu tráfico de red seguro."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"El administrador ha activado el registro de la red para supervisar el tráfico en tu dispositivo."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Te has conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede supervisar tu actividad de red, como los correos electrónicos, las aplicaciones y los sitios web."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Te has conectado a <xliff:g id="VPN_APP_0">%1$s</xliff:g> y <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que pueden supervisar tu actividad de red, como los correos electrónicos, las aplicaciones y los sitios web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Tu perfil de trabajo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede supervisar tu actividad de red, como los correos electrónicos, las aplicaciones y los sitios web."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Tu perfil personal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede supervisar tu actividad de red, como los correos electrónicos, las aplicaciones y los sitios web."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Tu dispositivo está administrado por <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -705,6 +702,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Es posible que la aplicación no funcione con la pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"La aplicación no admite la pantalla dividida."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Abrir ajustes."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir ajustes rápidos."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Cerrar ajustes rápidos."</string>
@@ -729,7 +730,7 @@
     <string name="pip_skip_to_prev" msgid="1955311326688637914">"Volver al anterior"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"Teléfono apagado por calor"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"El teléfono ahora funciona con normalidad"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"El teléfono se había calentado demasiado y se ha apagado para enfriarlo. Ahora funciona con normalidad.\n\nPuede calentarse demasiado si:\n	• Usas aplicaciones que consumen muchos recursos (p. ej., apps de juegos, vídeos o navegación)\n	• Descargas o subes archivos grandes\n	• Lo usas a altas temperaturas"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"El teléfono se había calentado demasiado y se ha apagado para enfriarse. Ahora funciona con normalidad.\n\nPuede calentarse demasiado si:\n	• Usas aplicaciones que consumen muchos recursos (p. ej., apps de juegos, vídeos o navegación)\n	• Descargas o subes archivos grandes\n	• Lo usas a altas temperaturas"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"El teléfono se está calentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Se limitan algunas funciones mientras el teléfono se enfría"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"El teléfono intentará enfriarse. Puedes seguir utilizándolo, pero es posible que funcione con mayor lentitud.\n\nUna vez que se haya enfriado, funcionará con normalidad."</string>
@@ -754,8 +755,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Aplicaciones Instantáneas"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"No es necesario instalar las Aplicaciones Instantáneas."</string>
     <string name="app_info" msgid="6856026610594615344">"Información de la aplicación"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Ir a la Web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Datos móviles"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi desactivado"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth desactivado"</string>

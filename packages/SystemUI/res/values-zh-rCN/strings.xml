@@ -152,14 +152,13 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
-    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"移动数据"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"移动数据已开启"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"移动数据已关闭"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"没有 SIM 卡。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"运营商网络正在更改。"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"打开电量详情"</string>
@@ -200,8 +199,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"飞行模式开启。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"飞行模式已关闭。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飞行模式已开启。"</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"勿扰模式已开启，仅限优先打扰。"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"勿扰模式已开启，完全静音。"</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"勿扰模式已开启，仅允许指定的优先事项打扰。"</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"勿扰模式已开启，阻止全部通知。"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"勿扰模式已开启，仅限闹钟。"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"勿扰。"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"勿扰模式关闭。"</string>
@@ -242,11 +241,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"正在充电"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 数据网络已暂停使用"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 数据网络已暂停使用"</string>
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"移动数据已暂停使用"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"数据网络已暂停使用"</string>
-    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"您的数据用量已达到所设置的用量上限，因此系统已停用移动数据。\n\n如果您要继续使用移动数据，则可能需要支付相应的数据流量费用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢复"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"已连接到WLAN网络"</string>
@@ -271,7 +268,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"屏保"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"有线网络"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"勿扰"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"仅限优先打扰"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"仅限优先事项"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"仅限闹钟"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"完全阻止"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"蓝牙"</string>
@@ -319,8 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"热点"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"手电筒"</string>
-    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"移动数据"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"流量使用情况"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩余流量"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"超出上限"</string>
@@ -370,9 +366,9 @@
     <string name="phone_hint" msgid="4872890986869209950">"滑动图标即可拨打电话"</string>
     <string name="voice_hint" msgid="8939888732119726665">"滑动图标即可打开语音助理"</string>
     <string name="camera_hint" msgid="7939688436797157483">"滑动图标即可打开相机"</string>
-    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"完全静音。此模式也会将屏幕阅读器静音。"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"完全阻止。此模式也会将屏幕阅读器静音。"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"完全阻止"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"仅限优先打扰"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"仅限优先事项"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"仅限闹钟"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"完全\n静音"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"仅限\n优先打扰"</string>
@@ -433,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"个人资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"设备已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"设备管理"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"资料监控"</string>
     <string name="monitoring_title" msgid="169206259253048106">"网络监控"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"关闭VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"断开VPN连接"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"查看政策"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"您的设备由“<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>”负责管理。\n\n您的管理员能够监控和管理与您的设备相关的设置、企业权限、应用、数据，以及您设备的位置信息。\n\n要了解详情，请与您的管理员联系。"</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"您的设备由贵单位负责管理。\n\n您的管理员能够监控和管理与您的设备相关的设置、企业权限、应用、数据，以及您设备的位置信息。\n\n要了解详情，请与您的管理员联系。"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"您所在的单位已在此设备上安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"您所在的单位已为您的工作资料安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"此设备上已安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"您的管理员已开启网络日志功能（该功能会监控您设备上的流量）。"</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"您已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"您已连接到“<xliff:g id="VPN_APP_0">%1$s</xliff:g>”和“<xliff:g id="VPN_APP_1">%2$s</xliff:g>”（这两个应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"您的工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"您的个人资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"您的设备由<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>管理。"</string>
@@ -569,12 +560,9 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>以及另外 <xliff:g id="NUMBER_5">%3$d</xliff:g> 项</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>以及另外 <xliff:g id="NUMBER_2">%3$d</xliff:g> 项</item>
     </plurals>
-    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
-    <skip />
-    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
-    <skip />
-    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
-    <skip />
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>的通知控件已打开"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>的通知控件已关闭"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"允许接收来自此频道的通知"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"所有类别"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多设置"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"自定义：<xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -712,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"应用可能无法在分屏模式下正常运行。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"应用不支持分屏。"</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"打开设置。"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"开启快捷设置。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"关闭快捷设置。"</string>
@@ -730,14 +722,10 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"画中画菜单"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>目前位于“画中画”中"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"如果您不想让<xliff:g id="NAME">%s</xliff:g>使用此功能，请点按以打开设置，然后关闭此功能。"</string>
-    <!-- no translation found for pip_play (1417176722760265888) -->
-    <skip />
-    <!-- no translation found for pip_pause (8881063404466476571) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
-    <skip />
+    <string name="pip_play" msgid="1417176722760265888">"播放"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"暂停"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"跳到下一个"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"跳到上一个"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"手机因严重发热而自动关机"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"现在，您的手机已恢复正常运行"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"由于发热严重，因此您的手机执行了自动关机以降温。现在，您的手机已恢复正常运行。\n\n以下情况可能会导致您的手机严重发热：\n • 使用占用大量资源的应用（例如游戏、视频或导航应用）\n • 下载或上传大型文件\n • 在高温环境下使用手机"</string>
@@ -765,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"免安装应用"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"免安装应用无需安装就能使用。"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"转到网页版"</string>
     <string name="mobile_data" msgid="7094582042819250762">"移动数据"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"WLAN 已关闭"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"蓝牙已关闭"</string>

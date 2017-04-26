@@ -157,6 +157,8 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"የተንቀሳቃሽ ስልክ ውሂብ ጠፍቷል"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ብሉቱዝ ማያያዝ።"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"የአውሮፕላን ሁነታ።"</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ምንም SIM ካርድ የለም።"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"የአገልግሎት አቅራቢ አውታረ መረብን በመቀየር ላይ።"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"የባትሪ ዝርዝሮችን ክፈት"</string>
@@ -427,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"የሥራ መገለጫ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"የግል መገለጫ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"ይህ መሣሪያ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"የመሣሪያ አስተዳደር"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"መገለጫን መከታተል"</string>
     <string name="monitoring_title" msgid="169206259253048106">"የአውታረ መረብ ክትትል"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -437,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN አሰናክል"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"የVPN ግንኙነት አቋርጥ"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"መመሪያዎችን ይመልከቱ"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"የእርስዎ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የሚተዳደር ነው።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻን፣ መተግበሪያዎችን እና የመሣሪያዎን የአካባቢ መረጃ መከታተል እና ማቀናበር ይችላሉ።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"የእርስዎ መሣሪያ በድርጅትዎ የሚተዳደር ነው።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻንና ውሂብን እና የመሣሪያዎን የአካባቢ መረጃ መከታተል እና ማቀናበር ይችላሉ።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"የእርስዎ ድርጅት የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"የእርስዎ ድርጅት የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በእርስዎ የሥራ መገለጫ ላይ ጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ተጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"የእርስዎ አስተዳዳሪ የአውታረ መረብ ምዝግብ ማስታወሻ መያዝን አብርተዋል፣ ይህም በመሣሪያዎ ላይ ያለውን ትራፊክ ይከታተላል።"</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችሉት <xliff:g id="VPN_APP_0">%1$s</xliff:g> እና <xliff:g id="VPN_APP_1">%2$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"የእርስዎ የሥራ መገለጫ የእርስዎን ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"የእርስዎ የግል መገለጫ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"የእርስዎ መሣሪያ በ<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ነው የሚቀናበረው።"</string>
@@ -703,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"የ<xliff:g id="ID_1">%1$s</xliff:g> ማሳወቂያ፦ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"መተግበሪያ ከተከፈለ ማያ ገጽ ጋር ላይሠራ ይችላል"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"መተግበሪያው የተከፈለ ማያ ገጽን አይደግፍም።"</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ቅንብሮችን ክፈት።"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ፈጣን ቅንብሮችን ክፈት።"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ፈጣን ቅንብሮችን ዝጋ።"</string>
@@ -752,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"የቅጽበት መተግበሪያዎች"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ቅጽበታዊ መተግበሪያዎች መጫን አያስፈልጋቸውም።"</string>
     <string name="app_info" msgid="6856026610594615344">"የመተግበሪያ መረጃ"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"ወደ ድር ሂድ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ጠፍቷል"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ብሉቱዝ ጠፍቷል"</string>

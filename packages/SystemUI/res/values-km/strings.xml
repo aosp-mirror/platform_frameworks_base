@@ -152,14 +152,13 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
-    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ទិន្នន័យទូរសព្ទចល័តបានបើក"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"ទិន្នន័យទូរសព្ទចល័តបានបិទ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"គ្មានស៊ីមកាតទេ។"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ការប្តូរបណ្តាញក្រុមហ៊ុនផ្តល់សេវា។"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"បើកព័ត៌មានលម្អិតអំពីថ្ម"</string>
@@ -242,11 +241,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"កំពុង​សាក​ថ្ម"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"ទិន្នន័យ 2G-3G ត្រូវបានផ្អាក"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ទិន្នន័យ 4G ត្រូវបានផ្អាក"</string>
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"ទិន្នន័យទូរសព្ទចល័តបានផ្អាក"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ទិន្នន័យត្រូវបានផ្អាក"</string>
-    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"បានឈានដល់កម្រិតទិន្នន័យដែលអ្នកបានកំណត់ហើយ។ ឥឡូវ​អ្នកមិនប្រើទិន្នន័យទូរសព្ទចល័តទៀតទេ។\n\nអាចនឹងគិតថ្លៃលើការប្រើទិន្នន័យ ប្រសិនបើអ្នកបន្តប្រើឡើងវិញ។"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"បន្ត"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"គ្មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"បាន​ភ្ជាប់​វ៉ាយហ្វាយ"</string>
@@ -319,8 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ហតស្ប៉ត"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ការ​ជូនដំណឹង"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ពិល"</string>
-    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ការ​ប្រើ​ទិន្នន័យ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ទិន្នន័យ​នៅសល់"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"លើស​ដែន​កំណត់"</string>
@@ -350,7 +346,7 @@
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម​​"</string>
-    <string name="expanded_header_battery_charging" msgid="205623198487189724">"កំពុង​បញ្ចូល​ថ្ម"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"កំពុងសាក​ថ្ម"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ​"</string>
@@ -433,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"កម្រងព័ត៌មាន​ការងារ​ត្រូវបាន​ភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"កម្រងព័ត៌មាន​ផ្ទាល់ខ្លួន​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"ឧបករណ៍​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"ការ​គ្រប់គ្រង​ឧបករណ៍"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"តាមដានប្រវត្ថិរូប"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ការ​ត្រួតពិនិត្យ​បណ្ដាញ"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"បិទ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ផ្ដាច់ VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"មើល​គោលការណ៍"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"ឧបករណ៍​របស់អ្នក​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>។\n\nអ្នក​គ្រប់គ្រង​របស់អ្នក​អាចតាមដាន និង​គ្រប់គ្រង​ការកំណត់ ការចូលប្រើជាលក្ខណៈក្រុមហ៊ុន កម្មវិធី ទិន្នន័យ​ដែលពាក់ព័ន្ធ​នឹង​ឧបករណ៍​របស់អ្នក និង​ព័ត៌មាន​ទីតាំង​នៃឧបករណ៍​របស់​អ្នក។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទងអ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"ឧបករណ៍​របស់អ្នក​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់ស្ថាប័ន​អ្នក។\n\nអ្នក​គ្រប់គ្រង​របស់អ្នក​អាចតាមដាន និង​គ្រប់គ្រង​ការកំណត់ ការចូលប្រើជាលក្ខណៈក្រុមហ៊ុន កម្មវិធី ទិន្នន័យ​ដែលពាក់ព័ន្ធ​នឹង​ឧបករណ៍​របស់អ្នក និង​ព័ត៌មាន​ទីតាំង​នៃឧបករណ៍​របស់​អ្នក។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​អ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"ស្ថាប័ន​របស់អ្នក​បានដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រនៅលើ​ឧបករណ៍​នេះ។ ចរាចរណ៍​បណ្តាញដែលមាន​សុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"ស្ថាប័នរបស់អ្នក​បានដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ។ ចរាចរណ៍​បណ្តាញដែលមាន​សុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"បាន​ដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រ​នៅលើ​ឧបករណ៍​នេះ។ ចរាចរណ៍​បណ្តាញដែលមានសុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"អ្នក​គ្រប់គ្រង​របស់អ្នក​បាន​បើក​ការ​ធ្វើ​កំណត់ហេតុ​បណ្តាញ​ ដែល​នឹង​តាមដាន​ចរាចរណ៍​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"អ្នកបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g> ដែលអាចតាមដានសកម្មភាពក្នុងបណ្តាញរបស់អ្នក រួមទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រផងដែរ។"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"អ្នកបាន​ភ្ជាប់ទៅ <xliff:g id="VPN_APP_0">%1$s</xliff:g> និង <xliff:g id="VPN_APP_1">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំងអ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"កម្រងព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់អ្នក​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g> ដែល​អាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"ឧបករណ៍របស់អ្នកគ្រប់គ្រងដោយ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ។"</string>
@@ -569,12 +560,9 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, និង <xliff:g id="NUMBER_5">%3$d</xliff:g> ផ្សេងទៀត</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>, និង <xliff:g id="NUMBER_2">%3$d</xliff:g> ផ្សេងទៀត</item>
     </plurals>
-    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
-    <skip />
-    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
-    <skip />
-    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
-    <skip />
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"ការគ្រប់គ្រងការជូនដំណឹងសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> បានបើក"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"ការគ្រប់គ្រងការជូនដំណឹងសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> បានបិទ"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"អនុញ្ញាតឲ្យមានការជូនដំណឹងពីប៉ុស្តិ៍នេះ"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"ប្រភេទ​ទាំងអស់"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ការកំណត់ច្រើនទៀត"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"ប្ដូរ​តាម​បំណង៖ <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -712,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> ការជូនដំណឹង៖ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"កម្មវិធីអាចនឹងមិនដំណើរការនៅលើអេក្រង់បំបែកទេ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"កម្មវិធីមិនគាំទ្រអេក្រង់បំបែកជាពីរទេ"</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"បើកការកំណត់"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"បើកការកំណត់រហ័ស"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"បិទការកំណត់រហ័ស"</string>
@@ -730,14 +722,10 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"ម៉ឺនុយ​រូបភាព​ក្នុងរូបភាព"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបភាពក្នុងរូបភាព"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ទេ សូមចុច​ដើម្បី​បើក​ការកំណត់ រួច​បិទ​វា។"</string>
-    <!-- no translation found for pip_play (1417176722760265888) -->
-    <skip />
-    <!-- no translation found for pip_pause (8881063404466476571) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
-    <skip />
+    <string name="pip_play" msgid="1417176722760265888">"លេង"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"ផ្អាក"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"រំលងទៅបន្ទាប់"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"រំលងទៅក្រោយ"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"ទូរសព្ទ​បាន​បិទដោយសារ​វា​ឡើងកម្តៅ"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"ឥឡូវនេះ​ទូរសព្ទ​របស់អ្នក​កំពុង​ដំណើរការ​ធម្មតា"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"ទូរសព្ទ​របស់អ្នក​ក្តៅពេក ដូច្នេះ​វាបាន​បិទ​ដើម្បី​បន្ថយ​កម្តៅ។ ឥឡូវនេះ ​ទូរសព្ទ​របស់អ្នក​កំពុង​ដំណើរការ​ធម្មតា។\n\nទូរសព្ទ​របស់អ្នក​អាចនឹង​ឡើង​កម្តៅ​ខ្លាំងជ្រុល ប្រសិន​បើអ្នក៖\n	• ប្រើប្រាស់​កម្មវិធី​ដែល​ប្រើប្រាស់ទិន្នន័យច្រើនក្នុងរយៈពេលខ្លី (ដូចជាហ្គេម វីដេអូ ឬកម្មវិធីរុករក)\n	• ទាញយក ឬ​បង្ហោះ​ឯកសារដែលមានទំហំធំ\n	• ប្រើប្រាស់​ទូរសព្ទ​របស់អ្នក​នៅកន្លែង​មានសីតុណ្ហភាព​ខ្ពស់"</string>
@@ -765,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"កម្មវិធី​ប្រើ​ភ្លាមៗ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"កម្មវិធី​ប្រើ​ភ្លាមៗ​មិន​តម្រូវ​ឲ្យ​មានការ​ដំឡើង​ទេ។"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"ចូលទៅកាន់បណ្តាញ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ទិន្នន័យ​ចល័ត"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi បាន​បិទ"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ប៊្លូធូស​បាន​បិទ"</string>

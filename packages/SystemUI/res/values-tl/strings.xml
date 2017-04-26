@@ -152,14 +152,13 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Walang SIM."</string>
-    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobile Data"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Naka-on ang Mobile Data"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Naka-off ang Mobile Data"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Pag-tether ng Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode na eroplano."</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Walang SIM card."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Nagpapalit ng carrier network."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Buksan ang mga detalye ng baterya"</string>
@@ -242,11 +241,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Nagcha-charge"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Naka-pause ang 2G-3G data"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Naka-pause ang 4G data"</string>
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Naka-pause ang mobile data"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Naka-pause ang data"</string>
-    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Naabot na ang itinakda mong limitasyon sa data. Hindi ka na gumagamit ng mobile data.\n\nKung magpapatuloy ka, maaaring may mga singil sa paggamit ng data."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Ipagpatuloy"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Walang koneksyon sa Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"nakakonekta ang Wi-Fi"</string>
@@ -319,8 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Mga Notification"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Flashlight"</string>
-    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobile data"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Paggamit ng data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Natitirang data"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Lumampas sa limitasyon"</string>
@@ -433,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang profile sa trabaho"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Nakakonekta ang personal na profile sa <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Nakakonekta ang device sa <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Pamamahala ng device"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Pagsubaybay sa Profile"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Pagsubaybay sa network"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"I-disable ang VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Idiskonekta ang VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Tingnan ang Mga Patakaran"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Pinamamahalaan ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang iyong device.\n\nMaaaring subaybayan at pamahalaan ng admin mo ang mga setting, pangkumpanyang access, app, data na nauugnay sa iyong device, at ang impormasyon ng lokasyon ng device mo.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa iyong admin."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Pinamamahalaan ng iyong organisasyon ang device mo.\n\nMaaaring subaybayan at pamahalaan ng iyong admin ang mga setting, pangkumpanyang access, app, data na nauugnay sa device mo, at ang impormasyon ng lokasyon ng iyong device.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa admin mo."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Nag-install ang iyong organisasyon ng awtoridad sa certificate sa device na ito. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Nag-install ang iyong organisasyon ng awtoridad sa certificate sa iyong profile sa trabaho. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"May naka-install sa device na ito na isang awtoridad sa certificate. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa device mo."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Nakakonekta ka sa <xliff:g id="VPN_APP">%1$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Nakakonekta ka sa <xliff:g id="VPN_APP_0">%1$s</xliff:g> at <xliff:g id="VPN_APP_1">%2$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong profile sa trabaho, na maaaring sumubaybay sa aktibidad sa iyong network, kasama ang mga email, app, at website."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong personal na profile, na maaaring sumubaybay sa aktibidad mo sa network, kasama ang mga email, app at website."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Pinamamahalaan ng <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ang iyong device."</string>
@@ -569,12 +560,9 @@
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, at <xliff:g id="NUMBER_5">%3$d</xliff:g> pang iba</item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, at <xliff:g id="NUMBER_5">%3$d</xliff:g> pang iba</item>
     </plurals>
-    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
-    <skip />
-    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
-    <skip />
-    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
-    <skip />
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Binuksan ang mga kontrol sa notification para sa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Isinara ang mga kontrol sa notification para sa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Payagan ang mga notification mula sa channel na ito"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"Lahat ng Kategorya"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Higit pang mga setting"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"I-customize: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -712,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notification sa <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Maaaring hindi gumana ang app sa split-screen."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Hindi sinusuportahan ng app ang split-screen."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Buksan ang mga setting."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Buksan ang mga mabilisang setting."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Isara ang mga mabilisang setting."</string>
@@ -730,14 +722,10 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Menu ng picture in picture"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Nasa picture-in-picture ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Kung ayaw mong gamitin ng <xliff:g id="NAME">%s</xliff:g> ang feature na ito, i-tap upang buksan ang mga setting at i-off ito."</string>
-    <!-- no translation found for pip_play (1417176722760265888) -->
-    <skip />
-    <!-- no translation found for pip_pause (8881063404466476571) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
-    <skip />
+    <string name="pip_play" msgid="1417176722760265888">"I-play"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"I-pause"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"Lumaktaw sa susunod"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"Lumaktaw sa nakaraan"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"Na-off ang telepono dahil sa init"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"Maayos na ngayong gumagana ang iyong telepono"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Napakainit ng telepono, kaya nag-off ito para lumamig. Maayos na itong gumagana.\n\nMaaaring lubos na uminit ang telepono kapag:\n	• Gumamit ka ng resource-intensive na app (gaya ng app para sa gaming, video, o navigation)\n	• Nag-download o nag-upload ka ng malaking file\n • Ginamit mo ito sa mainit na lugar"</string>
@@ -765,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Hindi kailangang i-install ang mga instant na app."</string>
     <string name="app_info" msgid="6856026610594615344">"Impormasyon ng app"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Pumunta sa web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Data ng mobile"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Naka-off ang Wi-Fi"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Naka-off ang Bluetooth"</string>
