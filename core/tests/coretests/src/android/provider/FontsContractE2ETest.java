@@ -29,7 +29,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.graphics.Typeface;
-import android.graphics.fonts.FontRequest;
 import android.os.Handler;
 import android.provider.FontsContract.Columns;
 import android.provider.FontsContract.FontFamilyResult;
