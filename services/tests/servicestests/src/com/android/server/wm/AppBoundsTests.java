@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.Debug;
 import android.view.DisplayInfo;
 import org.junit.Test;
 
@@ -53,11 +52,11 @@ public class AppBoundsTests extends WindowTestsBase {
      */
     @Test
     public void testRootConfigurationBounds() throws Exception {
-        final DisplayInfo info = sDisplayContent.getDisplayInfo();
+        final DisplayInfo info = mDisplayContent.getDisplayInfo();
         info.appWidth = 1024;
         info.appHeight = 768;
 
-        final Configuration config = sWm.computeNewConfiguration(sDisplayContent.getDisplayId());
+        final Configuration config = sWm.computeNewConfiguration(mDisplayContent.getDisplayId());
         // The bounds should always be positioned in the top left.
         assertEquals(config.appBounds.left, 0);
         assertEquals(config.appBounds.top, 0);
@@ -116,8 +115,8 @@ public class AppBoundsTests extends WindowTestsBase {
      */
     @Test
     public void testFullScreenFreeFormBounds() throws Exception {
-        final Rect fullScreenBounds = new Rect(0, 0, sDisplayInfo.logicalWidth,
-                sDisplayInfo.logicalHeight);
+        final Rect fullScreenBounds = new Rect(0, 0, mDisplayInfo.logicalWidth,
+                mDisplayInfo.logicalHeight);
         testStackBoundsConfiguration(null /*stackId*/, mParentBounds, fullScreenBounds,
                 mParentBounds);
     }
@@ -126,16 +125,16 @@ public class AppBoundsTests extends WindowTestsBase {
     private void testStackBoundsConfiguration(Integer stackId, Rect parentBounds, Rect bounds,
             Rect expectedConfigBounds) {
         final StackWindowController stackController = stackId != null ?
-                createStackControllerOnStackOnDisplay(stackId, sDisplayContent)
-                : createStackControllerOnDisplay(sDisplayContent);
+                createStackControllerOnStackOnDisplay(stackId, mDisplayContent)
+                : createStackControllerOnDisplay(mDisplayContent);
 
-        final Configuration parentConfig = sDisplayContent.getConfiguration();
+        final Configuration parentConfig = mDisplayContent.getConfiguration();
         parentConfig.setAppBounds(parentBounds);
 
         final Configuration config = new Configuration();
         stackController.adjustConfigurationForBounds(bounds, null /*insetBounds*/,
                 new Rect() /*nonDecorBounds*/, new Rect() /*stableBounds*/, false /*overrideWidth*/,
-                false /*overrideHeight*/, sDisplayInfo.logicalDensityDpi, config, parentConfig);
+                false /*overrideHeight*/, mDisplayInfo.logicalDensityDpi, config, parentConfig);
         // Assert that both expected and actual are null or are equal to each other
 
         assertTrue((expectedConfigBounds == null && config.appBounds == null)

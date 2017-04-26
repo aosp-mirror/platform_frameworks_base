@@ -47,7 +47,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testAddWindow() throws Exception {
         final WindowTestUtils.TestWindowToken token =
-                new WindowTestUtils.TestWindowToken(0, sDisplayContent);
+                new WindowTestUtils.TestWindowToken(0, mDisplayContent);
 
         assertEquals(0, token.getWindowsCount());
 
@@ -76,7 +76,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testChildRemoval() throws Exception {
-        final DisplayContent dc = sDisplayContent;
+        final DisplayContent dc = mDisplayContent;
         final WindowTestUtils.TestWindowToken token = new WindowTestUtils.TestWindowToken(0, dc);
 
         assertEquals(token, dc.getWindowToken(token.token));
@@ -97,7 +97,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testAdjustAnimLayer() throws Exception {
         final WindowTestUtils.TestWindowToken token =
-                new WindowTestUtils.TestWindowToken(0, sDisplayContent);
+                new WindowTestUtils.TestWindowToken(0, mDisplayContent);
         final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
         final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
         final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
@@ -109,7 +109,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
         // We assign layers once, to get the base values computed by
         // the controller.
-        sLayersController.assignWindowLayers(sDisplayContent);
+        mLayersController.assignWindowLayers(mDisplayContent);
 
         final int window1StartLayer = window1.mWinAnimator.mAnimLayer;
         final int window11StartLayer = window11.mWinAnimator.mAnimLayer;
@@ -120,7 +120,7 @@ public class WindowTokenTests extends WindowTestsBase {
         // Then we set an adjustment, and assign them again, they should
         // be offset.
         int adj = token.adj = 50;
-        sLayersController.assignWindowLayers(sDisplayContent);
+        mLayersController.assignWindowLayers(mDisplayContent);
         final int highestLayer = token.getHighestAnimLayer();
 
         assertEquals(window1StartLayer + adj, window1.mWinAnimator.mAnimLayer);
@@ -138,18 +138,18 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testTokenRemovalProcess() throws Exception {
         final WindowTestUtils.TestWindowToken token =
-                new WindowTestUtils.TestWindowToken(TYPE_TOAST, sDisplayContent,
+                new WindowTestUtils.TestWindowToken(TYPE_TOAST, mDisplayContent,
                         true /* persistOnEmpty */);
 
         // Verify that the token is on the display
-        assertNotNull(sDisplayContent.getWindowToken(token.token));
+        assertNotNull(mDisplayContent.getWindowToken(token.token));
 
         final WindowState window1 = createWindow(null, TYPE_TOAST, token, "window1");
         final WindowState window2 = createWindow(null, TYPE_TOAST, token, "window2");
 
-        sDisplayContent.removeWindowToken(token.token);
+        mDisplayContent.removeWindowToken(token.token);
         // Verify that the token is no longer mapped on the display
-        assertNull(sDisplayContent.getWindowToken(token.token));
+        assertNull(mDisplayContent.getWindowToken(token.token));
         // Verify that the token is still attached to its parent
         assertNotNull(token.getParent());
         // Verify that the token windows are still around.

@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import org.junit.Test;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 import android.platform.test.annotations.Presubmit;
@@ -52,7 +51,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     public void testAddWindow_Order() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
-                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
 
         assertEquals(0, token.getWindowsCount());
 
@@ -80,7 +79,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     public void testFindMainWindow() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
-                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
 
         assertNull(token.findMainWindow());
 
@@ -102,10 +101,10 @@ public class AppWindowTokenTests extends WindowTestsBase {
         sWm.mDisplayEnabled = true;
 
         // Create an app window with token on a display.
-        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
+        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken appWindowToken =
-                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
         task.addChild(appWindowToken, 0);
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
@@ -115,17 +114,17 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // Set initial orientation and update.
         appWindowToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        sWm.updateOrientationFromAppTokens(sDisplayContent.getOverrideConfiguration(), null,
-                sDisplayContent.getDisplayId());
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, sDisplayContent.getLastOrientation());
+        sWm.updateOrientationFromAppTokens(mDisplayContent.getOverrideConfiguration(), null,
+                mDisplayContent.getDisplayId());
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mDisplayContent.getLastOrientation());
         appWindow.resizeReported = false;
 
         // Update the orientation to perform 180 degree rotation and check that resize was reported.
         appWindowToken.setOrientation(SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-        sWm.updateOrientationFromAppTokens(sDisplayContent.getOverrideConfiguration(), null,
-                sDisplayContent.getDisplayId());
+        sWm.updateOrientationFromAppTokens(mDisplayContent.getOverrideConfiguration(), null,
+                mDisplayContent.getDisplayId());
         sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
-        assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, sDisplayContent.getLastOrientation());
+        assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, mDisplayContent.getLastOrientation());
         assertTrue(appWindow.resizeReported);
         appWindow.removeImmediately();
     }
@@ -170,7 +169,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     public void testGetOrientation() throws Exception {
         final WindowTestUtils.TestAppWindowToken token =
-                new WindowTestUtils.TestAppWindowToken(sDisplayContent);
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
         token.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         token.setFillsParent(false);

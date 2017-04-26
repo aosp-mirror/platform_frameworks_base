@@ -4313,7 +4313,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (mWaitingForConfig) {
                         mWaitingForConfig = false;
                         mLastFinishedFreezeSource = "config-unchanged";
-                        mRoot.getDisplayContent(displayId).setLayoutNeeded();
+                        final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                        if (dc != null) {
+                            dc.setLayoutNeeded();
+                        }
                         mWindowPlacerLocked.performSurfacePlacement();
                     }
                 }
