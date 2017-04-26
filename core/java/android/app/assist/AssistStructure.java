@@ -1644,7 +1644,7 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setAutofillId(@NonNull ViewStructure parent, int virtualId) {
-            mNode.mAutofillId = new AutofillId(parent.getAutofillId(), virtualId);
+            setAutofillId(parent.getAutofillId(), virtualId);
         }
 
         @Override
@@ -1685,8 +1685,13 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setAutofillId(int viewId) {
-            mNode.mAutofillId = new AutofillId(viewId);
+        public void setAutofillId(@NonNull AutofillId id) {
+            mNode.mAutofillId = id;
+        }
+
+        @Override
+        public void setAutofillId(@NonNull AutofillId parentId, int virtualId) {
+            mNode.mAutofillId = new AutofillId(parentId, virtualId);
         }
 
         @Override
