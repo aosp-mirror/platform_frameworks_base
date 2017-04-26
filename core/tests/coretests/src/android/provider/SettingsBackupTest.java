@@ -109,6 +109,8 @@ public class SettingsBackupTest {
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
+                    Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
                     Settings.Global.BLUETOOTH_DISABLED_PROFILES,
                     Settings.Global.BLUETOOTH_HEADSET_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,

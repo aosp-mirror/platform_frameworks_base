@@ -136,6 +136,38 @@ public final class BluetoothA2dp implements BluetoothProfile {
      */
     public static final int STATE_NOT_PLAYING   =  11;
 
+    /**
+     * We don't have a stored preference for whether or not the given A2DP sink device supports
+     * optional codecs.
+     * @hide */
+    public static final int OPTIONAL_CODECS_SUPPORT_UNKNOWN = -1;
+
+    /**
+     * The given A2DP sink device does not support optional codecs.
+     * @hide */
+    public static final int OPTIONAL_CODECS_NOT_SUPPORTED = 0;
+
+    /**
+     * The given A2DP sink device does support optional codecs.
+     * @hide */
+    public static final int OPTIONAL_CODECS_SUPPORTED = 1;
+
+    /**
+     * We don't have a stored preference for whether optional codecs should be enabled or disabled
+     * for the given A2DP device.
+     * @hide */
+    public static final int OPTIONAL_CODECS_PREF_UNKNOWN = -1;
+
+    /**
+     * Optional codecs should be disabled for the given A2DP device.
+     * @hide */
+    public static final int OPTIONAL_CODECS_PREF_DISABLED = 0;
+
+    /**
+     *  Optional codecs should be enabled for the given A2DP device.
+     *  @hide */
+    public static final int OPTIONAL_CODECS_PREF_ENABLED = 1;
+
     private Context mContext;
     private ServiceListener mServiceListener;
     private final ReentrantReadWriteLock mServiceLock = new ReentrantReadWriteLock();
@@ -648,6 +680,88 @@ public final class BluetoothA2dp implements BluetoothProfile {
             return;
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to BT service in enableDisableOptionalCodecs()", e);
+            return;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Returns whether this device supports optional codecs.
+     *
+     * @param device The device to check
+     * @return one of OPTIONAL_CODECS_SUPPORT_UNKNOWN, OPTIONAL_CODECS_NOT_SUPPORTED, or
+     *         OPTIONAL_CODECS_SUPPORTED.
+     *
+     * @hide
+     */
+    public int supportsOptionalCodecs(BluetoothDevice device) {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled() && isValidDevice(device)) {
+                return mService.supportsOptionalCodecs(device);
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return OPTIONAL_CODECS_SUPPORT_UNKNOWN;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to BT service in getSupportsOptionalCodecs()", e);
+            return OPTIONAL_CODECS_SUPPORT_UNKNOWN;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Returns whether this device should have optional codecs enabled.
+     *
+     * @param device The device in question.
+     * @return one of OPTIONAL_CODECS_PREF_UNKNOWN, OPTIONAL_CODECS_PREF_ENABLED, or
+     *         OPTIONAL_CODECS_PREF_DISABLED.
+     *
+     * @hide
+     */
+    public int getOptionalCodecsEnabled(BluetoothDevice device) {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled() && isValidDevice(device)) {
+                return mService.getOptionalCodecsEnabled(device);
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return OPTIONAL_CODECS_PREF_UNKNOWN;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to BT service in getSupportsOptionalCodecs()", e);
+            return OPTIONAL_CODECS_PREF_UNKNOWN;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Sets a persistent preference for whether a given device should have optional codecs enabled.
+     *
+     * @param device The device to set this preference for.
+     * @param value Whether the optional codecs should be enabled for this device.  This should be
+     *              one of OPTIONAL_CODECS_PREF_UNKNOWN, OPTIONAL_CODECS_PREF_ENABLED, or
+     *              OPTIONAL_CODECS_PREF_DISABLED.
+     * @hide
+     */
+    public void setOptionalCodecsEnabled(BluetoothDevice device, int value) {
+        try {
+            if (value != BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN &&
+                    value != BluetoothA2dp.OPTIONAL_CODECS_PREF_DISABLED &&
+                    value != BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED) {
+                Log.e(TAG, "Invalid value passed to setOptionalCodecsEnabled: " + value);
+                return;
+            }
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()
+                    && isValidDevice(device)) {
+                mService.setOptionalCodecsEnabled(device, value);
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return;
         } finally {
             mServiceLock.readLock().unlock();
