@@ -197,6 +197,19 @@ public class PipMenuActivityController {
         }
     }
 
+    public void onPinnedStackAnimationEnded() {
+        // Note: Only active menu activities care about this event
+        if (mToActivityMessenger != null) {
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_ANIMATION_ENDED;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not notify menu pinned animation ended", e);
+            }
+        }
+    }
+
     /**
      * Adds a new menu activity listener.
      */

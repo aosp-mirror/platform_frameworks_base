@@ -80,6 +80,7 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_HIDE_MENU = 3;
     public static final int MESSAGE_UPDATE_ACTIONS = 4;
     public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
+    public static final int MESSAGE_ANIMATION_ENDED = 6;
 
     private static final long INITIAL_DISMISS_DELAY = 3500;
     private static final long POST_INTERACTION_DISMISS_DELAY = 2000;
@@ -92,6 +93,7 @@ public class PipMenuActivity extends Activity {
 
     private int mMenuState;
     private boolean mAllowMenuTimeout = true;
+    private boolean mAllowTouches = true;
 
     private final List<RemoteAction> mActions = new ArrayList<>();
 
@@ -147,6 +149,10 @@ public class PipMenuActivity extends Activity {
                 case MESSAGE_UPDATE_DISMISS_FRACTION: {
                     final Bundle data = (Bundle) msg.obj;
                     updateDismissFraction(data.getFloat(EXTRA_DISMISS_FRACTION));
+                    break;
+                }
+                case MESSAGE_ANIMATION_ENDED: {
+                    mAllowTouches = true;
                     break;
                 }
             }
@@ -245,6 +251,10 @@ public class PipMenuActivity extends Activity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!mAllowTouches) {
+            return super.dispatchTouchEvent(ev);
+        }
+
         // On the first action outside the window, hide the menu
         switch (ev.getAction()) {
             case MotionEvent.ACTION_OUTSIDE:
@@ -284,6 +294,9 @@ public class PipMenuActivity extends Activity {
             boolean allowMenuTimeout) {
         mAllowMenuTimeout = allowMenuTimeout;
         if (mMenuState != menuState) {
+            boolean deferTouchesUntilAnimationEnds = (mMenuState == MENU_STATE_FULL) ||
+                    (menuState == MENU_STATE_FULL);
+            mAllowTouches = !deferTouchesUntilAnimationEnds;
             cancelDelayedFinish();
             updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
