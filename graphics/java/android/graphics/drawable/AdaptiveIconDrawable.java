@@ -78,6 +78,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * Mask path is defined inside device configuration in following dimension: [100 x 100]
      * @hide
      */
+    @TestApi
     public static final float MASK_SIZE = 100f;
 
     /**
@@ -179,7 +180,6 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      *
      * @param backgroundDrawable drawable that should be rendered in the background
      * @param foregroundDrawable drawable that should be rendered in the foreground
-     * @hide
      */
     public AdaptiveIconDrawable(Drawable backgroundDrawable,
             Drawable foregroundDrawable) {
