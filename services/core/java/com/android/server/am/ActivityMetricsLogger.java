@@ -133,7 +133,7 @@ class ActivityMetricsLogger {
      */
     void notifyActivityLaunching() {
         if (!isAnyTransitionActive()) {
-            mCurrentTransitionStartTime = System.currentTimeMillis();
+            mCurrentTransitionStartTime = SystemClock.uptimeMillis();
         }
     }
 
@@ -299,7 +299,7 @@ class ActivityMetricsLogger {
     private int calculateCurrentDelay() {
 
         // Shouldn't take more than 25 days to launch an app, so int is fine here.
-        return (int) (System.currentTimeMillis() - mCurrentTransitionStartTime);
+        return (int) (SystemClock.uptimeMillis() - mCurrentTransitionStartTime);
     }
 
     private void logAppTransitionMultiEvents() {
