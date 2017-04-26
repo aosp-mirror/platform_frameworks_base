@@ -148,7 +148,7 @@ public class PackageParser {
     private static final String PROPERTY_CHILD_PACKAGES_ENABLED =
             "persist.sys.child_packages_enabled";
 
-    private static final boolean MULTI_PACKAGE_APK_ENABLED =
+    private static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
             SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
 
     private static final int MAX_PACKAGES_PER_APK = 5;
