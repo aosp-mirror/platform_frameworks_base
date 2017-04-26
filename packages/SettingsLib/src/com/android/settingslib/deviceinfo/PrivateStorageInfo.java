@@ -33,7 +33,7 @@ public class PrivateStorageInfo {
     public final long freeBytes;
     public final long totalBytes;
 
-    private PrivateStorageInfo(long freeBytes, long totalBytes) {
+    public PrivateStorageInfo(long freeBytes, long totalBytes) {
         this.freeBytes = freeBytes;
         this.totalBytes = totalBytes;
     }
