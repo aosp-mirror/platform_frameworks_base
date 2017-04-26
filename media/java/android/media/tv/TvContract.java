@@ -2745,8 +2745,6 @@ public final class TvContract {
          *
          * <p>This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
          *
-         * <p>This is a required field.
-         *
          * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_CHANNEL_ID = "channel_id";
