@@ -2018,8 +2018,9 @@ public class AssistStructure implements Parcelable {
 
     /**
      * Returns whether the activity associated with this AssistStructure was the home activity
-     * at the time the assist data was acquired.
+     * (Launcher) at the time the assist data was acquired.
      * @return Whether the activity was the home activity.
+     * @see android.content.Intent#CATEGORY_HOME
      */
     public boolean isHomeActivity() {
         return mIsHomeActivity;
