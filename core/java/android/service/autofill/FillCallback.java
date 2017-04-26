@@ -47,8 +47,13 @@ public final class FillCallback {
     public void onSuccess(@Nullable FillResponse response) {
         assertNotCalled();
         mCalled = true;
+
+        if (response != null) {
+            response.setRequestId(mRequestId);
+        }
+
         try {
-            mCallback.onSuccess(response, mRequestId);
+            mCallback.onSuccess(response);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
