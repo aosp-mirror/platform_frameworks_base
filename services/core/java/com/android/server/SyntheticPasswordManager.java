@@ -346,11 +346,14 @@ public class SyntheticPasswordManager {
         PasswordData pwd = PasswordData.create(credentialType);
         byte[] pwdToken = computePasswordToken(credential, pwd);
 
+        // In case GK enrollment leaves persistent state around (in RPMB), this will nuke them
+        // to prevent them from accumulating and causing problems.
+        gatekeeper.clearSecureUserId(fakeUid(userId));
         GateKeeperResponse response = gatekeeper.enroll(fakeUid(userId), null, null,
                 passwordTokenToGkInput(pwdToken));
         if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
             Log.e(TAG, "Fail to enroll user password when creating SP for user " + userId);
-            return 0;
+            return DEFAULT_HANDLE;
         }
         pwd.passwordHandle = response.getPayload();
         long sid = sidFromPasswordHandle(pwd.passwordHandle);
