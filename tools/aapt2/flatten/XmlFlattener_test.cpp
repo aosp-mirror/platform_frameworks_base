@@ -82,72 +82,71 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
   android::ResXMLTree tree;
   ASSERT_TRUE(Flatten(doc.get(), &tree));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::START_NAMESPACE);
+  ASSERT_EQ(android::ResXMLTree::START_NAMESPACE, tree.next());
 
   size_t len;
   const char16_t* namespace_prefix = tree.getNamespacePrefix(&len);
-  EXPECT_EQ(StringPiece16(namespace_prefix, len), u"test");
+  EXPECT_EQ(StringPiece16(u"test"), StringPiece16(namespace_prefix, len));
 
   const char16_t* namespace_uri = tree.getNamespaceUri(&len);
-  ASSERT_EQ(StringPiece16(namespace_uri, len), u"http://com.test");
+  ASSERT_EQ(StringPiece16(u"http://com.test"), StringPiece16(namespace_uri, len));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
+  ASSERT_EQ(android::ResXMLTree::START_TAG, tree.next());
 
-  ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
+  ASSERT_EQ(nullptr, tree.getElementNamespace(&len));
   const char16_t* tag_name = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tag_name, len), u"View");
+  EXPECT_EQ(StringPiece16(u"View"), StringPiece16(tag_name, len));
 
   ASSERT_EQ(1u, tree.getAttributeCount());
-  ASSERT_EQ(tree.getAttributeNamespace(0, &len), nullptr);
+  ASSERT_EQ(nullptr, tree.getAttributeNamespace(0, &len));
   const char16_t* attr_name = tree.getAttributeName(0, &len);
-  EXPECT_EQ(StringPiece16(attr_name, len), u"attr");
+  EXPECT_EQ(StringPiece16(u"attr"), StringPiece16(attr_name, len));
 
-  EXPECT_EQ(0, tree.indexOfAttribute(nullptr, 0, u"attr",
-                                     StringPiece16(u"attr").size()));
+  EXPECT_EQ(0, tree.indexOfAttribute(nullptr, 0, u"attr", StringPiece16(u"attr").size()));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
+  ASSERT_EQ(android::ResXMLTree::START_TAG, tree.next());
 
-  ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
+  ASSERT_EQ(nullptr, tree.getElementNamespace(&len));
   tag_name = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tag_name, len), u"Layout");
+  EXPECT_EQ(StringPiece16(u"Layout"), StringPiece16(tag_name, len));
 
   ASSERT_EQ(1u, tree.getAttributeCount());
   const char16_t* attr_namespace = tree.getAttributeNamespace(0, &len);
-  EXPECT_EQ(StringPiece16(attr_namespace, len), u"http://com.test");
+  EXPECT_EQ(StringPiece16(u"http://com.test"), StringPiece16(attr_namespace, len));
 
   attr_name = tree.getAttributeName(0, &len);
-  EXPECT_EQ(StringPiece16(attr_name, len), u"hello");
+  EXPECT_EQ(StringPiece16(u"hello"), StringPiece16(attr_name, len));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::END_TAG);
-  ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
+  ASSERT_EQ(android::ResXMLTree::END_TAG, tree.next());
+  ASSERT_EQ(android::ResXMLTree::START_TAG, tree.next());
 
-  ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
+  ASSERT_EQ(nullptr, tree.getElementNamespace(&len));
   tag_name = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tag_name, len), u"Layout");
+  EXPECT_EQ(StringPiece16(u"Layout"), StringPiece16(tag_name, len));
   ASSERT_EQ(0u, tree.getAttributeCount());
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::TEXT);
+  ASSERT_EQ(android::ResXMLTree::TEXT, tree.next());
   const char16_t* text = tree.getText(&len);
-  EXPECT_EQ(StringPiece16(text, len), u"Some text\\");
+  EXPECT_EQ(StringPiece16(u"Some text\\"), StringPiece16(text, len));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::END_TAG);
-  ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
+  ASSERT_EQ(android::ResXMLTree::END_TAG, tree.next());
+  ASSERT_EQ(nullptr, tree.getElementNamespace(&len));
   tag_name = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tag_name, len), u"Layout");
+  EXPECT_EQ(StringPiece16(u"Layout"), StringPiece16(tag_name, len));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::END_TAG);
-  ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
+  ASSERT_EQ(android::ResXMLTree::END_TAG, tree.next());
+  ASSERT_EQ(nullptr, tree.getElementNamespace(&len));
   tag_name = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tag_name, len), u"View");
+  EXPECT_EQ(StringPiece16(u"View"), StringPiece16(tag_name, len));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::END_NAMESPACE);
+  ASSERT_EQ(android::ResXMLTree::END_NAMESPACE, tree.next());
   namespace_prefix = tree.getNamespacePrefix(&len);
-  EXPECT_EQ(StringPiece16(namespace_prefix, len), u"test");
+  EXPECT_EQ(StringPiece16(u"test"), StringPiece16(namespace_prefix, len));
 
   namespace_uri = tree.getNamespaceUri(&len);
-  ASSERT_EQ(StringPiece16(namespace_uri, len), u"http://com.test");
+  ASSERT_EQ(StringPiece16(u"http://com.test"), StringPiece16(namespace_uri, len));
 
-  ASSERT_EQ(tree.next(), android::ResXMLTree::END_DOCUMENT);
+  ASSERT_EQ(android::ResXMLTree::END_DOCUMENT, tree.next());
 }
 
 TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripSdk21) {
@@ -298,6 +297,43 @@ TEST_F(XmlFlattenerTest, FlattenNonStandardPackageId) {
   EXPECT_EQ(ResourceId(0x80010000), ResourceId(tree.getAttributeNameResID(idx)));
   EXPECT_EQ(android::Res_value::TYPE_REFERENCE, tree.getAttributeDataType(idx));
   EXPECT_EQ(ResourceId(0x80020000), tree.getAttributeData(idx));
+}
+
+TEST_F(XmlFlattenerTest, ProcessEscapedStrings) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(
+      R"EOF(<element value="\?hello" pattern="\\d{5}">\\d{5}</element>)EOF");
+
+  android::ResXMLTree tree;
+  ASSERT_TRUE(Flatten(doc.get(), &tree));
+
+  while (tree.next() != android::ResXMLTree::START_TAG) {
+    ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);
+    ASSERT_NE(tree.getEventType(), android::ResXMLTree::END_DOCUMENT);
+  }
+
+  const StringPiece16 kValue = u"value";
+  const StringPiece16 kPattern = u"pattern";
+
+  size_t len;
+  ssize_t idx;
+  const char16_t* str16;
+
+  idx = tree.indexOfAttribute(nullptr, 0, kValue.data(), kValue.size());
+  ASSERT_GE(idx, 0);
+  str16 = tree.getAttributeStringValue(idx, &len);
+  ASSERT_NE(nullptr, str16);
+  EXPECT_EQ(StringPiece16(u"?hello"), StringPiece16(str16, len));
+
+  idx = tree.indexOfAttribute(nullptr, 0, kPattern.data(), kPattern.size());
+  ASSERT_GE(idx, 0);
+  str16 = tree.getAttributeStringValue(idx, &len);
+  ASSERT_NE(nullptr, str16);
+  EXPECT_EQ(StringPiece16(u"\\d{5}"), StringPiece16(str16, len));
+
+  ASSERT_EQ(android::ResXMLTree::TEXT, tree.next());
+  str16 = tree.getText(&len);
+  ASSERT_NE(nullptr, str16);
+  EXPECT_EQ(StringPiece16(u"\\d{5}"), StringPiece16(str16, len));
 }
 
 }  // namespace aapt

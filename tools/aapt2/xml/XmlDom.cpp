@@ -42,7 +42,6 @@ struct Stack {
   std::stack<xml::Node*> node_stack;
   std::string pending_comment;
   std::unique_ptr<xml::Text> last_text_node;
-  util::StringBuilder pending_text;
 };
 
 /**
@@ -66,14 +65,12 @@ static void SplitName(const char* name, std::string* out_ns,
 
 static void FinishPendingText(Stack* stack) {
   if (stack->last_text_node != nullptr) {
-    if (!stack->pending_text.IsEmpty()) {
-      stack->last_text_node->text = stack->pending_text.ToString();
-      stack->pending_text = {};
+    if (!stack->last_text_node->text.empty()) {
       stack->node_stack.top()->AppendChild(std::move(stack->last_text_node));
     } else {
       // Drop an empty text node.
-      stack->last_text_node = nullptr;
     }
+    stack->last_text_node = nullptr;
   }
 }
 
@@ -138,13 +135,11 @@ static void XMLCALL StartElementHandler(void* user_data, const char* name,
   while (*attrs) {
     Attribute attribute;
     SplitName(*attrs++, &attribute.namespace_uri, &attribute.name);
-    util::StringBuilder builder;
-    builder.Append(*attrs++);
-    attribute.value = builder.ToString();
+    attribute.value = *attrs++;
 
     // Insert in sorted order.
-    auto iter = std::lower_bound(el->attributes.begin(), el->attributes.end(),
-                                 attribute, less_attribute);
+    auto iter = std::lower_bound(el->attributes.begin(), el->attributes.end(), attribute,
+                                 less_attribute);
     el->attributes.insert(iter, std::move(attribute));
   }
 
@@ -173,14 +168,14 @@ static void XMLCALL CharacterDataHandler(void* user_data, const char* s, int len
 
   // See if we can just append the text to a previous text node.
   if (stack->last_text_node != nullptr) {
-    stack->pending_text.Append(str);
+    stack->last_text_node->text.append(str.data(), str.size());
     return;
   }
 
   stack->last_text_node = util::make_unique<Text>();
   stack->last_text_node->line_number = XML_GetCurrentLineNumber(parser);
   stack->last_text_node->column_number = XML_GetCurrentColumnNumber(parser);
-  stack->pending_text.Append(str);
+  stack->last_text_node->text = str.to_string();
 }
 
 static void XMLCALL CommentDataHandler(void* user_data, const char* comment) {

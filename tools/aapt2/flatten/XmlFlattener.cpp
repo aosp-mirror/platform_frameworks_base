@@ -99,7 +99,11 @@ class XmlFlattenerVisitor : public xml::Visitor {
     flat_node->comment.index = util::HostToDevice32(-1);
 
     ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
-    AddString(node->text, kLowPriority, &flat_text->data);
+
+    // Process plain strings to make sure they get properly escaped.
+    util::StringBuilder builder;
+    builder.Append(node->text);
+    AddString(builder.ToString(), kLowPriority, &flat_text->data);
 
     writer.Finish();
   }
@@ -184,17 +188,14 @@ class XmlFlattenerVisitor : public xml::Visitor {
     writer.Finish();
   }
 
-  void WriteAttributes(xml::Element* node, ResXMLTree_attrExt* flat_elem,
-                       ChunkWriter* writer) {
+  void WriteAttributes(xml::Element* node, ResXMLTree_attrExt* flat_elem, ChunkWriter* writer) {
     filtered_attrs_.clear();
     filtered_attrs_.reserve(node->attributes.size());
 
     // Filter the attributes.
     for (xml::Attribute& attr : node->attributes) {
-      if (options_.max_sdk_level && attr.compiled_attribute &&
-          attr.compiled_attribute.value().id) {
-        size_t sdk_level =
-            FindAttributeSdkLevel(attr.compiled_attribute.value().id.value());
+      if (options_.max_sdk_level && attr.compiled_attribute && attr.compiled_attribute.value().id) {
+        size_t sdk_level = FindAttributeSdkLevel(attr.compiled_attribute.value().id.value());
         if (sdk_level > options_.max_sdk_level.value()) {
           continue;
         }
@@ -211,8 +212,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
 
     const ResourceId kIdAttr(0x010100d0);
 
-    std::sort(filtered_attrs_.begin(), filtered_attrs_.end(),
-              cmp_xml_attribute_by_id);
+    std::sort(filtered_attrs_.begin(), filtered_attrs_.end(), cmp_xml_attribute_by_id);
 
     flat_elem->attributeCount = util::HostToDevice16(filtered_attrs_.size());
 
@@ -234,18 +234,15 @@ class XmlFlattenerVisitor : public xml::Visitor {
       }
       attribute_index++;
 
-      // Add the namespaceUri to the list of StringRefs to encode. Use null if
-      // the namespace
+      // Add the namespaceUri to the list of StringRefs to encode. Use null if the namespace
       // is empty (doesn't exist).
       AddString(xml_attr->namespace_uri, kLowPriority, &flat_attr->ns,
                 true /* treat_empty_string_as_null */);
 
       flat_attr->rawValue.index = util::HostToDevice32(-1);
 
-      if (!xml_attr->compiled_attribute ||
-          !xml_attr->compiled_attribute.value().id) {
-        // The attribute has no associated ResourceID, so the string order
-        // doesn't matter.
+      if (!xml_attr->compiled_attribute || !xml_attr->compiled_attribute.value().id) {
+        // The attribute has no associated ResourceID, so the string order doesn't matter.
         AddString(xml_attr->name, kLowPriority, &flat_attr->name);
       } else {
         // Attribute names are stored without packages, but we use
@@ -255,8 +252,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
         // pools that we later combine.
         //
         // Lookup the StringPool for this package and make the reference there.
-        const xml::AaptAttribute& aapt_attr =
-            xml_attr->compiled_attribute.value();
+        const xml::AaptAttribute& aapt_attr = xml_attr->compiled_attribute.value();
 
         StringPool::Ref name_ref =
             package_pools[aapt_attr.id.value().package_id()].MakeRef(
@@ -266,10 +262,18 @@ class XmlFlattenerVisitor : public xml::Visitor {
         AddString(name_ref, &flat_attr->name);
       }
 
+      // Process plain strings to make sure they get properly escaped.
+      StringPiece raw_value = xml_attr->value;
+      util::StringBuilder str_builder;
+      if (!options_.keep_raw_values) {
+        str_builder.Append(xml_attr->value);
+        raw_value = str_builder.ToString();
+      }
+
       if (options_.keep_raw_values || !xml_attr->compiled_value) {
         // Keep raw values if the value is not compiled or
         // if we're building a static library (need symbols).
-        AddString(xml_attr->value, kLowPriority, &flat_attr->rawValue);
+        AddString(raw_value, kLowPriority, &flat_attr->rawValue);
       }
 
       if (xml_attr->compiled_value) {
@@ -277,12 +281,12 @@ class XmlFlattenerVisitor : public xml::Visitor {
       } else {
         // Flatten as a regular string type.
         flat_attr->typedValue.dataType = android::Res_value::TYPE_STRING;
-        AddString(xml_attr->value, kLowPriority,
-                  (ResStringPool_ref*)&flat_attr->typedValue.data);
+
+        AddString(str_builder.ToString(), kLowPriority,
+                  (ResStringPool_ref*) &flat_attr->typedValue.data);
       }
 
-      flat_attr->typedValue.size =
-          util::HostToDevice16(sizeof(flat_attr->typedValue));
+      flat_attr->typedValue.size = util::HostToDevice16(sizeof(flat_attr->typedValue));
       flat_attr++;
     }
   }
