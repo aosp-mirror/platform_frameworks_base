@@ -152,14 +152,13 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाय-फाय"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"सिम नाही."</string>
-    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"मोबाइल डेटा"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"मोबाइल डेटा चालू आहे"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"मोबाइल डेटा बंद आहे"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटुथ टिथरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"विमान मोड."</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"सिम कार्ड नाही."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क बदलणे."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"बॅटरी तपशील उघडा"</string>
@@ -242,11 +241,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"चार्ज होत आहे"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डेटास विराम दिला आहे"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटास विराम दिला आहे"</string>
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"मोबाइल डेटा थांबवला आहे"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटास विराम दिला आहे"</string>
-    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"आपण सेट केलेली डेटा मर्यादा संपली. आता आपले मोबाइल डेटा वापरणे बंद आहे.\n\nआपण ते पुन्हा सुरू केल्यास, डेटा वापरासाठी शुल्क लागू होईल."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुन्हा सुरु करा"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इंटरनेट कनेक्शन नाही"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाय-फाय कनेक्ट केले"</string>
@@ -319,8 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"हॉटस्पॉट"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"सूचना"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"फ्लॅशलाइट"</string>
-    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"मोबाइल डेटा"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"डेटा वापर"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"शिल्लक डेटा"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"मर्यादेबाहेर"</string>
@@ -433,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"वैयक्तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"डिव्हाइस व्‍यवस्‍थापन"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफाईल परीक्षण"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क परीक्षण"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करा"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्कनेक्ट करा"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"धोरणे पहा"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"तुमचे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> व्‍यवस्‍थापित करते.\n\nतुमचे प्रशासन सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, आपल्या डिव्हाइसशी संबंधित डेटा आणि आपल्या डिव्हाइसच्या ठिकाणाची माहिती मॉनिटर करू आणि व्‍यवस्‍थापित करू शकते.\n\nआणखी माहितीसाठी, आपल्या प्रशासनाशी संपर्क साधा."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"तुमचे डिव्हाइस आमची संस्‍था व्‍यवस्‍थापित करते.\n\nतुमचे प्रशासन सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, आपल्या डिव्हाइसशी संबंधित डेटा आणि आपल्या डिव्हाइसच्या ठिकाणाची माहिती मॉनिटर करू आणि व्‍यवस्‍थापित करू शकते.\n\nआणखी माहितीसाठी, आपल्या प्रशासनाशी संपर्क साधा."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"आपल्या संस्थेने या डिव्हाइसवर प्रमाणपत्र अधिकार स्थापित केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार स्थापित केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"या डिव्हाइसवर प्रमाणपत्र अधिकार स्थापित केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"आपल्या प्रशासकाने नेटवर्क लॉगिंग चालू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे परीक्षण करते."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"तुम्‍ही <xliff:g id="VPN_APP">%1$s</xliff:g>शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"तुम्‍ही <xliff:g id="VPN_APP_0">%1$s</xliff:g> आणि <xliff:g id="VPN_APP_1">%2$s</xliff:g>शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"आपले कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"आपले वैयक्तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"आपले डिव्हाइस <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ने व्यवस्थापित केले आहे."</string>
@@ -569,12 +560,9 @@
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, आणि <xliff:g id="NUMBER_5">%3$d</xliff:g> इतर</item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, आणि <xliff:g id="NUMBER_5">%3$d</xliff:g> इतर</item>
     </plurals>
-    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
-    <skip />
-    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
-    <skip />
-    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
-    <skip />
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे खुली आहेत"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे बंद आहेत"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"या चॅनेलकडील सूचनांना मान्यता द्या"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"सर्व श्रेण्या"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"अधिक सेटिंग्ज"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"सानुकूल करा: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -712,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"अॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"जलद सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"जलद सेटिंग्ज बंद करा."</string>
@@ -730,14 +722,10 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"चित्र मेनूमधील चित्र"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> चित्रामध्ये चित्र मध्ये आहे"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> ने हे वैशिष्ट्य वापरू नये असे आपल्याला वाटत असल्यास, टॅप करून सेटिंग्ज उघडा आणि ते बंद करा."</string>
-    <!-- no translation found for pip_play (1417176722760265888) -->
-    <skip />
-    <!-- no translation found for pip_pause (8881063404466476571) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
-    <skip />
+    <string name="pip_play" msgid="1417176722760265888">"प्ले करा"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"थांबवा"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"डावलून पुढे जा"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"डावलून मागे जा"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"तापल्‍यामुळे फोन बंद झाला"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"आपला फोन आता व्‍यवस्थित चालू आहे"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"आपला फोन खूप तापलाय, म्हणून तो थंड होण्यासाठी बंद झाला आहे. आपला फोन आता व्‍यवस्थित चालू आहे.\n\nआपण असे केल्यास आपला फोन खूप तापेल:\n	•संसाधन केंद्रित अॅप वापरणे (गेमिंग, व्हिडिओ किंवा नेव्हिगेशन अॅप यासारखे)\n	•मोठ्या फायली डाउनलोड किंवा अपलोड करणे\n	•उच्च तापमानामध्ये आपला फोन वापरणे"</string>
@@ -765,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"इन्सटंट अ‍ॅप्स"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"इन्सटंट अॅप्सना स्थापनेची आवश्यकता नसते."</string>
     <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"वेबवर जा"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"वाय-फाय बंद आहे"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ब्लूटुथ बंद आहे"</string>
