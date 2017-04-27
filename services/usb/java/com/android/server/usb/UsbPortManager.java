@@ -22,11 +22,12 @@ import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.hardware.usb.V1_0.IUsb;
-import android.hardware.usb.V1_0.IUsbCallback;
 import android.hardware.usb.V1_0.PortRole;
 import android.hardware.usb.V1_0.PortRoleType;
 import android.hardware.usb.V1_0.PortStatus;
 import android.hardware.usb.V1_0.Status;
+import android.hardware.usb.V1_1.IUsbCallback;
+import android.hardware.usb.V1_1.PortStatus_1_1;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.Bundle;
@@ -454,6 +455,39 @@ public class UsbPortManager {
             return;
         }
 
+
+        public void notifyPortStatusChange_1_1(ArrayList<PortStatus_1_1> currentPortStatus,
+                int retval) {
+            if (!portManager.mSystemReady) {
+                return;
+            }
+
+            if (retval != Status.SUCCESS) {
+                logAndPrint(Log.ERROR, pw, "port status enquiry failed");
+                return;
+            }
+
+            ArrayList<RawPortInfo> newPortInfo = new ArrayList<RawPortInfo>();
+
+            for (PortStatus_1_1 current : currentPortStatus) {
+                RawPortInfo temp = new RawPortInfo(current.status.portName,
+                        current.supportedModes, current.currentMode,
+                        current.status.canChangeMode, current.status.currentPowerRole,
+                        current.status.canChangePowerRole,
+                        current.status.currentDataRole, current.status.canChangeDataRole);
+                newPortInfo.add(temp);
+                logAndPrint(Log.INFO, pw, "ClientCallback: " + current.status.portName);
+            }
+
+            Message message = portManager.mHandler.obtainMessage();
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList(PORT_INFO, newPortInfo);
+            message.what = MSG_UPDATE_PORTS;
+            message.setData(bundle);
+            portManager.mHandler.sendMessage(message);
+            return;
+        }
+
         public void notifyRoleSwitchStatus(String portName, PortRole role, int retval) {
             if (retval == Status.SUCCESS) {
                 logAndPrint(Log.INFO, pw, portName + " role switch successful");
@@ -568,7 +602,7 @@ public class UsbPortManager {
             IndentingPrintWriter pw) {
         // Only allow mode switch capability for dual role ports.
         // Validate that the current mode matches the supported modes we expect.
-        if (supportedModes != UsbPort.MODE_DUAL) {
+        if ((supportedModes & UsbPort.MODE_DUAL) != UsbPort.MODE_DUAL) {
             canChangeMode = false;
             if (currentMode != 0 && currentMode != supportedModes) {
                 logAndPrint(Log.WARN, pw, "Ignoring inconsistent current mode from USB "
