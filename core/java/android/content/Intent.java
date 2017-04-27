@@ -3228,6 +3228,7 @@ public class Intent implements Parcelable, Cloneable {
      * caused the broadcast.
      * @hide
      */
+    @SystemApi
     public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
 
     /**
