@@ -83,14 +83,19 @@ public final class AutofillServiceInfo {
     }
 
     /**
-     * Gets the meta-data as a TypedArray, or null if not provided, or throws if invalid.
+     * Gets the meta-data as a {@link TypedArray}, or {@code null} if not provided,
+     * or throws if invalid.
      */
     @Nullable
     private static TypedArray getMetaDataArray(PackageManager pm, ServiceInfo si) {
         // Check for permissions.
-        if (!Manifest.permission.BIND_AUTOFILL.equals(si.permission)) {
-            Log.e(TAG, "Service does not require permission " + Manifest.permission.BIND_AUTOFILL);
-            return null;
+        // TODO(b/37563972): remove support to BIND_AUTOFILL once clients use BIND_AUTOFILL_SERVICE
+        if (!Manifest.permission.BIND_AUTOFILL_SERVICE.equals(si.permission)
+                && !Manifest.permission.BIND_AUTOFILL.equals(si.permission)) {
+            Log.w(TAG, "AutofillService from '" + si.packageName + "' does not require permission "
+                    + Manifest.permission.BIND_AUTOFILL_SERVICE);
+            throw new SecurityException("Service does not require permission "
+                    + Manifest.permission.BIND_AUTOFILL_SERVICE);
         }
 
         // Get the AutoFill metadata, if declared.

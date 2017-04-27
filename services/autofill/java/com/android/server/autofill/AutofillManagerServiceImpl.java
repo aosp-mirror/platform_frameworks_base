@@ -191,8 +191,8 @@ final class AutofillManagerServiceImpl {
                 }
                 sendStateToClients();
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Bad autofill service name " + componentName + ": " + e);
+        } catch (Exception e) {
+            Slog.e(TAG, "Bad AutofillService '" + componentName + "': " + e);
         }
     }
 
