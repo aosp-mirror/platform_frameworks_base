@@ -18,7 +18,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import android.testing.TestableSettings.SettingOverrider;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,11 +91,10 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
                         attr);
 
         // Must set the Settings value before instantiating the NetworkControllerImpl due to bugs in
-        // TestableSettings.
-        SettingOverrider settingsOverrider =
-                mContext.getSettingsProvider().acquireOverridesBuilder()
-                        .addSetting("global", Settings.Global.NETWORK_SCORING_UI_ENABLED, "1")
-                        .build();
+        // TestableSettingsProvider.
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                "1");
         super.setUp(); // re-instantiate NetworkControllImpl now that setting has been updated
         setupNetworkScoreManager();
 
@@ -131,8 +129,6 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         assertEquals("SD Badge is set",
                 Utils.getWifiBadgeResource(NetworkBadging.BADGING_SD),
                 iconState.iconOverlay);
-
-        settingsOverrider.release();
     }
 
     private void setupNetworkScoreManager() {
