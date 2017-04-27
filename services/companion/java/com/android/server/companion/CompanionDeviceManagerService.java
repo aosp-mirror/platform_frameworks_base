@@ -244,7 +244,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         private void checkCallerIsSystemOr(String pkg, int userId) throws RemoteException {
-            if (getCallingUserId() == UserHandle.USER_SYSTEM) {
+            if (isCallerSystem()) {
                 return;
             }
 
@@ -294,6 +294,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         private void checkUsesFeature(String pkg, int userId) {
+            if (isCallerSystem()) {
+                // Drop the requirement for calls from system process
+                return;
+            }
+
             FeatureInfo[] reqFeatures = getPackageInfo(pkg, userId).reqFeatures;
             String requiredFeature = PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
             int numFeatures = ArrayUtils.size(reqFeatures);
@@ -306,8 +311,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
-    private int getCallingUserId() {
+    private static int getCallingUserId() {
         return UserHandle.getUserId(Binder.getCallingUid());
+    }
+
+    private static boolean isCallerSystem() {
+        return getCallingUserId() == UserHandle.USER_SYSTEM;
     }
 
     private ServiceConnection createServiceConnection(
