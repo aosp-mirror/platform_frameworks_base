@@ -218,6 +218,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         return (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
+    private WifiManager getWifiManager() {
+        return (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+    }
+
     private void updateConfiguration() {
         mConfig = new TetheringConfiguration(mContext);
     }
@@ -396,8 +400,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private int setWifiTethering(final boolean enable) {
         synchronized (mPublicSync) {
             mWifiTetherRequested = enable;
-            final WifiManager wifiManager =
-                    (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+            final WifiManager wifiManager = getWifiManager();
             if ((enable && wifiManager.startSoftAp(null /* use existing wifi config */)) ||
                 (!enable && wifiManager.stopSoftAp())) {
                 return ConnectivityManager.TETHER_ERROR_NO_ERROR;
@@ -1421,12 +1424,37 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             } else {
                 mForwardedDownstreams.remove(who);
             }
+
+            // If this is a Wi-Fi interface, notify WifiManager of the active serving state.
+            if (who.interfaceType() == ConnectivityManager.TETHERING_WIFI) {
+                final WifiManager mgr = getWifiManager();
+                final String iface = who.interfaceName();
+                switch (mode) {
+                    case IControlsTethering.STATE_TETHERED:
+                        mgr.updateInterfaceIpState(iface, WifiManager.IFACE_IP_MODE_TETHERED);
+                        break;
+                    case IControlsTethering.STATE_LOCAL_ONLY:
+                        mgr.updateInterfaceIpState(iface, WifiManager.IFACE_IP_MODE_LOCAL_ONLY);
+                        break;
+                    default:
+                        Log.wtf(TAG, "Unknown active serving mode: " + mode);
+                        break;
+                }
+            }
         }
 
         private void handleInterfaceServingStateInactive(TetherInterfaceStateMachine who) {
             mNotifyList.remove(who);
             mIPv6TetheringCoordinator.removeActiveDownstream(who);
             mForwardedDownstreams.remove(who);
+
+            // If this is a Wi-Fi interface, tell WifiManager of any errors.
+            if (who.interfaceType() == ConnectivityManager.TETHERING_WIFI) {
+                if (who.lastError() != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                    getWifiManager().updateInterfaceIpState(
+                            who.interfaceName(), WifiManager.IFACE_IP_MODE_CONFIGURATION_ERROR);
+                }
+            }
         }
 
         class InitialState extends State {
@@ -1743,7 +1771,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     public void notifyInterfaceStateChange(String iface, TetherInterfaceStateMachine who,
                                            int state, int error) {
         synchronized (mPublicSync) {
-            TetherState tetherState = mTetherStates.get(iface);
+            final TetherState tetherState = mTetherStates.get(iface);
             if (tetherState != null && tetherState.stateMachine.equals(who)) {
                 tetherState.lastState = state;
                 tetherState.lastError = error;
