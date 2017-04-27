@@ -403,6 +403,7 @@ public class SettingsBackupTest {
                  Settings.Secure.BACKUP_PROVISIONED,
                  Settings.Secure.BACKUP_TRANSPORT,
                  Settings.Secure.BLUETOOTH_HCI_LOG,
+                 Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, // Candidate for backup?
                  Settings.Secure.CARRIER_APPS_HANDLED,
                  Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
                  Settings.Secure.COMPLETED_CATEGORY_PREFIX,
