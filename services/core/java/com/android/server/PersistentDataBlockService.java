@@ -95,7 +95,6 @@ public class PersistentDataBlockService extends SystemService {
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
         mBlockDeviceSize = -1; // Load lazily
-        mAllowedUid = getAllowedUid(UserHandle.USER_SYSTEM);
     }
 
     private int getAllowedUid(int userHandle) {
@@ -117,6 +116,7 @@ public class PersistentDataBlockService extends SystemService {
     public void onStart() {
         // Do init on a separate thread, will join in PHASE_ACTIVITY_MANAGER_READY
         SystemServerInitThreadPool.get().submit(() -> {
+            mAllowedUid = getAllowedUid(UserHandle.USER_SYSTEM);
             enforceChecksumValidity();
             formatIfOemUnlockEnabled();
             publishBinderService(Context.PERSISTENT_DATA_BLOCK_SERVICE, mService);
