@@ -47,6 +47,7 @@ inline android::hash_t hash_type(const ResourceId& id) {
 }
 
 class ISymbolSource;
+class ISymbolTableDelegate;
 class NameMangler;
 
 class SymbolTable {
@@ -73,7 +74,11 @@ class SymbolTable {
     bool is_public = false;
   };
 
-  SymbolTable(NameMangler* mangler) : mangler_(mangler), cache_(200), id_cache_(200) {}
+  SymbolTable(NameMangler* mangler);
+
+  // Overrides the default ISymbolTableDelegate, which allows a custom defined strategy for
+  // looking up resources from a set of sources.
+  void SetDelegate(std::unique_ptr<ISymbolTableDelegate> delegate);
 
   // Appends a symbol source. The cache is not cleared since entries that
   // have already been found would take precedence due to ordering.
@@ -99,6 +104,7 @@ class SymbolTable {
 
  private:
   NameMangler* mangler_;
+  std::unique_ptr<ISymbolTableDelegate> delegate_;
   std::vector<std::unique_ptr<ISymbolSource>> sources_;
 
   // We use shared_ptr because unique_ptr is not supported and
@@ -109,11 +115,41 @@ class SymbolTable {
   DISALLOW_COPY_AND_ASSIGN(SymbolTable);
 };
 
-/**
- * An interface that a symbol source implements in order to surface symbol
- * information
- * to the symbol table.
- */
+// Allows the customization of the lookup strategy/order of a symbol from a set of
+// symbol sources.
+class ISymbolTableDelegate {
+ public:
+  ISymbolTableDelegate() = default;
+  virtual ~ISymbolTableDelegate() = default;
+
+  // The name is already mangled and does not need further processing.
+  virtual std::unique_ptr<SymbolTable::Symbol> FindByName(
+      const ResourceName& name, const std::vector<std::unique_ptr<ISymbolSource>>& sources) = 0;
+
+  virtual std::unique_ptr<SymbolTable::Symbol> FindById(
+      ResourceId id, const std::vector<std::unique_ptr<ISymbolSource>>& sources) = 0;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ISymbolTableDelegate);
+};
+
+class DefaultSymbolTableDelegate : public ISymbolTableDelegate {
+ public:
+  DefaultSymbolTableDelegate() = default;
+  virtual ~DefaultSymbolTableDelegate() = default;
+
+  virtual std::unique_ptr<SymbolTable::Symbol> FindByName(
+      const ResourceName& name,
+      const std::vector<std::unique_ptr<ISymbolSource>>& sources) override;
+  virtual std::unique_ptr<SymbolTable::Symbol> FindById(
+      ResourceId id, const std::vector<std::unique_ptr<ISymbolSource>>& sources) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DefaultSymbolTableDelegate);
+};
+
+// An interface that a symbol source implements in order to surface symbol information
+// to the symbol table.
 class ISymbolSource {
  public:
   virtual ~ISymbolSource() = default;
@@ -122,9 +158,7 @@ class ISymbolSource {
       const ResourceName& name) = 0;
   virtual std::unique_ptr<SymbolTable::Symbol> FindById(ResourceId id) = 0;
 
-  /**
-   * Default implementation tries the name if it exists, else the ID.
-   */
+  // Default implementation tries the name if it exists, else the ID.
   virtual std::unique_ptr<SymbolTable::Symbol> FindByReference(
       const Reference& ref) {
     if (ref.name) {
@@ -136,11 +170,9 @@ class ISymbolSource {
   }
 };
 
-/**
- * Exposes the resources in a ResourceTable as symbols for SymbolTable.
- * Instances of this class must outlive the encompassed ResourceTable.
- * Lookups by ID are ignored.
- */
+// Exposes the resources in a ResourceTable as symbols for SymbolTable.
+// Instances of this class must outlive the encompassed ResourceTable.
+// Lookups by ID are ignored.
 class ResourceTableSymbolSource : public ISymbolSource {
  public:
   explicit ResourceTableSymbolSource(ResourceTable* table) : table_(table) {}

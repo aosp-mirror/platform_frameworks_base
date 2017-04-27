@@ -190,6 +190,62 @@ class LinkContext : public IAaptContext {
   int min_sdk_version_ = 0;
 };
 
+// A custom delegate that generates compatible pre-O IDs for use with feature splits.
+// Feature splits use package IDs > 7f, which in Java (since Java doesn't have unsigned ints)
+// is interpreted as a negative number. Some verification was wrongly assuming negative values
+// were invalid.
+//
+// This delegate will attempt to masquerade any '@id/' references with ID 0xPPTTEEEE,
+// where PP > 7f, as 0x7fPPEEEE. Any potential overlapping is verified and an error occurs if such
+// an overlap exists.
+class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
+ public:
+  FeatureSplitSymbolTableDelegate(IAaptContext* context) : context_(context) {
+  }
+
+  virtual ~FeatureSplitSymbolTableDelegate() = default;
+
+  virtual std::unique_ptr<SymbolTable::Symbol> FindByName(
+      const ResourceName& name,
+      const std::vector<std::unique_ptr<ISymbolSource>>& sources) override {
+    std::unique_ptr<SymbolTable::Symbol> symbol =
+        DefaultSymbolTableDelegate::FindByName(name, sources);
+    if (symbol == nullptr) {
+      return {};
+    }
+
+    // Check to see if this is an 'id' with the target package.
+    if (name.type == ResourceType::kId && symbol->id) {
+      ResourceId* id = &symbol->id.value();
+      if (id->package_id() > kAppPackageId) {
+        // Rewrite the resource ID to be compatible pre-O.
+        ResourceId rewritten_id(kAppPackageId, id->package_id(), id->entry_id());
+
+        // Check that this doesn't overlap another resource.
+        if (DefaultSymbolTableDelegate::FindById(rewritten_id, sources) != nullptr) {
+          // The ID overlaps, so log a message (since this is a weird failure) and fail.
+          context_->GetDiagnostics()->Error(DiagMessage() << "Failed to rewrite " << name
+                                                          << " for pre-O feature split support");
+          return {};
+        }
+
+        if (context_->IsVerbose()) {
+          context_->GetDiagnostics()->Note(DiagMessage() << "rewriting " << name << " (" << *id
+                                                         << ") -> (" << rewritten_id << ")");
+        }
+
+        *id = rewritten_id;
+      }
+    }
+    return symbol;
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(FeatureSplitSymbolTableDelegate);
+
+  IAaptContext* context_;
+};
+
 static bool FlattenXml(xml::XmlResource* xml_res, const StringPiece& path,
                        Maybe<size_t> max_sdk_level, bool keep_raw_values, IArchiveWriter* writer,
                        IAaptContext* context) {
@@ -1462,6 +1518,19 @@ class LinkCommand {
     // Add our table to the symbol table.
     context_->GetExternalSymbols()->PrependSource(
         util::make_unique<ResourceTableSymbolSource>(&final_table_));
+
+    // Workaround for pre-O runtime that would treat negative resource IDs
+    // (any ID with a package ID > 7f) as invalid. Intercept any ID (PPTTEEEE) with PP > 0x7f
+    // and type == 'id', and return the ID 0x7fPPEEEE. IDs don't need to be real resources, they
+    // are just identifiers.
+    if (context_->GetMinSdkVersion() < SDK_O && context_->GetPackageType() == PackageType::kApp) {
+      if (context_->IsVerbose()) {
+        context_->GetDiagnostics()->Note(DiagMessage()
+                                         << "enabling pre-O feature split ID rewriting");
+      }
+      context_->GetExternalSymbols()->SetDelegate(
+          util::make_unique<FeatureSplitSymbolTableDelegate>(context_));
+    }
 
     ReferenceLinker linker;
     if (!linker.Consume(context_, &final_table_)) {
