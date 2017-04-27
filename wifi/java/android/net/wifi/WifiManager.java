@@ -2436,6 +2436,75 @@ public class WifiManager {
         public void onStopped() {};
     }
 
+    /**
+     * Callback proxy for LocalOnlyHotspotObserver objects.
+     */
+    private static class LocalOnlyHotspotObserverProxy {
+        private final Handler mHandler;
+        private final WeakReference<WifiManager> mWifiManager;
+        private final Looper mLooper;
+        private final Messenger mMessenger;
+
+        /**
+         * Constructs a {@link LocalOnlyHotspotObserverProxy} using the specified looper.
+         * All callbacks will be delivered on the thread of the specified looper.
+         *
+         * @param manager WifiManager
+         * @param looper Looper for delivering callbacks
+         * @param observer LocalOnlyHotspotObserver to notify the calling application.
+         */
+        LocalOnlyHotspotObserverProxy(WifiManager manager, Looper looper,
+                final LocalOnlyHotspotObserver observer) {
+            mWifiManager = new WeakReference<>(manager);
+            mLooper = looper;
+
+            mHandler = new Handler(looper) {
+                @Override
+                public void handleMessage(Message msg) {
+                    Log.d(TAG, "LocalOnlyHotspotObserverProxy: handle message what: "
+                            + msg.what + " msg: " + msg);
+
+                    WifiManager manager = mWifiManager.get();
+                    if (manager == null) {
+                        Log.w(TAG, "LocalOnlyHotspotObserverProxy: handle message post GC");
+                        return;
+                    }
+
+                    switch (msg.what) {
+                        case HOTSPOT_OBSERVER_REGISTERED:
+                            observer.onRegistered(manager.new LocalOnlyHotspotSubscription());
+                            break;
+                        case HOTSPOT_STARTED:
+                            WifiConfiguration config = (WifiConfiguration) msg.obj;
+                            if (config == null) {
+                                Log.e(TAG, "LocalOnlyHotspotObserverProxy: config cannot be null.");
+                                return;
+                            }
+                            observer.onStarted(config);
+                            break;
+                        case HOTSPOT_STOPPED:
+                            observer.onStopped();
+                            break;
+                        default:
+                            Log.e(TAG, "LocalOnlyHotspotObserverProxy unhandled message.  type: "
+                                    + msg.what);
+                    }
+                }
+            };
+            mMessenger = new Messenger(mHandler);
+        }
+
+        public Messenger getMessenger() {
+            return mMessenger;
+        }
+
+        public void registered() throws RemoteException {
+            Message msg = Message.obtain();
+            msg.what = HOTSPOT_OBSERVER_REGISTERED;
+            mMessenger.send(msg);
+        }
+    }
+
     // Ensure that multiple ServiceHandler threads do not interleave message dispatch.
     private static final Object sServiceHandlerDispatchLock = new Object();
 
