@@ -2130,6 +2130,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #onConfigurationChanged(Configuration)
      * @see View#onMovedToDisplay(int, Configuration)
+     * @hide
      */
     public void onMovedToDisplay(int displayId, Configuration config) {
     }

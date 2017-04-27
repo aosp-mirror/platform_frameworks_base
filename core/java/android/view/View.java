@@ -16560,6 +16560,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param config Configuration of the resources on new display after move.
      *
      * @see #onConfigurationChanged(Configuration)
+     * @hide
      */
     public void onMovedToDisplay(int displayId, Configuration config) {
     }
