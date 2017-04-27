@@ -56,6 +56,7 @@ import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -80,6 +81,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
@@ -7588,13 +7590,31 @@ public class DevicePolicyManager {
      * created.
      *
      * @param admin Which profile or device owner this request is associated with.
-     * @param ids A list of opaque non-empty affiliation ids. Duplicate elements will be ignored.
+     * @param ids A set of opaque non-empty affiliation ids.
      *
-     * @throws NullPointerException if {@code ids} is null or contains null elements.
-     * @throws IllegalArgumentException if {@code ids} contains an empty string.
+     * @throws IllegalArgumentException if {@code ids} is null or contains an empty string.
+     */
+    public void setAffiliationIds(@NonNull ComponentName admin, @NonNull Set<String> ids) {
+        throwIfParentInstance("setAffiliationIds");
+        if (ids == null) {
+            throw new IllegalArgumentException("ids must not be null");
+        }
+        try {
+            mService.setAffiliationIds(admin, new ArrayList<>(ids));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * STOPSHIP (b/37622682) Remove it before release.
+     * @removed
      */
     public void setAffiliationIds(@NonNull ComponentName admin, @NonNull List<String> ids) {
         throwIfParentInstance("setAffiliationIds");
+        if (ids == null) {
+            throw new IllegalArgumentException("ids must not be null");
+        }
         try {
             mService.setAffiliationIds(admin, ids);
         } catch (RemoteException e) {
@@ -7603,13 +7623,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of affiliation ids previously set via {@link #setAffiliationIds}, or an
-     * empty list if none have been set.
+     * Returns the set of affiliation ids previously set via {@link #setAffiliationIds}, or an
+     * empty set if none have been set.
      */
-    public @NonNull List<String> getAffiliationIds(@NonNull ComponentName admin) {
-        throwIfParentInstance("getAffiliationIds");
+    public @NonNull Set<String> getAffiliationIds(@NonNull ComponentName admin) {
         try {
-            return mService.getAffiliationIds(admin);
+            return new ArraySet<>(mService.getAffiliationIds(admin));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
