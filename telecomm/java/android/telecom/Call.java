@@ -165,20 +165,39 @@ public final class Call {
             "android.telecom.extra.HANDOVER_VIDEO_STATE";
 
     /**
-     * Call event sent from Telecom via {@link Connection#onCallEvent(String, Bundle)} to
-     * inform a {@link Connection} that a handover initiated via {@link #EVENT_REQUEST_HANDOVER}
-     * has completed.
+     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Used by the
+     * {@link InCallService} initiating a handover to provide a {@link Bundle} with extra
+     * information to the handover {@link ConnectionService} specified by
+     * {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE}.
+     * <p>
+     * This {@link Bundle} is not interpreted by Telecom, but passed as-is to the
+     * {@link ConnectionService} via the request extras when
+     * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * is called to initate the handover.
      * @hide
      */
-    public static final String EVENT_HANDOVER_COMPLETE = "android.telecom.event.HANDOVER_COMPLETE";
+    public static final String EXTRA_HANDOVER_EXTRAS = "android.telecom.extra.HANDOVER_EXTRAS";
 
     /**
-     * Call event sent from Telecom via {@link Connection#onCallEvent(String, Bundle)} to
-     * inform a {@link Connection} that a handover initiated via {@link #EVENT_REQUEST_HANDOVER}
-     * has failed to complete.
+     * Call event sent from Telecom to the handover {@link ConnectionService} via
+     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
+     * to the {@link ConnectionService} has completed successfully.
+     * <p>
+     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
      * @hide
      */
-    public static final String EVENT_HANDOVER_FAILED = "android.telecom.event.HANDOVER_FAILED";
+    public static final String EVENT_HANDOVER_COMPLETE =
+            "android.telecom.event.HANDOVER_COMPLETE";
+    /**
+     * Call event sent from Telecom to the handover {@link ConnectionService} via
+     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
+     * to the {@link ConnectionService} has failed.
+     * <p>
+     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_FAILED =
+            "android.telecom.event.HANDOVER_FAILED";
 
     public static class Details {
 
