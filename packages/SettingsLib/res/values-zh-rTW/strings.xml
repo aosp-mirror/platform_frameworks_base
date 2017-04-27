@@ -56,6 +56,10 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"網際網路連線分享"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"訊息存取權"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 卡存取權"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"連接至媒體音訊"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"連接至電話音訊"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"已連線到檔案傳輸伺服器"</string>
@@ -75,7 +79,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"配對"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"配對"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"取消"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"配對完成後，所配對的裝置即可在連線後存取您的聯絡人和通話紀錄。"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"配對完成後，所配對的裝置即可在連線後存取你的聯絡人和通話紀錄。"</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對。"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對，因為 PIN 或密碼金鑰不正確。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 通訊。"</string>
@@ -114,9 +118,9 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"播放簡短的語音合成範例"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"安裝語音資料"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"安裝語音合成所需的語音資料"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"此語音合成引擎可能會收集您輸入的所有語音，包括密碼和信用卡號等個人資料。此引擎來自「<xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>」引擎，是否要使用此語音合成引擎？"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"您必須連上網路才能使用文字轉語音輸出功能。"</string>
-    <string name="tts_default_sample_string" msgid="4040835213373086322">"您目前聽到的是我們的語音合成範例"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"此語音合成引擎可能會收集你輸入的所有語音，包括密碼和信用卡號等個人資料。此引擎來自「<xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>」引擎，是否要使用此語音合成引擎？"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"你必須連上網路才能使用文字轉語音輸出功能。"</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"你目前聽到的是我們的語音合成範例"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"預設語言狀態"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"完整支援<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"需要網路連線才支援<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
@@ -161,7 +165,7 @@
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM 解鎖"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"允許解除鎖定開機載入器"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"要允許 OEM 解鎖嗎？"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"警告：開啟這項設定時，您將無法使用這個裝置的防盜功能。"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"警告：開啟這項設定時，你將無法使用這個裝置的防盜功能。"</string>
     <string name="mock_location_app" msgid="7966220972812881854">"選取模擬位置應用程式"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"未設定模擬位置應用程式"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"模擬位置應用程式：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -193,7 +197,7 @@
     <string name="select_logd_size_title" msgid="7433137108348553508">"紀錄器緩衝區空間"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個紀錄緩衝區的紀錄器空間"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"要清除永久儲存的記錄器資料嗎？"</string>
-    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"如果您選擇不再透過永久記錄器進行監控，系統就必須清除裝置中的記錄器資料。"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"如果你選擇不再透過永久記錄器進行監控，系統就必須清除裝置中的記錄器資料。"</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"在裝置上永久儲存記錄器資料"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"選取要在裝置上永久儲存的紀錄緩衝區"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"選取 USB 設定"</string>
@@ -203,10 +207,10 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"啟用檢視屬性檢查"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"即使 Wi‑Fi 連線已啟用，一律將行動數據連線保持啟用狀態 (以便快速切換網路)。"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"允許 USB 偵錯嗎？"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB 偵錯是針對應用程式開發而設計的功能，可讓您複製電腦和裝置中的資料、不需經由通知即可在裝置上安裝應用程式，以及讀取記錄資料。"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB 偵錯是針對應用程式開發而設計的功能，可讓你複製電腦和裝置中的資料、不需經由通知即可在裝置上安裝應用程式，以及讀取記錄資料。"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"要針對先前授權的所有電腦撤銷 USB 偵錯權限嗎？"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"允許開發設定？"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"這些設定僅供開發之用，可能導致您的裝置及裝置中的應用程式毀損或運作異常。"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"這些設定僅供開發之用，可能導致你的裝置及裝置中的應用程式毀損或運作異常。"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"透過 USB 驗證應用程式"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"檢查透過 ADB/ADT 安裝的應用程式是否具有有害行為。"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"只要停用藍牙絕對音量功能，即可避免在連線到遠端裝置時，發生音量過大或無法控制音量等問題。"</string>
@@ -304,7 +308,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"轉換..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"已將檔案加密"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"正在轉換成個別加密檔案"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"將資料分割區轉換成個別加密檔案。\n警告！這項操作會清除您的所有資料。\n這是 Alpha 版功能，可能無法正確運作。\n按下 [清除並轉換...] 即可繼續。"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"將資料分割區轉換成個別加密檔案。\n警告！這項操作會清除你的所有資料。\n這是 Alpha 版功能，可能無法正確運作。\n按下 [清除並轉換...] 即可繼續。"</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"清除並轉換..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"螢幕色彩模式"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"使用 sRGB"</string>
@@ -356,6 +360,6 @@
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"啟用的輸入法"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"使用系統語言"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"無法開啟「<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>」的設定"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"這個輸入法是由「<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>」應用程式所提供，它可能會收集您輸入的所有文字，包括密碼和信用卡號等個人資料。要啟用這個輸入法嗎？"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"注意：重新啟動後，您必須將手機解鎖，才能執行這個應用程式"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"這個輸入法是由「<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>」應用程式所提供，它可能會收集你輸入的所有文字，包括密碼和信用卡號等個人資料。要啟用這個輸入法嗎？"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"注意：重新啟動後，你必須將手機解鎖，才能執行這個應用程式"</string>
 </resources>

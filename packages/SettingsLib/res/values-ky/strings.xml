@@ -56,6 +56,10 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Интернет байланышын бөлүшүү"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Билдирүү алмашуу"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM картаны пайдалануу мүмкүнчүлүгү"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Медиа аудиого туташты"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Телефон аудиосуна туташты"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Файл өткөрүү серверине туташты"</string>
@@ -172,7 +176,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi Роуминг Скандоо мүмкүнчүлүгүнө ар дайым уруксат берилсин"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилдик дайындар ар дайым иштетилсин"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Үндүн абсолюттук деңгээли өчүрүлсүн"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Bluetooth аркылуу чалууну иштетүү"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Канал аралык чалууну иштетүү"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP версиясы"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP версиясын тандоо"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудио кодек"</string>
