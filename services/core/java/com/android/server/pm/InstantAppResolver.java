@@ -41,6 +41,7 @@ import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -147,6 +148,7 @@ public abstract class InstantAppResolver {
                 final Intent installerIntent = buildEphemeralInstallerIntent(
                         requestObj.origIntent,
                         requestObj.callingPackage,
+                        requestObj.verificationBundle,
                         requestObj.resolvedType,
                         requestObj.userId,
                         packageName,
@@ -172,6 +174,7 @@ public abstract class InstantAppResolver {
      */
     public static Intent buildEphemeralInstallerIntent(@NonNull Intent origIntent,
             @NonNull String callingPackage,
+            @Nullable Bundle verificationBundle,
             @NonNull String resolvedType,
             int userId,
             @NonNull String instantAppPackageName,
@@ -234,6 +237,10 @@ public abstract class InstantAppResolver {
             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, instantAppPackageName);
             intent.putExtra(Intent.EXTRA_SPLIT_NAME, instantAppSplitName);
             intent.putExtra(Intent.EXTRA_VERSION_CODE, versionCode);
+            intent.putExtra(Intent.EXTRA_CALLING_PACKAGE, callingPackage);
+            if (verificationBundle != null) {
+                intent.putExtra(Intent.EXTRA_VERIFICATION_BUNDLE, verificationBundle);
+            }
         }
 
         return intent;

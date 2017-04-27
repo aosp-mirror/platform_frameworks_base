@@ -19,6 +19,7 @@ package android.content.pm;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
 import android.util.SparseArray;
 
 import java.util.List;
@@ -215,11 +216,13 @@ public abstract class PackageManagerInternal {
      * @param origIntent The original intent that triggered ephemeral resolution
      * @param resolvedType The resolved type of the intent
      * @param callingPackage The name of the package requesting the ephemeral application
+     * @param verificationBundle Optional bundle to pass to the installer for additional
+     * verification
      * @param userId The ID of the user that triggered ephemeral resolution
      */
     public abstract void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
             Intent origIntent, String resolvedType, String callingPackage,
-            int userId);
+            Bundle verificationBundle, int userId);
 
     /**
      * Grants access to the package metadata for an ephemeral application.
