@@ -59,6 +59,7 @@ public final class UsbAudioDevice {
         return sb.toString();
     }
 
+    // called by logDevices
     public String toShortString() {
         return "[card:" + mCard + " device:" + mDevice + " " + mDeviceName + "]";
     }

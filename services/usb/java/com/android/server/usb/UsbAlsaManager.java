@@ -332,7 +332,7 @@ public final class UsbAlsaManager {
         audioDevice.mDeviceName = cardRecord.mCardName;
         audioDevice.mDeviceDescription = cardRecord.mCardDescription;
 
-        notifyDeviceState(audioDevice, true);
+        notifyDeviceState(audioDevice, true /*enabled*/);
 
         return audioDevice;
     }
@@ -442,7 +442,7 @@ public final class UsbAlsaManager {
         Slog.i(TAG, "USB Audio Device Removed: " + audioDevice);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasCapture) {
-                notifyDeviceState(audioDevice, false);
+                notifyDeviceState(audioDevice, false /*enabled*/);
 
                 // if there any external devices left, select one of them
                 selectDefaultDevice();
@@ -461,9 +461,9 @@ public final class UsbAlsaManager {
         if (enabled) {
             mAccessoryAudioDevice = new UsbAudioDevice(card, device, true, false,
                     UsbAudioDevice.kAudioDeviceClass_External);
-            notifyDeviceState(mAccessoryAudioDevice, true);
+            notifyDeviceState(mAccessoryAudioDevice, true /*enabled*/);
         } else if (mAccessoryAudioDevice != null) {
-            notifyDeviceState(mAccessoryAudioDevice, false);
+            notifyDeviceState(mAccessoryAudioDevice, false /*enabled*/);
             mAccessoryAudioDevice = null;
         }
     }
@@ -508,6 +508,7 @@ public final class UsbAlsaManager {
     //
     // Logging
     //
+    // called by UsbService.dump
     public void dump(IndentingPrintWriter pw) {
         pw.println("USB Audio Devices:");
         for (UsbDevice device : mAudioDevices.keySet()) {
