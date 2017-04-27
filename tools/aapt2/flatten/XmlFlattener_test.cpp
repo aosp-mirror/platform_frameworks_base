@@ -35,13 +35,16 @@ class XmlFlattenerTest : public ::testing::Test {
                    .SetNameManglerPolicy(NameManglerPolicy{"com.app.test"})
                    .AddSymbolSource(
                        test::StaticSymbolSourceBuilder()
-                           .AddSymbol("android:attr/id", ResourceId(0x010100d0),
-                                      test::AttributeBuilder().Build())
+                           .AddPublicSymbol("android:attr/id", ResourceId(0x010100d0),
+                                            test::AttributeBuilder().Build())
                            .AddSymbol("com.app.test:id/id", ResourceId(0x7f020000))
                            .AddPublicSymbol("android:attr/paddingStart", ResourceId(0x010103b3),
                                             test::AttributeBuilder().Build())
                            .AddPublicSymbol("android:attr/colorAccent", ResourceId(0x01010435),
                                             test::AttributeBuilder().Build())
+                           .AddSymbol("com.app.test.feature:id/foo", ResourceId(0x80020000))
+                           .AddSymbol("com.app.test.feature:attr/foo", ResourceId(0x80010000),
+                                      test::AttributeBuilder().Build())
                            .Build())
                    .Build();
   }
@@ -65,7 +68,7 @@ class XmlFlattenerTest : public ::testing::Test {
   }
 
  protected:
-  std::unique_ptr<IAaptContext> context_;
+  std::unique_ptr<test::Context> context_;
 };
 
 TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
@@ -218,14 +221,10 @@ TEST_F(XmlFlattenerTest, AssignSpecialAttributeIndices) {
   EXPECT_EQ(tree.indexOfStyle(), 1);
 }
 
-/*
- * The device ResXMLParser in libandroidfw differentiates between empty
- * namespace and null
- * namespace.
- */
+// The device ResXMLParser in libandroidfw differentiates between empty namespace and null
+// namespace.
 TEST_F(XmlFlattenerTest, NoNamespaceIsNotTheSameAsEmptyNamespace) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDom("<View package=\"android\"/>");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom("<View package=\"android\"/>");
 
   android::ResXMLTree tree;
   ASSERT_TRUE(Flatten(doc.get(), &tree));
@@ -259,6 +258,46 @@ TEST_F(XmlFlattenerTest, EmptyStringValueInAttributeIsNotNull) {
 
   size_t len;
   EXPECT_NE(nullptr, tree.getAttributeStringValue(idx, &len));
+}
+
+TEST_F(XmlFlattenerTest, FlattenNonStandardPackageId) {
+  context_->SetCompilationPackage("com.app.test.feature");
+  context_->SetPackageId(0x80);
+  context_->SetNameManglerPolicy({"com.app.test.feature"});
+
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+      <View xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@id/foo"
+            app:foo="@id/foo" />)EOF");
+
+  XmlReferenceLinker linker;
+  ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
+
+  // The tree needs a custom DynamicRefTable since it is not using a standard app ID (0x7f).
+  android::DynamicRefTable dynamic_ref_table;
+  dynamic_ref_table.addMapping(0x80, 0x80);
+
+  android::ResXMLTree tree(&dynamic_ref_table);
+  ASSERT_TRUE(Flatten(doc.get(), &tree));
+
+  while (tree.next() != android::ResXMLTree::START_TAG) {
+    ASSERT_NE(android::ResXMLTree::BAD_DOCUMENT, tree.getEventType());
+    ASSERT_NE(android::ResXMLTree::END_DOCUMENT, tree.getEventType());
+  }
+
+  ssize_t idx;
+
+  idx = tree.indexOfAttribute(xml::kSchemaAndroid, "id");
+  ASSERT_GE(idx, 0);
+  EXPECT_EQ(idx, tree.indexOfID());
+  EXPECT_EQ(ResourceId(0x010100d0), ResourceId(tree.getAttributeNameResID(idx)));
+
+  idx = tree.indexOfAttribute(xml::kSchemaAuto, "foo");
+  ASSERT_GE(idx, 0);
+  EXPECT_EQ(ResourceId(0x80010000), ResourceId(tree.getAttributeNameResID(idx)));
+  EXPECT_EQ(android::Res_value::TYPE_REFERENCE, tree.getAttributeDataType(idx));
+  EXPECT_EQ(ResourceId(0x80020000), tree.getAttributeData(idx));
 }
 
 }  // namespace aapt

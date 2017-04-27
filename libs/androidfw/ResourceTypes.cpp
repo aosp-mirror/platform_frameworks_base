@@ -6664,6 +6664,10 @@ status_t DynamicRefTable::addMapping(const String16& packageName, uint8_t packag
     return NO_ERROR;
 }
 
+void DynamicRefTable::addMapping(uint8_t buildPackageId, uint8_t runtimePackageId) {
+    mLookupTable[buildPackageId] = runtimePackageId;
+}
+
 status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
     size_t packageId = Res_GETPACKAGE(res) + 1;
