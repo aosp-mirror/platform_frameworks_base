@@ -529,7 +529,7 @@ bool AndroidRuntime::parseRuntimeOption(const char* property,
 /*
  * Reads a "property" into "buffer". If the property is non-empty, it
  * is treated as a dex2oat compiler option that should be
- * passed as a quoted option, e.g. "-Ximage-compiler-option --compiler-filter=verify-none".
+ * passed as a quoted option, e.g. "-Ximage-compiler-option --compiler-filter=assume-verified".
  *
  * The "compilerArg" is a prefix for the option such as "--compiler-filter=".
  *
@@ -777,7 +777,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
                                "-Xmx", "-Ximage-compiler-option");
     if (skip_compilation) {
         addOption("-Ximage-compiler-option");
-        addOption("--compiler-filter=verify-none");
+        addOption("--compiler-filter=assume-verified");
     } else {
         parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
                             "--compiler-filter=", "-Ximage-compiler-option");
@@ -808,7 +808,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
                                "-Xmx", "-Xcompiler-option");
     if (skip_compilation) {
         addOption("-Xcompiler-option");
-        addOption("--compiler-filter=verify-none");
+        addOption("--compiler-filter=assume-verified");
 
         // We skip compilation when a minimal runtime is brought up for decryption. In that case
         // /data is temporarily backed by a tmpfs, which is usually small.
