@@ -2154,7 +2154,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Have the profile owner specify a set of affiliation ids. Check that the test user remains
         // unaffiliated.
-        final List<String> userAffiliationIds = new ArrayList<>();
+        final Set<String> userAffiliationIds = new ArraySet<>();
         userAffiliationIds.add("red");
         userAffiliationIds.add("green");
         userAffiliationIds.add("blue");
@@ -2164,7 +2164,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Have the device owner specify a set of affiliation ids that do not intersect with those
         // specified by the profile owner. Check that the test user remains unaffiliated.
-        final List<String> deviceAffiliationIds = new ArrayList<>();
+        final Set<String> deviceAffiliationIds = new ArraySet<>();
         deviceAffiliationIds.add("cyan");
         deviceAffiliationIds.add("yellow");
         deviceAffiliationIds.add("magenta");
@@ -2184,7 +2184,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isAffiliatedUser());
 
         // Clear affiliation ids for the profile owner. The user becomes unaffiliated.
-        dpm.setAffiliationIds(admin2, Collections.emptyList());
+        dpm.setAffiliationIds(admin2, Collections.emptySet());
         assertTrue(dpm.getAffiliationIds(admin2).isEmpty());
         assertFalse(dpm.isAffiliatedUser());
 
@@ -3377,7 +3377,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         MoreAsserts.assertEmpty(targetUsers);
 
         // Setting affiliation ids
-        final List<String> userAffiliationIds = Arrays.asList("some.affiliation-id");
+        final Set<String> userAffiliationIds = Collections.singleton("some.affiliation-id");
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         dpm.setAffiliationIds(admin1, userAffiliationIds);
 
@@ -3397,7 +3397,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         MoreAsserts.assertContentsInAnyOrder(targetUsers, UserHandle.SYSTEM);
 
         // Changing affiliation ids in one
-        dpm.setAffiliationIds(admin1, Arrays.asList("some-different-affiliation-id"));
+        dpm.setAffiliationIds(admin1, Collections.singleton("some-different-affiliation-id"));
 
         // Since the managed profile is not affiliated any more, they should not be allowed to talk
         // to each other.
@@ -3422,7 +3422,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
 
         // Setting affiliation ids
-        final List<String> userAffiliationIds = Arrays.asList("some-affiliation-id");
+        final Set<String> userAffiliationIds = Collections.singleton("some-affiliation-id");
         dpm.setAffiliationIds(admin1, userAffiliationIds);
 
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
@@ -3484,7 +3484,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpm.isLockTaskPermitted("doPackage1"));
 
         // Setting same affiliation ids
-        final List<String> userAffiliationIds = Arrays.asList("some-affiliation-id");
+        final Set<String> userAffiliationIds = Collections.singleton("some-affiliation-id");
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         dpm.setAffiliationIds(admin1, userAffiliationIds);
 
@@ -3500,7 +3500,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .updateLockTaskPackages(eq(MANAGED_PROFILE_USER_ID), eq(poPackages));
 
         // Unaffiliate the profile, lock task mode no longer available on the profile.
-        dpm.setAffiliationIds(adminDifferentPackage, Collections.<String>emptyList());
+        dpm.setAffiliationIds(adminDifferentPackage, Collections.emptySet());
         assertFalse(dpm.isLockTaskPermitted("poPackage1"));
         // Lock task packages cleared when loading user data and when the user becomes unaffiliated.
         verify(mContext.iactivityManager, times(2))
