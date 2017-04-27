@@ -39,20 +39,43 @@ import java.lang.annotation.RetentionPolicy;
 
 
 /**
- * A Layout that arranges its children in a single column or a single row. The direction of
- * the row can be set by calling {@link #setOrientation(int) setOrientation()}.
- * You can also specify gravity, which specifies the alignment of all the child elements by
- * calling {@link #setGravity(int) setGravity()} or specify that specific children
- * grow to fill up any remaining space in the layout by setting the <em>weight</em> member of
- * {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams}.
- * The default orientation is horizontal.
+ * A layout that arranges other views either horizontally in a single column
+ * or vertically in a single row.
  *
- * <p>See the <a href="{@docRoot}guide/topics/ui/layout/linear.html">Linear Layout</a>
- * guide.</p>
+ * <p>The following snippet shows how to include a linear layout in your layout XML file:</p>
  *
- * <p>
- * Also see {@link LinearLayout.LayoutParams android.widget.LinearLayout.LayoutParams}
- * for layout attributes </p>
+ * <pre>&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ *   android:layout_width="match_parent"
+ *   android:layout_height="match_parent"
+ *   android:paddingLeft="16dp"
+ *   android:paddingRight="16dp"
+ *   android:orientation="horizontal"
+ *   android:gravity="center"&gt;
+ *
+ *   &lt;!-- Include other widget or layout tags here. These are considered
+ *           "child views" or "children" of the linear layout --&gt;
+ *
+ * &lt;/LinearLayout&gt;</pre>
+ *
+ * <p>Set {@link android.R.styleable#LinearLayout_orientation android:orientation} to specify
+ * whether child views are displayed in a row or column.</p>
+ *
+ * <p>To control how linear layout aligns all the views it contains, set a value for
+ * {@link android.R.styleable#LinearLayout_gravity android:gravity}.  For example, the
+ * snippet above sets android:gravity to "center".  The value you set affects
+ * both horizontal and vertical alignment of all child views within the single row or column.</p>
+ *
+ * <p>You can set
+ * {@link LinearLayout.LayoutParams.html#attr_android:layout_weight android:layout_weight}
+ * on individual child views to specify how linear layout divides remaining space amongst
+ * the views it contains. See the
+ * <a href="https://developer.android.com/guide/topics/ui/layout/linear.html">Linear Layout</a>
+ * guide for an example.</p>
+ *
+ * <p>See
+ * {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams}
+ * to learn about other attributes you can set on a child view to affect its
+ * position and size in the containing linear layout.</p>
  *
  * @attr ref android.R.styleable#LinearLayout_baselineAligned
  * @attr ref android.R.styleable#LinearLayout_baselineAlignedChildIndex
