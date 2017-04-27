@@ -336,8 +336,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
             builder.append(',').append(securityToString(security, pskType));
         }
         builder.append(",level=").append(getLevel());
-        builder.append(",rankingScore=").append(mRankingScore);
-        builder.append(",badge=").append(mBadge);
+        if (mRankingScore != Integer.MIN_VALUE) {
+            builder.append(",rankingScore=").append(mRankingScore);
+        }
+        if (mBadge != NetworkBadging.BADGING_NONE) {
+            builder.append(",badge=").append(mBadge);
+        }
         builder.append(",metered=").append(isMetered());
 
         return builder.append(')').toString();
