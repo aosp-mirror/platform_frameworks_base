@@ -17,11 +17,13 @@
 package com.android.mtp;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriPermission;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDiskIOException;
 import android.graphics.Point;
@@ -55,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-
 import libcore.io.IoUtils;
 
 /**
@@ -177,7 +178,57 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
         }
-        return mDatabase.queryDocument(documentId, projection);
+        final Cursor cursor = mDatabase.queryDocument(documentId, projection);
+        final int cursorCount = cursor.getCount();
+        if (cursorCount == 0) {
+            cursor.close();
+            throw new FileNotFoundException();
+        } else if (cursorCount != 1) {
+            cursor.close();
+            Log.wtf(TAG, "Unexpected cursor size: " + cursorCount);
+            return null;
+        }
+
+        final Identifier identifier = mDatabase.createIdentifier(documentId);
+        if (identifier.mDocumentType != MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE) {
+            return cursor;
+        }
+        final String[] storageDocIds = mDatabase.getStorageDocumentIds(documentId);
+        if (storageDocIds.length != 1) {
+            return mDatabase.queryDocument(documentId, projection);
+        }
+
+        // If the documentId specifies a device having exact one storage, we repalce some device
+        // attributes with the storage attributes.
+        try {
+            final String storageName;
+            final int storageFlags;
+            try (final Cursor storageCursor = mDatabase.queryDocument(
+                    storageDocIds[0],
+                    MtpDatabase.strings(Document.COLUMN_DISPLAY_NAME, Document.COLUMN_FLAGS))) {
+                if (!storageCursor.moveToNext()) {
+                    throw new FileNotFoundException();
+                }
+                storageName = storageCursor.getString(0);
+                storageFlags = storageCursor.getInt(1);
+            }
+
+            cursor.moveToNext();
+            final ContentValues values = new ContentValues();
+            DatabaseUtils.cursorRowToContentValues(cursor, values);
+            if (values.containsKey(Document.COLUMN_DISPLAY_NAME)) {
+                values.put(Document.COLUMN_DISPLAY_NAME, mResources.getString(
+                        R.string.root_name,
+                        values.getAsString(Document.COLUMN_DISPLAY_NAME),
+                        storageName));
+            }
+            values.put(Document.COLUMN_FLAGS, storageFlags);
+            final MatrixCursor output = new MatrixCursor(projection, 1);
+            MtpDatabase.putValuesToCursor(values, output);
+            return output;
+        } finally {
+            cursor.close();
+        }
     }
 
     @Override

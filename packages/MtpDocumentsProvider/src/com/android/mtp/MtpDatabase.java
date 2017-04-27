@@ -200,10 +200,7 @@ class MtpDatabase {
                     storageCursor.close();
                 }
 
-                final RowBuilder row = result.newRow();
-                for (final String key : values.keySet()) {
-                    row.add(key, values.get(key));
-                }
+                putValuesToCursor(values, result);
             }
 
             return result;
@@ -760,7 +757,9 @@ class MtpDatabase {
                 Document.MIME_TYPE_DIR,
                 0,
                 MtpConstants.PROTECTION_STATUS_NONE,
-                DOCUMENT_TYPE_DEVICE));
+                // Storages are placed under device so we cannot create a document just under
+                // device.
+                DOCUMENT_TYPE_DEVICE) & ~Document.FLAG_DIR_SUPPORTS_CREATE);
         values.putNull(Document.COLUMN_SIZE);
 
         extraValues.clear();
@@ -913,6 +912,13 @@ class MtpDatabase {
             results[i] = Objects.toString(args[i]);
         }
         return results;
+    }
+
+    static void putValuesToCursor(ContentValues values, MatrixCursor cursor) {
+        final RowBuilder row = cursor.newRow();
+        for (final String name : cursor.getColumnNames()) {
+            row.add(values.get(name));
+        }
     }
 
     private static String getIdList(Set<String> ids) {
