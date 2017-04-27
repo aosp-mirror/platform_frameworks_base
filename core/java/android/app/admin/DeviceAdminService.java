@@ -26,16 +26,25 @@ import android.os.IBinder;
  * <p>The system searches for it with an intent filter with the
  * {@link DevicePolicyManager#ACTION_DEVICE_ADMIN_SERVICE} action, and tries to keep a bound
  * connection as long as the hosting user is running, so that the device/profile owner is always
- * considered to be in the foreground.
+ * considered to be in the foreground.  This is useful to receive implicit broadcasts that
+ * can no longer be received by manifest receivers by apps targeting Android version
+ * {@link android.os.Build.VERSION_CODES#O}.  Device/profile owners can use a runtime-registered
+ * broadcast receiver instead, and have a {@link DeviceAdminService} so that the process is always
+ * running.
  *
  * <p>Device/profile owners can use
  * {@link android.content.pm.PackageManager#setComponentEnabledSetting(ComponentName, int, int)}
  * to disable/enable its own service.  For example, when a device/profile owner no longer needs
  * to be in the foreground, it can (and should) disable its service.
  *
- * <p>The service must not be exported.
+ * <p>The service must be protected with the permission
+ * {@link android.Manifest.permission#BIND_DEVICE_ADMIN}.  Otherwise the system would ignore it.
  *
- * <p>TODO: Describe how the system handles crashes in DO/PO.
+ * <p>When the owner process crashes, the service will be re-bound automatically after a
+ * back-off.
+ *
+ * <p>Note the process may still be killed if the system is under heavy memory pressure, in which
+ * case the process will be re-started later.
  */
 public class DeviceAdminService extends Service {
     private final IDeviceAdminServiceImpl mImpl;
