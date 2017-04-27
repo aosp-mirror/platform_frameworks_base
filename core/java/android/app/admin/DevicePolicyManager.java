@@ -260,6 +260,26 @@ public class DevicePolicyManager {
         = "android.app.action.PROVISION_MANAGED_DEVICE";
 
     /**
+     * Activity action: launch when user provisioning completed, i.e.
+     * {@link #getUserProvisioningState()} returns one of the complete state.
+     *
+     * <p> Please note that the API behavior is not necessarily consistent across various releases,
+     * and devices, as it's contract between SetupWizard and ManagedProvisioning. The default
+     * implementation is that ManagedProvisioning launches SetupWizard in NFC provisioning only.
+     *
+     * <p> The activity must be protected by permission
+     * {@link android.Manifest.permission#BIND_DEVICE_ADMIN}, and the process must hold
+     * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE} to be launched.
+     * Only one {@link ComponentName} in the entire system should be enabled, and the rest of the
+     * components are not started by this intent.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_STATE_USER_SETUP_COMPLETE =
+            "android.app.action.STATE_USER_SETUP_COMPLETE";
+
+    /**
      * Activity action: Starts the provisioning flow which sets up a managed device.
      *
      * <p>During device owner provisioning, a device admin app is downloaded and set as the owner of
