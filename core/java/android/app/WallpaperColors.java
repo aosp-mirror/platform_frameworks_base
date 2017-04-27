@@ -22,6 +22,7 @@ import android.os.Parcelable;
 
 import android.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +30,19 @@ import java.util.List;
  */
 public final class WallpaperColors implements Parcelable {
 
+    private static final float BRIGHT_LUMINANCE = 0.9f;
+    private final List<Pair<Color, Integer>> mColors;
+    private final boolean mSupportsDarkText;
+
     public WallpaperColors(Parcel parcel) {
+        mColors = new ArrayList<>();
+        int count = parcel.readInt();
+        for (int i=0; i < count; i++) {
+            Color color = Color.valueOf(parcel.readInt());
+            int weight = parcel.readInt();
+            mColors.add(new Pair<>(color, weight));
+        }
+        mSupportsDarkText = parcel.readBoolean();
     }
 
     /**
@@ -43,6 +56,7 @@ public final class WallpaperColors implements Parcelable {
      *               and number of occurrences/influence.
      */
     public WallpaperColors(List<Pair<Color, Integer>> colors) {
+        this(colors, calculateDarkTextSupport(colors));
     }
 
     /**
@@ -55,6 +69,10 @@ public final class WallpaperColors implements Parcelable {
      * @param supportsDarkText can have dark text on top or not
      */
     public WallpaperColors(List<Pair<Color, Integer>> colors, boolean supportsDarkText) {
+        if (colors == null)
+            colors = new ArrayList<>();
+        mColors = colors;
+        mSupportsDarkText = supportsDarkText;
     }
 
     public static final Creator<WallpaperColors> CREATOR = new Creator<WallpaperColors>() {
@@ -76,6 +94,13 @@ public final class WallpaperColors implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        int count = mColors.size();
+        dest.writeInt(count);
+        for (Pair<Color, Integer> color : mColors) {
+            dest.writeInt(color.first.toArgb());
+            dest.writeInt(color.second);
+        }
+        dest.writeBoolean(mSupportsDarkText);
     }
 
     /**
@@ -83,7 +108,22 @@ public final class WallpaperColors implements Parcelable {
      * @return list of colors paired with their weights.
      */
     public List<Pair<Color, Integer>> getColors() {
-        return null;
+        return mColors;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        WallpaperColors other = (WallpaperColors) o;
+        return mColors.equals(other.mColors) && mSupportsDarkText == other.mSupportsDarkText;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * mColors.hashCode() + (mSupportsDarkText ? 1 : 0);
     }
 
     /**
@@ -92,6 +132,24 @@ public final class WallpaperColors implements Parcelable {
      * @return true if dark text is supported
      */
     public boolean supportsDarkText() {
-        return false;
+        return mSupportsDarkText;
+    }
+
+    private static boolean calculateDarkTextSupport(List<Pair<Color, Integer>> colors) {
+        if (colors == null) {
+            return false;
+        }
+
+        Pair<Color, Integer> mainColor = null;
+
+        for (Pair<Color, Integer> color : colors) {
+            if (mainColor == null) {
+                mainColor = color;
+            } else if (color.second > mainColor.second) {
+                mainColor = color;
+            }
+        }
+        return mainColor != null &&
+                mainColor.first.luminance() > BRIGHT_LUMINANCE;
     }
 }
