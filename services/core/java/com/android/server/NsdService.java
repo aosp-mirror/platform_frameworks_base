@@ -39,6 +39,7 @@ import android.util.SparseArray;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 
@@ -64,8 +65,8 @@ public class NsdService extends INsdManager.Stub {
     private final Context mContext;
     private final NsdSettings mNsdSettings;
     private final NsdStateMachine mNsdStateMachine;
-    private final NativeDaemonConnector mNativeConnector;
-    private final CountDownLatch mNativeDaemonConnected = new CountDownLatch(1);
+    private final DaemonConnection mDaemon;
+    private final NativeCallbackReceiver mDaemonCallback;
 
     /**
      * Clients receiving asynchronous messages
@@ -545,18 +546,13 @@ public class NsdService extends INsdManager.Stub {
     }
 
     @VisibleForTesting
-    NsdService(Context ctx, NsdSettings settings, Handler handler) {
+    NsdService(Context ctx, NsdSettings settings, Handler handler, DaemonConnectionSupplier fn) {
         mContext = ctx;
         mNsdSettings = settings;
-
-        NativeCallbackReceiver callback = new NativeCallbackReceiver();
-        mNativeConnector = new NativeDaemonConnector(callback, "mdns", 10, MDNS_TAG, 25, null);
-
         mNsdStateMachine = new NsdStateMachine(TAG, handler);
         mNsdStateMachine.start();
-
-        Thread th = new Thread(mNativeConnector, MDNS_TAG);
-        th.start();
+        mDaemonCallback = new NativeCallbackReceiver();
+        mDaemon = fn.get(mDaemonCallback);
     }
 
     public static NsdService create(Context context) throws InterruptedException {
@@ -564,8 +560,8 @@ public class NsdService extends INsdManager.Stub {
         HandlerThread thread = new HandlerThread(TAG);
         thread.start();
         Handler handler = new Handler(thread.getLooper());
-        NsdService service = new NsdService(context, settings, handler);
-        service.mNativeDaemonConnected.await();
+        NsdService service = new NsdService(context, settings, handler, DaemonConnection::new);
+        service.mDaemonCallback.awaitConnection();
         return service;
     }
 
@@ -664,14 +660,23 @@ public class NsdService extends INsdManager.Stub {
     }
 
     class NativeCallbackReceiver implements INativeDaemonConnectorCallbacks {
-        public void onDaemonConnected() {
-            mNativeDaemonConnected.countDown();
+        private final CountDownLatch connected = new CountDownLatch(1);
+
+        public void awaitConnection() throws InterruptedException {
+            connected.await();
         }
 
+        @Override
+        public void onDaemonConnected() {
+            connected.countDown();
+        }
+
+        @Override
         public boolean onCheckHoldWakeLock(int code) {
             return false;
         }
 
+        @Override
         public boolean onEvent(int code, String raw, String[] cooked) {
             // TODO: NDC translates a message to a callback, we could enhance NDC to
             // directly interact with a state machine through messages
@@ -681,132 +686,102 @@ public class NsdService extends INsdManager.Stub {
         }
     }
 
-    private boolean startMDnsDaemon() {
-        if (DBG) Slog.d(TAG, "startMDnsDaemon");
-        try {
-            mNativeConnector.execute("mdnssd", "start-service");
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to start daemon" + e);
-            return false;
+    interface DaemonConnectionSupplier {
+        DaemonConnection get(NativeCallbackReceiver callback);
+    }
+
+    @VisibleForTesting
+    public static class DaemonConnection {
+        final NativeDaemonConnector mNativeConnector;
+
+        DaemonConnection(NativeCallbackReceiver callback) {
+            mNativeConnector = new NativeDaemonConnector(callback, "mdns", 10, MDNS_TAG, 25, null);
+            new Thread(mNativeConnector, MDNS_TAG).start();
         }
-        return true;
+
+        public boolean execute(Object... args) {
+            if (DBG) {
+                Slog.d(TAG, "mdnssd " + Arrays.toString(args));
+            }
+            try {
+                mNativeConnector.execute("mdnssd", args);
+            } catch (NativeDaemonConnectorException e) {
+                Slog.e(TAG, "Failed to execute mdnssd " + Arrays.toString(args), e);
+                return false;
+            }
+            return true;
+        }
+
+        public boolean execute(Command cmd) {
+            if (DBG) {
+                Slog.d(TAG, cmd.toString());
+            }
+            try {
+                mNativeConnector.execute(cmd);
+            } catch (NativeDaemonConnectorException e) {
+                Slog.e(TAG, "Failed to execute " + cmd, e);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private boolean startMDnsDaemon() {
+        return mDaemon.execute("start-service");
     }
 
     private boolean stopMDnsDaemon() {
-        if (DBG) Slog.d(TAG, "stopMDnsDaemon");
-        try {
-            mNativeConnector.execute("mdnssd", "stop-service");
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to start daemon" + e);
-            return false;
-        }
-        return true;
+        return mDaemon.execute("stop-service");
     }
 
     private boolean registerService(int regId, NsdServiceInfo service) {
-        if (DBG) Slog.d(TAG, "registerService: " + regId + " " + service);
-        try {
-            Command cmd = new Command("mdnssd", "register", regId, service.getServiceName(),
-                    service.getServiceType(), service.getPort(),
-                    Base64.encodeToString(service.getTxtRecord(), Base64.DEFAULT)
-                            .replace("\n", ""));
-
-            mNativeConnector.execute(cmd);
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to execute registerService " + e);
-            return false;
+        if (DBG) {
+            Slog.d(TAG, "registerService: " + regId + " " + service);
         }
-        return true;
+        String name = service.getServiceName();
+        String type = service.getServiceType();
+        int port = service.getPort();
+        byte[] textRecord = service.getTxtRecord();
+        String record = Base64.encodeToString(textRecord, Base64.DEFAULT).replace("\n", "");
+        Command cmd = new Command("mdnssd", "register", regId, name, type, port, record);
+        return mDaemon.execute(cmd);
     }
 
     private boolean unregisterService(int regId) {
-        if (DBG) Slog.d(TAG, "unregisterService: " + regId);
-        try {
-            mNativeConnector.execute("mdnssd", "stop-register", regId);
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to execute unregisterService " + e);
-            return false;
-        }
-        return true;
+        return mDaemon.execute("stop-register", regId);
     }
 
     private boolean updateService(int regId, DnsSdTxtRecord t) {
-        if (DBG) Slog.d(TAG, "updateService: " + regId + " " + t);
-        try {
-            if (t == null) return false;
-            mNativeConnector.execute("mdnssd", "update", regId, t.size(), t.getRawData());
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to updateServices " + e);
+        if (t == null) {
             return false;
         }
-        return true;
+        return mDaemon.execute("update", regId, t.size(), t.getRawData());
     }
 
     private boolean discoverServices(int discoveryId, String serviceType) {
-        if (DBG) Slog.d(TAG, "discoverServices: " + discoveryId + " " + serviceType);
-        try {
-            mNativeConnector.execute("mdnssd", "discover", discoveryId, serviceType);
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to discoverServices " + e);
-            return false;
-        }
-        return true;
+        return mDaemon.execute("discover", discoveryId, serviceType);
     }
 
     private boolean stopServiceDiscovery(int discoveryId) {
-        if (DBG) Slog.d(TAG, "stopServiceDiscovery: " + discoveryId);
-        try {
-            mNativeConnector.execute("mdnssd", "stop-discover", discoveryId);
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to stopServiceDiscovery " + e);
-            return false;
-        }
-        return true;
+        return mDaemon.execute("stop-discover", discoveryId);
     }
 
     private boolean resolveService(int resolveId, NsdServiceInfo service) {
-        if (DBG) Slog.d(TAG, "resolveService: " + resolveId + " " + service);
-        try {
-            mNativeConnector.execute("mdnssd", "resolve", resolveId, service.getServiceName(),
-                    service.getServiceType(), "local.");
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to resolveService " + e);
-            return false;
-        }
-        return true;
+        String name = service.getServiceName();
+        String type = service.getServiceType();
+        return mDaemon.execute("resolve", resolveId, name, type, "local.");
     }
 
     private boolean stopResolveService(int resolveId) {
-        if (DBG) Slog.d(TAG, "stopResolveService: " + resolveId);
-        try {
-            mNativeConnector.execute("mdnssd", "stop-resolve", resolveId);
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to stop resolve " + e);
-            return false;
-        }
-        return true;
+        return mDaemon.execute("stop-resolve", resolveId);
     }
 
     private boolean getAddrInfo(int resolveId, String hostname) {
-        if (DBG) Slog.d(TAG, "getAdddrInfo: " + resolveId);
-        try {
-            mNativeConnector.execute("mdnssd", "getaddrinfo", resolveId, hostname);
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to getAddrInfo " + e);
-            return false;
-        }
-        return true;
+        return mDaemon.execute("getaddrinfo", resolveId, hostname);
     }
 
     private boolean stopGetAddrInfo(int resolveId) {
-        if (DBG) Slog.d(TAG, "stopGetAdddrInfo: " + resolveId);
-        try {
-            mNativeConnector.execute("mdnssd", "stop-getaddrinfo", resolveId);
-        } catch(NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to stopGetAddrInfo " + e);
-            return false;
-        }
-        return true;
+        return mDaemon.execute("stop-getaddrinfo", resolveId);
     }
 
     @Override
