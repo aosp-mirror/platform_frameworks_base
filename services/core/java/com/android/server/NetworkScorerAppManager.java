@@ -208,11 +208,11 @@ public class NetworkScorerAppManager {
      *
      * <p>The caller must have permission to write to {@link Settings.Global}.
      *
-     * @param packageName the packageName of the new scorer to use. If null, the scoring app will
-     *                    revert back to the configured default. Otherwise, the scorer will only
-     *                    be set if it is a valid scorer application.
-     * @return true if the scorer was changed, or false if the package is not a valid scorer or
-     *         a valid network recommendation provider exists.
+     * @param packageName the packageName of the new scorer to use. If null, scoring will be forced
+     *                    off, otherwise the scorer will only be set if it is a valid scorer
+     *                    application.
+     * @return true if the package was a valid scorer (including <code>null</code>) and now
+     *         represents the active scorer, false otherwise.
      */
     @VisibleForTesting
     public boolean setActiveScorer(String packageName) {
@@ -223,16 +223,19 @@ public class NetworkScorerAppManager {
             return true;
         }
 
-        if (packageName == null) {
-            // revert to the default setting.
-            packageName = getDefaultPackageSetting();
+        if (TextUtils.isEmpty(packageName)) {
+            Log.i(TAG, "Network scorer forced off, was: " + oldPackageName);
+            setNetworkRecommendationsPackage(null);
+            setNetworkRecommendationsEnabledSetting(
+                    NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF);
+            return true;
         }
-
-        Log.i(TAG, "Changing network scorer from " + oldPackageName + " to " + packageName);
 
         // We only make the change if the new package is valid.
         if (getScorer(packageName) != null) {
+            Log.i(TAG, "Changing network scorer from " + oldPackageName + " to " + packageName);
             setNetworkRecommendationsPackage(packageName);
+            setNetworkRecommendationsEnabledSetting(NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON);
             return true;
         } else {
             Log.w(TAG, "Requested network scorer is not valid: " + packageName);
