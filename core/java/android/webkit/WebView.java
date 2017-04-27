@@ -2255,6 +2255,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Sets the {@link TextClassifier} for this WebView.
+     * @hide
      */
     public void setTextClassifier(@Nullable TextClassifier textClassifier) {
         mProvider.setTextClassifier(textClassifier);
@@ -2263,6 +2264,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Returns the {@link TextClassifier} used by this WebView.
      * If no TextClassifier has been set, this WebView uses the default set by the system.
+     * @hide
      */
     @NonNull
     public TextClassifier getTextClassifier() {
