@@ -23,10 +23,8 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Build;
-import android.os.Process;
 import android.security.KeyStore;
 import android.security.KeyStoreException;
-import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterDefs;
@@ -38,10 +36,8 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Utilities for attesting the device's hardware identifiers.
@@ -51,8 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SystemApi
 @TestApi
 public abstract class AttestationUtils {
-    private static AtomicInteger sSequenceNumber = new AtomicInteger(0);
-
     private AttestationUtils() {
     }
 
@@ -171,59 +165,30 @@ public abstract class AttestationUtils {
         attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
                 Build.MODEL.getBytes(StandardCharsets.UTF_8));
 
-        final KeyStore keyStore = KeyStore.getInstance();
-        final String keyAlias = "android_internal_device_id_attestation-"
-                + Process.myPid() + "-" + sSequenceNumber.incrementAndGet();
-        // Clear any leftover temporary key.
-        if (!keyStore.delete(keyAlias)) {
-            throw new DeviceIdAttestationException("Unable to remove temporary key");
+        // Perform attestation.
+        final KeymasterCertificateChain outChain = new KeymasterCertificateChain();
+        final int errorCode = KeyStore.getInstance().attestDeviceIds(attestArgs, outChain);
+        if (errorCode != KeyStore.NO_ERROR) {
+            throw new DeviceIdAttestationException("Unable to perform attestation",
+                    KeyStore.getKeyStoreException(errorCode));
         }
+
+        // Extract certificate chain.
+        final Collection<byte[]> rawChain = outChain.getCertificates();
+        if (rawChain.size() < 2) {
+            throw new DeviceIdAttestationException("Attestation certificate chain contained "
+                    + rawChain.size() + " entries. At least two are required.");
+        }
+        final ByteArrayOutputStream concatenatedRawChain = new ByteArrayOutputStream();
         try {
-            // Generate a temporary key.
-            final KeymasterArguments generateArgs = new KeymasterArguments();
-            generateArgs.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_VERIFY);
-            generateArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
-            generateArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
-            generateArgs.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE);
-            generateArgs.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-            generateArgs.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
-            generateArgs.addUnsignedLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
-                    RSAKeyGenParameterSpec.F4);
-            int errorCode = keyStore.generateKey(keyAlias, generateArgs, null, 0,
-                    new KeyCharacteristics());
-            if (errorCode != KeyStore.NO_ERROR) {
-                throw new DeviceIdAttestationException("Unable to create temporary key",
-                        KeyStore.getKeyStoreException(errorCode));
+            for (final byte[] cert : rawChain) {
+                concatenatedRawChain.write(cert);
             }
-
-            // Perform attestation.
-            final KeymasterCertificateChain outChain = new KeymasterCertificateChain();
-            errorCode = keyStore.attestKey(keyAlias, attestArgs, outChain);
-            if (errorCode != KeyStore.NO_ERROR) {
-                throw new DeviceIdAttestationException("Unable to perform attestation",
-                        KeyStore.getKeyStoreException(errorCode));
-            }
-
-            // Extract certificate chain.
-            final Collection<byte[]> rawChain = outChain.getCertificates();
-            if (rawChain.size() < 2) {
-                throw new DeviceIdAttestationException("Attestation certificate chain contained "
-                        + rawChain.size() + " entries. At least two are required.");
-            }
-            final ByteArrayOutputStream concatenatedRawChain = new ByteArrayOutputStream();
-            try {
-                for (final byte[] cert : rawChain) {
-                    concatenatedRawChain.write(cert);
-                }
-                return CertificateFactory.getInstance("X.509").generateCertificates(
-                        new ByteArrayInputStream(concatenatedRawChain.toByteArray()))
-                                .toArray(new X509Certificate[0]);
-            } catch (Exception e) {
-                throw new DeviceIdAttestationException("Unable to construct certificate chain", e);
-            }
-        } finally {
-            // Remove temporary key.
-            keyStore.delete(keyAlias);
+            return CertificateFactory.getInstance("X.509").generateCertificates(
+                    new ByteArrayInputStream(concatenatedRawChain.toByteArray()))
+                            .toArray(new X509Certificate[0]);
+        } catch (Exception e) {
+            throw new DeviceIdAttestationException("Unable to construct certificate chain", e);
         }
     }
 }
