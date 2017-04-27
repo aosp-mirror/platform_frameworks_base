@@ -400,7 +400,6 @@ public final class AutofillManager {
         }
     }
 
-
     /**
      * Called when a {@link View} that supports autofill is entered.
      *
@@ -780,8 +779,12 @@ public final class AutofillManager {
             throw e.rethrowFromSystemServer();
         }
 
-        mTrackedViews = null;
+        resetSessionLocked();
+    }
+
+    private void resetSessionLocked() {
         mSessionId = NO_SESSION;
+        mTrackedViews = null;
     }
 
     private void updateSessionLocked(AutofillId id, Rect bounds, AutofillValue value, int flags) {
@@ -903,9 +906,17 @@ public final class AutofillManager {
         }
     }
 
-    private void setState(boolean enabled) {
+    private void setState(boolean enabled, boolean resetSession, boolean resetClient) {
         synchronized (mLock) {
             mEnabled = enabled;
+            if (!mEnabled || resetSession) {
+                // Reset the session state
+                resetSessionLocked();
+            }
+            if (resetClient) {
+                // Reset connection to system
+                mServiceClient = null;
+            }
         }
     }
 
@@ -1025,13 +1036,14 @@ public final class AutofillManager {
 
         AutofillCallback callback = null;
         synchronized (mLock) {
-            if (mSessionId == sessionId) {
-                AutofillClient client = getClientLocked();
-
-                if (client != null) {
-                    if (client.autofillCallbackRequestHideFillUi() && mCallback != null) {
-                        callback = mCallback;
-                    }
+            // We do not check the session id for two reasons:
+            // 1. If local and remote session id are off sync the UI would be stuck shown
+            // 2. There is a race between the user state being destroyed due the fill
+            //    service being uninstalled and the UI being dismissed.
+            AutofillClient client = getClientLocked();
+            if (client != null) {
+                if (client.autofillCallbackRequestHideFillUi() && mCallback != null) {
+                    callback = mCallback;
                 }
             }
         }
@@ -1343,10 +1355,11 @@ public final class AutofillManager {
         }
 
         @Override
-        public void setState(boolean enabled) {
+        public void setState(boolean enabled, boolean resetSession, boolean resetClient) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> afm.setState(enabled));
+                afm.mContext.getMainThreadHandler().post(
+                        () -> afm.setState(enabled, resetSession, resetClient));
             }
         }
 
