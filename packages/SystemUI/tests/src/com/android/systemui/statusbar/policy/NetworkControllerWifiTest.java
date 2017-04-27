@@ -61,7 +61,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     public void testWifiIcon() {
         String testSsid = "Test SSID";
         setWifiEnabled(true);
-        verifyLastWifiIcon(true, WifiIcons.WIFI_DISCONNECTED);
+        verifyLastWifiIcon(false, WifiIcons.WIFI_NO_NETWORK);
 
         setWifiState(true, testSsid);
         verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[0][0]);

@@ -128,7 +128,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         state.value = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
         state.icon = ResourceIcon.get(R.drawable.ic_data_unavailable);
-        state.state = cb.airplaneModeEnabled || !cb.enabled || cb.noSim ? Tile.STATE_UNAVAILABLE
+        state.state = cb.airplaneModeEnabled || !cb.enabled ? Tile.STATE_UNAVAILABLE
                 : state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         if (state.state == Tile.STATE_ACTIVE) {
             state.icon = ResourceIcon.get(R.drawable.ic_data_on);
@@ -161,27 +161,44 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private static final class CallbackInfo {
         boolean enabled;
+        boolean wifiEnabled;
         boolean airplaneModeEnabled;
+        String signalContentDescription;
+        int dataTypeIconId;
+        String dataContentDescription;
         boolean activityIn;
         boolean activityOut;
+        String enabledDesc;
         boolean noSim;
+        boolean isDataTypeIconWide;
         boolean roaming;
     }
 
     private final class CellSignalCallback implements SignalCallback {
         private final CallbackInfo mInfo = new CallbackInfo();
+        @Override
+        public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
+                boolean activityIn, boolean activityOut, String description, boolean isTransient) {
+            mInfo.wifiEnabled = enabled;
+            refreshState(mInfo);
+        }
 
         @Override
-        public void setMobileDataIndicators(IconState statusIcon, int statusType,
-                boolean activityIn, boolean activityOut, String typeContentDescription,
-                int subId, boolean roaming, boolean isEmergency) {
-            if (statusIcon == null) {
+        public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
+                int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
+                String description, boolean isWide, int subId, boolean roaming) {
+            if (qsIcon == null) {
                 // Not data sim, don't display.
                 return;
             }
-            mInfo.enabled = statusIcon.visible;
+            mInfo.enabled = qsIcon.visible;
+            mInfo.signalContentDescription = qsIcon.contentDescription;
+            mInfo.dataTypeIconId = qsType;
+            mInfo.dataContentDescription = typeContentDescription;
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
+            mInfo.enabledDesc = description;
+            mInfo.isDataTypeIconWide = qsType != 0 && isWide;
             mInfo.roaming = roaming;
             refreshState(mInfo);
         }
@@ -189,6 +206,15 @@ public class CellularTile extends QSTileImpl<SignalState> {
         @Override
         public void setNoSims(boolean show) {
             mInfo.noSim = show;
+            if (mInfo.noSim) {
+                // Make sure signal gets cleared out when no sims.
+                mInfo.dataTypeIconId = 0;
+                // Show a No SIMs description to avoid emergency calls message.
+                mInfo.enabled = true;
+                mInfo.enabledDesc = mContext.getString(
+                        R.string.keyguard_missing_sim_message_short);
+                mInfo.signalContentDescription = mInfo.enabledDesc;
+            }
             refreshState(mInfo);
         }
 
