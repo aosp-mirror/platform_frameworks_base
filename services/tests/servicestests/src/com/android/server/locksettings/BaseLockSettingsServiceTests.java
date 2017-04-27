@@ -31,6 +31,7 @@ import android.content.pm.UserInfo;
 import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.security.KeyStore;
 import android.test.AndroidTestCase;
 
@@ -85,7 +86,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mDevicePolicyManager = mock(DevicePolicyManager.class);
 
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
-                mDevicePolicyManager);
+                mDevicePolicyManager, mock(StorageManager.class));
         mStorage = new LockSettingsStorageTestable(mContext,
                 new File(getContext().getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;

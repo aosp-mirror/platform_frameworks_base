@@ -452,7 +452,7 @@ public class SyntheticPasswordManager {
 
     // Nuke the SP handle (and as a result, its SID) for the given user.
     public void clearSidForUser(int userId) {
-        destroyState(SP_HANDLE_NAME, true, DEFAULT_HANDLE, userId);
+        destroyState(SP_HANDLE_NAME, DEFAULT_HANDLE, userId);
     }
 
     public boolean hasSidForUser(int userId) {
@@ -487,8 +487,8 @@ public class SyntheticPasswordManager {
     }
 
     public void destroyEscrowData(int userId) {
-        destroyState(SP_E0_NAME, true, DEFAULT_HANDLE, userId);
-        destroyState(SP_P1_NAME, true, DEFAULT_HANDLE, userId);
+        destroyState(SP_E0_NAME, DEFAULT_HANDLE, userId);
+        destroyState(SP_P1_NAME, DEFAULT_HANDLE, userId);
     }
 
     private int loadWeaverSlot(long handle, int userId) {
@@ -523,7 +523,7 @@ public class SyntheticPasswordManager {
                 Log.w(TAG, "Failed to destroy slot", e);
             }
         }
-        destroyState(WEAVER_SLOT_NAME, true, handle, userId);
+        destroyState(WEAVER_SLOT_NAME, handle, userId);
     }
 
     private int getNextAvailableWeaverSlot() {
@@ -877,17 +877,17 @@ public class SyntheticPasswordManager {
 
     public void destroyTokenBasedSyntheticPassword(long handle, int userId) {
         destroySyntheticPassword(handle, userId);
-        destroyState(SECDISCARDABLE_NAME, true, handle, userId);
+        destroyState(SECDISCARDABLE_NAME, handle, userId);
     }
 
     public void destroyPasswordBasedSyntheticPassword(long handle, int userId) {
         destroySyntheticPassword(handle, userId);
-        destroyState(SECDISCARDABLE_NAME, true, handle, userId);
-        destroyState(PASSWORD_DATA_NAME, true, handle, userId);
+        destroyState(SECDISCARDABLE_NAME, handle, userId);
+        destroyState(PASSWORD_DATA_NAME, handle, userId);
     }
 
     private void destroySyntheticPassword(long handle, int userId) {
-        destroyState(SP_BLOB_NAME, true, handle, userId);
+        destroyState(SP_BLOB_NAME, handle, userId);
         destroySPBlobKey(getHandleName(handle));
         if (hasState(WEAVER_SLOT_NAME, handle, userId)) {
             destroyWeaverSlot(handle, userId);
@@ -938,8 +938,8 @@ public class SyntheticPasswordManager {
         mStorage.writeSyntheticPasswordState(userId, handle, stateName, data);
     }
 
-    private void destroyState(String stateName, boolean secure, long handle, int userId) {
-        mStorage.deleteSyntheticPasswordState(userId, handle, stateName, secure);
+    private void destroyState(String stateName, long handle, int userId) {
+        mStorage.deleteSyntheticPasswordState(userId, handle, stateName);
     }
 
     protected byte[] decryptSPBlob(String blobKeyName, byte[] blob, byte[] applicationId) {
