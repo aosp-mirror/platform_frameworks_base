@@ -110,7 +110,6 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.IActivityContainerCallback;
-import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
@@ -157,7 +156,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -1129,7 +1127,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mActivitiesWaitingForVisibleActivity.remove(r);
 
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
-            if (mWaitingForActivityVisible.get(i).matches(r)) {
+            if (mWaitingForActivityVisible.get(i).matches(r.realActivity)) {
                 mWaitingForActivityVisible.remove(i);
             }
         }
@@ -1143,7 +1141,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         boolean changed = false;
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             final WaitInfo w = mWaitingForActivityVisible.get(i);
-            if (w.matches(r)) {
+            if (w.matches(r.realActivity)) {
                 final WaitResult result = w.getResult();
                 changed = true;
                 result.timeout = false;
@@ -5128,10 +5126,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             this.mResult = result;
         }
 
-        public boolean matches(ActivityRecord record) {
-            return mTargetComponent == null ||
-                    (TextUtils.equals(mTargetComponent.getPackageName(), record.info.packageName)
-                            && TextUtils.equals(mTargetComponent.getClassName(), record.info.name));
+        public boolean matches(ComponentName targetComponent) {
+            return mTargetComponent == null || mTargetComponent.equals(targetComponent);
         }
 
         public WaitResult getResult() {
