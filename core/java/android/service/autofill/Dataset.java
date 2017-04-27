@@ -16,7 +16,7 @@
 
 package android.service.autofill;
 
-import static android.view.autofill.Helper.DEBUG;
+import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,7 +24,6 @@ import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
@@ -90,7 +89,7 @@ public final class Dataset implements Parcelable {
 
     @Override
     public String toString() {
-        if (!DEBUG) return super.toString();
+        if (!sDebug) return super.toString();
 
         return new StringBuilder("Dataset " + mId + " [")
                 .append("fieldIds=").append(mFieldIds)

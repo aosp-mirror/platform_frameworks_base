@@ -18,7 +18,8 @@ package com.android.server.autofill;
 
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 
-import static com.android.server.autofill.Helper.DEBUG;
+import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -219,9 +220,7 @@ final class RemoteFillService implements DeathRecipient {
             mPendingRequest = pendingRequest;
             ensureBound();
         } else {
-            if (DEBUG) {
-                Slog.d(LOG_TAG, "[user: " + mUserId + "] handlePendingRequest()");
-            }
+            if (sVerbose) Slog.v(LOG_TAG, "[user: " + mUserId + "] handlePendingRequest()");
             pendingRequest.run();
             if (pendingRequest.isFinal()) {
                 mCompleted = true;
@@ -237,9 +236,7 @@ final class RemoteFillService implements DeathRecipient {
         if (isBound() || mBinding) {
             return;
         }
-        if (DEBUG) {
-            Slog.d(LOG_TAG, "[user: " + mUserId + "] ensureBound()");
-        }
+        if (sVerbose) Slog.v(LOG_TAG, "[user: " + mUserId + "] ensureBound()");
         mBinding = true;
 
         boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection,
@@ -247,9 +244,7 @@ final class RemoteFillService implements DeathRecipient {
                 new UserHandle(mUserId));
 
         if (!willBind) {
-            if (DEBUG) {
-                Slog.d(LOG_TAG, "[user: " + mUserId + "] could not bind to " + mIntent);
-            }
+            if (sDebug) Slog.d(LOG_TAG, "[user: " + mUserId + "] could not bind to " + mIntent);
             mBinding = false;
 
             if (!mServiceDied) {
@@ -262,9 +257,7 @@ final class RemoteFillService implements DeathRecipient {
         if (!isBound() && !mBinding) {
             return;
         }
-        if (DEBUG) {
-            Slog.d(LOG_TAG, "[user: " + mUserId + "] ensureUnbound()");
-        }
+        if (sVerbose) Slog.v(LOG_TAG, "[user: " + mUserId + "] ensureUnbound()");
         mBinding = false;
         if (isBound()) {
             try {

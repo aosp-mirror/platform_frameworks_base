@@ -19,14 +19,13 @@ package com.android.server.autofill;
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 
-import static com.android.server.autofill.Helper.DEBUG;
-import static com.android.server.autofill.Helper.VERBOSE;
+import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.bundleToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -39,6 +38,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -50,13 +50,12 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
-import android.text.TextUtils;
 import android.util.LocalLog;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
@@ -118,10 +117,6 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                final String reason = intent.getStringExtra("reason");
-                if (VERBOSE) {
-                    Slog.v(TAG, "close system dialogs: " + reason);
-                }
                 mUi.hideAll();
             }
         }
@@ -131,6 +126,10 @@ public final class AutofillManagerService extends SystemService {
         super(context);
         mContext = context;
         mUi = new AutoFillUI(mContext);
+
+        final boolean debug = Build.IS_DEBUGGABLE;
+        Slog.i(TAG, "Setting debug to " + debug);
+        setDebugLocked(debug);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -154,7 +153,7 @@ public final class AutofillManagerService extends SystemService {
                 final boolean disabledBefore = mDisabledUsers.get(userId);
                 if (disabledBefore == disabledNow) {
                     // Nothing changed, do nothing.
-                    if (DEBUG) {
+                    if (sDebug) {
                         Slog.d(TAG, "Restriction not changed for user " + userId + ": "
                                 + bundleToString(newRestrictions));
                         return;
@@ -368,6 +367,42 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
+    // Called by Shell command.
+    void setLogLevel(int level) {
+        Slog.i(TAG, "setLogLevel(): " + level);
+        boolean debug = false;
+        boolean verbose = false;
+        if (level == AutofillManager.FLAG_ADD_CLIENT_VERBOSE) {
+            debug = verbose = true;
+        } else if (level == AutofillManager.FLAG_ADD_CLIENT_DEBUG) {
+            debug = true;
+        }
+        synchronized (mLock) {
+            setDebugLocked(debug);
+            setVerboseLocked(verbose);
+        }
+    }
+
+    // Called by Shell command.
+    int getLogLevel() {
+        synchronized (mLock) {
+            if (sVerbose) return AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
+            if (sDebug) return AutofillManager.FLAG_ADD_CLIENT_DEBUG;
+            return 0;
+        }
+    }
+
+    private void setDebugLocked(boolean debug) {
+        com.android.server.autofill.Helper.sDebug = debug;
+        android.view.autofill.Helper.sDebug = debug;
+    }
+
+
+    private void setVerboseLocked(boolean verbose) {
+        com.android.server.autofill.Helper.sVerbose = verbose;
+        android.view.autofill.Helper.sVerbose = verbose;
+    }
+
     /**
      * Removes a cached service for a given user.
      */
@@ -399,24 +434,21 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
-    private IBinder getTopActivityForUser() {
-        final List<IBinder> topActivities = LocalServices
-                .getService(ActivityManagerInternal.class).getTopVisibleActivities();
-        if (VERBOSE) {
-            Slog.v(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
-        }
-        if (topActivities.isEmpty()) {
-            Slog.w(TAG, "Could not get top activity");
-            return null;
-        }
-        return topActivities.get(0);
-    }
-
     final class AutoFillManagerServiceStub extends IAutoFillManager.Stub {
         @Override
-        public boolean addClient(IAutoFillManagerClient client, int userId) {
+        public int addClient(IAutoFillManagerClient client, int userId) {
             synchronized (mLock) {
-                return getServiceForUserLocked(userId).addClientLocked(client);
+                int flags = 0;
+                if (getServiceForUserLocked(userId).addClientLocked(client)) {
+                    flags |= AutofillManager.FLAG_ADD_CLIENT_ENABLED;
+                }
+                if (sDebug) {
+                    flags |= AutofillManager.FLAG_ADD_CLIENT_DEBUG;
+                }
+                if (sVerbose) {
+                    flags |= AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
+                }
+                return flags;
             }
         }
 
@@ -568,24 +600,38 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
-            synchronized (mLock) {
-                pw.print("Disabled users: "); pw.println(mDisabledUsers);
-                final int size = mServicesCache.size();
-                pw.print("Cached services: ");
-                if (size == 0) {
-                    pw.println("none");
-                } else {
-                    pw.println(size);
-                    for (int i = 0; i < size; i++) {
-                        pw.print("\nService at index "); pw.println(i);
-                        final AutofillManagerServiceImpl impl = mServicesCache.valueAt(i);
-                        impl.dumpLocked("  ", pw);
+
+            boolean oldDebug = sDebug;
+            boolean oldVerbose = sVerbose;
+            try {
+                synchronized (mLock) {
+                    oldDebug = sDebug;
+                    oldVerbose = sVerbose;
+                    setDebugLocked(true);
+                    setVerboseLocked(true);
+                    pw.print("Debug mode: "); pw.println(oldDebug);
+                    pw.print("Verbose mode: "); pw.println(oldVerbose);
+                    pw.print("Disabled users: "); pw.println(mDisabledUsers);
+                    final int size = mServicesCache.size();
+                    pw.print("Cached services: ");
+                    if (size == 0) {
+                        pw.println("none");
+                    } else {
+                        pw.println(size);
+                        for (int i = 0; i < size; i++) {
+                            pw.print("\nService at index "); pw.println(i);
+                            final AutofillManagerServiceImpl impl = mServicesCache.valueAt(i);
+                            impl.dumpLocked("  ", pw);
+                        }
                     }
+                    mUi.dump(pw);
                 }
-                mUi.dump(pw);
+                pw.println("Requests history:");
+                mRequestsHistory.reverseDump(fd, pw, args);
+            } finally {
+                setDebugLocked(oldDebug);
+                setVerboseLocked(oldVerbose);
             }
-            pw.println("Requests history:");
-            mRequestsHistory.reverseDump(fd, pw, args);
         }
 
         @Override
