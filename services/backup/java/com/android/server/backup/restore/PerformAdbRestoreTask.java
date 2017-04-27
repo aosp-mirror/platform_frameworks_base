@@ -479,6 +479,13 @@ public class PerformAdbRestoreTask implements Runnable {
                         RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
                     // Metadata blobs!
                     tarBackupReader.readMetadata(info);
+
+                    // The following only exist because we want to keep refactoring as safe as
+                    // possible, without changing too much.
+                    // TODO: Refactor, so that there are no funny things like this.
+                    // This is read during TarBackupReader.readMetadata().
+                    mWidgetData = tarBackupReader.getWidgetData();
+
                     tarBackupReader.skipTarPadding(info.size);
                 } else {
                     // Non-manifest, so it's actual file data.  Is this a package
