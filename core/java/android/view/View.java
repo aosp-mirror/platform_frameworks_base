@@ -21067,7 +21067,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @Nullable
     public final <T extends View> T findViewById(@IdRes int id) {
-        if (id < 0) {
+        if (id == NO_ID) {
             return null;
         }
         return findViewTraversal(id);
