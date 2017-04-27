@@ -1845,8 +1845,12 @@ public final class ViewRootImpl implements ViewParent,
 
         final boolean isViewVisible = viewVisibility == View.VISIBLE;
         final boolean windowRelayoutWasForced = mForceNextWindowRelayout;
-        if (mFirst || windowShouldResize || insetsChanged ||
-                viewVisibilityChanged || params != null || mForceNextWindowRelayout) {
+        final int contextConfigSeq = mContext.getResources().getConfiguration().seq;
+        final int lastConfigSeq = mLastReportedMergedConfiguration.getMergedConfiguration().seq;
+        final boolean staleConfig = lastConfigSeq != 0 && contextConfigSeq != lastConfigSeq;
+
+        if (mFirst || windowShouldResize || insetsChanged || staleConfig || viewVisibilityChanged
+                || params != null || mForceNextWindowRelayout) {
             mForceNextWindowRelayout = false;
 
             if (isViewVisible) {
@@ -6083,7 +6087,13 @@ public final class ViewRootImpl implements ViewParent,
         if (params != null) {
             if (DBG) Log.d(mTag, "WindowLayout in layoutWindow:" + params);
         }
-        mPendingMergedConfiguration.getMergedConfiguration().seq = 0;
+
+        if (mPendingMergedConfiguration.getMergedConfiguration().seq == 0) {
+            mPendingMergedConfiguration.setTo(mLastReportedMergedConfiguration);
+        }
+
+        int initialConfigSeq = mPendingMergedConfiguration.getMergedConfiguration().seq;
+
         //Log.d(mTag, ">>>>>> CALLING relayout");
         if (params != null && mOrigWindowType != params.type) {
             // For compatibility with old apps, don't crash here.
@@ -6101,6 +6111,10 @@ public final class ViewRootImpl implements ViewParent,
                 mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame,
                 mPendingMergedConfiguration, mSurface);
+
+        if (initialConfigSeq == mPendingMergedConfiguration.getMergedConfiguration().seq) {
+            mPendingMergedConfiguration.getMergedConfiguration().seq = 0;
+        }
 
         mPendingAlwaysConsumeNavBar =
                 (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR) != 0;
