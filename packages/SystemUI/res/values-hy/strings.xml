@@ -157,6 +157,8 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Բջջային տվյալներն անջատված են"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ը կապվում է:"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ինքնաթիռի ռեժիմ"</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM քարտ չկա:"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Օպերատորի ցանցի փոփոխում:"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Բացել մարտկոցի տվյալները"</string>
@@ -427,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Աշխատանքային պրոֆիլը կապակցված է <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Անձնական պրոֆիլը կապակցված է <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Սարքը կապակցված է <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Սարքերի կառավարում"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Պրոֆիլի վերահսկում"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Ցանցի մշտադիտարկում"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -437,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Անջատել VPN-ը"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Անջատել VPN-ը"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Դիտել քաղաքականությունները"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Ձեր սարքը կառավարվում է <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\n-ի կողմից: Ձեր ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ օգտագործման թույլտվությունները, հավելվածները, սարքին կապված տվյալները և սարքի տեղադրման մասին տեղեկատվությունը:\n\nՄանրամասների համար դիմեք ձեր ադմինիստրատորին:"</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Ձեր շարժական սարքը կառավարվում է ձեր կազմակերպության կողմից։\n\nՁեր ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ օգտագործման թույլտվությունները, հավելվածները, սարքին կապված տվյալները և սարքի տեղադրման մասին տեղեկատվությունը:\n\nՄանրամասների համար դիմեք ձեր ադմինիստրատորին:"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Ձեր կազմակերպությունը այս սարքում տեղադրել է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Ձեր կազմակերպությունը ձեր աշխատանքային պրոֆիլում տեղադրել է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Այս սարքում տեղադրված է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Ձեր ադմինիստրատորը միացրել է ցանցային իրադարձությունների գրանցումը, որը վերահսկում է ձեր սարքի թրաֆիկը։"</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Դուք կապակցված եք <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործողությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Դուք կապակցված եք <xliff:g id="VPN_APP_0">%1$s</xliff:g> և <xliff:g id="VPN_APP_1">%2$s</xliff:g> հավելվածներին, որոնք կարող են վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Ձեր աշխատանքային պրոֆիլը կապակցված է <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Ձեր անձնական պրոֆիլը կապակցված է <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Ձեր սարքը կառավարվում է <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> հավելվածի կողմից:"</string>
@@ -703,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> ծանուցում՝ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Հավելվածը չի կարող աշխատել տրոհված էկրանի ռեժիմում:"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Հավելվածը չի աջակցում էկրանի տրոհումը:"</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Բացել կարգավորումները:"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Բացել արագ կարգավորումները:"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Փակել արագ կարգավորումները:"</string>
@@ -752,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Ակնթարթորեն գործարկվող հավելվածներ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Ակնթարթորեն գործարկվող հավելվածները տեղադրում չեն պահանջում։"</string>
     <string name="app_info" msgid="6856026610594615344">"Հավելվածի տվյալներ"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Բացեք համացանցում"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Բջջային ինտերնետ"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi-ն անջատված է"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth-ն անջատված է"</string>

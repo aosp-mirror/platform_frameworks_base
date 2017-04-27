@@ -60,7 +60,7 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Vuelve a intentarlo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Dibuja tu patrón"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Introduce el PIN de la tarjeta SIM."</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Introduce el PIN de la tarjeta SIM de \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Introduce el PIN de la tarjeta SIM de <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Inhabilita la tarjeta eSIM para utilizar el dispositivo sin servicio móvil."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Introduce el PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Introduce tu contraseña"</string>
