@@ -3942,10 +3942,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     private StackInfo getStackInfoLocked(ActivityStack stack) {
-        final ActivityDisplay display = mActivityDisplays.get(DEFAULT_DISPLAY);
+        final int displayId = stack.mDisplayId;
+        final ActivityDisplay display = mActivityDisplays.get(displayId);
         StackInfo info = new StackInfo();
         stack.getWindowContainerBounds(info.bounds);
-        info.displayId = DEFAULT_DISPLAY;
+        info.displayId = displayId;
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null) == STACK_VISIBLE;
