@@ -257,7 +257,7 @@ public class NotificationColorUtil {
      * @return a color with the same hue as {@param color}, potentially darkened to meet the
      *          contrast ratio.
      */
-    private static int findContrastColor(int color, int other, boolean findFg, double minRatio) {
+    public static int findContrastColor(int color, int other, boolean findFg, double minRatio) {
         int fg = findFg ? color : other;
         int bg = findFg ? other : color;
         if (ColorUtilsFromCompat.calculateContrast(fg, bg) >= minRatio) {
@@ -402,16 +402,17 @@ public class NotificationColorUtil {
     }
 
     /**
-     * Lighten a color by a specified value
+     * Change a color by a specified value
      * @param baseColor the base color to lighten
      * @param amount the amount to lighten the color from 0 to 100. This corresponds to the L
-     *               increase in the LAB color space.
-     * @return the lightened color
+     *               increase in the LAB color space. A negative value will darken the color and
+     *               a positive will lighten it.
+     * @return the changed color
      */
-    public static int lightenColor(int baseColor, int amount) {
+    public static int changeColorLightness(int baseColor, int amount) {
         final double[] result = ColorUtilsFromCompat.getTempDouble3Array();
         ColorUtilsFromCompat.colorToLAB(baseColor, result);
-        result[0] = Math.min(100, result[0] + amount);
+        result[0] = Math.max(Math.min(100, result[0] + amount), 0);
         return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
     }
 
@@ -489,6 +490,15 @@ public class NotificationColorUtil {
             useDark = ColorUtilsFromCompat.calculateLuminance(backgroundColor) > 0.5;
         }
         return useDark;
+    }
+
+    public static double calculateLuminance(int backgroundColor) {
+        return ColorUtilsFromCompat.calculateLuminance(backgroundColor);
+    }
+
+
+    public static double calculateContrast(int foregroundColor, int backgroundColor) {
+        return ColorUtilsFromCompat.calculateContrast(foregroundColor, backgroundColor);
     }
 
     /**
