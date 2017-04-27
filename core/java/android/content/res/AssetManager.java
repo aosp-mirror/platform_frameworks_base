@@ -788,8 +788,8 @@ public final class AssetManager implements AutoCloseable {
     /**
      * Retrieve the resource identifier for the given resource name.
      */
-    /*package*/ native final int getResourceIdentifier(String type,
-                                                       String name,
+    /*package*/ native final int getResourceIdentifier(String name,
+                                                       String defType,
                                                        String defPackage);
 
     /*package*/ native final String getResourceName(int resid);
