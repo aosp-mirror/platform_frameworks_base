@@ -13545,7 +13545,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         return;
                     }
                     if (pr.hasTopUi != hasTopUi) {
-                        Slog.i(TAG, "Setting hasTopUi=" + hasTopUi + " for pid=" + pid);
+                        if (DEBUG_OOM_ADJ) {
+                            Slog.d(TAG, "Setting hasTopUi=" + hasTopUi + " for pid=" + pid);
+                        }
                         pr.hasTopUi = hasTopUi;
                         changed = true;
                     }

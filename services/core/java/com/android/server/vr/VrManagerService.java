@@ -96,6 +96,7 @@ import java.util.Objects;
 public class VrManagerService extends SystemService implements EnabledComponentChangeListener{
 
     public static final String TAG = "VrManagerService";
+    static final boolean DBG = false;
 
     private static final int PENDING_STATE_DELAY_MS = 300;
     private static final int EVENT_LOG_SIZE = 32;
@@ -157,7 +158,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private void setVrModeAllowedLocked(boolean allowed) {
         if (mVrModeAllowed != allowed) {
             mVrModeAllowed = allowed;
-            Slog.i(TAG, "VR mode is " + ((allowed) ? "allowed" : "disallowed"));
+            if (DBG) Slog.d(TAG, "VR mode is " + ((allowed) ? "allowed" : "disallowed"));
             if (mVrModeAllowed) {
                 consumeAndApplyPendingStateLocked();
             } else {

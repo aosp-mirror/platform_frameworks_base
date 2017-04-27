@@ -87,6 +87,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         implements PowerManagerInternal.LowPowerModeListener,
         BatteryStatsImpl.PlatformIdleStateCallback {
     static final String TAG = "BatteryStatsService";
+    static final boolean DBG = false;
 
     /**
      * How long to wait on an individual subsystem to return its stats.
@@ -152,11 +153,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                 case MSG_WRITE_TO_DISK:
                     updateExternalStatsSync("write", UPDATE_ALL);
-                    Slog.d(TAG, "begin writeAsyncLocked");
+                    if (DBG) Slog.d(TAG, "begin writeAsyncLocked");
                     synchronized (mStats) {
                         mStats.writeAsyncLocked();
                     }
-                    Slog.d(TAG, "end writeAsyncLocked");
+                    if (DBG) Slog.d(TAG, "end writeAsyncLocked");
                     break;
             }
         }
@@ -196,7 +197,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     public String getPlatformLowPowerStats() {
-        Slog.d(TAG, "begin getPlatformLowPowerStats");
+        if (DBG) Slog.d(TAG, "begin getPlatformLowPowerStats");
         try {
             mUtf8BufferStat.clear();
             mUtf16BufferStat.clear();
@@ -212,7 +213,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mUtf16BufferStat.flip();
             return mUtf16BufferStat.toString();
         } finally {
-            Slog.d(TAG, "end getPlatformLowPowerStats");
+            if (DBG) Slog.d(TAG, "end getPlatformLowPowerStats");
         }
     }
 
@@ -561,11 +562,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         
     public void noteScreenState(int state) {
         enforceCallingPermission();
-        Slog.d(TAG, "begin noteScreenState");
+        if (DBG) Slog.d(TAG, "begin noteScreenState");
         synchronized (mStats) {
             mStats.noteScreenStateLocked(state);
         }
-        Slog.d(TAG, "end noteScreenState");
+        if (DBG) Slog.d(TAG, "end noteScreenState");
     }
     
     public void noteScreenBrightness(int brightness) {
@@ -718,11 +719,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteStartCamera(int uid) {
         enforceCallingPermission();
-        Slog.d(TAG, "begin noteStartCamera");
+        if (DBG) Slog.d(TAG, "begin noteStartCamera");
         synchronized (mStats) {
             mStats.noteCameraOnLocked(uid);
         }
-        Slog.d(TAG, "end noteStartCamera");
+        if (DBG) Slog.d(TAG, "end noteStartCamera");
     }
 
     public void noteStopCamera(int uid) {
@@ -1342,23 +1343,23 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     }
                 }
             }
-            Slog.d(TAG, "begin dumpCheckinLocked from UID " + Binder.getCallingUid());
+            if (DBG) Slog.d(TAG, "begin dumpCheckinLocked from UID " + Binder.getCallingUid());
             synchronized (mStats) {
                 mStats.dumpCheckinLocked(mContext, pw, apps, flags, historyStart);
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }
             }
-            Slog.d(TAG, "end dumpCheckinLocked");
+            if (DBG) Slog.d(TAG, "end dumpCheckinLocked");
         } else {
-            Slog.d(TAG, "begin dumpLocked from UID " + Binder.getCallingUid());
+            if (DBG) Slog.d(TAG, "begin dumpLocked from UID " + Binder.getCallingUid());
             synchronized (mStats) {
                 mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }
             }
-            Slog.d(TAG, "end dumpLocked");
+            if (DBG) Slog.d(TAG, "end dumpLocked");
         }
     }
 
@@ -1480,11 +1481,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         SynchronousResultReceiver bluetoothReceiver = null;
         SynchronousResultReceiver modemReceiver = null;
 
-        Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
+        if (DBG) Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
         synchronized (mExternalStatsLock) {
             if (mContext == null) {
                 // Don't do any work yet.
-                Slog.d(TAG, "end updateExternalStatsSync");
+                if (DBG) Slog.d(TAG, "end updateExternalStatsSync");
                 return;
             }
 
@@ -1583,7 +1584,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             }
         }
-        Slog.d(TAG, "end updateExternalStatsSync");
+        if (DBG) Slog.d(TAG, "end updateExternalStatsSync");
     }
 
     /**
@@ -1603,7 +1604,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return getHealthStatsForUidLocked(requestUid);
             }
         } catch (Exception ex) {
-            Slog.d(TAG, "Crashed while writing for takeUidSnapshot(" + requestUid + ")", ex);
+            Slog.w(TAG, "Crashed while writing for takeUidSnapshot(" + requestUid + ")", ex);
             throw ex;
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1633,7 +1634,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return results;
             }
         } catch (Exception ex) {
-            Slog.d(TAG, "Crashed while writing for takeUidSnapshots("
+            if (DBG) Slog.d(TAG, "Crashed while writing for takeUidSnapshots("
                     + Arrays.toString(requestUids) + ") i=" + i, ex);
             throw ex;
         } finally {
