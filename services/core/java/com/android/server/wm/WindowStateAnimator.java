@@ -1132,7 +1132,10 @@ class WindowStateAnimator {
         // Task is non-null per shouldCropToStackBounds
         final TaskStack stack = w.getTask().mStack;
         stack.getDimBounds(finalClipRect);
-        w.expandForSurfaceInsets(finalClipRect);
+
+        if (StackId.tasksAreFloating(stack.mStackId)) {
+            w.expandForSurfaceInsets(finalClipRect);
+        }
         return true;
     }
 
