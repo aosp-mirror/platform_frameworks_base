@@ -2508,6 +2508,7 @@ public class WebView extends AbsoluteLayout
         super.onDetachedFromWindowInternal();
     }
 
+    /** @hide */
     @Override
     public void onMovedToDisplay(int displayId, Configuration config) {
         mProvider.getViewDelegate().onMovedToDisplay(displayId, config);
