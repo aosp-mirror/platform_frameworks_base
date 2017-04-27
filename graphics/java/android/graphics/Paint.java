@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Size;
 import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import android.os.LocaleList;
 import android.text.FontConfig;
 import android.text.GraphicsOperations;
@@ -1539,25 +1540,49 @@ public class Paint {
     }
 
     /**
-     * Set font variation settings.
+     * Sets TrueType or OpenType font variation settings. The settings string is constructed from
+     * multiple pairs of axis tag and style values. The axis tag must contain four ASCII characters
+     * and must be wrapped with single quotes (U+0027) or double quotes (U+0022). Axis strings that
+     * are longer or shorter than four characters, or contain characters outside of U+0020..U+007E
+     * are invalid. If a specified axis name is not defined in the font, the settings will be
+     * ignored.
      *
-     * This function does nothing if none of the settings is applicable to underlying font files.
+     * Examples,
+     * <ul>
+     * <li>Set font width to 150.
+     * <pre>
+     * <code>
+     *   Paint paint = new Paint();
+     *   paint.setFontVariationSettings("'wdth' 150");
+     * </code>
+     * </pre>
+     * </li>
      *
-     * @param settings font variation settings, e.g. "'wdth' 300, 'wght' 1.8"
+     * <li>Set the font slant to 20 degrees and ask for italic style.
+     * <pre>
+     * <code>
+     *   Paint paint = new Paint();
+     *   paint.setFontVariationSettings("'slnt' 20, 'ital' 1");
+     * </code>
+     * </pre>
+     * </li>
+     * </ul>
      *
-     * @see #getFontVariationSettings()
+     * @param fontVariationSettings font variation settings. You can pass null or empty string as
+     *                              no variation settings.
      *
-     * @param settings the font variation settings. You can pass null or empty string as no
-     *                 variation settings.
      * @return true if the given settings is effective to at least one font file underlying this
      *         typeface. This function also returns true for empty settings string. Otherwise
      *         returns false
-     * @throws FontVariationAxis.InvalidFormatException
-     *         If given string is not a valid font variation settings format.
+     *
+     * @throws InvalidFormatException If given string is not a valid font variation settings format.
+     *
+     * @see #getFontVariationSettings()
+     * @see FontVariationAxis
      */
-    public boolean setFontVariationSettings(String settings)
-            throws FontVariationAxis.InvalidFormatException {
-        settings = TextUtils.nullIfEmpty(settings);
+    public boolean setFontVariationSettings(String fontVariationSettings)
+            throws InvalidFormatException {
+        final String settings = TextUtils.nullIfEmpty(fontVariationSettings);
         if (settings == mFontVariationSettings
                 || (settings != null && settings.equals(mFontVariationSettings))) {
             return true;
