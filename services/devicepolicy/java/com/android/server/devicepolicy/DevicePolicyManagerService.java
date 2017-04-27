@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
@@ -10844,8 +10845,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!expectedPackageName.equals(info.serviceInfo.packageName)) {
             throw new SecurityException("Only allow to bind service in " + expectedPackageName);
         }
-        if (info.serviceInfo.exported) {
-            throw new SecurityException("The service must be unexported");
+        // STOPSHIP(b/37624960): Remove info.serviceInfo.exported before release.
+        if (info.serviceInfo.exported && !BIND_DEVICE_ADMIN.equals(info.serviceInfo.permission)) {
+            throw new SecurityException(
+                    "Service must be protected by BIND_DEVICE_ADMIN permission");
         }
         // It is the system server to bind the service, it would be extremely dangerous if it
         // can be exploited to bind any service. Set the component explicitly to make sure we
