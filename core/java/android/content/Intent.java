@@ -4422,6 +4422,21 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_VERSION_CODE = "android.intent.extra.VERSION_CODE";
 
     /**
+     * The app that triggered the ephemeral installation.
+     * @hide
+     */
+    public static final String EXTRA_CALLING_PACKAGE
+            = "android.intent.extra.CALLING_PACKAGE";
+
+    /**
+     * Optional calling app provided bundle containing additional launch information the
+     * installer may use.
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_BUNDLE
+            = "android.intent.extra.VERIFICATION_BUNDLE";
+
+    /**
      * A Bundle forming a mapping of potential target package names to different extras Bundles
      * to add to the default intent extras in {@link #EXTRA_INTENT} when used with
      * {@link #ACTION_CHOOSER}. Each key should be a package name. The package need not
