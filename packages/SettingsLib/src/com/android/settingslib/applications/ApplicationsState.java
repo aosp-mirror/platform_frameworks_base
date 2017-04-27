@@ -1040,6 +1040,11 @@ public class ApplicationsState {
 
         final IPackageStatsObserver.Stub mStatsObserver = new IPackageStatsObserver.Stub() {
             public void onGetStatsCompleted(PackageStats stats, boolean succeeded) {
+                if (!succeeded) {
+                    // There is no meaningful information in stats if the call failed.
+                    return;
+                }
+
                 boolean sizeChanged = false;
                 synchronized (mEntriesMap) {
                     if (DEBUG_LOCKING) Log.v(TAG, "onGetStatsCompleted acquired lock");
