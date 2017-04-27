@@ -14,8 +14,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.Dependency;
-import com.android.systemui.plugins.Plugin;
+import android.content.Context;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -31,7 +30,9 @@ public interface ExtensionController {
 
     interface Extension<T> {
         T get();
+        Context getContext();
         void destroy();
+        void addCallback(Consumer<T> callback);
     }
 
     interface ExtensionBuilder<T> {
@@ -42,6 +43,7 @@ public interface ExtensionController {
                 PluginConverter<T, P> converter);
         ExtensionBuilder<T> withDefault(Supplier<T> def);
         ExtensionBuilder<T> withCallback(Consumer<T> callback);
+        ExtensionBuilder<T> withUiMode(int mode, Supplier<T> def);
         Extension build();
     }
 
