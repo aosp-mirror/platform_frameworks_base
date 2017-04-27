@@ -43,7 +43,7 @@ import org.junit.runners.model.Statement;
  * <ul>
  * <li>System services can be mocked out with {@link #addMockSystemService}</li>
  * <li>Service binding can be mocked out with {@link #addMockService}</li>
- * <li>Settings support {@link TestableSettings}</li>
+ * <li>Settings support {@link TestableSettingsProvider}</li>
  * <li>Has support for {@link LeakCheck} for services and receivers</li>
  * </ul>
  *
@@ -59,7 +59,7 @@ import org.junit.runners.model.Statement;
 public class TestableContext extends ContextWrapper implements TestRule {
 
     private final TestableContentResolver mTestableContentResolver;
-    private final TestableSettings mSettingsProvider;
+    private final TestableSettingsProvider mSettingsProvider;
 
     private ArrayMap<String, Object> mMockSystemServices;
     private ArrayMap<ComponentName, IBinder> mMockServices;
@@ -79,9 +79,8 @@ public class TestableContext extends ContextWrapper implements TestRule {
         mTestableContentResolver = new TestableContentResolver(base);
         ContentProviderClient settings = base.getContentResolver()
                 .acquireContentProviderClient(Settings.AUTHORITY);
-        mSettingsProvider = TestableSettings.getFakeSettingsProvider(settings,
-                mTestableContentResolver);
-        mTestableContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider.getProvider());
+        mSettingsProvider = TestableSettingsProvider.getFakeSettingsProvider(settings);
+        mTestableContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
         mReceiver = check != null ? check.getTracker("receiver") : null;
         mService = check != null ? check.getTracker("service") : null;
         mComponent = check != null ? check.getTracker("component") : null;
@@ -129,7 +128,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return super.getSystemService(name);
     }
 
-    public TestableSettings getSettingsProvider() {
+    TestableSettingsProvider getSettingsProvider() {
         return mSettingsProvider;
     }
 
@@ -236,12 +235,12 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return new TestWatcher() {
             @Override
             protected void succeeded(Description description) {
-                mSettingsProvider.clearOverrides();
+                mSettingsProvider.clearValuesAndCheck(TestableContext.this);
             }
 
             @Override
             protected void failed(Throwable e, Description description) {
-                mSettingsProvider.clearOverrides();
+                mSettingsProvider.clearValuesAndCheck(TestableContext.this);
             }
         }.apply(base, description);
     }
