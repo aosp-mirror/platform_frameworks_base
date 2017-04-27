@@ -544,6 +544,17 @@ public final class BluetoothLeAdvertiser {
             }
 
             @Override
+            public void onOwnAddressRead(int advertiserId, int addressType, String address) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AdvertisingSet advertisingSet = mAdvertisingSets.get(advertiserId);
+                        callback.onOwnAddressRead(advertisingSet, addressType, address);
+                    }
+                });
+            }
+
+            @Override
             public void onAdvertisingSetStopped(int advertiserId) {
                 handler.post(new Runnable() {
                     @Override

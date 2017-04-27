@@ -143,4 +143,15 @@ public abstract class AdvertisingSetCallback {
      */
     public void onPeriodicAdvertisingEnabled(AdvertisingSet advertisingSet, boolean enable,
                                             int status) {}
+
+    /**
+     * Callback triggered in response to {@link AdvertisingSet#getOwnAddress()}
+     * indicating result of the operation.
+     *
+     * @param advertisingSet The advertising set.
+     * @param addressType type of address.
+     * @param address advertising set bluetooth address.
+     * @hide
+     */
+    public void onOwnAddressRead(AdvertisingSet advertisingSet, int addressType, String address) {}
 }

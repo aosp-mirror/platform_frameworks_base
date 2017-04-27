@@ -21,6 +21,7 @@ package android.bluetooth.le;
  */
 oneway interface IAdvertisingSetCallback {
   void onAdvertisingSetStarted(in int advertiserId, in int tx_power, in int status);
+  void onOwnAddressRead(in int advertiserId, in int addressType, in String address);
   void onAdvertisingSetStopped(in int advertiserId);
   void onAdvertisingEnabled(in int advertiserId, in boolean enable, in int status);
   void onAdvertisingDataSet(in int advertiserId, in int status);

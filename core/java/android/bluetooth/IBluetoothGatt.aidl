@@ -59,6 +59,7 @@ interface IBluetoothGatt {
                                 in IAdvertisingSetCallback callback);
     void stopAdvertisingSet(in IAdvertisingSetCallback callback);
 
+    void getOwnAddress(in int advertiserId);
     void enableAdvertisingSet(in int advertiserId, in boolean enable, in int duration, in int maxExtAdvEvents);
     void setAdvertisingData(in int advertiserId, in AdvertiseData data);
     void setScanResponseData(in int advertiserId, in AdvertiseData data);
@@ -80,6 +81,8 @@ interface IBluetoothGatt {
     void refreshDevice(in int clientIf, in String address);
     void discoverServices(in int clientIf, in String address);
     void readCharacteristic(in int clientIf, in String address, in int handle, in int authReq);
+    void readUsingCharacteristicUuid(in int clientIf, in String address, in ParcelUuid uuid,
+                           in int startHandle, in int endHandle, in int authReq);
     void writeCharacteristic(in int clientIf, in String address, in int handle,
                             in int writeType, in int authReq, in byte[] value);
     void readDescriptor(in int clientIf, in String address, in int handle, in int authReq);
