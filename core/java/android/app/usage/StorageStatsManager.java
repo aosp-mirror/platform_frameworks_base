@@ -18,6 +18,7 @@ package android.app.usage;
 
 import static android.os.storage.StorageManager.convert;
 
+import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
@@ -37,13 +38,16 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Provides access to detailed storage statistics.
+ * Access to detailed storage statistics. This provides a summary of how apps,
+ * users, and external/shared storage is utilizing disk space.
  * <p class="note">
- * Note: this API requires the permission
- * {@code android.permission.PACKAGE_USAGE_STATS}, which is a system-level
- * permission that will not be granted to normal apps. However, declaring the
- * permission expresses your intention to use this API and an end user can then
- * choose to grant this permission through the Settings application.
+ * Note: no permissions are required when calling these APIs for your own
+ * package or UID. However, requesting details for any other package requires
+ * the {@code android.Manifest.permission#PACKAGE_USAGE_STATS} permission, which
+ * is a system-level permission that will not be granted to normal apps.
+ * Declaring that permission expresses your intention to use this API and an end
+ * user can then choose to grant this permission through the Settings
+ * application.
  * </p>
  */
 public class StorageStatsManager {
@@ -73,19 +77,22 @@ public class StorageStatsManager {
     }
 
     /**
-     * Return the total size of the underlying media that is hosting this
-     * storage volume.
+     * Return the total size of the underlying physical media that is hosting
+     * this storage volume.
      * <p>
-     * To reduce end user confusion, this value matches the total storage size
-     * advertised in a retail environment, which is typically larger than the
-     * actual usable partition space.
+     * This value is best suited for visual display to end users, since it's
+     * designed to reflect the total storage size advertised in a retail
+     * environment.
+     * <p>
+     * Apps making logical decisions about disk space should always use
+     * {@link File#getTotalSpace()} instead of this value.
      *
      * @param storageUuid the UUID of the storage volume you're interested in,
      *            such as {@link StorageManager#UUID_DEFAULT}.
      * @throws IOException when the storage device isn't present.
      */
     @WorkerThread
-    public long getTotalBytes(@NonNull UUID storageUuid) throws IOException {
+    public @BytesLong long getTotalBytes(@NonNull UUID storageUuid) throws IOException {
         try {
             return mService.getTotalBytes(convert(storageUuid), mContext.getOpPackageName());
         } catch (ParcelableException e) {
@@ -105,19 +112,20 @@ public class StorageStatsManager {
     /**
      * Return the free space on the requested storage volume.
      * <p>
-     * The free space is equivalent to {@link File#getUsableSpace()} plus the
-     * size of any cached data that can be automatically deleted by the system
-     * as additional space is needed.
+     * This value is best suited for visual display to end users, since it's
+     * designed to reflect both unused space <em>and</em> and cached space that
+     * could be reclaimed by the system.
      * <p>
-     * This method may take several seconds to calculate the requested values,
-     * so it should only be called from a worker thread.
+     * Apps making logical decisions about disk space should always use
+     * {@link StorageManager#getAllocatableBytes(UUID, int)} instead of this
+     * value.
      *
      * @param storageUuid the UUID of the storage volume you're interested in,
      *            such as {@link StorageManager#UUID_DEFAULT}.
      * @throws IOException when the storage device isn't present.
      */
     @WorkerThread
-    public long getFreeBytes(@NonNull UUID storageUuid) throws IOException {
+    public @BytesLong long getFreeBytes(@NonNull UUID storageUuid) throws IOException {
         try {
             return mService.getFreeBytes(convert(storageUuid), mContext.getOpPackageName());
         } catch (ParcelableException e) {
@@ -137,9 +145,15 @@ public class StorageStatsManager {
     /**
      * Return storage statistics for a specific package on the requested storage
      * volume.
-     * <p>
-     * This method may take several seconds to calculate the requested values,
-     * so it should only be called from a worker thread.
+     * <p class="note">
+     * Note: no permissions are required when calling this API for your own
+     * package. However, requesting details for any other package requires the
+     * {@code android.Manifest.permission#PACKAGE_USAGE_STATS} permission, which
+     * is a system-level permission that will not be granted to normal apps.
+     * Declaring that permission expresses your intention to use this API and an
+     * end user can then choose to grant this permission through the Settings
+     * application.
+     * </p>
      * <p class="note">
      * Note: if the requested package uses the {@code android:sharedUserId}
      * manifest feature, this call will be forced into a slower manual
@@ -158,8 +172,9 @@ public class StorageStatsManager {
      * @see PackageInfo#packageName
      */
     @WorkerThread
-    public @NonNull StorageStats queryStatsForPackage(@NonNull UUID storageUuid, String packageName,
-            UserHandle user) throws PackageManager.NameNotFoundException, IOException {
+    public @NonNull StorageStats queryStatsForPackage(@NonNull UUID storageUuid,
+            @NonNull String packageName, @NonNull UserHandle user)
+            throws PackageManager.NameNotFoundException, IOException {
         try {
             return mService.queryStatsForPackage(convert(storageUuid), packageName,
                     user.getIdentifier(), mContext.getOpPackageName());
@@ -182,9 +197,15 @@ public class StorageStatsManager {
     /**
      * Return storage statistics for a specific UID on the requested storage
      * volume.
-     * <p>
-     * This method may take several seconds to calculate the requested values,
-     * so it should only be called from a worker thread.
+     * <p class="note">
+     * Note: no permissions are required when calling this API for your own UID.
+     * However, requesting details for any other UID requires the
+     * {@code android.Manifest.permission#PACKAGE_USAGE_STATS} permission, which
+     * is a system-level permission that will not be granted to normal apps.
+     * Declaring that permission expresses your intention to use this API and an
+     * end user can then choose to grant this permission through the Settings
+     * application.
+     * </p>
      *
      * @param storageUuid the UUID of the storage volume you're interested in,
      *            such as {@link StorageManager#UUID_DEFAULT}.
@@ -194,7 +215,8 @@ public class StorageStatsManager {
      * @see ApplicationInfo#uid
      */
     @WorkerThread
-    public StorageStats queryStatsForUid(@NonNull UUID storageUuid, int uid) throws IOException {
+    public @NonNull StorageStats queryStatsForUid(@NonNull UUID storageUuid, int uid)
+            throws IOException {
         try {
             return mService.queryStatsForUid(convert(storageUuid), uid,
                     mContext.getOpPackageName());
@@ -215,9 +237,14 @@ public class StorageStatsManager {
     /**
      * Return storage statistics for a specific {@link UserHandle} on the
      * requested storage volume.
-     * <p>
-     * This method may take several seconds to calculate the requested values,
-     * so it should only be called from a worker thread.
+     * <p class="note">
+     * Note: this API requires the
+     * {@code android.Manifest.permission#PACKAGE_USAGE_STATS} permission, which
+     * is a system-level permission that will not be granted to normal apps.
+     * Declaring that permission expresses your intention to use this API and an
+     * end user can then choose to grant this permission through the Settings
+     * application.
+     * </p>
      *
      * @param storageUuid the UUID of the storage volume you're interested in,
      *            such as {@link StorageManager#UUID_DEFAULT}.
@@ -226,8 +253,8 @@ public class StorageStatsManager {
      * @see android.os.Process#myUserHandle()
      */
     @WorkerThread
-    public StorageStats queryStatsForUser(@NonNull UUID storageUuid, UserHandle user)
-            throws IOException {
+    public @NonNull StorageStats queryStatsForUser(@NonNull UUID storageUuid,
+            @NonNull UserHandle user) throws IOException {
         try {
             return mService.queryStatsForUser(convert(storageUuid), user.getIdentifier(),
                     mContext.getOpPackageName());
@@ -248,9 +275,14 @@ public class StorageStatsManager {
     /**
      * Return shared/external storage statistics for a specific
      * {@link UserHandle} on the requested storage volume.
-     * <p>
-     * This method may take several seconds to calculate the requested values,
-     * so it should only be called from a worker thread.
+     * <p class="note">
+     * Note: this API requires the
+     * {@code android.Manifest.permission#PACKAGE_USAGE_STATS} permission, which
+     * is a system-level permission that will not be granted to normal apps.
+     * Declaring that permission expresses your intention to use this API and an
+     * end user can then choose to grant this permission through the Settings
+     * application.
+     * </p>
      *
      * @param storageUuid the UUID of the storage volume you're interested in,
      *            such as {@link StorageManager#UUID_DEFAULT}.
@@ -258,8 +290,8 @@ public class StorageStatsManager {
      * @see android.os.Process#myUserHandle()
      */
     @WorkerThread
-    public ExternalStorageStats queryExternalStatsForUser(@NonNull UUID storageUuid,
-            UserHandle user) throws IOException {
+    public @NonNull ExternalStorageStats queryExternalStatsForUser(@NonNull UUID storageUuid,
+            @NonNull UserHandle user) throws IOException {
         try {
             return mService.queryExternalStatsForUser(convert(storageUuid), user.getIdentifier(),
                     mContext.getOpPackageName());

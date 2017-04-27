@@ -23,6 +23,10 @@ package android.app.admin {
 
 package android.app.usage {
 
+  public final class StorageStats implements android.os.Parcelable {
+    method public deprecated long getCodeBytes();
+  }
+
   public class StorageStatsManager {
     method public deprecated long getFreeBytes(java.lang.String) throws java.io.IOException;
     method public deprecated long getTotalBytes(java.lang.String) throws java.io.IOException;

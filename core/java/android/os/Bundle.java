@@ -25,7 +25,6 @@ import android.util.SparseArray;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * A mapping from String keys to various {@link Parcelable} values.
@@ -477,18 +476,6 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
-     * Inserts a UUID value into the mapping of this Bundle, replacing
-     * any existing value for the given key.  Either key or value may be null.
-     *
-     * @param key a String, or null
-     * @param value a UUID object, or null
-     */
-    public void putUuid(@Nullable String key, @Nullable UUID value) {
-        unparcel();
-        mMap.put(key, value);
-    }
-
-    /**
      * Inserts an array of Parcelable values into the mapping of this Bundle,
      * replacing any existing value for the given key.  Either key or value may
      * be null.
@@ -861,26 +848,6 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             return (SizeF) o;
         } catch (ClassCastException e) {
             typeWarning(key, o, "SizeF", e);
-            return null;
-        }
-    }
-
-    /**
-     * Returns the value associated with the given key, or null if
-     * no mapping of the desired type exists for the given key or a null
-     * value is explicitly associated with the key.
-     *
-     * @param key a String, or null
-     * @return a UUID value, or null
-     */
-    @Nullable
-    public UUID getUuid(@Nullable String key) {
-        unparcel();
-        final Object o = mMap.get(key);
-        try {
-            return (UUID) o;
-        } catch (ClassCastException e) {
-            typeWarning(key, o, "UUID", e);
             return null;
         }
     }
