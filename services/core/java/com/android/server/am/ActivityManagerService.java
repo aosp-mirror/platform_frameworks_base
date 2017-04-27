@@ -21706,9 +21706,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 } catch (Exception e) {
-                    Slog.w(TAG, "Failed setting process group of " + app.pid
-                            + " to " + app.curSchedGroup);
-                    e.printStackTrace();
+                    if (false) {
+                        Slog.w(TAG, "Failed setting process group of " + app.pid
+                                + " to " + app.curSchedGroup);
+                        Slog.w(TAG, "at location", e);
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(oldId);
                 }
