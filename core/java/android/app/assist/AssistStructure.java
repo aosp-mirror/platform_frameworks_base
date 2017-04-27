@@ -33,6 +33,7 @@ import android.view.autofill.AutofillValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Assist data automatically created by the platform's implementation of Assist and Autofill.
@@ -1788,7 +1789,7 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public ArrayList<Pair<String, String>> getAttributes() {
+        public List<Pair<String, String>> getAttributes() {
             if (mAttributes == null && mNames != null) {
                 mAttributes = new ArrayList<>(mNames.length);
                 for (int i = 0; i < mNames.length; i++) {
