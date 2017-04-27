@@ -33,11 +33,35 @@ import android.view.accessibility.AccessibilityNodeInfo;
  */
 
 /**
- * EditText is a thin veneer over TextView that configures itself
- * to be editable.
+ * A user interface element for entering and modifying text.
+ * When you define an edit text widget, you must specify the
+ * {@link android.R.styleable#TextView_inputType}
+ * attribute. For example, for plain text input set inputType to "text":
+ * <p>
+ * <pre>
+ * &lt;EditText
+ *     android:id="@+id/plain_text_input"
+ *     android:layout_height="wrap_content"
+ *     android:layout_width="match_parent"
+ *     android:inputType="text"/&gt;</pre>
  *
- * <p>See the <a href="{@docRoot}guide/topics/ui/controls/text.html">Text Fields</a>
- * guide.</p>
+ * Choosing the input type configures the keyboard type that is shown, acceptable characters,
+ * and appearance of the edit text.
+ * For example, if you want to accept a secret number, like a unique pin or serial number,
+ * you can set inputType to "numericPassword".
+ * An inputType of "numericPassword" results in an edit text that accepts numbers only,
+ * shows a numeric keyboard when focused, and masks the text that is entered for privacy.
+ * <p>
+ * See the <a href="{@docRoot}guide/topics/ui/controls/text.html">Text Fields</a>
+ * guide for examples of other
+ * {@link android.R.styleable#TextView_inputType} settings.
+ * </p>
+ * <p>You also can receive callbacks as a user changes text by
+ * adding a {@link android.text.TextWatcher} to the edit text.
+ * This is useful when you want to add auto-save functionality as changes are made,
+ * or validate the format of user input, for example.
+ * You add a text watcher using the {@link TextView#addTextChangedListener} method.
+ * </p>
  * <p>
  * This widget does not support auto-sizing text.
  * <p>
