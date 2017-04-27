@@ -1174,7 +1174,19 @@ public class RelativeLayout extends ViewGroup {
     }
 
     /**
-     * Per-child layout information associated with RelativeLayout.
+     * Specifies how a view is positioned within a {@link RelativeLayout}.
+     * The relative layout containing the view uses the value of these layout parameters to
+     * determine where to position the view on the screen.  If the view is not contained
+     * within a relative layout, these attributes are ignored.
+     *
+     * See the <a href=“https://developer.android.com/guide/topics/ui/layout/relative.html”>
+     * Relative Layout</a> guide for example code demonstrating how to use relative layout’s
+     * layout parameters in a layout XML.
+     *
+     * To learn more about layout parameters and how they differ from typical view attributes,
+     * see the <a href=“https://developer.android.com/guide/topics/ui/declaring-layout.html#attributes”>
+     *     Layouts guide</a>.
+     *
      *
      * @attr ref android.R.styleable#RelativeLayout_Layout_layout_alignWithParentIfMissing
      * @attr ref android.R.styleable#RelativeLayout_Layout_layout_toLeftOf

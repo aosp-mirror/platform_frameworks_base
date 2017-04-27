@@ -405,7 +405,11 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
 
     uint32_t dirty;
     if (icon.isValid()) {
-        icon.bitmap.copyTo(&mLocked.state.icon.bitmap, kN32_SkColorType);
+        SkBitmap* bitmapCopy = &mLocked.state.icon.bitmap;
+        if (bitmapCopy->tryAllocPixels(icon.bitmap.info().makeColorType(kN32_SkColorType))) {
+            icon.bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
+                    bitmapCopy->rowBytes(), 0, 0);
+        }
 
         if (!mLocked.state.icon.isValid()
                 || mLocked.state.icon.hotSpotX != icon.hotSpotX

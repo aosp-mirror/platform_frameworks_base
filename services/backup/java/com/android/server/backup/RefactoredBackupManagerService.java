@@ -3654,38 +3654,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    public Bundle putMonitoringExtra(Bundle extras, String key, String value) {
-        if (extras == null) {
-            extras = new Bundle();
-        }
-        extras.putString(key, value);
-        return extras;
-    }
-
-    private Bundle putMonitoringExtra(Bundle extras, String key, int value) {
-        if (extras == null) {
-            extras = new Bundle();
-        }
-        extras.putInt(key, value);
-        return extras;
-    }
-
-    public Bundle putMonitoringExtra(Bundle extras, String key, long value) {
-        if (extras == null) {
-            extras = new Bundle();
-        }
-        extras.putLong(key, value);
-        return extras;
-    }
-
-
-    public Bundle putMonitoringExtra(Bundle extras, String key, boolean value) {
-        if (extras == null) {
-            extras = new Bundle();
-        }
-        extras.putBoolean(key, value);
-        return extras;
-    }
 
     @Override
     public IBackupManager getBackupManagerBinder() {

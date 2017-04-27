@@ -35,7 +35,7 @@ oneway interface IAutoFillManagerClient {
     /**
      * Notifies the client when the autofill enabled state changed.
      */
-    void setState(boolean enabled);
+    void setState(boolean enabled, boolean resetSession, boolean resetClient);
 
     /**
       * Autofills the activity with the contents of a dataset.

@@ -107,6 +107,9 @@ public final class JobStatus {
     private GrantedUriPermissions uriPerms;
     private boolean prepared;
 
+    static final boolean DEBUG_PREPARE = true;
+    private Throwable unpreparedPoint = null;
+
     /**
      * Earliest point in the future at which this job will be eligible to run. A value of 0
      * indicates there is no delay constraint. See {@link #hasTimingDelayConstraint()}.
@@ -410,6 +413,9 @@ public final class JobStatus {
             return;
         }
         prepared = true;
+        if (DEBUG_PREPARE) {
+            unpreparedPoint = null;
+        }
         final ClipData clip = job.getClipData();
         if (clip != null) {
             uriPerms = GrantedUriPermissions.createFromClip(am, clip, sourceUid, sourcePackageName,
@@ -420,9 +426,15 @@ public final class JobStatus {
     public void unprepareLocked(IActivityManager am) {
         if (!prepared) {
             Slog.wtf(TAG, "Hasn't been prepared: " + this);
+            if (DEBUG_PREPARE && unpreparedPoint != null) {
+                Slog.e(TAG, "Was already unprepared at ", unpreparedPoint);
+            }
             return;
         }
         prepared = false;
+        if (DEBUG_PREPARE) {
+            unpreparedPoint = new Throwable().fillInStackTrace();
+        }
         if (uriPerms != null) {
             uriPerms.revoke(am);
             uriPerms = null;

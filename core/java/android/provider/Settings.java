@@ -6754,6 +6754,20 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
 
         /**
+         * Whether the assist gesture should be enabled during sleep
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_ENABLED_SLEEP = "assist_gesture_enabled_sleep";
+
+        /**
+         * Whether assist gesture should be enabled in keyguard
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_ENABLED_KEYGUARD = "assist_gesture_enabled_keyguard";
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */

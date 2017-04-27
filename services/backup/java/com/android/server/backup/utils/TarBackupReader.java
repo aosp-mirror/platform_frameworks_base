@@ -1,14 +1,44 @@
 package com.android.server.backup.utils;
 
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_MANIFEST_PACKAGE_NAME;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_OLD_VERSION;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_POLICY_ALLOW_APKS;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_APK_NOT_INSTALLED;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_MISSING_SIGNATURE;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_RESTORE_ANY_VERSION;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO_AGENT;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
+
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
+import android.app.backup.IBackupManagerMonitor;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.os.Bundle;
+import android.os.Process;
 import android.util.Slog;
 
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.restore.RestorePolicy;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  * Utility methods to read backup tar file.
@@ -30,6 +60,11 @@ public class TarBackupReader {
     private final InputStream mInputStream;
     private final BytesReadListener mBytesReadListener;
 
+    private IBackupManagerMonitor mMonitor;
+
+    // Widget blob to be restored out-of-band.
+    private byte[] mWidgetData = null;
+
     /**
      * Listener for bytes reading.
      */
@@ -37,75 +72,11 @@ public class TarBackupReader {
         void onBytesRead(long bytesRead);
     }
 
-    public TarBackupReader(InputStream inputStream, BytesReadListener bytesReadListener) {
+    public TarBackupReader(InputStream inputStream, BytesReadListener bytesReadListener,
+            IBackupManagerMonitor monitor) {
         mInputStream = inputStream;
         mBytesReadListener = bytesReadListener;
-    }
-
-    /**
-     * Tries to read exactly the given number of bytes into a buffer at the stated offset.
-     *
-     * @param in - input stream to read bytes from..
-     * @param buffer - where to write bytes to.
-     * @param offset - offset in buffer to write bytes to.
-     * @param size - number of bytes to read.
-     * @return number of bytes actually read.
-     * @throws IOException in case of an error.
-     */
-    public static int readExactly(InputStream in, byte[] buffer, int offset, int size)
-            throws IOException {
-        if (size <= 0) {
-            throw new IllegalArgumentException("size must be > 0");
-        }
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.i(RefactoredBackupManagerService.TAG, "  ... readExactly(" + size + ") called");
-        }
-        int soFar = 0;
-        while (soFar < size) {
-            int nRead = in.read(buffer, offset + soFar, size - soFar);
-            if (nRead <= 0) {
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "- wanted exactly " + size + " but got only " + soFar);
-                }
-                break;
-            }
-            soFar += nRead;
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.v(RefactoredBackupManagerService.TAG,
-                        "   + got " + nRead + "; now wanting " + (size - soFar));
-            }
-        }
-        return soFar;
-    }
-
-    /**
-     * Builds a line from a byte buffer starting at 'offset'.
-     *
-     * @param buffer - where to read a line from.
-     * @param offset - offset in buffer to read a line from.
-     * @param outStr - an output parameter, the result will be put in outStr.
-     * @return the index of the next unconsumed data in the buffer.
-     * @throws IOException in case of an error.
-     */
-    public static int extractLine(byte[] buffer, int offset, String[] outStr) throws IOException {
-        final int end = buffer.length;
-        if (offset >= end) {
-            throw new IOException("Incomplete data");
-        }
-
-        int pos;
-        for (pos = offset; pos < end; pos++) {
-            byte c = buffer[pos];
-            // at LF we declare end of line, and return the next char as the
-            // starting point for the next time through
-            if (c == '\n') {
-                break;
-            }
-        }
-        outStr[0] = new String(buffer, offset, pos - offset);
-        pos++;  // may be pointing an extra byte past the end but that's okay
-        return pos;
+        mMonitor = monitor;
     }
 
     /**
@@ -247,6 +218,454 @@ public class TarBackupReader {
         return info;
     }
 
+    /**
+     * Tries to read exactly the given number of bytes into a buffer at the stated offset.
+     *
+     * @param in - input stream to read bytes from..
+     * @param buffer - where to write bytes to.
+     * @param offset - offset in buffer to write bytes to.
+     * @param size - number of bytes to read.
+     * @return number of bytes actually read.
+     * @throws IOException in case of an error.
+     */
+    private static int readExactly(InputStream in, byte[] buffer, int offset, int size)
+            throws IOException {
+        if (size <= 0) {
+            throw new IllegalArgumentException("size must be > 0");
+        }
+        if (RefactoredBackupManagerService.MORE_DEBUG) {
+            Slog.i(RefactoredBackupManagerService.TAG, "  ... readExactly(" + size + ") called");
+        }
+        int soFar = 0;
+        while (soFar < size) {
+            int nRead = in.read(buffer, offset + soFar, size - soFar);
+            if (nRead <= 0) {
+                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    Slog.w(RefactoredBackupManagerService.TAG,
+                            "- wanted exactly " + size + " but got only " + soFar);
+                }
+                break;
+            }
+            soFar += nRead;
+            if (RefactoredBackupManagerService.MORE_DEBUG) {
+                Slog.v(RefactoredBackupManagerService.TAG,
+                        "   + got " + nRead + "; now wanting " + (size - soFar));
+            }
+        }
+        return soFar;
+    }
+
+    /**
+     * Reads app manifest and returns a policy constant.
+     *
+     * @param packageManager - PackageManager instance.
+     * @param allowApks - allow restore set to include apks.
+     * @param manifestSignatures - parsed signatures will be put here.
+     * @param info - file metadata.
+     * @return a policy constant.
+     * @throws IOException in case of an error.
+     */
+    public RestorePolicy readAppManifest(PackageManager packageManager,
+            boolean allowApks, HashMap<String, Signature[]> manifestSignatures,
+            FileMetadata info)
+            throws IOException {
+        // Fail on suspiciously large manifest files
+        if (info.size > 64 * 1024) {
+            throw new IOException("Restore manifest too big; corrupt? size=" + info.size);
+        }
+
+        byte[] buffer = new byte[(int) info.size];
+        if (RefactoredBackupManagerService.MORE_DEBUG) {
+            Slog.i(RefactoredBackupManagerService.TAG,
+                    "   readAppManifest() looking for " + info.size + " bytes");
+        }
+        if (readExactly(mInputStream, buffer, 0, (int) info.size) == info.size) {
+            mBytesReadListener.onBytesRead(info.size);
+        } else {
+            throw new IOException("Unexpected EOF in manifest");
+        }
+
+        RestorePolicy policy = RestorePolicy.IGNORE;
+        String[] str = new String[1];
+        int offset = 0;
+
+        try {
+            offset = extractLine(buffer, offset, str);
+            int version = Integer.parseInt(str[0]);
+            if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
+                offset = extractLine(buffer, offset, str);
+                String manifestPackage = str[0];
+                // TODO: handle <original-package>
+                if (manifestPackage.equals(info.packageName)) {
+                    offset = extractLine(buffer, offset, str);
+                    version = Integer.parseInt(str[0]);  // app version
+                    offset = extractLine(buffer, offset, str);
+                    // This is the platform version, which we don't use, but we parse it
+                    // as a safety against corruption in the manifest.
+                    Integer.parseInt(str[0]);
+                    offset = extractLine(buffer, offset, str);
+                    info.installerPackageName = (str[0].length() > 0) ? str[0] : null;
+                    offset = extractLine(buffer, offset, str);
+                    boolean hasApk = str[0].equals("1");
+                    offset = extractLine(buffer, offset, str);
+                    int numSigs = Integer.parseInt(str[0]);
+                    if (numSigs > 0) {
+                        Signature[] sigs = new Signature[numSigs];
+                        for (int i = 0; i < numSigs; i++) {
+                            offset = extractLine(buffer, offset, str);
+                            sigs[i] = new Signature(str[0]);
+                        }
+                        manifestSignatures.put(info.packageName, sigs);
+
+                        // Okay, got the manifest info we need...
+                        try {
+                            PackageInfo pkgInfo = packageManager.getPackageInfo(
+                                    info.packageName, PackageManager.GET_SIGNATURES);
+                            // Fall through to IGNORE if the app explicitly disallows backup
+                            final int flags = pkgInfo.applicationInfo.flags;
+                            if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
+                                // Restore system-uid-space packages only if they have
+                                // defined a custom backup agent
+                                if ((pkgInfo.applicationInfo.uid
+                                        >= Process.FIRST_APPLICATION_UID)
+                                        || (pkgInfo.applicationInfo.backupAgentName != null)) {
+                                    // Verify signatures against any installed version; if they
+                                    // don't match, then we fall though and ignore the data.  The
+                                    // signatureMatch() method explicitly ignores the signature
+                                    // check for packages installed on the system partition, because
+                                    // such packages are signed with the platform cert instead of
+                                    // the app developer's cert, so they're different on every
+                                    // device.
+                                    if (AppBackupUtils.signaturesMatch(sigs,
+                                            pkgInfo)) {
+                                        if ((pkgInfo.applicationInfo.flags
+                                                & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
+                                            Slog.i(RefactoredBackupManagerService.TAG,
+                                                    "Package has restoreAnyVersion; taking data");
+                                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                                                    mMonitor,
+                                                    LOG_EVENT_ID_RESTORE_ANY_VERSION,
+                                                    pkgInfo,
+                                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                    null);
+                                            policy = RestorePolicy.ACCEPT;
+                                        } else if (pkgInfo.versionCode >= version) {
+                                            Slog.i(RefactoredBackupManagerService.TAG,
+                                                    "Sig + version match; taking data");
+                                            policy = RestorePolicy.ACCEPT;
+                                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                                                    mMonitor,
+                                                    LOG_EVENT_ID_VERSIONS_MATCH,
+                                                    pkgInfo,
+                                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                    null);
+                                        } else {
+                                            // The data is from a newer version of the app than
+                                            // is presently installed.  That means we can only
+                                            // use it if the matching apk is also supplied.
+                                            if (allowApks) {
+                                                Slog.i(RefactoredBackupManagerService.TAG,
+                                                        "Data version " + version
+                                                                + " is newer than installed "
+                                                                + "version "
+                                                                + pkgInfo.versionCode
+                                                                + " - requiring apk");
+                                                policy = RestorePolicy.ACCEPT_IF_APK;
+                                            } else {
+                                                Slog.i(RefactoredBackupManagerService.TAG,
+                                                        "Data requires newer version "
+                                                                + version + "; ignoring");
+                                                mMonitor = BackupManagerMonitorUtils
+                                                        .monitorEvent(mMonitor,
+                                                                LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER,
+                                                                pkgInfo,
+                                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                                BackupManagerMonitorUtils
+                                                                        .putMonitoringExtra(
+                                                                                null,
+                                                                                EXTRA_LOG_OLD_VERSION,
+                                                                                version));
+
+                                                policy = RestorePolicy.IGNORE;
+                                            }
+                                        }
+                                    } else {
+                                        Slog.w(RefactoredBackupManagerService.TAG,
+                                                "Restore manifest signatures do not match "
+                                                        + "installed application for "
+                                                        + info.packageName);
+                                        mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                                                mMonitor,
+                                                LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH,
+                                                pkgInfo,
+                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                null);
+                                    }
+                                } else {
+                                    Slog.w(RefactoredBackupManagerService.TAG,
+                                            "Package " + info.packageName
+                                                    + " is system level with no agent");
+                                    mMonitor = BackupManagerMonitorUtils.monitorEvent(
+
+
+                                            mMonitor,
+                                            LOG_EVENT_ID_SYSTEM_APP_NO_AGENT,
+                                            pkgInfo,
+                                            LOG_EVENT_CATEGORY_AGENT,
+                                            null);
+                                }
+                            } else {
+                                if (RefactoredBackupManagerService.DEBUG) {
+                                    Slog.i(RefactoredBackupManagerService.TAG,
+                                            "Restore manifest from "
+                                                    + info.packageName + " but allowBackup=false");
+                                }
+                                mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                                        mMonitor,
+                                        LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE,
+                                        pkgInfo,
+                                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                        null);
+                            }
+                        } catch (PackageManager.NameNotFoundException e) {
+                            // Okay, the target app isn't installed.  We can process
+                            // the restore properly only if the dataset provides the
+                            // apk file and we can successfully install it.
+                            if (allowApks) {
+                                if (RefactoredBackupManagerService.DEBUG) {
+                                    Slog.i(RefactoredBackupManagerService.TAG,
+                                            "Package " + info.packageName
+                                                    + " not installed; requiring apk in dataset");
+                                }
+                                policy = RestorePolicy.ACCEPT_IF_APK;
+                            } else {
+                                policy = RestorePolicy.IGNORE;
+                            }
+                            Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+                                    null,
+                                    EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                            monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+                                    monitoringExtras,
+                                    EXTRA_LOG_POLICY_ALLOW_APKS, allowApks);
+                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                                    mMonitor,
+                                    LOG_EVENT_ID_APK_NOT_INSTALLED,
+                                    null,
+                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                    monitoringExtras);
+                        }
+
+                        if (policy == RestorePolicy.ACCEPT_IF_APK && !hasApk) {
+                            Slog.i(RefactoredBackupManagerService.TAG,
+                                    "Cannot restore package " + info.packageName
+                                            + " without the matching .apk");
+                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                                    mMonitor,
+                                    LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK,
+                                    null,
+                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                    BackupManagerMonitorUtils.putMonitoringExtra(null,
+                                            EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
+                        }
+                    } else {
+                        Slog.i(RefactoredBackupManagerService.TAG,
+                                "Missing signature on backed-up package "
+                                        + info.packageName);
+                        mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                                mMonitor,
+                                LOG_EVENT_ID_MISSING_SIGNATURE,
+                                null,
+                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                BackupManagerMonitorUtils.putMonitoringExtra(null,
+                                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
+                    }
+                } else {
+                    Slog.i(RefactoredBackupManagerService.TAG,
+                            "Expected package " + info.packageName
+                                    + " but restore manifest claims " + manifestPackage);
+                    Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
+                            EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+                            monitoringExtras,
+                            EXTRA_LOG_MANIFEST_PACKAGE_NAME, manifestPackage);
+                    mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                            mMonitor,
+                            LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE,
+                            null,
+                            LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                            monitoringExtras);
+                }
+            } else {
+                Slog.i(RefactoredBackupManagerService.TAG,
+                        "Unknown restore manifest version " + version
+                                + " for package " + info.packageName);
+                Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
+                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
+                        EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
+                mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                        mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_VERSION,
+                        null,
+                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
+
+            }
+        } catch (NumberFormatException e) {
+            Slog.w(RefactoredBackupManagerService.TAG,
+                    "Corrupt restore manifest for package " + info.packageName);
+            mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                    mMonitor,
+                    BackupManagerMonitor.LOG_EVENT_ID_CORRUPT_MANIFEST,
+                    null,
+                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    BackupManagerMonitorUtils.putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
+                            info.packageName));
+        } catch (IllegalArgumentException e) {
+            Slog.w(RefactoredBackupManagerService.TAG, e.getMessage());
+        }
+
+        return policy;
+    }
+
+    // Given an actual file content size, consume the post-content padding mandated
+    // by the tar format.
+    public void skipTarPadding(long size) throws IOException {
+        long partial = (size + 512) % 512;
+        if (partial > 0) {
+            final int needed = 512 - (int) partial;
+            if (RefactoredBackupManagerService.MORE_DEBUG) {
+                Slog.i(RefactoredBackupManagerService.TAG,
+                        "Skipping tar padding: " + needed + " bytes");
+            }
+            byte[] buffer = new byte[needed];
+            if (readExactly(mInputStream, buffer, 0, needed) == needed) {
+                mBytesReadListener.onBytesRead(needed);
+            } else {
+                throw new IOException("Unexpected EOF in padding");
+            }
+        }
+    }
+
+    /**
+     * Read a widget metadata file, returning the restored blob.
+     */
+    public void readMetadata(FileMetadata info) throws IOException {
+        // Fail on suspiciously large widget dump files
+        if (info.size > 64 * 1024) {
+            throw new IOException("Metadata too big; corrupt? size=" + info.size);
+        }
+
+        byte[] buffer = new byte[(int) info.size];
+        if (readExactly(mInputStream, buffer, 0, (int) info.size) == info.size) {
+            mBytesReadListener.onBytesRead(info.size);
+        } else {
+            throw new IOException("Unexpected EOF in widget data");
+        }
+
+        String[] str = new String[1];
+        int offset = extractLine(buffer, 0, str);
+        int version = Integer.parseInt(str[0]);
+        if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
+            offset = extractLine(buffer, offset, str);
+            final String pkg = str[0];
+            if (info.packageName.equals(pkg)) {
+                // Data checks out -- the rest of the buffer is a concatenation of
+                // binary blobs as described in the comment at writeAppWidgetData()
+                ByteArrayInputStream bin = new ByteArrayInputStream(buffer,
+                        offset, buffer.length - offset);
+                DataInputStream in = new DataInputStream(bin);
+                while (bin.available() > 0) {
+                    int token = in.readInt();
+                    int size = in.readInt();
+                    if (size > 64 * 1024) {
+                        throw new IOException("Datum "
+                                + Integer.toHexString(token)
+                                + " too big; corrupt? size=" + info.size);
+                    }
+                    switch (token) {
+                        case RefactoredBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN: {
+                            if (RefactoredBackupManagerService.MORE_DEBUG) {
+                                Slog.i(RefactoredBackupManagerService.TAG,
+                                        "Got widget metadata for " + info.packageName);
+                            }
+                            mWidgetData = new byte[size];
+                            in.read(mWidgetData);
+                            break;
+                        }
+                        default: {
+                            if (RefactoredBackupManagerService.DEBUG) {
+                                Slog.i(RefactoredBackupManagerService.TAG, "Ignoring metadata blob "
+                                        + Integer.toHexString(token)
+                                        + " for " + info.packageName);
+                            }
+                            in.skipBytes(size);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                Slog.w(RefactoredBackupManagerService.TAG,
+                        "Metadata mismatch: package " + info.packageName
+                                + " but widget data for " + pkg);
+
+                Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
+                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
+                        BackupManagerMonitor.EXTRA_LOG_WIDGET_PACKAGE_NAME, pkg);
+                mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                        mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_WIDGET_METADATA_MISMATCH,
+                        null,
+                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
+            }
+        } else {
+            Slog.w(RefactoredBackupManagerService.TAG, "Unsupported metadata version " + version);
+
+            Bundle monitoringExtras = BackupManagerMonitorUtils
+                    .putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
+                            info.packageName);
+            monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
+                    EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
+            mMonitor = BackupManagerMonitorUtils.monitorEvent(
+                    mMonitor,
+                    BackupManagerMonitor.LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION,
+                    null,
+                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    monitoringExtras);
+        }
+    }
+
+    /**
+     * Builds a line from a byte buffer starting at 'offset'.
+     *
+     * @param buffer - where to read a line from.
+     * @param offset - offset in buffer to read a line from.
+     * @param outStr - an output parameter, the result will be put in outStr.
+     * @return the index of the next unconsumed data in the buffer.
+     * @throws IOException in case of an error.
+     */
+    private static int extractLine(byte[] buffer, int offset, String[] outStr) throws IOException {
+        final int end = buffer.length;
+        if (offset >= end) {
+            throw new IOException("Incomplete data");
+        }
+
+        int pos;
+        for (pos = offset; pos < end; pos++) {
+            byte c = buffer[pos];
+            // at LF we declare end of line, and return the next char as the
+            // starting point for the next time through
+            if (c == '\n') {
+                break;
+            }
+        }
+        outStr[0] = new String(buffer, offset, pos - offset);
+        pos++;  // may be pointing an extra byte past the end but that's okay
+        return pos;
+    }
+
     private boolean readTarHeader(byte[] block) throws IOException {
         final int got = readExactly(mInputStream, block, 0, 512);
         if (got == 0) {
@@ -323,25 +742,6 @@ public class TarBackupReader {
         return true;
     }
 
-    // Given an actual file content size, consume the post-content padding mandated
-    // by the tar format.
-    public void skipTarPadding(long size) throws IOException {
-        long partial = (size + 512) % 512;
-        if (partial > 0) {
-            final int needed = 512 - (int) partial;
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.i(RefactoredBackupManagerService.TAG,
-                        "Skipping tar padding: " + needed + " bytes");
-            }
-            byte[] buffer = new byte[needed];
-            if (readExactly(mInputStream, buffer, 0, needed) == needed) {
-                mBytesReadListener.onBytesRead(needed);
-            } else {
-                throw new IOException("Unexpected EOF in padding");
-            }
-        }
-    }
-
     private static long extractRadix(byte[] data, int offset, int maxChars, int radix)
             throws IOException {
         long value = 0;
@@ -388,4 +788,11 @@ public class TarBackupReader {
         }
     }
 
+    public IBackupManagerMonitor getMonitor() {
+        return mMonitor;
+    }
+
+    public byte[] getWidgetData() {
+        return mWidgetData;
+    }
 }

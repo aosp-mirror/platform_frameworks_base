@@ -842,7 +842,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                                         mCurrentPackage,
                                         BackupManagerMonitor
                                                 .LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                        backupManagerService.putMonitoringExtra(null,
+                                        BackupManagerMonitorUtils.putMonitoringExtra(null,
                                                 BackupManagerMonitor.EXTRA_LOG_ILLEGAL_KEY,
                                                 key));
                                 backupManagerService.getBackupHandler().removeMessages(
@@ -1027,7 +1027,7 @@ public class PerformBackupTask implements BackupRestoreTask {
             mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                     BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
                     mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
-                    backupManagerService.putMonitoringExtra(null,
+                    BackupManagerMonitorUtils.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL,
                             mCancelAll));
             errorCleanup();

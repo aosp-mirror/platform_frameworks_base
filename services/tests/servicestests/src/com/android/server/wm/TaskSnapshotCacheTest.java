@@ -16,28 +16,13 @@
 
 package com.android.server.wm;
 
-import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
-import static android.graphics.GraphicBuffer.USAGE_SW_READ_NEVER;
-import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
-import static android.graphics.GraphicBuffer.USAGE_SW_WRITE_NEVER;
-import static android.graphics.GraphicBuffer.create;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
-import android.app.ActivityManager.TaskSnapshot;
-import android.content.res.Configuration;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.GraphicBuffer;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.os.Debug;
-import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

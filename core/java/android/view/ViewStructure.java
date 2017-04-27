@@ -284,12 +284,30 @@ public abstract class ViewStructure {
     public abstract ViewStructure asyncNewChild(int index);
 
     /**
+     * Gets the {@link AutofillId} associated with this node.
+     */
+    @Nullable
+    public abstract AutofillId getAutofillId();
+
+    /**
+     * Sets the {@link AutofillId} associated with this node.
+     */
+    public abstract void setAutofillId(@NonNull AutofillId id);
+
+    /**
      * Sets the {@link AutofillId} for this virtual node.
      *
-     * @param parent parent node.
+     * @param parentId id of the parent node.
      * @param virtualId an opaque ID to the Android System; it's the same id used on
      *            {@link View#autofill(android.util.SparseArray)}.
      */
+    public abstract void setAutofillId(@NonNull AutofillId parentId, int virtualId);
+
+    /**
+     * @deprecated - use {@link #setAutofillId(AutofillId, int)} instead
+     * @hide
+     */
+    @Deprecated
     public abstract void setAutofillId(@NonNull ViewStructure parent, int virtualId);
 
     /**
@@ -355,14 +373,9 @@ public abstract class ViewStructure {
     /** @hide */
     public abstract Rect getTempRect();
 
-    /** @hide */
-    public abstract void setAutofillId(int viewId);
-
-    /** @hide */
-    public abstract AutofillId getAutofillId();
-
     /**
      * @deprecated - use {@link #setWebDomain(String)} instead.
+     * @hide
      */
     @Deprecated
     public abstract void setUrl(String url);

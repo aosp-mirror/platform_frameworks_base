@@ -87,6 +87,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return mAnimationFilter;
         }
     }.setDuration(200).setDelay(50);
+    public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
 
     private boolean mShowAllIcons = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
@@ -243,6 +244,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         float translationX = getActualPaddingStart();
         int firstOverflowIndex = -1;
         int childCount = getChildCount();
+        int maxVisibleIcons = mDark ? MAX_VISIBLE_ICONS_WHEN_DARK : childCount;
         float layoutEnd = getLayoutEnd();
         float overflowStart = layoutEnd - mIconSize * (2 + OVERFLOW_EARLY_AMOUNT);
         boolean hasAmbient = mSpeedBumpIndex != -1 && mSpeedBumpIndex < getChildCount();
@@ -251,21 +253,21 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
             iconState.xTranslation = translationX;
-            boolean isAmbient = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
-                    && iconState.iconAppearAmount > 0.0f;
+            boolean forceOverflow = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
+                    && iconState.iconAppearAmount > 0.0f || i >= maxVisibleIcons;
             boolean noOverflowAfter = i == childCount - 1;
             if (mOpenedAmount != 0.0f) {
-                noOverflowAfter = noOverflowAfter && !hasAmbient;
+                noOverflowAfter = noOverflowAfter && !hasAmbient && !forceOverflow;
             }
             iconState.visibleState = StatusBarIconView.STATE_ICON;
-            if (firstOverflowIndex == -1 && (isAmbient
+            if (firstOverflowIndex == -1 && (forceOverflow
                     || (translationX >= (noOverflowAfter ? layoutEnd - mIconSize : overflowStart)))) {
-                firstOverflowIndex = noOverflowAfter && !isAmbient ? i - 1 : i;
+                firstOverflowIndex = noOverflowAfter && !forceOverflow ? i - 1 : i;
                 int totalDotLength = mStaticDotRadius * 6 + 2 * mDotPadding;
                 visualOverflowStart = overflowStart + mIconSize * (1 + OVERFLOW_EARLY_AMOUNT)
                         - totalDotLength / 2
                         - mIconSize * 0.5f + mStaticDotRadius;
-                if (isAmbient) {
+                if (forceOverflow) {
                     visualOverflowStart = Math.min(translationX, visualOverflowStart
                             + mStaticDotRadius * 2 + mDotPadding);
                 } else {
@@ -318,6 +320,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         boolean center = mDark;
         if (center && translationX < getLayoutEnd()) {
             float delta = (getLayoutEnd() - translationX) / 2;
+            if (firstOverflowIndex != -1) {
+                // If we have an overflow, only count those half for centering because the dots
+                // don't have a lot of visual weight.
+                float deltaIgnoringOverflow = (getLayoutEnd() - visualOverflowStart) / 2;
+                delta = (deltaIgnoringOverflow + delta) / 2;
+            }
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);

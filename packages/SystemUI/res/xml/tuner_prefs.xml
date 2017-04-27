@@ -131,6 +131,12 @@
         android:summary="@string/pip_minimize_description"
         sysui:defValue="false" />
 
+      <com.android.systemui.tuner.TunerSwitch
+        android:key="pip_fling_dismiss"
+        android:title="@string/pip_fling_dismiss_title"
+        android:summary="@string/pip_fling_dismiss_description"
+        sysui:defValue="false" />
+
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -140,11 +146,6 @@
         <com.android.systemui.tuner.TunerSwitch
           android:key="doze_always_on"
           android:title="@string/tuner_doze_always_on"
-          sysui:defValue="false" />
-
-        <com.android.systemui.tuner.TunerSwitch
-          android:key="doze_sensors_wake_up_fully"
-          android:title="@string/tuner_doze_sensors_wake_up_fully"
           sysui:defValue="false" />
 
     </PreferenceScreen>

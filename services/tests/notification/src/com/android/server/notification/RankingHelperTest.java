@@ -19,6 +19,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
@@ -48,6 +49,7 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -547,6 +549,56 @@ public class RankingHelperTest {
 
         // all fields should be changed
         assertEquals(channel2, mHelper.getNotificationChannel(PKG, UID, channel.getId(), false));
+    }
+
+    @Test
+    public void testUpdate_preUpgrade_updatesAppFields() throws Exception {
+        mHelper.setImportance(PKG, UID, IMPORTANCE_UNSPECIFIED);
+        assertTrue(mHelper.canShowBadge(PKG, UID));
+        assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG, UID));
+        assertEquals(NotificationManager.VISIBILITY_NO_OVERRIDE,
+                mHelper.getPackageVisibility(PKG, UID));
+
+        NotificationChannel defaultChannel = mHelper.getNotificationChannel(
+                PKG, UID, NotificationChannel.DEFAULT_CHANNEL_ID, false);
+
+        defaultChannel.setShowBadge(false);
+        defaultChannel.setImportance(IMPORTANCE_NONE);
+        defaultChannel.setBypassDnd(true);
+        defaultChannel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+
+        mHelper.updateNotificationChannel(PKG, UID, defaultChannel);
+
+        // ensure app level fields are changed
+        assertFalse(mHelper.canShowBadge(PKG, UID));
+        assertEquals(Notification.PRIORITY_MAX, mHelper.getPackagePriority(PKG, UID));
+        assertEquals(Notification.VISIBILITY_SECRET, mHelper.getPackageVisibility(PKG, UID));
+        assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG, UID));
+    }
+
+    @Test
+    public void testUpdate_postUpgrade_noUpdateAppFields() throws Exception {
+        final NotificationChannel channel = new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+
+        mHelper.createNotificationChannel(PKG, UID, channel, false);
+        assertTrue(mHelper.canShowBadge(PKG, UID));
+        assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG, UID));
+        assertEquals(NotificationManager.VISIBILITY_NO_OVERRIDE,
+                mHelper.getPackageVisibility(PKG, UID));
+
+        channel.setShowBadge(false);
+        channel.setImportance(IMPORTANCE_NONE);
+        channel.setBypassDnd(true);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+
+        mHelper.updateNotificationChannel(PKG, UID, channel);
+
+        // ensure app level fields are not changed
+        assertTrue(mHelper.canShowBadge(PKG, UID));
+        assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG, UID));
+        assertEquals(NotificationManager.VISIBILITY_NO_OVERRIDE,
+                mHelper.getPackageVisibility(PKG, UID));
+        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG, UID));
     }
 
     @Test

@@ -24,8 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.ExpandableViewState;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollState;
 
 import java.util.ArrayList;
@@ -355,7 +355,7 @@ public abstract class ExpandableView extends FrameLayout {
         if (mClipToActualHeight) {
             int top = getClipTopAmount();
             mClipRect.set(0, top, getWidth(), Math.max(getActualHeight() + getExtraBottomPadding()
-                                - mClipBottomAmount, top));
+                    - mClipBottomAmount, top));
             setClipBounds(mClipRect);
         } else {
             setClipBounds(null);

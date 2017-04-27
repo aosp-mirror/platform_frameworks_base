@@ -65,7 +65,10 @@ struct SpriteIcon {
 
     inline SpriteIcon copy() const {
         SkBitmap bitmapCopy;
-        bitmap.copyTo(&bitmapCopy, kN32_SkColorType);
+        if (bitmapCopy.tryAllocPixels(bitmap.info().makeColorType(kN32_SkColorType))) {
+            bitmap.readPixels(bitmapCopy.info(), bitmapCopy.getPixels(), bitmapCopy.rowBytes(),
+                    0, 0);
+        }
         return SpriteIcon(bitmapCopy, hotSpotX, hotSpotY);
     }
 

@@ -45,8 +45,6 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         }
         final PrintWriter pw = getOutPrintWriter();
         switch (cmd) {
-            case "save":
-                return requestSave();
             case "list":
                 return requestList(pw);
             case "destroy":
@@ -71,19 +69,10 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  destroy sessions [--user USER_ID]");
             pw.println("    Destroy all pending sessions.");
             pw.println("");
-            pw.println("  save [--user USER_ID]");
-            pw.println("    Request provider to save contents of the top activity.");
-            pw.println("");
             pw.println("  reset");
             pw.println("    Reset all pending sessions and cached service connections.");
             pw.println("");
         }
-    }
-
-    private int requestSave() {
-        final int userId = getUserIdFromArgsOrCurrentUser();
-        mService.requestSaveForUser(userId);
-        return 0;
     }
 
     private int requestDestroy(PrintWriter pw) {

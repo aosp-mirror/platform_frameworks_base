@@ -48,6 +48,7 @@ public class FocusRequester {
     private final String mPackageName;
     private final int mCallingUid;
     private final MediaFocusControl mFocusController; // never null
+    private final int mSdkTarget;
 
     /**
      * the audio focus gain request that caused the addition of this object in the focus stack.
@@ -87,7 +88,7 @@ public class FocusRequester {
      */
     FocusRequester(AudioAttributes aa, int focusRequest, int grantFlags,
             IAudioFocusDispatcher afl, IBinder source, String id, AudioFocusDeathHandler hdlr,
-            String pn, int uid, @NonNull MediaFocusControl ctlr) {
+            String pn, int uid, @NonNull MediaFocusControl ctlr, int sdk) {
         mAttributes = aa;
         mFocusDispatcher = afl;
         mSourceRef = source;
@@ -99,6 +100,7 @@ public class FocusRequester {
         mGrantFlags = grantFlags;
         mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
         mFocusController = ctlr;
+        mSdkTarget = sdk;
     }
 
     FocusRequester(AudioFocusInfo afi, IAudioFocusDispatcher afl,
@@ -110,6 +112,7 @@ public class FocusRequester {
         mFocusGainRequest = afi.getGainRequest();
         mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
         mGrantFlags = afi.getFlags();
+        mSdkTarget = afi.getSdkTarget();
 
         mFocusDispatcher = afl;
         mSourceRef = source;
@@ -169,6 +172,9 @@ public class FocusRequester {
         return mAttributes;
     }
 
+    int getSdkTarget() {
+        return mSdkTarget;
+    }
 
     private static String focusChangeToString(int focus) {
         switch(focus) {
@@ -226,7 +232,8 @@ public class FocusRequester {
                 + " -- loss: " + focusLossToString()
                 + " -- notified: " + mFocusLossWasNotified
                 + " -- uid: " + mCallingUid
-                + " -- attr: " + mAttributes);
+                + " -- attr: " + mAttributes
+                + " -- sdk:" + mSdkTarget);
     }
 
 
@@ -419,6 +426,6 @@ public class FocusRequester {
 
     AudioFocusInfo toAudioFocusInfo() {
         return new AudioFocusInfo(mAttributes, mCallingUid, mClientId, mPackageName,
-                mFocusGainRequest, mFocusLossReceived, mGrantFlags);
+                mFocusGainRequest, mFocusLossReceived, mGrantFlags, mSdkTarget);
     }
 }

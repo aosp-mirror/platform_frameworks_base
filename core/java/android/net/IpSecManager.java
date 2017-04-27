@@ -37,6 +37,8 @@ import java.net.Socket;
  * <p>An IpSecManager may be obtained by calling {@link
  * android.content.Context#getSystemService(String) Context#getSystemService(String)} with {@link
  * android.content.Context#IPSEC_SERVICE Context#IPSEC_SERVICE}
+ *
+ * @hide
  */
 public final class IpSecManager {
     private static final String TAG = "IpSecManager";

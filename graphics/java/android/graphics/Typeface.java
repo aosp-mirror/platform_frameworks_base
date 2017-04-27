@@ -29,7 +29,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.graphics.FontListParser;
-import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import android.net.Uri;
@@ -37,6 +36,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.ResultReceiver;
+import android.provider.FontRequest;
 import android.provider.FontsContract;
 import android.text.FontConfig;
 import android.util.Base64;
@@ -218,7 +218,7 @@ public class Typeface {
                 // default font instead (nothing we can do now).
                 FontRequest request = new FontRequest(providerEntry.getAuthority(),
                         providerEntry.getPackage(), providerEntry.getQuery(), certs);
-                Typeface typeface = FontsContract.getFontOrWarmUpCache(request);
+                Typeface typeface = FontsContract.getFontSync(request);
                 return typeface == null ? DEFAULT : typeface;
             }
 

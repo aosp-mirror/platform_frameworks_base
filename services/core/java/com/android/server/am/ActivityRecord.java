@@ -117,7 +117,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
-import android.app.PictureInPictureArgs;
+import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -293,8 +293,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     boolean supportsPictureInPictureWhilePausing;  // This flag is set by the system to indicate
         // that the activity can enter picture in picture while pausing (ie. only when another
         // task is brought to front or started)
-    PictureInPictureArgs pictureInPictureArgs = new PictureInPictureArgs();  // The PiP
-        // arguments used when deferring the entering of picture-in-picture.
+    PictureInPictureParams pictureInPictureArgs = new PictureInPictureParams.Builder().build();
+        // The PiP params used when deferring the entering of picture-in-picture.
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.

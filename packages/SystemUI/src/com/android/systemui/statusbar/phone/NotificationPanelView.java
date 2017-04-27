@@ -26,6 +26,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -287,16 +288,18 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void updateResources() {
-        int panelWidth = getResources().getDimensionPixelSize(R.dimen.notification_panel_width);
+        Resources res = getResources();
+        int qsWidth = res.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelGravity = getResources().getInteger(R.integer.notification_panel_layout_gravity);
         FrameLayout.LayoutParams lp =
                 (FrameLayout.LayoutParams) mQsFrame.getLayoutParams();
-        if (lp.width != panelWidth || lp.gravity != panelGravity) {
-            lp.width = panelWidth;
+        if (lp.width != qsWidth || lp.gravity != panelGravity) {
+            lp.width = qsWidth;
             lp.gravity = panelGravity;
             mQsFrame.setLayoutParams(lp);
         }
 
+        int panelWidth = res.getDimensionPixelSize(R.dimen.notification_panel_width);
         lp = (FrameLayout.LayoutParams) mNotificationStackScroller.getLayoutParams();
         if (lp.width != panelWidth || lp.gravity != panelGravity) {
             lp.width = panelWidth;

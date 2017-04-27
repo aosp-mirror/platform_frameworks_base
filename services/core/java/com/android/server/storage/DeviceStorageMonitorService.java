@@ -661,7 +661,7 @@ public class DeviceStorageMonitorService extends SystemService {
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setCategory(Notification.CATEGORY_SYSTEM)
                         .extend(new Notification.TvExtender()
-                                .setChannel(TV_NOTIFICATION_CHANNEL_ID))
+                                .setChannelId(TV_NOTIFICATION_CHANNEL_ID))
                         .build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         notificationMgr.notifyAsUser(null, SystemMessage.NOTE_LOW_STORAGE, notification,

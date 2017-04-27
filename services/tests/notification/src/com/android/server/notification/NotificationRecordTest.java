@@ -150,7 +150,7 @@ public class NotificationRecordTest {
 
         builder.setDefaults(defaults);
         if (!preO) {
-            builder.setChannel(channelId);
+            builder.setChannelId(channelId);
         }
 
 

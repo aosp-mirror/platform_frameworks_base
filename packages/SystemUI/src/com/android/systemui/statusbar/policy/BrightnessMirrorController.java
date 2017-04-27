@@ -109,7 +109,7 @@ public class BrightnessMirrorController {
         FrameLayout.LayoutParams lp =
                 (FrameLayout.LayoutParams) mBrightnessMirror.getLayoutParams();
         lp.width = mBrightnessMirror.getResources().getDimensionPixelSize(
-                R.dimen.notification_panel_width);
+                R.dimen.qs_panel_width);
         lp.gravity = mBrightnessMirror.getResources().getInteger(
                 R.integer.notification_panel_layout_gravity);
         mBrightnessMirror.setLayoutParams(lp);

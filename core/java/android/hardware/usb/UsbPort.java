@@ -65,6 +65,18 @@ public final class UsbPort implements Parcelable {
     public static final int MODE_DUAL = Constants.PortMode.DRP;
 
     /**
+     * Mode bit: This USB port can support USB Type-C Audio accessory.
+     */
+    public static final int MODE_AUDIO_ACCESSORY =
+            android.hardware.usb.V1_1.Constants.PortMode_1_1.AUDIO_ACCESSORY;
+
+    /**
+     * Mode bit: This USB port can support USB Type-C debug accessory.
+     */
+    public static final int MODE_DEBUG_ACCESSORY =
+            android.hardware.usb.V1_1.Constants.PortMode_1_1.DEBUG_ACCESSORY;
+
+    /**
      * Power role: This USB port does not have a power role.
      */
     public static final int POWER_ROLE_NONE = Constants.PortPowerRole.NONE;
@@ -135,9 +147,9 @@ public final class UsbPort implements Parcelable {
      * in a bit-field.
      *
      * @param powerRole The desired power role: {@link UsbPort#POWER_ROLE_SOURCE}
-     * or {@link UsbPort#POWER_ROLE_SINK}, or 0 if no power role.
-     * @param dataRole The desired data role: {@link UsbPort#DATA_ROLE_HOST}
-     * or {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if no data role.
+     *                  or {@link UsbPort#POWER_ROLE_SINK}, or 0 if no power role.
+     * @param dataRole  The desired data role: {@link UsbPort#DATA_ROLE_HOST}
+     *                  or {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if no data role.
      * @hide
      */
     public static int combineRolesAsBit(int powerRole, int dataRole) {
@@ -148,18 +160,31 @@ public final class UsbPort implements Parcelable {
 
     /** @hide */
     public static String modeToString(int mode) {
-        switch (mode) {
-            case MODE_NONE:
-                return "none";
-            case MODE_DFP:
-                return "dfp";
-            case MODE_UFP:
-                return "ufp";
-            case MODE_DUAL:
-                return "dual";
-            default:
-                return Integer.toString(mode);
+        StringBuilder modeString = new StringBuilder();
+        if (mode == MODE_NONE) {
+            return "none";
         }
+
+        if ((mode & MODE_DUAL) == MODE_DUAL) {
+            modeString.append("dual, ");
+        } else {
+            if ((mode & MODE_DFP) == MODE_DFP) {
+                modeString.append("dfp, ");
+            } else if ((mode & MODE_UFP) == MODE_UFP) {
+                modeString.append("ufp, ");
+            }
+        }
+        if ((mode & MODE_AUDIO_ACCESSORY) == MODE_AUDIO_ACCESSORY) {
+            modeString.append("audio_acc, ");
+        }
+        if ((mode & MODE_DEBUG_ACCESSORY) == MODE_DEBUG_ACCESSORY) {
+            modeString.append("debug_acc, ");
+        }
+
+        if (modeString.length() == 0) {
+            return Integer.toString(mode);
+        }
+        return modeString.substring(0, modeString.length() - 2);
     }
 
     /** @hide */
@@ -240,6 +265,13 @@ public final class UsbPort implements Parcelable {
         Preconditions.checkArgumentInRange(dataRole, DATA_ROLE_NONE, DATA_ROLE_DEVICE, "dataRole");
     }
 
+    /** @hide */
+    public boolean isModeSupported(int mode) {
+        if ((mSupportedModes & mode) == mode) return true;
+        return false;
+    }
+
+
     @Override
     public String toString() {
         return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes) + "}";
@@ -258,16 +290,16 @@ public final class UsbPort implements Parcelable {
 
     public static final Parcelable.Creator<UsbPort> CREATOR =
             new Parcelable.Creator<UsbPort>() {
-        @Override
-        public UsbPort createFromParcel(Parcel in) {
-            String id = in.readString();
-            int supportedModes = in.readInt();
-            return new UsbPort(id, supportedModes);
-        }
+                @Override
+                public UsbPort createFromParcel(Parcel in) {
+                    String id = in.readString();
+                    int supportedModes = in.readInt();
+                    return new UsbPort(id, supportedModes);
+                }
 
-        @Override
-        public UsbPort[] newArray(int size) {
-            return new UsbPort[size];
-        }
-    };
+                @Override
+                public UsbPort[] newArray(int size) {
+                    return new UsbPort[size];
+                }
+            };
 }

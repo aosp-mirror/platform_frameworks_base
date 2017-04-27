@@ -40,8 +40,9 @@ import java.util.Arrays;
 public final class NotificationChannel implements Parcelable {
 
     /**
-     * The id of the default channel for an app. All notifications posted without a notification
-     * channel specified are posted to this channel.
+     * The id of the default channel for an app. This id is reserved by the system. All
+     * notifications posted from apps targeting {@link android.os.Build.VERSION_CODES#N_MR1} or
+     * earlier without a notification channel specified are posted to this channel.
      */
     public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
 
@@ -170,6 +171,9 @@ public final class NotificationChannel implements Parcelable {
         this.mImportance = importance;
     }
 
+    /**
+     * @hide
+     */
     protected NotificationChannel(Parcel in) {
         if (in.readByte() != 0) {
             mId = in.readString();

@@ -636,6 +636,15 @@ public class KeyStore {
         }
     }
 
+    public int attestDeviceIds(KeymasterArguments params, KeymasterCertificateChain outChain) {
+        try {
+            return mBinder.attestDeviceIds(params, outChain);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
     /**
      * Notify keystore that the device went off-body.
      */

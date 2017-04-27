@@ -16,6 +16,12 @@
 
 package com.android.server.backup;
 
+import android.app.backup.BackupAgent;
+import android.util.Slog;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Description of a file in the restore datastream.
  */
@@ -46,4 +52,33 @@ public class FileMetadata {
         sb.append('}');
         return sb.toString();
     }
+
+    public void dump() {
+        StringBuilder b = new StringBuilder(128);
+
+        // mode string
+        b.append((type == BackupAgent.TYPE_DIRECTORY) ? 'd' : '-');
+        b.append(((mode & 0400) != 0) ? 'r' : '-');
+        b.append(((mode & 0200) != 0) ? 'w' : '-');
+        b.append(((mode & 0100) != 0) ? 'x' : '-');
+        b.append(((mode & 0040) != 0) ? 'r' : '-');
+        b.append(((mode & 0020) != 0) ? 'w' : '-');
+        b.append(((mode & 0010) != 0) ? 'x' : '-');
+        b.append(((mode & 0004) != 0) ? 'r' : '-');
+        b.append(((mode & 0002) != 0) ? 'w' : '-');
+        b.append(((mode & 0001) != 0) ? 'x' : '-');
+        b.append(String.format(" %9d ", size));
+
+        Date stamp = new Date(mtime);
+        b.append(new SimpleDateFormat("MMM dd HH:mm:ss ").format(stamp));
+
+        b.append(packageName);
+        b.append(" :: ");
+        b.append(domain);
+        b.append(" :: ");
+        b.append(path);
+
+        Slog.i(RefactoredBackupManagerService.TAG, b.toString());
+    }
+
 }

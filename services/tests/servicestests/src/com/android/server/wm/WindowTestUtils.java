@@ -92,7 +92,7 @@ public class WindowTestUtils {
     public static class TestAppWindowToken extends AppWindowToken {
 
         TestAppWindowToken(DisplayContent dc) {
-            super(WindowTestsBase.sWm, null, false, dc, true /* fillsParent */,
+            super(dc.mService, null, false, dc, true /* fillsParent */,
                     null /* overrideConfig */, null /* bounds */);
         }
 
@@ -137,7 +137,7 @@ public class WindowTestUtils {
         }
 
         TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
-            super(WindowTestsBase.sWm, mock(IBinder.class), type, persistOnEmpty, dc,
+            super(dc.mService, mock(IBinder.class), type, persistOnEmpty, dc,
                     false /* ownerCanManageAppTokens */);
         }
 
@@ -201,8 +201,8 @@ public class WindowTestUtils {
      */
     public static class TestTaskWindowContainerController extends TaskWindowContainerController {
 
-        TestTaskWindowContainerController() {
-            this(WindowTestsBase.createStackControllerOnDisplay(WindowTestsBase.sDisplayContent));
+        TestTaskWindowContainerController(WindowTestsBase testsBase) {
+            this(testsBase.createStackControllerOnDisplay(testsBase.mDisplayContent));
         }
 
         TestTaskWindowContainerController(StackWindowController stackController) {
@@ -219,7 +219,8 @@ public class WindowTestUtils {
                     }, stackController, 0 /* userId */, null /* bounds */,
                     EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE,
                     false /* supportsPictureInPicture */, false /* homeTask*/, true /* toTop*/,
-                    true /* showForAllUsers */, new ActivityManager.TaskDescription(), WindowTestsBase.sWm);
+                    true /* showForAllUsers */, new ActivityManager.TaskDescription(),
+                    stackController.mService);
         }
 
         @Override
@@ -246,8 +247,8 @@ public class WindowTestUtils {
                     true /* showForAllUsers */, 0 /* configChanges */, false /* voiceInteraction */,
                     false /* launchTaskBehind */, false /* alwaysFocusable */,
                     0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
-                    0 /* inputDispatchingTimeoutNanos */, WindowTestsBase.sWm, null /* overrideConfig */,
-                    null /* bounds */);
+                    0 /* inputDispatchingTimeoutNanos */, taskController.mService,
+                    null /* overrideConfig */, null /* bounds */);
             mToken = token;
         }
 
@@ -265,8 +266,8 @@ public class WindowTestUtils {
                     controller, overrideConfig, bounds);
         }
 
-        AppWindowToken getAppWindowToken() {
-            return (AppWindowToken) WindowTestsBase.sDisplayContent.getWindowToken(mToken.asBinder());
+        AppWindowToken getAppWindowToken(DisplayContent dc) {
+            return (AppWindowToken) dc.getWindowToken(mToken.asBinder());
         }
     }
 

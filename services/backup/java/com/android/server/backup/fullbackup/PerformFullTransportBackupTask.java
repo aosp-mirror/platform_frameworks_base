@@ -364,7 +364,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                                 BackupManagerMonitor.LOG_EVENT_ID_ERROR_PREFLIGHT,
                                 mCurrentPackage,
                                 BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                backupManagerService.putMonitoringExtra(null,
+                                BackupManagerMonitorUtils.putMonitoringExtra(null,
                                         BackupManagerMonitor.EXTRA_LOG_PREFLIGHT_ERROR,
                                         preflightResult));
                         backupPackageStatus = (int) preflightResult;
@@ -545,7 +545,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     BackupManagerMonitor.LOG_EVENT_ID_EXCEPTION_FULL_BACKUP,
                     mCurrentPackage,
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    backupManagerService.putMonitoringExtra(null,
+                    BackupManagerMonitorUtils.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_EXCEPTION_FULL_BACKUP,
                             Log.getStackTraceString(e)));
 

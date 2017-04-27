@@ -16,29 +16,9 @@
 
 package com.android.server.backup.restore;
 
-import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
-import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION;
-import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_MANIFEST_PACKAGE_NAME;
-import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_OLD_VERSION;
-import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_POLICY_ALLOW_APKS;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_APK_NOT_INSTALLED;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_MISSING_SIGNATURE;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_RESTORE_ANY_VERSION;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO_AGENT;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
-import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
-
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.PackageInstallObserver;
-import android.app.backup.BackupAgent;
-import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -60,17 +40,12 @@ import com.android.server.backup.FileMetadata;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.AppBackupUtils;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.TarBackupReader;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -206,7 +181,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     public void onBytesRead(long bytesRead) {
                         mBytes += bytesRead;
                     }
-                });
+                }, mMonitor);
 
         FileMetadata info;
         try {
@@ -216,7 +191,7 @@ public class FullRestoreEngine extends RestoreEngine {
             info = tarBackupReader.readTarHeaders();
             if (info != null) {
                 if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    dumpFileMetadata(info);
+                    info.dump();
                 }
 
                 final String pkg = info.packageName;
@@ -256,7 +231,10 @@ public class FullRestoreEngine extends RestoreEngine {
                 }
 
                 if (info.path.equals(RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME)) {
-                    mPackagePolicies.put(pkg, readAppManifest(info, instream));
+                    RestorePolicy appManifest = tarBackupReader.readAppManifest(
+                            backupManagerService.getPackageManager(), mAllowApks,
+                            mManifestSignatures, info);
+                    mPackagePolicies.put(pkg, appManifest);
                     mPackageInstallers.put(pkg, info.installerPackageName);
                     // We've read only the manifest content itself at this point,
                     // so consume the footer before looping around to the next
@@ -266,7 +244,16 @@ public class FullRestoreEngine extends RestoreEngine {
                 } else if (info.path.equals(
                         RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
                     // Metadata blobs!
-                    readMetadata(info, instream);
+                    tarBackupReader.readMetadata(info);
+
+                    // The following only exist because we want to keep refactoring as safe as
+                    // possible, without changing too much.
+                    // TODO: Refactor, so that there are no funny things like this.
+                    // This is read during TarBackupReader.readMetadata().
+                    mWidgetData = tarBackupReader.getWidgetData();
+                    // This can be nulled during TarBackupReader.readMetadata().
+                    mMonitor = tarBackupReader.getMonitor();
+
                     tarBackupReader.skipTarPadding(info.size);
                 } else {
                     // Non-manifest, so it's actual file data.  Is this a package
@@ -810,374 +797,6 @@ public class FullRestoreEngine extends RestoreEngine {
         }
 
         return okay;
-    }
-
-    // Read a widget metadata file, returning the restored blob
-    void readMetadata(FileMetadata info, InputStream instream) throws IOException {
-        // Fail on suspiciously large widget dump files
-        if (info.size > 64 * 1024) {
-            throw new IOException("Metadata too big; corrupt? size=" + info.size);
-        }
-
-        byte[] buffer = new byte[(int) info.size];
-        if (TarBackupReader.readExactly(instream, buffer, 0, (int) info.size) == info.size) {
-            mBytes += info.size;
-        } else {
-            throw new IOException("Unexpected EOF in widget data");
-        }
-
-        String[] str = new String[1];
-        int offset = TarBackupReader.extractLine(buffer, 0, str);
-        int version = Integer.parseInt(str[0]);
-        if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
-            offset = TarBackupReader.extractLine(buffer, offset, str);
-            final String pkg = str[0];
-            if (info.packageName.equals(pkg)) {
-                // Data checks out -- the rest of the buffer is a concatenation of
-                // binary blobs as described in the comment at writeAppWidgetData()
-                ByteArrayInputStream bin = new ByteArrayInputStream(buffer,
-                        offset, buffer.length - offset);
-                DataInputStream in = new DataInputStream(bin);
-                while (bin.available() > 0) {
-                    int token = in.readInt();
-                    int size = in.readInt();
-                    if (size > 64 * 1024) {
-                        throw new IOException("Datum "
-                                + Integer.toHexString(token)
-                                + " too big; corrupt? size=" + info.size);
-                    }
-                    switch (token) {
-                        case RefactoredBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN: {
-                            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                                Slog.i(RefactoredBackupManagerService.TAG,
-                                        "Got widget metadata for " + info.packageName);
-                            }
-                            mWidgetData = new byte[size];
-                            in.read(mWidgetData);
-                            break;
-                        }
-                        default: {
-                            if (RefactoredBackupManagerService.DEBUG) {
-                                Slog.i(RefactoredBackupManagerService.TAG, "Ignoring metadata blob "
-                                        + Integer.toHexString(token)
-                                        + " for " + info.packageName);
-                            }
-                            in.skipBytes(size);
-                            break;
-                        }
-                    }
-                }
-            } else {
-                Slog.w(RefactoredBackupManagerService.TAG,
-                        "Metadata mismatch: package " + info.packageName
-                                + " but widget data for " + pkg);
-
-                Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                        BackupManagerMonitor.EXTRA_LOG_WIDGET_PACKAGE_NAME, pkg);
-                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                        BackupManagerMonitor.LOG_EVENT_ID_WIDGET_METADATA_MISMATCH,
-                        null,
-                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                        monitoringExtras);
-            }
-        } else {
-            Slog.w(RefactoredBackupManagerService.TAG, "Unsupported metadata version " + version);
-
-            Bundle monitoringExtras = backupManagerService
-                    .putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
-                            info.packageName);
-            monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                    EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                    BackupManagerMonitor.LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION,
-                    null,
-                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    monitoringExtras);
-        }
-    }
-
-    // Returns a policy constant
-    RestorePolicy readAppManifest(FileMetadata info, InputStream instream)
-            throws IOException {
-        // Fail on suspiciously large manifest files
-        if (info.size > 64 * 1024) {
-            throw new IOException("Restore manifest too big; corrupt? size=" + info.size);
-        }
-
-        byte[] buffer = new byte[(int) info.size];
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.i(RefactoredBackupManagerService.TAG,
-                    "   readAppManifest() looking for " + info.size + " bytes, "
-                            + mBytes + " already consumed");
-        }
-        if (TarBackupReader.readExactly(instream, buffer, 0, (int) info.size) == info.size) {
-            mBytes += info.size;
-        } else {
-            throw new IOException("Unexpected EOF in manifest");
-        }
-
-        RestorePolicy policy = RestorePolicy.IGNORE;
-        String[] str = new String[1];
-        int offset = 0;
-
-        try {
-            offset = TarBackupReader.extractLine(buffer, offset, str);
-            int version = Integer.parseInt(str[0]);
-            if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
-                offset = TarBackupReader.extractLine(buffer, offset, str);
-                String manifestPackage = str[0];
-                // TODO: handle <original-package>
-                if (manifestPackage.equals(info.packageName)) {
-                    offset = TarBackupReader.extractLine(buffer, offset, str);
-                    version = Integer.parseInt(str[0]);  // app version
-                    offset = TarBackupReader.extractLine(buffer, offset, str);
-                    // This is the platform version, which we don't use, but we parse it
-                    // as a safety against corruption in the manifest.
-                    Integer.parseInt(str[0]);
-                    offset = TarBackupReader.extractLine(buffer, offset, str);
-                    info.installerPackageName = (str[0].length() > 0) ? str[0] : null;
-                    offset = TarBackupReader.extractLine(buffer, offset, str);
-                    boolean hasApk = str[0].equals("1");
-                    offset = TarBackupReader.extractLine(buffer, offset, str);
-                    int numSigs = Integer.parseInt(str[0]);
-                    if (numSigs > 0) {
-                        Signature[] sigs = new Signature[numSigs];
-                        for (int i = 0; i < numSigs; i++) {
-                            offset = TarBackupReader.extractLine(buffer, offset, str);
-                            sigs[i] = new Signature(str[0]);
-                        }
-                        mManifestSignatures.put(info.packageName, sigs);
-
-                        // Okay, got the manifest info we need...
-                        try {
-                            PackageInfo pkgInfo =
-                                    backupManagerService.getPackageManager().getPackageInfo(
-                                            info.packageName, PackageManager.GET_SIGNATURES);
-                            // Fall through to IGNORE if the app explicitly disallows backup
-                            final int flags = pkgInfo.applicationInfo.flags;
-                            if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
-                                // Restore system-uid-space packages only if they have
-                                // defined a custom backup agent
-                                if ((pkgInfo.applicationInfo.uid
-                                        >= Process.FIRST_APPLICATION_UID)
-                                        || (pkgInfo.applicationInfo.backupAgentName != null)) {
-                                    // Verify signatures against any installed version; if they
-                                    // don't match, then we fall though and ignore the data.  The
-                                    // signatureMatch() method explicitly ignores the signature
-                                    // check for packages installed on the system partition, because
-                                    // such packages are signed with the platform cert instead of
-                                    // the app developer's cert, so they're different on every
-                                    // device.
-                                    if (AppBackupUtils.signaturesMatch(sigs,
-                                            pkgInfo)) {
-                                        if ((pkgInfo.applicationInfo.flags
-                                                & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
-                                            Slog.i(RefactoredBackupManagerService.TAG,
-                                                    "Package has restoreAnyVersion; taking data");
-                                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                                                    mMonitor,
-                                                    LOG_EVENT_ID_RESTORE_ANY_VERSION,
-                                                    pkgInfo,
-                                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                    null);
-                                            policy = RestorePolicy.ACCEPT;
-                                        } else if (pkgInfo.versionCode >= version) {
-                                            Slog.i(RefactoredBackupManagerService.TAG,
-                                                    "Sig + version match; taking data");
-                                            policy = RestorePolicy.ACCEPT;
-                                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                                                    mMonitor,
-                                                    LOG_EVENT_ID_VERSIONS_MATCH,
-                                                    pkgInfo,
-                                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                    null);
-                                        } else {
-                                            // The data is from a newer version of the app than
-                                            // is presently installed.  That means we can only
-                                            // use it if the matching apk is also supplied.
-                                            if (mAllowApks) {
-                                                Slog.i(RefactoredBackupManagerService.TAG,
-                                                        "Data version " + version
-                                                                + " is newer than installed "
-                                                                + "version "
-                                                                + pkgInfo.versionCode
-                                                                + " - requiring apk");
-                                                policy = RestorePolicy.ACCEPT_IF_APK;
-                                            } else {
-                                                Slog.i(RefactoredBackupManagerService.TAG,
-                                                        "Data requires newer version "
-                                                                + version + "; ignoring");
-                                                mMonitor = BackupManagerMonitorUtils
-                                                        .monitorEvent(mMonitor,
-                                                                LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER,
-                                                                pkgInfo,
-                                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                                backupManagerService
-                                                                        .putMonitoringExtra(
-                                                                                null,
-                                                                                EXTRA_LOG_OLD_VERSION,
-                                                                                version));
-
-                                                policy = RestorePolicy.IGNORE;
-                                            }
-                                        }
-                                    } else {
-                                        Slog.w(RefactoredBackupManagerService.TAG,
-                                                "Restore manifest signatures do not match "
-                                                        + "installed application for "
-                                                        + info.packageName);
-                                        mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                                                mMonitor,
-                                                LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH,
-                                                pkgInfo,
-                                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                null);
-                                    }
-                                } else {
-                                    Slog.w(RefactoredBackupManagerService.TAG,
-                                            "Package " + info.packageName
-                                                    + " is system level with no agent");
-                                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                                            LOG_EVENT_ID_SYSTEM_APP_NO_AGENT,
-                                            pkgInfo,
-                                            LOG_EVENT_CATEGORY_AGENT,
-                                            null);
-                                }
-                            } else {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.i(RefactoredBackupManagerService.TAG,
-                                            "Restore manifest from "
-                                                    + info.packageName + " but allowBackup=false");
-                                }
-                                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                                        LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE,
-                                        pkgInfo,
-                                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                        null);
-                            }
-                        } catch (NameNotFoundException e) {
-                            // Okay, the target app isn't installed.  We can process
-                            // the restore properly only if the dataset provides the
-                            // apk file and we can successfully install it.
-                            if (mAllowApks) {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.i(RefactoredBackupManagerService.TAG,
-                                            "Package " + info.packageName
-                                                    + " not installed; requiring apk in dataset");
-                                }
-                                policy = RestorePolicy.ACCEPT_IF_APK;
-                            } else {
-                                policy = RestorePolicy.IGNORE;
-                            }
-                            Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                                    EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                            monitoringExtras = backupManagerService.putMonitoringExtra(
-                                    monitoringExtras,
-                                    EXTRA_LOG_POLICY_ALLOW_APKS, mAllowApks);
-                            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                                    LOG_EVENT_ID_APK_NOT_INSTALLED,
-                                    null,
-                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                    monitoringExtras);
-                        }
-
-                        if (policy == RestorePolicy.ACCEPT_IF_APK && !hasApk) {
-                            Slog.i(RefactoredBackupManagerService.TAG,
-                                    "Cannot restore package " + info.packageName
-                                            + " without the matching .apk");
-                            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                                    LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK,
-                                    null,
-                                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                    backupManagerService.putMonitoringExtra(null,
-                                            EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
-                        }
-                    } else {
-                        Slog.i(RefactoredBackupManagerService.TAG,
-                                "Missing signature on backed-up package "
-                                        + info.packageName);
-                        mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                                LOG_EVENT_ID_MISSING_SIGNATURE,
-                                null,
-                                LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                backupManagerService.putMonitoringExtra(null,
-                                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
-                    }
-                } else {
-                    Slog.i(RefactoredBackupManagerService.TAG,
-                            "Expected package " + info.packageName
-                                    + " but restore manifest claims " + manifestPackage);
-                    Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                            EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                    monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                            EXTRA_LOG_MANIFEST_PACKAGE_NAME, manifestPackage);
-                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                            LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE,
-                            null,
-                            LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                            monitoringExtras);
-                }
-            } else {
-                Slog.i(RefactoredBackupManagerService.TAG,
-                        "Unknown restore manifest version " + version
-                                + " for package " + info.packageName);
-                Bundle monitoringExtras = backupManagerService.putMonitoringExtra(null,
-                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                monitoringExtras = backupManagerService.putMonitoringExtra(monitoringExtras,
-                        EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
-                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                        BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_VERSION,
-                        null,
-                        LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                        monitoringExtras);
-
-            }
-        } catch (NumberFormatException e) {
-            Slog.w(RefactoredBackupManagerService.TAG,
-                    "Corrupt restore manifest for package " + info.packageName);
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                    BackupManagerMonitor.LOG_EVENT_ID_CORRUPT_MANIFEST,
-                    null,
-                    LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    backupManagerService.putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
-                            info.packageName));
-        } catch (IllegalArgumentException e) {
-            Slog.w(RefactoredBackupManagerService.TAG, e.getMessage());
-        }
-
-        return policy;
-    }
-
-    void dumpFileMetadata(FileMetadata info) {
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            StringBuilder b = new StringBuilder(128);
-
-            // mode string
-            b.append((info.type == BackupAgent.TYPE_DIRECTORY) ? 'd' : '-');
-            b.append(((info.mode & 0400) != 0) ? 'r' : '-');
-            b.append(((info.mode & 0200) != 0) ? 'w' : '-');
-            b.append(((info.mode & 0100) != 0) ? 'x' : '-');
-            b.append(((info.mode & 0040) != 0) ? 'r' : '-');
-            b.append(((info.mode & 0020) != 0) ? 'w' : '-');
-            b.append(((info.mode & 0010) != 0) ? 'x' : '-');
-            b.append(((info.mode & 0004) != 0) ? 'r' : '-');
-            b.append(((info.mode & 0002) != 0) ? 'w' : '-');
-            b.append(((info.mode & 0001) != 0) ? 'x' : '-');
-            b.append(String.format(" %9d ", info.size));
-
-            Date stamp = new Date(info.mtime);
-            b.append(new SimpleDateFormat("MMM dd HH:mm:ss ").format(stamp));
-
-            b.append(info.packageName);
-            b.append(" :: ");
-            b.append(info.domain);
-            b.append(" :: ");
-            b.append(info.path);
-
-            Slog.i(RefactoredBackupManagerService.TAG, b.toString());
-        }
     }
 
     private boolean isRestorableFile(FileMetadata info) {
