@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -83,5 +84,17 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Make sure the resumed activity is untouched.
         assertEquals(testStack.mResumedActivity, activityRecord);
+    }
+
+    @Test
+    public void testStopActivityWhenActivityDestroyed() throws Exception {
+        final ActivityManagerService service = createActivityManagerService();
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
+        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
+        activityRecord.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
+        final ActivityStack testStack = service.mStackSupervisor.getStack(TEST_STACK_ID);
+        service.mStackSupervisor.setFocusStackUnchecked("testStopActivityWithDestroy", testStack);
+
+        testStack.stopActivityLocked(activityRecord);
     }
 }
