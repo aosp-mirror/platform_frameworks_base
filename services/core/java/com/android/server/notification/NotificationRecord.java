@@ -392,7 +392,8 @@ public final class NotificationRecord {
         }
         pw.println(prefix + "contentView=" + notification.contentView);
         pw.println(prefix + String.format("color=0x%08x", notification.color));
-        pw.println(prefix + "timeout=" + TimeUtils.formatForLogging(notification.getTimeout()));
+        pw.println(prefix + "timeout="
+                + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
             pw.println(prefix + "actions={");
             final int N = notification.actions.length;

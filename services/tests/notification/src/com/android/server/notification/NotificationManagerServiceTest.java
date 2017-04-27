@@ -403,7 +403,7 @@ public class NotificationManagerServiceTest {
                 anyString(), anyInt(), eq("foo"), anyBoolean())).thenReturn(
                         new NotificationChannel("foo", "foo", NotificationManager.IMPORTANCE_HIGH));
 
-        Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
+        Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null, tv).getNotification(), 0);
         verify(mRankingHelper, times(1)).getNotificationChannel(
@@ -418,7 +418,7 @@ public class NotificationManagerServiceTest {
                 anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
                 mTestNotificationChannel);
 
-        Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
+        Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null, tv).getNotification(), 0);
         verify(mRankingHelper, times(1)).getNotificationChannel(
