@@ -26,6 +26,7 @@
 
 #include "SkPath.h"
 #include "SkPathOps.h"
+#include "SkGeometry.h" // WARNING: Internal Skia Header
 
 #include <Caches.h>
 #include <vector>
@@ -355,8 +356,9 @@ public:
         }
     }
 
-    static void createVerbSegments(SkPath::Verb verb, const SkPoint* points,
-        std::vector<SkPoint>& segmentPoints, std::vector<float>& lengths, float errorSquared) {
+    static void createVerbSegments(const SkPath::Iter& pathIter, SkPath::Verb verb,
+            const SkPoint* points, std::vector<SkPoint>& segmentPoints,
+            std::vector<float>& lengths, float errorSquared, float errorConic) {
         switch (verb) {
             case SkPath::kMove_Verb:
                 addMove(segmentPoints, lengths, points[0]);
@@ -375,8 +377,27 @@ public:
                 addBezier(points, cubicBezierCalculation, segmentPoints, lengths,
                     errorSquared, true);
                 break;
+            case SkPath::kConic_Verb: {
+                SkAutoConicToQuads converter;
+                const SkPoint* quads = converter.computeQuads(
+                        points, pathIter.conicWeight(), errorConic);
+                for (int i = 0; i < converter.countQuads(); i++) {
+                    // Note: offset each subsequent quad by 2, since end points are shared
+                    const SkPoint* quad = quads + i * 2;
+                    addBezier(quad, quadraticBezierCalculation, segmentPoints, lengths,
+                        errorConic, false);
+                }
+                break;
+            }
             default:
-                // Leave element as NULL, Conic sections are not supported.
+                static_assert(SkPath::kMove_Verb == 0
+                                && SkPath::kLine_Verb == 1
+                                && SkPath::kQuad_Verb == 2
+                                && SkPath::kConic_Verb == 3
+                                && SkPath::kCubic_Verb == 4
+                                && SkPath::kClose_Verb == 5
+                                && SkPath::kDone_Verb == 6,
+                        "Path enum changed, new types may have been added.");
                 break;
         }
     }
@@ -398,9 +419,11 @@ public:
         std::vector<SkPoint> segmentPoints;
         std::vector<float> lengths;
         float errorSquared = acceptableError * acceptableError;
+        float errorConic = acceptableError / 2; // somewhat arbitrary
 
         while ((verb = pathIter.next(points, false)) != SkPath::kDone_Verb) {
-            createVerbSegments(verb, points, segmentPoints, lengths, errorSquared);
+            createVerbSegments(pathIter, verb, points, segmentPoints, lengths,
+                    errorSquared, errorConic);
         }
 
         if (segmentPoints.empty()) {
