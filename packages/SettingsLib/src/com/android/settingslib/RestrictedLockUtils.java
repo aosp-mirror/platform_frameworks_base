@@ -35,8 +35,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
-import android.text.Spanned;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.MenuItem;
@@ -75,41 +75,52 @@ public class RestrictedLockUtils {
      */
     public static EnforcedAdmin checkIfRestrictionEnforced(Context context,
             String userRestriction, int userId) {
-        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         if (dpm == null) {
             return null;
         }
-        UserManager um = UserManager.get(context);
-        int restrictionSource = um.getUserRestrictionSource(userRestriction,
-                UserHandle.of(userId));
 
-        // If the restriction is not enforced or enforced only by system then return null
-        if (restrictionSource == UserManager.RESTRICTION_NOT_SET
-                || restrictionSource == UserManager.RESTRICTION_SOURCE_SYSTEM) {
+        final UserManager um = UserManager.get(context);
+        final List<UserManager.EnforcingUser> enforcingUsers =
+                um.getUserRestrictionSources(userRestriction, UserHandle.of(userId));
+
+        if (enforcingUsers.isEmpty()) {
+            // Restriction is not enforced.
             return null;
+        } else if (enforcingUsers.size() > 1) {
+            return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
         }
 
-        final boolean enforcedByProfileOwner =
-                (restrictionSource & UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) != 0;
-        final boolean enforcedByDeviceOwner =
-                (restrictionSource & UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) != 0;
-        if (enforcedByProfileOwner) {
-            return getProfileOwner(context, userId);
-        } else if (enforcedByDeviceOwner) {
+        final int restrictionSource = enforcingUsers.get(0).getUserRestrictionSource();
+        final int adminUserId = enforcingUsers.get(0).getUserHandle().getIdentifier();
+
+        if (restrictionSource == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
+            // Check if it is a profile owner of the user under consideration.
+            if (adminUserId == userId) {
+                return getProfileOwner(context, adminUserId);
+            } else {
+                // Check if it is a profile owner of a managed profile of the current user.
+                // Otherwise it is in a separate user and we return a default EnforcedAdmin.
+                final UserInfo parentUser = um.getProfileParent(adminUserId);
+                return (parentUser != null && parentUser.id == userId)
+                        ? getProfileOwner(context, adminUserId)
+                        : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+            }
+        } else if (restrictionSource == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
             // When the restriction is enforced by device owner, return the device owner admin only
             // if the admin is for the {@param userId} otherwise return a default EnforcedAdmin.
-            final EnforcedAdmin deviceOwner = getDeviceOwner(context);
-            return deviceOwner.userId == userId
-                    ? deviceOwner
-                    : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+            return adminUserId == userId
+                    ? getDeviceOwner(context) : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
         }
+
+        // If the restriction is enforced by system then return null.
         return null;
     }
 
     public static boolean hasBaseUserRestriction(Context context,
             String userRestriction, int userId) {
-        UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        final UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         return um.hasBaseUserRestriction(userRestriction, UserHandle.of(userId));
     }
 
@@ -424,7 +435,6 @@ public class RestrictedLockUtils {
         if (dpm == null) {
             return null;
         }
-        LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
         EnforcedAdmin enforcedAdmin = null;
         final int userId = UserHandle.myUserId();
         final UserManager um = UserManager.get(context);
