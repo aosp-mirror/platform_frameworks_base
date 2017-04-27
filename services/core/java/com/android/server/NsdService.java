@@ -26,6 +26,8 @@ import android.net.nsd.DnsSdTxtRecord;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
 import android.os.Binder;
+import android.os.HandlerThread;
+import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.UserHandle;
@@ -40,6 +42,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Protocol;
@@ -60,7 +63,7 @@ public class NsdService extends INsdManager.Stub {
     private static final boolean DBG = true;
 
     private final Context mContext;
-    private final ContentResolver mContentResolver;
+    private final NsdSettings mNsdSettings;
     private final NsdStateMachine mNsdStateMachine;
     private final NativeDaemonConnector mNativeConnector;
     private final CountDownLatch mNativeDaemonConnected = new CountDownLatch(1);
@@ -109,8 +112,8 @@ public class NsdService extends INsdManager.Stub {
                     false, contentObserver);
         }
 
-        NsdStateMachine(String name) {
-            super(name);
+        NsdStateMachine(String name, Handler handler) {
+            super(name, handler);
             addState(mDefaultState);
                 addState(mDisabledState, mDefaultState);
                 addState(mEnabledState, mDefaultState);
@@ -542,14 +545,15 @@ public class NsdService extends INsdManager.Stub {
         return sb.toString();
     }
 
-    private NsdService(Context context) {
-        mContext = context;
-        mContentResolver = context.getContentResolver();
+    @VisibleForTesting
+    NsdService(Context ctx, NsdSettings settings, Handler handler) {
+        mContext = ctx;
+        mNsdSettings = settings;
 
-        mNativeConnector = new NativeDaemonConnector(new NativeCallbackReceiver(), "mdns", 10,
-                MDNS_TAG, 25, null);
+        NativeCallbackReceiver callback = new NativeCallbackReceiver();
+        mNativeConnector = new NativeDaemonConnector(callback, "mdns", 10, MDNS_TAG, 25, null);
 
-        mNsdStateMachine = new NsdStateMachine(TAG);
+        mNsdStateMachine = new NsdStateMachine(TAG, handler);
         mNsdStateMachine.start();
 
         Thread th = new Thread(mNativeConnector, MDNS_TAG);
@@ -557,21 +561,24 @@ public class NsdService extends INsdManager.Stub {
     }
 
     public static NsdService create(Context context) throws InterruptedException {
-        NsdService service = new NsdService(context);
+        NsdSettings settings = NsdSettings.makeDefault(context);
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        Handler handler = new Handler(thread.getLooper());
+        NsdService service = new NsdService(context, settings, handler);
         service.mNativeDaemonConnected.await();
         return service;
     }
 
     public Messenger getMessenger() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INTERNET,
-            "NsdService");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INTERNET, "NsdService");
         return new Messenger(mNsdStateMachine.getHandler());
     }
 
     public void setEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "NsdService");
-        Settings.Global.putInt(mContentResolver, Settings.Global.NSD_ON, enable ? 1 : 0);
+        mNsdSettings.putEnabledStatus(enable);
         if (enable) {
             mNsdStateMachine.sendMessage(NsdManager.ENABLE);
         } else {
@@ -591,8 +598,10 @@ public class NsdService extends INsdManager.Stub {
     }
 
     private boolean isNsdEnabled() {
-        boolean ret = Settings.Global.getInt(mContentResolver, Settings.Global.NSD_ON, 1) == 1;
-        if (DBG) Slog.d(TAG, "Network service discovery enabled " + ret);
+        boolean ret = mNsdSettings.isEnabled();
+        if (DBG) {
+            Slog.d(TAG, "Network service discovery is " + (ret ? "enabled" : "disabled"));
+        }
         return ret;
     }
 
@@ -920,6 +929,27 @@ public class NsdService extends INsdManager.Stub {
                 }
             }
             return -1;
+        }
+    }
+
+    @VisibleForTesting
+    public interface NsdSettings {
+        boolean isEnabled();
+        void putEnabledStatus(boolean isEnabled);
+
+        static NsdSettings makeDefault(Context context) {
+            ContentResolver resolver = context.getContentResolver();
+            return new NsdSettings() {
+                @Override
+                public boolean isEnabled() {
+                    return Settings.Global.getInt(resolver, Settings.Global.NSD_ON, 1) == 1;
+                }
+
+                @Override
+                public void putEnabledStatus(boolean isEnabled) {
+                    Settings.Global.putInt(resolver, Settings.Global.NSD_ON, isEnabled ? 1 : 0);
+                }
+            };
         }
     }
 }
