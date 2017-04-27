@@ -47,6 +47,7 @@ import com.android.server.net.NetworkPinner;
 
 import dalvik.system.CloseGuard;
 
+import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
@@ -850,6 +851,16 @@ public class WifiManager {
     private AsyncChannel mAsyncChannel;
     private CountDownLatch mConnected;
     private Looper mLooper;
+
+    /* LocalOnlyHotspot callback message types */
+    /** @hide */
+    public static final int HOTSPOT_STARTED = 0;
+    /** @hide */
+    public static final int HOTSPOT_STOPPED = 1;
+    /** @hide */
+    public static final int HOTSPOT_FAILED = 2;
+    /** @hide */
+    public static final int HOTSPOT_OBSERVER_REGISTERED = 3;
 
     /**
      * Create a new WifiManager instance.
@@ -2280,6 +2291,88 @@ public class WifiManager {
          * {@link #ERROR_NO_CHANNEL}, or {@link #ERROR_GENERIC}.
          */
         public void onFailed(int reason) { };
+    }
+
+    /**
+     * Callback proxy for LocalOnlyHotspotCallback objects.
+     */
+    private static class LocalOnlyHotspotCallbackProxy {
+        private final Handler mHandler;
+        private final WeakReference<WifiManager> mWifiManager;
+        private final Looper mLooper;
+        private final Messenger mMessenger;
+
+        /**
+         * Constructs a {@link LocalOnlyHotspotCallback} using the specified looper.  All callbacks
+         * will be delivered on the thread of the specified looper.
+         *
+         * @param manager WifiManager
+         * @param looper Looper for delivering callbacks
+         * @param callback LocalOnlyHotspotCallback to notify the calling application.
+         */
+        LocalOnlyHotspotCallbackProxy(WifiManager manager, Looper looper,
+                final LocalOnlyHotspotCallback callback) {
+            mWifiManager = new WeakReference<>(manager);
+            mLooper = looper;
+
+            mHandler = new Handler(looper) {
+                @Override
+                public void handleMessage(Message msg) {
+                    Log.d(TAG, "LocalOnlyHotspotCallbackProxy: handle message what: "
+                            + msg.what + " msg: " + msg);
+
+                    WifiManager manager = mWifiManager.get();
+                    if (manager == null) {
+                        Log.w(TAG, "LocalOnlyHotspotCallbackProxy: handle message post GC");
+                        return;
+                    }
+
+                    switch (msg.what) {
+                        case HOTSPOT_STARTED:
+                            WifiConfiguration config = (WifiConfiguration) msg.obj;
+                            if (config == null) {
+                                Log.e(TAG, "LocalOnlyHotspotCallbackProxy: config cannot be null.");
+                                callback.onFailed(LocalOnlyHotspotCallback.ERROR_GENERIC);
+                                return;
+                            }
+                            callback.onStarted(manager.new LocalOnlyHotspotReservation(config));
+                            break;
+                        case HOTSPOT_STOPPED:
+                            Log.w(TAG, "LocalOnlyHotspotCallbackProxy: hotspot stopped");
+                            callback.onStopped();
+                            break;
+                        case HOTSPOT_FAILED:
+                            int reasonCode = msg.arg1;
+                            Log.w(TAG, "LocalOnlyHotspotCallbackProxy: failed to start.  reason: "
+                                    + reasonCode);
+                            callback.onFailed(reasonCode);
+                            Log.w(TAG, "done with the callback...");
+                            break;
+                        default:
+                            Log.e(TAG, "LocalOnlyHotspotCallbackProxy unhandled message.  type: "
+                                    + msg.what);
+                    }
+                }
+            };
+            mMessenger = new Messenger(mHandler);
+        }
+
+        public Messenger getMessenger() {
+            return mMessenger;
+        }
+
+        /**
+         * Helper method allowing the the incoming application call to move the onFailed callback
+         * over to the desired callback thread.
+         *
+         * @param reason int representing the error type
+         */
+        public void notifyFailed(int reason) throws RemoteException {
+            Message msg = Message.obtain();
+            msg.what = HOTSPOT_FAILED;
+            msg.arg1 = reason;
+            mMessenger.send(msg);
+        }
     }
 
     /**
