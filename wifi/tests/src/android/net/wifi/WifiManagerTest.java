@@ -25,6 +25,7 @@ import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_NO_CHA
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -234,22 +235,26 @@ public class WifiManagerTest {
         public boolean mOnStoppedCalled = false;
         public WifiConfiguration mConfig = null;
         public LocalOnlyHotspotSubscription mSub = null;
+        public long mCallingThreadId = -1;
 
         @Override
         public void onRegistered(LocalOnlyHotspotSubscription sub) {
             mOnRegistered = true;
             mSub = sub;
+            mCallingThreadId = Thread.currentThread().getId();
         }
 
         @Override
         public void onStarted(WifiConfiguration config) {
             mOnStartedCalled = true;
             mConfig = config;
+            mCallingThreadId = Thread.currentThread().getId();
         }
 
         @Override
         public void onStopped() {
             mOnStoppedCalled = true;
+            mCallingThreadId = Thread.currentThread().getId();
         }
     }
 
@@ -322,15 +327,6 @@ public class WifiManagerTest {
         doThrow(new IllegalStateException()).when(mWifiService)
                 .startLocalOnlyHotspot(any(Messenger.class), any(IBinder.class));
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
-    }
-
-    /**
-     * Verify the watchLocalOnlyHotspot call currently throws an UnsupportedOperationException.
-     */
-    @Test(expected = UnsupportedOperationException.class)
-    public void testWatchLocalOnlyHotspot() throws Exception {
-        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
-        mWifiManager.watchLocalOnlyHotspot(observer, mHandler);
     }
 
     /**
@@ -579,4 +575,187 @@ public class WifiManagerTest {
         mWifiManager.cancelLocalOnlyHotspotRequest();
         verify(mWifiService, never()).stopLocalOnlyHotspot();
     }
+
+    /**
+     * Verify the watchLocalOnlyHotspot call goes to WifiServiceImpl.
+     */
+    public void testWatchLocalOnlyHotspot() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+
+        mWifiManager.watchLocalOnlyHotspot(observer, mHandler);
+        verify(mWifiService).startWatchLocalOnlyHotspot(any(Messenger.class), any(IBinder.class));
+    }
+
+    /**
+     * Verify a SecurityException is thrown for callers without proper permissions for
+     * startWatchLocalOnlyHotspot.
+     */
+    @Test(expected = SecurityException.class)
+    public void testStartWatchLocalOnlyHotspotThrowsSecurityException() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        doThrow(new SecurityException()).when(mWifiService)
+                .startWatchLocalOnlyHotspot(any(Messenger.class), any(IBinder.class));
+        mWifiManager.watchLocalOnlyHotspot(observer, mHandler);
+    }
+
+    /**
+     * Verify an IllegalStateException is thrown for callers that already have a pending request for
+     * watchLocalOnlyHotspot.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testStartWatchLocalOnlyHotspotThrowsIllegalStateException() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        doThrow(new IllegalStateException()).when(mWifiService)
+                .startWatchLocalOnlyHotspot(any(Messenger.class), any(IBinder.class));
+        mWifiManager.watchLocalOnlyHotspot(observer, mHandler);
+    }
+
+    /**
+     * Verify that the handler provided by the caller is used for the observer.
+     */
+    @Test
+    public void testCorrectLooperIsUsedForObserverHandler() throws Exception {
+        // record thread from looper.getThread and check ids.
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        mWifiManager.watchLocalOnlyHotspot(observer, mHandler);
+        mLooper.dispatchAll();
+        assertTrue(observer.mOnRegistered);
+        assertEquals(mLooper.getLooper().getThread().getId(), observer.mCallingThreadId);
+    }
+
+    /**
+     * Verify that the main looper's thread is used if a handler is not provided by the requesting
+     * application.
+     */
+    @Test
+    public void testMainLooperIsUsedWhenHandlerNotProvidedForObserver() throws Exception {
+        // record thread from looper.getThread and check ids.
+        TestLooper altLooper = new TestLooper();
+        when(mContext.getMainLooper()).thenReturn(altLooper.getLooper());
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        mWifiManager.watchLocalOnlyHotspot(observer, null);
+        altLooper.dispatchAll();
+        assertTrue(observer.mOnRegistered);
+        assertEquals(altLooper.getLooper().getThread().getId(), observer.mCallingThreadId);
+    }
+
+    /**
+     * Verify the LOHS onRegistered observer callback is triggered when WifiManager receives a
+     * HOTSPOT_OBSERVER_REGISTERED message from WifiServiceImpl.
+     */
+    @Test
+    public void testOnRegisteredIsCalledWithSubscription() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        TestLooper observerLooper = new TestLooper();
+        Handler observerHandler = new Handler(observerLooper.getLooper());
+        assertFalse(observer.mOnRegistered);
+        assertEquals(null, observer.mSub);
+        mWifiManager.watchLocalOnlyHotspot(observer, observerHandler);
+        verify(mWifiService).startWatchLocalOnlyHotspot(mMessengerCaptor.capture(),
+                  any(IBinder.class));
+        // now trigger the callback
+        observerLooper.dispatchAll();
+        mLooper.dispatchAll();
+        assertTrue(observer.mOnRegistered);
+        assertNotNull(observer.mSub);
+    }
+
+    /**
+     * Verify the LOHS onStarted observer callback is triggered when WifiManager receives a
+     * HOTSPOT_STARTED message from WifiServiceImpl.
+     */
+    @Test
+    public void testObserverOnStartedIsCalledWithWifiConfig() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        TestLooper observerLooper = new TestLooper();
+        Handler observerHandler = new Handler(observerLooper.getLooper());
+        mWifiManager.watchLocalOnlyHotspot(observer, observerHandler);
+        verify(mWifiService).startWatchLocalOnlyHotspot(mMessengerCaptor.capture(),
+                  any(IBinder.class));
+        observerLooper.dispatchAll();
+        mLooper.dispatchAll();
+        assertFalse(observer.mOnStartedCalled);
+        // now trigger the callback
+        Message msg = new Message();
+        msg.what = HOTSPOT_STARTED;
+        msg.obj = mApConfig;
+        mMessengerCaptor.getValue().send(msg);
+        mLooper.dispatchAll();
+        observerLooper.dispatchAll();
+        assertTrue(observer.mOnStartedCalled);
+        assertEquals(mApConfig, observer.mConfig);
+    }
+
+    /**
+     * Verify the LOHS onStarted observer callback is triggered not when WifiManager receives a
+     * HOTSPOT_STARTED message from WifiServiceImpl with a null config.
+     */
+    @Test
+    public void testObserverOnStartedNotCalledWithNullConfig() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        TestLooper observerLooper = new TestLooper();
+        Handler observerHandler = new Handler(observerLooper.getLooper());
+        mWifiManager.watchLocalOnlyHotspot(observer, observerHandler);
+        verify(mWifiService).startWatchLocalOnlyHotspot(mMessengerCaptor.capture(),
+                  any(IBinder.class));
+        observerLooper.dispatchAll();
+        mLooper.dispatchAll();
+        assertFalse(observer.mOnStartedCalled);
+        // now trigger the callback
+        Message msg = new Message();
+        msg.what = HOTSPOT_STARTED;
+        mMessengerCaptor.getValue().send(msg);
+        mLooper.dispatchAll();
+        observerLooper.dispatchAll();
+        assertFalse(observer.mOnStartedCalled);
+        assertEquals(null, observer.mConfig);
+    }
+
+
+    /**
+     * Verify the LOHS onStopped observer callback is triggered when WifiManager receives a
+     * HOTSPOT_STOPPED message from WifiServiceImpl.
+     */
+    @Test
+    public void testObserverOnStoppedIsCalled() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        TestLooper observerLooper = new TestLooper();
+        Handler observerHandler = new Handler(observerLooper.getLooper());
+        mWifiManager.watchLocalOnlyHotspot(observer, observerHandler);
+        verify(mWifiService).startWatchLocalOnlyHotspot(mMessengerCaptor.capture(),
+                  any(IBinder.class));
+        observerLooper.dispatchAll();
+        mLooper.dispatchAll();
+        assertFalse(observer.mOnStoppedCalled);
+        // now trigger the callback
+        Message msg = new Message();
+        msg.what = HOTSPOT_STOPPED;
+        mMessengerCaptor.getValue().send(msg);
+        mLooper.dispatchAll();
+        observerLooper.dispatchAll();
+        assertTrue(observer.mOnStoppedCalled);
+    }
+
+    /**
+     * Verify WifiServiceImpl is not called if there is not a registered LOHS observer callback.
+     */
+    @Test
+    public void testUnregisterWifiServiceImplNotCalledWithoutRegisteredObserver() throws Exception {
+        mWifiManager.unregisterLocalOnlyHotspotObserver();
+        verifyZeroInteractions(mWifiService);
+    }
+
+    /**
+     * Verify WifiServiceImpl is called when there is a registered LOHS observer callback.
+     */
+    @Test
+    public void testUnregisterWifiServiceImplCalledWithRegisteredObserver() throws Exception {
+        TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
+        TestLooper observerLooper = new TestLooper();
+        Handler observerHandler = new Handler(observerLooper.getLooper());
+        mWifiManager.watchLocalOnlyHotspot(observer, observerHandler);
+        mWifiManager.unregisterLocalOnlyHotspotObserver();
+        verify(mWifiService).stopWatchLocalOnlyHotspot();
+    }
+
 }
