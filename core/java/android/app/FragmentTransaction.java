@@ -315,14 +315,22 @@ public abstract class FragmentTransaction {
      * in this transaction may have been optimized out due to the presence of a subsequent
      * fragment transaction in the batch.
      *
-     * <p><code>postOnCommit</code> may not be used with transactions
+     *
+     * <p>If a transaction is committed using {@link #commitAllowingStateLoss()} this runnable
+     * may be executed when the FragmentManager is in a state where new transactions may not
+     * be committed without allowing state loss.</p>
+     *
+     * <p><code>runOnCommit</code> may not be used with transactions
      * {@link #addToBackStack(String) added to the back stack} as Runnables cannot be persisted
-     * with back stack state.</p>
+     * with back stack state. {@link IllegalStateException} will be thrown if
+     * {@link #addToBackStack(String)} has been previously called for this transaction
+     * or if it is called after a call to <code>runOnCommit</code>.</p>
      *
      * @param runnable Runnable to add
      * @return this FragmentTransaction
+     * @throws IllegalStateException if {@link #addToBackStack(String)} has been called
      */
-    public abstract FragmentTransaction postOnCommit(Runnable runnable);
+    public abstract FragmentTransaction runOnCommit(Runnable runnable);
 
     /**
      * Schedules a commit of this transaction.  The commit does
