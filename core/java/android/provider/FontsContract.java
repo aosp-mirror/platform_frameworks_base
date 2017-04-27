@@ -607,43 +607,6 @@ public class FontsContract {
     }
 
     /**
-     * Build a Typeface from an array of {@link FontInfo}. Results that are marked as not ready
-     * will be skipped.
-     *
-     * @param context A {@link Context} that will be used to fetch the font contents.
-     * @param cancellationSignal A signal to cancel the operation in progress, or null if none. If
-     *                           the operation is canceled, then {@link
-     *                           android.os.OperationCanceledException} will be thrown.
-     * @param fonts An array of {@link FontInfo} to be used to create a Typeface.
-     * @param weight A weight value to be used for selecting a font from a font family.
-     * @param italic {@code true} if this font is of italic style. This will be used for font
-     *               selection from a font family.
-     * @param fallbackFontName A fallback font name used if this method fails to create the
-     *                         Typeface. By passing {@code null}, this method returns {@code null}
-     *                         if typeface creation fails.
-     * @return A Typeface object. May return {@code null} if that is the value passed to {@code
-     *         fallBackFontName}.
-     */
-    public static Typeface buildTypeface(@NonNull Context context,
-            @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fonts,
-            int weight, boolean italic, @Nullable String fallbackFontName) {
-        if (context.isRestricted()) {
-            // TODO: Should we allow if the peer process is system or myself?
-            return null;
-        }
-        final Map<Uri, ByteBuffer> uriBuffer =
-                prepareFontData(context, fonts, cancellationSignal);
-        if (uriBuffer.isEmpty()) {
-            return null;
-        }
-        return new Typeface.Builder(fonts, uriBuffer)
-            .setFallback(fallbackFontName)
-            .setWeight(weight)
-            .setItalic(italic)
-            .build();
-    }
-
-    /**
      * Build a Typeface from an array of {@link FontInfo}
      *
      * Results that are marked as not ready will be skipped.
