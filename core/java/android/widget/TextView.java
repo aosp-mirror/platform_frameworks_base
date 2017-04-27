@@ -56,6 +56,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import android.icu.text.DecimalFormatSymbols;
 import android.os.AsyncTask;
 import android.os.Build.VERSION_CODES;
@@ -3886,26 +3887,43 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * are invalid. If a specified axis name is not defined in the font, the settings will be
      * ignored.
      *
+     * <p>
+     * Examples,
+     * <ul>
+     * <li>Set font width to 150.
      * <pre>
-     *   textView.setFontVariationSettings("'wdth' 1.0");
-     *   textView.setFontVariationSettings("'AX  ' 1.8, 'FB  ' 2.0");
+     * <code>
+     *   TextView textView = (TextView) findViewById(R.id.textView);
+     *   textView.setFontVariationSettings("'wdth' 150");
+     * </code>
      * </pre>
+     * </li>
+     *
+     * <li>Set the font slant to 20 degrees and ask for italic style.
+     * <pre>
+     * <code>
+     *   TextView textView = (TextView) findViewById(R.id.textView);
+     *   textView.setFontVariationSettings("'slnt' 20, 'ital' 1");
+     * </code>
+     * </pre>
+     * </p>
+     * </li>
+     * </ul>
      *
      * @param fontVariationSettings font variation settings. You can pass null or empty string as
      *                              no variation settings.
-     *
      * @return true if the given settings is effective to at least one font file underlying this
      *         TextView. This function also returns true for empty settings string. Otherwise
      *         returns false.
      *
-     * @throws FontVariationAxis.InvalidFormatException
-     *         If given string is not a valid font variation settings format.
+     * @throws InvalidFormatException If given string is not a valid font variation settings
+     *                                format.
      *
      * @see #getFontVariationSettings()
-     * @see Paint#getFontVariationSettings() Paint.getFontVariationSettings()
+     * @see FontVariationAxis
      */
     public boolean setFontVariationSettings(@Nullable String fontVariationSettings)
-            throws FontVariationAxis.InvalidFormatException {
+            throws InvalidFormatException {
         final String existingSettings = mTextPaint.getFontVariationSettings();
         if (fontVariationSettings == existingSettings
                 || (fontVariationSettings != null
