@@ -139,7 +139,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             // (by default is speed-profile) they will be interepreted/JITed. This in itself is
             // not a problem as we will end up doing profile guided compilation. However, some
             // core apps may be loaded by system server which doesn't JIT and we need to make
-            // sure we don't interpret-only
+            // sure we are not interpreting all their code in that process.
             int compilationReason = p.coreApp
                     ? PackageManagerService.REASON_CORE_APP
                     : PackageManagerService.REASON_AB_OTA;
