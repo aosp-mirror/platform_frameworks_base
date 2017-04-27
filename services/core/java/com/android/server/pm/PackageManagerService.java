@@ -23572,6 +23572,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 mIsolatedOwners.delete(isolatedUid);
             }
         }
+
+        @Override
+        public int getUidTargetSdkVersion(int uid) {
+            synchronized (mPackages) {
+                return getUidTargetSdkVersionLockedLPr(uid);
+            }
+        }
     }
 
     @Override
