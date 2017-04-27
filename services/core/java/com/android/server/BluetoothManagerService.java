@@ -1496,16 +1496,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             if (mGetNameAddressOnly) return;
                         }
 
-                        try {
-                            boolean enableHciSnoopLog = (Settings.Secure.getInt(mContentResolver,
-                                Settings.Secure.BLUETOOTH_HCI_LOG, 0) == 1);
-                            if (!mBluetooth.configHciSnoopLog(enableHciSnoopLog)) {
-                                Slog.e(TAG,"IBluetooth.configHciSnoopLog return false");
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG,"Unable to call configHciSnoopLog", e);
-                        }
-
                         //Register callback object
                         try {
                             mBluetooth.registerCallback(mBluetoothCallback);

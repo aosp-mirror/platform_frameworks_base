@@ -4720,13 +4720,6 @@ public final class Settings {
         public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
 
         /**
-         * bluetooth HCI snoop log configuration
-         * @hide
-         */
-        public static final String BLUETOOTH_HCI_LOG =
-                "bluetooth_hci_log";
-
-        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead
          */
         @Deprecated
