@@ -716,7 +716,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NetworkController mNetworkController;
     private KeyguardMonitorImpl mKeyguardMonitor;
     private BatteryController mBatteryController;
-    private boolean mPanelExpanded;
+    protected boolean mPanelExpanded;
     private boolean mKeyguardRequested;
     private boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;

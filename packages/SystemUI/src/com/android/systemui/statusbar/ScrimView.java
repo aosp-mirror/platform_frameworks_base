@@ -140,6 +140,9 @@ public class ScrimView extends View implements ConfigurationController.Configura
         mDrawable = drawable;
         mDrawable.setCallback(this);
         mDrawable.setBounds(getLeft(), getTop(), getRight(), getBottom());
+        mDrawable.setAlpha((int) (255 * mViewAlpha));
+        setDrawAsSrc(mDrawAsSrc);
+        updateScreenSize();
         invalidate();
     }
 

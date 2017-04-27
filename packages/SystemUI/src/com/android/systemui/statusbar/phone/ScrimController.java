@@ -24,6 +24,7 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.ColorUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -258,6 +259,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         return mKeyguardUpdateMonitor.needsSlowUnlockTransition()
                 ? SCRIM_IN_FRONT_ALPHA_LOCKED
                 : SCRIM_IN_FRONT_ALPHA;
+    }
+
+    /**
+     * Sets the given drawable as the background of the scrim that shows up behind the
+     * notifications.
+     */
+    public void setScrimBehindDrawable(Drawable drawable) {
+        mScrimBehind.setDrawable(drawable);
     }
 
     protected void scheduleUpdate() {
