@@ -1159,7 +1159,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int IMPORTANT_FOR_AUTOFILL_YES = 0x1;
 
     /**
-     * The view is not important for autofill, and its children (if any) will be traversed.
+     * The view is not important for autofill, but its children (if any) will be traversed.
      */
     public static final int IMPORTANT_FOR_AUTOFILL_NO = 0x2;
 
