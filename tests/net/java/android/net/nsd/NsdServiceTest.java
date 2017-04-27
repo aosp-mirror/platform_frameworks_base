@@ -16,6 +16,11 @@
 
 package com.android.server;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
@@ -25,6 +30,9 @@ import android.os.test.TestLooper;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.net.nsd.NsdManager;
+import com.android.server.NsdService.DaemonConnection;
+import com.android.server.NsdService.DaemonConnectionSupplier;
+import com.android.server.NsdService.NativeCallbackReceiver;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import org.junit.Before;
@@ -34,7 +42,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 // TODOs:
-//  - test daemon connection
 //  - test client disconnects
 //  - test client can send requests and receive replies
 //  - test NSD_ON ENABLE/DISABLED listening
@@ -45,6 +52,8 @@ public class NsdServiceTest {
     @Mock Context mContext;
     @Mock ContentResolver mResolver;
     @Mock NsdService.NsdSettings mSettings;
+    @Mock DaemonConnection mDaemon;
+    NativeCallbackReceiver mDaemonCallback;
     TestLooper mLooper;
     TestHandler mHandler;
 
@@ -58,8 +67,13 @@ public class NsdServiceTest {
 
     @Test
     public void testClientsCanConnect() {
+        when(mSettings.isEnabled()).thenReturn(true);
+
         NsdService service = makeService();
+
         NsdManager client1 = connectClient(service);
+        verify(mDaemon, timeout(100).times(1)).execute("start-service");
+
         NsdManager client2 = connectClient(service);
 
         // TODO: disconnect client1
@@ -67,7 +81,13 @@ public class NsdServiceTest {
     }
 
     NsdService makeService() {
-        return new NsdService(mContext, mSettings, mHandler);
+        DaemonConnectionSupplier supplier = (callback) -> {
+            mDaemonCallback = callback;
+            return mDaemon;
+        };
+        NsdService service = new NsdService(mContext, mSettings, mHandler, supplier);
+        verify(mDaemon, never()).execute(any(String.class));
+        return service;
     }
 
     NsdManager connectClient(NsdService service) {
