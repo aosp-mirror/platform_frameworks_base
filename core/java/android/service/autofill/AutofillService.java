@@ -48,7 +48,7 @@ public abstract class AutofillService extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
      * To be supported, the service must also require the
-     * {@link android.Manifest.permission#BIND_AUTOFILL} permission so
+     * {@link android.Manifest.permission#BIND_AUTOFILL_SERVICE} permission so
      * that other applications can not abuse it.
      */
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
