@@ -353,6 +353,7 @@ public final class DreamManagerService extends SystemService {
                 && mCurrentDreamIsTest == isTest
                 && mCurrentDreamCanDoze == canDoze
                 && mCurrentDreamUserId == userId) {
+            Slog.i(TAG, "Already in target dream.");
             return;
         }
 
@@ -388,6 +389,7 @@ public final class DreamManagerService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    Slog.i(TAG, "Performing gentle wake from dream.");
                     mController.stopDream(immediate);
                 }
             });
