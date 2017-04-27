@@ -109,44 +109,49 @@ public class JobSchedulerShellCommand extends ShellCommand {
         final String pkgName = getNextArgRequired();
         final int jobId = Integer.parseInt(getNextArgRequired());
 
-        int ret = mInternal.executeRunCommand(pkgName, userId, jobId, force);
-        switch (ret) {
-            case CMD_ERR_NO_PACKAGE:
-                pw.print("Package not found: ");
-                pw.print(pkgName);
-                pw.print(" / user ");
-                pw.println(userId);
-                break;
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            int ret = mInternal.executeRunCommand(pkgName, userId, jobId, force);
+            switch (ret) {
+                case CMD_ERR_NO_PACKAGE:
+                    pw.print("Package not found: ");
+                    pw.print(pkgName);
+                    pw.print(" / user ");
+                    pw.println(userId);
+                    break;
 
-            case CMD_ERR_NO_JOB:
-                pw.print("Could not find job ");
-                pw.print(jobId);
-                pw.print(" in package ");
-                pw.print(pkgName);
-                pw.print(" / user ");
-                pw.println(userId);
-                break;
+                case CMD_ERR_NO_JOB:
+                    pw.print("Could not find job ");
+                    pw.print(jobId);
+                    pw.print(" in package ");
+                    pw.print(pkgName);
+                    pw.print(" / user ");
+                    pw.println(userId);
+                    break;
 
-            case CMD_ERR_CONSTRAINTS:
-                pw.print("Job ");
-                pw.print(jobId);
-                pw.print(" in package ");
-                pw.print(pkgName);
-                pw.print(" / user ");
-                pw.print(userId);
-                pw.println(" has functional constraints but --force not specified");
-                break;
+                case CMD_ERR_CONSTRAINTS:
+                    pw.print("Job ");
+                    pw.print(jobId);
+                    pw.print(" in package ");
+                    pw.print(pkgName);
+                    pw.print(" / user ");
+                    pw.print(userId);
+                    pw.println(" has functional constraints but --force not specified");
+                    break;
 
-            default:
-                // success!
-                pw.print("Running job");
-                if (force) {
-                    pw.print(" [FORCED]");
-                }
-                pw.println();
-                break;
+                default:
+                    // success!
+                    pw.print("Running job");
+                    if (force) {
+                        pw.print(" [FORCED]");
+                    }
+                    pw.println();
+                    break;
+            }
+            return ret;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        return ret;
     }
 
     private int runMonitorBattery(PrintWriter pw) throws Exception {
