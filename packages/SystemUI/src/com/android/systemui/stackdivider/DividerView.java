@@ -725,14 +725,21 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mMinimizedSnapAlgorithm = null;
             mDockedStackMinimized = minimized;
             initializeSnapAlgorithm();
-            if (!mIsInMinimizeInteraction && minimized) {
-                mIsInMinimizeInteraction = true;
-                mDividerPositionBeforeMinimized = DockedDividerUtils.calculateMiddlePosition(
-                        isHorizontalDivision(), mStableInsets, mDisplayWidth, mDisplayHeight,
-                        mDividerSize);
+            if (mIsInMinimizeInteraction != minimized) {
+                if (minimized) {
+                    mIsInMinimizeInteraction = true;
+                    mDividerPositionBeforeMinimized = DockedDividerUtils.calculateMiddlePosition(
+                            isHorizontalDivision(), mStableInsets, mDisplayWidth, mDisplayHeight,
+                            mDividerSize);
 
-                int position = mMinimizedSnapAlgorithm.getMiddleTarget().position;
-                resizeStack(position, position, mMinimizedSnapAlgorithm.getMiddleTarget());
+                    int position = mMinimizedSnapAlgorithm.getMiddleTarget().position;
+                    resizeStack(position, position, mMinimizedSnapAlgorithm.getMiddleTarget());
+                } else {
+                    resizeStack(mDividerPositionBeforeMinimized, mDividerPositionBeforeMinimized,
+                            mSnapAlgorithm.calculateNonDismissingSnapTarget(
+                                    mDividerPositionBeforeMinimized));
+                    mIsInMinimizeInteraction = false;
+                }
             }
         }
     }
