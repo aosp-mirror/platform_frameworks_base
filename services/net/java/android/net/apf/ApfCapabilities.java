@@ -46,7 +46,7 @@ public class ApfCapabilities {
     }
 
     public String toString() {
-        return String.format("%s{version: %d, maxSize: %d format: %d}", getClass().getSimpleName(),
+        return String.format("%s{version: %d, maxSize: %d, format: %d}", getClass().getSimpleName(),
                 apfVersionSupported, maximumApfProgramSize, apfPacketFormat);
     }
 }
