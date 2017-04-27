@@ -381,27 +381,58 @@ public class KeyguardManager {
      *                 or {@code null} if the caller isn't interested in knowing the result.
      * @param handler The handler to invoke the callback on, or {@code null} to use the main
      *                handler.
+     *
+     * TO BE REMOVED
      */
+    @Deprecated
     public void dismissKeyguard(@NonNull Activity activity,
             @Nullable KeyguardDismissCallback callback, @Nullable Handler handler) {
+        requestDismissKeyguard(activity, callback);
+    }
+
+    /**
+     * If the device is currently locked (see {@link #isKeyguardLocked()}, requests the Keyguard to
+     * be dismissed.
+     * <p>
+     * If the Keyguard is not secure or the device is currently in a trusted state, calling this
+     * method will immediately dismiss the Keyguard without any user interaction.
+     * <p>
+     * If the Keyguard is secure and the device is not in a trusted state, this will bring up the
+     * UI so the user can enter their credentials.
+     *
+     * @param activity The activity requesting the dismissal. The activity must be either visible
+     *                 by using {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} or must be in a state in
+     *                 which it would be visible if Keyguard would not be hiding it. If that's not
+     *                 the case, the request will fail immediately and
+     *                 {@link KeyguardDismissCallback#onDismissError} will be invoked.
+     * @param callback The callback to be called if the request to dismiss Keyguard was successful
+     *                 or {@code null} if the caller isn't interested in knowing the result. The
+     *                 callback will not be invoked if the activity was destroyed before the
+     *                 callback was received.
+     */
+    public void requestDismissKeyguard(@NonNull Activity activity,
+            @Nullable KeyguardDismissCallback callback) {
         try {
-            final Handler actualHandler = handler != null
-                    ? handler
-                    : new Handler(Looper.getMainLooper());
             mAm.dismissKeyguard(activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
                 @Override
                 public void onDismissError() throws RemoteException {
-                    actualHandler.post(callback::onDismissError);
+                    if (callback != null && !activity.isDestroyed()) {
+                        activity.mHandler.post(callback::onDismissError);
+                    }
                 }
 
                 @Override
                 public void onDismissSucceeded() throws RemoteException {
-                    actualHandler.post(callback::onDismissSucceeded);
+                    if (callback != null && !activity.isDestroyed()) {
+                        activity.mHandler.post(callback::onDismissSucceeded);
+                    }
                 }
 
                 @Override
                 public void onDismissCancelled() throws RemoteException {
-                    actualHandler.post(callback::onDismissCancelled);
+                    if (callback != null && !activity.isDestroyed()) {
+                        activity.mHandler.post(callback::onDismissCancelled);
+                    }
                 }
             });
         } catch (RemoteException e) {
