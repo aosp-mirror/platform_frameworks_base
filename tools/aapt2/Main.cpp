@@ -19,6 +19,8 @@
 
 #include "androidfw/StringPiece.h"
 
+#include "Diagnostics.h"
+
 namespace aapt {
 
 // DO NOT UPDATE, this is more of a marketing version.
@@ -33,8 +35,8 @@ int PrintVersion() {
   return 0;
 }
 
-extern int Compile(const std::vector<android::StringPiece>& args);
-extern int Link(const std::vector<android::StringPiece>& args);
+extern int Compile(const std::vector<android::StringPiece>& args, IDiagnostics* diagnostics);
+extern int Link(const std::vector<android::StringPiece>& args, IDiagnostics* diagnostics);
 extern int Dump(const std::vector<android::StringPiece>& args);
 extern int Diff(const std::vector<android::StringPiece>& args);
 extern int Optimize(const std::vector<android::StringPiece>& args);
@@ -53,9 +55,11 @@ int main(int argc, char** argv) {
 
     android::StringPiece command(argv[0]);
     if (command == "compile" || command == "c") {
-      return aapt::Compile(args);
+      aapt::StdErrDiagnostics diagnostics;
+      return aapt::Compile(args, &diagnostics);
     } else if (command == "link" || command == "l") {
-      return aapt::Link(args);
+      aapt::StdErrDiagnostics diagnostics;
+      return aapt::Link(args, &diagnostics);
     } else if (command == "dump" || command == "d") {
       return aapt::Dump(args);
     } else if (command == "diff") {
