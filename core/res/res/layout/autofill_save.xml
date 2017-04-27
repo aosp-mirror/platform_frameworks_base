@@ -94,6 +94,7 @@
                 android:layout_height="wrap_content"
                 style="@style/Widget.Material.Button.Colored"
                 android:text="@string/autofill_save_yes">
+                <requestFocus />
             </Button>
 
         </com.android.internal.widget.ButtonBarLayout>
