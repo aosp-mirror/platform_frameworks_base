@@ -208,8 +208,6 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
-
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
 
@@ -780,4 +778,15 @@
 
     <dimen name="signal_icon_size">17dp</dimen>
 
+    <dimen name="hwui_edge_margin">16dp</dimen>
+
+    <dimen name="volume_dialog_panel_width">315dp</dimen>
+    <dimen name="global_actions_panel_width">125dp</dimen>
+
+    <dimen name="global_actions_top_padding">100dp</dimen>
+
+    <dimen name="corner_size">16dp</dimen>
+    <dimen name="top_padding">0dp</dimen>
+    <dimen name="bottom_padding">48dp</dimen>
+    <dimen name="edge_margin">16dp</dimen>
 </resources>

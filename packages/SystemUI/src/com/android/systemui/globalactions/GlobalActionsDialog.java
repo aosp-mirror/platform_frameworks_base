@@ -15,15 +15,16 @@
 package com.android.systemui.globalactions;
 
 import com.android.internal.R;
-import com.android.internal.app.AlertController;
-import com.android.internal.app.AlertController.AlertParams;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.HardwareUiLayout;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
+import com.android.systemui.volume.VolumeDialogMotion.LogAccelerateInterpolator;
+import com.android.systemui.volume.VolumeDialogMotion.LogDecelerateInterpolator;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -34,11 +35,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -56,8 +59,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,10 +66,11 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -79,7 +81,7 @@ import java.util.List;
  * may show depending on whether the keyguard is showing, and whether the device
  * is provisioned.
  */
-class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener  {
+class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener {
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -162,6 +164,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
     /**
      * Show the global actions dialog (creating if necessary)
+     *
      * @param keyguardShowing True if keyguard is showing
      */
     public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned) {
@@ -205,12 +208,14 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             mDialog.getWindow().setAttributes(attrs);
             mDialog.show();
             mWindowManagerFuncs.onGlobalActionsShown();
-            mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
+            mDialog.getWindow().getDecorView().setSystemUiVisibility(
+                    View.STATUS_BAR_DISABLE_EXPAND);
         }
     }
 
     /**
      * Create the global actions dialog.
+     *
      * @return A new dialog.
      */
     private ActionsDialog createDialog() {
@@ -314,28 +319,19 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
         mAdapter = new MyAdapter();
 
-        AlertParams params = new AlertParams(mContext);
-        params.mAdapter = mAdapter;
-        params.mOnClickListener = this;
-        params.mForceInverseBackground = true;
-
-        ActionsDialog dialog = new ActionsDialog(mContext, params);
+        OnItemLongClickListener onItemLongClickListener = new OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+                    long id) {
+                final Action action = mAdapter.getItem(position);
+                if (action instanceof LongPressAction) {
+                    return ((LongPressAction) action).onLongPress();
+                }
+                return false;
+            }
+        };
+        ActionsDialog dialog = new ActionsDialog(mContext, this, mAdapter, onItemLongClickListener);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
-
-        dialog.getListView().setItemsCanFocus(true);
-        dialog.getListView().setLongClickable(true);
-        dialog.getListView().setOnItemLongClickListener(
-                new AdapterView.OnItemLongClickListener() {
-                    @Override
-                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
-                            long id) {
-                        final Action action = mAdapter.getItem(position);
-                        if (action instanceof LongPressAction) {
-                            return ((LongPressAction) action).onLongPress();
-                        }
-                        return false;
-                    }
-        });
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
 
         dialog.setOnDismissListener(this);
@@ -346,7 +342,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     private final class PowerAction extends SinglePressAction implements LongPressAction {
         private PowerAction() {
             super(R.drawable.ic_lock_power_off,
-                R.string.global_action_power_off);
+                    R.string.global_action_power_off);
         }
 
         @Override
@@ -614,7 +610,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     SinglePressAction switchToUser = new SinglePressAction(
                             R.drawable.ic_menu_cc, icon,
                             (user.name != null ? user.name : "Primary")
-                            + (isCurrentUser ? " \u2714" : "")) {
+                                    + (isCurrentUser ? " \u2714" : "")) {
                         public void onPress() {
                             try {
                                 ActivityManager.getService().switchUser(user.id);
@@ -652,7 +648,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         if (!mHasVibrator) {
             final boolean silentModeOn =
                     mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
-            ((ToggleAction)mSilentModeAction).updateState(
+            ((ToggleAction) mSilentModeAction).updateState(
                     silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
         }
     }
@@ -681,7 +677,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     /**
      * The adapter used for the list within the global actions dialog, taking
      * into account whether the keyguard is showing via
-     * {@link com.android.systemui.globalactions.GlobalActionsDialog#mKeyguardShowing} and whether the device is provisioned
+     * {@link com.android.systemui.globalactions.GlobalActionsDialog#mKeyguardShowing} and whether
+     * the device is provisioned
      * via {@link com.android.systemui.globalactions.GlobalActionsDialog#mDeviceProvisioned}.
      */
     private class MyAdapter extends BaseAdapter {
@@ -744,7 +741,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
-            return action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
+            View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
+            if (position == 2) {
+                HardwareUiLayout.get(parent).setDivisionView(view);
+            }
+            return view;
         }
     }
 
@@ -760,7 +761,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     private interface Action {
         /**
          * @return Text that will be announced when dialog is created.  null
-         *     for none.
+         * for none.
          */
         CharSequence getLabelForAccessibility(Context context);
 
@@ -770,13 +771,13 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
         /**
          * @return whether this action should appear in the dialog when the keygaurd
-         *    is showing.
+         * is showing.
          */
         boolean showDuringKeyguard();
 
         /**
          * @return whether this action should appear in the dialog before the
-         *   device is provisioned.
+         * device is provisioned.
          */
         boolean showBeforeProvisioning();
 
@@ -834,7 +835,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
-            View v = inflater.inflate(R.layout.global_actions_item, parent, false);
+            View v = inflater.inflate(com.android.systemui.R.layout.global_actions_item, parent,
+                    false);
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
@@ -895,10 +897,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         protected int mDisabledStatusMessageResId;
 
         /**
-         * @param enabledIconResId The icon for when this action is on.
-         * @param disabledIconResid The icon for when this action is off.
-         * @param message The general information message, e.g 'Silent Mode'
-         * @param enabledStatusMessageResId The on status message, e.g 'sound disabled'
+         * @param enabledIconResId           The icon for when this action is on.
+         * @param disabledIconResid          The icon for when this action is off.
+         * @param message                    The general information message, e.g 'Silent Mode'
+         * @param enabledStatusMessageResId  The on status message, e.g 'sound disabled'
          * @param disabledStatusMessageResId The off status message, e.g. 'sound enabled'
          */
         public ToggleAction(int enabledIconResId,
@@ -931,7 +933,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             willCreate();
 
             View v = inflater.inflate(R
-                            .layout.global_actions_item, parent, false);
+                    .layout.global_actions_item, parent, false);
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
@@ -979,6 +981,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
          * Implementations may override this if their state can be in on of the intermediate
          * states until some notification is received (e.g airplane mode is 'turning off' until
          * we know the wireless connections are back online
+         *
          * @param buttonOn Whether the button was turned on or off
          */
         protected void changeStateFromPress(boolean buttonOn) {
@@ -1020,7 +1023,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
     private static class SilentModeTriStateAction implements Action, View.OnClickListener {
 
-        private final int[] ITEM_IDS = { R.id.option1, R.id.option2, R.id.option3 };
+        private final int[] ITEM_IDS = {R.id.option1, R.id.option2, R.id.option3};
 
         private final AudioManager mAudioManager;
         private final Handler mHandler;
@@ -1145,19 +1148,19 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case MESSAGE_DISMISS:
-                if (mDialog != null) {
-                    mDialog.dismiss();
-                    mDialog = null;
-                }
-                break;
-            case MESSAGE_REFRESH:
-                refreshSilentMode();
-                mAdapter.notifyDataSetChanged();
-                break;
-            case MESSAGE_SHOW:
-                handleShow();
-                break;
+                case MESSAGE_DISMISS:
+                    if (mDialog != null) {
+                        mDialog.dismiss();
+                        mDialog = null;
+                    }
+                    break;
+                case MESSAGE_REFRESH:
+                    refreshSilentMode();
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                case MESSAGE_SHOW:
+                    handleShow();
+                    break;
             }
         }
     };
@@ -1192,39 +1195,81 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     }
 
     private static final class ActionsDialog extends Dialog implements DialogInterface {
-        private final Context mContext;
-        private final AlertController mAlert;
-        private final MyAdapter mAdapter;
 
-        public ActionsDialog(Context context, AlertParams params) {
-            super(context, getDialogTheme(context));
+        private final Context mContext;
+        private final MyAdapter mAdapter;
+        private final LinearLayout mListView;
+        private final HardwareUiLayout mHardwareLayout;
+        private final OnClickListener mClickListener;
+        private final OnItemLongClickListener mLongClickListener;
+
+        public ActionsDialog(Context context, OnClickListener clickListener, MyAdapter adapter,
+                OnItemLongClickListener longClickListener) {
+            super(context, android.R.style.Theme_DeviceDefault_Light_NoActionBar_Fullscreen);
             mContext = getContext();
-            mAlert = AlertController.create(mContext, this, getWindow());
-            mAdapter = (MyAdapter) params.mAdapter;
-            params.apply(mAlert);
+            mAdapter = adapter;
+            mClickListener = clickListener;
+            mLongClickListener = longClickListener;
+            setContentView(com.android.systemui.R.layout.global_actions_wrapped);
+            getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            mListView = findViewById(android.R.id.list);
+            mHardwareLayout = HardwareUiLayout.get(mListView);
+            mHardwareLayout.setOutsideTouchListener(view -> dismiss());
         }
 
-        private static int getDialogTheme(Context context) {
-            TypedValue outValue = new TypedValue();
-            context.getTheme().resolveAttribute(R.attr.alertDialogTheme,
-                    outValue, true);
-            return outValue.resourceId;
+        private void updateList() {
+            mListView.removeAllViews();
+            for (int i = 0; i < mAdapter.getCount(); i++) {
+                View v = mAdapter.getView(i, null, mListView);
+                final int pos = i;
+                v.setOnClickListener(view -> mClickListener.onClick(this, pos));
+                v.setOnLongClickListener(view ->
+                        mLongClickListener.onItemLongClick(null, v, pos, 0));
+                mListView.addView(v);
+            }
         }
 
         @Override
         protected void onStart() {
             super.setCanceledOnTouchOutside(true);
             super.onStart();
-        }
-
-        public ListView getListView() {
-            return mAlert.getListView();
+            updateList();
         }
 
         @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mAlert.installContent();
+        protected void onStop() {
+            super.onStop();
+        }
+
+        @Override
+        public void show() {
+            super.show();
+            mHardwareLayout.setTranslationX(getAnimTranslation());
+            mHardwareLayout.setAlpha(0);
+            mHardwareLayout.animate()
+                    .alpha(1)
+                    .translationX(0)
+                    .setDuration(300)
+                    .setInterpolator(new LogDecelerateInterpolator())
+                    .start();
+        }
+
+        @Override
+        public void dismiss() {
+            mHardwareLayout.setTranslationX(0);
+            mHardwareLayout.setAlpha(1);
+            mHardwareLayout.animate()
+                    .alpha(0)
+                    .translationX(getAnimTranslation())
+                    .setDuration(300)
+                    .withEndAction(() -> super.dismiss())
+                    .setInterpolator(new LogAccelerateInterpolator())
+                    .start();
+        }
+
+        private float getAnimTranslation() {
+            return getContext().getResources().getDimension(
+                    com.android.systemui.R.dimen.global_actions_panel_width) / 2;
         }
 
         @Override
@@ -1239,22 +1284,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                 }
             }
             return super.dispatchPopulateAccessibilityEvent(event);
-        }
-
-        @Override
-        public boolean onKeyDown(int keyCode, KeyEvent event) {
-            if (mAlert.onKeyDown(keyCode, event)) {
-                return true;
-            }
-            return super.onKeyDown(keyCode, event);
-        }
-
-        @Override
-        public boolean onKeyUp(int keyCode, KeyEvent event) {
-            if (mAlert.onKeyUp(keyCode, event)) {
-                return true;
-            }
-            return super.onKeyUp(keyCode, event);
         }
     }
 }

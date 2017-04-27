@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.volume;
 
 import android.animation.Animator;
@@ -67,8 +66,8 @@ public class VolumeDialogMotion {
             @Override
             public void onShow(DialogInterface dialog) {
                 if (D.BUG) Log.d(TAG, "mDialog.onShow");
-                final int h = mDialogView.getHeight();
-                mDialogView.setTranslationY(-h);
+                final int w = mDialogView.getWidth() / 4;
+                mDialogView.setTranslationX(w);
                 startShowAnimation();
             }
         });
@@ -117,7 +116,7 @@ public class VolumeDialogMotion {
     }
 
     private int chevronDistance() {
-        return mChevron.getHeight() / 6;
+        return 0;
     }
 
     private int chevronPosY() {
@@ -128,7 +127,9 @@ public class VolumeDialogMotion {
     private void startShowAnimation() {
         if (D.BUG) Log.d(TAG, "startShowAnimation");
         mDialogView.animate()
+                .translationX(0)
                 .translationY(0)
+                .alpha(1)
                 .setDuration(scaledDuration(300))
                 .setInterpolator(new LogDecelerateInterpolator())
                 .setListener(null)
@@ -139,7 +140,6 @@ public class VolumeDialogMotion {
                         // reposition chevron
                         final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
                         final int posY = chevronPosY();
-                        mChevron.setTranslationY(posY + v + -mDialogView.getTranslationY());
                     }
                 })
                 .withEndAction(new Runnable() {
@@ -148,7 +148,6 @@ public class VolumeDialogMotion {
                         if (mChevronPositionAnimator == null) return;
                         // reposition chevron
                         final int posY = chevronPosY();
-                        mChevron.setTranslationY(posY + -mDialogView.getTranslationY());
                     }
                 })
                 .start();
@@ -164,17 +163,11 @@ public class VolumeDialogMotion {
                 if (D.BUG) Log.d(TAG, "show.onAnimationEnd");
                 setShowing(false);
             }
+
             @Override
             public void onAnimationCancel(Animator animation) {
                 if (D.BUG) Log.d(TAG, "show.onAnimationCancel");
                 mCancelled = true;
-            }
-        });
-        mContentsPositionAnimator.addUpdateListener(new AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float v = (Float) animation.getAnimatedValue();
-                mContents.setTranslationY(v + -mDialogView.getTranslationY());
             }
         });
         mContentsPositionAnimator.setInterpolator(new LogDecelerateInterpolator());
@@ -218,34 +211,26 @@ public class VolumeDialogMotion {
             setShowing(false);
         }
         mDialogView.animate()
-                .translationY(-mDialogView.getHeight())
+                .translationX(mDialogView.getWidth() / 4)
+                .alpha(0)
                 .setDuration(scaledDuration(250))
                 .setInterpolator(new LogAccelerateInterpolator())
-                .setUpdateListener(new AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        mContents.setTranslationY(-mDialogView.getTranslationY());
-                        final int posY = chevronPosY();
-                        mChevron.setTranslationY(posY + -mDialogView.getTranslationY());
-                    }
-                })
                 .setListener(new AnimatorListenerAdapter() {
                     private boolean mCancelled;
+
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         if (mCancelled) return;
                         if (D.BUG) Log.d(TAG, "dismiss.onAnimationEnd");
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
-                                mDialog.dismiss();
-                                onComplete.run();
-                                setDismissing(false);
-                            }
+                        mHandler.postDelayed(() -> {
+                            if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
+                            mDialog.dismiss();
+                            onComplete.run();
+                            setDismissing(false);
                         }, PRE_DISMISS_DELAY);
 
                     }
+
                     @Override
                     public void onAnimationCancel(Animator animation) {
                         if (D.BUG) Log.d(TAG, "dismiss.onAnimationCancel");
@@ -258,13 +243,13 @@ public class VolumeDialogMotion {
         return (int) (base * ANIMATION_SCALE);
     }
 
-    private static final class LogDecelerateInterpolator implements TimeInterpolator {
+    public static final class LogDecelerateInterpolator implements TimeInterpolator {
         private final float mBase;
         private final float mDrift;
         private final float mTimeScale;
         private final float mOutputScale;
 
-        private LogDecelerateInterpolator() {
+        public LogDecelerateInterpolator() {
             this(400f, 1.4f, 0);
         }
 
@@ -286,12 +271,12 @@ public class VolumeDialogMotion {
         }
     }
 
-    private static final class LogAccelerateInterpolator implements TimeInterpolator {
+    public static final class LogAccelerateInterpolator implements TimeInterpolator {
         private final int mBase;
         private final int mDrift;
         private final float mLogScale;
 
-        private LogAccelerateInterpolator() {
+        public LogAccelerateInterpolator() {
             this(100, 0);
         }
 

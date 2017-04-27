@@ -18,6 +18,7 @@ package com.android.systemui.volume;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.ObjectAnimator;
@@ -59,6 +60,7 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
@@ -73,6 +75,7 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.HardwareUiLayout;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -199,53 +202,37 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         mDialog.setCanceledOnTouchOutside(true);
         final Resources res = mContext.getResources();
-        final WindowManager.LayoutParams lp = mWindow.getAttributes();
-        lp.type = mWindowType;
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.setTitle(VolumeDialogImpl.class.getSimpleName());
-        lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-        lp.y = res.getDimensionPixelSize(R.dimen.volume_offset_top);
-        lp.gravity = Gravity.TOP;
-        lp.windowAnimations = -1;
-        mWindow.setAttributes(lp);
         mWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 
-        mDialog.setContentView(R.layout.volume_dialog);
-        mDialogView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog);
-        mDialogView.setOnHoverListener(new View.OnHoverListener() {
-            @Override
-            public boolean onHover(View v, MotionEvent event) {
-                int action = event.getActionMasked();
-                mHovering = (action == MotionEvent.ACTION_HOVER_ENTER)
-                        || (action == MotionEvent.ACTION_HOVER_MOVE);
-                rescheduleTimeoutH();
-                return true;
-            }
+        mDialog.setContentView(R.layout.volume_dialog_wrapped);
+        mDialogView = mDialog.findViewById(R.id.volume_dialog);
+        mDialogView.setOnHoverListener((v, event) -> {
+            int action = event.getActionMasked();
+            mHovering = (action == MotionEvent.ACTION_HOVER_ENTER)
+                    || (action == MotionEvent.ACTION_HOVER_MOVE);
+            rescheduleTimeoutH();
+            return true;
         });
-        mDialogContentView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog_content);
-        mDialogRowsView = (ViewGroup) mDialogContentView.findViewById(R.id.volume_dialog_rows);
+        mDialogContentView = mDialog.findViewById(R.id.volume_dialog_content);
+        mDialogRowsView = mDialogContentView.findViewById(R.id.volume_dialog_rows);
         mExpanded = false;
-        mExpandButton = (ImageButton) mDialogView.findViewById(R.id.volume_expand_button);
+        mExpandButton = mDialogView.findViewById(R.id.volume_expand_button);
         mExpandButton.setOnClickListener(mClickExpand);
 
         mExpandButton.setVisibility(
                 AudioSystem.isSingleVolume(mContext) ? View.GONE : View.VISIBLE);
-        updateWindowWidthH();
         updateExpandButtonH();
 
-        mMotion = new VolumeDialogMotion(mDialog, mDialogView, mDialogContentView, mExpandButton,
-                new VolumeDialogMotion.Callback() {
-                    @Override
-                    public void onAnimatingChanged(boolean animating) {
-                        if (animating) return;
-                        if (mPendingStateChanged) {
-                            mHandler.sendEmptyMessage(H.STATE_CHANGED);
-                            mPendingStateChanged = false;
-                        }
-                        if (mPendingRecheckAll) {
-                            mHandler.sendEmptyMessage(H.RECHECK_ALL);
-                            mPendingRecheckAll = false;
-                        }
+        mMotion = new VolumeDialogMotion(mDialog, (View) mDialogView.getParent(),
+                mDialogContentView, mExpandButton, animating -> {
+                    if (animating) return;
+                    if (mPendingStateChanged) {
+                        mHandler.sendEmptyMessage(H.STATE_CHANGED);
+                        mPendingStateChanged = false;
+                    }
+                    if (mPendingRecheckAll) {
+                        mHandler.sendEmptyMessage(H.RECHECK_ALL);
+                        mPendingRecheckAll = false;
                     }
                 });
 
@@ -270,11 +257,20 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             addExistingRows();
         }
         mExpandButtonAnimationDuration = res.getInteger(R.integer.volume_expand_animation_duration);
-        mZenFooter = (ZenFooter) mDialog.findViewById(R.id.volume_zen_footer);
+        mZenFooter = mDialog.findViewById(R.id.volume_zen_footer);
         mZenFooter.init(mZenModeController);
-        mZenPanel = (TunerZenModePanel) mDialog.findViewById(R.id.tuner_zen_mode_panel);
+        mZenPanel = mDialog.findViewById(R.id.tuner_zen_mode_panel);
         mZenPanel.init(mZenModeController);
         mZenPanel.setCallback(mZenPanelCallback);
+
+        final WindowManager.LayoutParams lp = mWindow.getAttributes();
+        lp.width = MATCH_PARENT;
+        lp.height = MATCH_PARENT;
+        lp.type = mWindowType;
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.setTitle(VolumeDialogImpl.class.getSimpleName());
+        lp.windowAnimations = -1;
+        mWindow.setAttributes(lp);
     }
 
     @Override
@@ -286,20 +282,6 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
     private ColorStateList loadColorStateList(int colorResId) {
         return ColorStateList.valueOf(mContext.getColor(colorResId));
-    }
-
-    private void updateWindowWidthH() {
-        final ViewGroup.LayoutParams lp = mDialogView.getLayoutParams();
-        final DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
-        if (D.BUG) Log.d(TAG, "updateWindowWidth dm.w=" + dm.widthPixels);
-        int w = dm.widthPixels;
-        final int max = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.volume_dialog_panel_width);
-        if (w > max) {
-            w = max;
-        }
-        lp.width = w;
-        mDialogView.setLayoutParams(lp);
     }
 
     public void setStreamImportant(int stream, boolean important) {
@@ -542,10 +524,8 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     }
 
     private void updateDialogBottomMarginH() {
-        final long diff = System.currentTimeMillis() - mCollapseTime;
-        final boolean collapsing = mCollapseTime != 0 && diff < getConservativeCollapseDuration();
         final ViewGroup.MarginLayoutParams mlp = (MarginLayoutParams) mDialogView.getLayoutParams();
-        final int bottomMargin = collapsing ? mDialogContentView.getHeight() :
+        final int bottomMargin =
                 mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_margin_bottom);
         if (bottomMargin != mlp.bottomMargin) {
             if (D.BUG) Log.d(TAG, "bottomMargin " + mlp.bottomMargin + " -> " + bottomMargin);
@@ -575,7 +555,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         TransitionManager.endTransitions(mDialogView);
         final VolumeRow activeRow = getActiveRow();
         if (!dismissing) {
-            mWindow.setLayout(mWindow.getAttributes().width, ViewGroup.LayoutParams.MATCH_PARENT);
+            mWindow.setLayout(mWindow.getAttributes().width, MATCH_PARENT);
             TransitionManager.beginDelayedTransition(mDialogView, getTransistion());
         }
         updateRowsH(activeRow);
@@ -637,7 +617,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             final boolean isActive = row == activeRow;
             final boolean shouldBeVisible = shouldBeVisibleH(row, isActive);
             Util.setVisOrGone(row.view, shouldBeVisible);
-            Util.setVisOrGone(row.header, shouldBeVisible);
+            Util.setVisOrGone(row.header, shouldBeVisible && mExpanded);
             if (row.view.isShown()) {
                 updateVolumeRowSliderTintH(row, isActive);
             }
@@ -698,6 +678,16 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         TransitionManager.beginDelayedTransition(mDialogView, getTransistion());
         if (wasVisible != visible && !visible) {
             prepareForCollapse();
+        }
+        if (visible != wasVisible) {
+            if (visible) {
+                HardwareUiLayout.get(mZenFooter).setDivisionView(mZenFooter);
+            } else {
+                mHandler.postDelayed(() ->
+                        HardwareUiLayout.get(mZenFooter).setDivisionView(mZenFooter),
+                        mExpandButtonAnimationDuration);
+            }
+
         }
         Util.setVisOrGone(mZenFooter, visible);
         mZenFooter.update();
@@ -962,8 +952,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
             @Override
             public void onTransitionEnd(Transition transition) {
-                mWindow.setLayout(
-                        mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
+                mWindow.setLayout(MATCH_PARENT, MATCH_PARENT);
             }
 
             @Override
@@ -972,8 +961,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
             @Override
             public void onTransitionPause(Transition transition) {
-                mWindow.setLayout(
-                        mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
+                mWindow.setLayout(MATCH_PARENT, MATCH_PARENT);
             }
 
             @Override
@@ -1025,7 +1013,6 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 initDialog();
                 mDensity = density;
             }
-            updateWindowWidthH();
             mConfigurableTexts.update();
             mZenFooter.onConfigurationChanged();
         }
@@ -1081,6 +1068,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             if (mExpandButtonAnimationRunning) return;
             final boolean newExpand = !mExpanded;
             Events.writeEvent(mContext, Events.EVENT_EXPAND, newExpand);
+            if (!newExpand) {
+                HardwareUiLayout.get(mDialogContentView).setCollapse();
+            }
             updateExpandedH(newExpand, false /* dismissing */);
         }
     };
@@ -1156,8 +1146,8 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             event.setPackageName(mContext.getPackageName());
 
             ViewGroup.LayoutParams params = getWindow().getAttributes();
-            boolean isFullScreen = (params.width == ViewGroup.LayoutParams.MATCH_PARENT) &&
-                    (params.height == ViewGroup.LayoutParams.MATCH_PARENT);
+            boolean isFullScreen = (params.width == MATCH_PARENT) &&
+                    (params.height == MATCH_PARENT);
             event.setFullScreen(isFullScreen);
 
             if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
