@@ -65,99 +65,57 @@ import java.util.ArrayList;
 
 /**
  * <p>
- * Visual indicator of progress in some operation.  Displays a bar to the user
- * representing how far the operation has progressed; the application can
- * change the amount of progress (modifying the length of the bar) as it moves
- * forward.  There is also a secondary progress displayable on a progress bar
- * which is useful for displaying intermediate progress, such as the buffer
- * level during a streaming playback progress bar.
+ * A user interface element that indicates the progress of an operation.
+ * Progress bar supports two modes to represent progress: determinate, and indeterminate. For
+ * a visual overview of the difference between determinate and indeterminate progress modes, see
+ * <a href="https://material.io/guidelines/components/progress-activity.html#progress-activity-types-of-indicators">
+ * Progress & activity</a>.
+ * Display progress bars to a user in a non-interruptive way.
+ * Show the progress bar in your app's user interface or in a notification
+ * instead of within a dialog.
  * </p>
- *
+ * <h3>Indeterminate Progress</h3>
  * <p>
- * A progress bar can also be made indeterminate. In indeterminate mode, the
- * progress bar shows a cyclic animation without an indication of progress. This mode is used by
- * applications when the length of the task is unknown. The indeterminate progress bar can be either
- * a spinning wheel or a horizontal bar.
- * </p>
- *
- * <p>The following code example shows how a progress bar can be used from
- * a worker thread to update the user interface to notify the user of progress:
- * </p>
- *
- * <pre>
- * public class MyActivity extends Activity {
- *     private static final int PROGRESS = 0x1;
- *
- *     private ProgressBar mProgress;
- *     private int mProgressStatus = 0;
- *
- *     private Handler mHandler = new Handler();
- *
- *     protected void onCreate(Bundle icicle) {
- *         super.onCreate(icicle);
- *
- *         setContentView(R.layout.progressbar_activity);
- *
- *         mProgress = (ProgressBar) findViewById(R.id.progress_bar);
- *
- *         // Start lengthy operation in a background thread
- *         new Thread(new Runnable() {
- *             public void run() {
- *                 while (mProgressStatus &lt; 100) {
- *                     mProgressStatus = doWork();
- *
- *                     // Update the progress bar
- *                     mHandler.post(new Runnable() {
- *                         public void run() {
- *                             mProgress.setProgress(mProgressStatus);
- *                         }
- *                     });
- *                 }
- *             }
- *         }).start();
- *     }
- * }</pre>
- *
- * <p>To add a progress bar to a layout file, you can use the {@code <ProgressBar>} element.
- * By default, the progress bar is a spinning wheel (an indeterminate indicator). To change to a
- * horizontal progress bar, apply the {@link android.R.style#Widget_ProgressBar_Horizontal
- * Widget.ProgressBar.Horizontal} style, like so:</p>
- *
+ * Use indeterminate mode for the progress bar when you do not know how long an
+ * operation will take.
+ * Indeterminate mode is the default for progress bar and shows a cyclic animation without a
+ * specific amount of progress indicated.
+ * The following example shows an indeterminate progress bar:
  * <pre>
  * &lt;ProgressBar
- *     style="@android:style/Widget.ProgressBar.Horizontal"
- *     ... /&gt;</pre>
- *
- * <p>If you will use the progress bar to show real progress, you must use the horizontal bar. You
- * can then increment the  progress with {@link #incrementProgressBy incrementProgressBy()} or
- * {@link #setProgress setProgress()}. By default, the progress bar is full when it reaches 100. If
- * necessary, you can adjust the maximum value (the value for a full bar) using the {@link
- * android.R.styleable#ProgressBar_max android:max} attribute. Other attributes available are listed
- * below.</p>
- *
- * <p>Another common style to apply to the progress bar is {@link
- * android.R.style#Widget_ProgressBar_Small Widget.ProgressBar.Small}, which shows a smaller
- * version of the spinning wheel&mdash;useful when waiting for content to load.
- * For example, you can insert this kind of progress bar into your default layout for
- * a view that will be populated by some content fetched from the Internet&mdash;the spinning wheel
- * appears immediately and when your application receives the content, it replaces the progress bar
- * with the loaded content. For example:</p>
- *
+ *      android:id="@+id/indeterminateBar"
+ *      android:layout_width="wrap_content"
+ *      android:layout_height="wrap_content"
+ *      /&gt;
+ * </pre>
+ * </p>
+ * <h3>Determinate Progress</h3>
+ * <p>
+ * Use determinate mode for the progress bar when you want to show that a specific quantity of
+ * progress has occurred.
+ * For example, the percent remaining of a file being retrieved, the amount records in
+ * a batch written to database, or the percent remaining of an audio file that is playing.
+ * <p>
+ * <p>
+ * To indicate determinate progress, you set the style of the progress bar to
+ * {@link android.R.style#Widget_ProgressBar_Horizontal} and set the amount of progress.
+ * The following example shows a determinate progress bar that is 25% complete:
  * <pre>
- * &lt;LinearLayout
- *     android:orientation="horizontal"
- *     ... &gt;
- *     &lt;ProgressBar
- *         android:layout_width="wrap_content"
- *         android:layout_height="wrap_content"
- *         style="@android:style/Widget.ProgressBar.Small"
- *         android:layout_marginRight="5dp" /&gt;
- *     &lt;TextView
- *         android:layout_width="wrap_content"
- *         android:layout_height="wrap_content"
- *         android:text="@string/loading" /&gt;
- * &lt;/LinearLayout&gt;</pre>
- *
+ * &lt;ProgressBar
+ *      android:id="@+id/determinateBar"
+ *      style="@android:style/Widget.ProgressBar.Horizontal"
+ *      android:layout_width="wrap_content"
+ *      android:layout_height="wrap_content"
+ *      android:progress="25"/&gt;
+ * </pre>
+ * You can update the percentage of progress displayed by using the
+ * {@link #setProgress(int)} method, or by calling
+ * {@link #incrementProgressBy(int)} to increase the current progress completed
+ * by a specified amount.
+ * By default, the progress bar is full when the progress value reaches 100.
+ * You can adjust this default by setting the
+ * {@link android.R.styleable#ProgressBar_max android:max} attribute.
+ * </p>
  * <p>Other progress bar styles provided by the system include:</p>
  * <ul>
  * <li>{@link android.R.style#Widget_ProgressBar_Horizontal Widget.ProgressBar.Horizontal}</li>
