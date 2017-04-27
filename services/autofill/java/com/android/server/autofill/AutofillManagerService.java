@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +50,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
+import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
@@ -60,6 +62,7 @@ import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
@@ -161,6 +164,84 @@ public final class AutofillManagerService extends SystemService {
                 updateCachedServiceLocked(userId, disabledNow);
             }
         });
+        startTrackingPackageChanges();
+    }
+
+
+    private void startTrackingPackageChanges() {
+        PackageMonitor monitor = new PackageMonitor() {
+            @Override
+            public void onSomePackagesChanged() {
+                synchronized (mLock) {
+                    updateCachedServiceLocked(getChangingUserId());
+                }
+            }
+
+            @Override
+            public void onPackageUpdateFinished(String packageName, int uid) {
+                synchronized (mLock) {
+                    final String activePackageName = getActiveAutofillServicePackageName();
+                    if (packageName.equals(activePackageName)) {
+                        removeCachedServiceLocked(getChangingUserId());
+                    }
+                }
+            }
+
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                synchronized (mLock) {
+                    final int userId = getChangingUserId();
+                    final AutofillManagerServiceImpl userState = peekServiceForUserLocked(userId);
+                    if (userState != null) {
+                        final ComponentName componentName = userState.getServiceComponentName();
+                        if (componentName != null) {
+                            if (packageName.equals(componentName.getPackageName())) {
+                                handleActiveAutofillServiceRemoved(userId);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public boolean onHandleForceStop(Intent intent, String[] packages,
+                    int uid, boolean doit) {
+                synchronized (mLock) {
+                    final String activePackageName = getActiveAutofillServicePackageName();
+                    for (String pkg : packages) {
+                        if (pkg.equals(activePackageName)) {
+                            if (!doit) {
+                                return true;
+                            }
+                            handleActiveAutofillServiceRemoved(getChangingUserId());
+                        }
+                    }
+                }
+                return false;
+            }
+
+            private void handleActiveAutofillServiceRemoved(int userId) {
+                removeCachedServiceLocked(userId);
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        Settings.Secure.AUTOFILL_SERVICE, null, userId);
+            }
+
+            private String getActiveAutofillServicePackageName() {
+                final int userId = getChangingUserId();
+                final AutofillManagerServiceImpl userState = peekServiceForUserLocked(userId);
+                if (userState == null) {
+                    return null;
+                }
+                final ComponentName serviceComponent = userState.getServiceComponentName();
+                if (serviceComponent == null) {
+                    return null;
+                }
+                return serviceComponent.getPackageName();
+            }
+        };
+
+        // package changes
+        monitor.register(mContext, null,  UserHandle.ALL, true);
     }
 
     @Override
@@ -312,6 +393,9 @@ public final class AutofillManagerService extends SystemService {
         AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
         if (service != null) {
             service.updateLocked(disabled);
+            if (!service.isEnabled()) {
+                removeCachedServiceLocked(userId);
+            }
         }
     }
 

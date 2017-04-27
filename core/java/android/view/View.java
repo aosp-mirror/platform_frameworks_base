@@ -7642,7 +7642,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mContext.getSystemService(AutofillManager.class);
     }
 
-    private boolean isAutofillable() {
+    /** @hide */
+    public boolean isAutofillable() {
         return getAutofillType() != AUTOFILL_TYPE_NONE && !isAutofillBlocked();
     }
 
