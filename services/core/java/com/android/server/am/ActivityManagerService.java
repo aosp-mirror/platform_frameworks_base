@@ -229,7 +229,7 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.PictureInPictureArgs;
+import android.app.PictureInPictureParams;
 import android.app.ProfilerInfo;
 import android.app.RemoteAction;
 import android.app.WaitResult;
@@ -7818,29 +7818,38 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
-                final ActivityStack stack = ActivityRecord.getStackLocked(token);
-                if (stack == null || stack.mStackId != PINNED_STACK_ID) {
-                    return false;
-                }
-
-                // If we are animating to fullscreen then we have already dispatched the PIP mode
-                // changed, so we should reflect that check here as well.
-                final PinnedStackWindowController windowController =
-                        ((PinnedActivityStack) stack).getWindowContainerController();
-                return !windowController.isAnimatingBoundsToFullscreen();
+                return isInPictureInPictureMode(ActivityRecord.forTokenLocked(token));
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
+    private boolean isInPictureInPictureMode(ActivityRecord r) {
+        if (r == null || r.getStack() == null || !r.getStack().isPinnedStack() ||
+                r.getStack().isInStackLocked(r) == null) {
+            return false;
+        }
+
+        // If we are animating to fullscreen then we have already dispatched the PIP mode
+        // changed, so we should reflect that check here as well.
+        final PinnedActivityStack stack = r.getStack();
+        final PinnedStackWindowController windowController = stack.getWindowContainerController();
+        return !windowController.isAnimatingBoundsToFullscreen();
+    }
+
     @Override
-    public boolean enterPictureInPictureMode(IBinder token, final PictureInPictureArgs args) {
+    public boolean enterPictureInPictureMode(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
-                final ActivityRecord r = ensureValidPictureInPictureActivityArgsLocked(
-                        "enterPictureInPictureMode", token, args);
+                final ActivityRecord r = ensureValidPictureInPictureActivityParamsLocked(
+                        "enterPictureInPictureMode", token, params);
+
+                // If the activity is already in picture in picture mode, then just return early
+                if (isInPictureInPictureMode(r)) {
+                    return true;
+                }
 
                 // Activity supports picture-in-picture, now check that we can enter PiP at this
                 // point, if it is
@@ -7851,7 +7860,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 final Runnable enterPipRunnable = () -> {
                     // Only update the saved args from the args that are set
-                    r.pictureInPictureArgs.copyOnlySet(args);
+                    r.pictureInPictureArgs.copyOnlySet(params);
                     final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                     final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                     // Adjust the source bounds by the insets for the transition down
@@ -7870,7 +7879,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_ENTERED,
                             r.supportsPictureInPictureWhilePausing);
-                    logPictureInPictureArgs(args);
+                    logPictureInPictureArgs(params);
                 };
 
                 if (isKeyguardLocked()) {
@@ -7909,15 +7918,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setPictureInPictureArgs(IBinder token, final PictureInPictureArgs args) {
+    public void setPictureInPictureParams(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
-                final ActivityRecord r = ensureValidPictureInPictureActivityArgsLocked(
-                        "setPictureInPictureArgs", token, args);
+                final ActivityRecord r = ensureValidPictureInPictureActivityParamsLocked(
+                        "setPictureInPictureParams", token, params);
 
                 // Only update the saved args from the args that are set
-                r.pictureInPictureArgs.copyOnlySet(args);
+                r.pictureInPictureArgs.copyOnlySet(params);
                 if (r.getStack().getStackId() == PINNED_STACK_ID) {
                     // If the activity is already in picture-in-picture, update the pinned stack now
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
@@ -7929,21 +7938,28 @@ public class ActivityManagerService extends IActivityManager.Stub
                         stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                     }
                 }
-                logPictureInPictureArgs(args);
+                logPictureInPictureArgs(params);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
-    private void logPictureInPictureArgs(PictureInPictureArgs args) {
-        if (args.hasSetActions()) {
+    @Override
+    public int getMaxNumPictureInPictureActions(IBinder token) {
+        // Currently, this is a static constant, but later, we may change this to be dependent on
+        // the context of the activity
+        return 3;
+    }
+
+    private void logPictureInPictureArgs(PictureInPictureParams params) {
+        if (params.hasSetActions()) {
             MetricsLogger.histogram(mContext, "tron_varz_picture_in_picture_actions_count",
-                    args.getActions().size());
+                    params.getActions().size());
         }
-        if (args.hasSetAspectRatio()) {
+        if (params.hasSetAspectRatio()) {
             LogMaker lm = new LogMaker(MetricsEvent.ACTION_PICTURE_IN_PICTURE_ASPECT_RATIO_CHANGED);
-            lm.addTaggedData(MetricsEvent.PICTURE_IN_PICTURE_ASPECT_RATIO, args.getAspectRatio());
+            lm.addTaggedData(MetricsEvent.PICTURE_IN_PICTURE_ASPECT_RATIO, params.getAspectRatio());
             MetricsLogger.action(lm);
         }
     }
@@ -7954,8 +7970,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @return the activity record for the given {@param token} if all the checks pass.
      */
-    private ActivityRecord ensureValidPictureInPictureActivityArgsLocked(String caller,
-            IBinder token, PictureInPictureArgs args) {
+    private ActivityRecord ensureValidPictureInPictureActivityParamsLocked(String caller,
+            IBinder token, PictureInPictureParams params) {
         if (!mSupportsPictureInPicture) {
             throw new IllegalStateException(caller
                     + ": Device doesn't support picture-in-picture mode.");
@@ -7977,9 +7993,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + ": Activities on the home, assistant, or recents stack not supported");
         }
 
-        if (args.hasSetAspectRatio()
+        if (params.hasSetAspectRatio()
                 && !mWindowManager.isValidPictureInPictureAspectRatio(r.getStack().mDisplayId,
-                        args.getAspectRatio())) {
+                        params.getAspectRatio())) {
             final float minAspectRatio = mContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
             final float maxAspectRatio = mContext.getResources().getFloat(
@@ -7989,12 +8005,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             minAspectRatio, maxAspectRatio));
         }
 
-        if (args.hasSetActions()
-                && args.getActions().size() > ActivityManager.getMaxNumPictureInPictureActions()) {
-            throw new IllegalArgumentException(String.format(caller + ": Invalid number of"
-                    + "picture-in-picture actions.  Only a maximum of %d actions allowed",
-                            ActivityManager.getMaxNumPictureInPictureActions()));
-        }
+        // Truncate the number of actions if necessary
+        params.truncateActions(getMaxNumPictureInPictureActions(token));
 
         return r;
     }
