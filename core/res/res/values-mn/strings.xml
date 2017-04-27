@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Таны оператор компани энэ байршилд дуу хоолой, яаралтай дуудлагыг түр хаасан байна"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Сүлжээнд холбогдох боломжгүй байна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Хүлээн авалтыг сайжруулахын тулд систем, сүлжээ, интернэт, мобайл сүлжээнд сонгосон сүлжээний төрлийг өөрчилнө үү."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сануулга"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Дуудлага шилжүүлэх"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Яаралтай дуудлага хийх горим"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Мобайл дата сануулга"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS мессеж"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Дуут шуудангийн мессеж"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi дуудлага"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Хандлагын цэгт хүсэлт тавьсан TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Хандлагын цэгт хүсэлт тавьсан TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Хандлагын цэгт хүсэлт тавьсан TTY Mode VCO"</string>
@@ -190,7 +197,7 @@
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Таблетын сонголтууд"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Телевиз сонголтууд"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Утасны сонголт"</string>
-    <string name="silent_mode" msgid="7167703389802618663">"Чимээгүй горим"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Дуугүй горим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Утасгүй холбоог асаах"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Утасгүй сүлжээг унтраах уу"</string>
     <string name="screen_lock" msgid="799094655496098153">"Дэлгэцний түгжээ"</string>
@@ -231,7 +238,7 @@
       <item quantity="other">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_1">%d</xliff:g> секундад авна.</item>
       <item quantity="one">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_0">%d</xliff:g> секундад авна.</item>
     </plurals>
-    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Чимээгүй горим"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Дуугүй горим"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Дуу хаагдсан"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Дуу асав"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Нислэгийн горим"</string>
@@ -1730,11 +1737,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Цагийг оруулахын тулд текст оруулах горимд шилжүүлнэ үү."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Цагийг оруулахын тулд цагийн горимд шилжүүлнэ үү."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Автоматаар бөглөх хэсгийн сонголт"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Агуулгыг автоматаар бөглөх боломжгүй"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>-д хадгалах уу?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>-г <xliff:g id="LABEL">%2$s</xliff:g>-д хадгалах уу?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>-г <xliff:g id="LABEL">%3$s</xliff:g>-д хадгалах уу?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>-г <xliff:g id="LABEL">%4$s</xliff:g>-д хадгалах уу?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;-д хадгалах уу?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>-г &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;-д хадгалах уу?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>-г &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;-д хадгалах уу?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>-г &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;-д хадгалах уу?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Хадгалах"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Үгүй, баярлалаа"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"нууц үг"</string>

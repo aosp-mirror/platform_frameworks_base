@@ -101,6 +101,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Jūsų operatorius laikinai sustabdė balso skambučius ir skambučius pagalbos numeriais šioje vietovėje"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nepavyko pasiekti tinklo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Kad pagerintumėte ryšį, pabandykite pakeisti tipą, pasirinktą skiltyje „Nustatymai“ &gt; „Tinklas ir internetas“ &gt; „Mobiliojo ryšio tinklai“ &gt; „Pageidaujamas tinklo tipas“."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Įspėjimai"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Skambučio peradresavimas"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Atskambinimo pagalbos numeriu režimas"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Mobiliojo ryšio duomenų įspėjimai"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS pranešimai"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Balso pašto pranešimai"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"„Wi-Fi“ skambinimas"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo VCO"</string>
@@ -1794,11 +1801,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Laiko įvestį pateikti perjungus į teksto įvesties režimą."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Laiko įvestį pateikti perjungus į laikrodžio režimą."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Automatinio pildymo parinktys"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Turinio negalima pildyti automatiškai"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Išsaugoti skiltyje „<xliff:g id="LABEL">%1$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Išsaugoti <xliff:g id="TYPE">%1$s</xliff:g> skiltyje „<xliff:g id="LABEL">%2$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> sistemoje „<xliff:g id="LABEL">%3$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> sistemoje „<xliff:g id="LABEL">%4$s</xliff:g>“?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Išsaugoti sistemoje &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Išsaugoti <xliff:g id="TYPE">%1$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g> ir <xliff:g id="TYPE_1">%2$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ir <xliff:g id="TYPE_2">%3$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Išsaugoti"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, ačiū"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"slaptažodį"</string>

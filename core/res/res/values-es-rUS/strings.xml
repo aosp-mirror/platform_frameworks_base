@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Tu proveedor suspendió temporalmente las llamadas de emergencia y de voz en esta ubicación"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mejorar la recepción, cambia el tipo de red. Selecciona Sistema &gt; Internet y red &gt; Redes móviles &gt; Tipo de red preferido."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamada"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de llamada de emergencia"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertas de datos móviles"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"Mensajes SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensajes del buzón de voz"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Llamada por Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"El dispositivo del mismo nivel solicitó el modo TTY FULL."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"El dispositivo del mismo nivel solicitó el modo TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"El dispositivo del mismo nivel solicitó el modo TTY VCO."</string>
@@ -1426,7 +1433,7 @@
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Dibuja tu patrón."</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingresa el PIN de la tarjeta SIM."</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingresa el PIN."</string>
-    <string name="kg_password_instructions" msgid="5753646556186936819">"Ingresa tu contraseña."</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Escribe la contraseña."</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"La tarjeta SIM está inhabilitada. Para continuar, ingresa el código PUK. Si quieres obtener más información, ponte en contacto con el proveedor."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingresa el código PIN deseado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirmar código PIN deseado"</string>
@@ -1701,7 +1708,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Presiona para ver archivos"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fijar"</string>
     <string name="unpin_target" msgid="3556545602439143442">"No fijar"</string>
-    <string name="app_info" msgid="6856026610594615344">"Información de la app"</string>
+    <string name="app_info" msgid="6856026610594615344">"Información de apps"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"¿Deseas restablecer el dispositivo?"</string>
     <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Presiona para restablecer el dispositivo"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Cambia al modo de entrada de texto para ingresar la hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Cambia al modo de reloj para ingresar la hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opciones de autocompletar"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"El contenido no puede autocompletarse"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"¿Quieres guardar el contenido en <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"¿Quieres guardar el contenido de <xliff:g id="TYPE">%1$s</xliff:g> en <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"¿Guardar <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"¿Guardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g> en <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"¿Quieres guardar el contenido en &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"¿Quieres guardar tu <xliff:g id="TYPE">%1$s</xliff:g> en &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"¿Quieres guardar tu <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"¿Quieres guardar tu <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g> en &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Guardar"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, gracias"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"contraseña"</string>

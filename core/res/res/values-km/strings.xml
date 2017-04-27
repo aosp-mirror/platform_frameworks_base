@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ក្រុមហ៊ុន​បម្រើ​សេវា​ទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​ដោយ​សំឡេង និង​ការហៅ​បន្ទាន់​ជា​បណ្តោះអាសន្ន​នៅទី​តាំង​នេះ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ដើម្បីកែលម្អការទទួលយក សាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ប្រព័ន្ធ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"ការជូនដំណឹង​អំពី​ទិន្នន័យ​ទូរសព្ទ​ចល័ត"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"សារ SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"សារ​ជា​សំឡេង"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"ការហៅ​ទូរសព្ទ​តាម Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode VCO"</string>
@@ -1734,11 +1741,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ប្តូរ​ទៅ​មុខងារ​បញ្ចូល​អក្សរ​សម្រាប់​ការ​បញ្ចូល​ម៉ោង។"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ប្តូរ​ទៅ​មុខងារ​នាឡិកា​សម្រាប់​ការ​បញ្ចូល​ម៉ោង។"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ជម្រើសបំពេញដោយស្វ័យប្រវត្តិ"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"មិនអាច​បំពេញ​មាតិកា​ដោយស្វ័យប្រវត្តិ​បានទេ"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"រក្សា​ទុក​ទៅ​ក្នុង <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"រក្សាទុក <xliff:g id="TYPE">%1$s</xliff:g> ​ទៅ​ក្នុង <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ទៅក្នុង <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> ទៅក្នុង <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"រក្សាទុក​ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"រក្សាទុក <xliff:g id="TYPE">%1$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g> និង <xliff:g id="TYPE_1">%2$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, និង <xliff:g id="TYPE_2">%3$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"រក្សាទុក"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"ទេ អរគុណ"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"ពាក្យ​សម្ងាត់"</string>

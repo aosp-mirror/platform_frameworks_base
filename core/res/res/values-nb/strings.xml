@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operatøren din har midlertidig suspendert tale- og nødanrop på dette stedet"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Får ikke kontakt med nettverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"For å forbedre signalet, prøv å endre valgt nettverkstype i System &gt; Nettverk og Internett &gt; Mobilnettverk &gt; Foretrukket nettverkstype."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Varsler"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Viderekobling"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modusen nødsamtale-tilbakeringing"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Varsler for mobildata"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-meldinger"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Talepostmeldinger"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-anrop"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Motpart ba om TTY-modus FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Motpart ba om TTY-modus HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Motpart ba om TTY-modus VCO"</string>
@@ -281,15 +288,15 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få tilgang til sensordata om de vitale tegnene dine"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente innhold i vinduer"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Den analyserer innholdet i vinduer du samhandler med."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Appen analyserer innholdet i vinduer du samhandler med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"slå på berøringsutforsking"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Elementer du trykker på, leses høyt, og skjermen kan utforskes ved bruk av bevegelser."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"slå på forbedret nettilgjengelighet"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skript kan installeres for å gjøre appinnhold mer tilgjengelig."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere teksten du skriver inn"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data, som kredittkortnumre og passord."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrollér forstørrelse for skjermen"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrollér zoomenivået og plasseringen for skjermen."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Styre skjermforstørrelsen"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Appen kan styre zoomnivået og plassering på skjermen."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gjøre bevegelser"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, sveipe, klype og gjøre andre bevegelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Bevegelser på fingeravtrykkssensor"</string>
@@ -1603,7 +1610,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installert av administratoren din"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet av administratoren din"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"For å forlenge batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataene. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Med batterisparing forlenges batteritiden ved at bruk av for eksempel vibrasjon, posisjonstjenester og bakgrunnsdata reduseres. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparing hindrer at apper kan sende og motta data i bakgrunnen. Apper du bruker i øyeblikket, bruker ikke data i like stor grad – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå på"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Bytt til tekstinndatamodus for tidsinndata."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Bytt til klokkemodus for tidsinndata."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Alternativer for autofyll"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Innhold kan ikke fylles ut automatisk"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Vil du lagre i <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Vil du lagre <xliff:g id="TYPE">%1$s</xliff:g> i <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Vil du lagre <xliff:g id="TYPE_0">%1$s</xliff:g> og <xliff:g id="TYPE_1">%2$s</xliff:g> til <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Vil du lagre <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> og <xliff:g id="TYPE_2">%3$s</xliff:g> til <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Vil du lagre i &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vil du lagre <xliff:g id="TYPE">%1$s</xliff:g> i &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Vil du lagre <xliff:g id="TYPE_0">%1$s</xliff:g> og <xliff:g id="TYPE_1">%2$s</xliff:g> i &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Vil du lagre <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> og <xliff:g id="TYPE_2">%3$s</xliff:g> i &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Lagre"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nei takk"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"passord"</string>

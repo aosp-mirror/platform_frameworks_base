@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"この場所では、携帯通信会社により音声通話と緊急通報が一時的に停止されています"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"受信状態を改善するには、[システム] &gt; [ネットワークとインターネット] &gt; [モバイル ネットワーク] &gt; [優先ネットワーク タイプ] で選択したタイプを変更してみてください。"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"通知"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"電話の転送"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"緊急通報待機モード"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"モバイルデータ通知"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS メッセージ"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ボイスメール メッセージ"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ピアから、TTYモードをFULLにするようリクエストされました"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ピアから、TTYモードをHCOにするようリクエストされました"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ピアから、TTYモードをVCOにするようリクエストされました"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"時刻をテキストで入力するモードに切り替えます。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"時刻を時計で入力するモードに切り替えます。"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自動入力のオプション"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"コンテンツを自動入力できません"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> に保存しますか？"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>を <xliff:g id="LABEL">%2$s</xliff:g> に保存しますか？"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>を <xliff:g id="LABEL">%3$s</xliff:g> に保存しますか？"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を <xliff:g id="LABEL">%4$s</xliff:g> に保存しますか？"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"はい"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"いいえ"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"パスワード"</string>

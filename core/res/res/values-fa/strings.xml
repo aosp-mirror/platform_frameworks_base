@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"شرکت مخابراتی شما موقتاً تماس‌های صوتی و اضطراری را در این مکان به حالت تعلیق درآورده است"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"شبکه دردسترس نیست"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"برای بهبود دریافت، نوع شبکه‌ای را که انتخاب کرده‌اید در «سیستم» &gt; «شبکه‌ و اینترنت» &gt; «شبکه‌های تلفن همراه» &gt; «نوع شبکه ترجیحی» تغییر دهید."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"هشدارها"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"بازارسال تماس"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"حالت پاسخ تماس اضطراری"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"هشدارهای داده تلفن همراه"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"پیامک‌ها"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"پیام‌های پست صوتی"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"‏تماس ازطریق Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏دستگاه مرتبط درخواست TTY حالت FULL کرد"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏دستگاه مرتبط درخواست TTY حالت HCO کرد"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏دستگاه مرتبط درخواست TTY حالت VCO کرد"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"برای وارد کردن زمان، به حالت وارد کردن نوشتار تغییر وضعیت دهید."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"برای وارد کردن زمان، به حالت ساعت تغییر وضعیت دهید."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"گزینه‌های تکمیل خودکار"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"تکمیل خودکار محتوا ممکن نیست"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"در <xliff:g id="LABEL">%1$s</xliff:g> ذخیره شود؟"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> در <xliff:g id="LABEL">%2$s</xliff:g> ذخیره شود؟"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>، <xliff:g id="TYPE_1">%2$s</xliff:g> در <xliff:g id="LABEL">%3$s</xliff:g> ذخیره شود؟"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>، <xliff:g id="TYPE_1">%2$s</xliff:g>، <xliff:g id="TYPE_2">%3$s</xliff:g> در <xliff:g id="LABEL">%4$s</xliff:g> ذخیره شود؟"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"‏در &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ذخیره شود؟"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏<xliff:g id="TYPE">%1$s</xliff:g> در &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ذخیره شود؟"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"‏<xliff:g id="TYPE_0">%1$s</xliff:g> و <xliff:g id="TYPE_1">%2$s</xliff:g> در &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ذخیره شوند؟"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"‏<xliff:g id="TYPE_0">%1$s</xliff:g>، <xliff:g id="TYPE_1">%2$s</xliff:g> و <xliff:g id="TYPE_2">%3$s</xliff:g> در &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ذخیره شوند؟"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"ذخیره"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"نه سپاسگزارم"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"گذرواژه"</string>

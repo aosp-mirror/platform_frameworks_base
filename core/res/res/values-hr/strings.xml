@@ -100,6 +100,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Vaš je mobilni operater privremeno obustavio glasovne i hitne pozive na ovoj lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Pristup mreži nije moguć"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Za bolji prijem pokušajte odabrati drugu vrstu mreže u odjeljku Sustav &gt; Mreža i internet &gt; Mobilne mreže &gt; Željena vrsta mreže."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmjeravanje poziva"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Način hitnog povratnog poziva"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Upozorenja o mobilnim podacima"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS poruke"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi pozivi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Način TTY FULL koji zahtijeva paralelni uređaj"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Način TTY HCO koji zahtijeva paralelni uređaj"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Način TTY VCO koji zahtijeva paralelni uređaj"</string>
@@ -268,7 +275,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pristupati vašim kontaktima"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupiti lokaciji ovog uređaja"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"pristup lokaciji ovog uređaja"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pristupati kalendaru"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -1625,7 +1632,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje rad uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, lokacijske usluge i većinu pozadinskih radnji. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjila potrošnja podataka, Ušteda podataka onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
@@ -1763,11 +1770,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Prijeđite na način unosa teksta da biste unijeli vrijeme."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Prijeđite na način rada sata da biste unijeli vrijeme."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcije automatskog popunjavanja"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Sadržaj se ne može automatski popuniti"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Želi te li to spremiti u aplikaciju <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Želite li spremiti <xliff:g id="TYPE">%1$s</xliff:g> u aplikaciju <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Želite li spremiti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> u <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Želite li spremiti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> u <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Želite li spremiti na uslugu &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Želite li da se podatak (<xliff:g id="TYPE">%1$s</xliff:g>) spremi na uslugu &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> spreme na uslugu &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> spreme na uslugu &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Spremi"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, hvala"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"zaporku"</string>

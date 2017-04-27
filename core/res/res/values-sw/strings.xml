@@ -45,7 +45,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Ujumbe wa sauti"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Tatizo la muunganisho au msimbo batili MMI."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"Uendeshaji umepunguzwa kwa namba za upigaji simu za kudumu pekee."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Ni matumizi yanayohusisha nambari za simu zilizobainishwa pekee yatakayowezekana."</string>
     <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Haiwezi kubadilisha mipangilio ya kusambaza simu kutoka kwenye simu yako ukiwa unatumia mitandao mingine."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Huduma iliwezeshwa"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Huduma iliwezesha kwa:"</string>
@@ -73,7 +73,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"Kitambulisho cha Mstari Uliounganishwa"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Kizuizi cha Kitambulisho cha Mstari Uliounganishwa"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Kusambaza simu"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Simu inasubiriwa"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Simu inayosubiri kupokewa"</string>
     <string name="BaMmi" msgid="455193067926770581">"Kuzuia upigaji simu"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Badilisho la nenosiri"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Badilisha PIN"</string>
@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Mtoa huduma wako amesitisha kwa muda huduma ya kupiga simu za dharura na za sauti mahali hapa"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Haiwezi kufikia mtandao"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Ili kupata mtandao thabiti, jaribu kubadilisha aina iliyochaguliwa katika Mfumo &gt; Mtandao na Intaneti &gt; Mitandao ya simu &gt; Aina ya mtandao unaopendelea."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Arifa"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Kusambaza simu"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Hali ya kupiga simu za dharura"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Arifa za data ya simu"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"Ujumbe wa SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ujumbe wa sauti"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Kupiga simu kupitia Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Hali ya TTY iliyoombwa na mtandao mwenza KAMILI"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Hali ya TTY iliyoombwa na mtandao mwenza HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Hali ya TTY iliyoombwa na mtandao mwenza VCO"</string>
@@ -1601,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Imesakinishwa na msimamizi wako"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Imefutwa na msimamizi wako"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, kiokoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotegemea usawazishaji huenda zisisasishwe usipozifungua.\n\nKiokoa betri hujizima kiotomatiki wakati kifaa chako kinachaji."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chini chini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozigonga."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Washa"</string>
@@ -1730,11 +1737,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Badilisha iwe katika hali ya maandishi wakati wa kuweka muda."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Badilisha umbo liwe la saa ya mishale wakati wa kuweka muda."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Chaguo za kujaza otomatiki"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Maudhui hayawezi kujazwa kiotomatiki"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Ungependa kuhifadhi kwenye <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> kwenye <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> kwenye <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Ungependa kuhifadhi kwenye &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, na <xliff:g id="TYPE_2">%3$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Hifadhi"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Hapana, asante"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"nenosiri"</string>

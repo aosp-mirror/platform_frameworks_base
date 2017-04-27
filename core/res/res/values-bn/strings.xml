@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"আপনার পরিষেবা প্রদানকারী এই অবস্থানে ভয়েস এবং জরুরি কল সাময়িকভাবে সাসপেন্ড করেছে"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"নেটওয়ার্কের সিগন্যাল নেই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"রিসেপশন উন্নত করতে সিস্টেম &gt; নেটওয়ার্ক এবং ইন্টারনেট &gt; মোবাইল নেটওয়ার্ক &gt; পছন্দের নেটওয়ার্কের ধরণ এ গিয়ে নির্বাচিত নেটওয়ার্কের ধরণ পরিবর্তন করে দেখুন।"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"সতর্কবার্তা"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"কল ফরওয়ার্ড করা"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"জরুরি কলব্যাক মোড"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"মোবাইল ডেটার সতর্কবার্তা"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"এসএমএস বার্তা"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ভয়েসমেল বার্তা"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"ওয়াই-ফাই কলিং"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"পির TTY মোড FULL অনুরোধ করেছে"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"পির TTY মোড HCO অনুরোধ করেছে"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"পির TTY মোড VCO অনুরোধ করেছে"</string>
@@ -1604,7 +1611,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"আপনার প্রশাসক ইনস্টল করেছেন"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ব্যাটরির লাইফ উন্নত করতে সহায়তা করতে, ব্যাটারি সাশ্রয়কারী আপনার ডিভাইসের কার্যসম্পাদনা হ্রাস করে এবং কম্পন, অবস্থান পরিষেবাসমূহ এবং অধিকাংশ ব্যাকগ্রাউন্ড ডেটা সীমিত করে৷ ইমেল, বার্তাপ্রেরণ এবং অন্যান্য অ্যাপ্লিকেশানগুলিকে যেগুলি সিঙ্কের উপর নির্ভর করে সেগুলিকে আপনি না খোলা পর্যন্ত নাও আপডেট হতে পারে৷\n\nআপনার ডিভাইসটিকে যখন চার্জ করা হয় তখন ব্যাটারি সাশ্রয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়৷"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ব্যাটরির লাইফ উন্নত করতে সহায়তা করতে, ব্যাটারি সাশ্রয়কারী আপনার ডিভাইসের কার্যসম্পাদনা হ্রাস করে এবং কম্পন, অবস্থান পরিষেবাগুলি এবং অধিকাংশ ব্যাকগ্রাউন্ড ডেটা সীমিত করে৷ ইমেল, বার্তাপ্রেরণ এবং অন্যান্য অ্যাপ্লিকেশানগুলিকে যেগুলি সিঙ্কের উপর নির্ভর করে সেগুলিকে আপনি না খোলা পর্যন্ত নাও আপডেট হতে পারে৷\n\nআপনার ডিভাইসটিকে যখন চার্জ করা হয় তখন ব্যাটারি সাশ্রয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়৷"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার পটভূমিতে কিছু অ্যাপ্লিকেশানকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশান ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবিগুলিতে আলতো চাপ না দেওয়া পর্যন্ত সেগুলি প্রদর্শিত হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"চালু করুন"</string>
@@ -1733,11 +1740,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"সময় ইনপুট দেওয়ার জন্য পাঠ্য ইনপুট মোডে যান।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"সময় ইনপুট দেওয়ার জন্য ঘড়ি মোডে যান।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"আপনাআপনি পূরণ করার বিকল্পগুলি"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"বিষয়বস্তুগুলি অটো-ফিল করা যাবে না"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> এ সংরক্ষণ করবেন?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> এ <xliff:g id="TYPE">%1$s</xliff:g> সংরক্ষণ করবেন?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> <xliff:g id="LABEL">%3$s</xliff:g> এ সংরক্ষণ করবেন?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> <xliff:g id="LABEL">%4$s</xliff:g> এ সংরক্ষণ করবেন?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; এ সংরক্ষণ করবেন?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> কে &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;এ সংরক্ষণ করবেন?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> এবং <xliff:g id="TYPE_1">%2$s</xliff:g> কে &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; এ সংরক্ষণ করবেন?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, এবং <xliff:g id="TYPE_2">%3$s</xliff:g> কে &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; এ সংরক্ষণ করবেন?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"সংরক্ষণ করুন"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"না থাক"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"পাসওয়ার্ড"</string>

@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Your operator has temporarily suspended voice and emergency calls at this location"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Can’t find network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"To improve reception, try changing the type selected at System &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerts"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Call forwarding"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Emergency callback mode"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Mobile data alerts"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS messages"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Voicemail messages"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi Calling"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer requested TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer requested TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer requested TTY Mode VCO"</string>
@@ -259,7 +266,7 @@
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Retail demo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB connection"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android system"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Switch to Personal"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Switch to Work"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
@@ -278,7 +285,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"take pictures and record video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telephone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"make and manage phone calls"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Body Sensors"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Body sensors"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"access sensor data about your vital signs"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Retrieve window content"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspect the content of a window that you\'re interacting with."</string>
@@ -580,8 +587,8 @@
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
     <item msgid="7897544654242874543">"Work"</item>
-    <item msgid="1103601433382158155">"Work Fax"</item>
-    <item msgid="1735177144948329370">"Home Fax"</item>
+    <item msgid="1103601433382158155">"Work fax"</item>
+    <item msgid="1735177144948329370">"Home fax"</item>
     <item msgid="603878674477207394">"Pager"</item>
     <item msgid="1650824275177931637">"Other"</item>
     <item msgid="9192514806975898961">"Custom"</item>
@@ -624,7 +631,7 @@
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobile"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Work"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Work Fax"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Home Fax"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Home fax"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Other"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Callback"</string>
@@ -1603,7 +1610,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installed by your admin"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Updated by your admin"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Deleted by your admin"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services and most background data. Email, messaging and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app that you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Turn on Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Turn on"</string>
@@ -1641,8 +1648,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (next alarm)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Until you turn off Do Not Disturb"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Until you turn off Do Not Disturb"</string>
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Until you turn off Do not disturb"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Until you turn off Do not disturb"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Collapse"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Do not disturb"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Switch to text input mode for the time input."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Switch to clock mode for the time input."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Auto-fill options"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Contents can’t be auto-filled"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Save to <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Save <xliff:g id="TYPE">%1$s</xliff:g> to <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Save <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> to <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Save <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> to <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Save to &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Save <xliff:g id="TYPE">%1$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Save <xliff:g id="TYPE_0">%1$s</xliff:g> and <xliff:g id="TYPE_1">%2$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Save <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, and <xliff:g id="TYPE_2">%3$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Save"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No thanks"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"password"</string>
