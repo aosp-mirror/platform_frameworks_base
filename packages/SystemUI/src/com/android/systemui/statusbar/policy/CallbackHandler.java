@@ -110,24 +110,30 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     public void setWifiIndicators(final boolean enabled, final IconState statusIcon,
             final IconState qsIcon, final boolean activityIn, final boolean activityOut,
             final String description, boolean isTransient) {
-        post(() -> {
-            for (SignalCallback callback : mSignalCallbacks) {
-                callback.setWifiIndicators(enabled, statusIcon, qsIcon, activityIn, activityOut,
-                        description, isTransient);
+        post(new Runnable() {
+            @Override
+            public void run() {
+                for (SignalCallback callback : mSignalCallbacks) {
+                    callback.setWifiIndicators(enabled, statusIcon, qsIcon, activityIn, activityOut,
+                            description, isTransient);
+                }
             }
         });
     }
 
     @Override
-    public void setMobileDataIndicators(final IconState statusIcon,
-            final int statusType, final boolean activityIn,
+    public void setMobileDataIndicators(final IconState statusIcon, final IconState qsIcon,
+            final int statusType, final int qsType,final boolean activityIn,
             final boolean activityOut, final String typeContentDescription,
-            final int subId, boolean roaming, boolean isEmergency) {
-        post(() -> {
-            for (SignalCallback signalCluster : mSignalCallbacks) {
-                signalCluster.setMobileDataIndicators(statusIcon, statusType,
-                        activityIn, activityOut, typeContentDescription,
-                        subId, roaming, isEmergency);
+            final String description, final boolean isWide, final int subId, boolean roaming) {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                for (SignalCallback signalCluster : mSignalCallbacks) {
+                    signalCluster.setMobileDataIndicators(statusIcon, qsIcon, statusType, qsType,
+                            activityIn, activityOut, typeContentDescription, description, isWide,
+                            subId, roaming);
+                }
             }
         });
     }
