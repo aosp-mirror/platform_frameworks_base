@@ -69,6 +69,9 @@ public final class NotificationChannelGroup implements Parcelable {
         this.mName = name != null ? getTrimmedString(name.toString()) : null;
     }
 
+    /**
+     * @hide
+     */
     protected NotificationChannelGroup(Parcel in) {
         if (in.readByte() != 0) {
             mId = in.readString();

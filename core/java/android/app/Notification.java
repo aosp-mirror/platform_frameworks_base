@@ -2393,7 +2393,7 @@ public class Notification implements Parcelable
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Notification(channel=");
-        sb.append(getChannel());
+        sb.append(getChannelId());
         sb.append(" pri=");
         sb.append(priority);
         sb.append(" contentView=");
@@ -2507,10 +2507,25 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Returns the id of the channel this notification posts to.
+     */
+    public String getChannelId() {
+        return mChannelId;
+    }
+
+    /**
      * Returns the time at which this notification should be canceled by the system, if it's not
      * canceled already.
      */
     public long getTimeout() {
+        return mTimeout;
+    }
+
+    /**
+     * Returns the duration from posting after which this notification should be canceled by the
+     * system, if it's not canceled already.
+     */
+    public long getTimeoutAfter() {
         return mTimeout;
     }
 
@@ -2525,6 +2540,9 @@ public class Notification implements Parcelable
 
     /**
      * Returns the {@link ShortcutInfo#getId() id} that this notification supersedes, if any.
+     *
+     * <p>Used by some Launchers that display notification content to hide shortcuts that duplicate
+     * notifications.
      */
     public String getShortcutId() {
         return mShortcutId;
@@ -2770,8 +2788,8 @@ public class Notification implements Parcelable
          * {@link ShortcutInfo#getId() id} of the shortcut, in case the Launcher wants to hide
          * the shortcut.
          *
-         * This field will be ignored by Launchers that don't support badging or
-         * {@link android.content.pm.ShortcutManager shortcuts}.
+         * This field will be ignored by Launchers that don't support badging, don't show
+         * notification content, or don't show {@link android.content.pm.ShortcutManager shortcuts}.
          *
          * @param shortcutId the {@link ShortcutInfo#getId() id} of the shortcut this notification
          *                   supersedes
@@ -2816,10 +2834,27 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Specifies the channel the notification should be delivered on.
+         */
+        public Builder setChannelId(String channelId) {
+            mN.mChannelId = channelId;
+            return this;
+        }
+
+        /**
          * Specifies a duration in milliseconds after which this notification should be canceled,
          * if it is not already canceled.
          */
         public Builder setTimeout(long durationMs) {
+            mN.mTimeout = durationMs;
+            return this;
+        }
+
+        /**
+         * Specifies a duration in milliseconds after which this notification should be canceled,
+         * if it is not already canceled.
+         */
+        public Builder setTimeoutAfter(long durationMs) {
             mN.mTimeout = durationMs;
             return this;
         }
@@ -7915,9 +7950,26 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Specifies the channel the notification should be delivered on when shown on TV.
+         * It can be different from the channel that the notification is delivered to when
+         * posting on a non-TV device.
+         */
+        public TvExtender setChannelId(String channelId) {
+            mChannelId = channelId;
+            return this;
+        }
+
+        /**
          * Returns the id of the channel this notification posts to on TV.
          */
         public String getChannel() {
+            return mChannelId;
+        }
+
+        /**
+         * Returns the id of the channel this notification posts to on TV.
+         */
+        public String getChannelId() {
             return mChannelId;
         }
 
