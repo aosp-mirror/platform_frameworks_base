@@ -483,7 +483,7 @@ final class ServiceRecord extends Binder {
                                         appInfo.packageName, 0, new UserHandle(userId));
 
                                 Notification.Builder notiBuilder = new Notification.Builder(ctx,
-                                        localForegroundNoti.getChannel());
+                                        localForegroundNoti.getChannelId());
 
                                 // it's ugly, but it clearly identifies the app
                                 notiBuilder.setSmallIcon(appInfo.icon);
