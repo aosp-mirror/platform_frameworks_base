@@ -26,8 +26,8 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaHTTPService;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IHwBinder;
 import android.os.PersistableBundle;
 
 import com.android.internal.util.Preconditions;
@@ -38,9 +38,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -263,7 +262,7 @@ final public class MediaExtractor {
         nativeSetMediaCas(mediaCas.getBinder());
     }
 
-    private native final void nativeSetMediaCas(@NonNull IBinder casBinder);
+    private native final void nativeSetMediaCas(@NonNull IHwBinder casBinder);
 
     /**
      * Describes the conditional access system used to scramble a track.
@@ -300,6 +299,14 @@ final public class MediaExtractor {
         }
     }
 
+    private ArrayList<Byte> toByteArray(@NonNull byte[] data) {
+        ArrayList<Byte> byteArray = new ArrayList<Byte>(data.length);
+        for (int i = 0; i < data.length; i++) {
+            byteArray.add(i, Byte.valueOf(data[i]));
+        }
+        return byteArray;
+    }
+
     /**
      * Retrieves the information about the conditional access system used to scramble
      * a track.
@@ -317,7 +324,7 @@ final public class MediaExtractor {
                 buf.rewind();
                 final byte[] sessionId = new byte[buf.remaining()];
                 buf.get(sessionId);
-                session = mMediaCas.createFromSessionId(sessionId);
+                session = mMediaCas.createFromSessionId(toByteArray(sessionId));
             }
             return new CasInfo(systemId, session);
         }

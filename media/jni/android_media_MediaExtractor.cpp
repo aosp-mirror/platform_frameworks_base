@@ -18,16 +18,20 @@
 #define LOG_TAG "MediaExtractor-JNI"
 #include <utils/Log.h>
 
+#include "android_media_MediaDataSource.h"
 #include "android_media_MediaExtractor.h"
 #include "android_media_MediaMetricsJNI.h"
-
 #include "android_media_Utils.h"
+#include "android_os_HwRemoteBinder.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
+#include "android_util_Binder.h"
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_media_MediaDataSource.h"
 
+#include <android/hardware/cas/1.0/BpHwCas.h>
+#include <android/hardware/cas/1.0/BnHwCas.h>
+#include <hidl/HybridInterface.h>
 #include <media/IMediaHTTPService.h>
 #include <media/hardware/CryptoAPI.h>
 #include <media/stagefright/foundation/ABuffer.h>
@@ -37,13 +41,11 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/NuMediaExtractor.h>
-#include <android/media/ICas.h>
-
 #include <nativehelper/ScopedLocalRef.h>
 
-#include "android_util_Binder.h"
-
 namespace android {
+
+using namespace hardware::cas::V1_0;
 
 struct fields_t {
     jfieldID context;
@@ -89,8 +91,28 @@ status_t JMediaExtractor::setDataSource(const sp<DataSource> &datasource) {
     return mImpl->setDataSource(datasource);
 }
 
-status_t JMediaExtractor::setMediaCas(const sp<ICas> &cas) {
-    return mImpl->setMediaCas(cas);
+status_t JMediaExtractor::setMediaCas(JNIEnv *env, jobject casBinderObj) {
+    if (casBinderObj == NULL) {
+        return BAD_VALUE;
+    }
+
+    sp<hardware::IBinder> hwBinder =
+        JHwRemoteBinder::GetNativeContext(env, casBinderObj)->getBinder();
+    if (hwBinder == NULL) {
+        return BAD_VALUE;
+    }
+
+    sp<ICas> cas = hardware::fromBinder<ICas, BpHwCas, BnHwCas>(hwBinder);
+    if (cas == NULL) {
+        return BAD_VALUE;
+    }
+
+    HalToken halToken;
+    if (!createHalToken(cas, &halToken)) {
+        return BAD_VALUE;
+    }
+
+    return mImpl->setMediaCas(halToken);
 }
 
 size_t JMediaExtractor::countTracks() const {
@@ -748,23 +770,13 @@ static void android_media_MediaExtractor_setMediaCas(
         return;
     }
 
-    if (casBinderObj == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
-
-    sp<ICas> cas;
-    if (casBinderObj != NULL) {
-        sp<IBinder> binder = ibinderForJavaObject(env, casBinderObj);
-        cas = interface_cast<ICas>(binder);
-    }
-    status_t err = extractor->setMediaCas(cas);
+    status_t err = extractor->setMediaCas(env, casBinderObj);
 
     if (err != OK) {
-        cas.clear();
+        extractor.clear();
         jniThrowException(
                 env,
-                "java/io/IllegalArgumentException",
+                "java/lang/IllegalArgumentException",
                 "Failed to set MediaCas on extractor.");
     }
 }
@@ -896,7 +908,7 @@ static const JNINativeMethod gMethods[] = {
     { "setDataSource", "(Landroid/media/MediaDataSource;)V",
       (void *)android_media_MediaExtractor_setDataSourceCallback },
 
-    { "nativeSetMediaCas", "(Landroid/os/IBinder;)V",
+    { "nativeSetMediaCas", "(Landroid/os/IHwBinder;)V",
       (void *)android_media_MediaExtractor_setMediaCas },
 
     { "getCachedDuration", "()J",
