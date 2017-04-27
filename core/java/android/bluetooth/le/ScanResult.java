@@ -52,6 +52,16 @@ public final class ScanResult implements Parcelable {
     public static final int SID_NOT_PRESENT = 0xFF;
 
     /**
+     * TX power is not present in the packet.
+     */
+    public static final int TX_POWER_NOT_PRESENT = 0x7F;
+
+    /**
+     * Periodic advertising interval is not present in the packet.
+     */
+    public static final int PERIODIC_INTERVAL_NOT_PRESENT = 0x00;
+
+    /**
      * Mask for checking whether event type represents legacy advertisement.
      */
     private static final int ET_LEGACY_MASK = 0x10;
@@ -265,15 +275,16 @@ public final class ScanResult implements Parcelable {
 
     /**
      * Returns the transmit power in dBm.
-     * Valid range is [-127, 126]. A value of 127 indicates that the
-     * advertisement did not indicate TX power.
+     * Valid range is [-127, 126]. A value of {@link ScanResult#TX_POWER_NOT_PRESENT}
+     * indicates that the TX power is not present.
      */
     public int getTxPower() { return mTxPower; }
 
     /**
      * Returns the periodic advertising interval in units of 1.25ms.
-     * Valid range is 6 (7.5ms) to 65536 (81918.75ms). A value of 0 means
-     * periodic advertising is not used for this scan result.
+     * Valid range is 6 (7.5ms) to 65536 (81918.75ms). A value of
+     * {@link ScanResult#PERIODIC_INTERVAL_NOT_PRESENT} means periodic
+     * advertising interval is not present.
      */
     public int getPeriodicAdvertisingInterval() {
         return mPeriodicAdvertisingInterval;
