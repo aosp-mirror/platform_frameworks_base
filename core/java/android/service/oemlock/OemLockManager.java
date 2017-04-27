@@ -147,7 +147,7 @@ public class OemLockManager {
      */
     public boolean isDeviceOemUnlocked() {
         try {
-            return mService.isOemUnlockAllowed();
+            return mService.isDeviceOemUnlocked();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
