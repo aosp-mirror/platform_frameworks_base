@@ -18,37 +18,32 @@ package com.android.server.backup.restore;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
-import android.app.PackageInstallObserver;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
-import android.net.Uri;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
+import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
-import com.android.server.backup.utils.AppBackupUtils;
+import com.android.server.backup.utils.BytesReadListener;
+import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
+import com.android.server.backup.utils.RestoreUtils;
 import com.android.server.backup.utils.TarBackupReader;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Full restore engine, used by both adb restore and transport-based full restore.
@@ -108,42 +103,7 @@ public class FullRestoreEngine extends RestoreEngine {
     // Widget blob to be restored out-of-band
     byte[] mWidgetData = null;
 
-    private final int mEphemeralOpToken;
-
-    // Runner that can be placed in a separate thread to do in-process
-    // invocations of the full restore API asynchronously. Used by adb restore.
-    class RestoreFileRunnable implements Runnable {
-
-        IBackupAgent mAgent;
-        FileMetadata mInfo;
-        ParcelFileDescriptor mSocket;
-        int mToken;
-
-        RestoreFileRunnable(IBackupAgent agent, FileMetadata info,
-                ParcelFileDescriptor socket, int token) throws IOException {
-            mAgent = agent;
-            mInfo = info;
-            mToken = token;
-
-            // This class is used strictly for process-local binder invocations.  The
-            // semantics of ParcelFileDescriptor differ in this case; in particular, we
-            // do not automatically get a 'dup'ed descriptor that we can can continue
-            // to use asynchronously from the caller.  So, we make sure to dup it ourselves
-            // before proceeding to do the restore.
-            mSocket = ParcelFileDescriptor.dup(socket.getFileDescriptor());
-        }
-
-        @Override
-        public void run() {
-            try {
-                mAgent.doRestoreFile(mSocket, mInfo.size, mInfo.type,
-                        mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
-                        mToken, backupManagerService.getBackupManagerBinder());
-            } catch (RemoteException e) {
-                // never happens; this is used strictly for local binder calls
-            }
-        }
-    }
+    final int mEphemeralOpToken;
 
     public FullRestoreEngine(RefactoredBackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
@@ -169,19 +129,22 @@ public class FullRestoreEngine extends RestoreEngine {
         return mWidgetData;
     }
 
-    public boolean restoreOneFile(InputStream instream, boolean mustKillAgent) {
+    public boolean restoreOneFile(InputStream instream, boolean mustKillAgent, byte[] buffer,
+            PackageInfo onlyPackage, boolean allowApks, int token, IBackupManagerMonitor monitor) {
         if (!isRunning()) {
             Slog.w(RefactoredBackupManagerService.TAG, "Restore engine used after halting");
             return false;
         }
 
+        BytesReadListener bytesReadListener = new BytesReadListener() {
+            @Override
+            public void onBytesRead(long bytesRead) {
+                mBytes += bytesRead;
+            }
+        };
+
         TarBackupReader tarBackupReader = new TarBackupReader(instream,
-                new TarBackupReader.BytesReadListener() {
-                    @Override
-                    public void onBytesRead(long bytesRead) {
-                        mBytes += bytesRead;
-                    }
-                }, mMonitor);
+                bytesReadListener, monitor);
 
         FileMetadata info;
         try {
@@ -198,10 +161,10 @@ public class FullRestoreEngine extends RestoreEngine {
                 if (!pkg.equals(mAgentPackage)) {
                     // In the single-package case, it's a semantic error to expect
                     // one app's data but see a different app's on the wire
-                    if (mOnlyPackage != null) {
-                        if (!pkg.equals(mOnlyPackage.packageName)) {
+                    if (onlyPackage != null) {
+                        if (!pkg.equals(onlyPackage.packageName)) {
                             Slog.w(RefactoredBackupManagerService.TAG,
-                                    "Expected data for " + mOnlyPackage
+                                    "Expected data for " + onlyPackage
                                             + " but saw " + pkg);
                             setResult(RestoreEngine.TRANSPORT_FAILURE);
                             setRunning(false);
@@ -232,7 +195,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
                 if (info.path.equals(RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME)) {
                     RestorePolicy appManifest = tarBackupReader.readAppManifest(
-                            backupManagerService.getPackageManager(), mAllowApks,
+                            backupManagerService.getPackageManager(), allowApks,
                             mManifestSignatures, info);
                     mPackagePolicies.put(pkg, appManifest);
                     mPackageInstallers.put(pkg, info.installerPackageName);
@@ -240,7 +203,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     // so consume the footer before looping around to the next
                     // input file
                     tarBackupReader.skipTarPadding(info.size);
-                    sendOnRestorePackage(pkg);
+                    mObserver = FullBackupRestoreObserverUtils.sendOnRestorePackage(mObserver, pkg);
                 } else if (info.path.equals(
                         RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
                     // Metadata blobs!
@@ -252,7 +215,7 @@ public class FullRestoreEngine extends RestoreEngine {
                     // This is read during TarBackupReader.readMetadata().
                     mWidgetData = tarBackupReader.getWidgetData();
                     // This can be nulled during TarBackupReader.readMetadata().
-                    mMonitor = tarBackupReader.getMonitor();
+                    monitor = tarBackupReader.getMonitor();
 
                     tarBackupReader.skipTarPadding(info.size);
                 } else {
@@ -275,9 +238,14 @@ public class FullRestoreEngine extends RestoreEngine {
                                 }
                                 // Try to install the app.
                                 String installerName = mPackageInstallers.get(pkg);
-                                okay = installApk(info, installerName, instream);
+                                boolean isSuccessfullyInstalled = RestoreUtils.installApk(
+                                        instream, backupManagerService.getPackageManager(),
+                                        mInstallObserver, mDeleteObserver, mManifestSignatures,
+                                        mPackagePolicies, info, installerName,
+                                        bytesReadListener, backupManagerService.getDataDir()
+                                                              );
                                 // good to go; promote to ACCEPT
-                                mPackagePolicies.put(pkg, (okay)
+                                mPackagePolicies.put(pkg, isSuccessfullyInstalled
                                         ? RestorePolicy.ACCEPT
                                         : RestorePolicy.IGNORE);
                                 // At this point we've consumed this file entry
@@ -318,8 +286,8 @@ public class FullRestoreEngine extends RestoreEngine {
                             break;
                     }
 
-                    // Is it a *file* we need to drop?
-                    if (!isRestorableFile(info)) {
+                    // Is it a *file* we need to drop or is it not a canonical path?
+                    if (!isRestorableFile(info) || !isCanonicalFilePath(info.path)) {
                         okay = false;
                     }
 
@@ -404,12 +372,12 @@ public class FullRestoreEngine extends RestoreEngine {
                         boolean agentSuccess = true;
                         long toCopy = info.size;
                         try {
-                            backupManagerService.prepareOperationTimeout(mEphemeralOpToken,
+                            backupManagerService.prepareOperationTimeout(token,
                                     RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
                                     mMonitorTask,
                                     RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT);
 
-                            if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
+                            if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
                                 if (RefactoredBackupManagerService.DEBUG) {
                                     Slog.d(RefactoredBackupManagerService.TAG,
                                             "Restoring OBB file for " + pkg
@@ -417,8 +385,22 @@ public class FullRestoreEngine extends RestoreEngine {
                                 }
                                 mObbConnection.restoreObbFile(pkg, mPipes[0],
                                         info.size, info.type, info.path, info.mode,
-                                        info.mtime, mEphemeralOpToken,
+                                        info.mtime, token,
                                         backupManagerService.getBackupManagerBinder());
+                            } else if (FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)) {
+                                // This is only possible during adb restore.
+                                // TODO: Refactor to clearly separate the flows.
+                                if (RefactoredBackupManagerService.DEBUG) {
+                                    Slog.d(RefactoredBackupManagerService.TAG,
+                                            "Restoring key-value file for " + pkg
+                                                    + " : " + info.path);
+                                }
+                                KeyValueAdbRestoreEngine restoreEngine =
+                                        new KeyValueAdbRestoreEngine(
+                                                backupManagerService,
+                                                backupManagerService.getDataDir(), info, mPipes[0],
+                                                mAgent, token);
+                                new Thread(restoreEngine, "restore-key-value-runner").start();
                             } else {
                                 if (RefactoredBackupManagerService.MORE_DEBUG) {
                                     Slog.d(RefactoredBackupManagerService.TAG,
@@ -433,13 +415,12 @@ public class FullRestoreEngine extends RestoreEngine {
                                     Slog.d(RefactoredBackupManagerService.TAG,
                                             "system process agent - spinning a thread");
                                     RestoreFileRunnable runner = new RestoreFileRunnable(
-                                            mAgent, info, mPipes[0], mEphemeralOpToken);
+                                            backupManagerService, mAgent, info, mPipes[0], token);
                                     new Thread(runner, "restore-sys-runner").start();
                                 } else {
                                     mAgent.doRestoreFile(mPipes[0], info.size, info.type,
                                             info.domain, info.path, info.mode, info.mtime,
-                                            mEphemeralOpToken,
-                                            backupManagerService.getBackupManagerBinder());
+                                            token, backupManagerService.getBackupManagerBinder());
                                 }
                             }
                         } catch (IOException e) {
@@ -468,9 +449,9 @@ public class FullRestoreEngine extends RestoreEngine {
                             FileOutputStream pipe = new FileOutputStream(
                                     mPipes[1].getFileDescriptor());
                             while (toCopy > 0) {
-                                int toRead = (toCopy > mBuffer.length)
-                                        ? mBuffer.length : (int) toCopy;
-                                int nRead = instream.read(mBuffer, 0, toRead);
+                                int toRead = (toCopy > buffer.length)
+                                        ? buffer.length : (int) toCopy;
+                                int nRead = instream.read(buffer, 0, toRead);
                                 if (nRead >= 0) {
                                     mBytes += nRead;
                                 }
@@ -483,7 +464,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                 // are still good
                                 if (pipeOkay) {
                                     try {
-                                        pipe.write(mBuffer, 0, nRead);
+                                        pipe.write(buffer, 0, nRead);
                                     } catch (IOException e) {
                                         Slog.e(RefactoredBackupManagerService.TAG,
                                                 "Failed to write to restore pipe: "
@@ -499,15 +480,14 @@ public class FullRestoreEngine extends RestoreEngine {
 
                             // and now that we've sent it all, wait for the remote
                             // side to acknowledge receipt
-                            agentSuccess = backupManagerService.waitUntilOperationComplete(
-                                    mEphemeralOpToken);
+                            agentSuccess = backupManagerService.waitUntilOperationComplete(token);
                         }
 
                         // okay, if the remote end failed at any point, deal with
                         // it by ignoring the rest of the restore on it
                         if (!agentSuccess) {
                             Slog.w(RefactoredBackupManagerService.TAG,
-                                    "Agent failure; ending restore");
+                                    "Agent failure restoring " + pkg + "; ending restore");
                             backupManagerService.getBackupHandler().removeMessages(
                                     RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
@@ -517,7 +497,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
                             // If this was a single-package restore, we halt immediately
                             // with an agent error under these circumstances
-                            if (mOnlyPackage != null) {
+                            if (onlyPackage != null) {
                                 setResult(RestoreEngine.TARGET_FAILURE);
                                 setRunning(false);
                                 return false;
@@ -534,9 +514,9 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
                         long bytesToConsume = (info.size + 511) & ~511;
                         while (bytesToConsume > 0) {
-                            int toRead = (bytesToConsume > mBuffer.length)
-                                    ? mBuffer.length : (int) bytesToConsume;
-                            long nRead = instream.read(mBuffer, 0, toRead);
+                            int toRead = (bytesToConsume > buffer.length)
+                                    ? buffer.length : (int) bytesToConsume;
+                            long nRead = instream.read(buffer, 0, toRead);
                             if (nRead >= 0) {
                                 mBytes += nRead;
                             }
@@ -608,198 +588,10 @@ public class FullRestoreEngine extends RestoreEngine {
         setRunning(false);
     }
 
-    class RestoreInstallObserver extends PackageInstallObserver {
-
-        final AtomicBoolean mDone = new AtomicBoolean();
-        String mPackageName;
-        int mResult;
-
-        public void reset() {
-            synchronized (mDone) {
-                mDone.set(false);
-            }
-        }
-
-        public void waitForCompletion() {
-            synchronized (mDone) {
-                while (mDone.get() == false) {
-                    try {
-                        mDone.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-        }
-
-        int getResult() {
-            return mResult;
-        }
-
-        @Override
-        public void onPackageInstalled(String packageName, int returnCode,
-                String msg, Bundle extras) {
-            synchronized (mDone) {
-                mResult = returnCode;
-                mPackageName = packageName;
-                mDone.set(true);
-                mDone.notifyAll();
-            }
-        }
-    }
-
-    class RestoreDeleteObserver extends IPackageDeleteObserver.Stub {
-
-        final AtomicBoolean mDone = new AtomicBoolean();
-        int mResult;
-
-        public void reset() {
-            synchronized (mDone) {
-                mDone.set(false);
-            }
-        }
-
-        public void waitForCompletion() {
-            synchronized (mDone) {
-                while (mDone.get() == false) {
-                    try {
-                        mDone.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void packageDeleted(String packageName, int returnCode) throws RemoteException {
-            synchronized (mDone) {
-                mResult = returnCode;
-                mDone.set(true);
-                mDone.notifyAll();
-            }
-        }
-    }
-
     final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
     final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
 
-    boolean installApk(FileMetadata info, String installerPackage, InputStream instream) {
-        boolean okay = true;
-
-        if (RefactoredBackupManagerService.DEBUG) {
-            Slog.d(RefactoredBackupManagerService.TAG,
-                    "Installing from backup: " + info.packageName);
-        }
-
-        // The file content is an .apk file.  Copy it out to a staging location and
-        // attempt to install it.
-        File apkFile = new File(backupManagerService.getDataDir(), info.packageName);
-        try {
-            FileOutputStream apkStream = new FileOutputStream(apkFile);
-            byte[] buffer = new byte[32 * 1024];
-            long size = info.size;
-            while (size > 0) {
-                long toRead = (buffer.length < size) ? buffer.length : size;
-                int didRead = instream.read(buffer, 0, (int) toRead);
-                if (didRead >= 0) {
-                    mBytes += didRead;
-                }
-                apkStream.write(buffer, 0, didRead);
-                size -= didRead;
-            }
-            apkStream.close();
-
-            // make sure the installer can read it
-            apkFile.setReadable(true, false);
-
-            // Now install it
-            Uri packageUri = Uri.fromFile(apkFile);
-            mInstallObserver.reset();
-            backupManagerService.getPackageManager().installPackage(packageUri, mInstallObserver,
-                    PackageManager.INSTALL_REPLACE_EXISTING | PackageManager.INSTALL_FROM_ADB,
-                    installerPackage);
-            mInstallObserver.waitForCompletion();
-
-            if (mInstallObserver.getResult() != PackageManager.INSTALL_SUCCEEDED) {
-                // The only time we continue to accept install of data even if the
-                // apk install failed is if we had already determined that we could
-                // accept the data regardless.
-                if (mPackagePolicies.get(info.packageName) != RestorePolicy.ACCEPT) {
-                    okay = false;
-                }
-            } else {
-                // Okay, the install succeeded.  Make sure it was the right app.
-                boolean uninstall = false;
-                if (!mInstallObserver.mPackageName.equals(info.packageName)) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "Restore stream claimed to include apk for "
-                                    + info.packageName + " but apk was really "
-                                    + mInstallObserver.mPackageName);
-                    // delete the package we just put in place; it might be fraudulent
-                    okay = false;
-                    uninstall = true;
-                } else {
-                    try {
-                        PackageInfo pkg = backupManagerService.getPackageManager().getPackageInfo(
-                                info.packageName,
-                                PackageManager.GET_SIGNATURES);
-                        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
-                                == 0) {
-                            Slog.w(RefactoredBackupManagerService.TAG,
-                                    "Restore stream contains apk of package "
-                                            + info.packageName
-                                            + " but it disallows backup/restore");
-                            okay = false;
-                        } else {
-                            // So far so good -- do the signatures match the manifest?
-                            Signature[] sigs = mManifestSignatures.get(info.packageName);
-                            if (AppBackupUtils.signaturesMatch(sigs, pkg)) {
-                                // If this is a system-uid app without a declared backup agent,
-                                // don't restore any of the file data.
-                                if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
-                                        && (pkg.applicationInfo.backupAgentName == null)) {
-                                    Slog.w(RefactoredBackupManagerService.TAG,
-                                            "Installed app " + info.packageName
-                                                    + " has restricted uid and no agent");
-                                    okay = false;
-                                }
-                            } else {
-                                Slog.w(RefactoredBackupManagerService.TAG,
-                                        "Installed app " + info.packageName
-                                                + " signatures do not match restore manifest");
-                                okay = false;
-                                uninstall = true;
-                            }
-                        }
-                    } catch (NameNotFoundException e) {
-                        Slog.w(RefactoredBackupManagerService.TAG,
-                                "Install of package " + info.packageName
-                                        + " succeeded but now not found");
-                        okay = false;
-                    }
-                }
-
-                // If we're not okay at this point, we need to delete the package
-                // that we just installed.
-                if (uninstall) {
-                    mDeleteObserver.reset();
-                    backupManagerService.getPackageManager().deletePackage(
-                            mInstallObserver.mPackageName,
-                            mDeleteObserver, 0);
-                    mDeleteObserver.waitForCompletion();
-                }
-            }
-        } catch (IOException e) {
-            Slog.e(RefactoredBackupManagerService.TAG,
-                    "Unable to transcribe restored apk for install");
-            okay = false;
-        } finally {
-            apkFile.delete();
-        }
-
-        return okay;
-    }
-
-    private boolean isRestorableFile(FileMetadata info) {
+    private static boolean isRestorableFile(FileMetadata info) {
         if (FullBackup.CACHE_TREE_TOKEN.equals(info.domain)) {
             if (RefactoredBackupManagerService.MORE_DEBUG) {
                 Slog.i(RefactoredBackupManagerService.TAG, "Dropping cache file path " + info.path);
@@ -821,28 +613,19 @@ public class FullRestoreEngine extends RestoreEngine {
             }
         }
 
-        // The path needs to be canonical
-        if (info.path.contains("..") || info.path.contains("//")) {
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Dropping invalid path " + info.path);
-            }
-            return false;
-        }
-
         // Otherwise we think this file is good to go
         return true;
     }
 
-    void sendStartRestore() {
-        if (mObserver != null) {
-            try {
-                mObserver.onStartRestore();
-            } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG,
-                        "full restore observer went away: startRestore");
-                mObserver = null;
+    private static boolean isCanonicalFilePath(String path) {
+        if (path.contains("..") || path.contains("//")) {
+            if (RefactoredBackupManagerService.MORE_DEBUG) {
+                Slog.w(RefactoredBackupManagerService.TAG, "Dropping invalid path " + path);
             }
+            return false;
         }
+
+        return true;
     }
 
     void sendOnRestorePackage(String name) {
@@ -853,18 +636,6 @@ public class FullRestoreEngine extends RestoreEngine {
             } catch (RemoteException e) {
                 Slog.w(RefactoredBackupManagerService.TAG,
                         "full restore observer went away: restorePackage");
-                mObserver = null;
-            }
-        }
-    }
-
-    void sendEndRestore() {
-        if (mObserver != null) {
-            try {
-                mObserver.onEndRestore();
-            } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG,
-                        "full restore observer went away: endRestore");
                 mObserver = null;
             }
         }

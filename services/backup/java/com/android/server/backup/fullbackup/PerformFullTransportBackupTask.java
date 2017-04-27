@@ -265,7 +265,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.i(TAG, "full backup requested but enabled=" + backupManagerService
                             .isEnabled()
-                            + " provisioned=" + backupManagerService.isProvisioned() + "; ignoring");
+                            + " provisioned=" + backupManagerService.isProvisioned()
+                            + "; ignoring");
                 }
                 int monitoringEvent;
                 if (!backupManagerService.isEnabled()) {
