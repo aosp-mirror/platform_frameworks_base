@@ -16,8 +16,6 @@
 
 package android.service.wallpaper;
 
-import android.annotation.Nullable;
-import android.app.WallpaperColors;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.MergedConfiguration;
@@ -543,24 +541,6 @@ public abstract class WallpaperService extends Service {
          * SurfaceHolder.Callback.surfaceDestroyed()}.
          */
         public void onSurfaceDestroyed(SurfaceHolder holder) {
-        }
-
-        /**
-         * Notifies the engine that wallpaper colors changed significantly.
-         * This will trigger a {@link #onComputeWallpaperColors()} call.
-         */
-        public void invalidateColors() {
-        }
-
-        /**
-         * Notifies the system about what colors the wallpaper is using.
-         * You might return null if no color information is available at the moment. In that case
-         * you might want to call {@link #invalidateColors()} in a near future.
-         *
-         * @return List of wallpaper colors and their weights.
-         */
-        public @Nullable WallpaperColors onComputeWallpaperColors() {
-            return null;
         }
         
         protected void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
