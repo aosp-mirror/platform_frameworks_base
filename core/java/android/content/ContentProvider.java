@@ -46,6 +46,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.MathUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1066,14 +1067,65 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * <li>{@link ContentResolver#QUERY_ARG_SQL_SELECTION_ARGS}
      * <li>{@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER}
      *
+     * <p>This method can be called from multiple threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     *
+     * <p>
+     * Example client call:<p>
+     * <pre>// Request 20 records starting at row index 30.
+       Bundle queryArgs = new Bundle();
+       queryArgs.putInt(ContentResolver.QUERY_ARG_OFFSET, 30);
+       queryArgs.putInt(ContentResolver.QUERY_ARG_LIMIT, 20);
+
+       Cursor cursor = getContentResolver().query(
+                contentUri,    // Content Uri is specific to individual content providers.
+                projection,    // String[] describing which columns to return.
+                queryArgs,     // Query arguments.
+                null);         // Cancellation signal.</pre>
+     *
+     * Example implementation:<p>
+     * <pre>
+
+        int recordsetSize = 0x1000;  // Actual value is implementation specific.
+        queryArgs = queryArgs != null ? queryArgs : Bundle.EMPTY;  // ensure queryArgs is non-null
+
+        int offset = queryArgs.getInt(ContentResolver.QUERY_ARG_OFFSET, 0);
+        int limit = queryArgs.getInt(ContentResolver.QUERY_ARG_LIMIT, Integer.MIN_VALUE);
+
+        MatrixCursor c = new MatrixCursor(PROJECTION, limit);
+
+        // Calculate the number of items to include in the cursor.
+        int numItems = MathUtils.constrain(recordsetSize - offset, 0, limit);
+
+        // Build the paged result set....
+        for (int i = offset; i < offset + numItems; i++) {
+            // populate row from your data.
+        }
+
+        Bundle extras = new Bundle();
+        c.setExtras(extras);
+
+        // Any QUERY_ARG_* key may be included if honored.
+        // In an actual implementation, include only keys that are both present in queryArgs
+        // and reflected in the Cursor output. For example, if QUERY_ARG_OFFSET were included
+        // in queryArgs, but was ignored because it contained an invalid value (like –273),
+        // then QUERY_ARG_OFFSET should be omitted.
+        extras.putStringArray(ContentResolver.EXTRA_HONORED_ARGS, new String[] {
+            ContentResolver.QUERY_ARG_OFFSET,
+            ContentResolver.QUERY_ARG_LIMIT
+        });
+
+        extras.putInt(ContentResolver.EXTRA_TOTAL_COUNT, recordsetSize);
+
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
+        return cursor;</pre>
+     * <p>
      * @see #query(Uri, String[], String, String[], String, CancellationSignal) for
      *     implementation details.
      *
      * @param uri The URI to query. This will be the full URI sent by the client.
-     *            TODO: Me wonders about this use case, and how we adapt it.
-     *            If the client is requesting a specific record, the URI will end
-     *            in a record number that the implementation should parse and add
-     *            to a WHERE or HAVING clause, specifying that _id value.
      * @param projection The list of columns to put into the cursor.
      *            If {@code null} provide a default set of columns.
      * @param queryArgs A Bundle containing all additional information necessary for the query.
