@@ -218,7 +218,7 @@ public class WebViewZygote {
             final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
                     TextUtils.join(File.pathSeparator, zipPaths);
 
-            waitForZygote();
+            ZygoteProcess.waitForConnectionToZygote(WEBVIEW_ZYGOTE_SOCKET);
 
             Log.d(LOGTAG, "Preloading package " + zip + " " + librarySearchPath);
             sZygote.preloadPackageForAbi(zip, librarySearchPath, sPackageCacheKey,
@@ -226,27 +226,6 @@ public class WebViewZygote {
         } catch (Exception e) {
             Log.e(LOGTAG, "Error connecting to " + serviceName, e);
             sZygote = null;
-        }
-    }
-
-    /**
-     * Wait until a connection to the Zygote can be established.
-     */
-    private static void waitForZygote() {
-        while (true) {
-            try {
-                final ZygoteProcess.ZygoteState zs =
-                        ZygoteProcess.ZygoteState.connect(WEBVIEW_ZYGOTE_SOCKET);
-                zs.close();
-                break;
-            } catch (IOException ioe) {
-                Log.w(LOGTAG, "Got error connecting to zygote, retrying. msg= " + ioe.getMessage());
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ie) {
-            }
         }
     }
 }
