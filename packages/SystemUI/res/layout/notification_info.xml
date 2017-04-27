@@ -74,8 +74,9 @@
         android:orientation="horizontal">
         <!-- Channel Text -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
             <!-- Channel Name -->
             <TextView
@@ -113,7 +114,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
-            android:layout_weight="1"
             android:contentDescription="@string/notification_channel_switch_accessibility"
             android:background="@null" />
     </LinearLayout>
