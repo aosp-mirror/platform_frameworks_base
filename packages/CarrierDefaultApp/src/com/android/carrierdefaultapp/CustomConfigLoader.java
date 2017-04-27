@@ -91,6 +91,10 @@ public class CustomConfigLoader {
                     arg1 = intent.getStringExtra(TelephonyIntents.EXTRA_APN_TYPE_KEY);
                     arg2 = intent.getStringExtra(TelephonyIntents.EXTRA_ERROR_CODE_KEY);
                     break;
+                case TelephonyIntents.ACTION_CARRIER_SIGNAL_RESET:
+                    configs = b.getStringArray(CarrierConfigManager
+                            .KEY_CARRIER_DEFAULT_ACTIONS_ON_RESET);
+                    break;
                 default:
                     Rlog.e(TAG, "load carrier config failure with un-configured key: " +
                             intent.getAction());
