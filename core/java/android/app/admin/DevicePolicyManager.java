@@ -7906,7 +7906,8 @@ public class DevicePolicyManager {
      * See {@link #getBindDeviceAdminTargetUsers} for a definition of which
      * device/profile owners are allowed to bind to services of another profile/device owner.
      * <p>
-     * The service must be unexported. Note that the {@link Context} used to obtain this
+     * The service must be protected by {@link android.Manifest.permission#BIND_DEVICE_ADMIN}.
+     * Note that the {@link Context} used to obtain this
      * {@link DevicePolicyManager} instance via {@link Context#getSystemService(Class)} will be used
      * to bind to the {@link android.app.Service}.
      *
