@@ -3301,13 +3301,21 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         final ActivityRecord next = topRunningActivityLocked();
         final String myReason = reason + " adjustFocus";
+
         if (next != r) {
             if (next != null && StackId.keepFocusInStackIfPossible(mStackId) && isFocusable()) {
                 // For freeform, docked, and pinned stacks we always keep the focus within the
                 // stack as long as there is a running activity.
                 return;
             } else {
+                // Task is not guaranteed to be non-null. For example, destroying the
+                // {@link ActivityRecord} will disassociate the task from the activity.
                 final TaskRecord task = r.getTask();
+
+                if (task == null) {
+                    throw new IllegalStateException("activity no longer associated with task:" + r);
+                }
+
                 final boolean isAssistantOrOverAssistant = task.getStack().isAssistantStack() ||
                         task.isOverAssistantStack();
                 if (r.frontOfTask && isATopFinishingTask(task)
@@ -3373,8 +3381,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + r);
                     if (requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
                             "stop-no-history", false)) {
-                        // Activity was finished, no need to continue trying to schedule stop.
-                        adjustFocusedActivityStackLocked(r, "stopActivityFinished");
+                        // If {@link requestFinishActivityLocked} returns {@code true},
+                        // {@link adjustFocusedActivityStackLocked} would have been already called.
                         r.resumeKeyDispatchingLocked();
                         return;
                     }

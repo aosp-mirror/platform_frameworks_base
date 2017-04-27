@@ -161,6 +161,11 @@ public class ActivityTestsBase {
         void moveHomeStackToFront(String reason) {
         }
 
+        @Override
+        boolean moveHomeStackTaskToTop(String reason) {
+            return true;
+        }
+
         // Invoked during {@link ActivityStack} creation.
         @Override
         void updateUIDsPresentOnDisplay() {
