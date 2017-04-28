@@ -2687,17 +2687,6 @@ public class Notification implements Parcelable
         /**
          * Constructs a new Builder with the defaults:
          *
-
-         * <table>
-         * <tr><th align=right>priority</th>
-         *     <td>{@link #PRIORITY_DEFAULT}</td></tr>
-         * <tr><th align=right>when</th>
-         *     <td>now ({@link System#currentTimeMillis()})</td></tr>
-         * <tr><th align=right>audio stream</th>
-         *     <td>{@link #STREAM_DEFAULT}</td></tr>
-         * </table>
-         *
-
          * @param context
          *            A {@link Context} that will be used by the Builder to construct the
          *            RemoteViews. The Context will not be held past the lifetime of this Builder
