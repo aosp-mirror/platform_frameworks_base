@@ -28,7 +28,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +51,7 @@ public class FragmentHostManager {
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE);
     private final FragmentService mManager;
-    private final ExtensionFragmentManager mPlugins = new ExtensionFragmentManager();
+    private final PluginFragmentManager mPlugins = new PluginFragmentManager();
 
     private FragmentController mFragments;
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
@@ -175,7 +174,7 @@ public class FragmentHostManager {
         return mFragments.getFragmentManager();
     }
 
-    ExtensionFragmentManager getExtensionManager() {
+    PluginFragmentManager getPluginManager() {
         return mPlugins;
     }
 
@@ -262,16 +261,22 @@ public class FragmentHostManager {
         }
     }
 
-    class ExtensionFragmentManager {
-        private final ArrayMap<String, Context> mExtensionLookup = new ArrayMap<>();
+    class PluginFragmentManager {
+        private final ArrayMap<String, Context> mPluginLookup = new ArrayMap<>();
 
-        public void setCurrentExtension(@NonNull  String tag, @Nullable String oldClass,
-                @NonNull String currentClass, @Nullable Context context) {
+        public void removePlugin(String tag, String currentClass, String defaultClass) {
             Fragment fragment = getFragmentManager().findFragmentByTag(tag);
-            if (oldClass != null) {
-                mExtensionLookup.remove(oldClass);
-            }
-            mExtensionLookup.put(currentClass, context);
+            mPluginLookup.remove(currentClass);
+            getFragmentManager().beginTransaction()
+                    .replace(((View) fragment.getView().getParent()).getId(),
+                            instantiate(mContext, defaultClass, null), tag)
+                    .commit();
+            reloadFragments();
+        }
+
+        public void setCurrentPlugin(String tag, String currentClass, Context context) {
+            Fragment fragment = getFragmentManager().findFragmentByTag(tag);
+            mPluginLookup.put(currentClass, context);
             getFragmentManager().beginTransaction()
                     .replace(((View) fragment.getView().getParent()).getId(),
                             instantiate(context, currentClass, null), tag)
@@ -287,11 +292,11 @@ public class FragmentHostManager {
         }
 
         Fragment instantiate(Context context, String className, Bundle arguments) {
-            Context extensionContext = mExtensionLookup.get(className);
-            if (extensionContext != null) {
-                Fragment f = Fragment.instantiate(extensionContext, className, arguments);
+            Context pluginContext = mPluginLookup.get(className);
+            if (pluginContext != null) {
+                Fragment f = Fragment.instantiate(pluginContext, className, arguments);
                 if (f instanceof Plugin) {
-                    ((Plugin) f).onCreate(mContext, extensionContext);
+                    ((Plugin) f).onCreate(mContext, pluginContext);
                 }
                 return f;
             }
