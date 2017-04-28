@@ -1868,7 +1868,8 @@ public final class ActiveServices {
         final boolean newService = app.services.add(r);
         bumpServiceExecutingLocked(r, execInFg, "create");
         mAm.updateLruProcessLocked(app, false, null);
-        updateServiceForegroundLocked(r.app, true);
+        updateServiceForegroundLocked(r.app, /* oomAdj= */ false);
+        mAm.updateOomAdjLocked();
 
         boolean created = false;
         try {
