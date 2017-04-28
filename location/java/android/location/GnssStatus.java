@@ -55,9 +55,9 @@ public final class GnssStatus {
     public static final int GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY = (1 << 3);
 
     /** @hide */
-    public static final int SVID_SHIFT_WIDTH = 7;
+    public static final int SVID_SHIFT_WIDTH = 8;
     /** @hide */
-    public static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 3;
+    public static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 4;
     /** @hide */
     public static final int CONSTELLATION_TYPE_MASK = 0xf;
 
