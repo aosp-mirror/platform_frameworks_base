@@ -21,7 +21,6 @@
 
 #include "com_android_server_radio_RadioService.h"
 #include "com_android_server_radio_Tuner.h"
-#include "com_android_server_radio_Tuner_TunerCallback.h"
 
 namespace android {
 int register_android_server_AlarmManagerService(JNIEnv* env);
@@ -67,8 +66,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     ALOG_ASSERT(env, "Could not retrieve the env!");
 
     register_android_server_radio_RadioService(env);
-    register_android_server_radio_Tuner(env);
-    register_android_server_radio_Tuner_TunerCallback(vm, env);
+    register_android_server_radio_Tuner(vm, env);
     register_android_server_PowerManagerService(env);
     register_android_server_SerialService(env);
     register_android_server_InputApplicationHandle(env);

@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_TUNER_H
-#define _ANDROID_SERVER_RADIO_TUNER_H
+#ifndef _ANDROID_SERVER_RADIO_TYPES_H
+#define _ANDROID_SERVER_RADIO_TYPES_H
 
-#include "com_android_server_radio_types.h"
-
-#include <android/hardware/broadcastradio/1.1/ITuner.h>
-#include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
 #include <jni.h>
-#include <utils/StrongPointer.h>
 
 namespace android {
-
-void register_android_server_radio_Tuner(JavaVM *vm, JNIEnv *env);
-
 namespace server {
 namespace radio {
-namespace Tuner {
 
-void setHalTuner(JNIEnv *env, jobject obj, sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
+/* Most of these enums are dereived from Java code, based at
+ * frameworks/base/core/java/android/hardware/radio/RadioManager.java.
+ */
 
-sp<hardware::broadcastradio::V1_1::ITunerCallback> getNativeCallback(JNIEnv *env, jobject obj);
+// Keep in sync with REGION_* constants from RadioManager.java.
+enum class Region : jint {
+    ITU_1 = 0,
+    ITU_2 = 1,
+    OIRT = 2,
+    JAPAN = 3,
+    KOREA = 4,
+};
 
-Region getRegion(JNIEnv *env, jobject obj);
-
-} // namespace Tuner
 } // namespace radio
 } // namespace server
 } // namespace android
 
-#endif // _ANDROID_SERVER_RADIO_TUNER_H
+#endif // _ANDROID_SERVER_RADIO_TYPES_H
