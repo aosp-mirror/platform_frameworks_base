@@ -231,8 +231,18 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * Check if the window is in picture-in-picture mode.
      *
      * @return {@code true} if the window is in picture-in-picture mode, {@code false} otherwise.
+     * @removed
      */
     public boolean inPictureInPicture() {
+        return isInPictureInPictureMode();
+    }
+
+    /**
+     * Check if the window is in picture-in-picture mode.
+     *
+     * @return {@code true} if the window is in picture-in-picture mode, {@code false} otherwise.
+     */
+    public boolean isInPictureInPictureMode() {
         return mInPictureInPicture;
     }
 

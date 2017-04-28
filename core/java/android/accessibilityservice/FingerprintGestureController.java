@@ -181,11 +181,5 @@ public final class FingerprintGestureController {
          * {@link #FINGERPRINT_GESTURE_SWIPE_RIGHT}.
          */
         public void onGestureDetected(int gesture) {}
-
-        /**
-         * @deprecated Never called. Use onGestureDetected.
-         */
-        @Deprecated
-        public void onGesture(int gesture) {}
     }
 }

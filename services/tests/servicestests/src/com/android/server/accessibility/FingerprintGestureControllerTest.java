@@ -131,7 +131,8 @@ public class FingerprintGestureControllerTest {
         mFingerprintGestureController.registerFingerprintGestureCallback(
                 mMockFingerprintGestureCallback, null);
         mFingerprintGestureController.onGesture(FINGERPRINT_GESTURE_SWIPE_DOWN);
-        verify(mMockFingerprintGestureCallback, times(1)).onGestureDetected(FINGERPRINT_GESTURE_SWIPE_DOWN);
+        verify(mMockFingerprintGestureCallback, times(1))
+                .onGestureDetected(FINGERPRINT_GESTURE_SWIPE_DOWN);
 
         reset(mMockFingerprintGestureCallback);
         mFingerprintGestureController.unregisterFingerprintGestureCallback(
@@ -150,9 +151,11 @@ public class FingerprintGestureControllerTest {
         mFingerprintGestureController.registerFingerprintGestureCallback(
                 mMockFingerprintGestureCallback, messageCapturingHandler);
         mFingerprintGestureController.onGesture(FINGERPRINT_GESTURE_SWIPE_DOWN);
-        verify(mMockFingerprintGestureCallback, times(0)).onGestureDetected(FINGERPRINT_GESTURE_SWIPE_DOWN);
+        verify(mMockFingerprintGestureCallback, times(0))
+                .onGestureDetected(FINGERPRINT_GESTURE_SWIPE_DOWN);
         messageCapturingHandler.sendLastMessage();
-        verify(mMockFingerprintGestureCallback, times(1)).onGestureDetected(FINGERPRINT_GESTURE_SWIPE_DOWN);
+        verify(mMockFingerprintGestureCallback, times(1))
+                .onGestureDetected(FINGERPRINT_GESTURE_SWIPE_DOWN);
 
         reset(mMockFingerprintGestureCallback);
         mFingerprintGestureController.unregisterFingerprintGestureCallback(

@@ -487,7 +487,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see AccessibilityAction#ACTION_MOVE_WINDOW
      */
     public static final String ACTION_ARGUMENT_MOVE_WINDOW_X =
-            "android.view.accessibility.action.ARGUMENT_MOVE_WINDOW_X";
+            "ACTION_ARGUMENT_MOVE_WINDOW_X";
 
     /**
      * Argument for specifying the y coordinate to which to move a window.
@@ -501,7 +501,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see AccessibilityAction#ACTION_MOVE_WINDOW
      */
     public static final String ACTION_ARGUMENT_MOVE_WINDOW_Y =
-            "android.view.accessibility.action.ARGUMENT_MOVE_WINDOW_Y";
+            "ACTION_ARGUMENT_MOVE_WINDOW_Y";
 
     /**
      * Argument to pass the {@link AccessibilityClickableSpan}.

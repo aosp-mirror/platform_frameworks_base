@@ -16,7 +16,6 @@
 
 package com.android.server.accessibility;
 
-import static android.accessibilityservice.GestureDescription.StrokeDescription.INVALID_STROKE_ID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -246,7 +245,7 @@ public class GestureDescriptionTest {
         swipePath.moveTo(10, 20);
         swipePath.lineTo(30, 40);
         StrokeDescription stroke1 =
-                new StrokeDescription(swipePath, 0, 100, 0, true);
+                new StrokeDescription(swipePath, 0, 100, true);
         GestureDescription gesture = new GestureDescription.Builder().addStroke(stroke1).build();
         List<GestureStep> steps = MotionEventGenerator
                 .getGestureStepsFromGestureDescription(gesture, 10);
@@ -260,9 +259,8 @@ public class GestureDescriptionTest {
         swipePath.moveTo(10, 20);
         swipePath.lineTo(30, 40);
         StrokeDescription stroke1 =
-                new StrokeDescription(swipePath, 0, 100, INVALID_STROKE_ID, true);
-        StrokeDescription stroke2 =
-                new StrokeDescription(swipePath, 0, 100, stroke1.getId(), false);
+                new StrokeDescription(swipePath, 0, 100, true);
+        StrokeDescription stroke2 = stroke1.continueStroke(swipePath, 0, 100, false);
         GestureDescription gesture = new GestureDescription.Builder().addStroke(stroke2).build();
         List<GestureStep> steps = MotionEventGenerator
                 .getGestureStepsFromGestureDescription(gesture, 10);

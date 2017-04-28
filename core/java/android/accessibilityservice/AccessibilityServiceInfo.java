@@ -119,9 +119,9 @@ public class AccessibilityServiceInfo implements Parcelable {
 
     /**
      * Capability: This accessibility service can capture gestures from the fingerprint sensor
-     * @see android.R.styleable#AccessibilityService_canCaptureFingerprintGestures
+     * @see android.R.styleable#AccessibilityService_canRequestFingerprintGestures
      */
-    public static final int CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES = 0x00000040;
+    public static final int CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES = 0x00000040;
 
     private static SparseArray<CapabilityInfo> sAvailableCapabilityInfos;
 
@@ -301,7 +301,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * This flag requests that all fingerprint gestures be sent to the accessibility service.
      * It is handled in {@link FingerprintGestureController}
      */
-    public static final int FLAG_CAPTURE_FINGERPRINT_GESTURES = 0x00000200;
+    public static final int FLAG_REQUEST_FINGERPRINT_GESTURES = 0x00000200;
 
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
@@ -521,8 +521,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 mCapabilities |= CAPABILITY_CAN_PERFORM_GESTURES;
             }
             if (asAttributes.getBoolean(com.android.internal.R.styleable
-                    .AccessibilityService_canCaptureFingerprintGestures, false)) {
-                mCapabilities |= CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES;
+                    .AccessibilityService_canRequestFingerprintGestures, false)) {
+                mCapabilities |= CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES;
             }
             TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
@@ -971,8 +971,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_ENABLE_ACCESSIBILITY_VOLUME";
             case FLAG_REQUEST_ACCESSIBILITY_BUTTON:
                 return "FLAG_REQUEST_ACCESSIBILITY_BUTTON";
-            case FLAG_CAPTURE_FINGERPRINT_GESTURES:
-                return "FLAG_CAPTURE_FINGERPRINT_GESTURES";
+            case FLAG_REQUEST_FINGERPRINT_GESTURES:
+                return "FLAG_REQUEST_FINGERPRINT_GESTURES";
             default:
                 return null;
         }
@@ -1000,8 +1000,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "CAPABILITY_CAN_CONTROL_MAGNIFICATION";
             case CAPABILITY_CAN_PERFORM_GESTURES:
                 return "CAPABILITY_CAN_PERFORM_GESTURES";
-            case CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES:
-                return "CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES";
+            case CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES:
+                return "CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES";
             default:
                 return "UNKNOWN";
         }
@@ -1064,8 +1064,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                             R.string.capability_title_canPerformGestures,
                             R.string.capability_desc_canPerformGestures));
             if ((context == null) || fingerprintAvailable(context)) {
-                sAvailableCapabilityInfos.put(CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES,
-                        new CapabilityInfo(CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES,
+                sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES,
+                        new CapabilityInfo(CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES,
                                 R.string.capability_title_canCaptureFingerprintGestures,
                                 R.string.capability_desc_canCaptureFingerprintGestures));
             }

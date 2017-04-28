@@ -443,6 +443,14 @@ package android.view {
 
 }
 
+package android.view.accessibility {
+
+  public final class AccessibilityWindowInfo implements android.os.Parcelable {
+    method public boolean inPictureInPicture();
+  }
+
+}
+
 package android.webkit {
 
   public class WebViewClient {
