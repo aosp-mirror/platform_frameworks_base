@@ -390,7 +390,7 @@ public final class AutofillManagerService extends SystemService {
      * Updates a cached service for a given user.
      */
     private void updateCachedServiceLocked(int userId, boolean disabled) {
-        AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+        AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
         if (service != null) {
             service.updateLocked(disabled);
             if (!service.isEnabled()) {
