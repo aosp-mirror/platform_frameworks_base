@@ -2778,7 +2778,7 @@
         <public name="paddingVertical" />
         <public name="fontStyle" />
         <public name="keyboardNavigationCluster" />
-        <public name="targetProcess" />
+        <public name="targetProcesses" />
         <public name="nextClusterForward" />
         <public name="__removed1" />
         <public name="colorError" />
