@@ -18,23 +18,18 @@ package com.android.systemui.doze;
 
 import android.app.AlarmManager;
 import android.app.Application;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Handler;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SystemUIApplication;
-import com.android.systemui.plugins.doze.DozeProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.WakeLock;
 
 public class DozeFactory {
 
-    private final DozeProvider mDozePlugin;
-
-    public DozeFactory(DozeProvider plugin) {
-        mDozePlugin = plugin;
+    public DozeFactory() {
     }
 
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
@@ -65,89 +60,14 @@ public class DozeFactory {
     private DozeTriggers createDozeTriggers(Context context, SensorManager sensorManager,
             DozeHost host, AmbientDisplayConfiguration config, DozeParameters params,
             Handler handler, WakeLock wakeLock, DozeMachine machine) {
-        boolean allowPulseTriggers = mDozePlugin == null || mDozePlugin.allowDefaultPulseTriggers();
+        boolean allowPulseTriggers = true;
         return new DozeTriggers(context, machine, host, config, params,
                 sensorManager, handler, wakeLock, allowPulseTriggers);
     }
 
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
             DozeMachine machine, Handler handler, AlarmManager alarmManager) {
-        if (mDozePlugin != null) {
-            DozeProvider.DozeUi dozeUi = mDozePlugin.provideDozeUi(context,
-                    pluginMachine(context, machine, host),
-                    wakeLock);
-            return (oldState, newState) -> {
-                dozeUi.transitionTo(pluginState(oldState),
-                        pluginState(newState));
-            };
-        } else {
-            return new DozeUi(context, alarmManager, machine, wakeLock, host, handler);
-        }
-    }
-
-    private DozeProvider.DozeMachine pluginMachine(Context context, DozeMachine machine,
-            DozeHost host) {
-        return new DozeProvider.DozeMachine() {
-            @Override
-            public void requestState(DozeProvider.DozeState state) {
-                if (state == DozeProvider.DozeState.WAKE_UP) {
-                    machine.wakeUp();
-                    return;
-                }
-                machine.requestState(implState(state));
-            }
-
-            @Override
-            public void requestSendIntent(PendingIntent intent) {
-                host.startPendingIntentDismissingKeyguard(intent);
-            }
-        };
-    }
-
-    private DozeMachine.State implState(DozeProvider.DozeState s) {
-        switch (s) {
-            case UNINITIALIZED:
-                return DozeMachine.State.UNINITIALIZED;
-            case INITIALIZED:
-                return DozeMachine.State.INITIALIZED;
-            case DOZE:
-                return DozeMachine.State.DOZE;
-            case DOZE_AOD:
-                return DozeMachine.State.DOZE_AOD;
-            case DOZE_REQUEST_PULSE:
-                return DozeMachine.State.DOZE_REQUEST_PULSE;
-            case DOZE_PULSING:
-                return DozeMachine.State.DOZE_PULSING;
-            case DOZE_PULSE_DONE:
-                return DozeMachine.State.DOZE_PULSE_DONE;
-            case FINISH:
-                return DozeMachine.State.FINISH;
-            default:
-                throw new IllegalArgumentException("Unknown state: " + s);
-        }
-    }
-
-    private DozeProvider.DozeState pluginState(DozeMachine.State s) {
-        switch (s) {
-            case UNINITIALIZED:
-                return DozeProvider.DozeState.UNINITIALIZED;
-            case INITIALIZED:
-                return DozeProvider.DozeState.INITIALIZED;
-            case DOZE:
-                return DozeProvider.DozeState.DOZE;
-            case DOZE_AOD:
-                return DozeProvider.DozeState.DOZE_AOD;
-            case DOZE_REQUEST_PULSE:
-                return DozeProvider.DozeState.DOZE_REQUEST_PULSE;
-            case DOZE_PULSING:
-                return DozeProvider.DozeState.DOZE_PULSING;
-            case DOZE_PULSE_DONE:
-                return DozeProvider.DozeState.DOZE_PULSE_DONE;
-            case FINISH:
-                return DozeProvider.DozeState.FINISH;
-            default:
-                throw new IllegalArgumentException("Unknown state: " + s);
-        }
+        return new DozeUi(context, alarmManager, machine, wakeLock, host, handler);
     }
 
     public static DozeHost getHost(DozeService service) {
