@@ -19,14 +19,15 @@ package android.net.nsd;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.os.HandlerThread;
 import android.os.Handler;
@@ -165,6 +166,84 @@ public class NsdManagerTest {
 
         //sendResponse(NsdManager.UNREGISTER_SERVICE_SUCCEEDED, 0, key2yetAgain, null);
         //verify(listener2, timeout(mTimeoutMs).times(1)).onServiceUnregistered(request2);
+    }
+
+    @Test
+    public void testDiscoverService() {
+        NsdManager manager = makeManager();
+
+        NsdServiceInfo reply1 = new NsdServiceInfo("a_name", "a_type");
+        NsdServiceInfo reply2 = new NsdServiceInfo("another_name", "a_type");
+        NsdServiceInfo reply3 = new NsdServiceInfo("a_third_name", "a_type");
+
+        NsdManager.DiscoveryListener listener = mock(NsdManager.DiscoveryListener.class);
+
+        // Client registers for discovery, request fails
+        manager.discoverServices("a_type", PROTOCOL, listener);
+        int key1 = verifyRequest(NsdManager.DISCOVER_SERVICES);
+
+        int err = 1;
+        sendResponse(NsdManager.DISCOVER_SERVICES_FAILED, err, key1, null);
+        verify(listener, timeout(mTimeoutMs).times(1)).onStartDiscoveryFailed("a_type", err);
+
+        // Client retries, request succeeds
+        manager.discoverServices("a_type", PROTOCOL, listener);
+        int key2 = verifyRequest(NsdManager.DISCOVER_SERVICES);
+
+        sendResponse(NsdManager.DISCOVER_SERVICES_STARTED, 0, key2, reply1);
+        verify(listener, timeout(mTimeoutMs).times(1)).onDiscoveryStarted("a_type");
+
+
+        // mdns notifies about services
+        sendResponse(NsdManager.SERVICE_FOUND, 0, key2, reply1);
+        verify(listener, timeout(mTimeoutMs).times(1)).onServiceFound(reply1);
+
+        sendResponse(NsdManager.SERVICE_FOUND, 0, key2, reply2);
+        verify(listener, timeout(mTimeoutMs).times(1)).onServiceFound(reply2);
+
+        sendResponse(NsdManager.SERVICE_LOST, 0, key2, reply2);
+        verify(listener, timeout(mTimeoutMs).times(1)).onServiceLost(reply2);
+
+
+        // Client unregisters its listener
+        manager.stopServiceDiscovery(listener);
+        int key2again = verifyRequest(NsdManager.STOP_DISCOVERY);
+        assertEquals(key2, key2again);
+
+        // TODO: unregister listener immediately and stop notifying it about services
+        // Notifications are still passed to the client's listener
+        sendResponse(NsdManager.SERVICE_LOST, 0, key2, reply1);
+        verify(listener, timeout(mTimeoutMs).times(1)).onServiceLost(reply1);
+
+        // Client is notified of complete unregistration
+        sendResponse(NsdManager.STOP_DISCOVERY_SUCCEEDED, 0, key2again, "a_type");
+        verify(listener, timeout(mTimeoutMs).times(1)).onDiscoveryStopped("a_type");
+
+        // Notifications are not passed to the client anymore
+        sendResponse(NsdManager.SERVICE_FOUND, 0, key2, reply3);
+        verify(listener, timeout(mTimeoutMs).times(0)).onServiceLost(reply3);
+
+
+        // Client registers for service discovery
+        reset(listener);
+        manager.discoverServices("a_type", PROTOCOL, listener);
+        int key3 = verifyRequest(NsdManager.DISCOVER_SERVICES);
+
+        sendResponse(NsdManager.DISCOVER_SERVICES_STARTED, 0, key3, reply1);
+        verify(listener, timeout(mTimeoutMs).times(1)).onDiscoveryStarted("a_type");
+
+        // Client unregisters immediately, it fails
+        manager.stopServiceDiscovery(listener);
+        int key3again = verifyRequest(NsdManager.STOP_DISCOVERY);
+        assertEquals(key3, key3again);
+
+        err = 2;
+        sendResponse(NsdManager.STOP_DISCOVERY_FAILED, err, key3again, "a_type");
+        verify(listener, timeout(mTimeoutMs).times(1)).onStopDiscoveryFailed("a_type", err);
+
+        // New notifications are not passed to the client anymore
+        sendResponse(NsdManager.SERVICE_FOUND, 0, key3, reply1);
+        verify(listener, timeout(mTimeoutMs).times(0)).onServiceFound(reply1);
     }
 
     @Test
