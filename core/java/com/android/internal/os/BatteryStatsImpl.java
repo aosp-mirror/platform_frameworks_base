@@ -114,7 +114,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 155 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 156 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -4704,6 +4704,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void noteBluetoothScanResultFromSourceLocked(WorkSource ws) {
+        final int N = ws.size();
+        for (int i = 0; i < N; i++) {
+            int uid = mapUid(ws.get(i));
+            getUidStatsLocked(uid).noteBluetoothScanResultLocked();
+        }
+    }
+
     private void noteWifiRadioApWakeupLocked(final long elapsedRealtimeMillis,
             final long uptimeMillis, int uid) {
         uid = mapUid(uid);
@@ -5421,6 +5429,7 @@ public class BatteryStatsImpl extends BatteryStats {
         StopwatchTimer mCameraTurnedOnTimer;
         StopwatchTimer mForegroundActivityTimer;
         DualTimer mBluetoothScanTimer;
+        Counter mBluetoothScanResultCounter;
 
         int mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         StopwatchTimer[] mProcessStateTimer;
@@ -5864,6 +5873,17 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        public Counter createBluetoothScanResultCounterLocked() {
+            if (mBluetoothScanResultCounter == null) {
+                mBluetoothScanResultCounter = new Counter(mBsi.mOnBatteryTimeBase);
+            }
+            return mBluetoothScanResultCounter;
+        }
+
+        public void noteBluetoothScanResultLocked() {
+            createBluetoothScanResultCounterLocked().stepAtomic();
+        }
+
         @Override
         public void noteActivityResumedLocked(long elapsedRealtimeMs) {
             // We always start, since we want multiple foreground PIDs to nest
@@ -6015,6 +6035,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 return null;
             }
             return mBluetoothScanTimer.getSubTimer();
+        }
+
+        @Override
+        public Counter getBluetoothScanResultCounter() {
+            return mBluetoothScanResultCounter;
         }
 
         void makeProcessState(int i, Parcel in) {
@@ -6266,6 +6291,9 @@ public class BatteryStatsImpl extends BatteryStats {
             active |= !resetTimerIfNotNull(mCameraTurnedOnTimer, false);
             active |= !resetTimerIfNotNull(mForegroundActivityTimer, false);
             active |= !resetTimerIfNotNull(mBluetoothScanTimer, false);
+            if (mBluetoothScanResultCounter != null) {
+                mBluetoothScanResultCounter.reset(false);
+            }
 
             if (mProcessStateTimer != null) {
                 for (int i = 0; i < NUM_PROCESS_STATE; i++) {
@@ -6450,6 +6478,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     mBluetoothScanTimer.detach();
                     mBluetoothScanTimer = null;
                 }
+                if (mBluetoothScanResultCounter != null) {
+                    mBluetoothScanResultCounter.detach();
+                    mBluetoothScanResultCounter = null;
+                }
                 if (mUserActivityCounters != null) {
                     for (int i=0; i<NUM_USER_ACTIVITY_TYPES; i++) {
                         mUserActivityCounters[i].detach();
@@ -6617,6 +6649,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mBluetoothScanTimer != null) {
                 out.writeInt(1);
                 mBluetoothScanTimer.writeToParcel(out, elapsedRealtimeUs);
+            } else {
+                out.writeInt(0);
+            }
+            if (mBluetoothScanResultCounter != null) {
+                out.writeInt(1);
+                mBluetoothScanResultCounter.writeToParcel(out);
             } else {
                 out.writeInt(0);
             }
@@ -6849,6 +6887,11 @@ public class BatteryStatsImpl extends BatteryStats {
                         mOnBatteryBackgroundTimeBase, in);
             } else {
                 mBluetoothScanTimer = null;
+            }
+            if (in.readInt() != 0) {
+                mBluetoothScanResultCounter = new Counter(mBsi.mOnBatteryTimeBase, in);
+            } else {
+                mBluetoothScanResultCounter = null;
             }
             mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
             for (int i = 0; i < NUM_PROCESS_STATE; i++) {
@@ -10998,6 +11041,9 @@ public class BatteryStatsImpl extends BatteryStats {
             if (in.readInt() != 0) {
                 u.createBluetoothScanTimerLocked().readSummaryFromParcelLocked(in);
             }
+            if (in.readInt() != 0) {
+                u.createBluetoothScanResultCounterLocked().readSummaryFromParcelLocked(in);
+            }
             u.mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
             for (int i = 0; i < Uid.NUM_PROCESS_STATE; i++) {
                 if (in.readInt() != 0) {
@@ -11388,6 +11434,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (u.mBluetoothScanTimer != null) {
                 out.writeInt(1);
                 u.mBluetoothScanTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+            if (u.mBluetoothScanResultCounter != null) {
+                out.writeInt(1);
+                u.mBluetoothScanResultCounter.writeSummaryFromParcelLocked(out);
             } else {
                 out.writeInt(0);
             }

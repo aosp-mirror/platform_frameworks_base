@@ -513,6 +513,7 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getForegroundActivityTimer();
         public abstract Timer getBluetoothScanTimer();
         public abstract Timer getBluetoothScanBackgroundTimer();
+        public abstract Counter getBluetoothScanResultCounter();
 
         // Note: the following times are disjoint.  They can be added together to find the
         // total time a uid has had any processes running at all.
@@ -3347,8 +3348,10 @@ public abstract class BatteryStats implements Parcelable {
                     final long actualTime = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
                     final long actualTimeBg = bleTimerBg != null ?
                             bleTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    final int resultCount = u.getBluetoothScanResultCounter() != null ?
+                            u.getBluetoothScanResultCounter().getCountLocked(which) : 0;
                     dumpLine(pw, uid, category, BLUETOOTH_MISC_DATA, totalTime, count,
-                            countBg, actualTime, actualTimeBg);
+                            countBg, actualTime, actualTimeBg, resultCount);
                 }
             }
 
@@ -4500,6 +4503,8 @@ public abstract class BatteryStats implements Parcelable {
                     final long actualTimeMs = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
                     final long actualTimeMsBg = bleTimerBg != null ?
                             bleTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    final int resultCount = u.getBluetoothScanResultCounter() != null ?
+                            u.getBluetoothScanResultCounter().getCountLocked(which) : 0;
 
                     sb.setLength(0);
                     sb.append(prefix);
@@ -4524,6 +4529,8 @@ public abstract class BatteryStats implements Parcelable {
                         sb.append(countBg);
                         sb.append(" times)");
                     }
+                    sb.append("; Results count ");
+                    sb.append(resultCount);
                     pw.println(sb.toString());
                     uidActivity = true;
                 }
