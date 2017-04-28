@@ -598,11 +598,9 @@
   <java-symbol type="string" name="badPin" />
   <java-symbol type="string" name="badPuk" />
   <java-symbol type="string" name="byteShort" />
-  <java-symbol type="string" name="capability_desc_canRequestEnhancedWebAccessibility" />
   <java-symbol type="string" name="capability_title_canRequestFilterKeyEvents" />
   <java-symbol type="string" name="capability_desc_canRequestTouchExploration" />
   <java-symbol type="string" name="capability_desc_canRetrieveWindowContent" />
-  <java-symbol type="string" name="capability_title_canRequestEnhancedWebAccessibility" />
   <java-symbol type="string" name="capability_desc_canRequestFilterKeyEvents" />
   <java-symbol type="string" name="capability_title_canRequestTouchExploration" />
   <java-symbol type="string" name="capability_title_canRetrieveWindowContent" />
