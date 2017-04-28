@@ -218,9 +218,9 @@ public class UserManager {
     public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
 
     /**
-     * Specifies if bluetooth sharing is disallowed on the device. Device owner and profile owner
-     * can set this restriction. When it is set by device owner, all users on this device will be
-     * affected.
+     * Specifies if outgoing bluetooth sharing is disallowed on the device. Device owner and profile
+     * owner can set this restriction. When it is set by device owner, all users on this device will
+     * be affected.
      *
      * <p>Default is <code>true</code> for managed profiles and false for otherwise. When a device
      * upgrades to {@link android.os.Build.VERSION_CODES#O}, the system sets it for all existing
