@@ -5414,6 +5414,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mDefaultFocus != null) {
             clearDefaultFocus(mDefaultFocus);
         }
+        if (mFocusedInCluster != null) {
+            clearFocusedInCluster(mFocusedInCluster);
+        }
         if (clearChildFocus) {
             clearChildFocus(focused);
             if (!rootViewRequestFocus()) {
