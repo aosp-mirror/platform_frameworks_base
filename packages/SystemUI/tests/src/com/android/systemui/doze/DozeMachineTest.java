@@ -238,7 +238,7 @@ public class DozeMachineTest {
         mMachine.requestState(DOZE_REQUEST_PULSE);
         mMachine.requestState(DOZE_PULSING);
 
-        assertEquals(Display.STATE_DOZE, mServiceFake.screenState);
+        assertEquals(Display.STATE_ON, mServiceFake.screenState);
     }
 
     @Test
