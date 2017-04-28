@@ -118,6 +118,11 @@ public final class RemoteInput implements Parcelable {
         return mChoices;
     }
 
+    /**
+     * Get possible non-textual inputs that are accepted.
+     * This can be {@code null} if the input does not accept non-textual values.
+     * See {@link Builder#setAllowDataType}.
+     */
     public Set<String> getAllowedDataTypes() {
         return mAllowedDataTypes;
     }
@@ -202,7 +207,9 @@ public final class RemoteInput implements Parcelable {
         }
 
         /**
-         * Specifies whether the user can provide arbitrary values.
+         * Specifies whether the user can provide arbitrary values. This allows an input
+         * to accept non-textual values. Examples of usage are an input that wants audio
+         * or an image.
          *
          * @param mimeType A mime type that results are allowed to come in.
          *         Be aware that text results (see {@link #setAllowFreeFormInput}
@@ -374,7 +381,12 @@ public final class RemoteInput implements Parcelable {
     }
 
     /**
-     * Same as {@link #addResultsToIntent} but for setting data results.
+     * Same as {@link #addResultsToIntent} but for setting data results. This is used
+     * for inputs that accept non-textual results (see {@link Builder#setAllowDataType}).
+     * Only one result can be provided for every mime type accepted by the RemoteInput.
+     * If multiple inputs of the same mime type are expected then multiple RemoteInputs
+     * should be used.
+     *
      * @param remoteInput The remote input for which results are being provided
      * @param intent The intent to add remote input results to. The {@link ClipData}
      *               field of the intent will be modified to contain the results.
