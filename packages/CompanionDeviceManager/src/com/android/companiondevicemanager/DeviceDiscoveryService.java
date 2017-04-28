@@ -35,7 +35,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
-import android.companion.BluetoothLEDeviceFilter;
+import android.companion.BluetoothLeDeviceFilter;
 import android.companion.DeviceFilter;
 import android.companion.ICompanionDeviceDiscoveryService;
 import android.companion.ICompanionDeviceDiscoveryServiceCallback;
@@ -79,7 +79,7 @@ public class DeviceDiscoveryService extends Service {
     private ScanSettings mDefaultScanSettings = new ScanSettings.Builder().build();
 
     private List<DeviceFilter<?>> mFilters;
-    private List<BluetoothLEDeviceFilter> mBLEFilters;
+    private List<BluetoothLeDeviceFilter> mBLEFilters;
     private List<BluetoothDeviceFilter> mBluetoothFilters;
     private List<WifiDeviceFilter> mWifiFilters;
     private List<ScanFilter> mBLEScanFilters;
@@ -144,8 +144,8 @@ public class DeviceDiscoveryService extends Service {
             mFilters = request.getDeviceFilters();
             mWifiFilters = CollectionUtils.filter(mFilters, WifiDeviceFilter.class);
             mBluetoothFilters = CollectionUtils.filter(mFilters, BluetoothDeviceFilter.class);
-            mBLEFilters = CollectionUtils.filter(mFilters, BluetoothLEDeviceFilter.class);
-            mBLEScanFilters = CollectionUtils.map(mBLEFilters, BluetoothLEDeviceFilter::getScanFilter);
+            mBLEFilters = CollectionUtils.filter(mFilters, BluetoothLeDeviceFilter.class);
+            mBLEScanFilters = CollectionUtils.map(mBLEFilters, BluetoothLeDeviceFilter::getScanFilter);
 
             reset();
         } else if (DEBUG) Log.i(LOG_TAG, "startDiscovery: duplicate request: " + request);
