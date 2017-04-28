@@ -460,8 +460,8 @@ public class PipMenuActivity extends Activity {
                         });
                     } else {
                         actionView.setAlpha(DISABLED_ACTION_ALPHA);
-                        actionView.setEnabled(false);
                     }
+                    actionView.setEnabled(action.isEnabled());
 
                     // Update the margin between actions
                     LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
