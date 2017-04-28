@@ -135,7 +135,7 @@ public abstract class AdvertisingSetCallback {
                                              int status) {}
 
     /**
-     * Callback triggered in response to {@link AdvertisingSet#setPeriodicAdvertisingEnable}
+     * Callback triggered in response to {@link AdvertisingSet#setPeriodicAdvertisingEnabled}
      * indicating result of the operation.
      *
      * @param advertisingSet The advertising set.
