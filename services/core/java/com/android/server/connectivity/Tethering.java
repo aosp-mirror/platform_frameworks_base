@@ -398,7 +398,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             mWifiTetherRequested = enable;
             final WifiManager wifiManager =
                     (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-            if (wifiManager.setWifiApEnabled(null /* use existing wifi config */, enable)) {
+            if ((enable && wifiManager.startSoftAp(null /* use existing wifi config */)) ||
+                (!enable && wifiManager.stopSoftAp())) {
                 return ConnectivityManager.TETHER_ERROR_NO_ERROR;
             }
             return ConnectivityManager.TETHER_ERROR_MASTER_ERROR;
