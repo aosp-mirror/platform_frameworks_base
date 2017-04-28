@@ -248,7 +248,7 @@ public class Dependency extends SystemUI {
                 new FragmentService(mContext));
 
         mProviders.put(ExtensionController.class, () ->
-                new ExtensionControllerImpl());
+                new ExtensionControllerImpl(mContext));
 
         mProviders.put(PluginDependencyProvider.class, () ->
                 new PluginDependencyProvider(get(PluginManager.class)));
