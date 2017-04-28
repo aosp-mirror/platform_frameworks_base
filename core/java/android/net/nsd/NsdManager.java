@@ -274,6 +274,14 @@ public final class NsdManager {
     }
 
     /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void disconnect() {
+        mAsyncChannel.disconnect();
+    }
+
+    /**
      * Failures are passed with {@link RegistrationListener#onRegistrationFailed},
      * {@link RegistrationListener#onUnregistrationFailed},
      * {@link DiscoveryListener#onStartDiscoveryFailed},

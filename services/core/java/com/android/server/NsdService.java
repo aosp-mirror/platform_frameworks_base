@@ -48,7 +48,6 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
-import com.android.server.NativeDaemonConnector.Command;
 
 /**
  * Network Service Discovery Service handles remote service discovery operation requests by
@@ -161,7 +160,7 @@ public class NsdService extends INsdManager.Stub {
                         }
                         //Last client
                         if (mClients.size() == 0) {
-                            stopMDnsDaemon();
+                            mDaemon.stop();
                         }
                         break;
                     case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION:
@@ -221,14 +220,14 @@ public class NsdService extends INsdManager.Stub {
             public void enter() {
                 sendNsdStateChangeBroadcast(true);
                 if (mClients.size() > 0) {
-                    startMDnsDaemon();
+                    mDaemon.start();
                 }
             }
 
             @Override
             public void exit() {
                 if (mClients.size() > 0) {
-                    stopMDnsDaemon();
+                    mDaemon.stop();
                 }
             }
 
@@ -262,7 +261,7 @@ public class NsdService extends INsdManager.Stub {
                         //First client
                         if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL &&
                                 mClients.size() == 0) {
-                            startMDnsDaemon();
+                            mDaemon.start();
                         }
                         return NOT_HANDLED;
                     case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
@@ -712,26 +711,13 @@ public class NsdService extends INsdManager.Stub {
             return true;
         }
 
-        public boolean execute(Command cmd) {
-            if (DBG) {
-                Slog.d(TAG, cmd.toString());
-            }
-            try {
-                mNativeConnector.execute(cmd);
-            } catch (NativeDaemonConnectorException e) {
-                Slog.e(TAG, "Failed to execute " + cmd, e);
-                return false;
-            }
-            return true;
+        public void start() {
+            execute("start-service");
         }
-    }
 
-    private boolean startMDnsDaemon() {
-        return mDaemon.execute("start-service");
-    }
-
-    private boolean stopMDnsDaemon() {
-        return mDaemon.execute("stop-service");
+        public void stop() {
+            execute("stop-service");
+        }
     }
 
     private boolean registerService(int regId, NsdServiceInfo service) {
@@ -743,8 +729,7 @@ public class NsdService extends INsdManager.Stub {
         int port = service.getPort();
         byte[] textRecord = service.getTxtRecord();
         String record = Base64.encodeToString(textRecord, Base64.DEFAULT).replace("\n", "");
-        Command cmd = new Command("mdnssd", "register", regId, name, type, port, record);
-        return mDaemon.execute(cmd);
+        return mDaemon.execute("register", regId, name, type, port, record);
     }
 
     private boolean unregisterService(int regId) {
