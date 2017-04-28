@@ -236,6 +236,9 @@ public class TetheringTest {
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
         verifyNoMoreInteractions(mNMService);
+        verify(mWifiManager).updateInterfaceIpState(
+                mTestIfname, WifiManager.IFACE_IP_MODE_LOCAL_ONLY);
+        verifyNoMoreInteractions(mWifiManager);
         verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_ACTIVE_LOCAL_ONLY);
         // UpstreamNetworkMonitor will be started, and will register two callbacks:
         // a "listen all" and a "track default".
@@ -261,6 +264,7 @@ public class TetheringTest {
         verify(mNMService, times(1)).stopTethering();
         verify(mNMService, times(1)).setIpForwardingEnabled(false);
         verifyNoMoreInteractions(mNMService);
+        verifyNoMoreInteractions(mWifiManager);
         // Asking for the last error after the per-interface state machine
         // has been reaped yields an unknown interface error.
         assertEquals(ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE,
@@ -292,6 +296,9 @@ public class TetheringTest {
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
         verifyNoMoreInteractions(mNMService);
+        verify(mWifiManager).updateInterfaceIpState(
+                mTestIfname, WifiManager.IFACE_IP_MODE_TETHERED);
+        verifyNoMoreInteractions(mWifiManager);
         verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_ACTIVE_TETHER);
         // UpstreamNetworkMonitor will be started, and will register two callbacks:
         // a "listen all" and a "track default".
@@ -338,6 +345,7 @@ public class TetheringTest {
         verify(mNMService, times(1)).stopTethering();
         verify(mNMService, times(1)).setIpForwardingEnabled(false);
         verifyNoMoreInteractions(mNMService);
+        verifyNoMoreInteractions(mWifiManager);
         // Asking for the last error after the per-interface state machine
         // has been reaped yields an unknown interface error.
         assertEquals(ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE,
