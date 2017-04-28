@@ -22,7 +22,7 @@ import java.util.List;
  * A Parcelable class with Cell-Broadcast service information.
  * @hide
  */
-public class MbmsDownloadManagerListener extends IMbmsDownloadManagerListener.Stub {
+public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.Stub {
 
     public final static int ERROR_CARRIER_NOT_SUPPORTED      = 1;
     public final static int ERROR_UNABLE_TO_INITIALIZE       = 2;

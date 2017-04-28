@@ -20,8 +20,8 @@ import android.app.PendingIntent;
 import android.net.Uri;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.DownloadStatus;
-import android.telephony.mbms.IMbmsDownloadManagerListener;
-import android.telephony.mbms.IDownloadListener;
+import android.telephony.mbms.IMbmsDownloadManagerCallback;
+import android.telephony.mbms.IDownloadCallback;
 
 /**
  * The interface the opaque MbmsStreamingService will satisfy.
@@ -35,7 +35,7 @@ interface IMbmsDownloadService
      *
      * No return value.  Async errors may be reported, but none expected (not doing anything yet).
      */
-    void initialize(String appName, int subId, IMbmsDownloadManagerListener listener);
+    void initialize(String appName, int subId, IMbmsDownloadManagerCallback listener);
 
     /**
      * - Registers serviceClasses of interest with the uid/appName/subId key.
@@ -50,20 +50,20 @@ interface IMbmsDownloadService
     /**
      * should move the params into a DownloadRequest parcelable
      */
-    int download(in DownloadRequest downloadRequest, IDownloadListener listener);
+    int download(String appName, in DownloadRequest downloadRequest, IDownloadCallback listener);
 
-    List<DownloadRequest> listPendingDownloads();
+    List<DownloadRequest> listPendingDownloads(String appName);
 
-    int cancelDownload(in DownloadRequest downloadRequest);
+    int cancelDownload(String appName, in DownloadRequest downloadRequest);
 
-    DownloadStatus getDownloadStatus(in DownloadRequest downloadRequest);
+    DownloadStatus getDownloadStatus(String appName, in DownloadRequest downloadRequest);
 
     /*
      * named this for 2 reasons:
      *  1 don't want 'State' here as it conflicts with 'Status' of the previous function
      *  2 want to perfect typing 'Knowledge'
      */
-    void resetDownloadKnowledge(in DownloadRequest downloadRequest);
+    void resetDownloadKnowledge(String appName, in DownloadRequest downloadRequest);
 
     /**
      * End of life for this MbmsDownloadManager.
