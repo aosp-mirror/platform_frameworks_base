@@ -1420,6 +1420,7 @@ public class StorageManager {
     public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
             int mode, ProxyFileDescriptorCallback callback, Handler handler, ThreadFactory factory)
                     throws IOException {
+        Preconditions.checkNotNull(callback);
         MetricsLogger.count(mContext, "storage_open_proxy_file_descriptor", 1);
         // Retry is needed because the mount point mFuseAppLoop is using may be unmounted before
         // invoking StorageManagerService#openProxyFileDescriptor. In this case, we need to re-mount
@@ -1466,19 +1467,7 @@ public class StorageManager {
         }
     }
 
-    /**
-     * Opens seekable ParcelFileDescriptor that routes file operation requests to
-     * ProxyFileDescriptorCallback.
-     *
-     * @param mode The desired access mode, must be one of
-     *     {@link ParcelFileDescriptor#MODE_READ_ONLY},
-     *     {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, or
-     *     {@link ParcelFileDescriptor#MODE_READ_WRITE}
-     * @param callback Callback to process file operation requests issued on returned file
-     *     descriptor.
-     * @return Seekable ParcelFileDescriptor.
-     * @throws IOException
-     */
+    /** {@hide} */
     public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
             int mode, ProxyFileDescriptorCallback callback)
                     throws IOException {
@@ -1502,6 +1491,7 @@ public class StorageManager {
     public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
             int mode, ProxyFileDescriptorCallback callback, Handler handler)
                     throws IOException {
+        Preconditions.checkNotNull(handler);
         return openProxyFileDescriptor(mode, callback, handler, null);
     }
 
