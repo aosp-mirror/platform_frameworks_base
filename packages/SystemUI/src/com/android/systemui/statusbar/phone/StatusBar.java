@@ -709,6 +709,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private KeyguardMonitorImpl mKeyguardMonitor;
     private BatteryController mBatteryController;
     private boolean mPanelExpanded;
+    private boolean mKeyguardRequested;
+    private boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private NotificationIconAreaController mNotificationIconAreaController;
@@ -4058,6 +4060,30 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void showKeyguard() {
+        mKeyguardRequested = true;
+        updateIsKeyguard();
+    }
+
+    public boolean hideKeyguard() {
+        mKeyguardRequested = false;
+        return updateIsKeyguard();
+    }
+
+    private boolean updateIsKeyguard() {
+        // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
+        // there's no surface we can show to the user.
+        boolean keyguardForDozing = mDozingRequested && !mDeviceInteractive;
+        boolean shouldBeKeyguard = mKeyguardRequested || keyguardForDozing;
+        if (shouldBeKeyguard && !mIsKeyguard) {
+            showKeyguardImpl();
+        } else if (!shouldBeKeyguard && mIsKeyguard) {
+            return hideKeyguardImpl();
+        }
+        return false;
+    }
+
+    public void showKeyguardImpl() {
+        mIsKeyguard = true;
         if (mLaunchTransitionFadingAway) {
             mNotificationPanel.animate().cancel();
             onLaunchTransitionFadingEnded();
@@ -4211,7 +4237,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * @return true if we would like to stay in the shade, false if it should go away entirely
      */
-    public boolean hideKeyguard() {
+    public boolean hideKeyguardImpl() {
+        mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mLeaveOpenOnKeyguardHide;
         setBarState(StatusBarState.SHADE);
@@ -4890,6 +4917,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             });
         }
+        updateIsKeyguard();
     }
 
     public void onStartedWakingUp() {
@@ -4898,6 +4926,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mVisualStabilityManager.setScreenOn(true);
         mNotificationPanel.setTouchDisabled(false);
         updateVisibleToUser();
+        updateIsKeyguard();
     }
 
     public void onScreenTurningOn() {
@@ -5012,6 +5041,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 || mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
         mStatusBarWindowManager.setDozing(mDozing);
+        mStatusBarKeyguardViewManager.setDozing(mDozing);
         updateDozingState();
         Trace.endSection();
     }
