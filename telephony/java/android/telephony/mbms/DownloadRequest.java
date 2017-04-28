@@ -16,44 +16,101 @@
 
 package android.telephony.mbms;
 
-import android.app.PendingIntent;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.net.URISyntaxException;
 
 /**
  * A Parcelable class describing a pending Cell-Broadcast download request
  * @hide
  */
 public class DownloadRequest implements Parcelable {
-    public DownloadRequest(int id, FileServiceInfo serviceInfo, Uri source, Uri dest,
-            PendingIntent resultPI, int sub) {
+    /** @hide */
+    public static class Builder {
+        private int id;
+        private FileServiceInfo serviceInfo;
+        private Uri source;
+        private Uri dest;
+        private int sub;
+        private String appIntent;
+
+        public Builder setId(int id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setServiceInfo(FileServiceInfo serviceInfo) {
+            this.serviceInfo = serviceInfo;
+            return this;
+        }
+
+        public Builder setSource(Uri source) {
+            this.source = source;
+            return this;
+        }
+
+        public Builder setDest(Uri dest) {
+            this.dest = dest;
+            return this;
+        }
+
+        public Builder setSub(int sub) {
+            this.sub = sub;
+            return this;
+        }
+
+        public Builder setAppIntent(Intent intent) {
+            this.appIntent = intent.toUri(0);
+            return this;
+        }
+
+        public DownloadRequest build() {
+            return new DownloadRequest(id, serviceInfo, source, dest, sub, appIntent);
+        }
+    }
+
+    private final int downloadId;
+    private final FileServiceInfo fileServiceInfo;
+    private final Uri sourceUri;
+    private final Uri destinationUri;
+    private final int subId;
+    private final String serializedResultIntentForApp;
+
+    private DownloadRequest(int id, FileServiceInfo serviceInfo,
+            Uri source, Uri dest,
+            int sub, String appIntent) {
         downloadId = id;
         fileServiceInfo = serviceInfo;
         sourceUri = source;
         destinationUri = dest;
         subId = sub;
+        serializedResultIntentForApp = appIntent;
     }
 
-    /** @hide */
-    public DownloadRequest(DownloadRequest dr, PendingIntent fdRequestPI, PendingIntent cleanupPI) {
+    public static DownloadRequest copy(DownloadRequest other) {
+        return new DownloadRequest(other);
+    }
+
+    private DownloadRequest(DownloadRequest dr) {
         downloadId = dr.downloadId;
         fileServiceInfo = dr.fileServiceInfo;
         sourceUri = dr.sourceUri;
         destinationUri = dr.destinationUri;
         subId = dr.subId;
-        /*
-         * resultPI = new PI
-         * fileDescriptorRequstPI = fdRequestPI;
-         * this.cleanupPI = cleanupPI;
-         */
+        serializedResultIntentForApp = dr.serializedResultIntentForApp;
     }
 
-    public final int downloadId;
-    public final FileServiceInfo fileServiceInfo;
-    public final Uri sourceUri;
-    public final Uri destinationUri;
-    public final int subId;
+    private DownloadRequest(Parcel in) {
+        downloadId = in.readInt();
+        fileServiceInfo = in.readParcelable(getClass().getClassLoader());
+        sourceUri = in.readParcelable(getClass().getClassLoader());
+        destinationUri = in.readParcelable(getClass().getClassLoader());
+        subId = in.readInt();
+        serializedResultIntentForApp = in.readString();
+    }
 
     public int describeContents() {
         return 0;
@@ -65,14 +122,35 @@ public class DownloadRequest implements Parcelable {
         out.writeParcelable(sourceUri, flags);
         out.writeParcelable(destinationUri, flags);
         out.writeInt(subId);
+        out.writeString(serializedResultIntentForApp);
     }
 
-    private DownloadRequest(Parcel in) {
-        downloadId = in.readInt();
-        fileServiceInfo = in.readParcelable(null);
-        sourceUri = in.readParcelable(null);
-        destinationUri = in.readParcelable(null);
-        subId = in.readInt();
+    public int getDownloadId() {
+        return downloadId;
+    }
+
+    public FileServiceInfo getFileServiceInfo() {
+        return fileServiceInfo;
+    }
+
+    public Uri getSourceUri() {
+        return sourceUri;
+    }
+
+    public Uri getDestinationUri() {
+        return destinationUri;
+    }
+
+    public int getSubId() {
+        return subId;
+    }
+
+    public Intent getIntentForApp() {
+        try {
+            return Intent.parseUri(serializedResultIntentForApp, 0);
+        } catch (URISyntaxException e) {
+            return null;
+        }
     }
 
     public static final Parcelable.Creator<DownloadRequest> CREATOR =
