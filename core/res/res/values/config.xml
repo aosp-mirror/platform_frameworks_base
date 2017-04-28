@@ -1299,9 +1299,9 @@
              * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
                protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
 
-         This must be set to a valid network recommendation app.
+         This must be set to a valid network recommendation app or empty.
      -->
-    <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false">com.android.networkrecommendation</string>
+    <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
 
     <!-- Whether to enable Hardware FLP overlay which allows Hardware FLP to be
          replaced by an app at run-time. When disabled, only the
