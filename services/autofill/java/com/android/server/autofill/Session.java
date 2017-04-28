@@ -1253,7 +1253,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final Intent fillInIntent = new Intent();
         fillInIntent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, structure);
         if (extras != null) {
-            fillInIntent.putExtra(AutofillManager.EXTRA_DATA_EXTRAS, extras);
+            fillInIntent.putExtra(AutofillManager.EXTRA_CLIENT_STATE, extras);
         }
         return fillInIntent;
     }
