@@ -509,12 +509,12 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public void updateSession(int sessionId, AutofillId id, Rect bounds,
-                AutofillValue value, int flags, int userId) {
+                AutofillValue value, int action, int flags, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.updateSessionLocked(sessionId, getCallingUid(), id, bounds, value,
-                            flags);
+                            action, flags);
                 }
             }
         }
