@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.annotation.BytesLong;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,16 +34,22 @@ public final class StorageStats implements Parcelable {
     /** {@hide} */ public long cacheBytes;
 
     /**
-     * Return the size of all code. This includes {@code APK} files and
-     * optimized compiler output.
+     * Return the size of app. This includes {@code APK} files, optimized
+     * compiler output, and unpacked native libraries.
      * <p>
      * If the primary external/shared storage is hosted on this storage device,
      * then this includes files stored under {@link Context#getObbDir()}.
      * <p>
      * Code is shared between all users on a multiuser device.
      */
-    public long getCodeBytes() {
+    public @BytesLong long getAppBytes() {
         return codeBytes;
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getCodeBytes() {
+        return getAppBytes();
     }
 
     /**
@@ -58,7 +65,7 @@ public final class StorageStats implements Parcelable {
      * <p>
      * Data is isolated for each user on a multiuser device.
      */
-    public long getDataBytes() {
+    public @BytesLong long getDataBytes() {
         return dataBytes;
     }
 
@@ -72,7 +79,7 @@ public final class StorageStats implements Parcelable {
      * <p>
      * Cached data is isolated for each user on a multiuser device.
      */
-    public long getCacheBytes() {
+    public @BytesLong long getCacheBytes() {
         return cacheBytes;
     }
 
