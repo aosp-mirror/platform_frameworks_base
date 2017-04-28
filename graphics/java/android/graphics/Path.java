@@ -16,8 +16,10 @@
 
 package android.graphics;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -805,7 +807,12 @@ public class Path {
      *                        the error is less than half a pixel.
      * @return An array of components for points approximating the Path.
      */
-    public float[] approximate(float acceptableError) {
+    @NonNull
+    @Size(min = 6, multiple = 3)
+    public float[] approximate(@FloatRange(from = 0) float acceptableError) {
+        if (acceptableError < 0) {
+            throw new IllegalArgumentException("AcceptableError must be greater than or equal to 0");
+        }
         return nApproximate(mNativePath, acceptableError);
     }
 
