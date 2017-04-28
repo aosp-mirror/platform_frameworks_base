@@ -2091,7 +2091,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertFalse(mService.isUserUnlockedL(USER_10));
 
         // Directly call the stop lifecycle event.  Goes back to the initial state.
-        mService.handleCleanupUser(USER_0);
+        mService.handleStopUser(USER_0);
         assertFalse(mService.isUserUnlockedL(USER_0));
         assertFalse(mService.isUserUnlockedL(USER_10));
     }
