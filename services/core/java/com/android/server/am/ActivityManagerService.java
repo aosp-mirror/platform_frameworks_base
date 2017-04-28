@@ -12886,11 +12886,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean requestAutofillData(IResultReceiver receiver, Bundle receiverExtras,
             IBinder activityToken, int flags) {
-        // NOTE: we could always use ActivityManager.ASSIST_CONTEXT_FULL and let ActivityThread
-        // rely on the flags to decide whether the handleRequestAssistContextExtras() is for
-        // autofill, but it's safer to explicitly use new AutoFill types, in case the Assist
-        // requests use flags in the future as well (since their flags value might collide with the
-        // autofill flag values).
         return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTOFILL, null, null,
                 receiver, receiverExtras, activityToken, true, true, UserHandle.getCallingUserId(),
                 null, PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT, flags) != null;

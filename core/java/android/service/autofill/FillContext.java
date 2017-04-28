@@ -74,11 +74,9 @@ public final class FillContext implements Parcelable {
 
     @Override
     public String toString() {
-        if (!DEBUG) {
-            return super.toString();
-        } else {
-            return "FillContext [mRequestId=" + mRequestId + "]";
-        }
+        if (!DEBUG)  return super.toString();
+
+        return "FillContext [reqId=" + mRequestId + "]";
     }
 
     @Override

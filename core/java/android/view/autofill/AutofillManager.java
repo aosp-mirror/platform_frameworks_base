@@ -107,11 +107,10 @@ public final class AutofillManager {
     @Deprecated
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
-    // TODO(b/37563972): start from 0x1 once FLAG_MANUAL_REQUEST is gone
-    /** @hide */ public static final int FLAG_START_SESSION = 0x80000000;
-    /** @hide */ public static final int FLAG_VIEW_ENTERED =  0x40000000;
-    /** @hide */ public static final int FLAG_VIEW_EXITED =   0x20000000;
-    /** @hide */ public static final int FLAG_VALUE_CHANGED = 0x10000000;
+    /** @hide */ public static final int ACTION_START_SESSION = 1;
+    /** @hide */ public static final int ACTION_VIEW_ENTERED =  2;
+    /** @hide */ public static final int ACTION_VIEW_EXITED = 3;
+    /** @hide */ public static final int ACTION_VALUE_CHANGED = 4;
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
@@ -404,7 +403,7 @@ public final class AutofillManager {
                     startSessionLocked(id, view.getWindowToken(), null, value, flags);
                 } else {
                     // Update focus on existing session.
-                    updateSessionLocked(id, null, value, FLAG_VIEW_ENTERED);
+                    updateSessionLocked(id, null, value, ACTION_VIEW_ENTERED, flags);
                 }
             }
         }
@@ -430,7 +429,7 @@ public final class AutofillManager {
                 final AutofillId id = getAutofillId(view);
 
                 // Update focus on existing session.
-                updateSessionLocked(id, null, null, FLAG_VIEW_EXITED);
+                updateSessionLocked(id, null, null, ACTION_VIEW_EXITED, 0);
             }
         }
     }
@@ -482,7 +481,7 @@ public final class AutofillManager {
                     startSessionLocked(id, view.getWindowToken(), bounds, null, flags);
                 } else {
                     // Update focus on existing session.
-                    updateSessionLocked(id, bounds, null, FLAG_VIEW_ENTERED);
+                    updateSessionLocked(id, bounds, null, ACTION_VIEW_ENTERED, flags);
                 }
             }
         }
@@ -510,7 +509,7 @@ public final class AutofillManager {
                 final AutofillId id = getAutofillId(view, childId);
 
                 // Update focus on existing session.
-                updateSessionLocked(id, null, null, FLAG_VIEW_EXITED);
+                updateSessionLocked(id, null, null, ACTION_VIEW_EXITED, 0);
             }
         }
     }
@@ -562,7 +561,7 @@ public final class AutofillManager {
                 value = view.getAutofillValue();
             }
 
-            updateSessionLocked(id, null, value, FLAG_VALUE_CHANGED);
+            updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, 0);
         }
     }
 
@@ -583,7 +582,7 @@ public final class AutofillManager {
             }
 
             final AutofillId id = getAutofillId(view, childId);
-            updateSessionLocked(id, null, value, FLAG_VALUE_CHANGED);
+            updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, 0);
         }
     }
 
@@ -726,7 +725,7 @@ public final class AutofillManager {
             mSessionId = mService.startSession(mContext.getActivityToken(), windowToken,
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
                     mCallback != null, flags, mContext.getOpPackageName());
-            AutofillClient client = getClientLocked();
+            final AutofillClient client = getClientLocked();
             if (client != null) {
                 client.autofillCallbackResetableStateAvailable();
             }
@@ -769,16 +768,18 @@ public final class AutofillManager {
         mTrackedViews = null;
     }
 
-    private void updateSessionLocked(AutofillId id, Rect bounds, AutofillValue value, int flags) {
+    private void updateSessionLocked(AutofillId id, Rect bounds, AutofillValue value, int action,
+            int flags) {
         if (DEBUG) {
-            if (VERBOSE || (flags & FLAG_VIEW_EXITED) != 0) {
+            if (VERBOSE || action != ACTION_VIEW_EXITED) {
                 Log.d(TAG, "updateSessionLocked(): id=" + id + ", bounds=" + bounds
-                        + ", value=" + value + ", flags=" + flags);
+                        + ", value=" + value + ", action=" + action + ", flags=" + flags);
             }
         }
 
         try {
-            mService.updateSession(mSessionId, id, bounds, value, flags, mContext.getUserId());
+            mService.updateSession(mSessionId, id, bounds, value, action, flags,
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
