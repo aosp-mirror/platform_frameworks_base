@@ -16,7 +16,7 @@
 
 package com.android.server.autofill;
 
-import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
+import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.NO_SESSION;
 
 import static com.android.server.autofill.Helper.DEBUG;
@@ -271,14 +271,14 @@ final class AutofillManagerServiceImpl {
         }
 
         final String historyItem =
-                "id=" + newSession.getId() + " uid=" + uid + " s=" + mInfo.getServiceInfo().packageName
+                "id=" + newSession.id + " uid=" + uid + " s=" + mInfo.getServiceInfo().packageName
                         + " u=" + mUserId + " i=" + autofillId + " b=" + virtualBounds + " hc=" +
                         hasCallback + " f=" + flags;
         mRequestsHistory.log(historyItem);
 
-        newSession.updateLocked(autofillId, virtualBounds, value, FLAG_START_SESSION);
+        newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
 
-        return newSession.getId();
+        return newSession.id;
     }
 
     void finishSessionLocked(int sessionId, int uid) {
@@ -350,9 +350,9 @@ final class AutofillManagerServiceImpl {
         } while (sessionId == NO_SESSION || mSessions.indexOfKey(sessionId) >= 0);
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
-                sessionId, uid, activityToken, windowToken, appCallbackToken, hasCallback, flags,
+                sessionId, uid, activityToken, windowToken, appCallbackToken, hasCallback,
                 mInfo.getServiceInfo().getComponentName(), packageName);
-        mSessions.put(newSession.getId(), newSession);
+        mSessions.put(newSession.id, newSession);
 
         return newSession;
     }
@@ -396,7 +396,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void updateSessionLocked(int sessionId, int uid, AutofillId autofillId, Rect virtualBounds,
-            AutofillValue value, int flags) {
+            AutofillValue value, int action, int flags) {
         final Session session = mSessions.get(sessionId);
         if (session == null || session.uid != uid) {
             if (VERBOSE) {
@@ -406,7 +406,7 @@ final class AutofillManagerServiceImpl {
             return;
         }
 
-        session.updateLocked(autofillId, virtualBounds, value, flags);
+        session.updateLocked(autofillId, virtualBounds, value, action, flags);
     }
 
     void removeSessionLocked(int sessionId) {

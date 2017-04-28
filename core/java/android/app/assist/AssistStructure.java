@@ -64,6 +64,7 @@ public class AssistStructure implements Parcelable {
 
     ComponentName mActivityComponent;
     private boolean mIsHomeActivity;
+    private int mFlags;
 
     final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
 
@@ -186,6 +187,7 @@ public class AssistStructure implements Parcelable {
             mSanitizeOnWrite = as.mSanitizeOnWrite;
             mWriteStructure = as.waitForReady();
             ComponentName.writeToParcel(as.mActivityComponent, out);
+            out.writeInt(as.mFlags);
             out.writeLong(as.mAcquisitionStartTime);
             out.writeLong(as.mAcquisitionEndTime);
             mNumWindows = as.mWindowNodes.size();
@@ -340,6 +342,7 @@ public class AssistStructure implements Parcelable {
         void go() {
             fetchData();
             mActivityComponent = ComponentName.readFromParcel(mCurParcel);
+            mFlags = mCurParcel.readInt();
             mAcquisitionStartTime = mCurParcel.readLong();
             mAcquisitionEndTime = mCurParcel.readLong();
             final int N = mCurParcel.readInt();
@@ -1876,6 +1879,7 @@ public class AssistStructure implements Parcelable {
     public AssistStructure(Activity activity, boolean forAutoFill, int flags) {
         mHaveData = true;
         mActivityComponent = activity.getComponentName();
+        mFlags = flags;
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
         for (int i=0; i<views.size(); i++) {
@@ -1887,6 +1891,7 @@ public class AssistStructure implements Parcelable {
     public AssistStructure() {
         mHaveData = true;
         mActivityComponent = null;
+        mFlags = 0;
     }
 
     /** @hide */
@@ -1913,6 +1918,7 @@ public class AssistStructure implements Parcelable {
         }
         Log.i(TAG, "Activity: " + mActivityComponent.flattenToShortString());
         Log.i(TAG, "Sanitize on write: " + mSanitizeOnWrite);
+        Log.i(TAG, "Flags: " + mFlags);
         final int N = getWindowNodeCount();
         for (int i=0; i<N; i++) {
             WindowNode node = getWindowNodeAt(i);
@@ -2023,6 +2029,11 @@ public class AssistStructure implements Parcelable {
     public ComponentName getActivityComponent() {
         ensureData();
         return mActivityComponent;
+    }
+
+    /** @hide */
+    public int getFlags() {
+        return mFlags;
     }
 
     /**
