@@ -26,6 +26,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.ViewAssertion;
+import android.text.Spanned;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -100,22 +102,19 @@ public final class TextViewAssertions {
      * @param index  A matcher representing the expected index.
      */
     public static ViewAssertion hasInsertionPointerAtIndex(final Matcher<Integer> index) {
-        return new ViewAssertion() {
-            @Override
-            public void check(View view, NoMatchingViewException exception) {
-                if (view instanceof TextView) {
-                    TextView textView = (TextView) view;
-                    int selectionStart = textView.getSelectionStart();
-                    int selectionEnd = textView.getSelectionEnd();
-                    try {
-                        assertThat(selectionStart, index);
-                        assertThat(selectionEnd, index);
-                    } catch (IndexOutOfBoundsException e) {
-                        throw new AssertionFailedError(e.getMessage());
-                    }
-                } else {
-                    throw new AssertionFailedError("TextView not found");
+        return (view, exception) -> {
+            if (view instanceof TextView) {
+                TextView textView = (TextView) view;
+                int selectionStart = textView.getSelectionStart();
+                int selectionEnd = textView.getSelectionEnd();
+                try {
+                    assertThat(selectionStart, index);
+                    assertThat(selectionEnd, index);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new AssertionFailedError(e.getMessage());
                 }
+            } else {
+                throw new AssertionFailedError("TextView not found");
             }
         };
     }
@@ -134,6 +133,19 @@ public final class TextViewAssertions {
      */
     public static ViewAssertion hasInsertionPointerOnRight() {
         return new CursorPositionAssertion(CursorPositionAssertion.RIGHT);
+    }
+
+    /**
+     * Returns a {@link ViewAssertion} that asserts that the TextView does not contain styled text.
+     */
+    public static ViewAssertion doesNotHaveStyledText() {
+        return (view, exception) -> {
+            final CharSequence text = ((TextView) view).getText();
+            if (text instanceof Spanned && !TextUtils.hasStyleSpan((Spanned) text)) {
+                return;
+            }
+            throw new AssertionFailedError("TextView has styled text");
+        };
     }
 
     /**
