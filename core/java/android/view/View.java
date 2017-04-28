@@ -1173,6 +1173,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS = 0x8;
 
+    /** @hide */
+    @IntDef(
+            flag = true,
+            value = {AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutofillFlags {}
+
+    /**
+     * Flag requesting you to add views not-important for autofill to the assist data.
+     */
+    public static final int AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x1;
+
     /**
      * This view is enabled. Interpretation varies by subclass.
      * Use with ENABLED_MASK when calling setFlags.
@@ -2745,8 +2757,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                 1                 PFLAG3_IS_AUTOFILLED
      *                1                  PFLAG3_FINGER_DOWN
      *               1                   PFLAG3_FOCUSED_BY_DEFAULT
-     *             __                    unused
-     *           11                      PFLAG3_IMPORTANT_FOR_AUTOFILL
+     *           1111                    PFLAG3_IMPORTANT_FOR_AUTOFILL
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -2978,14 +2989,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Shift for the bits in {@link #mPrivateFlags3} related to the
      * "importantForAutofill" attribute.
      */
-    static final int PFLAG3_IMPORTANT_FOR_AUTOFILL_SHIFT = 21;
+    static final int PFLAG3_IMPORTANT_FOR_AUTOFILL_SHIFT = 19;
 
     /**
      * Mask for obtaining the bits which specify how to determine
      * whether a view is important for autofill.
      */
     static final int PFLAG3_IMPORTANT_FOR_AUTOFILL_MASK = (IMPORTANT_FOR_AUTOFILL_AUTO
-            | IMPORTANT_FOR_AUTOFILL_YES | IMPORTANT_FOR_AUTOFILL_NO)
+            | IMPORTANT_FOR_AUTOFILL_YES | IMPORTANT_FOR_AUTOFILL_NO
+            | IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS
+            | IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS)
             << PFLAG3_IMPORTANT_FOR_AUTOFILL_SHIFT;
 
     /**
@@ -7292,7 +7305,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param structure Fill in with structured view data. The default implementation
      * fills in all data that can be inferred from the view itself.
-     * @param flags optional flags (currently {@code 0}).
+     * @param flags optional flags.
+     *
+     * @see #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      */
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         onProvideStructureForAssistOrAutofill(structure, true);
@@ -7546,6 +7561,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Sets the mode for determining whether this View is important for autofill.
      *
+     * <p>This property controls how this view is presented to the autofill components
+     * which help users to fill credentials, addresses, etc. For example, views
+     * that contain labels and input fields are useful for autofill components to
+     * determine the user context and provide values for the inputs. Note that the
+     * user can always override this by manually triggering autotill which would
+     * expose the view to the autofill provider.
+     *
+     * <p>The platform determines the importance for autofill automatically but you
+     * can use this method to customize the behavior. See the autofill modes below
+     * for more details.
+     *
      * <p>See {@link #setImportantForAutofill(int)} for more info about this mode.
      *
      * @param mode {@link #IMPORTANT_FOR_AUTOFILL_AUTO}, {@link #IMPORTANT_FOR_AUTOFILL_YES},
@@ -7599,24 +7625,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return whether the view is considered important for autofill.
      *
+     * @see #setImportantForAutofill(int)
      * @see #IMPORTANT_FOR_AUTOFILL_AUTO
      * @see #IMPORTANT_FOR_AUTOFILL_YES
      * @see #IMPORTANT_FOR_AUTOFILL_NO
+     * @see #IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS
+     * @see #IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
      */
     public final boolean isImportantForAutofill() {
-        final int flag = getImportantForAutofill();
+        // Check parent mode to ensure we're not hidden.
+        ViewParent parent = mParent;
+        while (parent instanceof View) {
+            final int parentImportance = ((View) parent).getImportantForAutofill();
+            if (parentImportance == IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
+                    || parentImportance == IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS) {
+                return false;
+            }
+            parent = parent.getParent();
+        }
 
-        // First, check if view explicity set it to YES or NO
-        if ((flag & IMPORTANT_FOR_AUTOFILL_YES) != 0) {
+        final int importance = getImportantForAutofill();
+
+        // First, check the explicit states.
+        if (importance == IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS
+                || importance == IMPORTANT_FOR_AUTOFILL_YES) {
             return true;
         }
-        if ((flag & IMPORTANT_FOR_AUTOFILL_NO) != 0) {
+        if (importance == IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
+                || importance == IMPORTANT_FOR_AUTOFILL_NO) {
             return false;
         }
 
         // Then use some heuristics to handle AUTO.
 
-        // Always include views that have a explicity resource id.
+        // Always include views that have an explicit resource id.
         final int id = mID;
         if (id != NO_ID && !isViewIdGenerated(id)) {
             final Resources res = getResources();
@@ -7642,9 +7684,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mContext.getSystemService(AutofillManager.class);
     }
 
-    /** @hide */
-    public boolean isAutofillable() {
-        return getAutofillType() != AUTOFILL_TYPE_NONE && !isAutofillBlocked();
+    private boolean isAutofillable() {
+        return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill();
     }
 
     private void populateVirtualStructure(ViewStructure structure,
@@ -7728,26 +7769,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * set the {@link AutofillId} in the structure (for example, by calling
      * {@code structure.setAutofillId(getAutofillId())}).
      *
+     * <p>When providing your implementation you need to decide how to handle
+     * the {@link #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS} flag which instructs you
+     * to report all views to the structure regardless if {@link #isImportantForAutofill()}
+     * returns true. We encourage you respect the importance property for a better
+     * user experience in your app. If the flag is not set then you should filter out
+     * not important views to optimize autofill performance in your app.
+     *
      * @param structure Fill in with structured view data.
-     * @param flags optional flags (currently {@code 0}).
+     * @param flags optional flags.
+     *
+     * @see #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      */
-    public void dispatchProvideAutofillStructure(@NonNull ViewStructure structure, int flags) {
+    public void dispatchProvideAutofillStructure(@NonNull ViewStructure structure,
+            @AutofillFlags int flags) {
         dispatchProvideStructureForAssistOrAutofill(structure, true);
     }
 
     private void dispatchProvideStructureForAssistOrAutofill(ViewStructure structure,
             boolean forAutofill) {
-        boolean blocked = forAutofill ? isAutofillBlocked() : isAssistBlocked();
-        if (!blocked) {
-            if (forAutofill) {
-                structure.setAutofillId(getAutofillId());
-                // NOTE: flags are not currently supported, hence 0
-                onProvideAutofillStructure(structure, 0);
-                onProvideAutofillVirtualStructure(structure, 0);
-            } else {
-                onProvideStructure(structure);
-                onProvideVirtualStructure(structure);
-            }
+        if (forAutofill) {
+            structure.setAutofillId(getAutofillId());
+            // NOTE: flags are not currently supported, hence 0
+            onProvideAutofillStructure(structure, 0);
+            onProvideAutofillVirtualStructure(structure, 0);
+        } else if (!isAssistBlocked()) {
+            onProvideStructure(structure);
+            onProvideVirtualStructure(structure);
         } else {
             structure.setClassName(getAccessibilityClassName().toString());
             structure.setAssistBlocked(true);
@@ -9581,22 +9629,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean isAssistBlocked() {
         return (mPrivateFlags3 & PFLAG3_ASSIST_BLOCKED) != 0;
-    }
-
-    /**
-     * @hide
-     * Indicates whether this view will participate in data collection through
-     * {@link ViewStructure} for autofill purposes.
-     *
-     * <p>If {@code true}, it will not provide any data for itself or its children.
-     * <p>If {@code false}, the normal data collection will be allowed.
-     *
-     * @return Returns {@code false} if assist data collection for autofill is not blocked,
-     * else {@code true}.
-     */
-    public boolean isAutofillBlocked() {
-        // TODO(b/36171235): properly implement it using isImportantForAutofill()
-        return false;
     }
 
     /**

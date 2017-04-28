@@ -29,6 +29,7 @@ import android.view.ViewStructure.HtmlInfo.Builder;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
 import java.util.ArrayList;
@@ -473,7 +474,7 @@ public class AssistStructure implements Parcelable {
         final int mDisplayId;
         final ViewNode mRoot;
 
-        WindowNode(AssistStructure assist, ViewRootImpl root, boolean forAutoFill) {
+        WindowNode(AssistStructure assist, ViewRootImpl root, boolean forAutoFill, int flags) {
             View view = root.getView();
             Rect rect = new Rect();
             view.getBoundsOnScreen(rect);
@@ -488,8 +489,9 @@ public class AssistStructure implements Parcelable {
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
-                    // NOTE: flags are currently not supported, hence 0
-                    view.onProvideAutofillStructure(builder, 0);
+                    final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                            ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+                    view.onProvideAutofillStructure(builder, autofillFlags);
                 } else {
                     // This is a secure window, so it doesn't want a screenshot, and that
                     // means we should also not copy out its view hierarchy for Assist
@@ -499,8 +501,9 @@ public class AssistStructure implements Parcelable {
                 }
             }
             if (forAutoFill) {
-                // NOTE: flags are currently not supported, hence 0
-                view.dispatchProvideAutofillStructure(builder, 0);
+                final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                        ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+                view.dispatchProvideAutofillStructure(builder, autofillFlags);
             } else {
                 view.dispatchProvideStructure(builder);
             }
@@ -1869,14 +1872,14 @@ public class AssistStructure implements Parcelable {
     }
 
     /** @hide */
-    public AssistStructure(Activity activity, boolean forAutoFill) {
+    public AssistStructure(Activity activity, boolean forAutoFill, int flags) {
         mHaveData = true;
         mActivityComponent = activity.getComponentName();
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
         for (int i=0; i<views.size(); i++) {
             ViewRootImpl root = views.get(i);
-            mWindowNodes.add(new WindowNode(this, root, forAutoFill));
+            mWindowNodes.add(new WindowNode(this, root, forAutoFill, flags));
         }
     }
 
