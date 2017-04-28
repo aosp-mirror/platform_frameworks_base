@@ -3030,17 +3030,24 @@ public class DevicePolicyManager {
      * keyring. The user's credential will need to be entered again in order to derive the
      * credential encryption key that will be stored back in the keyring for future use.
      * <p>
-     * This flag can only be used by a profile owner when locking a managed profile on an FBE
-     * device.
+     * This flag can only be used by a profile owner when locking a managed profile when
+     * {@link #getStorageEncryptionStatus} returns {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      * <p>
      * In order to secure user data, the user will be stopped and restarted so apps should wait
      * until they are next run to perform further actions.
      */
+    public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1;
+
+    /**
+     * Instead use {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
+     * @removed
+     */
+    @Deprecated
     public static final int FLAG_EVICT_CE_KEY = 1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={FLAG_EVICT_CE_KEY})
+    @IntDef(flag=true, value={FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY})
     public @interface LockNowFlag {}
 
     /**
@@ -3072,15 +3079,17 @@ public class DevicePolicyManager {
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
      *
-     * @param flags May be 0 or {@link #FLAG_EVICT_CE_KEY}.
+     * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} or the
-     *             {@link #FLAG_EVICT_CE_KEY} flag is passed by an application that is not a profile
+     *             {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is passed by an application
+     *             that is not a profile
      *             owner of a managed profile.
-     * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CE_KEY} flag is passed when
-     *             locking the parent profile.
-     * @throws UnsupportedOperationException if the {@link #FLAG_EVICT_CE_KEY} flag is passed on a
-     *             non-FBE device.
+     * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is
+     *             passed when locking the parent profile.
+     * @throws UnsupportedOperationException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}
+     *             flag is passed when {@link #getStorageEncryptionStatus} does not return
+     *             {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
     public void lockNow(@LockNowFlag int flags) {
         if (mService != null) {
