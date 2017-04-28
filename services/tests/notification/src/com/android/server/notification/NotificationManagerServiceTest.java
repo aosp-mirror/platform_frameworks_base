@@ -24,6 +24,7 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -96,6 +97,7 @@ public class NotificationManagerServiceTest {
     private NotificationManagerService.NotificationListeners mNotificationListeners;
     private ManagedServices.ManagedServiceInfo mListener;
     @Mock private ICompanionDeviceManager mCompanionMgr;
+    @Mock SnoozeHelper mSnoozeHelper;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -133,7 +135,8 @@ public class NotificationManagerServiceTest {
                 null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
         when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
         mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
-                mPackageManagerClient, mockLightsManager, mNotificationListeners, mCompanionMgr);
+                mPackageManagerClient, mockLightsManager, mNotificationListeners, mCompanionMgr,
+                mSnoozeHelper);
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
@@ -147,6 +150,18 @@ public class NotificationManagerServiceTest {
         mTestableLooper.processAllMessages();
     }
 
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
+            String groupKey, boolean isSummary) {
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setGroup(groupKey)
+                .setGroupSummary(isSummary);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id, "tag", uid, 0,
+                nb.build(), new UserHandle(uid), null, 0);
+        return new NotificationRecord(mContext, sbn, channel);
+    }
     private NotificationRecord generateNotificationRecord(NotificationChannel channel) {
         return generateNotificationRecord(channel, null);
     }
@@ -394,6 +409,46 @@ public class NotificationManagerServiceTest {
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs[0].getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE);
     }
+
+    @Test
+    public void testFindGroupNotificationsLocked() throws Exception {
+        // make sure the same notification can be found in both lists and returned
+        final NotificationRecord group1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group1", true);
+        mNotificationManagerService.addEnqueuedNotification(group1);
+        mNotificationManagerService.addNotification(group1);
+
+        // should not be returned
+        final NotificationRecord group2 = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group2", true);
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
+                group2.sbn.getId(), group2.sbn.getNotification(), group2.sbn.getUserId());
+        waitForIdle();
+
+        // should not be returned
+        final NotificationRecord nonGroup = generateNotificationRecord(
+                mTestNotificationChannel, 3, null, false);
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
+                nonGroup.sbn.getId(), nonGroup.sbn.getNotification(), nonGroup.sbn.getUserId());
+        waitForIdle();
+
+        // same group, child, should be returned
+        final NotificationRecord group1Child = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group1", false);
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null, group1Child.sbn.getId(),
+                group1Child.sbn.getNotification(), group1Child.sbn.getUserId());
+        waitForIdle();
+
+        List<NotificationRecord> inGroup1 =
+                mNotificationManagerService.findGroupNotificationsLocked(PKG, group1.getGroupKey(),
+                        group1.sbn.getUserId());
+        assertEquals(3, inGroup1.size());
+        for (NotificationRecord record : inGroup1) {
+            assertTrue(record.getGroupKey().equals(group1.getGroupKey()));
+            assertTrue(record.sbn.getId() == 1 || record.sbn.getId() == 4);
+        }
+    }
+
 
     @Test
     public void testTvExtenderChannelOverride_onTv() throws Exception {
@@ -701,4 +756,134 @@ public class NotificationManagerServiceTest {
         assertFalse(mNotificationManagerService.hasCompanionDevice(mListener));
     }
 
+    @Test
+    public void testSnoozeRunnable_snoozeNonGrouped() throws Exception {
+        final NotificationRecord nonGrouped = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, false);
+        final NotificationRecord grouped = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        mNotificationManagerService.addNotification(grouped);
+        mNotificationManagerService.addNotification(nonGrouped);
+
+        NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
+                mNotificationManagerService.new SnoozeNotificationRunnable(
+                        nonGrouped.getKey(), 100, null);
+        snoozeNotificationRunnable.run();
+
+        // only snooze the one notification
+        verify(mSnoozeHelper, times(1)).snooze(any(NotificationRecord.class), anyLong());
+    }
+
+    @Test
+    public void testSnoozeRunnable_snoozeSummary_withChildren() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        mNotificationManagerService.addNotification(parent);
+        mNotificationManagerService.addNotification(child);
+        mNotificationManagerService.addNotification(child2);
+
+        NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
+                mNotificationManagerService.new SnoozeNotificationRunnable(
+                        parent.getKey(), 100, null);
+        snoozeNotificationRunnable.run();
+
+        // snooze parent and children
+        verify(mSnoozeHelper, times(3)).snooze(any(NotificationRecord.class), anyLong());
+    }
+
+    @Test
+    public void testSnoozeRunnable_snoozeGroupChild_fellowChildren() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        mNotificationManagerService.addNotification(parent);
+        mNotificationManagerService.addNotification(child);
+        mNotificationManagerService.addNotification(child2);
+
+        NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
+                mNotificationManagerService.new SnoozeNotificationRunnable(
+                        child2.getKey(), 100, null);
+        snoozeNotificationRunnable.run();
+
+        // only snooze the one child
+        verify(mSnoozeHelper, times(1)).snooze(any(NotificationRecord.class), anyLong());
+    }
+
+    @Test
+    public void testSnoozeRunnable_snoozeGroupChild_onlyChildOfSummary() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        assertTrue(parent.sbn.getNotification().isGroupSummary());
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        mNotificationManagerService.addNotification(parent);
+        mNotificationManagerService.addNotification(child);
+
+        NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
+                mNotificationManagerService.new SnoozeNotificationRunnable(
+                        child.getKey(), 100, null);
+        snoozeNotificationRunnable.run();
+
+        // snooze child and summary
+        verify(mSnoozeHelper, times(2)).snooze(any(NotificationRecord.class), anyLong());
+    }
+
+    @Test
+    public void testSnoozeRunnable_snoozeGroupChild_noOthersInGroup() throws Exception {
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        mNotificationManagerService.addNotification(child);
+
+        NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
+                mNotificationManagerService.new SnoozeNotificationRunnable(
+                        child.getKey(), 100, null);
+        snoozeNotificationRunnable.run();
+
+        // snooze child only
+        verify(mSnoozeHelper, times(1)).snooze(any(NotificationRecord.class), anyLong());
+    }
+
+    @Test
+    public void testPostGroupChild_unsnoozeParent() throws Exception {
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
+                child.sbn.getId(), child.sbn.getNotification(), child.sbn.getUserId());
+        waitForIdle();
+
+        verify(mSnoozeHelper, times(1)).repostGroupSummary(
+                anyString(), anyInt(), eq(child.getGroupKey()));
+    }
+
+    @Test
+    public void testPostNonGroup_noUnsnoozing() throws Exception {
+        final NotificationRecord record = generateNotificationRecord(
+                mTestNotificationChannel, 2, null, false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
+                record.sbn.getId(), record.sbn.getNotification(), record.sbn.getUserId());
+        waitForIdle();
+
+        verify(mSnoozeHelper, never()).repostGroupSummary(anyString(), anyInt(), anyString());
+    }
+
+    @Test
+    public void testPostGroupSummary_noUnsnoozing() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", true);
+
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
+                parent.sbn.getId(), parent.sbn.getNotification(), parent.sbn.getUserId());
+        waitForIdle();
+
+        verify(mSnoozeHelper, never()).repostGroupSummary(anyString(), anyInt(), anyString());
+    }
 }
