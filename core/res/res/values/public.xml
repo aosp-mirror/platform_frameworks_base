@@ -2834,11 +2834,6 @@
         <public name="autofill" />
     </public-group>
 
-    <public-group type="drawable" first-id="0x010800b5">
-        <!-- 0x010800b4 was removed -->
-        <public name="ic_picture_in_picture" />
-    </public-group>
-
     <public-group type="string" first-id="0x01040019">
         <public name="paste_as_plain_text" />
     </public-group>
