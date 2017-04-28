@@ -25,7 +25,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:padding="16dp"
+        android:paddingTop="16dp"
         android:elevation="32dp"
         android:background="?android:attr/colorBackground"
         android:orientation="vertical">
@@ -33,43 +33,53 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/autofill_save_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/autofill_save_title"
+                    android:textSize="16sp"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:layout_weight="1">
+                </TextView>
+
+                <ImageView
+                    android:id="@+id/autofill_save_close"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:src="@android:drawable/ic_close"
+                    android:alpha="0.54"
+                    android:background="?android:attr/selectableItemBackgroundBorderless">
+                </ImageView>
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/autofill_save_title"
-                android:layout_width="0dp"
+                android:id="@+id/autofill_save_subtitle"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/autofill_save_title"
-                android:textSize="16sp"
-                android:textColor="?android:attr/textColorPrimary"
-                android:layout_weight="1">
+                android:layout_marginTop="4dp"
+                android:visibility="gone">
             </TextView>
 
-            <ImageView
-                android:id="@+id/autofill_save_close"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:src="@android:drawable/ic_close"
-                android:alpha="0.54"
-                android:background="?android:attr/selectableItemBackgroundBorderless">
-            </ImageView>
-
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/autofill_save_subtitle"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:visibility="gone">
-        </TextView>
 
         <com.android.internal.widget.ButtonBarLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginTop="16dp"
+            android:padding="16dp"
+            android:clipToPadding="false"
             android:layout_weight="1"
             android:orientation="horizontal">
 
