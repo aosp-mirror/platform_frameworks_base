@@ -452,6 +452,18 @@ public abstract class FragmentManager {
         public void onFragmentAttached(FragmentManager fm, Fragment f, Context context) {}
 
         /**
+         * Called right before the fragment's {@link Fragment#onCreate(Bundle)} method is called.
+         * This is a good time to inject any required dependencies or perform other configuration
+         * for the fragment.
+         *
+         * @param fm Host FragmentManager
+         * @param f Fragment changing state
+         * @param savedInstanceState Saved instance bundle from a previous instance
+         */
+        public void onFragmentPreCreated(FragmentManager fm, Fragment f,
+                Bundle savedInstanceState) {}
+
+        /**
          * Called after the fragment has returned from the FragmentManager's call to
          * {@link Fragment#onCreate(Bundle)}. This will only happen once for any given
          * fragment instance, though the fragment may be attached and detached multiple times.
@@ -1218,6 +1230,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         dispatchOnFragmentAttached(f, mHost.getContext(), false);
 
                         if (!f.mRetaining) {
+                            dispatchOnFragmentPreCreated(f, f.mSavedFragmentState, false);
                             f.performCreate(f.mSavedFragmentState);
                             dispatchOnFragmentCreated(f, f.mSavedFragmentState, false);
                         } else {
@@ -3270,6 +3283,25 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentAttached(this, f, context);
+            }
+        }
+    }
+
+    void dispatchOnFragmentPreCreated(Fragment f, Bundle savedInstanceState,
+            boolean onlyRecursive) {
+        if (mParent != null) {
+            FragmentManager parentManager = mParent.getFragmentManager();
+            if (parentManager instanceof FragmentManagerImpl) {
+                ((FragmentManagerImpl) parentManager)
+                        .dispatchOnFragmentPreCreated(f, savedInstanceState, true);
+            }
+        }
+        if (mLifecycleCallbacks == null) {
+            return;
+        }
+        for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
+            if (!onlyRecursive || p.second) {
+                p.first.onFragmentPreCreated(this, f, savedInstanceState);
             }
         }
     }

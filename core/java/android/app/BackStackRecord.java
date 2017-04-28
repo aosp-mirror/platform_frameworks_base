@@ -621,7 +621,7 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     @Override
-    public FragmentTransaction postOnCommit(Runnable runnable) {
+    public FragmentTransaction runOnCommit(Runnable runnable) {
         if (runnable == null) {
             throw new IllegalArgumentException("runnable cannot be null");
         }
