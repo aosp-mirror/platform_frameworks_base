@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.statusbar.notification.NotificationInflater.InflationExceptionHandler;
+import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -47,6 +47,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.NotificationColorUtil;
@@ -61,7 +62,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.NotificationGuts.GutsContent;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
-import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -314,14 +314,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public void updateNotification(NotificationData.Entry entry) throws InflationException {
+    public void updateNotification(NotificationData.Entry entry) {
         mEntry = entry;
         mStatusBarNotification = entry.notification;
         mNotificationInflater.inflateNotificationViews();
-        onNotificationUpdated();
     }
 
-    private void onNotificationUpdated() {
+    public void onNotificationUpdated() {
         for (NotificationContentView l : mLayouts) {
             l.onNotificationUpdated(mEntry);
         }
@@ -359,6 +358,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded());
         }
         expandedIcon.setStaticDrawableColor(color);
+    }
+
+    @Override
+    public boolean isDimmable() {
+        if (!getShowingLayout().isDimmable()) {
+            return false;
+        }
+        return super.isDimmable();
     }
 
     private void updateLimits() {
@@ -482,9 +489,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         boolean childInGroup = StatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
         mNotificationParent = childInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(childInGroup);
-        if (mNotificationInflater.setIsChildInGroup(childInGroup)) {
-            onNotificationUpdated();
-        }
+        mNotificationInflater.setIsChildInGroup(childInGroup);
         resetBackgroundAlpha();
         updateBackgroundForGroupState();
         updateClickAndFocus();
@@ -1111,12 +1116,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mNotificationInflater.setRemoteViewClickHandler(remoteViewClickHandler);
     }
 
-    public void setInflateExceptionHandler(InflationExceptionHandler inflateExceptionHandler) {
-        mNotificationInflater.setInflateExceptionHandler(inflateExceptionHandler);
+    public void setInflationCallback(InflationCallback callback) {
+        mNotificationInflater.setInflationCallback(callback);
     }
 
     public void setNeedsRedaction(boolean needsRedaction) {
         mNotificationInflater.setRedactAmbient(needsRedaction);
+    }
+
+    @VisibleForTesting
+    public NotificationInflater getNotificationInflater() {
+        return mNotificationInflater;
     }
 
     public interface ExpansionLogger {
