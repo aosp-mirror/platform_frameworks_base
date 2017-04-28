@@ -21,7 +21,6 @@ import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
 import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
 
 import android.app.ActivityManager.TaskSnapshot;
-import android.content.pm.UserInfo;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.GraphicBuffer;
@@ -31,8 +30,6 @@ import android.os.UserManager;
 import android.support.test.InstrumentationRegistry;
 
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -43,32 +40,24 @@ import java.io.File;
  */
 class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
-    private static final String TEST_USER_NAME = "TaskSnapshotPersisterTest User";
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
 
     TaskSnapshotPersister mPersister;
     TaskSnapshotLoader mLoader;
-    static int sTestUserId;
+    int mTestUserId;
     static File sFilesDir;
-    private static UserManager sUserManager;
 
     @BeforeClass
     public static void setUpUser() {
-        sUserManager = UserManager.get(InstrumentationRegistry.getContext());
-        sTestUserId = createUser(TEST_USER_NAME, 0);
         sFilesDir = InstrumentationRegistry.getContext().getFilesDir();
-    }
-
-    @AfterClass
-    public static void tearDownUser() {
-        removeUser(sTestUserId);
     }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        mPersister = new TaskSnapshotPersister(
-                userId -> sFilesDir);
+        final UserManager um = UserManager.get(InstrumentationRegistry.getContext());
+        mTestUserId = um.getUserHandle();
+        mPersister = new TaskSnapshotPersister(userId -> sFilesDir);
         mLoader = new TaskSnapshotLoader(mPersister);
         mPersister.start();
     }
@@ -76,20 +65,6 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     @After
     public void tearDown() throws Exception {
         cleanDirectory();
-    }
-
-    private static int createUser(String name, int flags) {
-        UserInfo user = sUserManager.createUser(name, flags);
-        if (user == null) {
-            Assert.fail("Error while creating the test user: " + TEST_USER_NAME);
-        }
-        return user.id;
-    }
-
-    private static void removeUser(int userId) {
-        if (!sUserManager.removeUser(userId)) {
-            Assert.fail("Error while removing the test user: " + TEST_USER_NAME);
-        }
     }
 
     private void cleanDirectory() {
@@ -101,7 +76,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot() {
-        GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
+        final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
                 USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
         Canvas c = buffer.lockCanvas();
         c.drawColor(Color.RED);
