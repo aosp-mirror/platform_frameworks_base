@@ -16,6 +16,8 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_BACKUP;
+
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -66,7 +68,7 @@ public class RunBackupReceiver extends BroadcastReceiver {
                             backupManagerService.getWakelock().acquire();
 
                             Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                                    RefactoredBackupManagerService.MSG_RUN_BACKUP);
+                                    MSG_RUN_BACKUP);
                             backupManagerService.getBackupHandler().sendMessage(msg);
                         } else {
                             Slog.i(RefactoredBackupManagerService.TAG,

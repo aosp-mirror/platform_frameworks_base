@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
+
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.FullBackup;
@@ -489,7 +491,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             Slog.w(RefactoredBackupManagerService.TAG,
                                     "Agent failure restoring " + pkg + "; ending restore");
                             backupManagerService.getBackupHandler().removeMessages(
-                                    RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
+                                    MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp);
                             mAgent = null;
