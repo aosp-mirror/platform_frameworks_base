@@ -39,8 +39,7 @@ public class ExpandableNotificationRowTest {
     private NotificationTestHelper mNotificationTestHelper;
 
     @Before
-    @UiThreadTest
-    public void setUp() {
+    public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mGroup = mNotificationTestHelper.createGroup();

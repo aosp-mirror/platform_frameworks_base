@@ -28,4 +28,10 @@ public class Assert {
             throw new IllegalStateException("should be called from the main thread.");
         }
     }
+
+    public static void isNotMainThread() {
+        if (Looper.getMainLooper().isCurrentThread()) {
+            throw new IllegalStateException("should not be called from the main thread.");
+        }
+    }
 }
