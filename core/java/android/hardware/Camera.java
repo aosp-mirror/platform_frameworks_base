@@ -189,7 +189,7 @@ public class Camera {
      *
      * <p>In {@link android.os.Build.VERSION_CODES#O Android O} this broadcast has been brought
      * back, but only for <em>registered</em> receivers.  Apps that are actively running can
-     * against listen to the broadcast if they want an immediate clear signal about a picture
+     * again listen to the broadcast if they want an immediate clear signal about a picture
      * being taken, however anything doing heavy work (or needing to be launched) as a result of
      * this should still use JobScheduler.</p>
      */
@@ -208,12 +208,11 @@ public class Camera {
      *
      * <p>In {@link android.os.Build.VERSION_CODES#O Android O} this broadcast has been brought
      * back, but only for <em>registered</em> receivers.  Apps that are actively running can
-     * against listen to the broadcast if they want an immediate clear signal about a video
+     * again listen to the broadcast if they want an immediate clear signal about a video
      * being taken, however anything doing heavy work (or needing to be launched) as a result of
      * this should still use JobScheduler.</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
     public static final String ACTION_NEW_VIDEO = "android.hardware.action.NEW_VIDEO";
 
     /**
