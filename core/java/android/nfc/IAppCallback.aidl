@@ -25,6 +25,6 @@ import android.nfc.Tag;
 interface IAppCallback
 {
     BeamShareData createBeamShareData(byte peerLlcpVersion);
-    void onNdefPushComplete(byte peerLlcpVersion);
-    void onTagDiscovered(in Tag tag);
+    oneway void onNdefPushComplete(byte peerLlcpVersion);
+    oneway void onTagDiscovered(in Tag tag);
 }
