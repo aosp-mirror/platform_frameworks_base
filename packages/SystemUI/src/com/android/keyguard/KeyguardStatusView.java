@@ -280,6 +280,9 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     public void setDark(boolean dark) {
+        if (mDark == dark) {
+            return;
+        }
         mDark = dark;
 
         final int N = mClockContainer.getChildCount();
