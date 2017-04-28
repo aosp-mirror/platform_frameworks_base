@@ -3010,4 +3010,5 @@
   <java-symbol type="array" name="config_allowedSystemInstantAppSettings" />
   <java-symbol type="array" name="config_allowedSecureInstantAppSettings" />
 
+  <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
 </resources>
