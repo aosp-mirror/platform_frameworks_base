@@ -19,14 +19,18 @@ package android.os.storage;
 import static android.net.TrafficStats.GB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 
+import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
+import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
@@ -135,6 +139,7 @@ public class StorageManager {
      * thus it cannot be used to uniquely identify a particular physical device.
      *
      * @see #getUuidForPath(File)
+     * @see ApplicationInfo#storageUuid
      */
     public static final UUID UUID_DEFAULT = UUID
             .fromString("41217664-9172-527a-b3d5-edabb50a7d69");
@@ -166,6 +171,7 @@ public class StorageManager {
      * @see #ACTION_MANAGE_STORAGE
      * @see #UUID_DEFAULT
      * @see #getUuidForPath(File)
+     * @see Intent#putExtra(String, java.io.Serializable)
      */
     public static final String EXTRA_UUID = "android.os.storage.extra.UUID";
 
@@ -1533,7 +1539,8 @@ public class StorageManager {
      *             doesn't support cache quotas.
      * @see #getCacheSizeBytes(UUID)
      */
-    public long getCacheQuotaBytes(@NonNull UUID storageUuid) throws IOException {
+    @WorkerThread
+    public @BytesLong long getCacheQuotaBytes(@NonNull UUID storageUuid) throws IOException {
         try {
             final ApplicationInfo app = mContext.getApplicationInfo();
             return mStorageManager.getCacheQuotaBytes(convert(storageUuid), app.uid);
@@ -1573,7 +1580,8 @@ public class StorageManager {
      *             doesn't support cache quotas.
      * @see #getCacheQuotaBytes(UUID)
      */
-    public long getCacheSizeBytes(@NonNull UUID storageUuid) throws IOException {
+    @WorkerThread
+    public @BytesLong long getCacheSizeBytes(@NonNull UUID storageUuid) throws IOException {
         try {
             final ApplicationInfo app = mContext.getApplicationInfo();
             return mStorageManager.getCacheSizeBytes(convert(storageUuid), app.uid);
@@ -1631,8 +1639,10 @@ public class StorageManager {
      * @see #getAllocatableBytes(UUID, int)
      * @see #allocateBytes(UUID, long, int)
      * @see #allocateBytes(FileDescriptor, long, int)
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE)
+    @SystemApi
     public static final int FLAG_ALLOCATE_AGGRESSIVE = 1;
 
     /** @hide */
@@ -1656,7 +1666,7 @@ public class StorageManager {
      * the returned value will fail.
      * <p>
      * If the returned value is not large enough for the data you'd like to
-     * store, you can launch {@link #ACTION_MANAGE_STORAGE} with the
+     * persist, you can launch {@link #ACTION_MANAGE_STORAGE} with the
      * {@link #EXTRA_UUID} and {@link #EXTRA_REQUESTED_BYTES} options to help
      * involve the user in freeing up disk space.
      * <p class="note">
@@ -1670,13 +1680,19 @@ public class StorageManager {
      *            vary widely depending on the underlying storage device. The
      *            UUID for a specific path can be obtained using
      *            {@link #getUuidForPath(File)}.
-     * @param flags to apply to the request.
      * @return the maximum number of new bytes that the calling app can allocate
      *         using {@link #allocateBytes(UUID, long, int)} or
      *         {@link #allocateBytes(FileDescriptor, long, int)}.
      * @throws IOException when the storage device isn't present, or when it
      *             doesn't support allocating space.
      */
+    public @BytesLong long getAllocatableBytes(@NonNull UUID storageUuid)
+            throws IOException {
+        return getAllocatableBytes(storageUuid, 0);
+    }
+
+    /** @hide */
+    @SystemApi
     public long getAllocatableBytes(@NonNull UUID storageUuid, @AllocateFlags int flags)
             throws IOException {
         try {
@@ -1713,14 +1729,20 @@ public class StorageManager {
      *            allocate disk space. The UUID for a specific path can be
      *            obtained using {@link #getUuidForPath(File)}.
      * @param bytes the number of bytes to allocate.
-     * @param flags to apply to the request.
      * @throws IOException when the storage device isn't present, or when it
      *             doesn't support allocating space, or if the device had
      *             trouble allocating the requested space.
      * @see #getAllocatableBytes(UUID, int)
      */
-    public void allocateBytes(@NonNull UUID storageUuid, long bytes, @AllocateFlags int flags)
+    public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes)
             throws IOException {
+        allocateBytes(storageUuid, bytes, 0);
+    }
+
+    /** @hide */
+    @SystemApi
+    public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes,
+            @AllocateFlags int flags) throws IOException {
         try {
             mStorageManager.allocateBytes(convert(storageUuid), bytes, flags);
         } catch (ParcelableException e) {
@@ -1732,7 +1754,7 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
-    public void allocateBytes(@NonNull File path, long bytes, @AllocateFlags int flags)
+    public void allocateBytes(@NonNull File path, @BytesLong long bytes, @AllocateFlags int flags)
             throws IOException {
         allocateBytes(getUuidForPath(path), bytes, flags);
     }
@@ -1756,14 +1778,19 @@ public class StorageManager {
      *            requested size, it will be extended without modifying any
      *            existing contents. If the open file is larger than this
      *            requested size, it will be truncated.
-     * @param flags to apply to the request.
      * @throws IOException when the storage device isn't present, or when it
      *             doesn't support allocating space, or if the device had
      *             trouble allocating the requested space.
      * @see #getAllocatableBytes(UUID, int)
      * @see Environment#isExternalStorageEmulated(File)
      */
-    public void allocateBytes(FileDescriptor fd, long bytes, @AllocateFlags int flags)
+    public void allocateBytes(FileDescriptor fd, @BytesLong long bytes) throws IOException {
+        allocateBytes(fd, bytes, 0);
+    }
+
+    /** @hide */
+    @SystemApi
+    public void allocateBytes(FileDescriptor fd, @BytesLong long bytes, @AllocateFlags int flags)
             throws IOException {
         final File file = ParcelFileDescriptor.getFile(fd);
         for (int i = 0; i < 3; i++) {
