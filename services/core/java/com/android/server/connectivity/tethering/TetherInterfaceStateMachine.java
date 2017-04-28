@@ -117,9 +117,11 @@ public class TetherInterfaceStateMachine extends StateMachine {
         setInitialState(mInitialState);
     }
 
-    public int interfaceType() {
-        return mInterfaceType;
-    }
+    public String interfaceName() { return mIfaceName; }
+
+    public int interfaceType() { return mInterfaceType; }
+
+    public int lastError() { return mLastError; }
 
     // configured when we start tethering and unconfig'd on error or conclusion
     private boolean configureIfaceIp(boolean enabled) {
