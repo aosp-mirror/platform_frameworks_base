@@ -28,7 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class VersionedPackage implements Parcelable {
     private final String mPackageName;
-    private final long mVersionCode;
+    private final int mVersionCode;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -49,7 +49,7 @@ public final class VersionedPackage implements Parcelable {
 
     private VersionedPackage(Parcel parcel) {
         mPackageName = parcel.readString();
-        mVersionCode = parcel.readLong();
+        mVersionCode = parcel.readInt();
     }
 
     /**
@@ -66,7 +66,7 @@ public final class VersionedPackage implements Parcelable {
      *
      * @return The version code.
      */
-    public @VersionCode long getVersionCode() {
+    public @VersionCode int getVersionCode() {
         return mVersionCode;
     }
 
@@ -83,7 +83,7 @@ public final class VersionedPackage implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mPackageName);
-        parcel.writeLong(mVersionCode);
+        parcel.writeInt(mVersionCode);
     }
 
     public static final Creator<VersionedPackage> CREATOR = new Creator<VersionedPackage>() {
