@@ -240,7 +240,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         i.setPackage(mComponent.getPackageName());
         i = resolveIntent(i);
         if (i != null) {
-            i.putExtra(TileService.EXTRA_COMPONENT, mComponent);
+            i.putExtra(Intent.EXTRA_COMPONENT_NAME, mComponent);
             i.putExtra(TileService.EXTRA_STATE, mTile.getState());
             return i;
         }
