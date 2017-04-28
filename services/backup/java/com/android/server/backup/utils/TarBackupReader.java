@@ -65,13 +65,6 @@ public class TarBackupReader {
     // Widget blob to be restored out-of-band.
     private byte[] mWidgetData = null;
 
-    /**
-     * Listener for bytes reading.
-     */
-    public interface BytesReadListener {
-        void onBytesRead(long bytesRead);
-    }
-
     public TarBackupReader(InputStream inputStream, BytesReadListener bytesReadListener,
             IBackupManagerMonitor monitor) {
         mInputStream = inputStream;

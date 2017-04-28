@@ -50,7 +50,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             String packageName, String transport) {
         this.backupManagerService = backupManagerService;
         mPackageName = packageName;
-        mRestoreTransport = backupManagerService.getTransportManager().getTransportBinder(transport);
+        mRestoreTransport = backupManagerService.getTransportManager().getTransportBinder(
+                transport);
     }
 
     public void markTimedOut() {
@@ -298,7 +299,8 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
         // If the caller is not privileged and is not coming from the target
         // app's uid, throw a permission exception back to the caller.
-        int perm = backupManagerService.getContext().checkPermission(android.Manifest.permission.BACKUP,
+        int perm = backupManagerService.getContext().checkPermission(
+                android.Manifest.permission.BACKUP,
                 Binder.getCallingPid(), Binder.getCallingUid());
         if ((perm == PackageManager.PERMISSION_DENIED) &&
                 (app.applicationInfo.uid != Binder.getCallingUid())) {
