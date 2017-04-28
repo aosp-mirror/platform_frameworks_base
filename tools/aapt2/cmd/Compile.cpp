@@ -598,6 +598,9 @@ static bool CompileFile(IAaptContext* context, const CompileOptions& options,
 
 class CompileContext : public IAaptContext {
  public:
+  CompileContext(IDiagnostics* diagnostics) : diagnostics_(diagnostics) {
+  }
+
   PackageType GetPackageType() override {
     // Every compilation unit starts as an app and then gets linked as potentially something else.
     return PackageType::kApp;
@@ -612,7 +615,7 @@ class CompileContext : public IAaptContext {
   }
 
   IDiagnostics* GetDiagnostics() override {
-    return &diagnostics_;
+    return diagnostics_;
   }
 
   NameMangler* GetNameMangler() override {
@@ -639,7 +642,7 @@ class CompileContext : public IAaptContext {
   }
 
  private:
-  StdErrDiagnostics diagnostics_;
+  IDiagnostics* diagnostics_;
   bool verbose_ = false;
 };
 
@@ -647,8 +650,8 @@ class CompileContext : public IAaptContext {
  * Entry point for compilation phase. Parses arguments and dispatches to the
  * correct steps.
  */
-int Compile(const std::vector<StringPiece>& args) {
-  CompileContext context;
+int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
+  CompileContext context(diagnostics);
   CompileOptions options;
 
   bool verbose = false;

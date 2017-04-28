@@ -118,7 +118,8 @@ struct LinkOptions {
 
 class LinkContext : public IAaptContext {
  public:
-  LinkContext() : name_mangler_({}), symbols_(&name_mangler_) {
+  LinkContext(IDiagnostics* diagnostics)
+      : diagnostics_(diagnostics), name_mangler_({}), symbols_(&name_mangler_) {
   }
 
   PackageType GetPackageType() override {
@@ -130,7 +131,7 @@ class LinkContext : public IAaptContext {
   }
 
   IDiagnostics* GetDiagnostics() override {
-    return &diagnostics_;
+    return diagnostics_;
   }
 
   NameMangler* GetNameMangler() override {
@@ -181,7 +182,7 @@ class LinkContext : public IAaptContext {
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
   PackageType package_type_ = PackageType::kApp;
-  StdErrDiagnostics diagnostics_;
+  IDiagnostics* diagnostics_;
   NameMangler name_mangler_;
   std::string compilation_package_;
   uint8_t package_id_ = 0x0;
@@ -1736,8 +1737,8 @@ class LinkCommand {
   std::map<size_t, std::string> shared_libs_;
 };
 
-int Link(const std::vector<StringPiece>& args) {
-  LinkContext context;
+int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
+  LinkContext context(diagnostics);
   LinkOptions options;
   std::vector<std::string> overlay_arg_list;
   std::vector<std::string> extra_java_packages;
