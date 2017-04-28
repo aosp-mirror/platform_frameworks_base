@@ -1080,6 +1080,10 @@ static bool do9Patch(PngInfo* image, std::string* outError) {
         newRows[i] = image->rows[i + 1];
         memmove(newRows[i], newRows[i] + 4, (W - 2) * 4);
     }
+    delete[] image->rows[0];
+    if (H - 1 > 0) {
+      delete[] image->rows[H - 1];
+    }
     image->rows.swap(newRows);
 
     image->width -= 2;
