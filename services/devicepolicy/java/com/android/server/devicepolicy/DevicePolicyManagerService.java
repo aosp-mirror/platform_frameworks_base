@@ -4666,19 +4666,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final long ident = mInjector.binderClearCallingIdentity();
             try {
                 // Evict key
-                if ((flags & DevicePolicyManager.FLAG_EVICT_CE_KEY) != 0) {
-                    enforceManagedProfile(callingUserId, "set FLAG_EVICT_CE_KEY");
+                if ((flags & DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY) != 0) {
+                    enforceManagedProfile(
+                            callingUserId, "set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
                     if (!isProfileOwner(admin.info.getComponent(), callingUserId)) {
-                        throw new SecurityException(
-                               "Only profile owner admins can set FLAG_EVICT_CE_KEY");
+                        throw new SecurityException("Only profile owner admins can set "
+                                + "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
                     }
                     if (parent) {
                         throw new IllegalArgumentException(
-                                "Cannot set FLAG_EVICT_CE_KEY for the parent");
+                                "Cannot set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY for the parent");
                     }
                     if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
                         throw new UnsupportedOperationException(
-                                "FLAG_EVICT_CE_KEY only applies to FBE devices");
+                                "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY only applies to FBE devices");
                     }
                     mUserManager.evictCredentialEncryptionKey(callingUserId);
                 }
