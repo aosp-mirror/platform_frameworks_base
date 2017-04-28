@@ -1610,7 +1610,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void handleInflationException(StatusBarNotification notification, InflationException e) {
+    public void handleInflationException(StatusBarNotification notification, Exception e) {
         handleNotificationError(notification, e.getMessage());
     }
 

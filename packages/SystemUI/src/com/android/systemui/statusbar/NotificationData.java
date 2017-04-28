@@ -86,7 +86,7 @@ public class NotificationData {
         public List<SnoozeCriterion> snoozeCriteria;
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
-        private ArraySet<AsyncTask> mRunningTasks = new ArraySet();
+        private NotificationInflater.AsyncInflationTask mRunningTask = null;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -219,23 +219,25 @@ public class NotificationData {
          * Abort all existing inflation tasks
          */
         public void abortInflation() {
-            for (AsyncTask task : mRunningTasks) {
-                task.cancel(true /* mayInterruptIfRunning */);
+            if (mRunningTask != null) {
+                mRunningTask.abort();
+                mRunningTask = null;
             }
-            mRunningTasks.clear();
         }
 
-        public void addInflationTask(AsyncTask asyncInflationTask) {
-            mRunningTasks.add(asyncInflationTask);
+        public void setInflationTask(NotificationInflater.AsyncInflationTask asyncInflationTask) {
+            // abort any existing inflation
+            abortInflation();
+            mRunningTask = asyncInflationTask;
         }
 
-        public void onInflationTaskFinished(AsyncTask asyncInflationTask) {
-            mRunningTasks.remove(asyncInflationTask);
+        public void onInflationTaskFinished() {
+           mRunningTask = null;
         }
 
         @VisibleForTesting
-        public ArraySet<AsyncTask> getRunningTasks() {
-            return mRunningTasks;
+        public AsyncTask getRunningTask() {
+            return mRunningTask;
         }
     }
 

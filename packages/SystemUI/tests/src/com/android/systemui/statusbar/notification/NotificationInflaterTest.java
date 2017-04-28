@@ -26,6 +26,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.widget.RemoteViews;
@@ -41,7 +42,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Function;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -67,7 +67,7 @@ public class NotificationInflaterTest {
         mNotificationInflater.setInflationCallback(new NotificationInflater.InflationCallback() {
             @Override
             public void handleInflationException(StatusBarNotification notification,
-                    InflationException e) {
+                    Exception e) {
             }
 
             @Override
@@ -77,6 +77,7 @@ public class NotificationInflaterTest {
     }
 
     @Test
+    @UiThreadTest
     public void testIncreasedHeadsUpBeingUsed() {
         mNotificationInflater.setUsesIncreasedHeadsUpHeight(true);
         Notification.Builder builder = spy(mBuilder);
@@ -85,6 +86,7 @@ public class NotificationInflaterTest {
     }
 
     @Test
+    @UiThreadTest
     public void testIncreasedHeightBeingUsed() {
         mNotificationInflater.setUsesIncreasedHeight(true);
         Notification.Builder builder = spy(mBuilder);
@@ -127,7 +129,7 @@ public class NotificationInflaterTest {
         mRow.getEntry().abortInflation();
         runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
                 mNotificationInflater);
-        Assert.assertTrue(mRow.getEntry().getRunningTasks().size() == 0);
+        Assert.assertNull(mRow.getEntry().getRunningTask() );
     }
 
     public static void runThenWaitForInflation(Runnable block,
@@ -143,7 +145,7 @@ public class NotificationInflaterTest {
         inflater.setInflationCallback(new NotificationInflater.InflationCallback() {
             @Override
             public void handleInflationException(StatusBarNotification notification,
-                    InflationException e) {
+                    Exception e) {
                 if (!expectingException) {
                     exceptionHolder.setException(e);
                 }
