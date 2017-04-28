@@ -5149,7 +5149,7 @@ public class AudioService extends IAudioService.Stub
 
     private void onBluetoothA2dpDeviceConfigChange(BluetoothDevice btDevice)
     {
-        if (DEBUG_VOL) {
+        if (DEBUG_DEVICES) {
             Log.d(TAG, "onBluetoothA2dpDeviceConfigChange btDevice=" + btDevice);
         }
         if (btDevice == null) {
@@ -5166,8 +5166,13 @@ public class AudioService extends IAudioService.Stub
             final DeviceListSpec deviceSpec = mConnectedDevices.get(key);
             if (deviceSpec != null) {
                 // Device is connected
-                AudioSystem.handleDeviceConfigChange(device, address,
-                        btDevice.getName());
+               if (AudioSystem.handleDeviceConfigChange(device, address,
+                        btDevice.getName()) != AudioSystem.AUDIO_STATUS_OK) {
+                   // force A2DP device disconnection in case of error so that AudioService state is
+                   // consistent with audio policy manager state
+                   setBluetoothA2dpDeviceConnectionState(
+                           btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP_SINK);
+               }
             }
         }
     }
