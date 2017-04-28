@@ -157,7 +157,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public long getTotalBytes(String volumeUuid, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
+        // NOTE: No permissions required
 
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
             return FileUtils.roundStorageSize(mStorage.getPrimaryStorageSize());
@@ -173,7 +173,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public long getFreeBytes(String volumeUuid, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
+        // NOTE: No permissions required
 
         long cacheBytes = 0;
         final long token = Binder.clearCallingIdentity();
@@ -187,14 +187,14 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         }
 
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            return Environment.getDataDirectory().getUsableSpace() + cacheBytes;
+            return Environment.getDataDirectory().getFreeSpace() + cacheBytes;
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             if (vol == null) {
                 throw new ParcelableException(
                         new IOException("Failed to find storage device for UUID " + volumeUuid));
             }
-            return vol.getPath().getUsableSpace() + cacheBytes;
+            return vol.getPath().getFreeSpace() + cacheBytes;
         }
     }
 
@@ -213,7 +213,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     @Override
     public StorageStats queryStatsForPackage(String volumeUuid, String packageName, int userId,
             String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
         if (userId != UserHandle.getCallingUserId()) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
@@ -225,6 +224,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                     PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
         } catch (NameNotFoundException e) {
             throw new ParcelableException(e);
+        }
+
+        if (Binder.getCallingUid() == appInfo.uid) {
+            // No permissions required when asking about themselves
+        } else {
+            enforcePermission(Binder.getCallingUid(), callingPackage);
         }
 
         if (mPackage.getPackagesForUid(appInfo.uid).length == 1) {
@@ -257,14 +262,19 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public StorageStats queryStatsForUid(String volumeUuid, int uid, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
-        if (UserHandle.getUserId(uid) != UserHandle.getCallingUserId()) {
+        final int userId = UserHandle.getUserId(uid);
+        final int appId = UserHandle.getAppId(uid);
+
+        if (userId != UserHandle.getCallingUserId()) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
         }
 
-        final int userId = UserHandle.getUserId(uid);
-        final int appId = UserHandle.getAppId(uid);
+        if (Binder.getCallingUid() == uid) {
+            // No permissions required when asking about themselves
+        } else {
+            enforcePermission(Binder.getCallingUid(), callingPackage);
+        }
 
         final String[] packageNames = mPackage.getPackagesForUid(uid);
         final long[] ceDataInodes = new long[packageNames.length];
@@ -304,11 +314,13 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public StorageStats queryStatsForUser(String volumeUuid, int userId, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
         if (userId != UserHandle.getCallingUserId()) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
         }
+
+        // Always require permission to see user-level stats
+        enforcePermission(Binder.getCallingUid(), callingPackage);
 
         final int[] appIds = getAppIds(userId);
         final PackageStats stats = new PackageStats(TAG);
@@ -329,11 +341,13 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     @Override
     public ExternalStorageStats queryExternalStatsForUser(String volumeUuid, int userId,
             String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
         if (userId != UserHandle.getCallingUserId()) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
         }
+
+        // Always require permission to see user-level stats
+        enforcePermission(Binder.getCallingUid(), callingPackage);
 
         final int[] appIds = getAppIds(userId);
         final long[] stats;

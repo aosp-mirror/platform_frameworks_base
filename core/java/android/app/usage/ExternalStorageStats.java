@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.annotation.BytesLong;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -37,7 +38,7 @@ public final class ExternalStorageStats implements Parcelable {
      * Return the total bytes used by all files in the shared/external storage
      * hosted on this volume.
      */
-    public long getTotalBytes() {
+    public @BytesLong long getTotalBytes() {
         return totalBytes;
     }
 
@@ -45,7 +46,7 @@ public final class ExternalStorageStats implements Parcelable {
      * Return the total bytes used by audio files in the shared/external storage
      * hosted on this volume.
      */
-    public long getAudioBytes() {
+    public @BytesLong long getAudioBytes() {
         return audioBytes;
     }
 
@@ -53,7 +54,7 @@ public final class ExternalStorageStats implements Parcelable {
      * Return the total bytes used by video files in the shared/external storage
      * hosted on this volume.
      */
-    public long getVideoBytes() {
+    public @BytesLong long getVideoBytes() {
         return videoBytes;
     }
 
@@ -61,7 +62,7 @@ public final class ExternalStorageStats implements Parcelable {
      * Return the total bytes used by image files in the shared/external storage
      * hosted on this volume.
      */
-    public long getImageBytes() {
+    public @BytesLong long getImageBytes() {
         return imageBytes;
     }
 
@@ -72,7 +73,7 @@ public final class ExternalStorageStats implements Parcelable {
      * This data is already accounted against individual apps as returned
      * through {@link StorageStats}.
      */
-    public long getAppBytes() {
+    public @BytesLong long getAppBytes() {
         return appBytes;
     }
 
