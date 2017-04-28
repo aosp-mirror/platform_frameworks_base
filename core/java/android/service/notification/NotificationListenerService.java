@@ -1094,9 +1094,9 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Request that the service be unbound.
      *
-     * <p>This will no longer receive updates until
-     * {@link #requestRebind(ComponentName)} is called.
-     * The service will likely be kiled by the system after this call.
+     * <p>Once this is called, you will no longer receive updates and no method calls are
+     * guaranteed to be successful, until you next receive the {@link #onListenerConnected()} event.
+     * The service will likely be killed by the system after this call.
      *
      * <p>The service should wait for the {@link #onListenerConnected()} event
      * before performing this operation. I know it's tempting, but you must wait.

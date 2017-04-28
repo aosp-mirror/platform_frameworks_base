@@ -422,7 +422,9 @@ public class NotificationManager
      * Creates a notification channel that notifications can be posted to.
      *
      * This can also be used to restore a deleted channel and to update an existing channel's
-     * name and description. The name and description should only be changed if the locale changes
+     * name and description.
+     *
+     * <p>The name and description should only be changed if the locale changes
      * or in response to the user renaming this channel. For example, if a user has a channel
      * named 'John Doe' that represents messages from a 'John Doe', and 'John Doe' changes his name
      * to 'John Smith,' the channel can be renamed to match.
@@ -454,6 +456,8 @@ public class NotificationManager
 
     /**
      * Returns the notification channel settings for a given channel id.
+     *
+     * The channel must belong to your package, or it will not be returned.
      */
     public NotificationChannel getNotificationChannel(String channelId) {
         INotificationManager service = getService();
@@ -465,7 +469,7 @@ public class NotificationManager
     }
 
     /**
-     * Returns all notification channels belonging to the calling app.
+     * Returns all notification channels belonging to the calling package.
      */
     public List<NotificationChannel> getNotificationChannels() {
         INotificationManager service = getService();
@@ -478,6 +482,10 @@ public class NotificationManager
 
     /**
      * Deletes the given notification channel.
+     *
+     * <p>If you {@link #createNotificationChannel(NotificationChannel) create} a new channel with
+     * this same id, the deleted channel will be un-deleted with all of the same settings it
+     * had before it was deleted.
      */
     public void deleteNotificationChannel(String channelId) {
         INotificationManager service = getService();
@@ -501,7 +509,8 @@ public class NotificationManager
     }
 
     /**
-     * Deletes the given notification channel group.
+     * Deletes the given notification channel group, and all notification channels that
+     * belong to it.
      */
     public void deleteNotificationChannelGroup(String groupId) {
         INotificationManager service = getService();
