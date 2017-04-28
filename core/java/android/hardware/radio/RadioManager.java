@@ -755,8 +755,9 @@ public class RadioManager {
             if (!(obj instanceof BandConfig))
                 return false;
             BandConfig other = (BandConfig) obj;
-            if (mDescriptor != other.getDescriptor())
-                return false;
+            BandDescriptor otherDesc = other.getDescriptor();
+            if ((mDescriptor == null) != (otherDesc == null)) return false;
+            if (mDescriptor != null && !mDescriptor.equals(otherDesc)) return false;
             return true;
         }
     }
