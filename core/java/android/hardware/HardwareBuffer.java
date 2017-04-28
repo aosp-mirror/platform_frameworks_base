@@ -70,37 +70,34 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {USAGE0_CPU_READ, USAGE0_CPU_READ_OFTEN, USAGE0_CPU_WRITE,
-            USAGE0_CPU_WRITE_OFTEN, USAGE0_GPU_SAMPLED_IMAGE, USAGE0_GPU_COLOR_OUTPUT,
-            USAGE0_GPU_STORAGE_IMAGE, USAGE0_GPU_CUBEMAP, USAGE0_GPU_DATA_BUFFER,
-            USAGE0_PROTECTED_CONTENT, USAGE0_SENSOR_DIRECT_DATA, USAGE0_VIDEO_ENCODE})
-    public @interface Usage0 {};
+    @IntDef(flag = true, value = {USAGE_CPU_READ_RARELY, USAGE_CPU_READ_OFTEN,
+            USAGE_CPU_WRITE_RARELY, USAGE_CPU_WRITE_OFTEN, USAGE_GPU_SAMPLED_IMAGE,
+            USAGE_GPU_COLOR_OUTPUT, USAGE_PROTECTED_CONTENT, USAGE_VIDEO_ENCODE,
+            USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA})
+    public @interface Usage {};
 
-    /** Usage0: the buffer will sometimes be read by the CPU */
-    public static final long USAGE0_CPU_READ               = (1 << 1);
-    /** Usage0: the buffer will often be read by the CPU*/
-    public static final long USAGE0_CPU_READ_OFTEN         = (1 << 2 | USAGE0_CPU_READ);
-    /** Usage0: the buffer will sometimes be written to by the CPU */
-    public static final long USAGE0_CPU_WRITE              = (1 << 5);
-    /** Usage0: the buffer will often be written to by the CPU */
-    public static final long USAGE0_CPU_WRITE_OFTEN        = (1 << 6 | USAGE0_CPU_WRITE);
-    /** Usage0: the buffer will be read from by the GPU */
-    public static final long USAGE0_GPU_SAMPLED_IMAGE      = (1 << 10);
-    /** Usage0: the buffer will be written to by the GPU */
-    public static final long USAGE0_GPU_COLOR_OUTPUT       = (1 << 11);
-    /** Usage0: the buffer will be read from and written to by the GPU */
-    public static final long USAGE0_GPU_STORAGE_IMAGE      = (USAGE0_GPU_SAMPLED_IMAGE |
-            USAGE0_GPU_COLOR_OUTPUT);
-    /** Usage0: the buffer will be used as a cubemap texture */
-    public static final long USAGE0_GPU_CUBEMAP            = (1 << 13);
-    /** Usage0: the buffer will be used as a shader storage or uniform buffer object*/
-    public static final long USAGE0_GPU_DATA_BUFFER        = (1 << 14);
-    /** Usage0: the buffer must not be used outside of a protected hardware path */
-    public static final long USAGE0_PROTECTED_CONTENT      = (1 << 18);
-    /** Usage0: the buffer will be used for sensor direct data */
-    public static final long USAGE0_SENSOR_DIRECT_DATA     = (1 << 29);
-    /** Usage0: the buffer will be read by a hardware video encoder */
-    public static final long USAGE0_VIDEO_ENCODE           = (1 << 21);
+    /** Usage: The buffer will sometimes be read by the CPU */
+    public static final long USAGE_CPU_READ_RARELY       = 2;
+    /** Usage: The buffer will often be read by the CPU */
+    public static final long USAGE_CPU_READ_OFTEN        = 3;
+
+    /** Usage: The buffer will sometimes be written to by the CPU */
+    public static final long USAGE_CPU_WRITE_RARELY      = 2 << 4;
+    /** Usage: The buffer will often be written to by the CPU */
+    public static final long USAGE_CPU_WRITE_OFTEN       = 3 << 4;
+
+    /** Usage: The buffer will be read from by the GPU */
+    public static final long USAGE_GPU_SAMPLED_IMAGE      = 1 << 8;
+    /** Usage: The buffer will be written to by the GPU */
+    public static final long USAGE_GPU_COLOR_OUTPUT       = 1 << 9;
+    /** Usage: The buffer must not be used outside of a protected hardware path */
+    public static final long USAGE_PROTECTED_CONTENT      = 1 << 14;
+    /** Usage: The buffer will be read by a hardware video encoder */
+    public static final long USAGE_VIDEO_ENCODE           = 1 << 16;
+    /** Usage: The buffer will be used for sensor direct data */
+    public static final long USAGE_SENSOR_DIRECT_DATA     = 1 << 23;
+    /** Usage: The buffer will be used as a shader storage or uniform buffer object */
+    public static final long USAGE_GPU_DATA_BUFFER        = 1 << 24;
 
     // The approximate size of a native AHardwareBuffer object.
     private static final long NATIVE_HARDWARE_BUFFER_SIZE = 232;
@@ -116,13 +113,11 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * {@link #RGBX_8888}, {@link #RGB_565}, {@link #RGB_888}, {@link #RGBA_1010102}, {@link #BLOB}
      * @param layers The number of layers in the buffer
      * @param usage Flags describing how the buffer will be used, one of
-     *     {@link #USAGE0_CPU_READ}, {@link #USAGE0_CPU_READ_OFTEN}, {@link #USAGE0_CPU_WRITE},
-     *     {@link #USAGE0_CPU_WRITE_OFTEN}, {@link #USAGE0_GPU_SAMPLED_IMAGE},
-     *     {@link #USAGE0_GPU_COLOR_OUTPUT},{@link #USAGE0_GPU_STORAGE_IMAGE},
-     *     {@link #USAGE0_GPU_CUBEMAP}, {@link #USAGE0_GPU_DATA_BUFFER},
-     *     {@link #USAGE0_PROTECTED_CONTENT}, {@link #USAGE0_SENSOR_DIRECT_DATA},
-     *     {@link #USAGE0_VIDEO_ENCODE}
-     *
+     *     {@link #USAGE_CPU_READ_RARELY}, {@link #USAGE_CPU_READ_OFTEN},
+     *     {@link #USAGE_CPU_WRITE_RARELY}, {@link #USAGE_CPU_WRITE_OFTEN},
+     *     {@link #USAGE_GPU_SAMPLED_IMAGE}, {@link #USAGE_GPU_COLOR_OUTPUT},
+     *     {@link #USAGE_GPU_DATA_BUFFER}, {@link #USAGE_PROTECTED_CONTENT},
+     *     {@link #USAGE_SENSOR_DIRECT_DATA}, {@link #USAGE_VIDEO_ENCODE}
      * @return A <code>HardwareBuffer</code> instance if successful, or throws an
      *     IllegalArgumentException if the dimensions passed are invalid (either zero, negative, or
      *     too large to allocate), if the format is not supported, if the requested number of layers
@@ -130,7 +125,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      */
     @NonNull
     public static HardwareBuffer create(int width, int height, @Format int format, int layers,
-            @Usage0 long usage) {
+            @Usage long usage) {
         if (!HardwareBuffer.isSupportedFormat(format)) {
             throw new IllegalArgumentException("Invalid pixel format " + format);
         }
