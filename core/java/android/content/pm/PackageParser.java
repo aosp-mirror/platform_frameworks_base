@@ -3300,8 +3300,8 @@ public class PackageParser {
         a.info.targetPackage = str != null ? str.intern() : null;
 
         str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestInstrumentation_targetProcess);
-        a.info.targetProcess = str != null ? str.intern() : null;
+                com.android.internal.R.styleable.AndroidManifestInstrumentation_targetProcesses);
+        a.info.targetProcesses = str != null ? str.intern() : null;
 
         a.info.handleProfiling = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestInstrumentation_handleProfiling,
@@ -7237,8 +7237,8 @@ public class PackageParser {
                 info.targetPackage = info.targetPackage.intern();
             }
 
-            if (info.targetProcess != null) {
-                info.targetProcess = info.targetProcess.intern();
+            if (info.targetProcesses != null) {
+                info.targetProcesses = info.targetProcesses.intern();
             }
         }
 

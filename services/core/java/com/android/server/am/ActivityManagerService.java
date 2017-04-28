@@ -19719,12 +19719,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
             activeInstr.mClass = className;
             String defProcess = ai.processName;;
-            if (ii.targetProcess == null) {
+            if (ii.targetProcesses == null) {
                 activeInstr.mTargetProcesses = new String[]{ai.processName};
-            } else if (ii.targetProcess.equals("*")) {
+            } else if (ii.targetProcesses.equals("*")) {
                 activeInstr.mTargetProcesses = new String[0];
             } else {
-                activeInstr.mTargetProcesses = ii.targetProcess.split(",");
+                activeInstr.mTargetProcesses = ii.targetProcesses.split(",");
                 defProcess = activeInstr.mTargetProcesses[0];
             }
             activeInstr.mTargetInfo = ai;
