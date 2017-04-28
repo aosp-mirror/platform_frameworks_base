@@ -17,7 +17,6 @@
 package com.android.server.autofill;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
@@ -27,14 +26,22 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
-final class Helper {
+public final class Helper {
 
-    // TODO(b/36141126): set to false and remove guard from places that should always be on
-    static final boolean DEBUG = true;
-    static final boolean VERBOSE = false;
+    /**
+     * Defines a logging flag that can be dynamically changed at runtime using
+     * {@code cmd autofill debug [on|off]}.
+     */
+    public static boolean sDebug = false;
+
+    /**
+     * Defines a logging flag that can be dynamically changed at runtime using
+     * {@code cmd autofill verbose [on|off]}.
+     */
+    public static boolean sVerbose = false;
 
     static void append(StringBuilder builder, Bundle bundle) {
-        if (bundle == null || !DEBUG) {
+        if (bundle == null || !sVerbose) {
             builder.append("null");
             return;
         }

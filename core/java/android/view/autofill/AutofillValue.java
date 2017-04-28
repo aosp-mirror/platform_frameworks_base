@@ -20,8 +20,7 @@ import static android.view.View.AUTOFILL_TYPE_DATE;
 import static android.view.View.AUTOFILL_TYPE_LIST;
 import static android.view.View.AUTOFILL_TYPE_TEXT;
 import static android.view.View.AUTOFILL_TYPE_TOGGLE;
-import static android.view.autofill.Helper.DEBUG;
-import static android.view.autofill.Helper.VERBOSE;
+import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -171,12 +170,17 @@ public final class AutofillValue implements Parcelable {
 
     @Override
     public String toString() {
-        if (!DEBUG) return super.toString();
+        if (!sDebug) return super.toString();
 
-        final String sanitizedValue = isText() && !VERBOSE
-                ? ((CharSequence) mValue).length() + "_chars" : mValue.toString();
-
-        return "[type=" + mType + ", value=" + sanitizedValue + "]";
+        final StringBuilder string = new StringBuilder()
+                .append("[type=").append(mType)
+                .append(", value=");
+        if (isText()) {
+            string.append(((CharSequence) mValue).length()).append("_chars");
+        } else {
+            string.append(mValue);
+        }
+        return string.append(']').toString();
     }
 
     /////////////////////////////////////

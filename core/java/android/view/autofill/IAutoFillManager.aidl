@@ -30,7 +30,8 @@ import android.view.autofill.IAutoFillManagerClient;
  * {@hide}
  */
 interface IAutoFillManager {
-    boolean addClient(in IAutoFillManagerClient client, int userId);
+    // Returns flags: FLAG_ADD_CLIENT_ENABLED | FLAG_ADD_CLIENT_DEBUG | FLAG_ADD_CLIENT_VERBOSE
+    int addClient(in IAutoFillManagerClient client, int userId);
     int startSession(IBinder activityToken, IBinder windowToken, in IBinder appCallback,
             in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
             boolean hasCallback, int flags, String packageName);

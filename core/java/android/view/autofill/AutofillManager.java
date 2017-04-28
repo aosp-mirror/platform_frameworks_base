@@ -16,8 +16,8 @@
 
 package android.view.autofill;
 
-import static android.view.autofill.Helper.DEBUG;
-import static android.view.autofill.Helper.VERBOSE;
+import static android.view.autofill.Helper.sDebug;
+import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -111,6 +111,11 @@ public final class AutofillManager {
     /** @hide */ public static final int ACTION_VIEW_ENTERED =  2;
     /** @hide */ public static final int ACTION_VIEW_EXITED = 3;
     /** @hide */ public static final int ACTION_VALUE_CHANGED = 4;
+
+
+    /** @hide */ public static final int FLAG_ADD_CLIENT_ENABLED = 0x1;
+    /** @hide */ public static final int FLAG_ADD_CLIENT_DEBUG = 0x2;
+    /** @hide */ public static final int FLAG_ADD_CLIENT_VERBOSE = 0x4;
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
@@ -238,7 +243,7 @@ public final class AutofillManager {
                             Log.w(TAG, "Session " + mSessionId + " could not be restored");
                             mSessionId = NO_SESSION;
                         } else {
-                            if (DEBUG) {
+                            if (sDebug) {
                                 Log.d(TAG, "session " + mSessionId + " was restored");
                             }
 
@@ -689,7 +694,7 @@ public final class AutofillManager {
         // set the EXTRA_AUTHENTICATION_RESULT extra, but it could cause weird results if the
         // service set the extra and returned RESULT_CANCELED...
 
-        if (DEBUG) Log.d(TAG, "onAuthenticationResult(): d=" + data);
+        if (sDebug) Log.d(TAG, "onAuthenticationResult(): d=" + data);
 
         synchronized (mLock) {
             if (mSessionId == NO_SESSION || data == null) {
@@ -716,8 +721,8 @@ public final class AutofillManager {
 
     private void startSessionLocked(@NonNull AutofillId id, @NonNull IBinder windowToken,
             @NonNull Rect bounds, @NonNull AutofillValue value, int flags) {
-        if (DEBUG) {
-            Log.d(TAG, "startSessionLocked(): id=" + id + ", bounds=" + bounds + ", value=" + value
+        if (sVerbose) {
+            Log.v(TAG, "startSessionLocked(): id=" + id + ", bounds=" + bounds + ", value=" + value
                     + ", flags=" + flags);
         }
 
@@ -735,9 +740,7 @@ public final class AutofillManager {
     }
 
     private void finishSessionLocked() {
-        if (DEBUG) {
-            Log.d(TAG, "finishSessionLocked()");
-        }
+        if (sVerbose) Log.v(TAG, "finishSessionLocked()");
 
         try {
             mService.finishSession(mSessionId, mContext.getUserId());
@@ -750,9 +753,7 @@ public final class AutofillManager {
     }
 
     private void cancelSessionLocked() {
-        if (DEBUG) {
-            Log.d(TAG, "cancelSessionLocked()");
-        }
+        if (sVerbose) Log.v(TAG, "cancelSessionLocked()");
 
         try {
             mService.cancelSession(mSessionId, mContext.getUserId());
@@ -770,11 +771,9 @@ public final class AutofillManager {
 
     private void updateSessionLocked(AutofillId id, Rect bounds, AutofillValue value, int action,
             int flags) {
-        if (DEBUG) {
-            if (VERBOSE || action != ACTION_VIEW_EXITED) {
-                Log.d(TAG, "updateSessionLocked(): id=" + id + ", bounds=" + bounds
-                        + ", value=" + value + ", action=" + action + ", flags=" + flags);
-            }
+        if (sVerbose && action != ACTION_VIEW_EXITED) {
+            Log.v(TAG, "updateSessionLocked(): id=" + id + ", bounds=" + bounds
+                    + ", value=" + value + ", action=" + action + ", flags=" + flags);
         }
 
         try {
@@ -793,7 +792,10 @@ public final class AutofillManager {
         if (mServiceClient == null) {
             mServiceClient = new AutofillManagerClient(this);
             try {
-                mEnabled = mService.addClient(mServiceClient, mContext.getUserId());
+                final int flags = mService.addClient(mServiceClient, mContext.getUserId());
+                mEnabled = (flags & FLAG_ADD_CLIENT_ENABLED) != 0;
+                sDebug = (flags & FLAG_ADD_CLIENT_DEBUG) != 0;
+                sVerbose = (flags & FLAG_ADD_CLIENT_VERBOSE) != 0;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1175,8 +1177,8 @@ public final class AutofillManager {
                 }
             }
 
-            if (DEBUG) {
-                Log.d(TAG, "TrackedViews(trackedIds=" + trackedIds + "): "
+            if (sVerbose) {
+                Log.v(TAG, "TrackedViews(trackedIds=" + trackedIds + "): "
                         + " mVisibleTrackedIds=" + mVisibleTrackedIds
                         + " mInvisibleTrackedIds=" + mInvisibleTrackedIds);
             }
@@ -1196,7 +1198,7 @@ public final class AutofillManager {
             AutofillId id = getAutofillId(view);
             AutofillClient client = getClientLocked();
 
-            if (DEBUG) {
+            if (sDebug) {
                 Log.d(TAG, "notifyViewVisibilityChange(): id=" + id + " isVisible="
                         + isVisible);
             }
@@ -1237,8 +1239,8 @@ public final class AutofillManager {
                         if (client.getViewVisibility(id.getViewId())) {
                             updatedVisibleTrackedIds = addToSet(updatedVisibleTrackedIds, id);
 
-                            if (DEBUG) {
-                                Log.i(TAG, "onVisibleForAutofill() " + id + " became visible");
+                            if (sDebug) {
+                                Log.d(TAG, "onVisibleForAutofill() " + id + " became visible");
                             }
                         } else {
                             updatedInvisibleTrackedIds = addToSet(updatedInvisibleTrackedIds, id);
@@ -1253,8 +1255,8 @@ public final class AutofillManager {
                         } else {
                             updatedInvisibleTrackedIds = addToSet(updatedInvisibleTrackedIds, id);
 
-                            if (DEBUG) {
-                                Log.i(TAG, "onVisibleForAutofill() " + id + " became invisible");
+                            if (sDebug) {
+                                Log.d(TAG, "onVisibleForAutofill() " + id + " became invisible");
                             }
                         }
                     }
