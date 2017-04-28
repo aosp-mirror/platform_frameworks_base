@@ -1840,6 +1840,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_SPLIT_NAME = "android.intent.extra.SPLIT_NAME";
 
     /**
+     * Intent extra: A {@link ComponentName} value.
+     * <p>
+     * Type: String
+     * </p>
+     */
+    public static final String EXTRA_COMPONENT_NAME = "android.intent.extra.COMPONENT_NAME";
+
+    /**
      * Intent extra: An extra for specifying whether a result is needed.
      * <p>
      * Type: boolean

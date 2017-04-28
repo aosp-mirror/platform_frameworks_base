@@ -80,8 +80,13 @@ import com.android.internal.R;
 public class TileService extends Service {
 
     /**
-     * An activity that provides a user interface for adjusting TileService preferences.
-     * Optional but recommended for apps that implement a TileService.
+     * An activity that provides a user interface for adjusting TileService
+     * preferences. Optional but recommended for apps that implement a
+     * TileService.
+     * <p>
+     * This intent may also define a {@link Intent#EXTRA_COMPONENT_NAME} value
+     * to indicate the {@link ComponentName} that caused the preferences to be
+     * opened.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String ACTION_QS_TILE_PREFERENCES
@@ -128,13 +133,6 @@ public class TileService extends Service {
      * @hide
      */
     public static final String EXTRA_TOKEN = "token";
-
-    /**
-     * May be included when {@link #ACTION_QS_TILE_PREFERENCES} is launched from a tile.
-     * This extra may contain the {@link ComponentName} of the tile that triggered
-     * the preferences to be opened.
-     */
-    public static final String EXTRA_COMPONENT = "android.service.quicksettings.extra.COMPONENT";
 
     /**
      * @hide
@@ -445,7 +443,7 @@ public class TileService extends Service {
      */
     public static final void requestListeningState(Context context, ComponentName component) {
         Intent intent = new Intent(ACTION_REQUEST_LISTENING);
-        intent.putExtra(EXTRA_COMPONENT, component);
+        intent.putExtra(Intent.EXTRA_COMPONENT_NAME, component);
         intent.setPackage("com.android.systemui");
         context.sendBroadcast(intent, Manifest.permission.BIND_QUICK_SETTINGS_TILE);
     }
