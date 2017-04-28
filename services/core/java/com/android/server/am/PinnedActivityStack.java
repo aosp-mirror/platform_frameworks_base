@@ -43,6 +43,11 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
         return new PinnedStackWindowController(mStackId, this, displayId, onTop, outBounds);
     }
 
+    Rect getPictureInPictureBounds(float aspectRatio, boolean useExistingStackBounds) {
+        return getWindowContainerController().getPictureInPictureBounds(aspectRatio,
+                useExistingStackBounds);
+    }
+
     void animateResizePinnedStack(Rect sourceHintBounds, Rect toBounds, int animationDuration,
             boolean schedulePipModeChangedOnAnimationEnd) {
         getWindowContainerController().animateResizePinnedStack(toBounds, sourceHintBounds,

@@ -230,9 +230,17 @@ public class ActivityTestsBase {
                 if (mStack == null) {
                     final RecentTasks recents =
                             new RecentTasks(mService, mService.mStackSupervisor);
-                    mStack = mStackId == ActivityManager.StackId.PINNED_STACK_ID
-                    ? new PinnedActivityStack(this, recents, mOnTop)
-                    : new TestActivityStack(this, recents, mOnTop);
+                    if (mStackId == ActivityManager.StackId.PINNED_STACK_ID) {
+                        mStack = new PinnedActivityStack(this, recents, mOnTop) {
+                            @Override
+                            Rect getPictureInPictureBounds(float aspectRatio,
+                                    boolean useExistingStackBounds) {
+                                return new Rect(50, 50, 100, 100);
+                            }
+                        };
+                    } else {
+                        mStack = new TestActivityStack(this, recents, mOnTop);
+                    }
                 }
 
                 return mStack;

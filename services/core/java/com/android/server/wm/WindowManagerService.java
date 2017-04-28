@@ -2761,44 +2761,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mDockedStackCreateBounds = bounds;
     }
 
-    /**
-     * @param useExistingStackBounds Apply {@param aspectRatio} to the existing target stack bounds
-     *                               if possible
-     */
-    public Rect getPictureInPictureBounds(int displayId, float aspectRatio,
-            boolean useExistingStackBounds) {
-        synchronized (mWindowMap) {
-            if (!mSupportsPictureInPicture) {
-                return null;
-            }
-
-            final Rect stackBounds;
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent == null) {
-                return null;
-            }
-
-            final PinnedStackController pinnedStackController =
-                    displayContent.getPinnedStackController();
-            final TaskStack stack = displayContent.getStackById(PINNED_STACK_ID);
-            if (stack != null && useExistingStackBounds) {
-                // If the stack exists, then use its final bounds to calculate the new aspect ratio
-                // bounds.
-                stackBounds = new Rect();
-                stack.getAnimationOrCurrentBounds(stackBounds);
-            } else {
-                // Otherwise, just calculate the aspect ratio bounds from the default bounds
-                stackBounds = pinnedStackController.getDefaultBounds();
-            }
-
-            if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
-                return pinnedStackController.transformBoundsToAspectRatio(stackBounds, aspectRatio);
-            } else {
-                return stackBounds;
-            }
-        }
-    }
-
     public boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
         final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
         return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
