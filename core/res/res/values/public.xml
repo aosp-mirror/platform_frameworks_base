@@ -2815,7 +2815,7 @@
         <public name="maxAspectRatio"/>
         <public name="iconSpaceReserved"/>
         <public name="defaultFocusHighlightEnabled" />
-        <public name="persistentFeature"/>
+        <public name="persistentWhenFeatureAvailable"/>
         <public name="windowSplashscreenContent" />
         <!-- @hide @SystemApi -->
         <public name="requiredSystemPropertyName" />
