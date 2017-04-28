@@ -23,7 +23,7 @@ import android.telephony.SignalStrength;
  * A Callback class for use when the applicaiton is actively streaming content.
  * @hide
  */
-public class StreamingServiceListener extends IStreamingServiceListener.Stub {
+public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
 
 
     public void error(int errorCode, String message) {
@@ -36,7 +36,7 @@ public class StreamingServiceListener extends IStreamingServiceListener.Stub {
      * See {@link StreamingService#STATE_STOPPED}, {@link StreamingService#STATE_STARTED}
      * and {@link StreamingService#STATE_STALLED}.
      */
-    public void stateUpdated(int state) {
+    public void streamStateChanged(StreamingService service, int state) {
         // default implementation empty
     }
 
