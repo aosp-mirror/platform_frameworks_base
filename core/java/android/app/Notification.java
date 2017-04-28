@@ -239,16 +239,11 @@ public class Notification implements Parcelable
      * The number of events that this notification represents. For example, in a new mail
      * notification, this could be the number of unread messages.
      *
-     * The system may or may not use this field to modify the appearance of the notification. For
-     * example, before {@link android.os.Build.VERSION_CODES#HONEYCOMB}, this number was
-     * superimposed over the icon in the status bar. Starting with
-     * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, the template used by
-     * {@link Notification.Builder} has displayed the number in the expanded notification view.
+     * The system may or may not use this field to modify the appearance of the notification.
      * Starting with {@link android.os.Build.VERSION_CODES#O}, the number may be displayed as a
      * badge icon in Launchers that support badging.
-     *
      */
-    public int number = 1;
+    public int number = 0;
 
     /**
      * The intent to execute when the expanded status entry is clicked.  If
