@@ -325,6 +325,7 @@ public class NotificationInflater {
 
         @Override
         protected void onPostExecute(Notification.Builder builder) {
+            mRow.getEntry().onInflationTaskFinished(this);
             if (mError == null) {
                 finishInflation(mReInflateFlags, builder, mPackageContext);
             } else {
