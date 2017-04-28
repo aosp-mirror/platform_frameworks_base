@@ -21,6 +21,9 @@ import android.os.Parcelable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A class that represents a DNS lookup event.
@@ -62,16 +65,17 @@ public final class DnsEvent extends NetworkEvent implements Parcelable {
     }
 
     /** Returns (possibly a subset of) the IP addresses returned. */
-    public InetAddress[] getInetAddresses() {
-        final int length = ipAddresses != null ? ipAddresses.length : 0;
-        final InetAddress[] inetAddresses = new InetAddress[length];
-        for (int i = 0; i < length; i++) {
+    public List<InetAddress> getInetAddresses() {
+        if (ipAddresses == null || ipAddresses.length == 0) {
+            return Collections.emptyList();
+        }
+        final List<InetAddress> inetAddresses = new ArrayList<>(ipAddresses.length);
+        for (final String ipAddress : ipAddresses) {
             try {
                 // ipAddress is already an address, not a host name, no DNS resolution will happen.
-                inetAddresses[i] = InetAddress.getByName(ipAddresses[i]);
+                inetAddresses.add(InetAddress.getByName(ipAddress));
             } catch (UnknownHostException e) {
                 // Should never happen as we aren't passing a host name.
-                inetAddresses[i] = InetAddress.getLoopbackAddress();
             }
         }
         return inetAddresses;
@@ -79,7 +83,7 @@ public final class DnsEvent extends NetworkEvent implements Parcelable {
 
     /**
      * Returns the number of IP addresses returned from the DNS lookup event. May be different from
-     * the length of the array returned by {@link #getInetAddresses()} if there were too many
+     * the length of the list returned by {@link #getInetAddresses()} if there were too many
      * addresses to log.
      */
     public int getTotalResolvedAddressCount() {
