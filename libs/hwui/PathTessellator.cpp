@@ -1005,6 +1005,14 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                 break;
             }
             default:
+                static_assert(SkPath::kMove_Verb == 0
+                                && SkPath::kLine_Verb == 1
+                                && SkPath::kQuad_Verb == 2
+                                && SkPath::kConic_Verb == 3
+                                && SkPath::kCubic_Verb == 4
+                                && SkPath::kClose_Verb == 5
+                                && SkPath::kDone_Verb == 6,
+                        "Path enum changed, new types may have been added");
                 break;
             }
     }
