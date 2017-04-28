@@ -24,16 +24,20 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +53,8 @@ public class NotificationDataTest extends SysuiTestCase {
             mock(StatusBarNotification.class);
 
     private final IPackageManager mMockPackageManager = mock(IPackageManager.class);
+    private NotificationData mNotificationData;
+    private ExpandableNotificationRow mRow;
 
     @Before
     public void setUp() throws Exception {
@@ -62,6 +68,12 @@ public class NotificationDataTest extends SysuiTestCase {
                 eq(Manifest.permission.NOTIFICATION_DURING_SETUP),
                 eq(UID_ALLOW_DURING_SETUP)))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        NotificationData.Environment mock = mock(NotificationData.Environment.class);
+        when(mock.getGroupManager()).thenReturn(new NotificationGroupManager());
+        mNotificationData = new TestableNotificationData(mock);
+        mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class));
+        mRow = new NotificationTestHelper(getContext()).createRow();
     }
 
     @Test
@@ -99,6 +111,12 @@ public class NotificationDataTest extends SysuiTestCase {
                         mMockStatusBarNotification));
     }
 
+    @Test
+    public void testChannelSetWhenAdded() {
+        mNotificationData.add(mRow.getEntry());
+        Assert.assertTrue(mRow.getEntry().channel != null);
+    }
+
     private void initStatusBarNotification(boolean allowDuringSetup) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, allowDuringSetup);
@@ -106,5 +124,16 @@ public class NotificationDataTest extends SysuiTestCase {
                 .addExtras(bundle)
                 .build();
         when(mMockStatusBarNotification.getNotification()).thenReturn(notification);
+    }
+
+    private class TestableNotificationData extends NotificationData {
+        public TestableNotificationData(Environment environment) {
+            super(environment);
+        }
+
+        @Override
+        public NotificationChannel getChannel(String key) {
+            return new NotificationChannel(null, null, 0);
+        }
     }
 }
