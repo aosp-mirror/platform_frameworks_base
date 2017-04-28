@@ -893,6 +893,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mPendingRelaunchCount > 0) {
             mPendingRelaunchCount--;
         }
+        updateAllDrawn();
     }
 
     void clearRelaunching() {
@@ -1301,16 +1302,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    void updateAllDrawn(DisplayContent dc) {
+    void updateAllDrawn() {
         if (!allDrawn) {
+            // Number of drawn windows can be less when a window is being relaunched, wait for
+            // all windows to be launched and drawn for this token be considered all drawn
             final int numInteresting = mNumInterestingWindows;
-            if (numInteresting > 0 && mNumDrawnWindows >= numInteresting) {
+            if (numInteresting > 0 && mNumDrawnWindows >= numInteresting && !isRelaunching()) {
                 if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawn: " + this
                         + " interesting=" + numInteresting + " drawn=" + mNumDrawnWindows);
                 allDrawn = true;
                 // Force an additional layout pass where
                 // WindowStateAnimator#commitFinishDrawingLocked() will call performShowLocked().
-                dc.setLayoutNeeded();
+                if (mDisplayContent != null) {
+                    mDisplayContent.setLayoutNeeded();
+                }
                 mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
 
                 final TaskStack s = getStack();
@@ -1327,7 +1332,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                         + " interesting=" + numInteresting
                         + " drawn=" + mNumDrawnWindowsExcludingSaved);
                 allDrawnExcludingSaved = true;
-                dc.setLayoutNeeded();
+                if (mDisplayContent != null) {
+                    mDisplayContent.setLayoutNeeded();
+                }
                 if (isAnimatingInvisibleWithSavedSurface()
                         && !mService.mFinishedEarlyAnim.contains(this)) {
                     mService.mFinishedEarlyAnim.add(this);
