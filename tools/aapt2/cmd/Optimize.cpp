@@ -213,10 +213,10 @@ class OptimizeCommand {
 
             if (file_ref->file == nullptr) {
               ResourceNameRef name(pkg->name, type->type, entry->name);
-              context_->GetDiagnostics()->Error(DiagMessage(file_ref->GetSource())
+              context_->GetDiagnostics()->Warn(DiagMessage(file_ref->GetSource())
                                                 << "file for resource " << name << " with config '"
                                                 << config_value->config << "' not found");
-              return false;
+              continue;
             }
 
             const StringPiece entry_name = entry->name;
