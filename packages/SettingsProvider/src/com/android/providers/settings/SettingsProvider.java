@@ -898,13 +898,14 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getGlobalSetting(" + name + ")");
         }
 
-        // Ensure the caller can access the setting.
-        enforceSettingReadable(name, SETTINGS_TYPE_GLOBAL, UserHandle.getCallingUserId());
-
         // Get the value.
         synchronized (mLock) {
-            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_GLOBAL,
+            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_GLOBAL,
                     UserHandle.USER_SYSTEM, name);
+            // Ensure the caller can access the setting before we return it.
+            enforceSettingReadable(setting, name, SETTINGS_TYPE_GLOBAL,
+                    UserHandle.getCallingUserId());
+            return setting;
         }
     }
 
@@ -1062,9 +1063,6 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
-        // Ensure the caller can access the setting.
-        enforceSettingReadable(name, SETTINGS_TYPE_SECURE, UserHandle.getCallingUserId());
-
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
 
@@ -1078,6 +1076,7 @@ public class SettingsProvider extends ContentProvider {
 
         // As of Android O, the SSAID is read from an app-specific entry in table
         // SETTINGS_FILE_SSAID, unless accessed by a system process.
+        // All apps are allowed to access their SSAID, so we skip the permission check.
         if (isNewSsaidSetting(name)) {
             PackageInfo callingPkg = getCallingPackageInfo(owningUserId);
             synchronized (mLock) {
@@ -1087,8 +1086,12 @@ public class SettingsProvider extends ContentProvider {
 
         // Not the SSAID; do a straight lookup
         synchronized (mLock) {
-            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE,
+            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE,
                     owningUserId, name);
+            // Ensure the caller can access the setting before we return it.
+            enforceSettingReadable(setting, name, SETTINGS_TYPE_SECURE,
+                    UserHandle.getCallingUserId());
+            return setting;
         }
     }
 
@@ -1289,15 +1292,18 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
-        // Ensure the caller can access the setting.
-        enforceSettingReadable(name, SETTINGS_TYPE_SYSTEM, UserHandle.getCallingUserId());
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
 
         // Get the value.
         synchronized (mLock) {
-            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SYSTEM, owningUserId, name);
+            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SYSTEM,
+                    owningUserId, name);
+            // Ensure the caller can access the setting before we return it.
+            enforceSettingReadable(setting, name, SETTINGS_TYPE_SYSTEM,
+                    UserHandle.getCallingUserId());
+            return setting;
         }
     }
 
@@ -1644,12 +1650,20 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void enforceSettingReadable(String settingName, int settingsType, int userId) {
+    private void enforceSettingReadable(Setting setting, String settingName, int settingsType,
+            int userId) {
         if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
             return;
         }
         ApplicationInfo ai = getCallingApplicationInfoOrThrow();
+        // Installed apps are allowed to read all settings.
         if (!ai.isInstantApp()) {
+            return;
+        }
+        // Instant Apps are allowed to read settings defined by applications.
+        // TODO: Replace this with an API that allows the setting application to say if a setting
+        // shoud/shouldn't be accessible.
+        if (!setting.isDefaultFromSystem()) {
             return;
         }
         if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)) {
