@@ -14,36 +14,22 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.Context;
-import android.content.res.Configuration;
-import android.util.ArrayMap;
-
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
+import android.content.Context;
+import android.util.ArrayMap;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ExtensionControllerImpl implements ExtensionController {
-
-    public static final int SORT_ORDER_PLUGIN  = 0;
-    public static final int SORT_ORDER_TUNER   = 1;
-    public static final int SORT_ORDER_UI_MODE = 2;
-    public static final int SORT_ORDER_DEFAULT = 3;
-
-    private final Context mDefaultContext;
-
-    public ExtensionControllerImpl(Context context) {
-        mDefaultContext = context;
-    }
 
     @Override
     public <T> ExtensionBuilder<T> newExtension(Class<T> cls) {
@@ -52,7 +38,6 @@ public class ExtensionControllerImpl implements ExtensionController {
 
     private interface Producer<T> {
         T get();
-
         void destroy();
     }
 
@@ -90,12 +75,6 @@ public class ExtensionControllerImpl implements ExtensionController {
             return this;
         }
 
-        public ExtensionController.ExtensionBuilder<T> withUiMode(int uiMode,
-                Supplier<T> supplier) {
-            mExtension.addUiMode(uiMode, supplier);
-            return this;
-        }
-
         @Override
         public ExtensionController.ExtensionBuilder<T> withCallback(
                 Consumer<T> callback) {
@@ -106,30 +85,38 @@ public class ExtensionControllerImpl implements ExtensionController {
         @Override
         public ExtensionController.Extension build() {
             // Manually sort, plugins first, tuners second, defaults last.
-            Collections.sort(mExtension.mProducers, Comparator.comparingInt(Item::sortOrder));
+            Collections.sort(mExtension.mProducers, (o1, o2) -> {
+                if (o1 instanceof ExtensionImpl.PluginItem) {
+                    if (o2 instanceof ExtensionImpl.PluginItem) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                }
+                if (o1 instanceof ExtensionImpl.TunerItem) {
+                    if (o2 instanceof ExtensionImpl.PluginItem) {
+                        return 1;
+                    } else if (o2 instanceof ExtensionImpl.TunerItem) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                }
+                return 0;
+            });
             mExtension.notifyChanged();
             return mExtension;
         }
     }
 
     private class ExtensionImpl<T> implements ExtensionController.Extension<T> {
-        private final ArrayList<Item<T>> mProducers = new ArrayList<>();
+        private final ArrayList<Producer<T>> mProducers = new ArrayList<>();
         private final ArrayList<Consumer<T>> mCallbacks = new ArrayList<>();
         private T mItem;
-        private Context mPluginContext;
-
-        public void addCallback(Consumer<T> callback) {
-            mCallbacks.add(callback);
-        }
 
         @Override
         public T get() {
             return mItem;
-        }
-
-        @Override
-        public Context getContext() {
-            return mPluginContext != null ? mPluginContext : mDefaultContext;
         }
 
         @Override
@@ -140,7 +127,6 @@ public class ExtensionControllerImpl implements ExtensionController {
         }
 
         private void notifyChanged() {
-            mItem = null;
             for (int i = 0; i < mProducers.size(); i++) {
                 final T item = mProducers.get(i).get();
                 if (item != null) {
@@ -165,11 +151,7 @@ public class ExtensionControllerImpl implements ExtensionController {
             mProducers.add(new TunerItem(factory, factory.keys()));
         }
 
-        public void addUiMode(int uiMode, Supplier<T> mode) {
-            mProducers.add(new UiModeItem(uiMode, mode));
-        }
-
-        private class PluginItem<P extends Plugin> implements Item<T>, PluginListener<P> {
+        private class PluginItem<P extends Plugin> implements Producer<T>, PluginListener<P> {
             private final PluginConverter<T, P> mConverter;
             private T mItem;
 
@@ -180,7 +162,6 @@ public class ExtensionControllerImpl implements ExtensionController {
 
             @Override
             public void onPluginConnected(P plugin, Context pluginContext) {
-                mPluginContext = pluginContext;
                 if (mConverter != null) {
                     mItem = mConverter.getInterfaceFromPlugin(plugin);
                 } else {
@@ -191,7 +172,6 @@ public class ExtensionControllerImpl implements ExtensionController {
 
             @Override
             public void onPluginDisconnected(P plugin) {
-                mPluginContext = null;
                 mItem = null;
                 notifyChanged();
             }
@@ -205,14 +185,9 @@ public class ExtensionControllerImpl implements ExtensionController {
             public void destroy() {
                 Dependency.get(PluginManager.class).removePluginListener(this);
             }
-
-            @Override
-            public int sortOrder() {
-                return SORT_ORDER_PLUGIN;
-            }
         }
 
-        private class TunerItem<T> implements Item<T>, Tunable {
+        private class TunerItem<T> implements Producer<T>, Tunable {
             private final TunerFactory<T> mFactory;
             private final ArrayMap<String, String> mSettings = new ArrayMap<>();
             private T mItem;
@@ -238,52 +213,9 @@ public class ExtensionControllerImpl implements ExtensionController {
                 mItem = mFactory.create(mSettings);
                 notifyChanged();
             }
-
-            @Override
-            public int sortOrder() {
-                return SORT_ORDER_TUNER;
-            }
         }
 
-        private class UiModeItem<T> implements Item<T>, ConfigurationListener {
-
-            private final int mDesiredUiMode;
-            private final Supplier<T> mSupplier;
-            private int mUiMode;
-
-            public UiModeItem(int uiMode, Supplier<T> supplier) {
-                mDesiredUiMode = uiMode;
-                mSupplier = supplier;
-                mUiMode = mDefaultContext.getResources().getConfiguration().uiMode;
-                Dependency.get(ConfigurationController.class).addCallback(this);
-            }
-
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                int newMode = newConfig.uiMode & Configuration.UI_MODE_TYPE_MASK;
-                if (newMode != mUiMode) {
-                    mUiMode = newMode;
-                    notifyChanged();
-                }
-            }
-
-            @Override
-            public T get() {
-                return (mUiMode == mDesiredUiMode) ? mSupplier.get() : null;
-            }
-
-            @Override
-            public void destroy() {
-                Dependency.get(ConfigurationController.class).removeCallback(this);
-            }
-
-            @Override
-            public int sortOrder() {
-                return SORT_ORDER_UI_MODE;
-            }
-        }
-
-        private class Default<T> implements Item<T> {
+        private class Default<T> implements Producer<T> {
             private final Supplier<T> mSupplier;
 
             public Default(Supplier<T> supplier) {
@@ -299,15 +231,6 @@ public class ExtensionControllerImpl implements ExtensionController {
             public void destroy() {
 
             }
-
-            @Override
-            public int sortOrder() {
-                return SORT_ORDER_DEFAULT;
-            }
         }
-    }
-
-    private interface Item<T> extends Producer<T> {
-        int sortOrder();
     }
 }
