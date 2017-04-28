@@ -57,7 +57,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
-
 import com.android.internal.R;
 
 import java.util.ArrayList;
@@ -3442,12 +3441,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * default {@link View} implementation.
      */
     @Override
-    public void dispatchProvideAutofillStructure(ViewStructure structure, int flags) {
+    public void dispatchProvideAutofillStructure(ViewStructure structure,
+            @AutofillFlags int flags) {
         super.dispatchProvideAutofillStructure(structure, flags);
-        if (isAutofillBlocked() || structure.getChildCount() != 0) {
+        if (structure.getChildCount() != 0) {
             return;
         }
-        final ChildListForAutoFill children = getChildrenForAutofill();
+        final ChildListForAutoFill children = getChildrenForAutofill(flags);
         final int childrenCount = children.size();
         structure.setChildCount(childrenCount);
         for (int i = 0; i < childrenCount; i++) {
@@ -3463,14 +3463,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * level descendants that are important for autofill. The returned
      * child list object is pooled and the caller must recycle it once done.
      * @hide */
-    private @NonNull ChildListForAutoFill getChildrenForAutofill() {
+    private @NonNull ChildListForAutoFill getChildrenForAutofill(@AutofillFlags int flags) {
         final ChildListForAutoFill children = ChildListForAutoFill.obtain();
-        populateChildrenForAutofill(children);
+        populateChildrenForAutofill(children, flags);
         return children;
     }
 
     /** @hide */
-    private void populateChildrenForAutofill(ArrayList<View> list) {
+    private void populateChildrenForAutofill(ArrayList<View> list, @AutofillFlags int flags) {
         final int childrenCount = mChildrenCount;
         if (childrenCount <= 0) {
             return;
@@ -3482,10 +3482,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
             final View child = (preorderedList == null)
                     ? mChildren[childIndex] : preorderedList.get(childIndex);
-            if (child.isImportantForAutofill()) {
+            if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
+                    || child.isImportantForAutofill()) {
                 list.add(child);
             } else if (child instanceof ViewGroup) {
-                ((ViewGroup) child).populateChildrenForAutofill(list);
+                ((ViewGroup) child).populateChildrenForAutofill(list, flags);
             }
         }
     }

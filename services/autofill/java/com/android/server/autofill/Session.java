@@ -319,7 +319,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (!ActivityManager.getService().requestAutofillData(mAssistReceiver,
-                        receiverExtras, mActivityToken)) {
+                        receiverExtras, mActivityToken, mFlags)) {
                     Slog.w(TAG, "failed to request autofill data for " + mActivityToken);
                 }
             } finally {
