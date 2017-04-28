@@ -172,7 +172,7 @@ public final class AdvertisingSet {
      *
      * @param enable whether the periodic advertising should be enabled (true), or disabled (false).
      */
-    public void setPeriodicAdvertisingEnable(boolean enable) {
+    public void setPeriodicAdvertisingEnabled(boolean enable) {
         try {
             gatt.setPeriodicAdvertisingEnable(this.advertiserId, enable);
         } catch (RemoteException e) {
