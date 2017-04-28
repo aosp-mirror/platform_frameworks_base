@@ -414,8 +414,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
         Binder.withCleanCallingIdentity(() -> {
             try {
-                if (ArrayUtils.contains(packageInfo.requestedPermissions,
-                        Manifest.permission.RUN_IN_BACKGROUND)) {
+                if (containsEither(packageInfo.requestedPermissions,
+                        Manifest.permission.RUN_IN_BACKGROUND,
+                        Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
                     mIdleController.addPowerSaveWhitelistApp(packageInfo.packageName);
                 } else {
                     mIdleController.removePowerSaveWhitelistApp(packageInfo.packageName);
@@ -425,8 +426,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
 
             NetworkPolicyManager networkPolicyManager = NetworkPolicyManager.from(getContext());
-            if (ArrayUtils.contains(packageInfo.requestedPermissions,
-                    Manifest.permission.USE_DATA_IN_BACKGROUND)) {
+            if (containsEither(packageInfo.requestedPermissions,
+                    Manifest.permission.USE_DATA_IN_BACKGROUND,
+                    Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)) {
                 networkPolicyManager.addUidPolicy(
                         packageInfo.applicationInfo.uid,
                         NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
@@ -436,6 +438,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
             }
         });
+    }
+
+    private static <T> boolean containsEither(T[] array, T a, T b) {
+        return ArrayUtils.contains(array, a) || ArrayUtils.contains(array, b);
     }
 
     @Nullable
