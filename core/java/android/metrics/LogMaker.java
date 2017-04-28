@@ -170,6 +170,27 @@ public class LogMaker {
     }
 
     /**
+     * This will be set by the system when the log is persisted.
+     * Client-supplied values will be ignored.
+     *
+     * @param uid to replace the existing setting.
+     * @hide
+     */
+    public LogMaker setUid(int uid) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_UID, uid);
+        return this;
+    }
+
+    /**
+     * Remove the UID property.
+     * @hide
+     */
+    public LogMaker clearUid() {
+        entries.remove(MetricsEvent.RESERVED_FOR_LOGBUILDER_UID);
+        return this;
+    }
+
+    /**
      * The name of the counter or histogram.
      * Only useful for counter or histogram category objects.
      * @param name to replace the existing setting.
@@ -312,6 +333,16 @@ public class LogMaker {
     /** @return the process ID of the log, or -1. */
     public int getProcessId() {
         Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_PID);
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        } else {
+            return -1;
+        }
+    }
+
+    /** @return the UID of the log, or -1. */
+    public int getUid() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_UID);
         if (obj instanceof Integer) {
             return (Integer) obj;
         } else {
