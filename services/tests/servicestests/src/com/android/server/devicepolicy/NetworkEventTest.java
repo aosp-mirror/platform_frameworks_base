@@ -53,9 +53,10 @@ public class NetworkEventTest extends DpmTestBase {
         DnsEvent unparceledEvent = p.readParcelable(NetworkEventTest.class.getClassLoader());
         p.recycle();
         assertEquals(event.getHostname(), unparceledEvent.getHostname());
-        assertEquals(event.getInetAddresses()[0], unparceledEvent.getInetAddresses()[0]);
-        assertEquals(event.getInetAddresses()[1], unparceledEvent.getInetAddresses()[1]);
-        assertEquals(event.getTotalResolvedAddressCount(), unparceledEvent.getTotalResolvedAddressCount());
+        assertEquals(event.getInetAddresses().get(0), unparceledEvent.getInetAddresses().get(0));
+        assertEquals(event.getInetAddresses().get(1), unparceledEvent.getInetAddresses().get(1));
+        assertEquals(event.getTotalResolvedAddressCount(),
+                unparceledEvent.getTotalResolvedAddressCount());
         assertEquals(event.getPackageName(), unparceledEvent.getPackageName());
         assertEquals(event.getTimestamp(), unparceledEvent.getTimestamp());
     }
