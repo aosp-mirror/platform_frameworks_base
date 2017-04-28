@@ -3636,7 +3636,7 @@ message MetricsEvent {
     // OS: N
     ACTION_GET_CONTACT = 864;
 
-    // This values should never appear in log outputs - it is reserved for
+    // This value should never appear in log outputs - it is reserved for
     // internal platform metrics use.
     RESERVED_FOR_LOGBUILDER_PID = 865;
 
@@ -3947,6 +3947,10 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: O
     NOTIFICATION_CHANNEL_LOCK_SCREEN_VIS = 942;
+
+    // This value should never appear in log outputs - it is reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_UID = 943;
 
     // ---- End O Constants, all O constants go above this line ----
 
