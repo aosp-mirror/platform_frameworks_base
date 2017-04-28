@@ -1882,8 +1882,6 @@ public class WifiManager {
      * operating status.
      * @param handler Handler to be used for callbacks.  If the caller passes a null Handler, the
      * main thread will be used.
-     *
-     * @hide
      */
     public void startLocalOnlyHotspot(LocalOnlyHotspotCallback callback,
             @Nullable Handler handler) {
@@ -2274,8 +2272,6 @@ public class WifiManager {
      * any further callbacks. If the LocalOnlyHotspot is stopped due to a
      * user triggered mode change, applications will be notified via the {@link
      * LocalOnlyHotspotCallback#onStopped()} callback.
-     *
-     * @hide
      */
     public class LocalOnlyHotspotReservation implements AutoCloseable {
 
@@ -2318,8 +2314,6 @@ public class WifiManager {
 
     /**
      * Callback class for applications to receive updates about the LocalOnlyHotspot status.
-     *
-     * @hide
      */
     public static class LocalOnlyHotspotCallback {
         public static final int ERROR_NO_CHANNEL = 1;
@@ -2442,7 +2436,6 @@ public class WifiManager {
     public class LocalOnlyHotspotSubscription implements AutoCloseable {
         private final CloseGuard mCloseGuard = CloseGuard.get();
 
-        /** @hide */
         @VisibleForTesting
         public LocalOnlyHotspotSubscription() {
             mCloseGuard.open("close");
