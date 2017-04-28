@@ -23,6 +23,8 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
+
 /**
  * Controller for the accessibility button within the system's navigation area
  * <p>
@@ -89,7 +91,7 @@ public final class AccessibilityButtonController {
      * @param callback the callback to add, must be non-null
      */
     public void registerAccessibilityButtonCallback(@NonNull AccessibilityButtonCallback callback) {
-        registerAccessibilityButtonCallback(callback, null);
+        registerAccessibilityButtonCallback(callback, new Handler());
     }
 
     /**
@@ -99,11 +101,12 @@ public final class AccessibilityButtonController {
      * {@code null}.
      *
      * @param callback the callback to add, must be non-null
-     * @param handler the handler on which to callback should execute, or {@code null} to
-     *                execute on the service's main thread
+     * @param handler the handler on which the callback should execute, must be non-null
      */
     public void registerAccessibilityButtonCallback(@NonNull AccessibilityButtonCallback callback,
-            @Nullable Handler handler) {
+            @NonNull Handler handler) {
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(handler);
         synchronized (mLock) {
             if (mCallbacks == null) {
                 mCallbacks = new ArrayMap<>();
@@ -121,6 +124,7 @@ public final class AccessibilityButtonController {
      */
     public void unregisterAccessibilityButtonCallback(
             @NonNull AccessibilityButtonCallback callback) {
+        Preconditions.checkNotNull(callback);
         synchronized (mLock) {
             if (mCallbacks == null) {
                 return;
@@ -154,12 +158,7 @@ public final class AccessibilityButtonController {
         for (int i = 0, count = entries.size(); i < count; i++) {
             final AccessibilityButtonCallback callback = entries.keyAt(i);
             final Handler handler = entries.valueAt(i);
-            if (handler != null) {
-                handler.post(() -> callback.onClicked(this));
-            } else {
-                // We're already on the main thread, just run the callback.
-                callback.onClicked(this);
-            }
+            handler.post(() -> callback.onClicked(this));
         }
     }
 
@@ -184,12 +183,7 @@ public final class AccessibilityButtonController {
         for (int i = 0, count = entries.size(); i < count; i++) {
             final AccessibilityButtonCallback callback = entries.keyAt(i);
             final Handler handler = entries.valueAt(i);
-            if (handler != null) {
-                handler.post(() -> callback.onAvailabilityChanged(this, available));
-            } else {
-                // We're already on the main thread, just run the callback.
-                callback.onAvailabilityChanged(this, available);
-            }
+            handler.post(() -> callback.onAvailabilityChanged(this, available));
         }
     }
 
