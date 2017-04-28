@@ -30,7 +30,6 @@ import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
-import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -432,11 +431,10 @@ public class Typeface {
          * Sets a font variation settings.
          *
          * @param variationSettings See {@link android.widget.TextView#setFontVariationSettings}.
-         * @throws InvalidFormatException If given string is not a valid font variation settings
-         *                                format.
+         * @throws IllegalArgumentException If given string is not a valid font variation settings
+         *                                  format.
          */
-        public Builder setFontVariationSettings(@Nullable String variationSettings)
-                throws InvalidFormatException {
+        public Builder setFontVariationSettings(@Nullable String variationSettings) {
             if (mFonts != null) {
                 throw new IllegalArgumentException(
                         "Font variation settings can not be specified for FontResult source.");

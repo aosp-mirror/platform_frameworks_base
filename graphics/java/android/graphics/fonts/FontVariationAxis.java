@@ -37,12 +37,11 @@ public final class FontVariationAxis {
      * The axis tag must contain four ASCII characters. Tag string that are longer or shorter than
      * four characters, or contains characters outside of U+0020..U+007E are invalid.
      *
-     * @throws {@link InvalidFormatException} If given tag string is invalid.
+     * @throws IllegalArgumentException If given tag string is invalid.
      */
-    public FontVariationAxis(@NonNull String tagString, float styleValue)
-            throws InvalidFormatException {
+    public FontVariationAxis(@NonNull String tagString, float styleValue) {
         if (!isValidTag(tagString)) {
-            throw new InvalidFormatException("Invalid tag pattern: " + tagString);
+            throw new IllegalArgumentException("Illegal tag pattern: " + tagString);
         }
         mTag = makeTag(tagString);
         mTagString = tagString;
@@ -113,15 +112,6 @@ public final class FontVariationAxis {
     }
 
     /**
-     * An exception indicates that the format of font variation settings is invalid.
-     */
-    public static class InvalidFormatException extends Exception {
-        public InvalidFormatException(String message) {
-            super(message);
-        }
-    };
-
-    /**
      * Construct FontVariationAxis array from font variation settings.
      *
      * The settings string is constructed from multiple pairs of axis tag and style values. The axis
@@ -138,10 +128,11 @@ public final class FontVariationAxis {
      * @param settings font variation settings.
      * @return FontVariationAxis[] the array of parsed font variation axis. {@code null} if settings
      *                             has no font variation settings.
-     * @throws InvalidFormatException If given string is not a valid font variation settings format.
+     * @throws IllegalArgumentException If given string is not a valid font variation settings
+     *                                  format.
      */
-    public static @Nullable FontVariationAxis[] fromFontVariationSettings(@Nullable String settings)
-            throws InvalidFormatException {
+    public static @Nullable FontVariationAxis[] fromFontVariationSettings(
+            @Nullable String settings) {
         if (settings == null || settings.isEmpty()) {
             return null;
         }
@@ -153,7 +144,7 @@ public final class FontVariationAxis {
                 continue;
             }
             if (!(c == '\'' || c == '"') || length < i + 6 || settings.charAt(i + 5) != c) {
-                throw new InvalidFormatException(
+                throw new IllegalArgumentException(
                         "Tag should be wrapped with double or single quote: " + settings);
             }
             final String tagString = settings.substring(i + 1, i + 5);
@@ -168,7 +159,8 @@ public final class FontVariationAxis {
                 // Float.parseFloat ignores leading/trailing whitespaces.
                 value = Float.parseFloat(settings.substring(i, endOfValueString));
             } catch (NumberFormatException e) {
-                throw new InvalidFormatException("Failed to parse float string: " + e.getMessage());
+                throw new IllegalArgumentException(
+                        "Failed to parse float string: " + e.getMessage());
             }
             axisList.add(new FontVariationAxis(tagString, value));
             i = endOfValueString;

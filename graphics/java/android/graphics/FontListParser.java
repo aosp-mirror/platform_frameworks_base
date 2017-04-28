@@ -134,12 +134,7 @@ public class FontListParser {
         String tagStr = parser.getAttributeValue(null, "tag");
         String styleValueStr = parser.getAttributeValue(null, "stylevalue");
         skip(parser);  // axis tag is empty, ignore any contents and consume end tag
-        try {
-            return new FontVariationAxis(tagStr, Float.parseFloat(styleValueStr));
-        } catch (FontVariationAxis.InvalidFormatException e) {
-            // Treat as system failure since system preinstalled font setting has invalid format.
-            throw new RuntimeException(e);
-        }
+        return new FontVariationAxis(tagStr, Float.parseFloat(styleValueStr));
     }
 
     private static FontConfig.Alias readAlias(XmlPullParser parser)

@@ -33,7 +33,7 @@ public class VariationParserTest extends TestCase {
             try {
                 FontVariationAxis.fromFontVariationSettings("'wdth' " + invalidStyle);
                 fail();
-            } catch (FontVariationAxis.InvalidFormatException e) {
+            } catch (IllegalArgumentException e) {
                 // pass
             }
         }
@@ -41,14 +41,14 @@ public class VariationParserTest extends TestCase {
             try {
                 FontVariationAxis.fromFontVariationSettings("'wght' 1, 'wdth' " + invalidStyle);
                 fail();
-            } catch (FontVariationAxis.InvalidFormatException e) {
+            } catch (IllegalArgumentException e) {
                 // pass
             }
         }
     }
 
     @SmallTest
-    public void testOpenTypeTagValue() throws FontVariationAxis.InvalidFormatException {
+    public void testOpenTypeTagValue() {
       assertEquals(0x77647468, (new FontVariationAxis("wdth", 0).getOpenTypeTagValue()));
       assertEquals(0x41582020, (new FontVariationAxis("AX  ", 0).getOpenTypeTagValue()));
       assertEquals(0x20202020, (new FontVariationAxis("    ", 0).getOpenTypeTagValue()));
