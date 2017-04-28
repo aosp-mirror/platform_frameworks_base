@@ -1052,7 +1052,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return task != null ? (T) task.getStack() : null;
     }
 
-    private int getStackId() {
+    int getStackId() {
         return getStack() != null ? getStack().mStackId : INVALID_STACK_ID;
     }
 
@@ -1579,6 +1579,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setVisibility(boolean visible) {
         mWindowContainerController.setVisibility(visible, mDeferHidingClient);
+        mStackSupervisor.mActivityMetricsLogger.notifyVisibilityChanged(this, visible);
     }
 
     // TODO: Look into merging with #setVisibility()
