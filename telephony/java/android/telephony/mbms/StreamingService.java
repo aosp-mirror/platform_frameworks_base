@@ -33,7 +33,7 @@ public class StreamingService {
     /**
      */
     StreamingService(StreamingServiceInfo streamingServiceInfo,
-            IStreamingServiceListener listener) {
+            IStreamingServiceCallback listener) {
     }
 
     /**
