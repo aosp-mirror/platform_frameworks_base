@@ -232,6 +232,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_UNMUTE_STREAM = 24;
     private static final int MSG_DYN_POLICY_MIX_STATE_UPDATE = 25;
     private static final int MSG_INDICATE_SYSTEM_READY = 26;
+    private static final int MSG_ACCESSORY_PLUG_MEDIA_UNMUTE = 27;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -3964,6 +3965,33 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    private static final int DEVICE_MEDIA_UNMUTED_ON_PLUG =
+            AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
+            AudioSystem.DEVICE_OUT_LINE |
+            AudioSystem.DEVICE_OUT_ALL_A2DP |
+            AudioSystem.DEVICE_OUT_ALL_USB |
+            AudioSystem.DEVICE_OUT_HDMI;
+
+    private void onAccessoryPlugMediaUnmute(int newDevice) {
+        if (DEBUG_VOL) {
+            Log.i(TAG, String.format("onAccessoryPlugMediaUnmute newDevice=%d [%s]",
+                    newDevice, AudioSystem.getOutputDeviceName(newDevice)));
+        }
+        synchronized (mConnectedDevices) {
+            if ((newDevice & DEVICE_MEDIA_UNMUTED_ON_PLUG) != 0
+                    && mStreamStates[AudioSystem.STREAM_MUSIC].mIsMuted
+                    && mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(newDevice) != 0
+                    && (newDevice & AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC)) != 0)
+            {
+                if (DEBUG_VOL) {
+                    Log.i(TAG, String.format(" onAccessoryPlugMediaUnmute unmuting device=%d [%s]",
+                            newDevice, AudioSystem.getOutputDeviceName(newDevice)));
+                }
+                mStreamStates[AudioSystem.STREAM_MUSIC].mute(false);
+            }
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Inner classes
     ///////////////////////////////////////////////////////////////////////////
@@ -4854,6 +4882,10 @@ public class AudioService extends IAudioService.Stub
                     onIndicateSystemReady();
                     break;
 
+                case MSG_ACCESSORY_PLUG_MEDIA_UNMUTE:
+                    onAccessoryPlugMediaUnmute(msg.arg1);
+                    break;
+
                 case MSG_PERSIST_MUSIC_ACTIVE_MS:
                     final int musicActiveMs = msg.arg1;
                     Settings.Secure.putIntForUser(mContentResolver,
@@ -4942,7 +4974,7 @@ public class AudioService extends IAudioService.Stub
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceAvailable(String address, String name) {
-        // enable A2DP before notifying A2DP connection to avoid unecessary processing in
+        // enable A2DP before notifying A2DP connection to avoid unnecessary processing in
         // audio policy manager
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
@@ -4956,6 +4988,8 @@ public class AudioService extends IAudioService.Stub
                 makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address),
                 new DeviceListSpec(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, name,
                                    address));
+        sendMsg(mAudioHandler, MSG_ACCESSORY_PLUG_MEDIA_UNMUTE, SENDMSG_QUEUE,
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, null, 0);
     }
 
     private void onSendBecomingNoisyIntent() {
@@ -5176,6 +5210,8 @@ public class AudioService extends IAudioService.Stub
                     return false;
                 }
                 mConnectedDevices.put(deviceKey, new DeviceListSpec(device, deviceName, address));
+                sendMsg(mAudioHandler, MSG_ACCESSORY_PLUG_MEDIA_UNMUTE, SENDMSG_QUEUE,
+                        device, 0, null, 0);
                 return true;
             } else if (!connect && isConnected) {
                 AudioSystem.setDeviceConnectionState(device,
@@ -6182,6 +6218,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mCameraSoundForced="); pw.println(mCameraSoundForced);
         pw.print("  mHasVibrator="); pw.println(mHasVibrator);
         pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
+        pw.print("  mAvrcpAbsVolSupported="); pw.println(mAvrcpAbsVolSupported);
 
         dumpAudioPolicies(pw);
 
