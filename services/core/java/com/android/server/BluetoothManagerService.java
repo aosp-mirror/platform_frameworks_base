@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.IBluetooth;
@@ -37,11 +38,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -50,7 +51,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -61,15 +61,15 @@ import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 
 import com.android.internal.util.DumpUtils;
-import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.UserRestrictionsUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 class BluetoothManagerService extends IBluetoothManager.Stub {
@@ -120,7 +120,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_ADD_PROXY_DELAYED = 400;
     private static final int MESSAGE_BIND_PROFILE_SERVICE = 401;
 
-    private static final int MAX_SAVE_RETRIES = 3;
     private static final int MAX_ERROR_RESTART_RETRIES = 6;
 
     // Bluetooth persisted setting is off
@@ -223,22 +222,25 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         @Override
         public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
                 Bundle prevRestrictions) {
-            if (!newRestrictions.containsKey(UserManager.DISALLOW_BLUETOOTH)
-                    && !prevRestrictions.containsKey(UserManager.DISALLOW_BLUETOOTH)) {
-                // The relevant restriction has not changed - do nothing.
-                return;
+            if (!UserRestrictionsUtils.restrictionsChanged(prevRestrictions, newRestrictions,
+                    UserManager.DISALLOW_BLUETOOTH, UserManager.DISALLOW_BLUETOOTH_SHARING)) {
+                return; // No relevant changes, nothing to do.
             }
-            final boolean bluetoothDisallowed =
-                    newRestrictions.getBoolean(UserManager.DISALLOW_BLUETOOTH);
-            if ((mEnable || mEnableExternal) && bluetoothDisallowed) {
+
+            final boolean disallowed = newRestrictions.getBoolean(UserManager.DISALLOW_BLUETOOTH);
+
+            // DISALLOW_BLUETOOTH is a global restriction that can only be set by DO or PO on the
+            // system user, so we only look at the system user.
+            if (userId == UserHandle.USER_SYSTEM && disallowed && (mEnable || mEnableExternal)) {
                 try {
-                    disable(null, true);
+                    disable(null /* packageName */, true /* persist */);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Exception when disabling Bluetooth from UserRestrictionsListener",
-                            e);
+                    Slog.w(TAG, "Exception when disabling Bluetooth", e);
                 }
             }
-            updateOppLauncherComponentState(bluetoothDisallowed);
+            final boolean sharingDisallowed = disallowed
+                    || newRestrictions.getBoolean(UserManager.DISALLOW_BLUETOOTH_SHARING);
+            updateOppLauncherComponentState(userId, sharingDisallowed);
         }
     };
 
@@ -994,11 +996,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 LocalServices.getService(UserManagerInternal.class);
         userManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
         final boolean isBluetoothDisallowed = isBluetoothDisallowed();
-        PackageManagerService packageManagerService =
-                (PackageManagerService) ServiceManager.getService("package");
-        if (packageManagerService != null && !packageManagerService.isOnlyCoreApps()) {
-            updateOppLauncherComponentState(isBluetoothDisallowed);
-        }
         if (isBluetoothDisallowed) {
             return;
         }
@@ -2074,21 +2071,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     /**
      * Disables BluetoothOppLauncherActivity component, so the Bluetooth sharing option is not
-     * offered to the user if Bluetooth is disallowed. Puts the component to its default state if
-     * Bluetooth is not disallowed.
+     * offered to the user if Bluetooth or sharing is disallowed. Puts the component to its default
+     * state if Bluetooth is not disallowed.
      *
-     * @param bluetoothDisallowed whether the {@link UserManager.DISALLOW_BLUETOOTH} user
-     * restriction was set.
+     * @param userId user to disable bluetooth sharing for.
+     * @param bluetoothSharingDisallowed whether bluetooth sharing is disallowed.
      */
-    private void updateOppLauncherComponentState(boolean bluetoothDisallowed) {
+    private void updateOppLauncherComponentState(int userId, boolean bluetoothSharingDisallowed) {
         final ComponentName oppLauncherComponent = new ComponentName("com.android.bluetooth",
                 "com.android.bluetooth.opp.BluetoothOppLauncherActivity");
-        final int newState = bluetoothDisallowed
+        final int newState = bluetoothSharingDisallowed
                 ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED
                 : PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
         try {
-            mContext.getPackageManager()
-                    .setComponentEnabledSetting(oppLauncherComponent, newState, 0);
+            final IPackageManager imp = AppGlobals.getPackageManager();
+            imp.setComponentEnabledSetting(oppLauncherComponent, newState, 0 /* flags */, userId);
         } catch (Exception e) {
             // The component was not found, do nothing.
         }
