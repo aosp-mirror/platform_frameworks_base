@@ -356,21 +356,7 @@ public final class AutofillManager {
      * @param view view requesting the new autofill context.
      */
     public void requestAutofill(@NonNull View view) {
-        if (!hasAutofillFeature()) {
-            return;
-        }
-        synchronized (mLock) {
-            ensureServiceClientAddedIfNeededLocked();
-
-            if (!mEnabled) {
-                return;
-            }
-
-            final AutofillId id = getAutofillId(view);
-            final AutofillValue value = view.getAutofillValue();
-
-            startSessionLocked(id, view.getWindowToken(), null, value, FLAG_MANUAL_REQUEST);
-        }
+        notifyViewEntered(view, FLAG_MANUAL_REQUEST);
     }
 
     /**
@@ -385,19 +371,7 @@ public final class AutofillManager {
      * @param bounds child boundaries, relative to the top window.
      */
     public void requestAutofill(@NonNull View view, int childId, @NonNull Rect bounds) {
-        if (!hasAutofillFeature()) {
-            return;
-        }
-        synchronized (mLock) {
-            ensureServiceClientAddedIfNeededLocked();
-
-            if (!mEnabled) {
-                return;
-            }
-
-            final AutofillId id = getAutofillId(view, childId);
-            startSessionLocked(id, view.getWindowToken(), bounds, null, FLAG_MANUAL_REQUEST);
-        }
+        notifyViewEntered(view, childId, bounds, FLAG_MANUAL_REQUEST);
     }
 
     /**
@@ -406,6 +380,10 @@ public final class AutofillManager {
      * @param view {@link View} that was entered.
      */
     public void notifyViewEntered(@NonNull View view) {
+        notifyViewEntered(view, 0);
+    }
+
+    private void notifyViewEntered(@NonNull View view, int flags) {
         if (!hasAutofillFeature()) {
             return;
         }
@@ -423,7 +401,7 @@ public final class AutofillManager {
 
                 if (mSessionId == NO_SESSION) {
                     // Starts new session.
-                    startSessionLocked(id, view.getWindowToken(), null, value, 0);
+                    startSessionLocked(id, view.getWindowToken(), null, value, flags);
                 } else {
                     // Update focus on existing session.
                     updateSessionLocked(id, null, value, FLAG_VIEW_ENTERED);
@@ -481,6 +459,10 @@ public final class AutofillManager {
      * @param bounds child boundaries, relative to the top window.
      */
     public void notifyViewEntered(@NonNull View view, int childId, @NonNull Rect bounds) {
+        notifyViewEntered(view, childId, bounds, 0);
+    }
+
+    private void notifyViewEntered(View view, int childId, Rect bounds, int flags) {
         if (!hasAutofillFeature()) {
             return;
         }
@@ -497,7 +479,7 @@ public final class AutofillManager {
 
                 if (mSessionId == NO_SESSION) {
                     // Starts new session.
-                    startSessionLocked(id, view.getWindowToken(), bounds, null, 0);
+                    startSessionLocked(id, view.getWindowToken(), bounds, null, flags);
                 } else {
                     // Update focus on existing session.
                     updateSessionLocked(id, bounds, null, FLAG_VIEW_ENTERED);
