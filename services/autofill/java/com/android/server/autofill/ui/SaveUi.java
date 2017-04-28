@@ -16,7 +16,7 @@
 
 package com.android.server.autofill.ui;
 
-import static com.android.server.autofill.ui.Helper.DEBUG;
+import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.app.Dialog;
@@ -42,7 +42,7 @@ import com.android.server.UiThread;
  */
 final class SaveUi {
 
-    private static final String TAG = "SaveUi";
+    private static final String TAG = "AutofillSaveUi";
 
     public interface OnSaveListener {
         void onSave();
@@ -61,7 +61,7 @@ final class SaveUi {
 
         @Override
         public void onSave() {
-            if (DEBUG) Slog.d(TAG, "onSave(): " + mDone);
+            if (sDebug) Slog.d(TAG, "onSave(): " + mDone);
             if (mDone) {
                 return;
             }
@@ -71,7 +71,7 @@ final class SaveUi {
 
         @Override
         public void onCancel(IntentSender listener) {
-            if (DEBUG) Slog.d(TAG, "onCancel(): " + mDone);
+            if (sDebug) Slog.d(TAG, "onCancel(): " + mDone);
             if (mDone) {
                 return;
             }
@@ -81,7 +81,7 @@ final class SaveUi {
 
         @Override
         public void onDestroy() {
-            if (DEBUG) Slog.d(TAG, "onDestroy(): " + mDone);
+            if (sDebug) Slog.d(TAG, "onDestroy(): " + mDone);
             if (mDone) {
                 return;
             }
@@ -154,8 +154,9 @@ final class SaveUi {
             subTitleView.setVisibility(View.VISIBLE);
         }
 
-        if (DEBUG) {
-            Slog.d(TAG, "Title: " + title + " SubTitle: " + subTitle);
+        Slog.i(TAG, "Showing save dialog: " + title);
+        if (sDebug) {
+            Slog.d(TAG, "SubTitle: " + subTitle);
         }
 
         final TextView noButton = view.findViewById(R.id.autofill_save_no);

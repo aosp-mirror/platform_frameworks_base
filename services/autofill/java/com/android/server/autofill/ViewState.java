@@ -16,7 +16,7 @@
 
 package com.android.server.autofill;
 
-import static com.android.server.autofill.Helper.DEBUG;
+import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -172,9 +172,7 @@ final class ViewState {
      */
     void maybeCallOnFillReady() {
         if ((mState & (STATE_AUTOFILLED | STATE_WAITING_DATASET_AUTH)) != 0) {
-            if (DEBUG) {
-                Slog.d(TAG, "Ignoring UI for " + id + " on " + getStateAsString());
-            }
+            if (sDebug) Slog.d(TAG, "Ignoring UI for " + id + " on " + getStateAsString());
             return;
         }
         // First try the current response associated with this View.

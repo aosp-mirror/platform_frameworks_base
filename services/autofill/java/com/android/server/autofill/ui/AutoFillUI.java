@@ -15,7 +15,7 @@
  */
 package com.android.server.autofill.ui;
 
-import static com.android.server.autofill.ui.Helper.DEBUG;
+import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,7 +47,7 @@ import java.io.PrintWriter;
  * managing saving of user edits.
  */
 public final class AutoFillUI {
-    private static final String TAG = "AutoFillUI";
+    private static final String TAG = "AutofillUI";
 
     private final Handler mHandler = UiThread.getHandler();
     private final @NonNull Context mContext;
@@ -139,7 +139,7 @@ public final class AutoFillUI {
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @NonNull String packageName) {
-        if (DEBUG) {
+        if (sDebug) {
             Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + filterText);
         }
         final LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_FILL_UI))
