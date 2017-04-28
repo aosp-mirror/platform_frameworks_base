@@ -218,6 +218,11 @@ class InstantAppRegistry {
         byte[] randomBytes = new byte[8];
         new SecureRandom().nextBytes(randomBytes);
         String id = ByteStringUtils.toHexString(randomBytes).toLowerCase(Locale.US);
+        File appDir = getInstantApplicationDir(packageName, userId);
+        if (!appDir.exists() && !appDir.mkdirs()) {
+            Slog.e(LOG_TAG, "Cannot create instant app cookie directory");
+            return id;
+        }
         File idFile = new File(getInstantApplicationDir(packageName, userId),
                 INSTANT_APP_ANDROID_ID_FILE);
         try (FileOutputStream fos = new FileOutputStream(idFile)) {
