@@ -175,7 +175,7 @@ final class SaveUi {
         closeButton.setOnClickListener((v) -> mListener.onCancel(
                 info.getNegativeActionListener()));
 
-        mDialog = new Dialog(context, R.style.Theme_Material_Panel);
+        mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
         mDialog.setContentView(view);
 
         final Window window = mDialog.getWindow();
