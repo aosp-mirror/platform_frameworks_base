@@ -2822,6 +2822,7 @@
         <!-- @hide @SystemApi -->
         <public name="requiredSystemPropertyValue" />
         <public name="justificationMode" />
+        <public name="autofilledHighlight" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
@@ -2833,8 +2834,8 @@
         <public name="autofill" />
     </public-group>
 
-    <public-group type="drawable" first-id="0x010800b4">
-        <public name="autofilled_highlight" />
+    <public-group type="drawable" first-id="0x010800b5">
+        <!-- 0x010800b4 was removed -->
         <public name="ic_picture_in_picture" />
     </public-group>
 

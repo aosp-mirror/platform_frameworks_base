@@ -805,6 +805,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int LAST_APP_ACCESSIBILITY_ID = Integer.MAX_VALUE / 2;
 
     /**
+     * Attribute to find the autofilled highlight
+     *
+     * @see #getAutofilledDrawable()
+     */
+    private static final int[] AUTOFILL_HIGHLIGHT_ATTR =
+            new int[]{android.R.attr.autofilledHighlight};
+
+    /**
      * Signals that compatibility booleans have been initialized according to
      * target SDK versions.
      */
@@ -7471,10 +7479,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>See {@link #autofill(AutofillValue)} and
      * {@link #onProvideAutofillVirtualStructure(ViewStructure, int)} for more info.
      * <p>To indicate that a virtual view was autofilled
-     * <code>@android:drawable/autofilled_highlight</code> should be drawn over it until the data
+     * <code>?android:attr/autofilledHighlight</code> should be drawn over it until the data
      * changes.
      *
      * @param values map of values to be autofilled, keyed by virtual child id.
+     *
+     * @attr ref android.R.styleable#Theme_autofilledHighlight
      */
     public void autofill(@NonNull @SuppressWarnings("unused") SparseArray<AutofillValue> values) {
     }
@@ -20406,15 +20416,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @throws IllegalStateException if the drawable could not be found.
      */
-    @NonNull private Drawable getAutofilledDrawable() {
+    @Nullable private Drawable getAutofilledDrawable() {
         // Lazily load the isAutofilled drawable.
         if (mAttachInfo.mAutofilledDrawable == null) {
-            mAttachInfo.mAutofilledDrawable = mContext.getDrawable(R.drawable.autofilled_highlight);
-
-            if (mAttachInfo.mAutofilledDrawable == null) {
-                throw new IllegalStateException(
-                        "Could not find android:drawable/autofilled_highlight");
-            }
+            TypedArray a = mContext.getTheme().obtainStyledAttributes(AUTOFILL_HIGHLIGHT_ATTR);
+            int attributeResourceId = a.getResourceId(0, 0);
+            mAttachInfo.mAutofilledDrawable = mContext.getDrawable(attributeResourceId);
+            a.recycle();
         }
 
         return mAttachInfo.mAutofilledDrawable;
@@ -20429,8 +20437,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAutofilled()) {
             Drawable autofilledHighlight = getAutofilledDrawable();
 
-            autofilledHighlight.setBounds(0, 0, getWidth(), getHeight());
-            autofilledHighlight.draw(canvas);
+            if (autofilledHighlight != null) {
+                autofilledHighlight.setBounds(0, 0, getWidth(), getHeight());
+                autofilledHighlight.draw(canvas);
+            }
         }
     }
 

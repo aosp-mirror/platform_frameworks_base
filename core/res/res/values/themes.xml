@@ -435,6 +435,9 @@ please see themes_device_defaults.xml.
         <!-- Accessibility focused drawable -->
         <item name="accessibilityFocusedDrawable">@drawable/view_accessibility_focused</item>
 
+        <!-- Autofilled highlight drawable -->
+        <item name="autofilledHighlight">@drawable/autofilled_highlight</item>
+
         <!-- Lighting and shadow properties -->
         <item name="lightY">@dimen/light_y</item>
         <item name="lightZ">@dimen/light_z</item>
