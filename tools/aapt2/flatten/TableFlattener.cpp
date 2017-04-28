@@ -573,9 +573,16 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
   // Write the ResTable header.
   ChunkWriter table_writer(buffer_);
-  ResTable_header* table_header =
-      table_writer.StartChunk<ResTable_header>(RES_TABLE_TYPE);
+  ResTable_header* table_header = table_writer.StartChunk<ResTable_header>(RES_TABLE_TYPE);
   table_header->packageCount = util::HostToDevice32(table->packages.size());
+
+  // Write a self mapping entry for this package if the ID is non-standard (0x7f).
+  if (context->GetPackageType() == PackageType::kApp) {
+    const uint8_t package_id = context->GetPackageId();
+    if (package_id != kFrameworkPackageId && package_id != kAppPackageId) {
+      table->included_packages_[package_id] = context->GetCompilationPackage();
+    }
+  }
 
   // Flatten the values string pool.
   StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool);

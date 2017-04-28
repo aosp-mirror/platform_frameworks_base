@@ -400,7 +400,7 @@ TEST_F(TableFlattenerTest, FlattenTableReferencingSharedLibraries) {
   const DynamicRefTable* dynamic_ref_table = result.getDynamicRefTableForCookie(1);
   ASSERT_NE(nullptr, dynamic_ref_table);
 
-  const KeyedVector<String16, uint8_t> entries = dynamic_ref_table->entries();
+  const KeyedVector<String16, uint8_t>& entries = dynamic_ref_table->entries();
 
   ssize_t idx = entries.indexOfKey(android::String16("lib_one"));
   ASSERT_GE(idx, 0);
@@ -409,6 +409,26 @@ TEST_F(TableFlattenerTest, FlattenTableReferencingSharedLibraries) {
   idx = entries.indexOfKey(android::String16("lib_two"));
   ASSERT_GE(idx, 0);
   EXPECT_EQ(0x03u, entries.valueAt(idx));
+}
+
+TEST_F(TableFlattenerTest, PackageWithNonStandardIdHasDynamicRefTable) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("app").SetPackageId(0x80).Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+                                             .SetPackageId("app", 0x80)
+                                             .AddSimple("app:id/foo", ResourceId(0x80010000))
+                                             .Build();
+
+  ResTable result;
+  ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
+
+  const DynamicRefTable* dynamic_ref_table = result.getDynamicRefTableForCookie(1);
+  ASSERT_NE(nullptr, dynamic_ref_table);
+
+  const KeyedVector<String16, uint8_t>& entries = dynamic_ref_table->entries();
+  ssize_t idx = entries.indexOfKey(android::String16("app"));
+  ASSERT_GE(idx, 0);
+  EXPECT_EQ(0x80u, entries.valueAt(idx));
 }
 
 TEST_F(TableFlattenerTest, LongPackageNameIsTruncated) {
