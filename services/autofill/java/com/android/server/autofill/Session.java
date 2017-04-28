@@ -563,7 +563,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // AutoFillUiCallback
     @Override
     public void fill(int requestId, Dataset dataset) {
-        mHandlerCaller.getHandler().post(() -> autoFill(requestId, dataset));
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#fill() rejected - session: "
