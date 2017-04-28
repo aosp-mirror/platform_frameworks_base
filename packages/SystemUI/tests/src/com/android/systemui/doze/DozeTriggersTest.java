@@ -22,7 +22,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 import android.app.Instrumentation;
 import android.content.Context;
@@ -39,8 +38,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Answers;
-import org.mockito.MockSettings;
 
 public class DozeTriggersTest {
     private Context mContext;
@@ -104,7 +101,7 @@ public class DozeTriggersTest {
             mSensors.PROXIMITY.sendProximityResult(true); /* Far */
         });
 
-        verify(mMachine).requestState(DozeMachine.State.DOZE_REQUEST_PULSE);
+        verify(mMachine).requestPulse(anyInt());
     }
 
 }

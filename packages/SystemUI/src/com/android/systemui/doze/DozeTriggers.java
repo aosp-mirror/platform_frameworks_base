@@ -231,7 +231,7 @@ public class DozeTriggers implements DozeMachine.Part {
                     mDozeHost.isPulsingBlocked());
             return;
         }
-        mMachine.requestState(DozeMachine.State.DOZE_REQUEST_PULSE);
+        mMachine.requestPulse(reason);
     }
 
     @Override

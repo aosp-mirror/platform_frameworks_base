@@ -37,6 +37,7 @@ public class DozeLog {
 
     private static final int PULSE_REASONS = 5;
 
+    public static final int PULSE_REASON_NONE = -1;
     public static final int PULSE_REASON_INTENT = 0;
     public static final int PULSE_REASON_NOTIFICATION = 1;
     public static final int PULSE_REASON_SENSOR_SIGMOTION = 2;
