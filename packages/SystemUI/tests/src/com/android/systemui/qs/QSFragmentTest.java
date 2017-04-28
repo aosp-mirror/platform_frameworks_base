@@ -32,6 +32,7 @@ import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import android.testing.LayoutInflaterBuilder;
 import android.testing.TestableLooper;
@@ -64,6 +65,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                                 FrameLayout.class)
                         .replace("TextClock", View.class)
                         .replace(CarrierText.class, View.class)
+                        .replace(Clock.class, View.class)
                         .build());
 
         mDependency.injectTestDependency(Dependency.BG_LOOPER,

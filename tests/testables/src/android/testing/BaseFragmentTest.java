@@ -161,12 +161,12 @@ public abstract class BaseFragmentTest {
 
     protected void attachFragmentToWindow() {
         ViewUtils.attachView(mView);
-        TestableLooper.get(this).processMessages(1);
+        TestableLooper.get(this).processAllMessages();
     }
 
     protected void detachFragmentToWindow() {
         ViewUtils.detachView(mView);
-        TestableLooper.get(this).processMessages(1);
+        TestableLooper.get(this).processAllMessages();
     }
 
     protected void destroyFragments() {
