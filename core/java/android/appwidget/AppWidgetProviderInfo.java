@@ -368,11 +368,11 @@ public class AppWidgetProviderInfo implements Parcelable {
         try {
             Resources resources = context.getPackageManager().getResourcesForApplication(
                     providerInfo.applicationInfo);
-            if (resourceId > 0) {
-                if (density <= 0) {
-                    density = context.getResources().getDisplayMetrics().densityDpi;
+            if (resourceId != 0) {
+                if (density < 0) {
+                    density = 0;
                 }
-                return resources.getDrawableForDensity(resourceId, density);
+                return resources.getDrawableForDensity(resourceId, density, null);
             }
         } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
             /* ignore */
