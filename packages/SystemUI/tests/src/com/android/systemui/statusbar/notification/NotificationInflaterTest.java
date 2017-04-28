@@ -115,11 +115,19 @@ public class NotificationInflaterTest {
     public void testInflationThrowsErrorDoesntCallUpdated() throws Exception {
         mRow.getPrivateLayout().removeAllViews();
         mRow.getStatusBarNotification().getNotification().contentView
-                = new RemoteViews(mContext.getPackageName(), R.layout.status_bar);;
+                = new RemoteViews(mContext.getPackageName(), R.layout.status_bar);
         runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
                 true /* expectingException */, mNotificationInflater);
         Assert.assertTrue(mRow.getPrivateLayout().getChildCount() == 0);
         verify(mRow, times(0)).onNotificationUpdated();
+    }
+
+    @Test
+    public void testAsyncTaskRemoved() throws Exception {
+        mRow.getEntry().abortInflation();
+        runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
+                mNotificationInflater);
+        Assert.assertTrue(mRow.getEntry().getRunningTasks().size() == 0);
     }
 
     public static void runThenWaitForInflation(Runnable block,

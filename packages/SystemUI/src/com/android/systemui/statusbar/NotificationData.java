@@ -222,10 +222,20 @@ public class NotificationData {
             for (AsyncTask task : mRunningTasks) {
                 task.cancel(true /* mayInterruptIfRunning */);
             }
+            mRunningTasks.clear();
         }
 
         public void addInflationTask(AsyncTask asyncInflationTask) {
             mRunningTasks.add(asyncInflationTask);
+        }
+
+        public void onInflationTaskFinished(AsyncTask asyncInflationTask) {
+            mRunningTasks.remove(asyncInflationTask);
+        }
+
+        @VisibleForTesting
+        public ArraySet<AsyncTask> getRunningTasks() {
+            return mRunningTasks;
         }
     }
 
