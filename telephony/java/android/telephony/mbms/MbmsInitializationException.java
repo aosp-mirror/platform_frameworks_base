@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,20 +11,22 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
 package android.telephony.mbms;
 
-import android.net.Uri;
-import android.telephony.SignalStrength;
+/** @hide */
+public class MbmsInitializationException extends Exception {
+    private final int mErrorCode;
 
-/**
- * @hide
- */
-oneway interface IStreamingServiceListener {
-    void error(int errorCode, String message);
-    void stateUpdated(int state);
-    void uriUpdated(in Uri uri);
-    void signalStrengthUpdated(in SignalStrength signalStrength);
+    /** @hide */
+    public MbmsInitializationException(int errorCode) {
+        super();
+        mErrorCode = errorCode;
+    }
+
+    public int getErrorCode() {
+        return mErrorCode;
+    }
 }

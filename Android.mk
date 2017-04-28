@@ -483,10 +483,10 @@ LOCAL_SRC_FILES += \
 	telecomm/java/com/android/internal/telecom/IInCallService.aidl \
 	telecomm/java/com/android/internal/telecom/ITelecomService.aidl \
 	telecomm/java/com/android/internal/telecom/RemoteServiceCallback.aidl \
-        telephony/java/android/telephony/mbms/IMbmsDownloadManagerListener.aidl \
-	telephony/java/android/telephony/mbms/IMbmsStreamingManagerListener.aidl \
-	telephony/java/android/telephony/mbms/IDownloadListener.aidl \
-        telephony/java/android/telephony/mbms/IStreamingServiceListener.aidl \
+        telephony/java/android/telephony/mbms/IMbmsDownloadManagerCallback.aidl \
+	telephony/java/android/telephony/mbms/IMbmsStreamingManagerCallback.aidl \
+	telephony/java/android/telephony/mbms/IDownloadCallback.aidl \
+        telephony/java/android/telephony/mbms/IStreamingServiceCallback.aidl \
 	telephony/java/android/telephony/mbms/vendor/IMbmsDownloadService.aidl \
 	telephony/java/android/telephony/mbms/vendor/IMbmsStreamingService.aidl \
 	telephony/java/com/android/ims/internal/IImsCallSession.aidl \
