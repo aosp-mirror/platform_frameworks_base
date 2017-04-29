@@ -16,7 +16,7 @@
  *
  */
 
-package com.android.systemui.flash.headers;
+package com.android.systemui.six.headers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -50,7 +50,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import com.android.systemui.R;
-import com.android.internal.util.flash.FlashUtils;
+import com.android.internal.util.six.SixUtils;
 
 public class DaylightHeaderProvider implements
         StatusBarHeaderMachine.IStatusBarHeaderProvider {
@@ -365,7 +365,7 @@ public class DaylightHeaderProvider implements
 
     @Override
     public Drawable getCurrent(final Calendar now) {
-        if (!FlashUtils.isAvailableApp(mPackageName, mContext)) {
+        if (!SixUtils.isAvailableApp(mPackageName, mContext)) {
             Log.w(TAG, "Header pack no longer available - loading default " + mPackageName);
             loadDefaultHeaderPackage();
         }

@@ -16,7 +16,7 @@
  *
  */
 
-package com.android.systemui.flash.headers;
+package com.android.systemui.six.headers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -49,7 +49,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import com.android.systemui.R;
-import com.android.internal.util.flash.FlashUtils;
+import com.android.internal.util.six.SixUtils;
 
 public class StaticHeaderProvider implements
         StatusBarHeaderMachine.IStatusBarHeaderProvider {
@@ -113,7 +113,7 @@ public class StaticHeaderProvider implements
         if (mRes == null) {
             return null;
         }
-        if (!FlashUtils.isAvailableApp(mPackageName, mContext)) {
+        if (!SixUtils.isAvailableApp(mPackageName, mContext)) {
             return null;
         }
         try {

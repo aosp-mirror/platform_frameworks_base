@@ -16,7 +16,7 @@
  *
  */
 
-package com.android.systemui.flash.headers;
+package com.android.systemui.six.headers;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -73,7 +73,7 @@ public class StatusBarHeaderMachine {
     private String mCurrentProviderName;
 
     // broadcast providers sent when they update the header image
-    public static final String STATUS_BAR_HEADER_UPDATE_ACTION = "com.android.systemui.flash.headers.STATUS_BAR_HEADER_UPDATE";
+    public static final String STATUS_BAR_HEADER_UPDATE_ACTION = "com.android.systemui.six.headers.STATUS_BAR_HEADER_UPDATE";
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override

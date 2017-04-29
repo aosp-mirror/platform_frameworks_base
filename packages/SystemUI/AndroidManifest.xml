@@ -228,7 +228,7 @@
 
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
-        <service android:name=".flash.screenrecord.TakeScreenrecordService"
+        <service android:name=".six.screenrecord.TakeScreenrecordService"
             android:process=":screenrecord"
             android:exported="false" />
 
@@ -260,7 +260,7 @@
                   android:theme="@style/TunerSettings"
                   android:label="@string/statusbar_icons_blacklist"
                   android:process=":tuner"
-                  android:parentActivityName="com.flash.settings.fragments.StatusBarSettings"
+                  android:parentActivityName="com.six.settings.fragments.StatusBarSettings"
                   android:exported="true">
         </activity>
 
@@ -281,7 +281,7 @@
                   android:theme="@style/TunerSettings"
                   android:label="@string/tuner_notification_control"
                   android:process=":tuner"
-                  android:parentActivityName="com.flash.settings.fragments.NotificationMediaSettings"
+                  android:parentActivityName="com.six.settings.fragments.NotificationMediaSettings"
                   android:exported="true">
         </activity>
 

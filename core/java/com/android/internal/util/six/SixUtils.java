@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Flash ROM
+ * Copyright (C) 2017 SiXROM
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.util.flash;
+package com.android.internal.util.six;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -24,7 +24,7 @@ import android.content.res.Resources;
 
 import java.util.Locale;
 
-public class FlashUtils {
+public class SixUtils {
 
     public static boolean isChineseLanguage() {
        return Resources.getSystem().getConfiguration().locale.getLanguage().startsWith(

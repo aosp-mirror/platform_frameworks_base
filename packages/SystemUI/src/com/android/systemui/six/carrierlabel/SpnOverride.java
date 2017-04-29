@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.flash.carrierlabel;
+package com.android.systemui.six.carrierlabel;
 
 import java.io.File;
 import java.io.FileNotFoundException;

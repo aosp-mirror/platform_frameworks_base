@@ -147,7 +147,7 @@ public class AmbientLiftToWakeTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsEvent.FLASH;
+        return MetricsEvent.SIX;
     }
 
     private ContentObserver mObserver = new ContentObserver(mHandler) {

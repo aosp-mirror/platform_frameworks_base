@@ -64,7 +64,7 @@
             android:importantForAccessibility="noHideDescendants"/>
     </LinearLayout>
 
-    <com.android.systemui.flash.carrierlabel.CarrierLabel
+    <com.android.systemui.six.carrierlabel.CarrierLabel
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

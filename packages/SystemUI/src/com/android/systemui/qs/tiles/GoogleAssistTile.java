@@ -67,7 +67,7 @@ public class GoogleAssistTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsEvent.FLASH;
+        return MetricsEvent.SIX;
     }
 
     @Override

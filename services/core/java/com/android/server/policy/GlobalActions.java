@@ -100,7 +100,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.android.internal.util.flash.PowerMenuConstants.*;
+import static com.android.internal.util.six.PowerMenuConstants.*;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
@@ -905,7 +905,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 return;
             }
             ComponentName cn = new ComponentName("com.android.systemui",
-                    "com.android.systemui.flash.screenrecord.TakeScreenrecordService");
+                    "com.android.systemui.six.screenrecord.TakeScreenrecordService");
             Intent intent = new Intent();
             intent.setComponent(cn);
             ServiceConnection conn = new ServiceConnection() {

@@ -55,7 +55,7 @@ import com.android.internal.logging.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.flash.headers.StatusBarHeaderMachine;
+import com.android.systemui.six.headers.StatusBarHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.qs.QuickQSPanel;
@@ -457,7 +457,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private void startSettingsLongClickActivity() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
 	intent.setClassName("com.android.settings",
-            "com.android.settings.Settings$FlashSettingsActivity");
+            "com.android.settings.Settings$SixSettingsActivity");
         mActivityStarter.startActivity(intent, true /* dismissShade */);
     }
 

@@ -2258,7 +2258,7 @@ message MetricsEvent {
     // Quick setting tiles
     QUICK_SETTINGS = 412;
 
-    // Flash Metrics
-    FLASH = 420;
+    // SiX Metrics
+    SIX = 420;
   }
 }
