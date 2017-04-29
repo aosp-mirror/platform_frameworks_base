@@ -15,7 +15,6 @@
  */
 package android.provider;
 
-import static android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
@@ -601,7 +600,7 @@ public class FontsContract {
             FontInfo[] fonts = getFontFromProvider(
                     context, request, providerInfo.authority, cancellationSignal);
             return new FontFamilyResult(FontFamilyResult.STATUS_OK, fonts);
-        } catch (InvalidFormatException e) {
+        } catch (IllegalArgumentException e) {
             return new FontFamilyResult(FontFamilyResult.STATUS_UNEXPECTED_DATA_PROVIDED, null);
         }
     }
@@ -755,7 +754,7 @@ public class FontsContract {
     @VisibleForTesting
     public static @NonNull FontInfo[] getFontFromProvider(
             Context context, FontRequest request, String authority,
-            CancellationSignal cancellationSignal) throws InvalidFormatException {
+            CancellationSignal cancellationSignal) {
         ArrayList<FontInfo> result = new ArrayList<>();
         final Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority)
