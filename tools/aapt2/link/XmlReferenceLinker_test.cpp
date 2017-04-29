@@ -81,6 +81,7 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
               android:layout_width="match_parent"
               android:background="@color/green"
               android:text="hello"
+              android:attr="\?hello"
               nonAaptAttr="1"
               nonAaptAttrRef="@id/id"
               class="hello" />)EOF");
@@ -89,34 +90,39 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   xml::Element* view_el = xml::FindRootElement(doc.get());
-  ASSERT_NE(view_el, nullptr);
+  ASSERT_NE(nullptr, view_el);
 
   xml::Attribute* xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "layout_width");
-  ASSERT_NE(xml_attr, nullptr);
+  ASSERT_NE(nullptr, xml_attr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x01010000));
-  ASSERT_NE(xml_attr->compiled_value, nullptr);
-  ASSERT_NE(ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get()), nullptr);
+  EXPECT_EQ(ResourceId(0x01010000), xml_attr->compiled_attribute.value().id.value());
+  ASSERT_NE(nullptr, xml_attr->compiled_value);
+  ASSERT_NE(nullptr, ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get()));
 
   xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "background");
-  ASSERT_NE(xml_attr, nullptr);
+  ASSERT_NE(nullptr, xml_attr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x01010001));
-  ASSERT_NE(xml_attr->compiled_value, nullptr);
+  EXPECT_EQ(ResourceId(0x01010001), xml_attr->compiled_attribute.value().id.value());
+  ASSERT_NE(nullptr, xml_attr->compiled_value);
   Reference* ref = ValueCast<Reference>(xml_attr->compiled_value.get());
-  ASSERT_NE(ref, nullptr);
+  ASSERT_NE(nullptr, ref);
   AAPT_ASSERT_TRUE(ref->name);
-  EXPECT_EQ(ref->name.value(), test::ParseNameOrDie("color/green"));  // Make sure the name
+  EXPECT_EQ(test::ParseNameOrDie("color/green"), ref->name.value());  // Make sure the name
                                                                       // didn't change.
   AAPT_ASSERT_TRUE(ref->id);
-  EXPECT_EQ(ref->id.value(), ResourceId(0x7f020000));
+  EXPECT_EQ(ResourceId(0x7f020000), ref->id.value());
 
   xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "text");
-  ASSERT_NE(xml_attr, nullptr);
+  ASSERT_NE(nullptr, xml_attr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   ASSERT_FALSE(xml_attr->compiled_value);  // Strings don't get compiled for memory sake.
+
+  xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "attr");
+  ASSERT_NE(nullptr, xml_attr);
+  AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
+  ASSERT_FALSE(xml_attr->compiled_value);  // Should be a plain string.
 
   xml_attr = view_el->FindAttribute("", "nonAaptAttr");
   ASSERT_NE(nullptr, xml_attr);
@@ -131,9 +137,9 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
   ASSERT_NE(nullptr, ValueCast<Reference>(xml_attr->compiled_value.get()));
 
   xml_attr = view_el->FindAttribute("", "class");
-  ASSERT_NE(xml_attr, nullptr);
+  ASSERT_NE(nullptr, xml_attr);
   AAPT_ASSERT_FALSE(xml_attr->compiled_attribute);
-  ASSERT_EQ(xml_attr->compiled_value, nullptr);
+  ASSERT_EQ(nullptr, xml_attr->compiled_value);
 }
 
 TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreNotLinked) {
