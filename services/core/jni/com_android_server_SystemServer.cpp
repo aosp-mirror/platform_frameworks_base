@@ -48,7 +48,7 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* /* env */, job
 
     status_t err;
 
-    configureRpcThreadpool(1, false /* callerWillJoin */);
+    configureRpcThreadpool(5, false /* callerWillJoin */);
 
     sp<ISensorManager> sensorService = new SensorManager();
     err = sensorService->registerAsService();
