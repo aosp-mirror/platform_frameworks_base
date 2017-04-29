@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Size;
 import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
-import android.graphics.fonts.FontVariationAxis.InvalidFormatException;
 import android.os.LocaleList;
 import android.text.FontConfig;
 import android.text.GraphicsOperations;
@@ -1575,13 +1574,13 @@ public class Paint {
      *         typeface. This function also returns true for empty settings string. Otherwise
      *         returns false
      *
-     * @throws InvalidFormatException If given string is not a valid font variation settings format.
+     * @throws IllegalArgumentException If given string is not a valid font variation settings
+     *                                  format
      *
      * @see #getFontVariationSettings()
      * @see FontVariationAxis
      */
-    public boolean setFontVariationSettings(String fontVariationSettings)
-            throws InvalidFormatException {
+    public boolean setFontVariationSettings(String fontVariationSettings) {
         final String settings = TextUtils.nullIfEmpty(fontVariationSettings);
         if (settings == mFontVariationSettings
                 || (settings != null && settings.equals(mFontVariationSettings))) {
