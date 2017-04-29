@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.statusbar.Abortable;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationContentView;
 import com.android.systemui.statusbar.NotificationData;
@@ -475,7 +476,7 @@ public class NotificationInflater {
     }
 
     public static class AsyncInflationTask extends AsyncTask<Void, Void, InflationProgress>
-            implements InflationCallback {
+            implements InflationCallback, Abortable {
 
         private final StatusBarNotification mSbn;
         private final Context mContext;
@@ -556,6 +557,7 @@ public class NotificationInflater {
                     new InflationException("Couldn't inflate contentViews" + e));
         }
 
+        @Override
         public void abort() {
             cancel(true /* mayInterruptIfRunning */);
             if (mCancellationSignal != null) {

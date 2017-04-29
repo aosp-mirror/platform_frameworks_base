@@ -126,7 +126,7 @@ public class NotificationInflaterTest {
 
     @Test
     public void testAsyncTaskRemoved() throws Exception {
-        mRow.getEntry().abortInflation();
+        mRow.getEntry().abortTask();
         runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
                 mNotificationInflater);
         Assert.assertNull(mRow.getEntry().getRunningTask() );

@@ -172,6 +172,7 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.RowInflaterTask;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
@@ -1588,12 +1589,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void abortExistingInflation(String key) {
         if (mPendingNotifications.containsKey(key)) {
             Entry entry = mPendingNotifications.get(key);
-            entry.abortInflation();
+            entry.abortTask();
             mPendingNotifications.remove(key);
         }
         Entry addedEntry = mNotificationData.get(key);
         if (addedEntry != null) {
-            addedEntry.abortInflation();
+            addedEntry.abortTask();
         }
     }
 
@@ -6173,50 +6174,57 @@ public class StatusBar extends SystemUI implements DemoMode,
                 entry.notification.getUser().getIdentifier());
 
         final StatusBarNotification sbn = entry.notification;
-        ExpandableNotificationRow row;
         if (entry.row != null) {
-            row = entry.row;
             entry.reset();
+            updateNotification(entry, pmUser, sbn, entry.row);
         } else {
-            // create the row view
-            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            row = (ExpandableNotificationRow) inflater.inflate(R.layout.status_bar_notification_row,
-                    parent, false);
-            row.setExpansionLogger(this, entry.notification.getKey());
-            row.setGroupManager(mGroupManager);
-            row.setHeadsUpManager(mHeadsUpManager);
-            row.setRemoteInputController(mRemoteInputController);
-            row.setOnExpandClickListener(this);
-            row.setRemoteViewClickHandler(mOnClickHandler);
-            row.setInflationCallback(this);
-
-            // Get the app name.
-            // Note that Notification.Builder#bindHeaderAppName has similar logic
-            // but since this field is used in the guts, it must be accurate.
-            // Therefore we will only show the application label, or, failing that, the
-            // package name. No substitutions.
-            final String pkg = sbn.getPackageName();
-            String appname = pkg;
-            try {
-                final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                | PackageManager.MATCH_DISABLED_COMPONENTS);
-                if (info != null) {
-                    appname = String.valueOf(pmUser.getApplicationLabel(info));
-                }
-            } catch (NameNotFoundException e) {
-                // Do nothing
-            }
-            row.setAppName(appname);
-            row.setOnDismissRunnable(() ->
-                    performRemoveNotification(row.getStatusBarNotification()));
-            row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-            if (ENABLE_REMOTE_INPUT) {
-                row.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
-            }
+            new RowInflaterTask().inflate(mContext, parent, entry,
+                    row -> {
+                        bindRow(entry, pmUser, sbn, row);
+                        updateNotification(entry, pmUser, sbn, row);
+                    });
         }
 
+    }
+
+    private void bindRow(Entry entry, PackageManager pmUser,
+            StatusBarNotification sbn, ExpandableNotificationRow row) {
+        row.setExpansionLogger(this, entry.notification.getKey());
+        row.setGroupManager(mGroupManager);
+        row.setHeadsUpManager(mHeadsUpManager);
+        row.setRemoteInputController(mRemoteInputController);
+        row.setOnExpandClickListener(this);
+        row.setRemoteViewClickHandler(mOnClickHandler);
+        row.setInflationCallback(this);
+
+        // Get the app name.
+        // Note that Notification.Builder#bindHeaderAppName has similar logic
+        // but since this field is used in the guts, it must be accurate.
+        // Therefore we will only show the application label, or, failing that, the
+        // package name. No substitutions.
+        final String pkg = sbn.getPackageName();
+        String appname = pkg;
+        try {
+            final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                            | PackageManager.MATCH_DISABLED_COMPONENTS);
+            if (info != null) {
+                appname = String.valueOf(pmUser.getApplicationLabel(info));
+            }
+        } catch (NameNotFoundException e) {
+            // Do nothing
+        }
+        row.setAppName(appname);
+        row.setOnDismissRunnable(() ->
+                performRemoveNotification(row.getStatusBarNotification()));
+        row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        if (ENABLE_REMOTE_INPUT) {
+            row.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
+        }
+    }
+
+    private void updateNotification(Entry entry, PackageManager pmUser,
+            StatusBarNotification sbn, ExpandableNotificationRow row) {
         row.setNeedsRedaction(needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
         row.setIsLowPriority(isLowPriority);

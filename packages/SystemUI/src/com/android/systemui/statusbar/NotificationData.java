@@ -33,7 +33,6 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -43,7 +42,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.statusbar.notification.InflationException;
-import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -86,7 +84,7 @@ public class NotificationData {
         public List<SnoozeCriterion> snoozeCriteria;
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
-        private NotificationInflater.AsyncInflationTask mRunningTask = null;
+        private Abortable mRunningTask = null;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -218,17 +216,17 @@ public class NotificationData {
         /**
          * Abort all existing inflation tasks
          */
-        public void abortInflation() {
+        public void abortTask() {
             if (mRunningTask != null) {
                 mRunningTask.abort();
                 mRunningTask = null;
             }
         }
 
-        public void setInflationTask(NotificationInflater.AsyncInflationTask asyncInflationTask) {
+        public void setInflationTask(Abortable abortableTask) {
             // abort any existing inflation
-            abortInflation();
-            mRunningTask = asyncInflationTask;
+            abortTask();
+            mRunningTask = abortableTask;
         }
 
         public void onInflationTaskFinished() {
@@ -236,7 +234,7 @@ public class NotificationData {
         }
 
         @VisibleForTesting
-        public AsyncTask getRunningTask() {
+        public Abortable getRunningTask() {
             return mRunningTask;
         }
     }
