@@ -334,7 +334,7 @@ public class NotificationData {
             mEntries.put(entry.notification.getKey(), entry);
         }
         mGroupManager.onEntryAdded(entry);
-        filterAndSort();
+        updateRankingAndSort(mRankingMap);
     }
 
     public Entry remove(String key, RankingMap ranking) {
