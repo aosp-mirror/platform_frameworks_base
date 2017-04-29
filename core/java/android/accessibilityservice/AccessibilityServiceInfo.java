@@ -693,9 +693,10 @@ public class AccessibilityServiceInfo implements Parcelable {
      *    <strong>Statically set from
      *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
      * </p>
-     * @return The localized summary.
+     * @return The localized summary if available, and {@code null} if a summary
+     * has not been provided.
      */
-    public String loadSummary(PackageManager packageManager) {
+    public CharSequence loadSummary(PackageManager packageManager) {
         if (mSummaryResId == 0) {
             return mNonLocalizedSummary;
         }
