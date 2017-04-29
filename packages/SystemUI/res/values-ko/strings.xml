@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"모바일 데이터 사용 중지"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"블루투스 테더링입니다."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"비행기 모드입니다."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN 켜짐"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM 카드가 없습니다."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"이동통신사 네트워크가 변경됩니다."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"배터리 세부정보 열기"</string>
@@ -702,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> 알림: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"앱이 분할 화면에서 작동하지 않을 수 있습니다."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"앱이 화면 분할을 지원하지 않습니다."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"앱이 보조 디스플레이에서 작동하지 않을 수도 있습니다."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"앱이 보조 디스플레이에서의 실행을 지원하지 않습니다."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"설정 열기"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"빠른 설정 열기"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"빠른 설정 닫기"</string>

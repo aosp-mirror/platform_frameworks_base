@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобилдик Интернет өчүрүлгөн"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth аркылуу интернет бөлүшүү."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Учак тартиби."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN күйүк."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM карта жок"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Оператор тармагы өзгөртүлүүдө."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Батареянын чоо-жайын ачуу"</string>
@@ -317,7 +316,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Эскертмелер"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Кол чырак"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобилдик Интернет"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын колдонулушу"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын өткөрүлүшү"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Калган дайындар"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Чектен ашты"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> колдонулду"</string>
@@ -700,10 +699,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> эскертмеси: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Колдонмодо экран бөлүнбөшү мүмкүн."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Колдонмодо экран бөлүнбөйт."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Колдонмо көмөкчү дисплейде иштебей калышы мүмкүн."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Колдонмо көмөкчү дисплейлерде иштетилбейт."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ыкчам жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Ыкчам жөндөөлөрдү жабуу."</string>
@@ -754,7 +751,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Ыкчам ачылуучу колдонмолорду орнотуу талап кылынбайт."</string>
     <string name="app_info" msgid="6856026610594615344">"Колдонмо тууралуу"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Интернетке өтүү"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Мобилдик дайындар"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Мобилдик Интернет"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi өчүк"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth өчүк"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\"Тынчымды алба\" режими өчүк"</string>

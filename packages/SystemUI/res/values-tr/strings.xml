@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobil Veri Kapalı"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Uçak modu."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN açık."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM kart yok."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Operatör şebekesi değişiyor."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Pil ayrıntılarını aç"</string>
@@ -199,13 +198,13 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Uçak modu açık."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Uçak modu kapatıldı."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Uçak modu açıldı."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Rahatsız etmeyin ayarı açık, yalnızca öncelikliler."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Rahatsız etmeyin ayarı açık, tamamen sessiz."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Rahatsız etmeyin ayarı açık, yalnızca alarmlar."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Rahatsız etme ayarı açık, yalnızca öncelikliler."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Rahatsız etme ayarı açık, tamamen sessiz."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Rahatsız etme ayarı açık, yalnızca alarmlar."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Rahatsız etmeyin."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Rahatsız etmeyin\" ayarı kapalı."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Rahatsız etmeyin\" ayarı kapalı."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Rahatsız etmeyin\" ayarı açık."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Rahatsız etme\" ayarı kapalı."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Rahatsız etme\" ayarı kapalı."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Rahatsız etme\" ayarı açık."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth kapalı."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth açık."</string>
@@ -494,9 +493,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Çift ton çoklu frekans"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Erişilebilirlik"</string>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Sesi açmak için hafifçe dokunun."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Titreşime ayarlamak için hafifçe dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Sesi kapatmak için hafifçe dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Sesi açmak için dokunun."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Titreşime ayarlamak için dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Sesi kapatmak için dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Titreşime ayarlamak için dokunun."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Sesi kapatmak için dokunun."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ses denetimleri gösteriliyor. Kapatmak için hızlıca yukarı kaydırın."</string>
@@ -688,9 +687,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Üstte %50"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Üstte %30"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Altta tam ekran"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>. konum, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Düzenlemek için iki kez hafifçe dokunun."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Eklemek için iki kez hafifçe dokunun."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g>. konum. Seçmek için iki kez hafifçe dokunun."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>. konum, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Düzenlemek için iki kez dokunun."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Eklemek için iki kez dokunun."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g>. konum. Seçmek için iki kez dokunun."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> kutusunu taşı"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> kutusunu kaldır"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> kutusu <xliff:g id="POSITION">%2$d</xliff:g>. konuma eklendi"</string>
@@ -700,10 +699,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> bildirimi: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Uygulama bölünmüş ekranda çalışmayabilir."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Uygulama bölünmüş ekranı desteklemiyor."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Uygulama ikincil ekranda çalışmayabilir."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Uygulama ikincil ekranlarda başlatılmayı desteklemiyor."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Ayarları aç."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Hızlı ayarları aç."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Hızlı ayarları kapat."</string>

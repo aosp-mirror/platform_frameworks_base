@@ -159,8 +159,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobilné dáta sú vypnuté"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Pripojenie cez Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim v lietadle."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN je zapnuté."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Žiadna SIM karta."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Zmena siete operátora"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Otvoriť podrobnosti o batérii"</string>
@@ -235,8 +234,8 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilný hotspot je vypnutý."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilný hotspot je zapnutý."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Prenášanie bolo zastavené."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Pracovný režim – vyp."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Pracovný režim – zap."</string>
+    <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Pracovný režim vypnutý"</string>
+    <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Pracovný režim zapnutý"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Pracovný režim je vypnutý."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Pracovný režim je zapnutý."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Šetrič dát bol vypnutý."</string>
@@ -359,9 +358,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Vyhľadávanie"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Prejdite prstom nahor: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Prejdite prstom doľava: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Nebudú vás rušiť zvuky ani vibrácie s výnimkou budíkov, pripomenutí, udalostí a volajúcich, ktoré špecifikujete."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Nebudú vás rušiť zvuky ani vibrácie s výnimkou budíkov, pripomenutí, udalostí a vybraných volajúcich."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prispôsobiť"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Zablokujú sa tým VŠETKY zvuky a vibrácie vrátane zvukov budíkov, hudby, videí a hier. Stále však budete môcť telefonovať."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Budú zablokované všetky zvuky a vibrácie vrátane budíkov, hudby, videí a hier. Stále však budete môcť telefonovať."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Zablokujú sa tým VŠETKY zvuky a vibrácie vrátane zvukov budíkov, hudby, videí a hier."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Menej naliehavé upozornenia sa nachádzajú nižšie"</string>
@@ -710,15 +709,13 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Upozornenie <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Aplikácia nemusí fungovať so zapnutou rozdelenou obrazovkou."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikácia nepodporuje rozdelenú obrazovku."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Aplikácia nemusí fungovať na sekundárnej obrazovke."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Aplikácia nepodporuje spúšťanie na sekundárnych obrazovkách."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Otvoriť nastavenia"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Otvoriť rýchle nastavenia"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Zavrieť rýchle nastavenia"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Budík bol nastavený."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Prihlásený/-á ako <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Prihlásený používateľ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Žiadny internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Otvoriť podrobnosti"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otvoriť nastavenia <xliff:g id="ID_1">%s</xliff:g>"</string>
@@ -746,7 +743,7 @@
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Pravá skratka"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ľavá skratka tiež odomkne"</string>
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Pravá skratka tiež odomkne"</string>
-    <string name="lockscreen_none" msgid="4783896034844841821">"Žiadne"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Žiadna"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"Spustiť aplikáciu <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Ďalšie aplikácie"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Kruh"</string>
@@ -764,7 +761,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Okamžité aplikácie nevyžadujú inštaláciu."</string>
     <string name="app_info" msgid="6856026610594615344">"Info o aplikácii"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Prejsť na internet"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Mobilné dátové prenosy"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Mobilné dáta"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Pripojenie Wi-Fi je vypnuté"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Rozhranie Bluetooth je vypnuté"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Nastavenie Nerušiť je vypnuté"</string>
