@@ -145,13 +145,15 @@ public class NotificationSnooze extends LinearLayout
     }
 
     private void showSnoozeOptions(boolean show) {
-        mExpanded = show;
-        animateSnoozeOptions(show);
         int drawableId = show ? com.android.internal.R.drawable.ic_collapse_notification
                 : com.android.internal.R.drawable.ic_expand_notification;
         mExpandButton.setImageResource(drawableId);
-        if (mGutsContainer != null) {
-            mGutsContainer.onHeightChanged();
+        if (mExpanded != show) {
+            mExpanded = show;
+            animateSnoozeOptions(show);
+            if (mGutsContainer != null) {
+                mGutsContainer.onHeightChanged();
+            }
         }
     }
 
