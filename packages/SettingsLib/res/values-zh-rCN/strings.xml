@@ -56,10 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"共享互联网连接"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"消息权限"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 卡存取权限"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"使用高品质音频：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"使用高品质音频"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"已连接到媒体音频"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"已连接到手机音频"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"已连接到文件传输服务器"</string>
@@ -314,11 +312,11 @@
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"使用 sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"已停用"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"全色盲"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"绿色弱视（红绿色）"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"绿色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"红色弱视（红绿色）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"蓝色弱视（蓝黄色）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"此功能为实验性功能，可能会影响性能。"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"这是实验性功能，性能可能不稳定。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"还剩大约 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"还需 <xliff:g id="TIME">%1$s</xliff:g>充满电"</string>

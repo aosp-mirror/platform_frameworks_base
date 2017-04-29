@@ -56,10 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"သတင်းရယူမှု"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM အသုံးပြုခြင်း"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"အရည်အသွေးမြင့် အသံအမျိုးအစားကို သုံးရန်− <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"အရည်အသွေးမြင့် အသံအမျိုးအစားကိုသုံးရန်"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"မီဒီယာအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ဖုန်းအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ဖိုင်လွှဲပြောင်းမည့်ဆာဗာနှင့် ချိတ်ဆက်ထားပြီး"</string>
@@ -169,7 +167,7 @@
     <string name="mock_location_app" msgid="7966220972812881854">"တည်နေရာအတုပြု အက်ပ်ရွေးရန်"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြ အက်ပ်သတ်မှတ်ထားခြင်းမရှိပါ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"တည်နေရာအတုပြ အက်ပ်- <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"ကွန်ရက်လုပ်ငန်း"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"ချိတ်ဆက်ဆောင်ရွက်ခြင်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi‑Fi မှ မိုဘိုင်းသို့ လွှဲပြောင်းရန်"</string>
@@ -218,7 +216,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"လိုကယ်တာမီနယ်"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"local shell အသုံးပြုခွင့်ကမ်းလှမ်းသော တာမင်နယ်အပလီကေးရှင်းဖွင့်ပါ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP စစ်ဆေးမှု"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCPစစ်ဆေးခြင်းလုပ်ဆောင်မှုကို သတ်မှတ်မည်"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP စစ်ဆေးပုံကို သတ်မှတ်မည်"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"အမှားရှာဖွေဖယ်ရှားခြင်း"</string>
     <string name="debug_app" msgid="8349591734751384446">"အမှားရှာသည့်အပလီကေးရှင်းရွေးချယ်ရန်"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"အမှားရှာသည့်အပလီကေးရှင်းတခုမှ မသတ်မှတ်ထားပါ"</string>
@@ -318,7 +316,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaly (အပြာ-အဝါ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"အရောင်ပြင်ဆင်မှု"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဒီအင်္ဂါရပ်မှာ စမ်းသပ်မှု ဖြစ်၍ လုပ်ကိုင်မှုကို အကျိုးသက်ရောက်နိုင်သည်။"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဤဝန်ဆောင်မှုမှာ စမ်းသပ်အဆင့်သာဖြစ်၍ လုပ်ဆောင်မှုအားနည်းနိုင်သည်။"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်လိုပါသည်"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုပါသည်"</string>

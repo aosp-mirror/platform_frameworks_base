@@ -56,10 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Kushiriki muunganisho wa tovuti"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Ufikiaji wa Ujumbe"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Ufikiaji wa SIM"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Tumia sauti ya ubora wa juu: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Tumia sauti ya ubora wa juu"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Imeunganishwa kwenye sikika ya njia ya mawasiliano"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Imeunganishwa kwenye sauti ya simu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Imeunganishwa kwenye seva ya kuhamisha faili"</string>
@@ -106,7 +104,7 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"Hakuna chaguo-misingi zilizowekwa"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Mipangilio ya maandishi kwa hotuba"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Kubadilisha maandishi hadi usemi"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"Kiwango cha usemaji"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Kasi ya kutamka"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kasi ya kutamkwa kwa maneno"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Giza"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Huathiri sauti ya matamshi yaliyounganishwa"</string>
@@ -308,7 +306,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Badilisha..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Tayari faili imesimbwa kwa njia fiche"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Inabadilisha kuwa usimbaji fiche unaotegemea faili"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Badilisha sehemu za data kuwa usimbaji unaotegemea faili.\n!!Onyo!! Hatua hii itafuta data yako yote.\nKipengele hiki ni cha alpha, na huenda kisifanye kazi vizuri.\nBonyeza \'Futa na ubadilishe...\'  ili uendelee."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Badilisha sehemu za data kuwa usimbaji unaotegemea faili.\n!!Onyo!! Hatua hii itafuta data yako yote.\nKipengele hiki ni cha alpha na huenda kisifanye kazi vizuri.\nBonyeza \'Futa na ubadilishe...\'  ili uendelee."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Futa na uibadilishe..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Hali ya rangi ya picha"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Tumia sRGB"</string>

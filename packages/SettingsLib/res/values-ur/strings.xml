@@ -56,10 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"انٹرنیٹ کنکشن کا اشتراک کرنا"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"پیغام تک رسائی"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"‏SIM رسائی"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"اعلی معیار کی آڈیو استعمال کریں: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"اعلی معیار کی آڈیو استعمال کریں"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"میڈیا آڈیو سے مربوط"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"فون آڈیو سے مربوط"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"فائل منتقلی سرور سے مربوط ہو گیا ہے"</string>
@@ -93,11 +91,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ہٹائی گئی ایپس"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ہٹائی گئی ایپس اور صارفین"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏USB مربوط کرنا"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏USB ٹیتھرنگ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"پورٹیبل ہاٹ اسپاٹ"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"بلوٹوتھ مربوط کرنا"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"مربوط کرنا"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"مربوط کرنا اور پورٹیبل ہاٹ اسپاٹ"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"بلوٹوتھ ٹیتھرنگ"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ٹیتھرنگ"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"ٹیتھرنگ و پورٹیبل ہاٹ اسپاٹ"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"تمام کام کی ایپس"</string>
     <string name="user_guest" msgid="8475274842845401871">"مہمان"</string>
     <string name="unknown" msgid="1592123443519355854">"نامعلوم"</string>
@@ -151,7 +149,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"ایپ ڈویلپمنٹ کیلئے اختیارات سیٹ کریں"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"اس صارف کیلئے ڈیولپر کے اختیارات دستیاب نہیں ہیں"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"‏VPN ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ربط کی ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ٹیتھرنگ ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"رسائی کی جگہ کے نام کی ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="enable_adb" msgid="7982306934419797485">"‏USB ڈیبگ کرنا"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"‏USB مربوط ہونے پر ڈيبگ کرنے کی وضع"</string>

@@ -56,10 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ចែករំលែក​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"​​ចូល​ដំណើរការ​សារ"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ការចូលដំណើរការស៊ីម"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"ប្រើ​សំឡេង​គុណភាព​ខ្ពស់៖ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"ប្រើ​សំឡេង​គុណភាព​ខ្ពស់"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"បា​ន​ភ្ជាប់​ទៅ​អូឌីយ៉ូ​មេឌៀ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"តភ្ជាប់​ទៅ​អូឌីយ៉ូ​ទូរស័ព្ទ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"បាន​តភ្ជាប់​ទៅ​ម៉ាស៊ីន​មេ​ផ្ទេរ​ឯកសារ"</string>
@@ -146,7 +144,7 @@
     <string name="choose_profile" msgid="6921016979430278661">"ជ្រើសរើស​កម្រងព័ត៌មាន"</string>
     <string name="category_personal" msgid="1299663247844969448">"ផ្ទាល់ខ្លួន"</string>
     <string name="category_work" msgid="8699184680584175622">"កន្លែង​ធ្វើការ"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"ជម្រើស​អ្នក​អភិវឌ្ឍ"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"ជម្រើស​អ្នក​អភិវឌ្ឍន៍"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"បើកដំណើរការជម្រើសអ្នកអភិវឌ្ឍន៍"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"កំណត់​ជម្រើស​សម្រាប់​ការ​អភិវឌ្ឍ​កម្មវិធី"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"ជម្រើស​អ្នក​អភិវឌ្ឍ​មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​នេះ"</string>
@@ -301,15 +299,15 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"សេវាកម្ម​កំពុង​ដំណើរការ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"មើល និង​គ្រប់គ្រង​សេវាកម្ម​កំពុង​ដំណើរការ​បច្ចុប្បន្ន"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"ការប្រតិបត្តិ WebView"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"ការអនុវត្ត WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"កំណត់ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ជម្រើសនេះលែងមានសុពលភាពទៀតហើយ ព្យាយាមម្តងទៀត"</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"បម្លែងទៅជាការអ៊ីនគ្រីបឯកសារ"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"បំប្លែងទៅជាការអ៊ិនគ្រីបឯកសារ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"បម្លែង…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"បានអ៊ីនគ្រីបឯកសាររួចហើយ"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"កំពុងបម្លែងទៅការអ៊ីនគ្រីបដែលផ្អែកលើឯកសារ"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"បម្លែងការបែងចែកទិន្នន័យទៅជាការអ៊ីនគ្រីបដែលផ្អែកលើឯកសារ។\n !!ព្រមាន!! សកម្មភាពនេះនឹងលុបទិន្នន័យរបស់អ្នកទាំងអស់។\n លក្ខណៈពិសេសនេះជាការសាកល្បងដំបូង ហើយអាចនឹងដំណើរការមិនប្រក្រតី។\n សូមចុច \'សម្អាត និងបម្លែង...\' ដើម្បីបន្ត។"</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"សម្អាត និងបម្លែង…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"បំប្លែងការបែងចែកទិន្នន័យទៅជាការអ៊ិនគ្រីបដែលផ្អែកលើឯកសារ។\n !!ព្រមាន!! សកម្មភាពនេះនឹងលុបទិន្នន័យរបស់អ្នកទាំងអស់។\n មុខងារនេះសំខាន់ណាស់ ហើយអាចនឹងដំណើរការមិនប្រក្រតី។\n សូមចុច \'សម្អាត និងបំប្លែង...\' ដើម្បីបន្ត។"</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"សម្អាត និងបំប្លែង…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"របៀបនៃពណ៌រូបភាព"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"ប្រើ sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"បាន​បិទ"</string>
@@ -318,7 +316,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (ក្រហម​ពណ៌​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaly (ពណ៌​ខៀវ​-លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ការ​កែ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"លក្ខណៈ​នេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ការ​អនុវត្ត។"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"មុខងារនេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ដំណើរការ​។"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"សល់​ប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"សល់ <xliff:g id="TIME">%1$s</xliff:g> ទើប​សាកថ្ម​ពេញ"</string>

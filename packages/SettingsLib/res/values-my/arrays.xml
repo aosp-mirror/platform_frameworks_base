@@ -50,7 +50,7 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"ဘယ်တော့မှ မစစ်ဆေးပါနှင့်"</item>
-    <item msgid="6042769699089883931">"DRMအကြောင်းအရာကိုသာ စစ်ဆေးမည်"</item>
+    <item msgid="6042769699089883931">"DRM အကြောင်းအရာကိုသာ စစ်ဆေးရန်"</item>
     <item msgid="9174900380056846820">"အမြဲစစ်ဆေးရန်"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
