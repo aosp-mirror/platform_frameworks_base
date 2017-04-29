@@ -7739,6 +7739,14 @@ public final class Settings {
                 "location_background_throttle_interval_ms";
 
         /**
+         * Most frequent location update interval in milliseconds that proximity alert is allowed
+         * to request.
+         * @hide
+         */
+        public static final String LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS =
+                "location_background_throttle_proximity_alert_interval_ms";
+
+        /**
          * Packages that are whitelisted for background throttling (throttling will not be applied).
          * @hide
          */
