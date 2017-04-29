@@ -60,6 +60,9 @@
              mode. -->
         <attr name="colorMultiSelectHighlight" format="color" />
 
+        <!-- Drawable to be drawn over the view to mark it as autofilled-->
+        <attr name="autofilledHighlight" format="reference" />
+
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
         <!-- The alpha applied to the foreground color to create the primary text color. -->
