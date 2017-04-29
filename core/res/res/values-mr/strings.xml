@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"आपल्या वाहकाने या स्थानावर व्हॉइस आणि आणीबाणी कॉल तात्पुरते निलंबित केले आहेत"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कवर पोहोचूू शकत नाही"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रिसेप्शन सुधारण्यासाठी प्रणाली &gt; नेटवर्क आणि इंटरनेट &gt; मोबाइल नेटवर्क &gt; प्राधान्य दिलेला नेटवर्क प्रकार येथे निवडलेला प्रकार बदलून पहा."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"अलर्ट"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"कॉल फॉरवर्डिंग"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"इमर्जन्सी कॉलबॅक मोड"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"मोबाइल डेटा अलर्ट"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS संदेश"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"व्हॉइसमेल संदेश"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi कॉलिंग"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"समवयस्क व्यक्तीने TTY मोड पूर्ण ची विनंती केली"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
@@ -284,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"आपण परस्‍परसंवाद करीत असलेल्‍या विंडोची सामग्री तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"टॅप केलेले आयटम मोठ्‍याने बोलले जातील आणि जेश्चरचा वापर करून स्क्रीन एक्सप्लोर केली जाऊ शकते."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"वर्धित केलेली वेब प्रवेशयोग्यता चालू करा"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"अ‍ॅप सामग्री अधिक प्रवेशयोग्‍य बनविण्‍यासाठी कदाचित स्‍क्रिप्‍ट स्‍थापित केली जाऊ शकतात."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"आपण टाइप करता त्या मजकुराचे निरीक्षण करा"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर आणि संकेतशब्‍द यासारखा वैयक्तिक डेटा समाविष्‍ट करते."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"प्रदर्शन विस्तृतीकरण नियंत्रित करा"</string>
@@ -443,9 +448,9 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाय-फाय वरून कनेक्ट करा आणि डिस्कनेक्ट करा"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय प्रवेश बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डिव्हाइस कॉन्फिगरेशनमध्ये बदल करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाय-फाय मल्‍टिकास्‍ट रिसेप्‍शनला अनुमती द्या"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या टॅब्लेटवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या टॅब्लेटवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक पॉवर वापरते."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"केवळ आपला टीव्ही न वापरता, एकाधिक पत्ते वापरून एका वाय-फाय नेटवकवरील सर्व डिव्हाइसवर पाठविलेली पॅकेट प्राप्त करण्यासाठी अॅपला अनुमती देते."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक पॉवर वापरते."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटुथ सेटिंग्जवर प्रवेश करा"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक ब्लूटुथ टॅबलेट कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"स्थानिक ब्लूटुथ टीव्ही कॉन्फिगर करण्यासाठी आणि दूरस्थ डिव्हाइसेससह शोधण्यासाठी आणि जोडण्यासाठी अॅपला अनुमती देते."</string>
@@ -1604,7 +1609,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने स्थापित केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अद्यतनित केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरीचे आयुष्य सुधारित करण्‍यात मदत करण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरी लाइफ सुधारित करण्‍यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. आपण सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, आपण प्रतिमा टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
@@ -1733,11 +1738,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"वेळ इनपुटसाठी मजकूर इनपुट मोडवर स्विच करा."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"वेळ इनपुटसाठी घड्याळ मोडवर स्विच करा."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"स्वयं-भरण पर्याय"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"स्वत: भरण्यासाठी सेव्ह करा"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"सामग्रींची स्‍वयं-भरणा करता येणार नाही"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> वर जतन करायचे?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> वर <xliff:g id="TYPE">%1$s</xliff:g> जतन करायचे?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="LABEL">%3$s</xliff:g> वर <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> जतन करायचे का?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="LABEL">%4$s</xliff:g> वर <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> जतन करायचे का?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; मध्ये सेव्ह करायचे का?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE">%1$s</xliff:g> सेव्ह करायची?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE_0">%1$s</xliff:g> आणि <xliff:g id="TYPE_1">%2$s</xliff:g> सेव्ह करायची?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> सेव्ह करायची?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"जतन करा"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"नाही धन्यवाद"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"संकेतशब्द"</string>

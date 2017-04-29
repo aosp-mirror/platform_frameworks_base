@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Nhà cung cấp dịch vụ của bạn đã tạm ngưng các cuộc gọi thoại và cuộc gọi khẩn cấp ở vị trí này"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Không thể kết nối mạng"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại mạng được chọn trong Hệ thống &gt; Mạng và Internet &gt; Mạng di động &gt; Loại mạng ưa thích."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Thông báo"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Chuyển tiếp cuộc gọi"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Chế độ gọi lại khẩn cấp"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Thông báo dữ liệu di động"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"Tin nhắn SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Thư thoại"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Gọi qua Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ ĐẦY ĐỦ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ VCO"</string>
@@ -284,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Bật Khám phá bằng cách chạm"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Mục đã nhấn sẽ được nói to và bạn có thể khám phá màn hình bằng cử chỉ."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Bật khả năng truy cập web nâng cao"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Tập lệnh có thể được cài đặt để làm cho nội dung ứng dụng dễ truy cập hơn."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Xem nội dung bạn nhập"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kiểm soát thu phóng màn hình"</string>
@@ -1732,11 +1737,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Chuyển sang chế độ nhập văn bản để nhập thời gian."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Chuyển sang chế độ đồng hồ để nhập thời gian."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Tùy chọn tự động điền"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Lưu cho Tự động điền"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Không thể tự động điền nội dung"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Lưu vào <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Lưu <xliff:g id="TYPE">%1$s</xliff:g> vào <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Lưu <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> vào <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Lưu <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> vào <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Lưu vào &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Lưu <xliff:g id="TYPE">%1$s</xliff:g> vào &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Lưu <xliff:g id="TYPE_0">%1$s</xliff:g> và <xliff:g id="TYPE_1">%2$s</xliff:g> vào &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Lưu <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> và <xliff:g id="TYPE_2">%3$s</xliff:g> vào &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Lưu"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Không, cảm ơn"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"mật khẩu"</string>

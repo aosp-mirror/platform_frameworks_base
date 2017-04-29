@@ -98,7 +98,14 @@
     <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Tu operador ha suspendido temporalmente las llamadas de voz en esta ubicación"</string>
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Tu operador ha suspendido temporalmente las llamadas de emergencia y de voz en esta ubicación"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mejorar la recepción, prueba a cambiar el tipo de red seleccionado en Sistema &gt; Red e Internet &gt; Redes móviles &gt; Tipo de red preferida."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mejorar la recepción, prueba a cambiar el tipo de red seleccionado en Sistema &gt; Red e Internet &gt; Redes móviles &gt; Tipo de red preferido."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamada"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de llamada de emergencia"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertas de datos móviles"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"Mensajes SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensajes de voz"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Llamada por Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Un dispositivo ha solicitado el modo TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Un dispositivo ha solicitado el modo TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Un dispositivo ha solicitado el modo TTY VCO"</string>
@@ -136,7 +143,7 @@
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"Llamada Wi-Fi de %s"</item>
   </string-array>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"No"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferencia a datos móviles"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
@@ -284,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contenido de una ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar la exploración táctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Los elementos que tocas se dicen en voz alta y se puede explorar la pantalla mediante gestos."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar la accesibilidad web mejorada"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Es posible que se instalen secuencias de comandos para que el contenido de las aplicaciones sea más accesible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el texto que escribes"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Incluye datos personales como números de tarjetas de crédito y contraseñas."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controla la ampliación de la pantalla"</string>
@@ -987,8 +992,8 @@
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atención"</string>
     <string name="loading" msgid="7933681260296021180">"Cargando..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"SÍ"</string>
-    <string name="capital_off" msgid="6815870386972805832">"NO"</string>
+    <string name="capital_on" msgid="1544682755514494298">"ACTIVADO"</string>
+    <string name="capital_off" msgid="6815870386972805832">"DESACTIVADO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar acción utilizando"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Completar acción con %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Completar acción"</string>
@@ -1069,7 +1074,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"El proceso <xliff:g id="PROC">%1$s</xliff:g> ha superado su límite de memoria de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de pila disponible que puedes compartir con su desarrollador (ten cuidado, ya que puede incluir información personal a la que tenga acceso la aplicación)."</string>
     <string name="sendText" msgid="5209874571959469142">"Selecciona una acción para el texto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumen del timbre"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Volumen multimedia"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Volumen de multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Tono de silencio establecido"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volumen de la llamada"</string>
@@ -1080,7 +1085,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volumen de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volumen del tono"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumen de llamada"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen multimedia"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen de multimedia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumen de notificaciones"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Tono por defecto"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1467,7 +1472,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"El acceso directo a accesibilidad ha desactivado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Selecciona la función que se utilizará cuando toques el botón Accesibilidad:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Para cambiar las funciones, mantén pulsado el botón Accesibilidad."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ampliación"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ampliar"</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuario actual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Cambiando a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Cerrando la sesión de <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1603,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado por el administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado por el administrador"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Para mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se muestren hasta que no las toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
@@ -1732,11 +1737,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Cambia al modo de introducción de texto para escribir la hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Cambia al modo de reloj para escribir la hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opciones de Autocompletar"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Guardar en la función Autocompletar"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"El contenido no se puede autocompletar"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"¿Guardar en <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"¿Guardar <xliff:g id="TYPE">%1$s</xliff:g> en <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"¿Guardar <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"¿Guardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g> en <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"¿Guardar en &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"¿Guardar <xliff:g id="TYPE">%1$s</xliff:g> en &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"¿Guardar <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"¿Guardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g> en &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Guardar"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, gracias"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"contraseña"</string>
