@@ -56,10 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Dijeljenje internet veze"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Pristup poruci"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Pristup SIM-u"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (2221025895896419505) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (5860996587596508755) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Koristi visokokvalitetan zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Koristi visokokvalitetan zvuk"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Povezano sa zvukom medija"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Povezano na zvuk telefona"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Povezan na server za prijenos podataka"</string>
@@ -97,7 +95,7 @@
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prijenosna pristupna tačka"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Dijeljenje Bluetooth veze"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Dijeljenje veze"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Dijeljenje internetske veze i prijenosna pristupna tačka"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Povezivanje putem mobitela i prijenosna pristupna tačka"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Sve radne aplikacije"</string>
     <string name="user_guest" msgid="8475274842845401871">"Gost"</string>
     <string name="unknown" msgid="1592123443519355854">"Nepoznato"</string>
@@ -129,7 +127,7 @@
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"Postavke za <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Pokreni postavke programa"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Željeni program"</string>
-    <string name="tts_general_section_title" msgid="4402572014604490502">"Opće"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Opće postavke"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Postavite visinu glasa"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Visinu glasa koji izgovara tekst postavite na podrazumjevanu."</string>
   <string-array name="tts_rate_entries">
@@ -318,7 +316,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomalija (crveno-zeleno)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalija (plavo-žuta)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Ispravka boje"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ova funkcija je eksperimentalna te može utjecati na performanse."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ova funkcija je eksperimentalna i može uticati na performanse."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Zamjenjuje <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Preostalo je otprilike još <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Do potpune napunjenosti preostalo je <xliff:g id="TIME">%1$s</xliff:g>"</string>
@@ -348,8 +346,8 @@
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Malo"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Zadano"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Veliko"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Veće"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Najveće"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Vrlo veliko"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Najveći"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Prilagodi (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Pomoć i povratne informacije"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Meni"</string>
