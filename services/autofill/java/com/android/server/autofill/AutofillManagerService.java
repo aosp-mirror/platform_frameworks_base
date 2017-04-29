@@ -26,6 +26,7 @@ import static com.android.server.autofill.Helper.bundleToString;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -125,7 +126,7 @@ public final class AutofillManagerService extends SystemService {
     public AutofillManagerService(Context context) {
         super(context);
         mContext = context;
-        mUi = new AutoFillUI(mContext);
+        mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
 
         final boolean debug = Build.IS_DEBUGGABLE;
         Slog.i(TAG, "Setting debug to " + debug);
