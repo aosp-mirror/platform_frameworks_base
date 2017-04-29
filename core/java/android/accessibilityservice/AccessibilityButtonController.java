@@ -19,6 +19,7 @@ package android.accessibilityservice;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -91,7 +92,7 @@ public final class AccessibilityButtonController {
      * @param callback the callback to add, must be non-null
      */
     public void registerAccessibilityButtonCallback(@NonNull AccessibilityButtonCallback callback) {
-        registerAccessibilityButtonCallback(callback, new Handler());
+        registerAccessibilityButtonCallback(callback, new Handler(Looper.getMainLooper()));
     }
 
     /**
