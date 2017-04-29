@@ -619,20 +619,10 @@ public abstract class AccessibilityService extends Service {
      * @return The controller for fingerprint gestures, or {@code null} if gestures are unavailable.
      */
     @RequiresPermission(android.Manifest.permission.USE_FINGERPRINT)
-    public final @Nullable FingerprintGestureController getFingerprintGestureController() {
-        if ((mFingerprintGestureController == null)
-                && getPackageManager().hasSystemFeature(FEATURE_FINGERPRINT)) {
-            FingerprintManager fingerprintManager = getSystemService(FingerprintManager.class);
-            if ((fingerprintManager != null) && fingerprintManager.isHardwareDetected()) {
-                AccessibilityServiceInfo info = getServiceInfo();
-                int fingerprintCapabilityMask =
-                        AccessibilityServiceInfo.CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES;
-                if ((info.getCapabilities() & fingerprintCapabilityMask) != 0) {
-                    mFingerprintGestureController = new FingerprintGestureController(
-                            AccessibilityInteractionClient.getInstance()
-                                    .getConnection(mConnectionId));
-                }
-            }
+    public final @NonNull FingerprintGestureController getFingerprintGestureController() {
+        if (mFingerprintGestureController == null) {
+            mFingerprintGestureController = new FingerprintGestureController(
+                    AccessibilityInteractionClient.getInstance().getConnection(mConnectionId));
         }
         return mFingerprintGestureController;
     }
