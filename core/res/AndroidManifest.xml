@@ -1877,16 +1877,17 @@
         android:description="@string/permdesc_systemAlertWindow"
         android:protectionLevel="signature|preinstalled|appop|pre23|development" />
 
-    <!-- Allows an app to run in the background.
-         <p>Protection level: signature
+    <!-- @deprecated Use {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND}
+         @hide
     -->
     <permission android:name="android.permission.RUN_IN_BACKGROUND"
         android:label="@string/permlab_runInBackground"
         android:description="@string/permdesc_runInBackground"
         android:protectionLevel="signature" />
 
-    <!-- Allows an app to use data in the background.
-         <p>Protection level: signature
+    <!-- @deprecated Use
+        {@link android.Manifest.permission#REQUEST_COMPANION_USE_DATA_IN_BACKGROUND}
+         @hide
     -->
     <permission android:name="android.permission.USE_DATA_IN_BACKGROUND"
         android:label="@string/permlab_useDataInBackground"
@@ -1897,6 +1898,23 @@
          This permission is not available to third party applications. -->
     <permission android:name="android.permission.SET_DISPLAY_OFFSET"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows a companion app to run in the background.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"
+                android:label="@string/permlab_runInBackground"
+                android:description="@string/permdesc_runInBackground"
+                android:protectionLevel="signature" />
+
+    <!-- Allows a companion app to use data in the background.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND"
+                android:label="@string/permlab_useDataInBackground"
+                android:description="@string/permdesc_useDataInBackground"
+                android:protectionLevel="signature" />
+
 
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
