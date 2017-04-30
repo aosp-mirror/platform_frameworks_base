@@ -29,6 +29,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     tzdata_update2 \
     android.hidl.base-V1.0-java-static \
     android.hardware.biometrics.fingerprint-V2.1-java-static \
+    android.hardware.tetheroffload.control-V1.0-java-static \
     android.hardware.vibrator-V1.0-java-constants \
 
 ifneq ($(INCREMENTAL_BUILDS),)
