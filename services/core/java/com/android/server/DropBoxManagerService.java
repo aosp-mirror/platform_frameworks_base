@@ -371,6 +371,14 @@ public final class DropBoxManagerService extends SystemService {
                 doPrint = true;
             } else if (args[i].equals("-f") || args[i].equals("--file")) {
                 doFile = true;
+            } else if (args[i].equals("-h") || args[i].equals("--help")) {
+                pw.println("Dropbox (dropbox) dump options:");
+                pw.println("  [-h|--help] [-p|--print] [-f|--file] [timestamp]");
+                pw.println("    -h|--help: print this help");
+                pw.println("    -p|--print: print full contents of each entry");
+                pw.println("    -f|--file: print path of each entry's file");
+                pw.println("  [timestamp] optionally filters to only those entries.");
+                return;
             } else if (args[i].startsWith("-")) {
                 out.append("Unknown argument: ").append(args[i]).append("\n");
             } else {

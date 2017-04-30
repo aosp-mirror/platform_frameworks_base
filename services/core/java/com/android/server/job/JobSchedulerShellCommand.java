@@ -16,11 +16,11 @@
 
 package com.android.server.job;
 
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 
@@ -46,18 +46,20 @@ public class JobSchedulerShellCommand extends ShellCommand {
             switch (cmd != null ? cmd : "") {
                 case "run":
                     return runJob(pw);
+                case "timeout":
+                    return timeout(pw);
                 case "monitor-battery":
-                    return runMonitorBattery(pw);
+                    return monitorBattery(pw);
                 case "get-battery-seq":
-                    return runGetBatterySeq(pw);
+                    return getBatterySeq(pw);
                 case "get-battery-charging":
-                    return runGetBatteryCharging(pw);
+                    return getBatteryCharging(pw);
                 case "get-battery-not-low":
-                    return runGetBatteryNotLow(pw);
+                    return getBatteryNotLow(pw);
                 case "get-storage-seq":
-                    return runGetStorageSeq(pw);
+                    return getStorageSeq(pw);
                 case "get-storage-not-low":
-                    return runGetStorageNotLow(pw);
+                    return getStorageNotLow(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -154,7 +156,42 @@ public class JobSchedulerShellCommand extends ShellCommand {
         }
     }
 
-    private int runMonitorBattery(PrintWriter pw) throws Exception {
+    private int timeout(PrintWriter pw) throws Exception {
+        checkPermission("force timeout jobs");
+
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-u":
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
+        }
+
+        final String pkgName = getNextArg();
+        final String jobIdStr = getNextArg();
+        final int jobId = jobIdStr != null ? Integer.parseInt(jobIdStr) : -1;
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInternal.executeTimeoutCommand(pw, pkgName, userId, jobIdStr != null, jobId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private int monitorBattery(PrintWriter pw) throws Exception {
         checkPermission("change battery monitoring");
         String opt = getNextArgRequired();
         boolean enabled;
@@ -166,37 +203,42 @@ public class JobSchedulerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: unknown option " + opt);
             return 1;
         }
-        mInternal.setMonitorBattery(enabled);
-        if (enabled) pw.println("Battery monitoring enabled");
-        else pw.println("Battery monitoring disabled");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setMonitorBattery(enabled);
+            if (enabled) pw.println("Battery monitoring enabled");
+            else pw.println("Battery monitoring disabled");
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         return 0;
     }
 
-    private int runGetBatterySeq(PrintWriter pw) {
+    private int getBatterySeq(PrintWriter pw) {
         int seq = mInternal.getBatterySeq();
         pw.println(seq);
         return 0;
     }
 
-    private int runGetBatteryCharging(PrintWriter pw) {
+    private int getBatteryCharging(PrintWriter pw) {
         boolean val = mInternal.getBatteryCharging();
         pw.println(val);
         return 0;
     }
 
-    private int runGetBatteryNotLow(PrintWriter pw) {
+    private int getBatteryNotLow(PrintWriter pw) {
         boolean val = mInternal.getBatteryNotLow();
         pw.println(val);
         return 0;
     }
 
-    private int runGetStorageSeq(PrintWriter pw) {
+    private int getStorageSeq(PrintWriter pw) {
         int seq = mInternal.getStorageSeq();
         pw.println(seq);
         return 0;
     }
 
-    private int runGetStorageNotLow(PrintWriter pw) {
+    private int getStorageNotLow(PrintWriter pw) {
         boolean val = mInternal.getStorageNotLow();
         pw.println(val);
         return 0;
@@ -216,6 +258,12 @@ public class JobSchedulerShellCommand extends ShellCommand {
         pw.println("         connectivity are not currently met");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
+        pw.println("  timeout [-u | --user USER_ID] [PACKAGE] [JOB_ID]");
+        pw.println("    Trigger immediate timeout of currently executing jobs, as if their.");
+        pw.println("    execution timeout had expired.");
+        pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's job is to be run; the default is");
+        pw.println("         all users");
         pw.println("  monitor-battery [on|off]");
         pw.println("    Control monitoring of all battery changes.  Off by default.  Turning");
         pw.println("    on makes get-battery-seq useful.");

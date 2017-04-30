@@ -513,40 +513,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     // before we decide it must be hung.
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
 
-    // How long we will retain processes hosting content providers in the "last activity"
-    // state before allowing them to drop down to the regular cached LRU list.  This is
-    // to avoid thrashing of provider processes under low memory situations.
-    static final int CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
-
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real, when the process was
     // started with a wrapper for instrumentation (such as Valgrind) because it
     // could take much longer than usual.
     static final int PROC_START_TIMEOUT_WITH_WRAPPER = 1200*1000;
-
-    // How long to wait after going idle before forcing apps to GC.
-    static final int GC_TIMEOUT = 5*1000;
-
-    // The minimum amount of time between successive GC requests for a process.
-    static final int GC_MIN_INTERVAL = 60*1000;
-
-    // The minimum amount of time between successive PSS requests for a process.
-    static final int FULL_PSS_MIN_INTERVAL = 10*60*1000;
-
-    // The minimum amount of time between successive PSS requests for a process
-    // when the request is due to the memory state being lowered.
-    static final int FULL_PSS_LOWERED_INTERVAL = 2*60*1000;
-
-    // The rate at which we check for apps using excessive power -- 15 mins.
-    static final int POWER_CHECK_DELAY = (DEBUG_POWER_QUICK ? 2 : 15) * 60*1000;
-
-    // The minimum sample duration we will allow before deciding we have
-    // enough data on wake locks to start killing things.
-    static final int WAKE_LOCK_MIN_CHECK_DURATION = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
-
-    // The minimum sample duration we will allow before deciding we have
-    // enough data on CPU usage to start killing things.
-    static final int CPU_MIN_CHECK_DURATION = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
 
     // How long we allow a receiver to run before giving up on it.
     static final int BROADCAST_FG_TIMEOUT = 10*1000;
@@ -557,18 +528,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // How long we wait until we timeout on key dispatching during instrumentation.
     static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT = 60*1000;
-
-    // This is the amount of time an app needs to be running a foreground service before
-    // we will consider it to be doing interaction for usage stats.
-    static final int SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
-
-    // Maximum amount of time we will allow to elapse before re-reporting usage stats
-    // interaction with foreground processes.
-    static final long USAGE_STATS_INTERACTION_INTERVAL = 24*60*60*1000L;
-
-    // This is the amount of time we allow an app to settle after it goes into the background,
-    // before we start restricting what it can do.
-    static final int BACKGROUND_SETTLE_TIME = 1*60*1000;
 
     // How long to wait in getAssistContextExtras for the activity and foreground services
     // to respond with the result.
@@ -2127,7 +2086,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     checkExcessivePowerUsageLocked(true);
                     removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
                     Message nmsg = obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                    sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
+                    sendMessageDelayed(nmsg, mConstants.POWER_CHECK_DELAY);
                 }
             } break;
             case REPORT_MEM_USAGE_MSG: {
@@ -4239,7 +4198,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "Unable to set a higher trim level than current level");
             }
             if (!(level < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
-                    app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND)) {
+                    app.curProcState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)) {
                 throw new IllegalArgumentException("Unable to set a background trim level "
                     + "on a foreground process");
             }
@@ -5325,7 +5284,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     memInfos.add(new ProcessMemInfo(rec.processName, rec.pid, rec.setAdj,
                             rec.setProcState, rec.adjType, rec.makeAdjReason()));
                 }
-                if ((rec.lastLowMemory+GC_MIN_INTERVAL) <= now) {
+                if ((rec.lastLowMemory+mConstants.GC_MIN_INTERVAL) <= now) {
                     // The low memory report is overriding any current
                     // state for a GC request.  Make sure to do
                     // heavy/important/visible/foreground processes first.
@@ -7083,7 +7042,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 // Start looking for apps that are abusing wake locks.
                 Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
+                mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_DELAY);
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
 
@@ -12257,14 +12216,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void updateSleepIfNeededLocked() {
-        if (mSleeping && !shouldSleepLocked()) {
+        final boolean shouldSleep = shouldSleepLocked();
+        if (mSleeping && !shouldSleep) {
             mSleeping = false;
             startTimeTrackingFocusedActivityLocked();
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
             mStackSupervisor.comeOutOfSleepIfNeededLocked();
             sendNotifyVrManagerOfSleepState(false);
             updateOomAdjLocked();
-        } else if (!mSleeping && shouldSleepLocked()) {
+        } else if (!mSleeping && shouldSleep) {
             mSleeping = true;
             if (mCurAppTimeTracker != null) {
                 mCurAppTimeTracker.stop();
@@ -12278,7 +12238,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkExcessivePowerUsageLocked(false);
             mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
             Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-            mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
+            mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_DELAY);
+        }
+
+        // Also update state in a special way for running foreground services UI.
+        switch (mWakefulness) {
+            case PowerManagerInternal.WAKEFULNESS_ASLEEP:
+            case PowerManagerInternal.WAKEFULNESS_DREAMING:
+            case PowerManagerInternal.WAKEFULNESS_DOZING:
+                mServices.updateScreenStateLocked(false);
+                break;
+            case PowerManagerInternal.WAKEFULNESS_AWAKE:
+            default:
+                mServices.updateScreenStateLocked(true);
+                break;
         }
     }
 
@@ -19009,6 +18982,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                                         removeTasksByPackageNameLocked(ssp, userId);
 
+                                        mServices.removeUninstalledPackageLocked(ssp, userId);
+
                                         // Hide the "unsupported display" dialog if necessary.
                                         if (mUnsupportedDisplaySizeDialog != null && ssp.equals(
                                                 mUnsupportedDisplaySizeDialog.getPackageName())) {
@@ -20798,8 +20773,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (adj > ProcessList.BACKUP_APP_ADJ) {
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "oom BACKUP_APP_ADJ for " + app);
                 adj = ProcessList.BACKUP_APP_ADJ;
-                if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
-                    procState = ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
+                if (procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+                    procState = ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
                 }
                 app.adjType = "backup";
                 app.cached = false;
@@ -20831,7 +20806,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.adjType = "cch-started-ui-services";
                     }
                 } else {
-                    if (now < (s.lastActivity + ActiveServices.MAX_SERVICE_INACTIVITY)) {
+                    if (now < (s.lastActivity + mConstants.MAX_SERVICE_INACTIVITY)) {
                         // This service has seen some activity within
                         // recent memory, so we will keep its process ahead
                         // of the background processes.
@@ -20896,8 +20871,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 clientAdj = adj;
                                 clientProcState = procState;
                             } else {
-                                if (now >= (s.lastActivity
-                                        + ActiveServices.MAX_SERVICE_INACTIVITY)) {
+                                if (now >= (s.lastActivity + mConstants.MAX_SERVICE_INACTIVITY)) {
                                     // This service has not seen activity within
                                     // recent memory, so allow it to drop to the
                                     // LRU list if there is no other reason to keep
@@ -20943,7 +20917,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 adjType = "service";
                             }
                         }
-                        if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
+                        if ((cr.flags & (Context.BIND_NOT_FOREGROUND
+                                | Context.BIND_IMPORTANT_BACKGROUND)) == 0) {
                             // This will treat important bound services identically to
                             // the top app, which may behave differently than generic
                             // foreground work.
@@ -20986,6 +20961,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
                                     }
                                 }
+                            }
+                        } else if ((cr.flags & Context.BIND_IMPORTANT_BACKGROUND) == 0) {
+                            if (clientProcState <
+                                    ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+                                clientProcState =
+                                        ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
                             }
                         } else {
                             if (clientProcState <
@@ -21125,7 +21106,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (app.lastProviderTime > 0 && (app.lastProviderTime+CONTENT_PROVIDER_RETAIN_TIME) > now) {
+        if (app.lastProviderTime > 0 &&
+                (app.lastProviderTime+mConstants.CONTENT_PROVIDER_RETAIN_TIME) > now) {
             if (adj > ProcessList.PREVIOUS_APP_ADJ) {
                 adj = ProcessList.PREVIOUS_APP_ADJ;
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
@@ -21147,6 +21129,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             switch (procState) {
                 case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
                 case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
+                case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
                 case ActivityManager.PROCESS_STATE_SERVICE:
                     // These all are longer-term states, so pull them up to the top
                     // of the background states, but not all the way to the top state.
@@ -21342,7 +21325,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     void requestPssAllProcsLocked(long now, boolean always, boolean memLowered) {
         if (!always) {
             if (now < (mLastFullPssTime +
-                    (memLowered ? FULL_PSS_LOWERED_INTERVAL : FULL_PSS_MIN_INTERVAL))) {
+                    (memLowered ? mConstants.FULL_PSS_LOWERED_INTERVAL
+                            : mConstants.FULL_PSS_MIN_INTERVAL))) {
                 return;
             }
         }
@@ -21424,7 +21408,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             while (mProcessesToGc.size() > 0) {
                 ProcessRecord proc = mProcessesToGc.remove(0);
                 if (proc.curRawAdj > ProcessList.PERCEPTIBLE_APP_ADJ || proc.reportLowMemory) {
-                    if ((proc.lastRequestedGc+GC_MIN_INTERVAL)
+                    if ((proc.lastRequestedGc+mConstants.GC_MIN_INTERVAL)
                             <= SystemClock.uptimeMillis()) {
                         // To avoid spamming the system, we will GC processes one
                         // at a time, waiting a few seconds between each.
@@ -21467,10 +21451,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessRecord proc = mProcessesToGc.get(0);
             Message msg = mHandler.obtainMessage(GC_BACKGROUND_PROCESSES_MSG);
 
-            long when = proc.lastRequestedGc + GC_MIN_INTERVAL;
+            long when = proc.lastRequestedGc + mConstants.GC_MIN_INTERVAL;
             long now = SystemClock.uptimeMillis();
-            if (when < (now+GC_TIMEOUT)) {
-                when = now + GC_TIMEOUT;
+            if (when < (now+mConstants.GC_TIMEOUT)) {
+                when = now + mConstants.GC_TIMEOUT;
             }
             mHandler.sendMessageAtTime(msg, when);
         }
@@ -21503,7 +21487,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     final void scheduleAppGcLocked(ProcessRecord app) {
         long now = SystemClock.uptimeMillis();
-        if ((app.lastRequestedGc+GC_MIN_INTERVAL) > now) {
+        if ((app.lastRequestedGc+mConstants.GC_MIN_INTERVAL) > now) {
             return;
         }
         if (!mProcessesToGc.contains(app)) {
@@ -21533,10 +21517,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long uptimeSince = curUptime - mLastPowerCheckUptime;
         mLastPowerCheckRealtime = curRealtime;
         mLastPowerCheckUptime = curUptime;
-        if (realtimeSince < WAKE_LOCK_MIN_CHECK_DURATION) {
+        if (realtimeSince < mConstants.WAKE_LOCK_MIN_CHECK_DURATION) {
             doWakeKills = false;
         }
-        if (uptimeSince < CPU_MIN_CHECK_DURATION) {
+        if (uptimeSince < mConstants.CPU_MIN_CHECK_DURATION) {
             doCpuKills = false;
         }
         int i = mLruProcesses.size();
@@ -21794,7 +21778,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.procStateChanged = true;
             }
         } else if (app.reportedInteraction && (nowElapsed-app.interactionEventTime)
-                > USAGE_STATS_INTERACTION_INTERVAL) {
+                > mConstants.USAGE_STATS_INTERACTION_INTERVAL) {
             // For apps that sit around for a long time in the interactive state, we need
             // to report this at least once a day so they don't go idle.
             maybeUpdateUsageStatsLocked(app, nowElapsed);
@@ -21967,7 +21951,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.fgInteractionTime = nowElapsed;
                 isInteraction = false;
             } else {
-                isInteraction = nowElapsed > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
+                isInteraction = nowElapsed > app.fgInteractionTime
+                        + mConstants.SERVICE_USAGE_INTERACTION_TIME;
             }
         } else {
             // If the app was being forced to the foreground, by say a Toast, then
@@ -21976,8 +21961,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     && app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             app.fgInteractionTime = 0;
         }
-        if (isInteraction && (!app.reportedInteraction
-                || (nowElapsed-app.interactionEventTime) > USAGE_STATS_INTERACTION_INTERVAL)) {
+        if (isInteraction && (!app.reportedInteraction || (nowElapsed-app.interactionEventTime)
+                > mConstants.USAGE_STATS_INTERACTION_INTERVAL)) {
             app.interactionEventTime = nowElapsed;
             String[] packages = app.getPackageList();
             if (packages != null) {
@@ -22493,7 +22478,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             // the handler time base is uptime.  All this means is that we may
                             // stop background uids later than we had intended, but that only
                             // happens because the device was sleeping so we are okay anyway.
-                            mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG, BACKGROUND_SETTLE_TIME);
+                            mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
+                                    mConstants.BACKGROUND_SETTLE_TIME);
                         }
                     }
                 } else {
@@ -22598,7 +22584,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
             final long nowElapsed = SystemClock.elapsedRealtime();
-            final long maxBgTime = nowElapsed - BACKGROUND_SETTLE_TIME;
+            final long maxBgTime = nowElapsed - mConstants.BACKGROUND_SETTLE_TIME;
             long nextTime = 0;
             if (mLocalPowerManager != null) {
                 mLocalPowerManager.startUidChanges();
@@ -22623,7 +22609,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (nextTime > 0) {
                 mHandler.removeMessages(IDLE_UIDS_MSG);
                 mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
-                        nextTime + BACKGROUND_SETTLE_TIME - nowElapsed);
+                        nextTime + mConstants.BACKGROUND_SETTLE_TIME - nowElapsed);
             }
         }
     }
