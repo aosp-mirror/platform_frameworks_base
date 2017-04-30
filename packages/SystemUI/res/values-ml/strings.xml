@@ -50,7 +50,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"അറിയിപ്പുകൾ"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ബ്ലൂടൂത്ത് ടെതർ ചെയ്‌തു"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ടൈപ്പുചെയ്യൽ രീതികൾ സജ്ജീകരിക്കുക"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഭൗതിക കീബോർഡ്"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഫിസിക്കൽ കീബോർഡ്"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"USB ഉപകരണം ആക്‌സസ്സ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്‌ളിക്കേഷനെ അനുവദിക്കണോ?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"USB ആക്‌സസ്സറി ആക്‌സസ്സുചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്ലിക്കേഷനെ അനുവദിക്കണോ?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"ഈ USB ഉപകരണം കണക്റ്റുചെയ്‌തിരിക്കുമ്പോൾ <xliff:g id="ACTIVITY">%1$s</xliff:g> തുറക്കണോ?"</string>
@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"മൊബൈൽ ഡാറ്റ ഓഫാണ്"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ബ്ലൂടൂത്ത് ടെതറിംഗ്."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ഫ്ലൈറ്റ് മോഡ്."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ഓണാണ്."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM കാർഡൊന്നുമില്ല."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"കാരിയർ നെറ്റ്‌വർക്ക് മാറ്റൽ."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ബാറ്ററി വിശദാംശങ്ങൾ തുറക്കുക"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> ആപ്പിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, ഇമെയിലുകൾ, ആപ്‌സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാൻ ഈ ആപ്പിന് കഴിയും."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ മാനേജുചെയ്യുന്നത്. <xliff:g id="APPLICATION">%2$s</xliff:g> ആപ്പിലേക്ക് പ്രൊഫൈൽ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും.\n\nകൂടുതൽ വിവരങ്ങൾക്ക് നിങ്ങളുടെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ മാനേജുചെയ്യുന്നത്. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ആപ്പിലേക്ക് പ്രൊഫൈൽ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും.\n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ആപ്പിലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് നിങ്ങളുടെ വ്യക്തിഗത നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"നിങ്ങൾ സ്വമേധയാ അൺലോക്കുചെയ്യുന്നതുവരെ ഉപകരണം ലോക്കുചെയ്‌തതായി തുടരും"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"അറിയിപ്പുകൾ വേഗത്തിൽ സ്വീകരിക്കുക"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"അൺലോക്കുചെയ്യുന്നതിന് മുമ്പ് അവ കാണുക"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> അറിയിപ്പ്: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"സ്പ്ലിറ്റ്-സ്ക്രീനിനൊപ്പം ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"സ്പ്ലിറ്റ്-സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നത് ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ക്രമീകരണം തുറക്കുക."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ദ്രുത ക്രമീകരണം തുറക്കുക."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ദ്രുത ക്രമീകരണം അടയ്ക്കുക."</string>

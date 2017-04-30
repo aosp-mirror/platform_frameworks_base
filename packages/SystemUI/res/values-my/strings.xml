@@ -155,10 +155,9 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"မိုဘိုင်းဒေတာ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"မိုဘိုင်းဒေတာကို ဖွင့်ထားပါသည်"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"မိုဘိုင်းဒေတာကို ပိတ်ထားပါသည်"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်ဖြင့်ကွန်ရက်ချိတ်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ကို ဖွင့်ထားသည်။"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ဝန်ဆောင်မှုဌာန ကွန်ရက် ပြောင်းလဲနေစဉ်။"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ဘက်ထရီ အသေးစိတ် အချက်အလက်များကို ဖွင့်ပါ"</string>
@@ -298,7 +297,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ကွန်ရက်မရှိပါ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ဝိုင်ဖိုင်ပိတ်ရန်"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ကိုဖွင့်ပါ"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ဝိုင်ဖိုင်ကွန်ရက် မရနိုင်ပါ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi ကွန်ရက် မရှိပါ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ကာစ်တင်"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"အမည်မတပ် ကိရိယာ"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"သင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာ ကွန်ရက်အသုံးပြုမှုကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"သင်၏ အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> က စီမံခန့်ခွဲထားပါသည်။ ပရိုဖိုင်သည် အီးမေး၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက် လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။\n\nနောက်ထပ် အချက်အလက်များအတွက် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"သင်၏ အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> က စီမံခန့်ခွဲထားသည်။ ပရိုဖိုင်သည် အီးမေး၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက် လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။\n\nသင်၏ ကိုယ်ရေးကိုယ်တာ ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> သို့လည်း ချိတ်ဆက်ထားပါသည်။"</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"သင်က လက်ဖြင့် သော့မဖွင့်မချင်း ကိရိယာမှာ သော့ပိတ်လျက် ရှိနေမည်"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"အကြောင်းကြားချက်များ မြန်မြန်ရရန်"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"မဖွင့်ခင် ၎င်းတို့ကို ကြည့်ပါ"</string>
@@ -479,7 +480,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"သင်ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် Back နှင့် Overview ကို ထိ၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"သင်ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် Overview ကိုထိပြီး ဖိထားပါ။"</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"အဲဒါ ရပါပြီ"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"ရပါပြီ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"မလိုတော့ပါ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"နောက်တစ်ကြိမ်သင် ချိန်ညှိချက်များဖွင့်လျှင် ၎င်းပေါ်လာပါမည်။"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> အကြောင်းကြားချက် − <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"မျက်နှာပြင် ခွဲခြမ်းပြသမှုဖြင့် အက်ပ်သည် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"အက်ပ်သည် မျက်နှာပြင်ခွဲပြရန် ပံ့ပိုးထားခြင်းမရှိပါ။"</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"အက်ပ်သည် ဒုတိယမျက်နှာပြင်ပြသမှုတွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"အက်ပ်ကို ဒုတိယဖန်မျက်နှာပြင်ပြသမှုတွင် ဖွင့်ရန်အတွက် ပံ့ပိုးမထားပါ။"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"အမြန်ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"အမြန်ဆက်တင်များကို ပိတ်ပါ။"</string>
@@ -728,7 +727,7 @@
     <string name="pip_skip_to_prev" msgid="1955311326688637914">"ယခင်တစ်ခုသို့ ပြန်သွားရန်"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"အပူရှိန်ကြောင့်ဖုန်းပိတ်ထားသည်"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"သင်၏ဖုန်းသည် ပုံမှန် အလုပ်လုပ်နေပါသည်"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"သင့်ဖုန်းအလွန်ပူနေသည့်အတွက် အေးသွားစေရန် ပိတ်ထားပါသည်။ ယခုပုံမှန် အလုပ်လုပ်ပါပြီ။\n\nအောက်ပါတို့ကိုသုံးလျှင် ပူလာပါမည်-\n	• အရင်းအမြစ်များသောအက်ပ်ကို သုံခြင်း (ဥပမာ ဂိမ်းကစားခြင်း၊ ဗီဒီယိုကြည့်ခြင်း (သို့) လမ်းညွှန်အက်ပ်)\n	• ကြီးမားသောဖိုင်များ ဒေါင်းလုဒ် (သို့) အပ်လုဒ်လုပ်ခြင်း\n	• အပူရှိန်မြင့်သောနေရာတွင် သုံးခြင်း"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"သင့်ဖုန်းအလွန်ပူနေသည့်အတွက် အေးသွားစေရန် ပိတ်ထားပါသည်။ ယခုပုံမှန် အလုပ်လုပ်ပါပြီ။\n\nအောက်ပါတို့ကိုသုံးလျှင် ပူလာပါမည်-\n	• အရင်းအမြစ်များသောအက်ပ်ကို သုံးခြင်း (ဥပမာ ဂိမ်းကစားခြင်း၊ ဗီဒီယိုကြည့်ခြင်း (သို့) လမ်းညွှန်အက်ပ်)\n	• ကြီးမားသောဖိုင်များ ဒေါင်းလုဒ် (သို့) အပ်လုဒ်လုပ်ခြင်း\n	• အပူရှိန်မြင့်သောနေရာတွင် သုံးခြင်း"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ဖုန်း ပူနွေးလာပါပြီ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>

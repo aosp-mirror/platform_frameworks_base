@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Dades mòbils desactivades"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartició de xarxa per Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN activada"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"S\'està canviant la xarxa de l\'operador de telefonia mòbil."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Obre la informació detallada de la bateria"</string>
@@ -199,7 +198,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"El Mode d\'avió està activat."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"S\'ha desactivat el Mode d\'avió."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"S\'ha activat el Mode d\'avió."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"El mode No molestis està activat (només amb prioritat)."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Mode No molestis activat (només amb prioritat)."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"El mode No molestis està activat; silenci total."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"El mode No molestis està activat (només alarmes)."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Mode No molestis."</string>
@@ -274,7 +273,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositius)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivat"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"No hi ha dispositius vinculats  disponibles."</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"No hi ha dispositius vinculats  disponibles"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillantor"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Gira automàticament"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Gira la pantalla automàticament"</string>
@@ -353,9 +352,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Llisca cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Llisca cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"No t\'interromprà cap so ni cap vibració, tret dels que produeixin les alarmes, els recordatoris, els esdeveniments i les trucades de les persones que especifiquis."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"No t\'interromprà cap so ni cap vibració, tret dels sons de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalitza"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Tot i això, encara podràs fer trucades."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacions menys urgents a continuació"</string>
@@ -429,7 +428,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"El perfil professional està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"El perfil professional està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"El dispositiu està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Gestió de dispositius"</string>
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Gestió del dispositiu"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Supervisió del perfil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Supervisió de la xarxa"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. El perfil està connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. El perfil està connectat a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pot supervisar la teva activitat a la xarxa de treball, com ara els correus electrònics, les aplicacions i els llocs web.\n\nTambé estàs connectat a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositiu continuarà bloquejat fins que no el desbloquegis manualment."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Rep notificacions més ràpidament"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Mostra-les abans de desbloquejar"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificació de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"És possible que l\'aplicació no funcioni amb la pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"L\'aplicació no admet la pantalla dividida."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Pot ser que l\'aplicació no funcioni en una pantalla secundària."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"L\'aplicació no es pot obrir en pantalles secundàries."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Obre la configuració."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Obre la configuració ràpida."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tanca la configuració ràpida."</string>

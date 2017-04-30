@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"የተንቀሳቃሽ ስልክ ውሂብ ጠፍቷል"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ብሉቱዝ ማያያዝ።"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"የአውሮፕላን ሁነታ።"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"ቪፒኤን በርቷል።"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ምንም SIM ካርድ የለም።"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"የአገልግሎት አቅራቢ አውታረ መረብን በመቀየር ላይ።"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"የባትሪ ዝርዝሮችን ክፈት"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን ከሚከታተለው ከ<xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nለተጨማሪ መረጃ የእርስዎን አስተዳዳሪ ያነጋግሩ።"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nበተጨማሪ የእርስዎን የግል የአውታረ መረብ እንቅስቃሴ መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ጋር ተገናኝተዋል።"</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"እራስዎ እስኪከፍቱት ድረስ መሣሪያ እንደተቆለፈ ይቆያል"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ማሳወቂያዎችን ፈጥነው ያግኙ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ከመክፈትዎ በፊት ይመልከቷቸው"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"የ<xliff:g id="ID_1">%1$s</xliff:g> ማሳወቂያ፦ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"መተግበሪያ ከተከፈለ ማያ ገጽ ጋር ላይሠራ ይችላል"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"መተግበሪያው የተከፈለ ማያ ገጽን አይደግፍም።"</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"መተግበሪያ በሁለተኛ ማሳያ ላይ ላይሠራ ይችላል።"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"መተግበሪያ በሁለተኛ ማሳያዎች ላይ ማስጀመርን አይደግፍም።"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ቅንብሮችን ክፈት።"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ፈጣን ቅንብሮችን ክፈት።"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ፈጣን ቅንብሮችን ዝጋ።"</string>

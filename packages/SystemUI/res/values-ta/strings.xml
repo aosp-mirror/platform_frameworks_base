@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"மொபைல் தரவு முடக்கப்பட்டது"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் டெதெரிங்."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"விமானப் பயன்முறை."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN இயக்கத்தில் உள்ளது."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"சிம் கார்டு இல்லை."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"மொபைல் நிறுவன மாற்றம்."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"பேட்டரி விவரங்களைத் திறக்கும்"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"உங்கள் பணி விவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nமேலும் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"உங்கள் பணி விவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nஉங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடனும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"நீங்கள் கைமுறையாகத் திறக்கும் வரை, சாதனம் பூட்டப்பட்டிருக்கும்"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"விரைவாக அறிவிப்புகளைப் பெறுதல்"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"திறக்கும் முன் அவற்றைப் பார்க்கவும்"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> அறிவிப்பு: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"திரைப் பிரிப்பில் பயன்பாடு வேலைசெய்யாமல் போகக்கூடும்."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"திரையைப் பிரிப்பதைப் பயன்பாடு ஆதரிக்கவில்லை."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"இரண்டாம்நிலைத் திரையில் பயன்பாடுகள் வேலை செய்யாமல் போகக்கூடும்."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"இரண்டாம்நிலைத் திரைகளில் பயன்பாட்டைத் தொடங்க முடியாது."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"அமைப்புகளைத் திற."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"விரைவு அமைப்புகளைத் திற."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"விரைவு அமைப்புகளை மூடு."</string>

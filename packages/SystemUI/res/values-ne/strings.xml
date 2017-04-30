@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"मोबाइल डेटा निष्क्रिय छ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लुटुथ टेदर गर्दै।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाइजहाज मोड।"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN सक्रिय छ।"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM कार्ड छैन।"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क परिवर्तन हुँदै।"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ब्याट्री सम्बन्धी विवरणहरूलाई खोल्नुहोस्"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION">%2$s</xliff:g> मा जडान छ।\n\nथप जानकारीका लागि, आफ्ना प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> मा जडान छ। \n\nतपाईं आफ्नो व्यक्तिगत नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> मा पनि जडान हुनुहुन्छ।"</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> को सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"अनुप्रयोगले विभाजित-स्क्रिनमा काम नगर्न सक्छ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अनुप्रयोगले विभाजित-स्क्रिनलाई समर्थन गर्दैन।"</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"यो अनुप्रयोगले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लोकार्पण गर्ने गतिविधिलाई समर्थन गर्दैन।"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"द्रुत सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"द्रुत सेटिङहरूलाई बन्द गर्नुहोस्।"</string>
