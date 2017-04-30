@@ -2808,7 +2808,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mRetrieveInteractiveWindows = (info.flags
                     & AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) != 0;
             mCaptureFingerprintGestures = (info.flags
-                    & AccessibilityServiceInfo.FLAG_CAPTURE_FINGERPRINT_GESTURES) != 0;
+                    & AccessibilityServiceInfo.FLAG_REQUEST_FINGERPRINT_GESTURES) != 0;
             mRequestAccessibilityButton = (info.flags
                     & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
         }
@@ -4721,7 +4721,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public boolean canCaptureFingerprintGestures(Service service) {
             return (service.mAccessibilityServiceInfo.getCapabilities()
-                    & AccessibilityServiceInfo.CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES) != 0;
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES) != 0;
         }
 
         private int resolveProfileParentLocked(int userId) {

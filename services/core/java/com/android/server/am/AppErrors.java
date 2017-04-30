@@ -751,6 +751,26 @@ class AppErrors {
         mAppsNotReportingCrashes.add(proc.info.packageName);
     }
 
+    static boolean isInterestingForBackgroundTraces(ProcessRecord app) {
+        // The system_server is always considered interesting.
+        if (app.pid == MY_PID) {
+            return true;
+        }
+
+        // A package is considered interesting if any of the following is true :
+        //
+        // - It's displaying an activity.
+        // - It's the SystemUI.
+        // - It has an overlay or a top UI visible.
+        //
+        // NOTE: The check whether a given ProcessRecord belongs to the systemui
+        // process is a bit of a kludge, but the same pattern seems repeated at
+        // several places in the system server.
+        return app.isInterestingToUserLocked() ||
+            (app.info != null && "com.android.systemui".equals(app.info.packageName)) ||
+            (app.hasTopUi || app.hasOverlayUi);
+    }
+
     final void appNotResponding(ProcessRecord app, ActivityRecord activity,
             ActivityRecord parent, boolean aboveSystem, final String annotation) {
         ArrayList<Integer> firstPids = new ArrayList<Integer>(5);
@@ -812,7 +832,7 @@ class AppErrors {
             firstPids.add(app.pid);
 
             // Don't dump other PIDs if it's a background ANR
-            isSilentANR = !showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID;
+            isSilentANR = !showBackground && !isInterestingForBackgroundTraces(app);
             if (!isSilentANR) {
                 int parentPid = app.pid;
                 if (parent != null && parent.app != null && parent.app.pid > 0) {

@@ -56,6 +56,7 @@ import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -80,6 +81,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
@@ -256,6 +258,26 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_DEVICE
         = "android.app.action.PROVISION_MANAGED_DEVICE";
+
+    /**
+     * Activity action: launch when user provisioning completed, i.e.
+     * {@link #getUserProvisioningState()} returns one of the complete state.
+     *
+     * <p> Please note that the API behavior is not necessarily consistent across various releases,
+     * and devices, as it's contract between SetupWizard and ManagedProvisioning. The default
+     * implementation is that ManagedProvisioning launches SetupWizard in NFC provisioning only.
+     *
+     * <p> The activity must be protected by permission
+     * {@link android.Manifest.permission#BIND_DEVICE_ADMIN}, and the process must hold
+     * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE} to be launched.
+     * Only one {@link ComponentName} in the entire system should be enabled, and the rest of the
+     * components are not started by this intent.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_STATE_USER_SETUP_COMPLETE =
+            "android.app.action.STATE_USER_SETUP_COMPLETE";
 
     /**
      * Activity action: Starts the provisioning flow which sets up a managed device.
@@ -3028,17 +3050,24 @@ public class DevicePolicyManager {
      * keyring. The user's credential will need to be entered again in order to derive the
      * credential encryption key that will be stored back in the keyring for future use.
      * <p>
-     * This flag can only be used by a profile owner when locking a managed profile on an FBE
-     * device.
+     * This flag can only be used by a profile owner when locking a managed profile when
+     * {@link #getStorageEncryptionStatus} returns {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      * <p>
      * In order to secure user data, the user will be stopped and restarted so apps should wait
      * until they are next run to perform further actions.
      */
+    public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1;
+
+    /**
+     * Instead use {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
+     * @removed
+     */
+    @Deprecated
     public static final int FLAG_EVICT_CE_KEY = 1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={FLAG_EVICT_CE_KEY})
+    @IntDef(flag=true, value={FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY})
     public @interface LockNowFlag {}
 
     /**
@@ -3070,15 +3099,17 @@ public class DevicePolicyManager {
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
      *
-     * @param flags May be 0 or {@link #FLAG_EVICT_CE_KEY}.
+     * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} or the
-     *             {@link #FLAG_EVICT_CE_KEY} flag is passed by an application that is not a profile
+     *             {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is passed by an application
+     *             that is not a profile
      *             owner of a managed profile.
-     * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CE_KEY} flag is passed when
-     *             locking the parent profile.
-     * @throws UnsupportedOperationException if the {@link #FLAG_EVICT_CE_KEY} flag is passed on a
-     *             non-FBE device.
+     * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is
+     *             passed when locking the parent profile.
+     * @throws UnsupportedOperationException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}
+     *             flag is passed when {@link #getStorageEncryptionStatus} does not return
+     *             {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
     public void lockNow(@LockNowFlag int flags) {
         if (mService != null) {
@@ -7588,13 +7619,31 @@ public class DevicePolicyManager {
      * created.
      *
      * @param admin Which profile or device owner this request is associated with.
-     * @param ids A list of opaque non-empty affiliation ids. Duplicate elements will be ignored.
+     * @param ids A set of opaque non-empty affiliation ids.
      *
-     * @throws NullPointerException if {@code ids} is null or contains null elements.
-     * @throws IllegalArgumentException if {@code ids} contains an empty string.
+     * @throws IllegalArgumentException if {@code ids} is null or contains an empty string.
+     */
+    public void setAffiliationIds(@NonNull ComponentName admin, @NonNull Set<String> ids) {
+        throwIfParentInstance("setAffiliationIds");
+        if (ids == null) {
+            throw new IllegalArgumentException("ids must not be null");
+        }
+        try {
+            mService.setAffiliationIds(admin, new ArrayList<>(ids));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * STOPSHIP (b/37622682) Remove it before release.
+     * @removed
      */
     public void setAffiliationIds(@NonNull ComponentName admin, @NonNull List<String> ids) {
         throwIfParentInstance("setAffiliationIds");
+        if (ids == null) {
+            throw new IllegalArgumentException("ids must not be null");
+        }
         try {
             mService.setAffiliationIds(admin, ids);
         } catch (RemoteException e) {
@@ -7603,13 +7652,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of affiliation ids previously set via {@link #setAffiliationIds}, or an
-     * empty list if none have been set.
+     * Returns the set of affiliation ids previously set via {@link #setAffiliationIds}, or an
+     * empty set if none have been set.
      */
-    public @NonNull List<String> getAffiliationIds(@NonNull ComponentName admin) {
-        throwIfParentInstance("getAffiliationIds");
+    public @NonNull Set<String> getAffiliationIds(@NonNull ComponentName admin) {
         try {
-            return mService.getAffiliationIds(admin);
+            return new ArraySet<>(mService.getAffiliationIds(admin));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -7906,7 +7954,8 @@ public class DevicePolicyManager {
      * See {@link #getBindDeviceAdminTargetUsers} for a definition of which
      * device/profile owners are allowed to bind to services of another profile/device owner.
      * <p>
-     * The service must be unexported. Note that the {@link Context} used to obtain this
+     * The service must be protected by {@link android.Manifest.permission#BIND_DEVICE_ADMIN}.
+     * Note that the {@link Context} used to obtain this
      * {@link DevicePolicyManager} instance via {@link Context#getSystemService(Class)} will be used
      * to bind to the {@link android.app.Service}.
      *

@@ -17,11 +17,17 @@ package android.app.admin {
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
     method public deprecated java.lang.String getDeviceInitializerApp();
     method public deprecated android.content.ComponentName getDeviceInitializerComponent();
+    method public void setAffiliationIds(android.content.ComponentName, java.util.List<java.lang.String>);
+    field public static final deprecated int FLAG_EVICT_CE_KEY = 1; // 0x1
   }
 
 }
 
 package android.app.usage {
+
+  public final class StorageStats implements android.os.Parcelable {
+    method public deprecated long getCodeBytes();
+  }
 
   public class StorageStatsManager {
     method public deprecated long getFreeBytes(java.lang.String) throws java.io.IOException;
@@ -36,6 +42,10 @@ package android.app.usage {
 }
 
 package android.content {
+
+  public class ClipData implements android.os.Parcelable {
+    method public deprecated void addItem(android.content.ClipData.Item, android.content.ContentResolver);
+  }
 
   public abstract class Context {
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
@@ -438,6 +448,14 @@ package android.view {
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
+  }
+
+}
+
+package android.view.accessibility {
+
+  public final class AccessibilityWindowInfo implements android.os.Parcelable {
+    method public boolean inPictureInPicture();
   }
 
 }

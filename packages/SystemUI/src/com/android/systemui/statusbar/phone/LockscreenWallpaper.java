@@ -36,6 +36,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.app.WallpaperColors;
 import android.util.Log;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -154,6 +155,11 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     public void onWallpaperChanged() {
         // Called on Binder thread.
         postUpdateWallpaper();
+    }
+
+    @Override
+    public void onWallpaperColorsChanged(WallpaperColors colors, int which) {
+
     }
 
     private void postUpdateWallpaper() {

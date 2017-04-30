@@ -100,6 +100,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Mobilni operater je privremeno suspendovao glasovne i hitne pozive na ovoj lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Povezivanje sa mrežom nije uspelo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Da biste poboljšali prijem, probajte da promenite izabrani tip u odeljku Sistem &gt; Mreža i internet &gt; Mobilne mreže &gt; Željeni tip mreže."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Obaveštenja"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmeravanje poziva"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Režim za hitan povratni poziv"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Obaveštenja za mobilne podatke"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-ovi"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Pozivanje preko Wi-Fi mreže"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Korisnik zahteva POTPUN režim TTY"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Korisnik zahteva PRENOS ZVUKA za režim TTY"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Korisnik zahteva PRENOS GLASA za režim TTY"</string>
@@ -1763,11 +1770,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Pređite u režim unosa teksta radi unosa vremena."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Pređite u režim sata radi unosa vremena."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcije automatskog popunjavanja"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Sadržaj ne može automatski da se popuni"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Želite li da sačuvate u: <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Želite li da sačuvate stavku <xliff:g id="TYPE">%1$s</xliff:g> u: <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Želite li da sačuvate stavke <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> u <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Želite li da sačuvate stavke <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> u <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Želite li da sačuvate u: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Želite li da sačuvate stavku <xliff:g id="TYPE">%1$s</xliff:g> u: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Želite li da sačuvate stavke <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> u: &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Želite li da sačuvate stavke <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> u: &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Sačuvaj"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, hvala"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"lozinka"</string>

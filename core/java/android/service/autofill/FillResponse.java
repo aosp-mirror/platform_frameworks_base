@@ -17,7 +17,7 @@
 package android.service.autofill;
 
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
-import static android.view.autofill.Helper.DEBUG;
+import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -394,7 +394,7 @@ public final class FillResponse implements Parcelable {
     /////////////////////////////////////
     @Override
     public String toString() {
-        if (!DEBUG) return super.toString();
+        if (!sDebug) return super.toString();
 
         return new StringBuilder(
                 "FillResponse : [mRequestId=" + mRequestId)

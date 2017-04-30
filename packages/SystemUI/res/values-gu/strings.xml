@@ -152,14 +152,13 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM નથી."</string>
-    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"મોબાઇલ ડેટા"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"મોબાઇલ ડેટા ચાલુ છે"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"મોબાઇલ ડેટા બંધ છે"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ટિથરિંગ."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"એરપ્લેન મોડ."</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"કોઇ SIM કાર્ડ નથી."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"કેરીઅર નેટવર્કમાં ફેરફાર થઈ રહ્યો છે."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"બૅટરીની વિગતો ખોલો"</string>
@@ -242,11 +241,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ચાર્જ થઈ રહ્યું છે"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ડેટા થોભાવ્યો છે"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ડેટા થોભાવ્યો છે"</string>
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"મોબાઇલ ડેટા થોભાવ્યો છે"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ડેટા થોભાવ્યો છે"</string>
-    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"તમે સેટ કરેલી ડેટા મર્યાદા પહોંચી ગઇ છે. તમે હવે મોબાઇલ ડેટાનો ઉપયોગ નથી કરી રહ્યાં.\n\nજો હવે તમે ફરી શરૂ કરો, તો ડેટા વપરાશ માટે શુલ્ક લાગુ થઇ શકે છે."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ફરી શરૂ કરો"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"કોઈ ઇન્ટરનેટ કનેક્શન નથી"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi કનેક્ટ કર્યું"</string>
@@ -319,8 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"હોટસ્પોટ"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"સૂચનાઓ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ફ્લેશલાઇટ"</string>
-    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"મોબાઇલ ડેટા"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ડેટા વપરાશ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"બાકી ડેટા"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"મર્યાદાથી વધુ"</string>
@@ -433,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"કાર્ય પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"વ્યક્તિગત પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"આ ઉપકરણ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"ઉપકરણનું સંચાલન"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"પ્રોફાઇલ નિરીક્ષણ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"નેટવર્ક મૉનિટરિંગ"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN અક્ષમ કરો"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ડિસ્કનેક્ટ કરો"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"નીતિઓ જુઓ"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"તમારું ઉપકરણ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> દ્વારા સંચાલિત કરવામાં આવે છે.\n\nતમારા વ્યવસ્થાપક સેટિંગ્સ, કૉર્પોરેટ ઍક્સેસ, ઍપ્લિકેશનો, તમારા ઉપકરણ સાથે સંકળાયેલ ડેટા અને તમારા ઉપકરણની સ્થાન માહિતીનું નિરીક્ષણ અને સંચાલન કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"તમારું ઉપકરણ તમારી સંસ્થા દ્વારા સંચાલિત કરવામાં આવે છે.\n\nતમારા વ્યવસ્થાપક સેટિંગ્સ, કૉર્પોરેટ ઍક્સેસ, ઍપ્લિકેશનો, તમારા ઉપકરણ સાથે સંકળાયેલ ડેટા અને તમારા ઉપકરણની સ્થાન માહિતીનું નિરીક્ષણ અને સંચાલન કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"તમારી સંસ્થાએ આ ઉપકરણ પર પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કર્યું છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"તમારી સંસ્થાએ તમારી કાર્ય પ્રોફાઇલમાં પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કર્યું છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"આ ઉપકરણ પર પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કરેલ છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"તમારા વ્યવસ્થાપકે નેટવર્ક લૉગિંગ ચાલુ કર્યું છે, જે તમારા ઉપકરણ પર નેટવર્ક ટ્રાફિકનું નિયમન કરે છે."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"તમે <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટ સહિત તમારી નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરી શકે છે."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"તમે <xliff:g id="VPN_APP_0">%1$s</xliff:g> અને <xliff:g id="VPN_APP_1">%2$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટ સહિત તમારી નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરી શકે છે."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"તમારી કાર્ય પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"તમારી વ્યક્તિગત પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"તમારું ઉપકરણ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે."</string>
@@ -569,12 +560,9 @@
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> અને અન્ય <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> અને અન્ય <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
-    <skip />
-    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
-    <skip />
-    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
-    <skip />
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો ચાલુ છે"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો બંધ છે"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"આ ચૅનલની સૂચનાઓને મંજૂરી આપો"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"બધી કૅટેગરી"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"વધુ સેટિંગ્સ"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"કસ્ટમાઇઝ કરો: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -712,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> સૂચના: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"વિભાજિત-સ્ક્રીન સાથે ઍપ્લિકેશન કદાચ કામ ન કરે."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ઍપ્લિકેશન સ્ક્રીન-વિભાજનનું સમર્થન કરતી નથી."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"સેટિંગ્સ ખોલો."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ઝડપી સેટિંગ્સ ખોલો."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ઝડપી સેટિંગ્સ બંધ કરો."</string>
@@ -730,14 +722,10 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"ચિત્રમાં ચિત્ર મેનૂ"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ચિત્રમાં-ચિત્રની અંદર છે"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
-    <!-- no translation found for pip_play (1417176722760265888) -->
-    <skip />
-    <!-- no translation found for pip_pause (8881063404466476571) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
-    <skip />
+    <string name="pip_play" msgid="1417176722760265888">"ચલાવો"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"થોભાવો"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"આગલા પર જાઓ"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"પહેલાંના પર જાઓ"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"ફોન વધુ પડતી ગરમીને લીધે બંધ થઇ ગયો છે"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા આપમેળે બંધ થઇ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઇ શકે છે, જો તમે:\n • એવી ઍપ્લિકેશન વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વિડિઓ, અથવા નેવિગેટ કરતી ઍપ્લિકેશનો)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
@@ -765,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"ઝટપટ ઍપ્લિકેશનો"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ઝટપટ ઍપ્લિકેશનો માટે ઇન્સ્ટૉલેશનની જરૂર નથી."</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"વેબ પર જાઓ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"મોબાઇલ ડેટા"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi બંધ છે"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth બંધ છે"</string>

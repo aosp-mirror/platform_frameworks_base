@@ -157,6 +157,8 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Données mobiles désactivées"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Partage de connexion Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode Avion"</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Aucune carte SIM"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Modification du réseau de l\'opérateur"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Ouvrir les détails de la batterie"</string>
@@ -429,8 +431,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Profil professionnel connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Profil personnel connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Appareil connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Gestion des appareils"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Contrôle du profil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Contrôle du réseau"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -439,18 +440,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Désactiver le VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Déconnecter le VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Afficher les règles"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Votre appareil est géré par <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux données d\'entreprise, les applications, les données associées à l\'appareil et les informations sur sa localisation.\n\nPour plus d\'informations, contactez votre administrateur."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Votre appareil est géré par votre organisation.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux données d\'entreprise, les applications, les données associées à l\'appareil et les informations sur sa localisation.\n\nPour plus d\'informations, contactez votre administrateur."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Votre entreprise a installé une autorité de certification sur cet appareil. Votre trafic sur le réseau sécurisé peut être contrôlé ou modifié."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Votre entreprise a installé une autorité de certification dans votre profil professionnel. Votre trafic sur le réseau sécurisé peut être contrôlé ou modifié."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Une autorité de certification est installée sur cet appareil. Votre trafic sur le réseau sécurisé peut être contrôlé ou modifié."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Votre administrateur a activé la journalisation du réseau, pour contrôler le trafic sur votre appareil."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Vous êtes connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>, qui peut contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Vous êtes connecté à <xliff:g id="VPN_APP_0">%1$s</xliff:g> et à <xliff:g id="VPN_APP_1">%2$s</xliff:g>, qui peuvent contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Votre profil professionnel est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>, qui peut contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Votre profil personnel est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>, qui peut contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Votre appareil est géré par <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -705,6 +702,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notification <xliff:g id="ID_1">%1$s</xliff:g> : <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Application incompatible avec l\'écran partagé."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Ouvrir les paramètres."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ouvrir la fenêtre de configuration rapide."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Fermer la fenêtre de configuration rapide."</string>
@@ -754,8 +755,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Applis instantanées"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Les applis instantanées ne nécessitent pas d\'installation."</string>
     <string name="app_info" msgid="6856026610594615344">"Infos sur l\'appli"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Accéder au site Web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Données mobiles"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi désactivé"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth désactivé"</string>

@@ -80,14 +80,10 @@ static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
         }
         return NULL;
     }
-    uint64_t producerUsage = 0;
-    uint64_t consumerUsage = 0;
-    android_hardware_HardwareBuffer_convertToGrallocUsageBits(
-            &producerUsage, &consumerUsage, usage, 0);
 
+    uint64_t grallocUsage = AHardwareBuffer_convertToGrallocUsageBits(usage);
     sp<GraphicBuffer> buffer = new GraphicBuffer(width, height, pixelFormat, layers,
-            android_convertGralloc1To0Usage(producerUsage, consumerUsage),
-            std::string("HardwareBuffer pid [") + std::to_string(getpid()) +"]");
+            grallocUsage, std::string("HardwareBuffer pid [") + std::to_string(getpid()) +"]");
     status_t error = buffer->initCheck();
     if (error < 0) {
         if (kDebugGraphicBuffer) {
@@ -145,11 +141,7 @@ static jint android_hardware_HardwareBuffer_getLayers(JNIEnv* env,
 static jlong android_hardware_HardwareBuffer_getUsage(JNIEnv* env,
     jobject clazz, jlong nativeObject) {
     GraphicBuffer* buffer = GraphicBufferWrapper_to_GraphicBuffer(nativeObject);
-    uint64_t usage0 = 0;
-    uint64_t usage1 = 0;
-    android_hardware_HardwareBuffer_convertFromGrallocUsageBits(&usage0, &usage1,
-            buffer->getUsage(), buffer->getUsage());
-    return usage0;
+    return AHardwareBuffer_convertFromGrallocUsageBits(buffer->getUsage());
 }
 
 // ----------------------------------------------------------------------------
@@ -221,14 +213,8 @@ uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(uint32_t format) {
     return AHardwareBuffer_convertToPixelFormat(format);
 }
 
-void android_hardware_HardwareBuffer_convertToGrallocUsageBits(uint64_t* outProducerUsage,
-        uint64_t* outConsumerUsage, uint64_t usage0, uint64_t usage1) {
-    AHardwareBuffer_convertToGrallocUsageBits(outProducerUsage, outConsumerUsage, usage0, usage1);
-}
-
-void android_hardware_HardwareBuffer_convertFromGrallocUsageBits(uint64_t* outUsage0,
-        uint64_t* outUsage1, uint64_t producerUsage, uint64_t consumerUsage) {
-    AHardwareBuffer_convertFromGrallocUsageBits(outUsage0, outUsage1, producerUsage, consumerUsage);
+uint64_t android_hardware_HardwareBuffer_convertToGrallocUsageBits(uint64_t usage) {
+    return AHardwareBuffer_convertToGrallocUsageBits(usage);
 }
 
 }  // namespace android

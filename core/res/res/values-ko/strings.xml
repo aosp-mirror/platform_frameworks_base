@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"이동통신사에서 이 위치에서의 음성 및 긴급 통화를 일시적으로 정지했습니다."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"네트워크에 연결할 수 없습니다."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"수신 상태를 개선하려면 시스템 &gt; 네트워크 및 인터넷 &gt; 모바일 네트워크 &gt; 기본 네트워크 유형에서 선택된 유형을 변경해 보세요."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"알림"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"착신전환"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"긴급 콜백 모드"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"모바일 데이터 알림"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS 메시지"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"음성사서함 메시지"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 통화"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"피어가 TTY 모드 FULL을 요청했습니다."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"피어가 TTY 모드 HCO를 요청했습니다."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"피어가 TTY 모드 VCO를 요청했습니다."</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"시간 입력을 위해 텍스트 입력 모드로 전환합니다."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"시간 입력을 위해 시계 모드로 전환합니다."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"자동완성 옵션"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"콘텐츠를 자동완성할 수 없습니다."</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>에 저장하시겠습니까?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>을(를) <xliff:g id="LABEL">%2$s</xliff:g>에 저장하시겠습니까?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="LABEL">%3$s</xliff:g>에 <xliff:g id="TYPE_0">%1$s</xliff:g> 및 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) 저장하시겠습니까?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="LABEL">%4$s</xliff:g>에 <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> 및 <xliff:g id="TYPE_2">%3$s</xliff:g>을(를) 저장하시겠습니까?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> 및 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"저장"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"사용 안함"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"비밀번호"</string>

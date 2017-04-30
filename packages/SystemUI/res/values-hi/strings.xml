@@ -157,6 +157,8 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"मोबाइल डेटा बंद है"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ टेदरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज मोड."</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"कोई सिम कार्ड नहीं है."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क बदलना."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"बैटरी का विवरण खोलें"</string>
@@ -241,7 +243,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटा रोक दिया गया है"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"मोबाइल डेटा रोक दिया गया है"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटा रोक दिया गया है"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"आपने जो डेटा सीमा सेट की थी, वहां तक पहुंचा जा चुका है. अब आप मोबाइल डेटा का उपयोग नहीं कर रहे हैं.\n\nअगर आप फिर से शुरू करते हैं, तो डेटा उपयोग के लिए शुल्क लगाया जा सकता है."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"आपने जो डेटा सीमा सेट की थी, वह पूरी हो चुकी है. अब आप मोबाइल डेटा का उपयोग नहीं कर रहे हैं.\n\nअगर आप फिर से शुरू करते हैं, तो डेटा उपयोग के लिए शुल्क लगाया जा सकता है."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"फिर से शुरू करें"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"कोई इंटरनेट कनेक्शन नहीं"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाई-फ़ाई  कनेक्‍ट किया गया"</string>
@@ -427,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"कार्य प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट है"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"व्यक्तिगत प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट है"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"डिवाइस <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट है"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"डिवाइस प्रबंधन"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफ़ाइल को मॉनीटर करना"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क को मॉनीटर करना"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -437,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करें"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्‍कनेक्‍ट करें"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"नीतियां देखें"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> आपके डिवाइस का प्रबंधन करता है.\n\nआपका व्यवस्थापक सेटिंग, कॉर्पोरेट एक्सेस, ऐप्लिकेशन, आपके डिवाइस से संबद्ध डेटा और आपके डिवाइस की स्थान की जानकारी की निगरानी कर सकता है और उन्हें प्रबंधित कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"आपका संगठन आपके डिवाइस का प्रबंधन करता है.\n\nआपका व्यवस्थापक सेटिंग, कॉर्पोरेट एक्सेस, ऐप्लिकेशन, आपके डिवाइस से संबद्ध डेटा और आपके डिवाइस की स्थान की जानकारी की निगरानी कर सकता है और उन्हें प्रबंधित कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"आपके संगठन ने इस डिवाइस पर एक प्रमाणपत्र प्राधिकरण इंस्टॉल किया है. आपके सुरक्षित नेटवर्क की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"आपके संगठन ने आपकी कार्य प्रोफ़ाइल में एक प्रमाणपत्र प्राधिकरण इंस्टॉल किया है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"इस डिवाइस पर एक प्रमाणपत्र प्राधिकरण इंस्टॉल किया गया है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"आपके व्यवस्थापक ने नेटवर्क लॉगिंग चालू किया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"आप <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"आप <xliff:g id="VPN_APP_0">%1$s</xliff:g> और <xliff:g id="VPN_APP_1">%2$s</xliff:g> से कनेक्ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"आपकी कार्य प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"आपकी व्यक्तिगत प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> आपका डिवाइस प्रबंधित करता है."</string>
@@ -703,6 +700,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> नोटिफ़िकेशन: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"हो सकता है कि ऐप्लिकेशन विभाजित स्क्रीन के साथ काम ना करे."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ऐप विभाजित स्‍क्रीन का समर्थन नहीं करता है."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"त्वरित सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"त्वरित सेटिंग बंद करें."</string>
@@ -752,8 +753,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"झटपट ऐप्स"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"झटपट ऐप्स के लिए इंस्टॉलेशन ज़रूरी नहीं है."</string>
     <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"वेब पर जाएं"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"वाई-फ़ाई बंद है"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ब्लूटूथ बंद है"</string>

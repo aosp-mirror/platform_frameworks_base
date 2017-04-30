@@ -33,7 +33,7 @@
     <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> hod."</string>
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> hod. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> hod. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min."</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
     <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
@@ -92,15 +92,22 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Služba nie je poskytovaná."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nemôžete meniť nastavenia identifikácie volajúceho."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Žiadna dátová služba"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Žiadne núdzové hovory"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Tiesňové volania nie sú k dispozícii"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Žiadne hlasové hovory"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Žiadne hlasové ani núdzové hovory"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Hlasové ani tiesňové volania nie sú k dispozícii"</string>
     <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Váš operátor dočasne pozastavil dátovú službu na tomto mieste"</string>
     <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Váš operátor dočasne pozastavil núdzové hovory z tohto miesta"</string>
     <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Váš operátor dočasne pozastavil hlasové hovory z tohto miesta"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Váš operátor dočasne pozastavil hlasové a núdzové hovory z tohto miesta"</string>
+    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Váš operátor v tejto oblasti dočasne blokuje hlasové a tiesňové hovory"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nepodarilo sa pripojiť k sieti"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Ak chcete vylepšiť príjem, skúste zmeniť vybratý typ siete v časti Systém &gt; Sieť a internet &gt; Mobilné siete &gt; Preferovaný typ siete."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozornenia"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Presmerovanie hovorov"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Režim tiesňového spätného volania"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Upozornenia na mobilné dáta"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"Správy SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Správy hlasovej schránky"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Volanie cez Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Používateľ, s ktorým komunikujete, požiadal o režim FULL textového telefónu"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Používateľ, s ktorým komunikujete, požiadal o režim HCO textového telefónu"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Používateľ, s ktorým komunikujete, požiadal o režim VCO textového telefónu"</string>
@@ -295,7 +302,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovať zadávaný text"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládanie priblíženia obrazovky"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ovládajte úroveň priblíženia/oddialenia obrazovky a umiestnenie"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gestá"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Je možné použiť klepnutie, prejdenie, stiahnutie prstami a ďalšie gestá."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestá odtlačkov prstov"</string>
@@ -705,7 +712,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Zadajte kód PIN na odomknutie"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Nesprávny kód PIN."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Ak chcete telefón odomknúť, stlačte Menu a následne 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Číslo tiesňového volania"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Číslo tiesňovej linky"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Žiadny signál"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Obrazovka je uzamknutá."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
@@ -879,8 +886,8 @@
     <string name="days" msgid="4774547661021344602">"dní"</string>
     <string name="hour" msgid="2126771916426189481">"hodina"</string>
     <string name="hours" msgid="894424005266852993">"hodiny"</string>
-    <string name="minute" msgid="9148878657703769868">"min."</string>
-    <string name="minutes" msgid="5646001005827034509">"min."</string>
+    <string name="minute" msgid="9148878657703769868">"min"</string>
+    <string name="minutes" msgid="5646001005827034509">"min"</string>
     <string name="second" msgid="3184235808021478">"s"</string>
     <string name="seconds" msgid="3161515347216589235">"s"</string>
     <string name="week" msgid="5617961537173061583">"týždeň"</string>
@@ -1509,7 +1516,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Skratka dostupnosti vypla službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Klepnutím na tlačidlo dostupnosti vyberte požadovanú funkciu:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Ak chcete zmeniť funkcie, klepnite na tlačidlo dostupnosti a podržte ho"</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Lupa"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Priblíženie"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Prebieha odhlásenie používateľa <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1647,9 +1654,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Nainštaloval správca"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Odstránil správca"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"S cieľom predĺžiť výdrž batérie zníži šetrič batérie výkonnosť zariadenia a obmedzí vibrácie, služby určovania polohy a dátové prenosy na pozadí. Pošta, čet a ďalšie aplikácie, ktoré sa spoliehajú na synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Šetrič batérie zníži výkonnosť zariadenia a obmedzí vibrácie, služby určovania polohy a dátové prenosy na pozadí, aby predĺžil výdrž batérie. Pošta, čet a ďalšie aplikácie, ktoré sa spoliehajú na synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Šetrič dát bráni niektorým aplikáciám odosielať alebo prijímať dáta na pozadí s cieľom znížiť spotrebu dát. Aplikácia, ktorú momentálne používate, môže prenášať dáta, ale môže to robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"Zapnúť Šetrič dát?"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnúť"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">%1$d minúty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1794,11 +1801,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Ak chcete zadať čas, prepnite na textový režim vstupu"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Ak chcete zadať čas, prepnite na režim hodín."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Možnosti automatického dopĺňania"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Obsah nie je možné automaticky vyplniť"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Uložiť do zariadenia <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Uložiť <xliff:g id="TYPE">%1$s</xliff:g> do zariadenia <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Uložiť <xliff:g id="TYPE_0">%1$s</xliff:g> a <xliff:g id="TYPE_1">%2$s</xliff:g> do služby <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Uložiť <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> a <xliff:g id="TYPE_2">%3$s</xliff:g> do služby <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Uložiť do služby &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Uložiť <xliff:g id="TYPE">%1$s</xliff:g> do služby &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Uložiť <xliff:g id="TYPE_0">%1$s</xliff:g> a <xliff:g id="TYPE_1">%2$s</xliff:g> do služby &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Uložiť <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> a <xliff:g id="TYPE_2">%3$s</xliff:g> do služby &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Uložiť"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nie, vďaka"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"heslo"</string>

@@ -150,7 +150,7 @@ public abstract class ImsFeature {
     private void notifyFeatureState(@ImsState int state) {
         if (mStatusCallback != null) {
             try {
-                Log.i(LOG_TAG, "notifying ImsFeatureState");
+                Log.i(LOG_TAG, "notifying ImsFeatureState=" + state);
                 mStatusCallback.notifyImsFeatureStatus(state);
             } catch (RemoteException e) {
                 mStatusCallback = null;

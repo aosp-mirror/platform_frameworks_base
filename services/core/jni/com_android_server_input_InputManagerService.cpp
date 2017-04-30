@@ -1504,7 +1504,11 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
     }
 
     SpriteIcon spriteIcon;
-    pointerIcon.bitmap.copyTo(&spriteIcon.bitmap, kN32_SkColorType);
+    SkImageInfo spriteInfo = pointerIcon.bitmap.info().makeColorType(kN32_SkColorType);
+    if (spriteIcon.bitmap.tryAllocPixels(spriteInfo)) {
+        pointerIcon.bitmap.readPixels(spriteInfo, spriteIcon.bitmap.getPixels(),
+                spriteIcon.bitmap.rowBytes(), 0, 0);
+    }
     spriteIcon.hotSpotX = pointerIcon.hotSpotX;
     spriteIcon.hotSpotY = pointerIcon.hotSpotY;
     im->setCustomPointerIcon(spriteIcon);

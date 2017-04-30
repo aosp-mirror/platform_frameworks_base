@@ -34,6 +34,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Slog;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -232,18 +233,60 @@ public class SnoozeHelperTest {
         assertEquals(4, mSnoozeHelper.getSnoozed().size());
     }
 
+    @Test
+    public void repostGroupSummary_onlyFellowGroupChildren() throws Exception {
+        NotificationRecord r = getNotificationRecord(
+                "pkg", 1, "one", UserHandle.SYSTEM, "group1", false);
+        NotificationRecord r2 = getNotificationRecord(
+                "pkg", 2, "two", UserHandle.SYSTEM, "group1", false);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.repostGroupSummary("pkg", UserHandle.USER_SYSTEM, "group1");
+
+        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r);
+    }
+
+    @Test
+    public void repostGroupSummary_repostsSummary() throws Exception {
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(
+                new int[] {UserHandle.USER_SYSTEM});
+        NotificationRecord r = getNotificationRecord(
+                "pkg", 1, "one", UserHandle.SYSTEM, "group1", true);
+        NotificationRecord r2 = getNotificationRecord(
+                "pkg", 2, "two", UserHandle.SYSTEM, "group1", false);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        assertEquals(2, mSnoozeHelper.getSnoozed().size());
+        assertEquals(2, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
+
+        mSnoozeHelper.repostGroupSummary("pkg", UserHandle.USER_SYSTEM, r.getGroupKey());
+
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r2);
+
+        assertEquals(1, mSnoozeHelper.getSnoozed().size());
+        assertEquals(1, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
+    }
+
     private NotificationRecord getNotificationRecord(String pkg, int id, String tag,
-            UserHandle user) {
+            UserHandle user, String groupKey, boolean groupSummary) {
         Notification n = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("A")
                 .setGroup("G")
                 .setSortKey("A")
                 .setWhen(1205)
+                .setGroup(groupKey)
+                .setGroupSummary(groupSummary)
                 .build();
         final NotificationChannel notificationChannel = new NotificationChannel(
                 TEST_CHANNEL_ID, "name", NotificationManager.IMPORTANCE_LOW);
         return new NotificationRecord(getContext(), new StatusBarNotification(
                 pkg, pkg, id, tag, 0, 0, n, user, null,
                 System.currentTimeMillis()), notificationChannel);
+    }
+
+    private NotificationRecord getNotificationRecord(String pkg, int id, String tag,
+            UserHandle user) {
+        return getNotificationRecord(pkg, id, tag, user, null, false);
     }
 }

@@ -1478,12 +1478,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             = new ProcessMap<ArrayList<ProcessRecord>>();
 
     /**
-     * This is set if we had to do a delayed dexopt of an app before launching
-     * it, to increase the ANR timeouts in that case.
-     */
-    boolean mDidDexOpt;
-
-    /**
      * Set if the systemServer made a call to enterSafeMode.
      */
     boolean mSafeMode;
@@ -1965,13 +1959,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case SERVICE_TIMEOUT_MSG: {
-                if (mDidDexOpt) {
-                    mDidDexOpt = false;
-                    Message nmsg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
-                    nmsg.obj = msg.obj;
-                    mHandler.sendMessageDelayed(nmsg, ActiveServices.SERVICE_TIMEOUT);
-                    return;
-                }
                 mServices.serviceTimeout((ProcessRecord)msg.obj);
             } break;
             case SERVICE_FOREGROUND_TIMEOUT_MSG: {
@@ -2047,13 +2034,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case PROC_START_TIMEOUT_MSG: {
-                if (mDidDexOpt) {
-                    mDidDexOpt = false;
-                    Message nmsg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
-                    nmsg.obj = msg.obj;
-                    mHandler.sendMessageDelayed(nmsg, PROC_START_TIMEOUT);
-                    return;
-                }
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
@@ -12807,12 +12787,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return false;
                 }
 
-                if (mDidDexOpt) {
-                    // Give more time since we were dexopting.
-                    mDidDexOpt = false;
-                    return false;
-                }
-
                 if (proc.instr != null) {
                     Bundle info = new Bundle();
                     info.putString("shortMsg", "keyDispatchingTimedOut");
@@ -12836,7 +12810,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public Bundle getAssistContextExtras(int requestType) {
         PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
                 null, null, true /* focused */, true /* newSessionId */,
-                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT);
+                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT, 0);
         if (pae == null) {
             return null;
         }
@@ -12906,25 +12880,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             Bundle receiverExtras, IBinder activityToken, boolean focused, boolean newSessionId) {
         return enqueueAssistContext(requestType, null, null, receiver, receiverExtras,
                 activityToken, focused, newSessionId, UserHandle.getCallingUserId(), null,
-                PENDING_ASSIST_EXTRAS_LONG_TIMEOUT) != null;
+                PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0) != null;
     }
 
     @Override
     public boolean requestAutofillData(IResultReceiver receiver, Bundle receiverExtras,
-            IBinder activityToken) {
-        // NOTE: we could always use ActivityManager.ASSIST_CONTEXT_FULL and let ActivityThread
-        // rely on the flags to decide whether the handleRequestAssistContextExtras() is for
-        // autofill, but it's safer to explicitly use new AutoFill types, in case the Assist
-        // requests use flags in the future as well (since their flags value might collide with the
-        // autofill flag values).
+            IBinder activityToken, int flags) {
         return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTOFILL, null, null,
                 receiver, receiverExtras, activityToken, true, true, UserHandle.getCallingUserId(),
-                null, PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT) != null;
+                null, PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT, flags) != null;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
             IResultReceiver receiver, Bundle receiverExtras, IBinder activityToken,
-            boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout) {
+            boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout,
+            int flags) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "enqueueAssistContext()");
 
@@ -12974,7 +12944,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             try {
                 activity.app.thread.requestAssistContextExtras(activity.appToken, pae, requestType,
-                        mViSessionId);
+                        mViSessionId, flags);
                 mPendingAssistExtras.add(pae);
                 mUiHandler.postDelayed(pae, timeout);
             } catch (RemoteException e) {
@@ -13086,7 +13056,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Bundle args) {
         return enqueueAssistContext(requestType, intent, hint, null, null, null,
                 true /* focused */, true /* newSessionId */, userHandle, args,
-                PENDING_ASSIST_EXTRAS_TIMEOUT) != null;
+                PENDING_ASSIST_EXTRAS_TIMEOUT, 0) != null;
     }
 
     public void registerProcessObserver(IProcessObserver observer) {
@@ -14645,8 +14615,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     static int procStateToImportance(int procState, int memAdj,
-            ActivityManager.RunningAppProcessInfo currApp) {
-        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportance(procState);
+            ActivityManager.RunningAppProcessInfo currApp,
+            int clientTargetSdk) {
+        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportanceForTargetSdk(
+                procState, clientTargetSdk);
         if (imp == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
             currApp.lru = memAdj;
         } else {
@@ -14656,7 +14628,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void fillInProcMemInfo(ProcessRecord app,
-            ActivityManager.RunningAppProcessInfo outInfo) {
+            ActivityManager.RunningAppProcessInfo outInfo,
+            int clientTargetSdk) {
         outInfo.pid = app.pid;
         outInfo.uid = app.info.uid;
         if (mHeavyWeightProcess == app) {
@@ -14671,7 +14644,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         outInfo.lastTrimLevel = app.trimMemoryLevel;
         int adj = app.curAdj;
         int procState = app.curProcState;
-        outInfo.importance = procStateToImportance(procState, adj, outInfo);
+        outInfo.importance = procStateToImportance(procState, adj, outInfo, clientTargetSdk);
         outInfo.importanceReasonCode = app.adjTypeCode;
         outInfo.processState = app.curProcState;
     }
@@ -14681,6 +14654,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("getRunningAppProcesses");
 
         final int callingUid = Binder.getCallingUid();
+        final int clientTargetSdk = mPackageManagerInt.getUidTargetSdkVersion(callingUid);
 
         // Lazy instantiation of list
         List<ActivityManager.RunningAppProcessInfo> runList = null;
@@ -14703,7 +14677,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ActivityManager.RunningAppProcessInfo currApp =
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
-                    fillInProcMemInfo(app, currApp);
+                    fillInProcMemInfo(app, currApp, clientTargetSdk);
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
                         currApp.importanceReasonImportance =
@@ -14759,12 +14733,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outInfo) {
         enforceNotIsolatedCaller("getMyMemoryState");
+
+        final int callingUid = Binder.getCallingUid();
+        final int clientTargetSdk = mPackageManagerInt.getUidTargetSdkVersion(callingUid);
+
         synchronized (this) {
             ProcessRecord proc;
             synchronized (mPidsSelfLocked) {
                 proc = mPidsSelfLocked.get(Binder.getCallingPid());
             }
-            fillInProcMemInfo(proc, outInfo);
+            fillInProcMemInfo(proc, outInfo, clientTargetSdk);
         }
     }
 
@@ -19716,12 +19694,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
             activeInstr.mClass = className;
             String defProcess = ai.processName;;
-            if (ii.targetProcess == null) {
+            if (ii.targetProcesses == null) {
                 activeInstr.mTargetProcesses = new String[]{ai.processName};
-            } else if (ii.targetProcess.equals("*")) {
+            } else if (ii.targetProcesses.equals("*")) {
                 activeInstr.mTargetProcesses = new String[0];
             } else {
-                activeInstr.mTargetProcesses = ii.targetProcess.split(",");
+                activeInstr.mTargetProcesses = ii.targetProcesses.split(",");
                 defProcess = activeInstr.mTargetProcesses[0];
             }
             activeInstr.mTargetInfo = ai;
@@ -21723,9 +21701,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 } catch (Exception e) {
-                    Slog.w(TAG, "Failed setting process group of " + app.pid
-                            + " to " + app.curSchedGroup);
-                    e.printStackTrace();
+                    if (false) {
+                        Slog.w(TAG, "Failed setting process group of " + app.pid
+                                + " to " + app.curSchedGroup);
+                        Slog.w(TAG, "at location", e);
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(oldId);
                 }

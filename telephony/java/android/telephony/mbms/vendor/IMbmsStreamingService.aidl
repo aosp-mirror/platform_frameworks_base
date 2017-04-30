@@ -17,8 +17,8 @@
 package android.telephony.mbms.vendor;
 
 import android.net.Uri;
-import android.telephony.mbms.IMbmsStreamingManagerListener;
-import android.telephony.mbms.IStreamingServiceListener;
+import android.telephony.mbms.IMbmsStreamingManagerCallback;
+import android.telephony.mbms.IStreamingServiceCallback;
 import android.telephony.mbms.StreamingService;
 import android.telephony.mbms.StreamingServiceInfo;
 import android.telephony.SignalStrength;
@@ -34,7 +34,7 @@ interface IMbmsStreamingService
      * Registers this listener, subId with this appName
      *
      */
-    int initialize(IMbmsStreamingManagerListener listener, String appName, int subId);
+    int initialize(IMbmsStreamingManagerCallback listener, String appName, int subId);
 
 
     /**
@@ -55,7 +55,7 @@ interface IMbmsStreamingService
      *   URL-change and State-change pair.
      */
     StreamingService startStreaming(String appName, int subId, String serviceId,
-            IStreamingServiceListener listener);
+            IStreamingServiceCallback listener);
 
     /**
      * Asynchronously fetches all Services being streamed by this uid/appName/subId.

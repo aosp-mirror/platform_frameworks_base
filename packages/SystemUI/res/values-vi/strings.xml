@@ -152,14 +152,13 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Cạnh"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Không có SIM nào."</string>
-    <!-- no translation found for accessibility_cell_data (5326139158682385073) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (5927098403452994422) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_off (443267573897409704) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"Dữ liệu di động"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dữ liệu di động đang bật"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Dữ liệu di động đang tắt"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Truy cập Internet qua Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Chế độ trên máy bay."</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Không có thẻ SIM nào."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Thay đổi mạng của nhà cung cấp dịch vụ."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Mở chi tiết về pin"</string>
@@ -242,11 +241,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Đang sạc"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Đã tạm dừng dữ liệu 2G-3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Đã tạm dừng dữ liệu 4G"</string>
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (6801382439018099779) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Dữ liệu di động bị tạm dừng"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Đã tạm dừng dữ liệu"</string>
-    <!-- no translation found for data_usage_disabled_dialog (4919541636934603816) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Đã đạt đến giới hạn dữ liệu mà bạn đặt. Bạn hiện không còn sử dụng dữ liệu di động.\n\nNếu tiếp tục, bạn có thể phải trả phí sử dụng dữ liệu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Tiếp tục"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ko có k.nối Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>
@@ -319,8 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Điểm phát sóng"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Thông báo"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Đèn pin"</string>
-    <!-- no translation found for quick_settings_cellular_detail_title (3661194685666477347) -->
-    <skip />
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Dữ liệu di động"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Sử dụng dữ liệu"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dữ liệu còn lại"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Vượt quá giới hạn"</string>
@@ -433,8 +429,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Hồ sơ công việc được kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Hồ sơ cá nhân được kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Thiết bị được kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Quản lý thiết bị"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Giám sát hồ sơ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Giám sát mạng"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +438,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Tắt VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Ngắt kết nối VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Xem chính sách"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Thiết bị của bạn do <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> quản lý.\n\nQuản trị viên của bạn có thể giám sát và quản lý cài đặt, quyền truy cập vào dữ liệu công ty, ứng dụng, dữ liệu được liên kết với thiết bị và thông tin vị trí thiết bị của bạn.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên của bạn."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Thiết bị của bạn do tổ chức của bạn quản lý.\n\nQuản trị viên có thể giám sát và quản lý cài đặt, quyền truy cập vào dữ liệu công ty, ứng dụng, dữ liệu được liên kết với thiết bị và thông tin vị trí thiết bị của bạn.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên của bạn."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Tổ chức của bạn đã cài đặt một tổ chức phát hành chứng chỉ trên thiết bị này. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Tổ chức của bạn đã cài đặt một tổ chức phát hành chứng chỉ trong hồ cơ công việc của bạn. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Một tổ chức phát hành chứng chỉ được cài đặt trên thiết bị này. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Quản trị viên của bạn đã bật tính năng ghi nhật ký mạng. Tính năng này giám sát lưu lượng truy cập trên thiết bị của bạn."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Bạn đang kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Bạn đang kết nối với <xliff:g id="VPN_APP_0">%1$s</xliff:g> và <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Các ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Hồ sơ công việc của bạn được kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>, ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Hồ sơ cá nhân của bạn được kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Thiết bị của bạn do <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> quản lý."</string>
@@ -571,12 +562,9 @@
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> và <xliff:g id="NUMBER_5">%3$d</xliff:g> kênh khác</item>
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> và <xliff:g id="NUMBER_2">%3$d</xliff:g> kênh khác</item>
     </plurals>
-    <!-- no translation found for notification_channel_controls_opened_accessibility (6553950422055908113) -->
-    <skip />
-    <!-- no translation found for notification_channel_controls_closed_accessibility (7521619812603693144) -->
-    <skip />
-    <!-- no translation found for notification_channel_switch_accessibility (3420796005601900717) -->
-    <skip />
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Đã mở điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Đã đóng điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Cho phép thông báo từ kênh này"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"Tất cả danh mục"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Cài đặt khác"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"Tùy chỉnh: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
@@ -714,6 +702,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Thông báo của <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Ứng dụng có thể không hoạt động với tính năng chia đôi màn hình."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Ứng dụng không hỗ trợ chia đôi màn hình."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Mở cài đặt."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Mở cài đặt nhanh."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Đóng cài đặt nhanh."</string>
@@ -732,14 +724,10 @@
     <string name="pip_menu_title" msgid="3328510504196964712">"Menu ảnh trong ảnh"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> đang ở chế độ ảnh trong ảnh"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Nếu bạn không muốn <xliff:g id="NAME">%s</xliff:g> sử dụng tính năng này, hãy nhấn để mở cài đặt và tắt tính năng này."</string>
-    <!-- no translation found for pip_play (1417176722760265888) -->
-    <skip />
-    <!-- no translation found for pip_pause (8881063404466476571) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_next (1948440006726306284) -->
-    <skip />
-    <!-- no translation found for pip_skip_to_prev (1955311326688637914) -->
-    <skip />
+    <string name="pip_play" msgid="1417176722760265888">"Phát"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"Tạm dừng"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"Chuyển tới mục tiếp theo"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"Chuyển về mục trước"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"Điện thoại đã tắt do nhiệt"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"Điện thoại của bạn hiện đang chạy bình thường"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Do quá nóng nên điện thoại đã tắt để hạ nhiệt. Hiện điện thoại của bạn đang chạy bình thường.\n\nĐiện thoại có thể bị quá nóng nếu bạn:\n	• Dùng các ứng dụng tốn nhiều tài nguyên (như ứng dụng trò chơi, video hoặc điều hướng)\n	• Tải xuống hoặc tải lên tệp có dung lượng lớn\n	• Dùng điện thoại ở nhiệt độ cao"</string>
@@ -767,8 +755,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Ứng dụng tức thì"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Ứng dụng tức thì không yêu cầu cài đặt."</string>
     <string name="app_info" msgid="6856026610594615344">"Thông tin ứng dụng"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Truy cập web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Dữ liệu di động"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi tắt"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth tắt"</string>

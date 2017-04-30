@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Il tuo operatore ha sospeso temporaneamente le telefonate e le chiamate di emergenza per questa località"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossibile raggiungere la rete"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Per migliorare la ricezione, prova a modificare il tipo selezionato in Sistema &gt; Rete e Internet &gt; Reti mobili &gt; Tipo di rete preferito."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Avvisi"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Deviazione chiamate"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modalità di richiamata di emergenza"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Avvisi relativi ai dati mobili"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Messaggi vocali"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Chiamate Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer ha richiesto la modalità TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer ha richiesto la modalità TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer ha richiesto la modalità TTY VCO"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Passa alla modalità di immissione testo per inserire l\'ora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Passa alla modalità orologio per inserire l\'ora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opzioni di compilazione automatica"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Impossibile compilare automaticamente i contenuti"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Salvare in <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Salvare <xliff:g id="TYPE">%1$s</xliff:g> in <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Salvare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> su <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Salvare <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> su <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Salvare in &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Salvare <xliff:g id="TYPE">%1$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Salvare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Salvare <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Salva"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, grazie"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"password"</string>

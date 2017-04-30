@@ -239,16 +239,11 @@ public class Notification implements Parcelable
      * The number of events that this notification represents. For example, in a new mail
      * notification, this could be the number of unread messages.
      *
-     * The system may or may not use this field to modify the appearance of the notification. For
-     * example, before {@link android.os.Build.VERSION_CODES#HONEYCOMB}, this number was
-     * superimposed over the icon in the status bar. Starting with
-     * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, the template used by
-     * {@link Notification.Builder} has displayed the number in the expanded notification view.
+     * The system may or may not use this field to modify the appearance of the notification.
      * Starting with {@link android.os.Build.VERSION_CODES#O}, the number may be displayed as a
      * badge icon in Launchers that support badging.
-     *
      */
-    public int number = 1;
+    public int number = 0;
 
     /**
      * The intent to execute when the expanded status entry is clicked.  If
@@ -2681,21 +2676,12 @@ public class Notification implements Parcelable
         private int mPrimaryTextColor = COLOR_INVALID;
         private int mSecondaryTextColor = COLOR_INVALID;
         private int mActionBarColor = COLOR_INVALID;
+        private int mBackgroundColor = COLOR_INVALID;
+        private int mForegroundColor = COLOR_INVALID;
 
         /**
          * Constructs a new Builder with the defaults:
          *
-
-         * <table>
-         * <tr><th align=right>priority</th>
-         *     <td>{@link #PRIORITY_DEFAULT}</td></tr>
-         * <tr><th align=right>when</th>
-         *     <td>now ({@link System#currentTimeMillis()})</td></tr>
-         * <tr><th align=right>audio stream</th>
-         *     <td>{@link #STREAM_DEFAULT}</td></tr>
-         * </table>
-         *
-
          * @param context
          *            A {@link Context} that will be used by the Builder to construct the
          *            RemoteViews. The Context will not be held past the lifetime of this Builder
@@ -3854,10 +3840,62 @@ public class Notification implements Parcelable
                     || mActionBarColor == COLOR_INVALID
                     || mTextColorsAreForBackground != backgroundColor) {
                 mTextColorsAreForBackground = backgroundColor;
-                mPrimaryTextColor = NotificationColorUtil.resolvePrimaryColor(
-                        mContext, backgroundColor);
-                mSecondaryTextColor = NotificationColorUtil.resolveSecondaryColor(
-                        mContext, backgroundColor);
+                if (mForegroundColor == COLOR_INVALID || !isColorized()) {
+                    mPrimaryTextColor = NotificationColorUtil.resolvePrimaryColor(mContext,
+                            backgroundColor);
+                    mSecondaryTextColor = NotificationColorUtil.resolveSecondaryColor(mContext,
+                            backgroundColor);
+                } else {
+                    double backLum = NotificationColorUtil.calculateLuminance(backgroundColor);
+                    double textLum = NotificationColorUtil.calculateLuminance(mForegroundColor);
+                    double contrast = NotificationColorUtil.calculateContrast(mForegroundColor,
+                            backgroundColor);
+                    boolean textDark = backLum > textLum;
+                    if (contrast < 4.5f) {
+                        if (textDark) {
+                            mSecondaryTextColor = NotificationColorUtil.findContrastColor(
+                                    mForegroundColor,
+                                    backgroundColor,
+                                    true /* findFG */,
+                                    4.5f);
+                            mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
+                                    mSecondaryTextColor, -20);
+                        } else {
+                            mSecondaryTextColor =
+                                    NotificationColorUtil.findContrastColorAgainstDark(
+                                    mForegroundColor,
+                                    backgroundColor,
+                                    true /* findFG */,
+                                    4.5f);
+                            mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
+                                    mSecondaryTextColor, 10);
+                        }
+                    } else {
+                        mPrimaryTextColor = mForegroundColor;
+                        mSecondaryTextColor = NotificationColorUtil.changeColorLightness(
+                                mPrimaryTextColor, textDark ? 10 : -20);
+                        if (NotificationColorUtil.calculateContrast(mSecondaryTextColor,
+                                backgroundColor) < 4.5f) {
+                            // oh well the secondary is not good enough
+                            if (textDark) {
+                                mSecondaryTextColor = NotificationColorUtil.findContrastColor(
+                                        mSecondaryTextColor,
+                                        backgroundColor,
+                                        true /* findFG */,
+                                        4.5f);
+                            } else {
+                                mSecondaryTextColor
+                                        = NotificationColorUtil.findContrastColorAgainstDark(
+                                        mSecondaryTextColor,
+                                        backgroundColor,
+                                        true /* findFG */,
+                                        4.5f);
+                            }
+                            mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
+                                    mSecondaryTextColor, textDark ? -20 : 10);
+                        }
+                    }
+                }
                 mActionBarColor = NotificationColorUtil.resolveActionBarColor(mContext,
                         backgroundColor);
             }
@@ -4845,7 +4883,7 @@ public class Notification implements Parcelable
 
         private int getBackgroundColor() {
             if (isColorized()) {
-                return mN.color;
+                return mBackgroundColor != COLOR_INVALID ? mBackgroundColor : mN.color;
             } else {
                 return COLOR_DEFAULT;
             }
@@ -4862,6 +4900,21 @@ public class Notification implements Parcelable
             int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
             return targetSdkVersion > Build.VERSION_CODES.M
                     && targetSdkVersion < Build.VERSION_CODES.O;
+        }
+
+        /**
+         * Set a color palette to be used as the background and textColors
+         *
+         * @param backgroundColor the color to be used as the background
+         * @param foregroundColor the color to be used as the foreground
+         *
+         * @hide
+         */
+        public void setColorPalette(int backgroundColor, int foregroundColor) {
+            mBackgroundColor = backgroundColor;
+            mForegroundColor = foregroundColor;
+            mTextColorsAreForBackground = COLOR_INVALID;
+            ensureColors();
         }
     }
 
@@ -4899,6 +4952,18 @@ public class Notification implements Parcelable
      * @hide
      */
     public boolean isColorized() {
+        if (isColorizedMedia()) {
+            return true;
+        }
+        return extras.getBoolean(EXTRA_COLORIZED) && isForegroundService();
+    }
+
+    /**
+     * @return true if this notification is colorized and it is a media notification
+     *
+     * @hide
+     */
+    public boolean isColorizedMedia() {
         Class<? extends Style> style = getNotificationStyle();
         if (MediaStyle.class.equals(style)) {
             Boolean colorized = (Boolean) extras.get(EXTRA_COLORIZED);
@@ -4910,7 +4975,23 @@ public class Notification implements Parcelable
                 return true;
             }
         }
-        return extras.getBoolean(EXTRA_COLORIZED) && isForegroundService();
+        return false;
+    }
+
+
+    /**
+     * @return true if this is a media notification
+     *
+     * @hide
+     */
+    public boolean isMediaNotification() {
+        Class<? extends Style> style = getNotificationStyle();
+        if (MediaStyle.class.equals(style)) {
+            return true;
+        } else if (DecoratedMediaCustomViewStyle.class.equals(style)) {
+            return true;
+        }
+        return false;
     }
 
     private boolean hasLargeIcon() {

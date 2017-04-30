@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"तपाईंको सेवा प्रदायकले अस्थायी रूपमा यस स्थानमा भ्वाइस तथा आपतकालीन कलहरू निलम्बित गरेको छ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कमाथि पहुँच राख्न सकिँदैन"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रिसेप्सनमा सुधार गर्न, प्रणाली &gt; नेटवर्क र इन्टरनेट &gt; मोबाइल नेटवर्कहरू &gt; रुचाइएको नेटवर्कको प्रकार मा गएर चयन गरिएको प्रकार परिवर्तन गरी हेर्नुहोस्।"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"अलर्टहरू"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"कल फर्वार्ड गर्ने सेवा"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"आपतकालीन कलब्याक मोड"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"मोबाइल डेटाका अलर्टहरू"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS सन्देशहरू"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"भ्वाइस मेल सन्देशहरू"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi कल"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"सहकर्मी अनुरोध गरियो। TTY मोड पूर्ण"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"सहकर्मी अनुरोध गरियो। TTY मोड HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"सहकर्मी अनुरोध गरियो। TTY मोड VCO"</string>
@@ -1738,11 +1745,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"समय इनपुट गर्न पाठ इनपुट मोडमा स्विच गर्नुहोस्।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"समय इनपुट गर्न घडी मोडमा स्विच गर्नुहोस्।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"स्वतः भरणका विकल्पहरू"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"सामग्रीहरूलाई स्वत: भरण गर्न मिल्दैन"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> मा सुरक्षित गर्ने हो?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> लाई <xliff:g id="LABEL">%2$s</xliff:g> मा सुरक्षित गर्ने हो?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> लाई <xliff:g id="LABEL">%3$s</xliff:g> मा सुरक्षित गर्ने हो?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> लाई <xliff:g id="LABEL">%4$s</xliff:g> मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> लाई &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई  &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> लाई to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"सुरक्षित गर्नुहोस्"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"पर्दैन, धन्यवाद"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"पासवर्ड"</string>

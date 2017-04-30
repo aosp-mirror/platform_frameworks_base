@@ -6,6 +6,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.os.Bundle;
 import android.view.View;
 
 import java.lang.annotation.Retention;
@@ -279,45 +280,57 @@ public abstract class FragmentTransaction {
 
     /**
      * Sets whether or not to allow optimizing operations within and across
-     * transactions. Optimizing fragment transaction's operations can eliminate
+     * transactions. This will remove redundant operations, eliminating
      * operations that cancel. For example, if two transactions are executed
      * together, one that adds a fragment A and the next replaces it with fragment B,
      * the operations will cancel and only fragment B will be added. That means that
      * fragment A may not go through the creation/destruction lifecycle.
      * <p>
-     * The side effect of optimization is that fragments may have state changes
+     * The side effect of removing redundant operations is that fragments may have state changes
      * out of the expected order. For example, one transaction adds fragment A,
-     * a second adds fragment B, then a third removes fragment A. Without optimization,
-     * fragment B could expect that while it is being created, fragment A will also
+     * a second adds fragment B, then a third removes fragment A. Without removing the redundant
+     * operations, fragment B could expect that while it is being created, fragment A will also
      * exist because fragment A will be removed after fragment B was added.
-     * With optimization, fragment B cannot expect fragment A to exist when
+     * With removing redundant operations, fragment B cannot expect fragment A to exist when
      * it has been created because fragment A's add/remove will be optimized out.
+     * <p>
+     * It can also reorder the state changes of Fragments to allow for better Transitions.
+     * Added Fragments may have {@link Fragment#onCreate(Bundle)} called before replaced
+     * Fragments have {@link Fragment#onDestroy()} called.
      * <p>
      * The default is {@code false} for applications targeting version
      * versions prior to O and {@code true} for applications targeting O and
      * later.
      *
-     * @param allowOptimization {@code true} to enable optimizing operations
-     *                          or {@code false} to disable optimizing
+     * @param reorderingAllowed {@code true} to enable optimizing out redundant operations
+     *                          or {@code false} to disable optimizing out redundant
      *                          operations on this transaction.
      */
-    public abstract FragmentTransaction setAllowOptimization(boolean allowOptimization);
+    public abstract FragmentTransaction setReorderingAllowed(boolean reorderingAllowed);
 
     /**
      * Add a Runnable to this transaction that will be run after this transaction has
-     * been committed. If fragment transactions are {@link #setAllowOptimization(boolean) optimized}
+     * been committed. If fragment transactions are {@link #setReorderingAllowed(boolean) optimized}
      * this may be after other subsequent fragment operations have also taken place, or operations
      * in this transaction may have been optimized out due to the presence of a subsequent
      * fragment transaction in the batch.
      *
-     * <p><code>postOnCommit</code> may not be used with transactions
+     *
+     * <p>If a transaction is committed using {@link #commitAllowingStateLoss()} this runnable
+     * may be executed when the FragmentManager is in a state where new transactions may not
+     * be committed without allowing state loss.</p>
+     *
+     * <p><code>runOnCommit</code> may not be used with transactions
      * {@link #addToBackStack(String) added to the back stack} as Runnables cannot be persisted
-     * with back stack state.</p>
+     * with back stack state. {@link IllegalStateException} will be thrown if
+     * {@link #addToBackStack(String)} has been previously called for this transaction
+     * or if it is called after a call to <code>runOnCommit</code>.</p>
      *
      * @param runnable Runnable to add
      * @return this FragmentTransaction
+     * @throws IllegalStateException if {@link #addToBackStack(String)} has been called
      */
-    public abstract FragmentTransaction postOnCommit(Runnable runnable);
+    public abstract FragmentTransaction runOnCommit(Runnable runnable);
 
     /**
      * Schedules a commit of this transaction.  The commit does

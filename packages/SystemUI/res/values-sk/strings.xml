@@ -159,6 +159,8 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobilné dáta sú vypnuté"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Pripojenie cez Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim v lietadle."</string>
+    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
+    <skip />
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Žiadna SIM karta."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Zmena siete operátora"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Otvoriť podrobnosti o batérii"</string>
@@ -316,7 +318,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Hotovo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Pripojené"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Pripája sa..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Zdieľanie dátového pripojenia"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Zdieľané pripojenie"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Upozornenia"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Baterka"</string>
@@ -433,8 +435,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Pracovný profil je pripojený k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Osobný profil je pripojený k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Zariadenie je pripojené k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Správa zariadení"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorovanie profilu"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Sledovanie siete"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -443,18 +444,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktivovať VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Odpojiť sieť VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Zobraziť pravidlá"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Zariadenie spravuje organizácia <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nSprávca môže sledovať a spravovať nastavenia, firemný prístup, aplikácie a údaje súvisiace s týmto zariadením vrátane informácií o polohe vášho zariadenia.\n\nĎalšie informácie vám poskytne správca."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Zariadenie spravuje vaša organizácia.\n\nSprávca môže sledovať a spravovať nastavenia, firemný prístup, aplikácie a údaje súvisiace s týmto zariadením vrátane informácií o polohe vášho zariadenia.\n\nĎalšie informácie vám poskytne správca."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Organizácia nainštalovala pre toto zariadenie certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Organizácia nainštalovala pre váš pracovný profil certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Pripojili ste sa k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti, vrátane správ, aplikácií a webových stránok."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Pripojili ste sa k aplikáciám <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>, ktoré môžu sledovať vašu aktivitu v sieti, vrátane správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Váš pracovný profil je pripojený k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Váš osobný profil je pripojený k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Vaše zariadenie spravuje aplikácia <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -713,6 +710,10 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Upozornenie <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Aplikácia nemusí fungovať so zapnutou rozdelenou obrazovkou."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikácia nepodporuje rozdelenú obrazovku."</string>
+    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
+    <skip />
+    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
+    <skip />
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Otvoriť nastavenia"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Otvoriť rýchle nastavenia"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Zavrieť rýchle nastavenia"</string>
@@ -762,8 +763,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Okamžité aplikácie"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Okamžité aplikácie nevyžadujú inštaláciu."</string>
     <string name="app_info" msgid="6856026610594615344">"Info o aplikácii"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="go_to_web" msgid="1106022723459948514">"Prejsť na internet"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilné dátové prenosy"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Pripojenie Wi-Fi je vypnuté"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Rozhranie Bluetooth je vypnuté"</string>

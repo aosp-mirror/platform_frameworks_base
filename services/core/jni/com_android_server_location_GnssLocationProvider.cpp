@@ -1277,8 +1277,8 @@ static void android_location_GnssLocationProvider_delete_aiding_data(JNIEnv* /* 
  * constellation and svFlag fields.
  */
 enum ShiftWidth: uint8_t {
-    SVID_SHIFT_WIDTH = 7,
-    CONSTELLATION_TYPE_SHIFT_WIDTH = 3
+    SVID_SHIFT_WIDTH = 8,
+    CONSTELLATION_TYPE_SHIFT_WIDTH = 4
 };
 
 static jint android_location_GnssLocationProvider_read_sv_status(JNIEnv* env, jobject /* obj */,

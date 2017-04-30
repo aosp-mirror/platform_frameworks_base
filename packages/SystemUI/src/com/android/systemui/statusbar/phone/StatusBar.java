@@ -22,7 +22,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 
-import static com.android.systemui.statusbar.notification.NotificationInflater.InflationExceptionHandler;
+import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -257,7 +257,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         OnHeadsUpChangedListener, VisualStabilityManager.Callback, CommandQueue.Callbacks,
         ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener {
+        ExpandableNotificationRow.OnExpandClickListener, InflationCallback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_REMOTE_INPUT =
@@ -709,12 +709,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     private KeyguardMonitorImpl mKeyguardMonitor;
     private BatteryController mBatteryController;
     private boolean mPanelExpanded;
+    private boolean mKeyguardRequested;
+    private boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private NotificationIconAreaController mNotificationIconAreaController;
     private ConfigurationListener mConfigurationListener;
-    private InflationExceptionHandler mInflationExceptionHandler = this::handleInflationException;
     private boolean mReinflateNotificationsOnUserSwitched;
+    private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
@@ -1551,29 +1553,24 @@ public class StatusBar extends SystemUI implements DemoMode,
         return new UserHandle(mCurrentUserId);
     }
 
-    public void addNotification(StatusBarNotification notification, RankingMap ranking,
-            Entry oldEntry) throws InflationException {
-        if (DEBUG) Log.d(TAG, "addNotification key=" + notification.getKey());
+    public void addNotification(StatusBarNotification notification, RankingMap ranking)
+            throws InflationException {
+        String key = notification.getKey();
+        if (DEBUG) Log.d(TAG, "addNotification key=" + key);
 
         mNotificationData.updateRanking(ranking);
         Entry shadeEntry = createNotificationViews(notification);
         boolean isHeadsUped = shouldPeek(shadeEntry);
-        if (isHeadsUped) {
-            mHeadsUpManager.showNotification(shadeEntry);
-            // Mark as seen immediately
-            setNotificationShown(notification);
-        }
-
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            if (shouldSuppressFullScreenIntent(notification.getKey())) {
+            if (shouldSuppressFullScreenIntent(key)) {
                 if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + notification.getKey());
+                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + key);
                 }
-            } else if (mNotificationData.getImportance(notification.getKey())
+            } else if (mNotificationData.getImportance(key)
                     < NotificationManager.IMPORTANCE_HIGH) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: not important enough: "
-                            + notification.getKey());
+                            + key);
                 }
             } else {
                 // Stop screensaver if the notification has a full-screen intent.
@@ -1585,7 +1582,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
-                            notification.getKey());
+                            key);
                     notification.getNotification().fullScreenIntent.send();
                     shadeEntry.notifyFullScreenIntentLaunched();
                     mMetricsLogger.count("note_fullscreen", 1);
@@ -1593,13 +1590,45 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
         }
-        addNotificationViews(shadeEntry, ranking);
+        abortExistingInflation(key);
+        mPendingNotifications.put(key, shadeEntry);
+    }
+
+    private void abortExistingInflation(String key) {
+        if (mPendingNotifications.containsKey(key)) {
+            Entry entry = mPendingNotifications.get(key);
+            entry.abortInflation();
+            mPendingNotifications.remove(key);
+        }
+        Entry addedEntry = mNotificationData.get(key);
+        if (addedEntry != null) {
+            addedEntry.abortInflation();
+        }
+    }
+
+    private void addEntry(Entry shadeEntry) {
+        boolean isHeadsUped = shouldPeek(shadeEntry);
+        if (isHeadsUped) {
+            mHeadsUpManager.showNotification(shadeEntry);
+            // Mark as seen immediately
+            setNotificationShown(shadeEntry.notification);
+        }
+        addNotificationViews(shadeEntry);
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
     }
 
+    @Override
     public void handleInflationException(StatusBarNotification notification, InflationException e) {
         handleNotificationError(notification, e.getMessage());
+    }
+
+    @Override
+    public void onAsyncInflationFinished(Entry entry) {
+        mPendingNotifications.remove(entry.key);
+        if (mNotificationData.get(entry.key) == null) {
+            addEntry(entry);
+        }
     }
 
     private boolean shouldSuppressFullScreenIntent(String key) {
@@ -1621,6 +1650,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void removeNotification(String key, RankingMap ranking) {
         boolean deferRemoval = false;
+        abortExistingInflation(key);
         if (mHeadsUpManager.isHeadsUp(key)) {
             // A cancel() in repsonse to a remote input shouldn't be delayed, as it makes the
             // sending look longer than it takes.
@@ -3308,6 +3338,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                     + " scroll " + mStackScroller.getScrollX()
                     + "," + mStackScroller.getScrollY());
         }
+        pw.print("  mPendingNotifications=");
+        if (mPendingNotifications.size() == 0) {
+            pw.println("null");
+        } else {
+            for (Entry entry : mPendingNotifications.values()) {
+                pw.println(entry.notification);
+            }
+        }
 
         pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
         pw.print("  mStatusBarWindowState=");
@@ -4022,6 +4060,30 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void showKeyguard() {
+        mKeyguardRequested = true;
+        updateIsKeyguard();
+    }
+
+    public boolean hideKeyguard() {
+        mKeyguardRequested = false;
+        return updateIsKeyguard();
+    }
+
+    private boolean updateIsKeyguard() {
+        // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
+        // there's no surface we can show to the user.
+        boolean keyguardForDozing = mDozingRequested && !mDeviceInteractive;
+        boolean shouldBeKeyguard = mKeyguardRequested || keyguardForDozing;
+        if (shouldBeKeyguard && !mIsKeyguard) {
+            showKeyguardImpl();
+        } else if (!shouldBeKeyguard && mIsKeyguard) {
+            return hideKeyguardImpl();
+        }
+        return false;
+    }
+
+    public void showKeyguardImpl() {
+        mIsKeyguard = true;
         if (mLaunchTransitionFadingAway) {
             mNotificationPanel.animate().cancel();
             onLaunchTransitionFadingEnded();
@@ -4175,7 +4237,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * @return true if we would like to stay in the shade, false if it should go away entirely
      */
-    public boolean hideKeyguard() {
+    public boolean hideKeyguardImpl() {
+        mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mLeaveOpenOnKeyguardHide;
         setBarState(StatusBarState.SHADE);
@@ -4854,6 +4917,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             });
         }
+        updateIsKeyguard();
     }
 
     public void onStartedWakingUp() {
@@ -4862,6 +4926,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mVisualStabilityManager.setScreenOn(true);
         mNotificationPanel.setTouchDisabled(false);
         updateVisibleToUser();
+        updateIsKeyguard();
     }
 
     public void onScreenTurningOn() {
@@ -4976,6 +5041,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 || mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
         mStatusBarWindowManager.setDozing(mDozing);
+        mStatusBarKeyguardViewManager.setDozing(mDozing);
         updateDozingState();
         Trace.endSection();
     }
@@ -5548,7 +5614,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 public void run() {
                     for (StatusBarNotification sbn : notifications) {
                         try {
-                            addNotification(sbn, currentRanking, null /* oldEntry */);
+                            addNotification(sbn, currentRanking);
                         } catch (InflationException e) {
                             handleInflationException(sbn, e);
                         }
@@ -5591,7 +5657,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                             if (isUpdate) {
                                 updateNotification(sbn, rankingMap);
                             } else {
-                                addNotification(sbn, rankingMap, null /* oldEntry */);
+                                addNotification(sbn, rankingMap);
                             }
                         } catch (InflationException e) {
                             handleInflationException(sbn, e);
@@ -6153,8 +6219,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    protected void inflateViews(Entry entry, ViewGroup parent) throws
-            InflationException {
+    protected void inflateViews(Entry entry, ViewGroup parent) {
         PackageManager pmUser = getPackageManagerForUser(mContext,
                 entry.notification.getUser().getIdentifier());
 
@@ -6175,7 +6240,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             row.setRemoteInputController(mRemoteInputController);
             row.setOnExpandClickListener(this);
             row.setRemoteViewClickHandler(mOnClickHandler);
-            row.setInflateExceptionHandler(mInflationExceptionHandler);
+            row.setInflationCallback(this);
 
             // Get the app name.
             // Note that Notification.Builder#bindHeaderAppName has similar logic
@@ -6573,12 +6638,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         return entry;
     }
 
-    protected void addNotificationViews(Entry entry, RankingMap ranking) {
+    protected void addNotificationViews(Entry entry) {
         if (entry == null) {
             return;
         }
         // Add the expanded view and icon.
-        mNotificationData.add(entry, ranking);
+        mNotificationData.add(entry);
         updateNotifications();
     }
 
@@ -6710,6 +6775,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final String key = notification.getKey();
+        abortExistingInflation(key);
         Entry entry = mNotificationData.get(key);
         if (entry == null) {
             return;

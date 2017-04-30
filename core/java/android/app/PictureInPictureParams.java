@@ -238,7 +238,7 @@ public class PictureInPictureParams implements Parcelable {
      */
     public void truncateActions(int size) {
         if (hasSetActions()) {
-            mUserActions = mUserActions.subList(0, size);
+            mUserActions = mUserActions.subList(0, Math.min(mUserActions.size(), size));
         }
     }
 

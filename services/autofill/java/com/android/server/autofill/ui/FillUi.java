@@ -15,6 +15,8 @@
  */
 package com.android.server.autofill.ui;
 
+import static com.android.server.autofill.Helper.sDebug;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -341,7 +343,7 @@ final class FillUi {
                     mWm.updateViewLayout(mContentView, params);
                 }
             } catch (WindowManager.BadTokenException e) {
-                Slog.i(TAG, "Filed with with token " + params.token + " gone.");
+                if (sDebug) Slog.d(TAG, "Filed with with token " + params.token + " gone.");
                 mCallback.onDestroy();
             }
         }

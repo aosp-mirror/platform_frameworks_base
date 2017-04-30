@@ -6622,6 +6622,13 @@ public final class Settings {
         public static final String PAYMENT_SERVICE_SEARCH_URI = "payment_service_search_uri";
 
         /**
+         * This is the query URI for finding a auto fill service to install.
+         *
+         * @hide
+         */
+        public static final String AUTOFILL_SERVICE_SEARCH_URI = "autofill_service_search_uri";
+
+        /**
          * If enabled, apps should try to skip any introductory hints on first launch. This might
          * apply to users that are already familiar with the environment or temporary users.
          * <p>
@@ -7087,6 +7094,12 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR);
             INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_TYPEFACE);
             INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_FONT_SCALE);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_WINDOW_COLOR);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_DISPLAY_DALTONIZER);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_AUTOCLICK_DELAY);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_AUTOCLICK_ENABLED);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_LARGE_POINTER_ICON);
 
             INSTANT_APP_SETTINGS.add(DEFAULT_INPUT_METHOD);
             INSTANT_APP_SETTINGS.add(ENABLED_INPUT_METHODS);
@@ -7733,13 +7746,36 @@ public final class Settings {
                 "location_background_throttle_interval_ms";
 
         /**
+         * Most frequent location update interval in milliseconds that proximity alert is allowed
+         * to request.
+         * @hide
+         */
+        public static final String LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS =
+                "location_background_throttle_proximity_alert_interval_ms";
+
+        /**
          * Packages that are whitelisted for background throttling (throttling will not be applied).
          * @hide
          */
         public static final String LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
             "location_background_throttle_package_whitelist";
 
-       /**
+        /**
+         * The interval in milliseconds at which wifi scan requests will be throttled when they are
+         * coming from the background.
+         * @hide
+         */
+        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS =
+                "wifi_scan_background_throttle_interval_ms";
+
+        /**
+         * Packages that are whitelisted to be exempt for wifi background throttling.
+         * @hide
+         */
+        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
+                "wifi_scan_background_throttle_package_whitelist";
+
+        /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
         * @hide

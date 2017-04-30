@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operatörünüz bu konumdaki sesli ve acil durum çağrılarını geçici olarak askıya aldı"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ağa erişilemiyor"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Sinyal gücünü iyileştirmek için Sistem &gt; Ağ ve İnternet &gt; Mobil ağlar &gt; Tercih edilen ağ türü\'nden seçili türü değiştirmeyi deneyin."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Uyarılar"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Çağrı yönlendirme"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Acil geri arama modu"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Mobil veri uyarıları"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mesajları"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Sesli mesajlar"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Kablosuz çağrı"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Karşı taraf TTY Modunu TAM yaptı"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Karşı taraf TTY Modunu HCO yaptı"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Karşı taraf TTY Modunu VCO yaptı"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Zaman girişi için metin girişi moduna geçin."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Zaman girişi için saat moduna geçin."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Otomatik doldurma seçenekleri"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"İçerikler otomatik doldurulamıyor"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> hizmetine kaydedilsin mi?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>, <xliff:g id="LABEL">%2$s</xliff:g> etkinliğine kaydedilsin mi?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g> ve <xliff:g id="TYPE_1">%2$s</xliff:g> bilgileri <xliff:g id="LABEL">%3$s</xliff:g> hizmetine kaydedilsin mi?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ve <xliff:g id="TYPE_2">%3$s</xliff:g> bilgileri <xliff:g id="LABEL">%4$s</xliff:g> hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> ve <xliff:g id="TYPE_1">%2$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ve <xliff:g id="TYPE_2">%3$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Kaydet"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Hayır, teşekkürler"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"şifre"</string>

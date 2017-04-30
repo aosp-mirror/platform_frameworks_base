@@ -32,22 +32,19 @@ extern jobject android_hardware_HardwareBuffer_createFromAHardwareBuffer(
         JNIEnv* env, AHardwareBuffer* hardwareBuffer);
 
 /* Convert from HAL_PIXEL_FORMAT values to AHARDWAREBUFFER_FORMAT values. */
-extern uint32_t android_hardware_HardwareBuffer_convertFromPixelFormat(
-      uint32_t format);
+extern uint32_t android_hardware_HardwareBuffer_convertFromPixelFormat(uint32_t format);
 
 /* Convert from AHARDWAREBUFFER_FORMAT values to HAL_PIXEL_FORMAT values. */
-extern uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(
-      uint32_t format);
+extern uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(uint32_t format);
 
 /* Convert from AHARDWAREBUFFER_USAGE* flags to to gralloc usage flags. */
-extern void android_hardware_HardwareBuffer_convertToGrallocUsageBits(
-      uint64_t* outProducerUsage, uint64_t* outConsumerUsage, uint64_t usage0,
-      uint64_t usage1);
+extern uint64_t android_hardware_HardwareBuffer_convertToGrallocUsageBits(uint64_t usage);
 
-/* Convert from gralloc usage flags to to AHARDWAREBUFFER_USAGE0* flags. */
-extern void android_hardware_HardwareBuffer_convertFromGrallocUsageBits(
-      uint64_t* outUsage0, uint64_t* outUsage1, uint64_t producerUsage,
-      uint64_t consumerUsage);
+inline void android_hardware_HardwareBuffer_convertToGrallocUsageBits(
+        uint64_t* outProducerUsage, uint64_t* outConsumerUsage, uint64_t usage, uint64_t) {
+    outProducerUsage[0] = outConsumerUsage[0] =
+            android_hardware_HardwareBuffer_convertToGrallocUsageBits(usage);
+}
 
 } // namespace android
 

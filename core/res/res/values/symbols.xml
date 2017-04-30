@@ -238,6 +238,7 @@
   <java-symbol type="attr" name="windowFixedHeightMinor" />
   <java-symbol type="attr" name="accessibilityFocusedDrawable"/>
   <java-symbol type="attr" name="isLightTheme"/>
+  <java-symbol type="attr" name="autofilledHighlight"/>
 
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
@@ -598,11 +599,9 @@
   <java-symbol type="string" name="badPin" />
   <java-symbol type="string" name="badPuk" />
   <java-symbol type="string" name="byteShort" />
-  <java-symbol type="string" name="capability_desc_canRequestEnhancedWebAccessibility" />
   <java-symbol type="string" name="capability_title_canRequestFilterKeyEvents" />
   <java-symbol type="string" name="capability_desc_canRequestTouchExploration" />
   <java-symbol type="string" name="capability_desc_canRetrieveWindowContent" />
-  <java-symbol type="string" name="capability_title_canRequestEnhancedWebAccessibility" />
   <java-symbol type="string" name="capability_desc_canRequestFilterKeyEvents" />
   <java-symbol type="string" name="capability_title_canRequestTouchExploration" />
   <java-symbol type="string" name="capability_title_canRetrieveWindowContent" />
@@ -2624,7 +2623,7 @@
   <java-symbol type="string" name="new_sms_notification_title" />
   <java-symbol type="string" name="new_sms_notification_content" />
 
-  <java-symbol type="dimen" name="media_notification_expanded_image_max_size" />
+  <java-symbol type="dimen" name="media_notification_expanded_image_small_size" />
   <java-symbol type="dimen" name="media_notification_expanded_image_margin_bottom" />
   <java-symbol type="dimen" name="media_notification_header_height" />
   <java-symbol type="dimen" name="notification_content_image_margin_end" />

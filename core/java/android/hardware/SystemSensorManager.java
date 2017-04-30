@@ -589,9 +589,9 @@ public class SystemSensorManager extends SensorManager {
                         "Width if HaradwareBuffer must be greater than "
                         + MIN_DIRECT_CHANNEL_BUFFER_SIZE);
             }
-            if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE0_SENSOR_DIRECT_DATA) == 0) {
+            if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE_SENSOR_DIRECT_DATA) == 0) {
                 throw new IllegalArgumentException(
-                        "HardwareBuffer must set usage flag USAGE0_SENSOR_DIRECT_DATA");
+                        "HardwareBuffer must set usage flag USAGE_SENSOR_DIRECT_DATA");
             }
             size = hardwareBuffer.getWidth();
             id = nativeCreateDirectChannel(

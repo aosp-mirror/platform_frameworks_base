@@ -1205,7 +1205,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(largestWidthLimitDp);
         if (storageUuid != null) {
             dest.writeInt(1);
-            dest.writeUuid(storageUuid);
+            dest.writeLong(storageUuid.getMostSignificantBits());
+            dest.writeLong(storageUuid.getLeastSignificantBits());
         } else {
             dest.writeInt(0);
         }
@@ -1271,7 +1272,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         compatibleWidthLimitDp = source.readInt();
         largestWidthLimitDp = source.readInt();
         if (source.readInt() != 0) {
-            storageUuid = source.readUuid();
+            storageUuid = new UUID(source.readLong(), source.readLong());
             volumeUuid = StorageManager.convert(storageUuid);
         }
         scanSourceDir = source.readString();

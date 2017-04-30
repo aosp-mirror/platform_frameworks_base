@@ -178,4 +178,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public void setIsChildInGroup(boolean isChildInGroup) {
     }
+
+    public boolean isDimmable() {
+        return true;
+    }
 }

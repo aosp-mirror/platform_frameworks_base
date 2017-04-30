@@ -1840,6 +1840,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_SPLIT_NAME = "android.intent.extra.SPLIT_NAME";
 
     /**
+     * Intent extra: A {@link ComponentName} value.
+     * <p>
+     * Type: String
+     * </p>
+     */
+    public static final String EXTRA_COMPONENT_NAME = "android.intent.extra.COMPONENT_NAME";
+
+    /**
      * Intent extra: An extra for specifying whether a result is needed.
      * <p>
      * Type: boolean
@@ -3228,6 +3236,7 @@ public class Intent implements Parcelable, Cloneable {
      * caused the broadcast.
      * @hide
      */
+    @SystemApi
     public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
 
     /**
@@ -4420,6 +4429,21 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_VERSION_CODE = "android.intent.extra.VERSION_CODE";
+
+    /**
+     * The app that triggered the ephemeral installation.
+     * @hide
+     */
+    public static final String EXTRA_CALLING_PACKAGE
+            = "android.intent.extra.CALLING_PACKAGE";
+
+    /**
+     * Optional calling app provided bundle containing additional launch information the
+     * installer may use.
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_BUNDLE
+            = "android.intent.extra.VERIFICATION_BUNDLE";
 
     /**
      * A Bundle forming a mapping of potential target package names to different extras Bundles

@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Jou diensverskaffer het tydelik stem- en noodoproepe by hierdie ligging opgeskort"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Kan netwerk nie bereik nie"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Om die opvangs te verbeter, probeer die tipe verander wat gekies is by Stelsel &gt; Netwerk en internet &gt; Mobiele netwerke &gt; Voorkeurnetwerktipe."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Opletberigte"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Oproepaanstuur"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Noodterugbel-modus"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Opletberigte oor mobiele data"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-boodskappe"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Stemboodskappe"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-oproepe"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Ander party het TTY-modus VOL versoek"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Ander party het TTY-modus GOD versoek"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Ander party het TTY-modus SOD versoek"</string>
@@ -1732,11 +1739,13 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Skakel oor na teksmodus vir die tydinvoer."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Skakel oor na horlosiemodus vir die tydinvoer."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Outovulopsies"</string>
+    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
+    <skip />
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Inhoud kan nie outomaties ingevul word nie"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Stoor na <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Stoor <xliff:g id="TYPE">%1$s</xliff:g> na <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Stoor <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Stoor <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> in <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Stoor in &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Stoor <xliff:g id="TYPE">%1$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Stoor <xliff:g id="TYPE_0">%1$s</xliff:g> en <xliff:g id="TYPE_1">%2$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Stoor <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> en <xliff:g id="TYPE_2">%3$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Stoor"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nee, dankie"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"wagwoord"</string>

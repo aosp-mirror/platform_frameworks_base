@@ -25,15 +25,16 @@ import java.util.Set;
 /** @hide */
 public final class Helper {
 
-    // TODO(b/36141126): set to false and remove guard from places that should always be on
-    public static final boolean DEBUG = true;
-    public static final boolean VERBOSE = false;
+    // Debug-level flags are defined when service is bound.
+    public static boolean sDebug = false;
+    public static boolean sVerbose = false;
+
     public static final String REDACTED = "[REDACTED]";
 
     static StringBuilder append(StringBuilder builder, Bundle bundle) {
-        if (bundle == null) {
+        if (bundle == null || !sDebug) {
             builder.append("N/A");
-        } else if (!VERBOSE) {
+        } else if (!sVerbose) {
             builder.append(REDACTED);
         } else {
             final Set<String> keySet = bundle.keySet();
