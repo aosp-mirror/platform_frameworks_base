@@ -134,8 +134,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Dos barras"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Tres barras"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Señal al máximo"</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Sí"</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"No"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Activado"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Desactivado"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Conectado"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Conectando."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Datos móviles desactivados"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartir por Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"La red VPN está activada."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hay tarjeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambiando red de operador."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir detalles de la batería"</string>
@@ -546,8 +545,8 @@
     <string name="do_not_silence" msgid="6878060322594892441">"No silenciar"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"No silenciar ni bloquear"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Controles de energía de las notificaciones"</string>
-    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Sí"</string>
-    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"No"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Activado"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desactivado"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Los controles de energía de las notificaciones permiten establecer un nivel de importancia de 0 a 5 para las notificaciones de las aplicaciones. \n\n"<b>"Nivel 5"</b>" \n- Mostrar en la parte superior de la lista de notificaciones \n- Permitir interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 4"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 3"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n\n"<b>"Nivel 2"</b>" \n- Evitar interrumpir en el modo de pantalla completa\n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n\n"<b>"Nivel 1"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n- Ocultar de la pantalla de bloqueo y de la barra de estado \n- Mostrar en la parte inferior de la lista de notificaciones \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas las notificaciones de la aplicación"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificaciones"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Ya no recibirás estas notificaciones."</string>
@@ -635,8 +634,8 @@
     <string name="data_saver" msgid="5037565123367048522">"Ahorro de datos"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Ahorro de datos activado"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Ahorro de datos desactivado"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"Sí"</string>
-    <string name="switch_bar_off" msgid="8803270596930432874">"No"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Activado"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Desactivado"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegación"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Diseño"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Tipo de botón a la izquierda extra"</string>
@@ -702,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Es posible que la aplicación no funcione con la pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"La aplicación no admite la pantalla dividida."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Es posible que la aplicación no funcione en una pantalla secundaria."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"La aplicación no se puede iniciar en pantallas secundarias."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Abrir ajustes."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir ajustes rápidos."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Cerrar ajustes rápidos."</string>

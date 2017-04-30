@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobile data off"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Aeroplane mode"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN on."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No SIM card."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Carrier network changing."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Open battery details"</string>
@@ -331,7 +330,7 @@
     <string name="recents_empty_message" msgid="808480104164008572">"No recent items"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"You\'ve cleared everything"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Application Info"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen-pinning"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen pinning"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"search"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Could not start <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> is disabled in safe-mode."</string>
@@ -526,7 +525,7 @@
     <string name="tuner_warning_title" msgid="7094689930793031682">"Fun for some but not for all"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner gives you extra ways to tweak and customise the Android user interface. These experimental features may change, break or disappear in future releases. Proceed with caution."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"These experimental features may change, break or disappear in future releases. Proceed with caution."</string>
-    <string name="got_it" msgid="2239653834387972602">"Understood"</string>
+    <string name="got_it" msgid="2239653834387972602">"Got it"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Congrats! System UI Tuner has been added to Settings"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Remove from settings"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Remove System UI Tuner from Settings and stop using all of its features?"</string>
@@ -610,7 +609,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Back"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notifications"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Keyboard Shortcuts"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Keyboard shortcuts"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Switch input method"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Applications"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Assist"</string>
@@ -700,10 +699,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> notification: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"App may not work with split-screen."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"App does not support split-screen."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"App may not work on a secondary display."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"App does not support launch on secondary displays."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Open settings."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Open quick settings."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Close quick settings."</string>

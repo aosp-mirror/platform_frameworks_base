@@ -36,7 +36,7 @@
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Кубаттагычка туташтырыңыз."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Кулпуну ачуу үчүн Менюну басыңыз."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Тармак кулпуланган"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM-карта жок"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM карта жок"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"Планшетте SIM-карта жок."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"Телефондо SIM-карта жок."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"SIM-карта салыңыз."</string>
