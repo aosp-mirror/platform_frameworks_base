@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"محتوای پنجره‌ای را که درحال تعامل با آن هستید بررسی می‌کند."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"فعال‌سازی کاوش لمسی"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"موارد ضربه‌ زده‌شده با صدای بلند خوانده می‌شوند و با استفاده از حرکات اشاره می‌توانید صفحه را کاوش کنید."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"فعال‌سازی دسترس‌پذیری پیشرفته برای وب"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ممکن است جهت افزایش دسترس‌پذیری به محتوای برنامه، اسکریپت‌هایی نصب شود."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"نوشتاری را که تایپ می‌کنید مشاهده کند"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را لحاظ می‌کند."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"کنترل درشت‌نمایی نمایشگر"</string>
@@ -1478,7 +1476,7 @@
     <string name="user_switched" msgid="3768006783166984410">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"در حال خروج از سیستم <xliff:g id="NAME">%1$s</xliff:g>…"</string>
-    <string name="owner_name" msgid="2716755460376028154">"دارنده"</string>
+    <string name="owner_name" msgid="2716755460376028154">"مالک"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خطا"</string>
     <string name="error_message_change_not_allowed" msgid="1238035947357923497">"سرپرست سیستم شما این تغییر را مجاز نمی‌داند"</string>
     <string name="app_not_found" msgid="3429141853498927379">"برنامه‌ای برای انجام این عملکرد موجود نیست"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"برای وارد کردن زمان، به حالت وارد کردن نوشتار تغییر وضعیت دهید."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"برای وارد کردن زمان، به حالت ساعت تغییر وضعیت دهید."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"گزینه‌های تکمیل خودکار"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"ذخیره کردن برای تکمیل خودکار"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"تکمیل خودکار محتوا ممکن نیست"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"‏در &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ذخیره شود؟"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏<xliff:g id="TYPE">%1$s</xliff:g> در &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ذخیره شود؟"</string>

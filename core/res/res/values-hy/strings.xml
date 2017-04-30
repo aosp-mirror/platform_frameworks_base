@@ -82,7 +82,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Երեք կողմով զանգ"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Անցանկալի վրդովեցնող զանգերի մերժում"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Զանգող համարի առաքում"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Չխանգարել"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Չանհանգստացնել"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Զանգողի ID-ն լռելյայն սահմանափակված է: Հաջորդ զանգը` սահմանափակված"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Զանգողի ID-ն լռելյայն սահմանափակված է: Հաջորդ զանգը` չսահմանափակված"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Զանգողի ID-ն լռելյայն չսահմանափակված է: Հաջորդ զանգը` Սահմանափակված"</string>
@@ -271,32 +271,30 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Անցնել աշխատանքային պրոֆիլին"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"օգտագործել ձեր կոնտակտները"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"Տեղադրություն"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"օգտագործել այս սարքի տեղադրությունը"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Տեղորոշում"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"տեղորոշել այս սարքը"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"օգտագործել օրացույցը"</string>
-    <string name="permgrouplab_sms" msgid="228308803364967808">"Կարճ հաղորդագրություն"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS-ները"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Պահոց"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Հիշողություն"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"Բարձրախոս"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Խոսափող"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ձայնագրել"</string>
-    <string name="permgrouplab_camera" msgid="4820372495894586615">"Ֆոտոխցիկ"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Տեսախցիկ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"լուսանկարել և տեսագրել"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Հեռախոս"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"կատարել զանգեր և կառավարել զանգերը"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Մարմնի սենսորներ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"օգտագործել սենսորների տվյալները ձեր օրգանիզմի վիճակի մասին"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Առբերել պատուհանի բովանդակությունը"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ստուգեք պատուհանի բովանդակությունը, որի հետ փոխգործակցում եք:"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Վերլուծել գործող պատուհանի բովանդակությունը"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Միացնել Հպման միջոցով հետազոտումը"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ուսումնաիրեք էկրանը այն շոշափելով։ Այս կամ այն տարրին հպելուց հետո դրանք բարձրաձայն կնկարագրվեն։"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Միացնել ընդլայնված վեբ մատչելիությունը"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Հնարավոր է սկրիպտներ տեղադրվեն` ծրագրի բովանդակությունն ավելի մատչելի դարձնելու համար:"</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Զննել ձեր մուտքագրած տեքստը"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Ներառում է անձնական տվյալներ, ինչպիսիք են վարկային քարտերի համարները և գաղտնաբառերը:"</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ցուցասարքի խոշորացման կառավարում"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ցուցասարքի մասշտաբավորման և դիրքավորման կառավարում:"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Հնչեցնել սեղմվող տարրերը և թույլատրել սարքի կառավարումը ժեստերի միջոցով"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Մշակել մուտքագրվող տեքստը"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Այդ թվում անձնական տվյալներ, օրինակ վարկային քարտերի համարներն ու գաղտնաբառերը"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Կառավարել պատկերի մասշտաբը"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Կառավարել պատկերի մասշտաբն ու դիրքը"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Կատարել ժեստեր"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Կարող է հպել, թերթել, պտղունցել և կատարել այլ ժեստեր:"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Մատնահետքերի սկաների ժեստեր"</string>
@@ -344,7 +342,7 @@
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների վերևում"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների կամ էկրանի այլ հատվածների վերևում: Դա կարող է խոչընդոտել հավելվածի նորմալ օգտագործմանը և փոխել այլ հավելվածների տեսքը:"</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"աշխատել ֆոնում"</string>
-    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Այս հավելվածը կարող է աշխատել ֆոնում և ավելի արագ սպառել մարտկոցի լիցքը։"</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"Այս հավելվածը կարող է աշխատել ֆոնային ռեժիմում և ավելի արագ սպառել մարտկոցի լիցքը։"</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"տվյալներ օգտագործել ֆոնում"</string>
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Այս հավելվածը կարող է տվյալներ օգտագործել ֆոնում և ավելացնել տվյալների օգտագործման ծավալը։"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"միշտ աշխատեցնել հավելվածը"</string>
@@ -465,7 +463,7 @@
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Թույլ է տալիս հավելվածին հեռախոսը միացնել WiMAX ցանցին և անջատել այդ ցանցից:"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"զուգակցվել Bluetooth սարքերի հետ"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կարգավորումը պլանշետի վրա և կապվել ու կապեր ընդունել զուգակցված սարքերի հետ:"</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կազմաձևումը հեռուստացույցի վրա և կապակցվել ու թույլ տալ կապակցումները զուգավորված սարքերի հետ:"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կազմաձևումը հեռուստացույցի վրա և կապակցվել ու թույլ տալ կապակցումները զուգակցված սարքերի հետ:"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կարգավորումը հեռախոսի վրա և կապվել ու կապեր ընդունել զուգակցված սարքերի հետ:"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"վերահսկել Մոտ Տարածությամբ Հաղորդակցումը"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Թույլ է տալիս հավելվածին հաղորդակցվել Մոտ տարածությամբ հաղորդակցման (NFC) պիտակների, քարտերի և ընթերցիչների հետ:"</string>
@@ -780,7 +778,7 @@
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> վիջեթ:"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Օգտատիրոջ ընտրիչ"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Կարգավիճակ"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Ֆոտոխցիկ"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Տեսախցիկ"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Մեդիա կարգավորումներ"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Վիջեթների վերադասավորումը մեկնարկել է:"</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Վիջեթի վերադասավորումն ավարտվեց:"</string>
@@ -1185,7 +1183,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ՏՐԱՄԱԴՐԵԼ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ՄԵՐԺԵԼ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Փոխել ստեղնաշարը"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Պահել էկրանին մինչդեռ ֆիզիկական ստեղնաշարն ակտիվ է"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Պահել էկրանին, երբ ֆիզիկական ստեղնաշարն ակտիվ է"</string>
     <string name="hardware" msgid="194658061510127999">"Ցույց տալ վիրտուալ ստեղնաշարը"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Կազմաձևեք ֆիզիկական ստեղնաշարը"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
@@ -1569,7 +1567,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Չեղարկված է"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Բովանդակության գրելու սխալ"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"անհայտ"</string>
-    <string name="reason_service_unavailable" msgid="7824008732243903268">"Տպելու ծառայությունն ակտիվացված չէ"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Տպման ծառայությունն ակտիվացված չէ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ծառայությունը տեղադրվել է"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Հպեք` միացնելու համար"</string>
     <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Մուտքագրեք ադմինիստրատորի PIN կոդը"</string>
@@ -1610,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Տեղադրվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Մարտկոցի աշխատանքի ժամկետը երկարացնելու նպատակով, մարտկոցի էներգիայի խնայման գործառույթը սահմանափակում է սարքի աշխատանքը, թրթռոցը, տեղադրության ծառայությունները և հետնաշերտում աշխատող շատ գործընթացներ: Էլփոստը, հաղորդագրությունների փոխանակումը և տվյալների համաժամեցումից կախված այլ հավելվածները կարող են չթարմացվել, եթե դուք դրանք չգործարկեք:\n\nԵրբ ձեր սարքը լիցքավորվում է, մարտկոցի էներգիայի խնայման գործառույթն ինքնաշխատորեն անջատվում է:"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Մարտկոցի աշխատանքի ժամկետը երկարացնելու համար տնտեսման ռեժիմում սահմանափակվում են սարքի արտադրողականությունը, թրթռոցը, տեղորոշման ծառայությունները և տվյալների ֆոնային փոխանցումը: Տվյալների համաժամեցումից կախված հավելվածները կարող են չթարմացվել, եթե դուք դրանք չգործարկեք:\n\n Մարտկոցի տնտեսման գործառույթն ավտոմատ կերպով անջատվում է սարքի լիցքավորման ժամանակ։"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Տվյալների օգտագործումը նվազեցնելու նպատակով «Թրաֆիկի խնայումը» որոշ հավելվածներին թույլ չի տալիս ուղարկել կամ ստանալ տվյալներ ֆոնային ռեժիմում: Արդեն իսկ գործարկված հավելվածը կարող է օգտագործել տվյալները, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանք հպելուց հետո:"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Միացնե՞լ թրաֆիկի խնայումը:"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Միացնել"</string>
@@ -1733,14 +1731,13 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB վրիպազերծում"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ժամ"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"րոպե"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"Կարգավորել ժամը"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"Ժամը"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Մուտքագրեք վավեր ժամ"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Մուտքագրեք ժամը"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Ժամը մուտքագրելու համար միացրեք տեքստի մուտքագրման ռեժիմը:"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Ժամը մուտքագրելու համար միացրեք ժամացույցի ռեժիմը:"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Ինքնալրացման ընտրանքները"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Պահել ինքնալրացման համար"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Բովանդակության ինքնալրացումը հնարավոր չէ"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Պահե՞լ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;-ում:"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Պահե՞լ <xliff:g id="TYPE">%1$s</xliff:g>-ը &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;-ում:"</string>

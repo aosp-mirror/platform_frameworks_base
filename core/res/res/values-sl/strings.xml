@@ -297,11 +297,9 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverjanje vsebine okna, ki ga uporabljate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklopiti raziskovanje z dotikom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Elementi, ki se jih dotaknete, bodo izrečeni na glas, zaslon pa lahko raziskujete s potezami."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Vklopiti izboljšano dostopnost spleta za ljudi s posebnimi potrebami"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za boljšo dostopnost vsebine aplikacije je mogoče namestiti skripte."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Opazovati besedilo, ki ga natipkate"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Vključuje osebne podatke, kot so številke kreditnih kartic in gesla."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Nadziranje povečave prikaza"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Nadzirati povečave prikaza"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Nadziranje stopnje povečave in položaja prikaza."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvajanje potez"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mogoče je izvajanje dotikov, vlečenja, primikanja in razmikanja prstov ter drugih potez."</string>
@@ -1801,8 +1799,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Preklopite na način za vnašanje besedila, da vnesete čas."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Preklopite na način ure, da vnesete čas."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Možnosti samodejnega izpolnjevanja"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Shranjevanje v storitev samodejnega izpolnjevanja"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Vsebine ni mogoče samodejno izpolniti"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Želite shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Želite <xliff:g id="TYPE">%1$s</xliff:g> shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

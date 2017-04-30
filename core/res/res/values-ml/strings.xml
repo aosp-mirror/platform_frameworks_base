@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക ഓൺ ചെയ്യുക"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ടാപ്പുചെയ്ത ഇനങ്ങൾ ഉച്ചത്തിൽ പറയപ്പെടും, ജെസ്റ്ററുകൾ ഉപയോഗിച്ച് സ്‌ക്രീൻ അടുത്തറിയാവുന്നതാണ്."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"മെച്ചപ്പെടുത്തിയ വെബ് ഉപയോഗസഹായി ഓണാക്കുക"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"അപ്ലിക്കേഷൻ ഉള്ളടക്കം കൂടുതൽ ആക്‌സസ്സുചെയ്യാൻ കഴിയുന്നതാക്കാൻ സ്‌ക്രിപ്റ്റുകൾ ഇൻസ്റ്റാളുചെയ്യാനിടയുണ്ട്."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"നിങ്ങൾ ടൈപ്പുചെയ്യുന്ന വാചകം നിരീക്ഷിക്കുക"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ക്രെഡിറ്റ് കാർഡ് നമ്പറുകളും പാസ്‌വേഡുകളും പോലുള്ള വ്യക്തിഗത ഡാറ്റ ഉൾപ്പെടുന്നു."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ഡിസ്പ്ലേ മാഗ്നിഫിക്കേഷൻ നിയന്ത്രിക്കുക"</string>
@@ -1128,7 +1126,7 @@
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"ക്ഷണം അയച്ചു"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"കണക്റ്റുചെയ്യാനുള്ള ക്ഷണം"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"അയച്ചത്:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"സ്വീകർത്താവ്:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"ടു:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"ആവശ്യമായ പിൻ ടൈപ്പുചെയ്യുക:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"പിൻ:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ടാബ്‌ലെറ്റ് <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതിൽ കണക്റ്റുചെയ്‌തിരിക്കുമ്പോൾ അത് താൽക്കാലികമായി Wi-Fi-യിൽ നിന്നും വിച്ഛേദിക്കപ്പെടും."</string>
@@ -1732,7 +1730,7 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"ഉല്‍‌പ്പാദനക്ഷമത"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ഉപകരണ സ്റ്റോറേജ്"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ഡീബഗ്ഗിംഗ്"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"മണിക്കൂര്‍"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"മണി."</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"മിനിറ്റ്"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"സമയം സജ്ജീകരിക്കുക"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"ശരിയായ സമയം ‌നൽകുക"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"സ്വയമേവ പൂരിപ്പിക്കാനായി സംരക്ഷിക്കുക"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ഉള്ളടക്കങ്ങൾ സ്വയമേവ പൂരിപ്പിക്കാൻ കഴിയില്ല"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> എന്നതിനെ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>

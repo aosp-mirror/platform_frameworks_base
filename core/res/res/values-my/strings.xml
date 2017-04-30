@@ -287,14 +287,12 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ခန္ဓာကိုယ် အာရုံခံကိရိယာများ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးတွင်ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင် အပြန်အလှန်လုပ်နေသော ဝင်းဒိုးမှာပါရှိသည်များကို သေချာစွာ ကြည့်ရှုစစ်ဆေးပါ"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးတွင် ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင်အသုံးပြုနေသော ဝင်းဒိုးတွင် ပါရှိသည်များကို ကြည့်ရှုစစ်ဆေးသည်။"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"တို့ထိခြင်းဖြင့် ရှာဖွေမှုကို ဖွင့်ရန်"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"တို့လိုက်သည့်အရာများကို အသံထွက်ဖတ်ပေးပါလိမ့်မည်။ လက်ဟန်အမူအရာများကို အသုံးပြု၍ မျက်နှာပြင်ကို လေ့လာနိုင်ပါသည်။"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ပိုမိုကောင်းမွန်သော ဝဘ်ရယူသုံးစွဲနိုင်မှုကို ဖွင့်ရန်"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"အက်ပ်ကို လွယ်ကူစွာ ဝင်ရောက်အသုံးပြုနိုင်ရန်အတွက် စကရစ်ကို ထည့်သွင်းနိုင်သည်။"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို စောင့်ကြည့်ရန်"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"အရေးကြီးသော ကိုယ်ရေးအချက်အလက်များဖြစ်တဲ့ ခရက်ဒစ်ကဒ်နံပါတ်များနှင့် စကားဝှက်များ ပါဝင်ပါတယ်."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကဒ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ရန်"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါ။"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"လက်ဟန်များ အသုံးပြုပါ"</string>
@@ -758,7 +756,7 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"အကြိမ်ရေ များစွာ ပုံဆွဲသော့ဖွင့်ရန် ကြိုးစားခြင်း"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"သော့ဖွင့်ရန် Google အကောင့်ဖြင့် ဝင်ပါ"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"သုံးစွဲသူ အမှတ် (အီးမေးလ်)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"လျို့ဝှက် နံပါတ်"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"စကားဝှက်"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ဝင်ရန်"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"အသုံးပြုသူအမည် သို့မဟုတ် လျို့ဝှက် နံပါတ် မှားယွင်းနေသည်"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"သုံးစွဲသူ အမည် သို့ စကားဝှင်ကို မေ့နေပါသလား။ \n"<b>"google.com/accounts/recovery"</b>" ကို သွားရောက်ပါ။"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"အချိန်ထည့်သွင်းရန် စာသားထည့်သွင်းမှုမုဒ်သို့ ပြောင်းပါ။"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"အချိန်ထည့်သွင်းမှုအတွက် နာရီမုဒ်သို့ ပြောင်းပါ။"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"အော်တိုဖြည့် ရွေးချယ်စရာများ"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"အော်တိုဖြည့်ရန်အတွက် သိမ်းပါ"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"အကြောင်းအရာများကို အော်တိုဖြည့်၍မရပါ"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>

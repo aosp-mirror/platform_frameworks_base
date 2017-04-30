@@ -54,10 +54,10 @@
     <string name="serviceErased" msgid="1288584695297200972">"המחיקה בוצעה בהצלחה."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"סיסמה שגויה."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"‏MMI הושלם."</string>
-    <string name="badPin" msgid="9015277645546710014">"‏ה-PIN הישן שהקלדת שגוי."</string>
+    <string name="badPin" msgid="9015277645546710014">"קוד הגישה הישן שהקלדת שגוי."</string>
     <string name="badPuk" msgid="5487257647081132201">"‏ה-PUK שהקלדת שגוי."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"‏קודי ה-PIN שהקלדת לא תואמים."</string>
-    <string name="invalidPin" msgid="3850018445187475377">"‏הקלד PIN שאורכו 4 עד 8 ספרות."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"קודי הגישה שהקלדת לא תואמים."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"הקלד קוד גישה שאורכו 4 עד 8 ספרות."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"‏הקלד PUK באורך 8 מספרים או יותר."</string>
     <string name="needPuk" msgid="919668385956251611">"‏כרטיס ה-SIM נעול באמצעות PUK. הקלד את קוד PUK כדי לבטל את נעילתו."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏הקלד PUK2 כדי לבטל את חסימת כרטיס ה-SIM."</string>
@@ -78,7 +78,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"שיחה ממתינה"</string>
     <string name="BaMmi" msgid="455193067926770581">"חסימת שיחות"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"שינוי סיסמה"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"‏שנה את ה-PIN"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"שנה את קוד הגישה"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"מספר מתקשר נמצא"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"מספר מתקשר חסוי"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"שיחה עם שלושה משתתפים"</string>
@@ -297,8 +297,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעלה של \'גילוי באמצעות מגע\'"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"פריטים שעליהם תקיש יוקראו בקול, ותוכל לנווט במסך באמצעות תנועות."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"הפעלה של גישה משופרת לאינטרנט"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ייתכן שסקריפטים יותקנו על מנת להקל את הגישה אל תוכן של אפליקציות."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצגת טקסט בזמן הקלדה"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"כולל נתונים אישיים כמו מספרי כרטיס אשראי וסיסמאות."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"שליטה בהגדלת התצוגה"</string>
@@ -559,7 +557,7 @@
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"גישה אל \'נא לא להפריע\'"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"מאפשר לאפליקציה לקרוא ולכתוב את התצורה של \'נא לא להפריע\'."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"‏קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי PIN של מסך הנעילה."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי הגישה של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ניהול מעקב אחר מספר הסיסמאות השגויות שמוקלדות בעת ביטול נעילת המסך, וביצוע נעילה של הטאבלט, או מחיקה של כל נתוני הטאבלט, אם מוקלדות יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת נעילת המסך, ונעילת הטלוויזיה או מחיקה של כל נתוני הטלוויזיה אם הוזנו סיסמאות שגויות רבות מדי."</string>
@@ -582,7 +580,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"‏הגדר את שרת ה-Proxy הכללי של המכשיר"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"‏הגדרה של שרת ה-proxy הגלובלי שבו ייעשה שימוש כשהמדיניות פועלת. רק הבעלים של המכשיר יכול להגדיר את שרת ה-proxy הגלובלי."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"הגדרת תפוגה לסיסמת מסך הנעילה"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"‏שינוי התדירות לדרישת השינוי של הסיסמה, ה-PIN או קו ביטול הנעילה של מסך הנעילה."</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"שינוי התדירות לדרישת השינוי של הסיסמה, קוד הגישה או קו ביטול הנעילה של מסך הנעילה."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"הגדר הצפנת אחסון"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"דרוש שנתוני אפליקציות מאוחסנות יהיו מוצפנים."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"השבת מצלמות"</string>
@@ -703,14 +701,14 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"עבודה"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"אחר"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"לא נמצאה אפליקציה להצגת התוכן הזה."</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"‏הקלד קוד PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"‏הקלד את קוד ה-PUK וקוד  ה-PIN החדש"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"הקלד קוד גישה"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"‏הקלד את קוד ה-PUK וקוד  הגישה החדש"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"‏קוד PUK"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"‏קוד PIN חדש"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"קוד גישה חדש"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"הקש כדי להקליד את הסיסמה"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"הקלד סיסמה לביטול הנעילה"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"‏הקלד קוד PIN לביטול הנעילה"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"‏קוד PIN שגוי"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"הקלד קוד גישה לביטול הנעילה"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"קוד גישה שגוי"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"כדי לבטל את הנעילה, לחץ על \'תפריט\' ולאחר מכן על 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"מספר חירום"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"אין שירות"</string>
@@ -748,7 +746,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"‏מבטל נעילה של כרטיס SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"‏הקלדת קוד PIN שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"הקלדת קוד גישה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"‏שרטטת באופן שגוי את קו ביטול הנעילה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות פרטי הכניסה שלך ל-Google.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"‏שרטטת את קו ביטול הנעילה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים באופן שגוי. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלוויזיה באמצעות כניסה לחשבון Google שלך.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות פרטי הכניסה שלך ל-Google‏.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
@@ -795,7 +793,7 @@
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"ביטול נעילה באמצעות הסטה."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ביטול נעילה באמצעות ציור קו."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ביטול נעילה באמצעות זיהוי פנים."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"‏ביטול נעילה באמצעות מספר PIN."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ביטול נעילה באמצעות קוד גישה."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ביטול נעילה באמצעות סיסמה."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"אזור ציור קו."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"אזור הסטה."</string>
@@ -1169,16 +1167,16 @@
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"הזמנה להתחבר"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"מאת:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"אל:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"‏הקלד את קוד ה-PIN הנדרש."</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"הקלד את קוד הגישה הנדרש."</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"קוד גישה:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"‏הטאבלט יתנתק מרשת ה-Wi-Fi באופן זמני בשעה שהוא מחובר אל <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"‏הטלוויזיה תנותק באופן זמני מה-Wi-Fi בזמן שהיא מתחברת אל <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"‏הטלפון יתנתק מרשת ה-Wi-Fi באופן זמני בשעה שהוא מחובר אל <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"הוסף תו"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"‏שולח הודעות SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"‏&lt;b&gt; <xliff:g id="APP_NAME">%1$s</xliff:g> &lt;/ b&gt; שולח מספר רב של הודעות SMS. האם ברצונך לאפשר לאפליקציה זו להמשיך לשלוח הודעות?"</string>
-    <string name="sms_control_yes" msgid="3663725993855816807">"אפשר"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"דחה"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"כן, זה בסדר"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"לא, אין מצב"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; רוצה לשלוח הודעה אל &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"הדבר "<b>"עלול לגרום לחיובים"</b>" בחשבון המכשיר הנייד שלך."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"הדבר יגרום לחיובים בחשבון המכשיר הנייד שלך."</b></string>
@@ -1223,7 +1221,7 @@
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"שיתוף דוח על באג…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"מנהל המערכת ביקש דוח על באג כדי לסייע בפתרון בעיות במכשיר זה. ייתכן שאפליקציות ונתונים ישותפו."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"שתף"</string>
-    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"דחה"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"לא, אין מצב"</string>
     <string name="select_input_method" msgid="8547250819326693584">"שינוי מקלדת"</string>
     <string name="show_ime" msgid="2506087537466597099">"השאר אותו במסך בזמן שהמקלדת הפיזית פעילה"</string>
     <string name="hardware" msgid="194658061510127999">"הצג מקלדת וירטואלית"</string>
@@ -1298,8 +1296,8 @@
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"האפליקציות הבאות מבקשות אישור לגשת לחשבונך, כעת ובעתיד."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"האם ברצונך לאפשר בקשה זו?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"בקשת גישה"</string>
-    <string name="allow" msgid="7225948811296386551">"אפשר"</string>
-    <string name="deny" msgid="2081879885755434506">"דחה"</string>
+    <string name="allow" msgid="7225948811296386551">"כן, זה בסדר"</string>
+    <string name="deny" msgid="2081879885755434506">"לא, אין מצב"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"בקשת הרשאה"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"נדרשת הרשאה\nלחשבון <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"אתה משתמש באפליקציה זו מחוץ לפרופיל העבודה שלך"</string>
@@ -1470,21 +1468,21 @@
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"שכחת את הקו"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"קו ביטול נעילה שגוי"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"סיסמה שגויה"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"‏מספר PIN שגוי"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"קוד גישה שגוי"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"נסה שוב בעוד <xliff:g id="NUMBER">%1$d</xliff:g> שניות."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"שרטט את קו ביטול הנעילה"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"‏הזן מספר PIN ל-SIM"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"‏הזן מספר PIN"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"‏הזן קוד גישה ל-SIM"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"הזן קוד גישה"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"הזן את הסיסמה"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"‏כרטיס ה-SIM מושבת כעת. הזן קוד PUK כדי להמשיך. פנה אל הספק לפרטים."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"‏הזן את קוד ה-PIN הרצוי"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"‏אשר את קוד ה-PIN הרצוי"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"הזן את קוד הגישה הרצוי"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"אשר את קוד הגישה הרצוי"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"‏מבטל נעילה של כרטיס SIM…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"‏קוד PIN שגוי."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"‏הקלד מספר PIN שאורכו 4 עד 8 ספרות."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"קוד גישה שגוי."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"הקלד קוד גישה שאורכו 4 עד 8 ספרות."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"‏קוד PUK צריך להיות בן 8 ספרות."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"‏הזן מחדש את קוד PUK הנכון. ניסיונות חוזרים ישביתו לצמיתות את כרטיס ה-SIM."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"‏קודי ה-PIN אינם תואמים"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"קודי הגישה אינם תואמים"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ניסיונות רבים מדי לשרטוט קו ביטול נעילה."</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"‏כדי לבטל את הנעילה, היכנס באמצעות חשבון Google שלך."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"שם משתמש (אימייל)"</string>
@@ -1493,7 +1491,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"שם משתמש או סיסמה לא חוקיים."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏שכחת את שם המשתמש או הסיסמה?\nהיכנס לכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"בודק חשבון…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏הקלדת מספר PIN שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"הקלדת קוד גישה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ביצעת <xliff:g id="NUMBER_0">%1$d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, הטאבלט יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
@@ -1615,14 +1613,14 @@
     <string name="print_service_installed_title" msgid="2246317169444081628">"שירות <xliff:g id="NAME">%s</xliff:g> מותקן"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"הקש כדי להפעיל"</string>
     <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"הזן את קוד הגישה של מנהל המכשיר"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"‏הזן מספר PIN"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"הזן קוד גישה"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"שגוי"</string>
-    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"‏מספר PIN נוכחי"</string>
-    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"‏מספר PIN חדש"</string>
-    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"‏אשר את מספר ה-PIN החדש"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"‏צור מספר PIN לשינוי הגבלות"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"‏מספרי ה-PIN לא תואמים. נסה שוב."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"‏מספר ה-PIN קצר מדי. חייב להיות באורך 4 ספרות לפחות."</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"קוד גישה נוכחי"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"קוד גישה חדש"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"אשר את קוד הגישה החדש"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"צור קוד גישה לשינוי הגבלות"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"קודי הגישה לא תואמים. נסה שוב."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"קוד הגישה קצר מדי. חייב להיות באורך 4 ספרות לפחות."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="two">נסה שוב בעוד <xliff:g id="COUNT">%d</xliff:g> שניות</item>
       <item quantity="many">נסה שוב בעוד <xliff:g id="COUNT">%d</xliff:g> שניות</item>
@@ -1648,13 +1646,13 @@
     <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"לא ניתן לבטל את ההצמדה של האפליקציה הזו"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"הצמדת המסך בוטלה"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏בקש PIN לפני ביטול הצמדה"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"בקש קוד גישה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"בקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"בקש סיסמה לפני ביטול הצמדה"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"הותקנה על ידי מנהל המערכת"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"נמחקה על ידי מנהל המערכת"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם פותחים אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה אתה משתמש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. משמעות הדבר היא, למשל, שתמונות יוצגו רק לאחר שתקיש עליהן."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>
@@ -1801,8 +1799,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"העבר למצב קלט טקסט לצורך הזנת השעה"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"העבר למצב שעון לצורך הזנת השעה"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"אפשרויות מילוי אוטומטי"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"שמירה לצורך מילוי אוטומטי"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"לא ניתן למלא את התוכן באופן אוטומטי"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"‏לשמור בשירות &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏האם לשמור <xliff:g id="TYPE">%1$s</xliff:g> בשירות &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

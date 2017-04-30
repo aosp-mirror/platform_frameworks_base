@@ -100,9 +100,9 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Haiwezi kufikia mtandao"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Ili kupata mtandao thabiti, jaribu kubadilisha aina iliyochaguliwa katika Mfumo &gt; Mtandao na Intaneti &gt; Mitandao ya simu &gt; Aina ya mtandao unaopendelea."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Arifa"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Kusambaza simu"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Kupeleka simu kwenye nambari nyingine"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Hali ya kupiga simu za dharura"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Arifa za data ya simu"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Arifa za matumizi ya data ya simu"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Ujumbe wa SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ujumbe wa sauti"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kupiga simu kupitia Wi-Fi"</string>
@@ -239,9 +239,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mtindo wa kimya"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sauti Imezimwa"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sauti imewashwa"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Hali ya ndege"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndege IMEWASHWA"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hali ya ndege IMEZIMWA"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Hali ya ndegeni"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndegeni IMEWASHWA"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hali ya ndegeni IMEZIMWA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Mipangilio"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Mapendekezo"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Usaidizi wa Sauti"</string>
@@ -285,16 +285,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Rejesha maudhui ya dirisha"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Chunguza maudhui ya dirisha unaloingiliana nalo."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Washa Chunguza kwa Mguso"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kurejesha maudhui ya dirisha"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kuchunguza maudhui ya dirisha unalotumia."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Kuwasha \'Chunguza kwa Kugusa\'"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ukigonga vipengee, vitatamka maneno kwa sauti na unaweza kukagua skrini kwa kutumia ishara."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Washa ufikiaji wa wavuti ulioboreshwa"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Hati zinaweza kusakinishwa ili kuyafanya maudhui ya programu kufikiwa zaidi."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Angalia maandishi unayoyacharaza"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Kuangalia maandishi unayoyacharaza"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inajumuisha data binafsi kama vile nambari za kadi ya mkopo na manenosiri."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Dhibiti ukuzaji wa onyesho"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Dhibiti kiwango cha kukuza na nafasi cha onyesho."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kudhibiti ukuzaji wa onyesho"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kudhibiti kiwango cha kukuza na nafasi cha onyesho."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Tekeleza ishara"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugonga, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Ishara za alama ya kidole"</string>
@@ -1074,7 +1072,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Mchakato wa <xliff:g id="PROC">%1$s</xliff:g> umezidi kiwango kinachotakikana cha hifadhi cha <xliff:g id="SIZE">%2$s</xliff:g>. Unaweza kupata picha ya hifadhi ili uishiriki na msadini programu wa picha. Tahadhari: picha hii ya hifadhi inaweza kuwa na maelezo yako ya binafsi ambayo yanaweza kufikiwa na programu."</string>
     <string name="sendText" msgid="5209874571959469142">"Chagua kitendo kwa ajili ya maandishi"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Sauti ya mlio"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Sauti ya media"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Sauti ya muziki"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Inacheza kupitia Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Mlio wa simu ulionyamaza umewekwa"</string>
     <string name="volume_call" msgid="3941680041282788711">"Sauti ya simu inayoendelea"</string>
@@ -1183,7 +1181,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SHIRIKI"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"KATAA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Badilisha kibodi"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Iweke kwenye skrini wakati kibodi inapotumika"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Ionyeshe kwenye skrini wakati kibodi halisi inatumika"</string>
     <string name="hardware" msgid="194658061510127999">"Onyesha kibodi pepe"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Sanidi kibodi halisi"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Gonga ili uchague lugha na muundo"</string>
@@ -1688,7 +1686,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"Ongeza lugha"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Mapendeleo ya eneo"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Weka jina la lugha"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Inayopendekezwa"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Zinazopendekezwa"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Lugha zote"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Maeneo yote"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Tafuta"</string>
@@ -1737,8 +1735,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Badilisha iwe katika hali ya maandishi wakati wa kuweka muda."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Badilisha umbo liwe la saa ya mishale wakati wa kuweka muda."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Chaguo za kujaza otomatiki"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Hifadhi kwa ajili ya Kujaza kiotomatiki"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Maudhui hayawezi kujazwa kiotomatiki"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Ungependa kuhifadhi kwenye &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

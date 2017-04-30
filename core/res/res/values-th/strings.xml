@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"เปิด \"แตะเพื่อสำรวจ\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ระบบจะพูดออกเสียงรายการที่แตะและหน้าจอสามารถสำรวจได้ด้วยท่าทางสัมผัส"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"เปิดการเข้าถึงเว็บที่มีประสิทธิภาพมากขึ้น"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"อาจติดตั้งสคริปต์เพื่อทำให้สามารถเข้าถึงเนื้อหาแอปได้ง่ายขึ้น"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"สังเกตข้อความที่คุณพิมพ์"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"รวมถึงข้อมูลส่วนบุคคล เช่น หมายเลขบัตรเครดิตและรหัสผ่าน"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ควบคุมการขยายการแสดงผล"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"สลับไปโหมดป้อนข้อความเพื่อป้อนเวลา"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"สลับไปโหมดนาฬิกาเพื่อป้อนเวลา"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ตัวเลือกในการป้อนอัตโนมัติ"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"บันทึกไว้ป้อนอัตโนมัติ"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ไม่สามารถป้อนเนื้อหาอัตโนมัติ"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"บันทึกไปยัง &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ใช่ไหม"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"บันทึก <xliff:g id="TYPE">%1$s</xliff:g> ไปยัง &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ใช่ไหม"</string>

@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"தட்டிய உருப்படிகள் சத்தமாகப் படிக்கப்படும், சைகைகளைப் பயன்படுத்தி திரையில் உலாவலாம்."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"மேம்பட்ட இணைய அணுகல்தன்மையை இயக்கும்"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"பயன்பாட்டு உள்ளடக்கத்தை மேலும் எளிதாக அணுகக்கூடியதாக்க ஸ்கிரிப்ட்கள் நிறுவப்படலாம்."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"திரையின் உருப்பெருக்கத்தைக் கட்டுப்படுத்துதல்"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"உரை உள்ளீட்டிற்காக, கடிகாரப் பயன்முறைக்கு மாற்றும்."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"நேர உள்ளீட்டிற்காக, கடிகாரப் பயன்முறைக்கு மாற்றும்."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"தன்னிரப்பி விருப்பங்கள்"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"தன்னிரப்பியில் சேமி"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"உள்ளடக்கத்தைத் தானாக நிரப்ப முடியவில்லை"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; இல் சேமிக்கவா?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>ஐ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; இல் சேமிக்கவா?"</string>

@@ -100,12 +100,12 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tarmoq bilan bog‘lanib bo‘lmadi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Qabul qilish sifatini yaxshilash uchun Tizim &gt; Tarmoq va Internet &gt; Mobil tarmoqlar > Asosiy tarmoq turi orqali o‘zgartirib ko‘ring."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ogohlantirishlar"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Chaqiruvni yo‘naltirish"</string>
-    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Favqulodda teskari chaqiruv rejimi"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Chaqiruvlarni uzatish"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Favqulodda qaytarib chaqirish rejimi"</string>
     <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Mobil internetga oid ogohlantirishlar"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS xabarlar"</string>
-    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ovozli pochta xabarlari"</string>
-    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi qo‘ng‘iroq"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ovozli xabarlar"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi chaqiruv"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Teng huquqli ishtirokchi teletayp rejimini FULL (to‘liq) qilib o‘zgartirdi"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Teng huquqli ishtirokchi teletayp rejimini HCO (eshitadi, gapirolmaydi) qilib o‘zgartirdi"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Teng huquqli ishtirokchi teletayp rejimini VCO (gapiradi, eshitolmaydi) qilib o‘zgartirdi"</string>
@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Teginib o‘rganish xizmatini yoqadi"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Tegilgan elementlar nomini talaffuz qiladi va ekran bo‘ylab barmoq orqali kezish imkoniyatini yoqadi."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Internet uchun maxsus imkoniyatlarni yoqadi"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Qo‘shimcha skriptlar o‘rnatilishi mumkin."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Kiritilayotgan matnni kuzatadi"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bunga kredit karta raqamlari va parollar kabi shaxsiy ma’lumotlar kiradi."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ekranni kattalashtirishni boshqarish"</string>
@@ -1740,13 +1738,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Vaqtni kiritish uchun matn kiritish rejimiga o‘ting."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Vaqtni kiritish uchun soat rejimiga o‘ting."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Avtomatik to‘ldirish parametrlari"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Avtomatik to‘ldirish xizmatiga saqlash"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Avtomatik to‘ldirib bo‘lmaydi"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ma’lumotlari &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ichiga saqlansinmi?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> ma’lumotlari &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ichiga saqlansinmi?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> ma’lumotlari &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ichiga saqlansinmi?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Saqlash"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Yo‘q, kerak emas"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>

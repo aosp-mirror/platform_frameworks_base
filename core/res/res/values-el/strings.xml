@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Έλεγχος του περιεχομένου ενός παραθύρου με το οποίο αλληλεπιδράτε."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ενεργοποίηση της \"Εξερεύνησης με άγγιγμα\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Τα στοιχεία που πατάτε θα εκφωνούνται και η εξερεύνηση της οθόνης μπορεί να γίνει με κινήσεις."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ενεργοποίηση της βελτιωμένης προσβασιμότητας ιστού"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Ενδέχεται να εγκατασταθούν σενάρια για τη βελτίωση της πρόσβασης στο περιεχόμενο της εφαρμογής."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Παρακολούθηση του κειμένου που πληκτρολογείτε"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Περιλαμβάνει προσωπικά δεδομένα, όπως είναι οι αριθμοί πιστωτικών καρτών και οι κωδικοί πρόσβασης."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ελέγξτε τη μεγέθυνση της οθόνης"</string>
@@ -1610,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Εγκαταστάθηκε από τον διαχειριστή σας"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ενημερώθηκε από τον διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Διαγράφηκε από τον διαχειριστή σας"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Προκειμένου να βελτιώσει τη διάρκεια ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει λειτουργίες όπως η δόνηση, οι υπηρεσίες τοποθεσίας και τα περισσότερα δεδομένα παρασκηνίου. Το ηλεκτρονικό ταχυδρομείο, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται έως ότου τις ανοίξετε.\n\nΗ Εξοικονόμηση μπαταρίας απενεργοποιείται αυτόματα όταν η συσκευή σας φορτίζει."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Προκειμένου να βελτιώσει τη διάρκεια ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει λειτουργίες όπως η δόνηση, οι υπηρεσίες τοποθεσίας και τα περισσότερα δεδομένα παρασκηνίου. Το ηλεκτρονικό ταχυδρομείο, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται μέχρι να τις ανοίξετε.\n\nΗ Εξοικονόμηση μπαταρίας απενεργοποιείται αυτόματα όταν η συσκευή σας φορτίζει."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ενεργ.Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ενεργοποίηση"</string>
@@ -1648,8 +1646,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Μέχρι τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (επόμενο ξυπνητήρι)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Μέχρι να απενεργοποιήσετε τη ρύθμιση \"Μην ενοχλείτε\""</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Μέχρι να απενεργοποιήσετε τη ρύθμιση \"Μην ενοχλείτε\""</string>
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Μέχρι να απενεργοποιήσετε \"Μην ενοχλείτε\""</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Μέχρι να απενεργοποιήσετε \"Μην ενοχλείτε\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Σύμπτυξη"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Μην ενοχλείτε"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Κάντε εναλλαγή στη λειτουργία εισαγωγής κειμένου, για την εισαγωγή της ώρας."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Κάντε εναλλαγή στη λειτουργία ρολογιού, για την εισαγωγή της ώρας."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Επιλογές αυτόματης συμπλήρωσης"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Αποθήκευση για Αυτόματη Συμπλήρωση"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Δεν είναι δυνατή η αυτόματη συμπλήρωση των περιεχομένων"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Αποθήκευση σε &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;;"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Αποθήκευση <xliff:g id="TYPE">%1$s</xliff:g> σε &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;;"</string>

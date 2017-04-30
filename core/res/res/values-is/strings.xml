@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kanna innihald glugga sem þú ert að nota."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Kveikja á snertikönnun"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Snert atriði verða lesin upphátt og hægt er að kanna skjáinn með bendingum."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Kveikja á auknu vefaðgengi"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Hægt er að setja upp skriftur til að bæta aðgengi að efni forrits."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Fylgjast með texta sem þú slærð inn"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Felur í sér persónuleg gögn á borð við kreditkortanúmer og aðgangsorð."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Stilla skjástærð"</string>
@@ -1732,7 +1730,7 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Aðstoð"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Geymslurými tækis"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB-villuleit"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"klukkustund"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"klst."</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"mínúta"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Stilla tíma"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Færðu inn gildan tíma"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Skipta yfir í textastillingu til að færa inn tíma."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Skipta yfir í klukkustillingu til að færa inn tíma."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Valkostir sjálfvirkrar útfyllingar"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Vista fyrir sjálfvirka útfyllingu"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Ekki er hægt að fylla innihald út sjálfkrafa"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Vista á &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vista <xliff:g id="TYPE">%1$s</xliff:g> á &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

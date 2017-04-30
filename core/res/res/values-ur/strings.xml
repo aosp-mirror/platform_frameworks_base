@@ -99,20 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"آپ کے کیریئر نے عارضی طور پر اس مقام پر صوتی اور ہنگامی کالز کو معطل کر دیا ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"نیٹ ورک تک نہیں پہنچا جا سکتا"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"‏ریسپشن کو بہتر بنانے کیلئے، سسٹم ‎&gt; نیٹ ورک اور انٹرنیٹ ‎&gt; موبائل نیٹ ورکس ‎&gt; ترجیحی نیٹ ورک کی قسم تبدیل کرنے کی کوشش کریں۔"</string>
-    <!-- no translation found for notification_channel_network_alert (4427736684338074967) -->
-    <skip />
-    <!-- no translation found for notification_channel_call_forward (2419697808481833249) -->
-    <skip />
-    <!-- no translation found for notification_channel_emergency_callback (6686166232265733921) -->
-    <skip />
-    <!-- no translation found for notification_channel_mobile_data_alert (6130875231721406231) -->
-    <skip />
-    <!-- no translation found for notification_channel_sms (3441746047346135073) -->
-    <skip />
-    <!-- no translation found for notification_channel_voice_mail (3954099424160511919) -->
-    <skip />
-    <!-- no translation found for notification_channel_wfc (2130802501654254801) -->
-    <skip />
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"الرٹس"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"کال آگے منتقل کرنا"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ہنگامی کال بیک وضع"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"موبائل ڈیٹا الرٹس"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"‏SMS پیغامات"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"صوتی میل پیغامات"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"‏Wi-Fi کالنگ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏ہمسر نے TTY وضع مکمل کی درخواست کی"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏ہمسر نے TTY وضع HCO کی درخواست کی"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏ہمسر نے TTY وضع VCO کی درخواست کی"</string>
@@ -298,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسی ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کرنے کی"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"تھپتھپائے گئے آئٹمز کو باآواز بلند بولا جائے گا اور اشاروں کا استعمال کرکے اسکرین کو دریافت کیا جا سکتا ہے۔"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"بہتر ویب ایکسیسبیلٹی کو آن کرنے کی"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ایپ کا مواد مزید قابل رسائی بنانے کیلئے اسکرپٹس کو انسٹال کیا جا سکتا ہے۔"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"آپکے ٹائپ کردہ متن کا مشاہدہ کرنے کی"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اس میں ذاتی ڈیٹا جیسے کریڈٹ کارڈ نمبرز اور پاس ورڈز شامل ہیں۔"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ڈسپلے بڑا کرنے کے عمل کو کنٹرول کریں"</string>
@@ -1296,7 +1287,7 @@
     <string name="submit" msgid="1602335572089911941">"جمع کرائیں"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"کار وضع فعال ہے"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"کار موڈ سے خارج ہونے کیلئے تھپتھپائیں۔"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ربط بنانا یا ہاٹ اسپاٹ فعال"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"ٹیتھرنگ یا ہاٹ اسپاٹ فعال"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"سیٹ اپ کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="back_button_label" msgid="2300470004503343439">"واپس جائیں"</string>
     <string name="next_button_label" msgid="1080555104677992408">"اگلا"</string>
@@ -1747,17 +1738,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"وقت ان پٹ کے لیے ٹیکسٹ ان پٹ وضع پر سوئچ کریں۔"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"وقت ان پٹ کے لیے گھڑی و‏ضع پر سوئچ کریں۔"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"آٹو فل کے اختیارات"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"آٹوفل کیلئے محفوظ کریں"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"موادوں کو آٹو فل نہیں کیا جا سکتا"</string>
-    <!-- no translation found for autofill_save_title (3345527308992082601) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_type (8637809388029313305) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_2types (5214035651838265325) -->
-    <skip />
-    <!-- no translation found for autofill_save_title_with_3types (6943161834231458441) -->
-    <skip />
+    <string name="autofill_save_title" msgid="3345527308992082601">"‏&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; میں محفوظ کریں؟"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏<xliff:g id="TYPE">%1$s</xliff:g> کو &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; میں محفوظ کریں؟"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"‏<xliff:g id="TYPE_0">%1$s</xliff:g> اور <xliff:g id="TYPE_1">%2$s</xliff:g> کو &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; میں محفوظ کریں؟"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"‏<xliff:g id="TYPE_0">%1$s</xliff:g>،<xliff:g id="TYPE_1">%2$s</xliff:g>، اور <xliff:g id="TYPE_2">%3$s</xliff:g> کو &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; میں محفوظ کریں؟"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"محفوظ کریں"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"نہیں، شکریہ"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"پاس ورڈ"</string>
