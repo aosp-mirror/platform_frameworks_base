@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Операторът ви временно е спрял гласовите и спешните обаждания в това местоположение"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се установи връзка с мрежата"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"За да подобрите сигнала, променете избрания тип мрежа от „Система“ &gt; „Мрежа и интернет“ &gt; „Мобилни мрежи“ &gt; „Предпочитан тип мрежа“."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сигнали"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Пренасочване на обаждания"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Режим на обратно обаждане при спешност"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Сигнали за мобилните данни"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS съобщения"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Съобщения в гласовата поща"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Обаждания през Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Отсрещният потребител заяви пълен TTY режим (FULL)"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Отсрещният потребител заяви TTY режим с пренос на слух (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Отсрещният потребител заяви TTY режим с пренос на глас (VCО)"</string>
@@ -259,7 +266,7 @@
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Демонстрационен режим за магазини"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB връзка"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасен режим"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Системно от Android"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Превключване към личния потребителски профил"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Превключване към служебния пoтребителски профил"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
@@ -284,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Инспектиране на съдържанието на прозорец, с който взаимодействате."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включване на изследването чрез докосване"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Докосваните елементи ще бъдат изговаряни на глас и екранът може да бъде изследван посредством жестове."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Включване на подобрената достъпност в мрежата"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Скриптовете може да бъдат инсталирани, за да направят съдържанието от приложенията по-достъпно."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Наблюдение на въвеждания от вас текст"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Включва лични данни, като например номера на кредитни карти и пароли."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Управление на увеличението на дисплея"</string>
@@ -1471,7 +1476,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Превключва се към <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
-    <string name="owner_name" msgid="2716755460376028154">"Собственик"</string>
+    <string name="owner_name" msgid="2716755460376028154">"собственик"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="1238035947357923497">"Тази промяна не е разрешена от администратора ви"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Няма намерено приложение за извършване на това действие"</string>
@@ -1732,11 +1737,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Превключете към режима за въвеждане на текст, за да въведете часа."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Превключете към режима за часовник, за да въведете часа."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Опции за автоматично попълване"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Запазване за автоматично попълване"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Съдържанието не може да бъде попълнено автоматично"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Да се запази ли в/ъв „<xliff:g id="LABEL">%1$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> да се запази ли в/ъв „<xliff:g id="LABEL">%2$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Искате ли да запазите <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> в/ъв „<xliff:g id="LABEL">%3$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Искате ли да запазите <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> в/ъв „<xliff:g id="LABEL">%4$s</xliff:g>“?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Да се запази ли в/ъв &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> да се запази ли в/ъв &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> да се запазят ли в/ъв &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> да се запазят ли в/ъв &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Запазване"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Не, благодаря"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"Паролата"</string>

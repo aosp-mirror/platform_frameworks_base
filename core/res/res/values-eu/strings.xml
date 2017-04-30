@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operadoreak aldi baterako eten ditu ahots- eta larrialdi-deiak kokapen honetan"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ezin da konektatu sarera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Seinalea hobea izan dadin, aldatu hautatutako sare mota Sistema &gt; Sareak eta Internet &gt; Sare mugikorrak &gt; Sare mota hobetsia atalean."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Abisuak"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Dei-desbideratzea"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Larrialdi-deiak soilik jasotzeko modua"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Datu mugikorren abisuak"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mezuak"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Erantzungailuko mezuak"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi bidezko deiak"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Beste gailuak TTY osagarria HCO moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Beste gailuak TTY osagarria VCO moduan erabiltzea eskatu du"</string>
@@ -219,7 +226,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonoaren aukerak"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Pantailaren blokeoa"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Itzali"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Larrialdiak"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Larrialdi-deiak"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Akatsen txostena"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Sortu akatsen txostena"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
@@ -284,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu ukipen bidez arakatzeko eginbidea"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Sakatutako elementuak ozen esango dira eta pantaila keinu bidez arakatu ahal izango da."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktibatu web-erabilerraztasun hobetua"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Scriptak instala daitezke aplikazioaren edukia erabilerrazagoa egiteko."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Behatu idazten duzun testua"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Ez da salbuespenik egiten datu pertsonalekin, hala nola, kreditu-txartelen zenbakiekin eta pasahitzekin."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolatu pantailaren zoom-maila"</string>
@@ -705,7 +710,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Desblokeatzeko edo larrialdi-deia egiteko, sakatu Menua."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Desblokeatzeko, sakatu Menua."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Desblokeatzeko, marraztu eredua"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Larrialdiak"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Larrialdi-deiak"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Itzuli deira"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Eredua zuzena da!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Saiatu berriro"</string>
@@ -1604,7 +1609,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administratzaileak instalatu du"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren errendimendua murrizten du, eta dardara, kokapen-zerbitzuak eta atzeko planoko datu gehienak mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzeko konektatutakoan, bateria-aurrezlea automatikoki desaktibatuko da."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
@@ -1733,11 +1738,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Aldatu testu modura ordua zehazteko."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Aldatu erloju modura ordua zehazteko."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Betetze automatikoaren aukerak"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Gorde betetze automatikoarekin erabiltzeko"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Ezin dira bete automatikoki eremuak"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> zerbitzuan gorde?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="LABEL">%2$s</xliff:g> zerbitzuan gorde nahi duzu <xliff:g id="TYPE">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g> eta <xliff:g id="TYPE_1">%2$s</xliff:g> gorde nahi dituzu <xliff:g id="LABEL">%3$s</xliff:g> behar denean erabiltzeko?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> eta <xliff:g id="TYPE_2">%3$s</xliff:g> gorde nahi dituzu <xliff:g id="LABEL">%4$s</xliff:g> behar denean erabiltzeko?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi duzu?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi duzu?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> eta <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi dituzu?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> eta <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi dituzu?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Gorde"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ez, eskerrik asko"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"pasahitza"</string>

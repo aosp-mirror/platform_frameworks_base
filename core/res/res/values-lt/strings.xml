@@ -101,6 +101,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Jūsų operatorius laikinai sustabdė balso skambučius ir skambučius pagalbos numeriais šioje vietovėje"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nepavyko pasiekti tinklo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Kad pagerintumėte ryšį, pabandykite pakeisti tipą, pasirinktą skiltyje „Nustatymai“ &gt; „Tinklas ir internetas“ &gt; „Mobiliojo ryšio tinklai“ &gt; „Pageidaujamas tinklo tipas“."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Įspėjimai"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Skambučio peradresavimas"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Atskambinimo pagalbos numeriu režimas"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Mobiliojo ryšio duomenų įspėjimai"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS pranešimai"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Balso pašto pranešimai"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"„Wi-Fi“ skambinimas"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo VCO"</string>
@@ -290,11 +297,9 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tikrinti lango, su kuriuo sąveikaujate, turinį."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Įjungti „Naršyti paliečiant“"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Paliesti elementai bus ištariami garsiai. Be to, ekrane gali būti naršoma naudojant gestus."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Įjungti patobulintą žiniatinklio pasiekiamumą"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Gali būti įdiegti scenarijai, kad būtų lengviau pasiekti programų turinį."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Stebėti jūsų įvedamą tekstą"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Įtraukiami asmeniniai duomenys, pavyzdžiui, kredito kortelių numeriai ir slaptažodžiai."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ekrano didinimo valdymas"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Valdyti ekrano didinimą"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Valdykite ekrano mastelio keitimo lygį ir pozicijos nustatymą."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Veiksmai gestais"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Galima paliesti, perbraukti, suimti ir atlikti kitus veiksmus gestais."</string>
@@ -1647,7 +1652,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Įdiegė administratorius"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Ištrynė administratorius"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją, akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Kad padėtų sumažinti duomenų naudojimą, Duomenų taupymo priemonė neleidžia kai kurioms programoms siųsti ar gauti duomenų fone. Šiuo metu naudojama programa gali pasiekti duomenis, bet tai bus daroma rečiau. Tai gali reikšti, kad, pvz., vaizdai nebus pateikiami, jei jų nepaliesite."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Įj. Duomenų taupymo priemonę?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Įjungti"</string>
@@ -1794,11 +1799,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Laiko įvestį pateikti perjungus į teksto įvesties režimą."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Laiko įvestį pateikti perjungus į laikrodžio režimą."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Automatinio pildymo parinktys"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Išsaugoti Automatinio pildymo paslaugoje"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Turinio negalima pildyti automatiškai"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Išsaugoti skiltyje „<xliff:g id="LABEL">%1$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Išsaugoti <xliff:g id="TYPE">%1$s</xliff:g> skiltyje „<xliff:g id="LABEL">%2$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> sistemoje „<xliff:g id="LABEL">%3$s</xliff:g>“?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> sistemoje „<xliff:g id="LABEL">%4$s</xliff:g>“?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Išsaugoti sistemoje &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Išsaugoti <xliff:g id="TYPE">%1$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g> ir <xliff:g id="TYPE_1">%2$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ir <xliff:g id="TYPE_2">%3$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Išsaugoti"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, ačiū"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"slaptažodį"</string>

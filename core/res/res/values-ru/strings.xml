@@ -101,6 +101,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Ваш оператор временно заблокировал голосовые и экстренные вызовы в этом месте."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Сеть недоступна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Чтобы улучшить сигнал, попробуйте выбрать другой тип сети в настройках (раздел \"Мобильные сети\")."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Оповещения"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Переадресация вызовов"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Режим экстренных обратных вызовов"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Оповещения, связанные с мобильным Интернетом"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Голосовые сообщения"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Звонки по Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"На устройстве абонента выбран режим телетайпа \"ВСЕ\""</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"На устройстве абонента выбран режим телетайпа HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"На устройстве абонента выбран режим телетайпа VCO"</string>
@@ -222,7 +229,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Настройки телевизора"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Выключить"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Экстренный вызов"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
@@ -290,8 +297,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать Изучение касанием"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Озвучивать нажимаемые элементы и разрешать управление устройством с помощью жестов."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Включать спец. возможности для Интернета"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могут быть установлены дополнительные скрипты."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Обрабатывать набираемый текст"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"В том числе личные данные, например номера кредитных карт и пароли."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Управлять масштабом изображения"</string>
@@ -1186,7 +1191,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карта добавлена"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Перезагрузите устройство для доступа к мобильной сети."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапуск"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапустить"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Чтобы SIM-карта работала корректно, установите и запустите приложение оператора."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"СКАЧАТЬ"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ СЕЙЧАС"</string>
@@ -1794,11 +1799,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Чтобы ввести время, перейдите в режим ввода текста."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Чтобы ввести время, перейдите в режим часов."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Параметры автозаполнения"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Сохраните данные для автозаполнения"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Ошибка автозаполнения"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Сохранить в <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>: сохранить в <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Сохранить данные (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>) в \"<xliff:g id="LABEL">%3$s</xliff:g>\"?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Сохранить данные (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>) в \"<xliff:g id="LABEL">%4$s</xliff:g>\"?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Сохранить в &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Сохранить <xliff:g id="TYPE">%1$s</xliff:g> в &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Сохранить <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> в &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Сохранить <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> в &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Сохранить"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Нет, спасибо"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"Пароль"</string>

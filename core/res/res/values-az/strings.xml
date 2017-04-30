@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operator müvəqqəti olaraq bu məkanda səsli və təcili zəngləri dayandırıb"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Şəbəkəyə daxil olmaq mümkün deyil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Qəbulu inkişaf etdirmək üçün seçilmiş növü Sistem &gt; Şəbəkə və İnternet &gt; Mobil şəbəkə &gt; Tərcih edilən şəbəkə növü bölməsində dəyişə bilərsiniz."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Siqnallar"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Zəng yönləndirmə"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Təcili geriyə zəng rejimi"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Mobil data siqnalları"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mesajları"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Səsli e-poçt mesajları"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi zəngi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Eskpert TTY Rejimi FULL-u sorğuladı"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Ekspert TTY Rejimi HCO-nu sorğuladı"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Ekspert TTY Rejimi VCO-nu sorğuladı"</string>
@@ -284,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Əlaqədə olduğunuz pəncərənin məzmununu nəzərdən keçirin."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Toxunaraq Kəşf et funksiyasını yandırın"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Tıklanan hissələr səsləndiriləcək və ekran jestlərlə idarə oluna biləcək."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"İnkişaf etmiş veb əlçatımlılığı yandırın"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skriptlər tətbiq məzmununun daha əlçatımlı olması üçün quraşdırıla bilər."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Yazdığınız mətni izləyin"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Kredit kartı nömrələri və parollar kimi şəxsi məlumatlar daxildir."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ekran böyütməsinə nəzarət edin"</string>
@@ -1021,7 +1026,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> dayandırılması davam edir"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> dayandırılması davam edir"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Tətbiqi yenidən açın"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Geri əlaqə göndərin"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Rəyinizi bildirin"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Bağla"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Cihaz yeniden başladılana kimi səssiz edin"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Gözləyin"</string>
@@ -1732,11 +1737,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Zamanı daxil etmək üçün mətnlə daxiletmə rejiminə keçin"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Zamanı daxil etmək üçün saat rejiminə keçin"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Avtodoldurma seçimləri"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Avtodoldurma üçün yadda saxlayın"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Kontentlər avtomatik olaraq doldurula bilməz"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g> etiketində yadda saxlanılsın?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="LABEL">%2$s</xliff:g> etiketində yadda saxlanılsın?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> <xliff:g id="LABEL">%3$s</xliff:g> etiketində yadda saxlanılsın?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> <xliff:g id="LABEL">%4$s</xliff:g> etiketində yadda saxlanılsın?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; etiketində yadda saxlansın?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;b&gt; etiketində yadda saxlansın?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> və <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; etiketində yadda saxlansın?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> və <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; etiketində yadda saxlansın?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Yadda saxlayın"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Xeyr, çox sağ olun"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>

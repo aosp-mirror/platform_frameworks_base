@@ -100,6 +100,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Vaš operater je na ovoj lokaciji privremeno obustavio govorne i hitne pozive."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nije moguće dosegnuti mrežu"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Za poboljšanje prijema, pokušajte promijeniti tip odabran u meniju Sistem &gt; Mreža i internet &gt; Mobilne mreže &gt; Preferirani tip mreže."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmjeravanje poziva"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Način rada za hitni povratni poziv"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Upozorenja za mobilne podatke"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS poruke"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi pozivanje"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Ravnopravni uređaj zatražio TTY PUNI način rada"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Ravnopravni uređaj zatražio TTY HCO način rada"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Ravnopravni uređaj zatražio TTY VCO način rada"</string>
@@ -283,15 +290,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tjelesni senzori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ponovo prikaži sadržaj prozora"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Istražite sadržaj prozora koji trenutno koristite."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Uključite Istraživanje dodirom"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Preuzima sadržaj prozora"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Pregleda sadržaj prozora koji trenutno koristite."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Uključi opciju Istraživanje dodirom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Stavke koje dodirnete bit će izgovorene naglas, a ekran možete istraživati koristeći pokrete."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Uključite poboljšanu web pristupačnost"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Možda će biti instalirana skripta kako bi sadržaj aplikacije bio dostupniji."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obratite pažnju na tekst koji tipkate"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Uključuje lične podatke kao što su brojevi kreditnih kartica i lozinke."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontroliranje uvećanja prikaza na ekranu"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Prati tekst koji unosite"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obuhvata lične podatke kao što su brojevi kreditnih kartica i lozinke."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolira uvećanje prikaza na ekranu"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolira stepen uvećanja prikaza na ekranu i podešavanje položaja."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Praviti pokrete"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Može dodirivati, prevlačiti, hvatati prstima i praviti druge pokrete."</string>
@@ -641,14 +646,14 @@
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Poslovni mobilni"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Poslovni pejdžer"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Pomoćnik"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Prilagođeno"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Rođendan"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Godišnjica"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Ostalo"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Prilagođeno"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Kućni"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Privatna"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Posao"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Ostalo"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobilni"</string>
@@ -674,7 +679,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"Ostalo"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Prilagođeno"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Prilagođeno"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomoćnik"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"Asistent"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dijete"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Nevjenčani partner"</string>
@@ -849,9 +854,9 @@
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"razmak"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"potvrdi"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"izbriši"</string>
-    <string name="search_go" msgid="8298016669822141719">"Traži"</string>
+    <string name="search_go" msgid="8298016669822141719">"Pretraži"</string>
     <string name="search_hint" msgid="1733947260773056054">"Pretraži..."</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"Traži"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"Pretraživanje"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Upit za pretragu"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Obriši upit"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Potvrditi upit"</string>
@@ -878,7 +883,7 @@
     <string name="minute" msgid="9148878657703769868">"minuta"</string>
     <string name="minutes" msgid="5646001005827034509">"minute"</string>
     <string name="second" msgid="3184235808021478">"sekunda"</string>
-    <string name="seconds" msgid="3161515347216589235">"sekunde"</string>
+    <string name="seconds" msgid="3161515347216589235">"s"</string>
     <string name="week" msgid="5617961537173061583">"sedmica"</string>
     <string name="weeks" msgid="6509623834583944518">"sedmice"</string>
     <string name="year" msgid="4001118221013892076">"godina"</string>
@@ -1091,7 +1096,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Proces <xliff:g id="PROC">%1$s</xliff:g> je premašio ograničenje procesne memorije od <xliff:g id="SIZE">%2$s</xliff:g>. Snimak dinamičkog dijela memorije vam je dostupan i možete ga dijeliti sa njegovim programerom. Budite oprezni: ovaj snimak dinamičkog dijela memorije može sadržavati vaše lične podatke kojima aplikacija ima pristup."</string>
     <string name="sendText" msgid="5209874571959469142">"Biranje akcije za tekst"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Jačina zvuka zvona"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Jačina zvuka za medijske sadržaje"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Jačina zvuka medija"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Medijski sadržaj se reproducira preko Bluetooth veze"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Postavljena nečujna melodija zvona"</string>
     <string name="volume_call" msgid="3941680041282788711">"Jačina zvuka tokom poziva"</string>
@@ -1102,7 +1107,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Jačina zvuka za Bluetooth vezu"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Jačina zvuka melodije"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Jačina zvuka tokom poziva"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Jačina zvuka za medijske sadržaje"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Jačina zvuka medija"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Jačina zvuka za obavještenja"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zadana melodija zvona"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Zadano (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1112,7 +1117,7 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Zvuci obavještenja"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Nepoznato"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prijavljivanje na Wi-Fi mrežu"</string>
-    <string name="network_available_sign_in" msgid="1848877297365446605">"Prijavite se na mrežu"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nema pristup Internetu"</string>
@@ -1143,7 +1148,7 @@
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Pozivnica poslana"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Poziv za povezivanje"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Pošiljalac:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Primalac:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Prima:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Unesite potrebni PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet će privremeno prekinuti Wi-Fi vezu dok bude povezan s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
@@ -1204,7 +1209,7 @@
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ODBACI"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Promijeni tastaturu"</string>
     <string name="show_ime" msgid="2506087537466597099">"Prikaži na ekranu dok je fizička tastatura aktivna"</string>
-    <string name="hardware" msgid="194658061510127999">"Prikaži virtualnu tastaturu"</string>
+    <string name="hardware" msgid="194658061510127999">"Prikaži virtuelnu tastaturu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfiguriraj fizičku tastaturu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite za odabir jezika i rasporeda"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1265,7 +1270,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dodirnite dvaput za kontrolu uvećanja"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Dodavanje vidžeta nije uspjelo."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Počni"</string>
-    <string name="ime_action_search" msgid="658110271822807811">"Traži"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"Pretraži"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Poslati"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Naprijed"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Gotovo"</string>
@@ -1302,7 +1307,7 @@
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Dodirnite za postavke"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odabir fajla"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nije izabran nijedan fajl"</string>
-    <string name="reset" msgid="2448168080964209908">"Ponovno pokretanje"</string>
+    <string name="reset" msgid="2448168080964209908">"Vrati na zadano"</string>
     <string name="submit" msgid="1602335572089911941">"Potvrdi"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Način rada u autu omogućen"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Dodirnite za izlaz iz načina rada u automobilu"</string>
@@ -1337,7 +1342,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Poništiti brisanje"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Ne radi ništa za sada"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Odaberite račun"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Dodajte račun"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Dodaj račun"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodajte račun"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Povećaj"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Smanji"</string>
@@ -1609,7 +1614,7 @@
     <string name="restr_pin_try_later" msgid="973144472490532377">"Pokušajte ponovo kasnije."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Prikazuje se cijeli ekran"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Da izađete, prevucite nadolje odozgo."</string>
-    <string name="immersive_cling_positive" msgid="5016839404568297683">"Jasno mi je"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Razumijem"</string>
     <string name="done_label" msgid="2093726099505892398">"Završeno"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kružni klizač za odabir sata"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Kružni klizač za minute"</string>
@@ -1631,7 +1636,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao je vaš administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je vaš administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se trajanje baterije produžilo, opcija za štednju baterije minimizira rad uređaja i ograničava vibriranje, usluge lokacije i većinu prijenosa podataka u pozadini. E-pošta, poruke i druge aplikacije koje se oslanjaju na sinhronizaciju ne mogu biti ažurirane dok ih ne otvorite.\n\nŠtednja baterije se automatski isključi prilikom punjenja uređaja."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produžilo trajanje baterije, opcija za štednju baterije minimizira rad uređaja i ograničava vibriranje, usluge lokacije i većinu prijenosa podataka u pozadini. E-pošta, poruke i druge aplikacije koje se oslanjaju na sinhronizaciju ne mogu biti ažurirane dok ih ne otvorite.\n\nŠtednja baterije se automatski isključuje prilikom punjenja uređaja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio prijenos podataka, usluga Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali se to može desiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
@@ -1763,17 +1768,18 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Otklanjanje grešaka putem uređaja spojenog na USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"sat"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minuta"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"Postavite vrijeme"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"Postavljanje vremena"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Unesite ispravno vrijeme"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Upišite vrijeme"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Prebacite u način unosa teksta za unos vremena."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Prebacite u način rada kao sat za unos vremena."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcije za automatsko popunjavanje"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Sačuvaj za automatsko popunjavanje"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Sadržaje nije moguće automatski popuniti"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Želite li sačuvati u: <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Želite li sačuvati stavku <xliff:g id="TYPE">%1$s</xliff:g> u: <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Želite li <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> sačuvati u <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Želite li <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> sačuvati u <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Želite li sačuvati u &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Želite li da se <xliff:g id="TYPE">%1$s</xliff:g> sačuva u &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> sačuvaju u &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, i <xliff:g id="TYPE_2">%3$s</xliff:g> sačuvaju &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Sačuvaj"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, hvala"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"lozinka"</string>

@@ -99,6 +99,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"మీ క్యారియర్ ఈ స్థానంలో వాయిస్ మరియు అత్యవసర కాల్‌లను తాత్కాలికంగా నిలిపివేసింది"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"నెట్‌వర్క్‌ను చేరుకోలేరు"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"స్వీకరణను మెరుగుపరచాలంటే, సిస్టమ్ &gt; నెట్‌వర్క్ &amp; ఇంటర్నెట్ &gt; మొబైల్ నెట్‌వర్క్‌లు &gt; ప్రాధాన్య నెట్‌వర్క్ రకంలో మీరు ఎంచుకున్న రకాన్ని మార్చి ప్రయత్నించండి."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"హెచ్చరికలు"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"కాల్ ఫార్వార్డింగ్"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"మొబైల్ డేటా హెచ్చరికలు"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS సందేశాలు"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"వాయిస్ మెయిల్ సందేశాలు"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi కాలింగ్"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
@@ -281,11 +288,9 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"శరీర సెన్సార్‌లు"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని ప్రాప్యత చేస్తుంది"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలించండి."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలిస్తుంది."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభిస్తుంది"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"నొక్కిన అంశాలు బిగ్గరగా చదివి వినిపించబడతాయి మరియు సంజ్ఞలను ఉపయోగించి స్క్రీన్‌ను విశ్లేషించవచ్చు."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"మెరుగైన వెబ్ ప్రాప్యతను ప్రారంభిస్తుంది"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"అనువర్తన కంటెంట్‌కు మరింత సులభ ప్రాప్యత సౌలభ్యం అందించడానికి స్క్రిప్ట్‌లు ఇన్‌స్టాల్ చేయబడవచ్చు."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"మీరు టైప్ చేస్తున్న వచనాన్ని పరిశీలిస్తుంది"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"క్రెడిట్ కార్డు నంబర్‌లు మరియు పాస్‌వర్డ్‌ల వంటి వ్యక్తిగత డేటాను కలిగి ఉంటుంది."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"డిస్‌ప్లే మాగ్నిఫికేషన్‌ను నియంత్రించండి"</string>
@@ -671,7 +676,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"ఇతరం"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"అనుకూలం"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"అనుకూలం"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"సహాయకం"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"అసిస్టెంట్"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"సోదరుడు"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"బిడ్డ"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"జీవిత భాగస్వామి"</string>
@@ -1604,7 +1609,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"మీ నిర్వాహకులు తొలగించారు"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు ఎక్కువ నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు అత్యధిక నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని అనువర్తనాలను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న అనువర్తనం డేటాను ప్రాప్యత చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
@@ -1733,11 +1738,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"సమయాన్ని నమోదు చేయడం కోసం వచన నమోదు మోడ్‌కి మారండి."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"సమయాన్ని నమోదు చేయడం కోసం గడియారం మోడ్‌కు మారండి."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"స్వీయ పూరింపు ఎంపికలు"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"స్వీయ పూరింపు కోసం సేవ్ చేయండి"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"కంటెంట్‌లను స్వీయ పూరింపు చేయడం సాధ్యపడదు"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>కు సేవ్ చేయాలా?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>ని <xliff:g id="LABEL">%2$s</xliff:g>కు సేవ్ చేయాలా?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>లను <xliff:g id="LABEL">%3$s</xliff:g>కు సేవ్ చేయాలా?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>లను <xliff:g id="LABEL">%4$s</xliff:g>కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>ని &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> మరియు <xliff:g id="TYPE_1">%2$s</xliff:g>లను &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> మరియు <xliff:g id="TYPE_2">%3$s</xliff:g>లను &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;కు సేవ్ చేయాలా?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"సేవ్ చేయి"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"వద్దు, ధన్యవాదాలు"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"పాస్‌వర్డ్"</string>
