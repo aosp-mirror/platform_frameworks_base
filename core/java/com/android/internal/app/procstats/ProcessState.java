@@ -86,6 +86,7 @@ public final class ProcessState {
         STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         STATE_BACKUP,                   // ActivityManager.PROCESS_STATE_BACKUP
         STATE_HEAVY_WEIGHT,             // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         STATE_SERVICE,                  // ActivityManager.PROCESS_STATE_SERVICE

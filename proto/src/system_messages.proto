@@ -176,6 +176,10 @@ message SystemMessage {
     // Inform the user their phone recently shut down due to high temperature
     NOTE_THERMAL_SHUTDOWN = 39;
 
+    // Tell the user about currently running foreground services
+    // Package: android
+    NOTE_FOREGROUND_SERVICES = 40;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

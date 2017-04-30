@@ -2969,6 +2969,12 @@
   <java-symbol type="string" name="notification_channel_usb" />
   <java-symbol type="string" name="config_defaultAutofillService" />
 
+  <java-symbol type="string" name="notification_channel_foreground_service" />
+  <java-symbol type="string" name="foreground_service_app_in_background" />
+  <java-symbol type="string" name="foreground_service_apps_in_background" />
+  <java-symbol type="string" name="foreground_service_tap_for_details" />
+  <java-symbol type="string" name="foreground_service_multiple_separator" />
+
   <!-- ETWS primary messages -->
   <java-symbol type="string" name="etws_primary_default_message_earthquake" />
 
