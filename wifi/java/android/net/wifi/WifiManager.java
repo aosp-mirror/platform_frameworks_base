@@ -478,7 +478,6 @@ public class WifiManager {
      */
     public static final int IFACE_IP_MODE_LOCAL_ONLY = 2;
 
-
     /**
      * Broadcast intent action indicating that a connection to the supplicant has
      * been established (and it is now possible
@@ -1850,8 +1849,9 @@ public class WifiManager {
      * Tethering to provide an upstream to another device, LocalOnlyHotspot will not start due to
      * an incompatible mode. The possible error codes include:
      * {@link LocalOnlyHotspotCallback#ERROR_NO_CHANNEL},
-     * {@link LocalOnlyHotspotCallback#ERROR_GENERIC} and
-     * {@link LocalOnlyHotspotCallback#ERROR_INCOMPATIBLE_MODE}.
+     * {@link LocalOnlyHotspotCallback#ERROR_GENERIC},
+     * {@link LocalOnlyHotspotCallback#ERROR_INCOMPATIBLE_MODE} and
+     * {@link LocalOnlyHotspotCallback#ERROR_TETHERING_DISALLOWED}.
      * <p>
      * Internally, requests will be tracked to prevent the hotspot from being torn down while apps
      * are still using it.  The {@link LocalOnlyHotspotReservation} object passed in the  {@link
@@ -1892,12 +1892,10 @@ public class WifiManager {
             LocalOnlyHotspotCallbackProxy proxy =
                     new LocalOnlyHotspotCallbackProxy(this, looper, callback);
             try {
-                WifiConfiguration config = mService.startLocalOnlyHotspot(
-                        proxy.getMessenger(), new Binder());
-                if (config == null) {
+                int returnCode = mService.startLocalOnlyHotspot(proxy.getMessenger(), new Binder());
+                if (returnCode != LocalOnlyHotspotCallback.REQUEST_REGISTERED) {
                     // Send message to the proxy to make sure we call back on the correct thread
-                    proxy.notifyFailed(
-                            LocalOnlyHotspotCallback.ERROR_INCOMPATIBLE_MODE);
+                    proxy.notifyFailed(returnCode);
                     return;
                 }
                 mLOHSCallbackProxy = proxy;
@@ -2289,7 +2287,7 @@ public class WifiManager {
             mCloseGuard.open("close");
         }
 
-        public WifiConfiguration getConfig() {
+        public WifiConfiguration getWifiConfiguration() {
             return mConfig;
         }
 
@@ -2322,9 +2320,13 @@ public class WifiManager {
      * @hide
      */
     public static class LocalOnlyHotspotCallback {
+        /** @hide */
+        public static final int REQUEST_REGISTERED = 0;
+
         public static final int ERROR_NO_CHANNEL = 1;
         public static final int ERROR_GENERIC = 2;
         public static final int ERROR_INCOMPATIBLE_MODE = 3;
+        public static final int ERROR_TETHERING_DISALLOWED = 4;
 
         /** LocalOnlyHotspot start succeeded. */
         public void onStarted(LocalOnlyHotspotReservation reservation) {};
@@ -2345,7 +2347,8 @@ public class WifiManager {
          * {@link WifiManager#startLocalOnlyHotspot(LocalOnlyHotspotCallback, Handler)} again at
          * a later time.
          * <p>
-         * @param reason The reason for failure could be one of: {@link #ERROR_INCOMPATIBLE_MODE},
+         * @param reason The reason for failure could be one of: {@link
+         * #ERROR_TETHERING_DISALLOWED}, {@link #ERROR_INCOMPATIBLE_MODE},
          * {@link #ERROR_NO_CHANNEL}, or {@link #ERROR_GENERIC}.
          */
         public void onFailed(int reason) { };
