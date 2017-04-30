@@ -630,11 +630,16 @@ public final class AutofillManager {
         }
     }
 
+    /** @hide */
+    public void disableOwnedAutofillServices() {
+        disableAutofillServices();
+    }
+
     /**
      * If the app calling this API has enabled autofill services they
      * will be disabled.
      */
-    public void disableOwnedAutofillServices() {
+    public void disableAutofillServices() {
         if (!hasAutofillFeature()) {
             return;
         }
