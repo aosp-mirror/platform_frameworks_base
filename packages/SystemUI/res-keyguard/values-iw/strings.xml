@@ -62,14 +62,14 @@
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"‏הזן את קוד הגישה של כרטיס ה-SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"‏הזן את קוד הגישה של כרטיס ה-SIM של <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"‏השבת את ה-eSIM כדי להשתמש במכשיר ללא שירות סלולרי."</string>
-    <string name="kg_pin_instructions" msgid="4069609316644030034">"‏הזן קוד PIN"</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"הזן קוד גישה"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"הזן את הסיסמה"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"‏כרטיס ה-SIM מושבת כעת. הזן קוד PUK כדי להמשיך. פנה אל הספק לפרטים."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"‏ה-SIM של \"<xliff:g id="CARRIER">%1$s</xliff:g>\" מושבת כעת. הזן קוד PUK כדי להמשיך. לפרטים, פנה אל הספק."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"הזן את קוד הגישה הרצוי"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"אשר את קוד הגישה הרצוי"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"‏מבטל את הנעילה של כרטיס ה-SIM…"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"‏הקלד PIN שאורכו 4 עד 8 ספרות."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"הקלד קוד גישה שאורכו 4 עד 8 ספרות."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"‏קוד PUK צריך להיות בן 8 ספרות או יותר."</string>
     <string name="kg_invalid_puk" msgid="5399287873762592502">"‏הזן את קוד ה-PUK הנכון. ניסיונות חוזרים ישביתו את כרטיס ה-SIM לצמיתות."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"קודי הגישה אינם תואמים"</string>

@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Données mobiles désactivées"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Partage de connexion Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode Avion"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"Le VPN est activé."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Aucune carte SIM"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Modification du réseau de l\'opérateur"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Ouvrir les détails de la batterie"</string>
@@ -355,7 +354,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faites glisser vers le haut pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous spécifiez."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous avez spécifiées."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personnaliser"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez toujours passer des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
@@ -469,6 +468,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Vous êtes connecté à <xliff:g id="APPLICATION">%1$s</xliff:g>. Cette application peut contrôler votre activité personnelle sur le réseau, y compris les e-mails, les applications et les sites Web."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web.\n\nPour plus d\'informations, contactez votre administrateur."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, qui peut contrôler votre activité personnelle sur le réseau."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recevoir les notifications plus vite"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
@@ -702,10 +703,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notification <xliff:g id="ID_1">%1$s</xliff:g> : <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Application incompatible avec l\'écran partagé."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"L\'application ne peut être lancée sur des écrans secondaires."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Ouvrir les paramètres."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ouvrir la fenêtre de configuration rapide."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Fermer la fenêtre de configuration rapide."</string>

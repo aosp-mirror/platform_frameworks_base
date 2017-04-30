@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"मोबाइल डेटा बंद आहे"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटुथ टिथरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"विमान मोड."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN चालू."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"सिम कार्ड नाही."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क बदलणे."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"बॅटरी तपशील उघडा"</string>
@@ -438,14 +437,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करा"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्कनेक्ट करा"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"धोरणे पहा"</string>
-    <string name="monitoring_description_named_management" msgid="5281789135578986303">"तुमचे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> व्‍यवस्‍थापित करते.\n\nतुमचे प्रशासन सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, आपल्या डिव्हाइसशी संबंधित डेटा आणि आपल्या डिव्हाइसच्या ठिकाणाची माहिती मॉनिटर करू आणि व्‍यवस्‍थापित करू शकते.\n\nआणखी माहितीसाठी, आपल्या प्रशासनाशी संपर्क साधा."</string>
-    <string name="monitoring_description_management" msgid="4573721970278370790">"तुमचे डिव्हाइस आमची संस्‍था व्‍यवस्‍थापित करते.\n\nतुमचे प्रशासन सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, आपल्या डिव्हाइसशी संबंधित डेटा आणि आपल्या डिव्हाइसच्या ठिकाणाची माहिती मॉनिटर करू आणि व्‍यवस्‍थापित करू शकते.\n\nआणखी माहितीसाठी, आपल्या प्रशासनाशी संपर्क साधा."</string>
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"तुमचे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> व्‍यवस्‍थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, आपल्या डिव्हाइसशी संबंधित डेटा आणि आपल्या डिव्हाइसच्या ठिकाणाची माहिती मॉनिटर करू आणि व्‍यवस्‍थापित करू शकतो.\n\nआणखी माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"तुमचे डिव्हाइस तुमची संस्‍था व्‍यवस्‍थापित करते.\n\nतुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट अॅक्सेस, अॅप्स, आपल्या डिव्हाइसशी संबंधित डेटा आणि आपल्या डिव्हाइसच्या ठिकाणाची माहिती मॉनिटर करू आणि व्‍यवस्‍थापित करू शकतो.\n\nआणखी माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"आपल्या संस्थेने या डिव्हाइसवर प्रमाणपत्र अधिकार स्थापित केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार स्थापित केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"या डिव्हाइसवर प्रमाणपत्र अधिकार स्थापित केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"आपल्या प्रशासकाने नेटवर्क लॉगिंग चालू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे परीक्षण करते."</string>
-    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"तुम्‍ही <xliff:g id="VPN_APP">%1$s</xliff:g>शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"तुम्‍ही <xliff:g id="VPN_APP_0">%1$s</xliff:g> आणि <xliff:g id="VPN_APP_1">%2$s</xliff:g>शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"तुम्‍ही <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"तुम्‍ही <xliff:g id="VPN_APP_0">%1$s</xliff:g> आणि <xliff:g id="VPN_APP_1">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"आपले कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"आपले वैयक्तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"आपले डिव्हाइस <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ने व्यवस्थापित केले आहे."</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"आपले कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते. प्रोफाइल <xliff:g id="APPLICATION">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"आपले कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते. प्रोफाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nआपण <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> शीदेखील कनेक्‍ट केले आहे, जे आपल्या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"आपण व्यक्तिचलितपणे अनलॉक करेपर्यंत डिव्हाइस लॉक केलेले राहील"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचना अधिक जलद मिळवा"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपण अनलॉक करण्‍यापूर्वी त्यांना पहा"</string>
@@ -543,10 +544,10 @@
     <string name="block" msgid="2734508760962682611">"सर्व सूचना अवरोधित करा"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"शांत करू नका"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"शांत किंवा अवरोधित करू नका"</string>
-    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"उर्जा सूचना नियंत्रणे"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"पॉवर सूचना नियंत्रणे"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"उर्जा सूचना नियंत्रणांसह, आपण अॅपच्या सूचनांसाठी महत्त्व स्तर 0 ते 5 पर्यंत सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दर्शवा \n- पूर्ण स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n\n"<b>"स्तर 1"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना अवरोधित करा"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"पॉवर सूचना नियंत्रणांसह, आपण अॅपच्या सूचनांसाठी महत्त्व स्तर 0 ते 5 पर्यंत सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दर्शवा \n- पूर्ण स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n\n"<b>"स्तर 1"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना अवरोधित करा"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"आपल्याला यापुढे या सूचना प्राप्त होणार नाहीत."</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> सूचना श्रेण्या"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"अॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"दुय्यम डिस्प्लेवर अ‍ॅप कदाचित चालणार नाही."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"दुय्यम डिस्प्लेंवर अ‍ॅप लाँचचे समर्थन करत नाही."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"जलद सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"जलद सेटिंग्ज बंद करा."</string>

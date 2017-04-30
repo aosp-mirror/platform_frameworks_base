@@ -105,7 +105,7 @@
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM PUK կոդի գործողությունը ձախողվեց:"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"Կոդն ընդունվեց:"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Ծառայությունն անհասանելի է։"</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Փոխարկել մուտքագրման եղանակը"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Փոխել ներածման եղանակը"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"Ինքնաթիռի ռեժիմ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել նախշը"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել PIN կոդը"</string>

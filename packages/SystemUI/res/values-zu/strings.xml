@@ -102,11 +102,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Sondeza kancane esikrinini esikhudlwana"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ixhunyiwe"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"i-Bluetooth ayixhunywanga."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Ayikho ibhetri."</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Ibha eyodwa yebhetri"</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Amabha amabili ebhetri"</string>
-    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Amabha amathathu ebhetri"</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Ibhetri igcwele."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Ayikho ibhethri."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Ibha eyodwa yebhethri"</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Amabha amabili ebhethri"</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Amabha amathathu ebhethri"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Ibhethri igcwele."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Ayikho ifoni."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Ibha eyodwa yefoni"</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Amabha amabilil efoni."</string>
@@ -157,12 +157,11 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Idatha yeselula ivaliwe"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Imodemu nge-Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Imodi yendiza."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"I-VPN ivuliwe."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Alikho ikhadi le-SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Iguqula inethiwekhi yenkampani yenethiwekhi."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Vula imininingwane yebhethri"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Iphesenti <xliff:g id="NUMBER">%d</xliff:g> lebhetri"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Iphesenti <xliff:g id="NUMBER">%d</xliff:g> lebhethri"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Ibhethri liyashaja, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> iphesenti."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Izilungiselelo zesistimu"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Izaziso"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Uxhumeke ku-<xliff:g id="APPLICATION">%1$s</xliff:g>, engaqapha umsebenzi wakho womuntu siqu wenethiwekhi, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Iphrofayela yakho yomsebenzi iphethwe i-<xliff:g id="ORGANIZATION">%1$s</xliff:g>. Iphrofayela ixhumeke ku-<xliff:g id="APPLICATION">%2$s</xliff:g>, engaqapha umsebenzi wenethiwekhi yakho yokusebenza, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi.\n\nUkuze uthole olunye ulwazi, xhumana nomlawuli wakho."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Iphrofayela yakho yomsebenzi iphethwe i-<xliff:g id="ORGANIZATION">%1$s</xliff:g>. Iphrofayela ixhumeke ku-<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, engaqapha umsebenzi wakho wenethiwekhi, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi.\n\nFuthi uxhumeke ku-<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, engaqapha umsebenzi wakho siqu wenethiwekhi."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Idivayisi izohlala ikhiyekile uze uyivule ngokwenza"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Thola izaziso ngokushesha"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ibone ngaphambi kokuthi uyivule"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> isaziso: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Izinhlelo zokusebenza kungenzeka zingasebenzi ngesikrini esihlukanisiwe."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Uhlelo lokusebenza alusekeli isikrini esihlukanisiwe."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Uhlelo lokusebenza kungenzeka lungasebenzi kusibonisi sesibili."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Uhlelo lokusebenza alusekeli ukuqalisa kuzibonisi zesibili."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Vula izilungiselelo."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Vula izilungiselelo ezisheshayo."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Vala izilungiselelo ezisheshayo."</string>
