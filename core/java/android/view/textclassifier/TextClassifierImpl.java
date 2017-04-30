@@ -130,7 +130,7 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     @Override
-    public TextClassificationResult getTextClassificationResult(
+    public TextClassification classifyText(
             @NonNull CharSequence text, int startIndex, int endIndex,
             @Nullable LocaleList defaultLocales) {
         validateInput(text, startIndex, endIndex);
@@ -141,7 +141,7 @@ final class TextClassifierImpl implements TextClassifier {
                         .classifyText(string, startIndex, endIndex,
                                 getHintFlags(string, startIndex, endIndex));
                 if (results.length > 0) {
-                    final TextClassificationResult classificationResult =
+                    final TextClassification classificationResult =
                             createClassificationResult(
                                     results, string.subSequence(startIndex, endIndex));
                     // TODO: Added this log for debug only. Remove before release.
@@ -155,7 +155,7 @@ final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting assist info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.getTextClassificationResult(
+        return TextClassifier.NO_OP.classifyText(
                 text, startIndex, endIndex, defaultLocales);
     }
 
@@ -316,9 +316,9 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    private TextClassificationResult createClassificationResult(
+    private TextClassification createClassificationResult(
             SmartSelection.ClassificationResult[] classifications, CharSequence text) {
-        final TextClassificationResult.Builder builder = new TextClassificationResult.Builder()
+        final TextClassification.Builder builder = new TextClassification.Builder()
                 .setText(text.toString());
 
         final int size = classifications.length;
@@ -341,7 +341,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
         if (resolveInfo != null && resolveInfo.activityInfo != null) {
             builder.setIntent(intent)
-                    .setOnClickListener(TextClassificationResult.createStartActivityOnClickListener(
+                    .setOnClickListener(TextClassification.createStartActivityOnClickListener(
                             mContext, intent));
 
             final String packageName = resolveInfo.activityInfo.packageName;

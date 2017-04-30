@@ -20,6 +20,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.WorkerThread;
 import android.os.LocaleList;
 
 import java.lang.annotation.Retention;
@@ -62,9 +63,9 @@ public interface TextClassifier {
         }
 
         @Override
-        public TextClassificationResult getTextClassificationResult(
+        public TextClassification classifyText(
                 CharSequence text, int startIndex, int endIndex, LocaleList defaultLocales) {
-            return TextClassificationResult.EMPTY;
+            return TextClassification.EMPTY;
         }
 
         @Override
@@ -89,6 +90,7 @@ public interface TextClassifier {
      * @throws IllegalArgumentException if text is null; selectionStartIndex is negative;
      *      selectionEndIndex is greater than text.length() or not greater than selectionStartIndex
      */
+    @WorkerThread
     @NonNull
     TextSelection suggestSelection(
             @NonNull CharSequence text,
@@ -97,8 +99,8 @@ public interface TextClassifier {
             @Nullable LocaleList defaultLocales);
 
     /**
-     * Returns a {@link TextClassificationResult} object that can be used to generate a widget for
-     * handling the classified text.
+     * Classifies the specified text and returns a {@link TextClassification} object that can be
+     * used to generate a widget for handling the classified text.
      *
      * @param text text providing context for the text to classify (which is specified
      *      by the sub sequence starting at startIndex and ending at endIndex)
@@ -112,8 +114,9 @@ public interface TextClassifier {
      * @throws IllegalArgumentException if text is null; startIndex is negative;
      *      endIndex is greater than text.length() or not greater than startIndex
      */
+    @WorkerThread
     @NonNull
-    TextClassificationResult getTextClassificationResult(
+    TextClassification classifyText(
             @NonNull CharSequence text,
             @IntRange(from = 0) int startIndex,
             @IntRange(from = 0) int endIndex,
@@ -134,6 +137,7 @@ public interface TextClassifier {
      * @throws IllegalArgumentException if text is null
      * @hide
      */
+    @WorkerThread
     LinksInfo getLinks(
             @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales);
 }
