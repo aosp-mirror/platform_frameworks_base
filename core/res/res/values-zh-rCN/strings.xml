@@ -288,11 +288,9 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"身体传感器"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"访问与您的生命体征相关的传感器数据"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检查您正与其进行互动的窗口的内容。"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检测您正访问的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"启用触摸浏览"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"设备将大声读出您点按的内容，同时您可以通过手势来浏览屏幕。"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"启用网页无障碍增强功能"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"可能会安装程序以便访问应用的内容。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"监测您输入的文字"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包含个人数据，例如信用卡号和密码。"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控制显示内容放大功能"</string>
@@ -1130,7 +1128,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"发件人："</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件人："</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"输入所需的PIN码："</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN码："</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN 码："</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板电脑连接到“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”时会暂时断开与WLAN的连接"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"电视连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与 WLAN 的连接"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手机连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与WLAN的连接。"</string>
@@ -1185,7 +1183,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"拒绝"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
-    <string name="show_ime" msgid="2506087537466597099">"连接到实体键盘时使其在屏幕上保持显示状态"</string>
+    <string name="show_ime" msgid="2506087537466597099">"开启后，连接到实体键盘时，它会一直显示在屏幕上"</string>
     <string name="hardware" msgid="194658061510127999">"显示虚拟键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"配置实体键盘"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"点按即可选择语言和布局"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"切换到文字输入模式来输入时间。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"切换到时钟模式来输入时间。"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自动填充选项"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"保存以便用于自动填充"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"无法自动填充内容"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"要保存到&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;吗？"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要将<xliff:g id="TYPE">%1$s</xliff:g>保存到&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;吗？"</string>

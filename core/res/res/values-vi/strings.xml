@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Bật Khám phá bằng cách chạm"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Mục đã nhấn sẽ được nói to và bạn có thể khám phá màn hình bằng cử chỉ."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Bật khả năng truy cập web nâng cao"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Tập lệnh có thể được cài đặt để làm cho nội dung ứng dụng dễ truy cập hơn."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Xem nội dung bạn nhập"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kiểm soát thu phóng màn hình"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Chuyển sang chế độ nhập văn bản để nhập thời gian."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Chuyển sang chế độ đồng hồ để nhập thời gian."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Tùy chọn tự động điền"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Lưu cho Tự động điền"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Không thể tự động điền nội dung"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Lưu vào &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Lưu <xliff:g id="TYPE">%1$s</xliff:g> vào &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

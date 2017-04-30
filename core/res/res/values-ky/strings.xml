@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Учурда ачылып турган терезедеги маалыматты талдайт."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Сыйпалап изилдөө\" мүмкүнчүлүгүн иштетет"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Басылып жаткан элементтерди айтып турат жана түзмөктү жаңсоолор менен башкаруу мүмкүнчүлүгүн иштетет."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Интернет үчүн атайын мүмкүнчүлүктөрдү иштетет"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Кошумча скрипттер орнотулушу мүмкүн."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Терилип жаткан текстти текшерип турат"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Ошону менен катар, насыя карталарынын номерлери жана сырсөздөр сыяктуу жеке маалыматты да."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Көрүнүштү чоңойтуп кичирейтет"</string>
@@ -1319,8 +1317,8 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Жок кылынганды кайтаруу"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Азырынча эч нерсе кылбайм"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Каттоо эсебин тандаңыз"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Эсеп кошуу"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"Эсеп кошуу"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Каттоо эсебин кошуу"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Каттоо эсебин кошуу"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Жогорулатуу"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Төмөндөтүү"</string>
     <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> жолу басып, кармап туруңуз."</string>
@@ -1364,7 +1362,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB түзмөгү"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB эстутуму"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Өзгөртүү"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Дайындарды колдонууну чектөө"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Трафикти чектөө"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Колдонулушун жана жөндөөлөрүн көрүү үчүн таптаңыз."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G дайындар чегине жетти"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G дайындар чегине жетти"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Убакытты текст киргизүү режиминде киргизиңиз."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Убакытты дубал саатынын режиминде киргизиңиз."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Автотолтуруу опциялары"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Автотолтуруу функциясына сактап коюу"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Мазмундарды автотолтуруу мүмкүн эмес"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; кызматында сакталсынбы?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; кызматында сакталсынбы?"</string>

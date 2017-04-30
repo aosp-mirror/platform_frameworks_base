@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਇੰਟਰੈਕਟ ਕਰ ਰਹੇ ਹੋ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ਐਕਸਪਲੋਰ ਬਾਇ ਟਚ ਚਾਲੂ ਕਰੋ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ਟੈਪ ਕੀਤੀਆਂ ਆਈਟਮਾਂ ਨੂੰ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਬੋਲਿਆ ਜਾਵੇਗਾ ਅਤੇ ਸਕ੍ਰੀਨ ਦੀ ਸੰਕੇਤਾਂ ਦੀ ਵਰਤੋਂ ਨਾਲ ਪੜਚੋਲ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ਵਧੀ ਹੋਈ ਵੈਬ ਪਹੁੰਚਯੋਗਤਾ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ਐਪ ਸਮੱਗਰੀ ਨੂੰ ਵੱਧ ਪਹੁੰਚਯੋਗ ਬਣਾਉਣ ਲਈ ਸਕ੍ਰਿਪਟਾਂ ਇੰਸਟੌਲ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾ ਸਕਦੀਆਂ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ਜੋ ਟੈਕਸਟ ਤੁਸੀਂ ਟਾਈਪ ਕਰਦੇ ਹੋ, ਉਸਦਾ ਨਿਰੀਖਣ ਕਰੋ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ਇਸ ਵਿੱਚ ਨਿੱਜੀ ਡੈਟਾ ਸ਼ਾਮਲ ਹੈ ਜਿਵੇਂ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ ਅਤੇ ਪਾਸਵਰਡ।"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ਡਿਸਪਲੇ ਵੱਡਦਰਸ਼ੀ ਨੂੰ ਨਿਯੰਤ੍ਰਿਤ ਕਰੋ"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ਸਮਾਂ ਇਨਪੁੱਟ ਕਰਨ ਲਈ ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ \'ਤੇ ਬਦਲੀ ਕਰੋ।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ਸਮਾਂ ਇਨਪੁੱਟ ਕਰਨ ਲਈ ਘੜੀ ਮੋਡ \'ਤੇ ਬਦਲੀ ਕਰੋ।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ਆਟੋਫਿਲ ਵਿਕਲਪ"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"ਆਟੋਫਿਲ ਲਈ ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ਸਮੱਗਰੀਆਂ ਨੂੰ ਆਟੋਫਿਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੀਏ?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ਨੂੰ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੀਏ?"</string>

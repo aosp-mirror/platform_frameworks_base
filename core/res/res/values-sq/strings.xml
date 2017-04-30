@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekton përmbajtjen e dritares me të cilën po ndërvepron."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizojë funksionin \"Eksploro me prekje\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Artikujt e trokitur do të lexohen me zë të lartë dhe ekrani mund të eksplorohet duke përdorur gjestet."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktivizojë qasjen e përmirësuar në ueb"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skriptet mund të instalohen për ta bërë përmbajtjen e aplikacionit më të qasshme."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Vëzhgojë tekstin që shkruan"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Përfshi të dhënat personale si numrat e kartave të kreditit si dhe fjalëkalimet."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrollo zmadhimin e ekranit"</string>
@@ -1076,7 +1074,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories së procesit me <xliff:g id="SIZE">%2$s</xliff:g>. Mundësohet stivimi e skedarëve fiktivë në mënyrë që t\'i ndani me zhvilluesit e tyre. Bëni kujdes pasi stiva e skedarëve fiktivë mund të përmbajë ndonjë informacion tëndin personal ku aplikacioni ka qasje."</string>
     <string name="sendText" msgid="5209874571959469142">"Zgjidh një veprim për tekstin"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumi i ziles"</string>
-    <string name="volume_music" msgid="5421651157138628171">"volumi i klipit \"media\""</string>
+    <string name="volume_music" msgid="5421651157138628171">"Volumi i medias"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Luajtje përmes \"bluetooth-it\""</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Zilja \"në heshjte\" u caktua"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volumi i telefonatës"</string>
@@ -1087,7 +1085,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volumi i \"bluetooth-it\""</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volumi i ziles"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumi i telefonatës"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"volumi i klipit \"media\""</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumi i medias"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumi i njoftimeve"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zile e paracaktuar."</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"I parazgjedhur (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1611,7 +1609,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instaluar nga administratori"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Fshirë nga administratori"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Email-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivizo"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Kalo te modaliteti i hyrjes së tekstit për hyrjen e kohës."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Kalo te modaliteti i orës për hyrjen e kohës."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opsionet e plotësimit automatik"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Ruaje për \"Plotësim automatik\""</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Përmbajtjet nuk mund të plotësohen automatikisht"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Të ruhet te &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Të ruhet <xliff:g id="TYPE">%1$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"መስተጋበር የሚፈጥሩት የመስኮት ይዘት ይመርምሩ።"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"በመንካት ያስሱን ያብሩ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"መታ የተደረጉ ንጥሎች ጮክ ተብለው ይነገሩና የጣት ምልክቶችን በመጠቀም ማያ ገጹ ሊታሰስ ይችላል።"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"የተሻሻለ የድር ተደራሽነት ያብሩ"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"የመተግበሪያ ይዘት ይበልጥ የሚገኙ ለማድረግ ስክሪፕቶች ሊጫኑ ይችላሉ።"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"የሚተይቡት ጽሑፍ ይመልከቱ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"እንደ የክሬዲት ካርድ ቁጥሮች እና የይለፍ ቃላት ያሉ የግል ውሂብ ያካትታል።"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"የመቆጣጠሪያ ማሳያ እንዲጎላ አደራረግ"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ለጊዜ ግቤቱ ወደ የጽሑፍ ግቤት ሁነታ ቀይር።"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ለጊዜ ግቤቱ ወደ የሰዓት ሁነታ ቀይር።"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"የራስ-ሙላ አማራጮች"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"ለራስ-ሙላ አስቀምጥ"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ይዘቶች በራስ-ሰር ሊሞሉ አይችሉም"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"ወደ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ይቀመጥ?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ይቀመጥ?"</string>

@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳພັດ\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ລາຍການທີ່ແຕະຈະຖືກເວົ້າອອກມາ ແລະ ສາມາດສຳຫຼວດໜ້າຈໍໄດ້ດ້ວຍທ່າທາງໄດ້."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ເປີດການເຂົ້າເຖິງເວັບທີ່ມີປະສິດທິພາບຫຼາຍຂຶ້ນ"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ສະຄຣິບອາດຖືກຕິດຕັ້ງ ເພື່ອເຮັດໃຫ້ເນື້ອຫາແອັບຯເຂົ້າເຖິງໄດ້ຫຼາຍຂຶ້ນ."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ຕິດຕາມ​ເບິ່ງ​ຂໍ້​ຄວາມ​ທີ່​ທ່ານ​ພິມ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ຮວມທັງຂໍ້ມູນສ່ວນໂຕເຊັ່ນ: ເລກບັດເຄຣດິດ ແລະລະຫັດຜ່ານ."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ຄວບຄຸມການຂະຫຍາຍຈໍສະແດງຜົນ"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ສະຫຼັບໄປໃຊ້ໂໝດປ້ອນຂໍ້ຄວາມສຳລັບການປ້ອນເວລາ."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ສະຫຼັບໄປໃຊ້ໂໝດໂມງສຳລັບການປ້ອນເວລາ."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ຕົວເລືອກການຕື່ມຂໍ້ມູນອັດຕະໂນມັດ"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"ບັນທຶກໄວ້ຕື່ມຂໍ້ມູນອັດຕະໂນມັດ"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ບໍ່ສາມາດຕື່ມຂໍ້ມູນເນື້ອຫາອັດຕະໂນມັດໄດ້"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"ບັນທຶກໃສ່ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ບໍ?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"ບັນທຶກ <xliff:g id="TYPE">%1$s</xliff:g> ໃສ່ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ບໍ?"</string>

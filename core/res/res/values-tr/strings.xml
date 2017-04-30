@@ -291,14 +291,12 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Etkileşim kurduğunuz pencerenin içeriğini inceler."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Dokunarak Keşfet\'i açma"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Dokunulan öğeler sesli olarak okunur ve ekranı keşfetmek için hareketler kullanılabilir."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Gelişmiş web erişilebilirliğini açma"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Uygulamanın erişilebilirliğini artırmak için komut dosyaları yüklenebilir."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Yazdığınız metni izleme"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Kredi kartı ve şifre gibi kişisel bilgiler içerir."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ekran büyütecini kontrol et"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ekran büyütecini kontrol etme"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ekranın yakınlaştırma seviyesini ve konumunu kontrol edin."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Haraketleri yapma"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Hafifçe dokunabilir, hızlıca kaydırabilir, sıkıştırabilir ve diğer hareketleri yapabilirsiniz."</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Dokunabilir, hızlıca kaydırabilir, sıkıştırabilir ve diğer hareketleri yapabilirsiniz."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Parmak izi hareketleri"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Cihazların parmak izi sensörlerinde gerçekleştirilen hareketleri yakalayabilir."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"durum çubuğunu devre dışı bırak veya değiştir"</string>
@@ -1188,7 +1186,7 @@
     <string name="show_ime" msgid="2506087537466597099">"Fiziksel klavye etkin durumdayken ekranda tut"</string>
     <string name="hardware" msgid="194658061510127999">"Sanal klavyeyi göster"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Fiziksel klavyeyi yapılandırın"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dili ve düzeni seçmek için hafifçe dokunun"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dili ve düzeni seçmek için dokunun"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>, diğer uygulamaların üzerinde görüntüleniyor"</string>
@@ -1275,8 +1273,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Bildirim sıralama hizmeti"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN etkinleştirildi"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN, <xliff:g id="APP">%s</xliff:g> tarafından etkinleştirildi"</string>
-    <string name="vpn_text" msgid="1610714069627824309">"Ağı yönetmek için hafifçe vurun."</string>
-    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> oturumuna bağlı. Ağı yönetmek için hafifçe vurun."</string>
+    <string name="vpn_text" msgid="1610714069627824309">"Ağı yönetmek için dokunun."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> oturumuna bağlı. Ağı yönetmek için dokunun."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Her zaman açık VPN\'ye bağlanılıyor…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Her zaman açık VPN\'ye bağlanıldı"</string>
     <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Her zaman açık VPN bağlantısı kesildi"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Zaman girişi için metin girişi moduna geçin."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Zaman girişi için saat moduna geçin."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Otomatik doldurma seçenekleri"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Otomatik Doldurma için kaydedin"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"İçerikler otomatik doldurulamıyor"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>

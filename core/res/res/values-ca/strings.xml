@@ -143,7 +143,7 @@
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"Trucada de Wi-Fi de: %s"</item>
   </string-array>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivades"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivat"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per la Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferència per a dades mòbils"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Només Wi-Fi"</string>
@@ -291,14 +291,12 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contingut d\'una finestra amb què estàs interaccionant."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar Exploració tàctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Els elements que toquis es diran en veu alta, i podràs explorar la pantalla amb gestos."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar l\'accessibilitat web millorada"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"És possible que s\'instal·lin scripts perquè el contingut de les aplicacions sigui més accessible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el text que escrius"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclou dades personals com ara números de targetes de crèdit i contrasenyes."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar l\'ampliació de la pantalla"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el nivell i la posició del zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Utilitza gestos"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Pot tocar, lliscar, pessigar i utilitzar altres gestos."</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos al sensor d\'empremtes digitals"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Captura gestos realitzats en el sensor d\'empremtes digitals del dispositiu."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra d\'estat"</string>
@@ -1610,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instal·lat per l\'administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Suprimit per l\'administrador"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració, els serveis d\'ubicació i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a dades, però potser ho farà menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activa"</string>
@@ -1698,7 +1696,7 @@
     <string name="work_mode_off_message" msgid="2961559609199223594">"S\'activarà el teu perfil professional, incloses les aplicacions, la sincronització en segon pla i les funcions relacionades"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activa"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tens missatges nous"</string>
-    <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació de SMS per veure\'ls"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació d\'SMS per veure\'ls"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Algunes funcions es limitaran"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Toca per desbloquejar"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Dades d\'usuari bloquejades"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Canvia al mode d\'introducció de text per introduir l\'hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Canvia al mode de rellotge per introduir l\'hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcions d\'emplenament automàtic"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Desa per a emplenament automàtic"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"El contingut no es pot emplenar automàticament"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Vols desar-ho a <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vols desar <xliff:g id="TYPE">%1$s</xliff:g> a <xliff:g id="LABEL">%2$s</xliff:g>?"</string>

@@ -288,11 +288,9 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"სხეულის სენსორები"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"თქვენი სასიცოცხლო ფუნქციების შესახებ სენსორის მონაცემებზე წვდომა"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ფანჯრის კონტენტის მოძიება"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"შეამოწმეთ იმ ფანჯრის კონტექტი, რომელშიც მუშაობთ."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"იმ ფანჯრის კონტენტის შემოწმება, რომელშიც მუშაობთ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"„შეხებით აღმოჩენის“ ჩართვა"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ერთეულები, რომლებსაც შეეხებით, წაიკითხება ხმამაღლა, ხოლო ეკრანის დათვალიერება ჟესტების მეშვეობით იქნება შესაძლებელი."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ვებზე გამარტივებული წვდომის დამატებითი შესაძლებლობების ჩართვა"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"შესაძლებელია სკრიპტების ინსტალაცია აპის კონტენტის წვდომადობის უზრუნველსაყოფად."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"თქვენ მიერ აკრეფილ ტექსტზე დაკვირვება"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"შეიცავს ისეთ პირად მონაცემებს, როგორიცაა საკრედიტო ბარათის ნომრები და პაროლები."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ერანის გადიდების მართვა"</string>
@@ -1610,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"დაინსტალირებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის შესრულებას და ზღუდავს ვიბრაციას, ადგილმდებარეობის მომსახურებებს და ძირითად ფონურ მონაცემებს. ელ-ფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპლიკაციების განახლება არ მოხდება მათ გახსნეამდე. \n\n ელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის ფუნქციონალობას და ზღუდავს ვიბრაციას, ადგილმდებარეობის მომსახურებებს და ძირითად ფონურ მონაცემებს. ელფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპების განახლება არ მოხდება მათ გახსნამდე. \n\n ელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ჩართვა"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"დროის შეყვანისთვის ტექსტის შეყვანის რეჟიმზე გადართვა."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"დროის შეყვანისთვის საათის რეჟიმზე გადართვა."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ავტომატური შევსების ვარიანტები"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"ავტომატური შევსებისთვის შენახვა"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"კონტენტის ავტომატური შევსება ვერ მოხერხდება"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"გსურთ, შეინახოთ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>-ში&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"გსურთ, შეინახოთ <xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>-ში&lt;/b&gt;?"</string>

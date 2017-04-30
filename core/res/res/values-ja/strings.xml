@@ -106,7 +106,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS メッセージ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ボイスメール メッセージ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
-    <string name="peerTtyModeFull" msgid="6165351790010341421">"ピアから、TTYモードをFULLにするようリクエストされました"</string>
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"ピアから、TTY モードを FULL にするようリクエストされました"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ピアから、TTYモードをHCOにするようリクエストされました"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ピアから、TTYモードをVCOにするようリクエストされました"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"ピアから、TTYモードをOFFにするようリクエストされました"</string>
@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"タップしたアイテムが読み上げられ、ジェスチャーで画面のガイドを利用できます。"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ウェブアクセシビリティ拡張の有効化"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"スクリプトをインストールしてアプリコンテンツにアクセスしやすくできます。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"入力テキストの監視"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"クレジットカードの番号やパスワードなどの個人データが含まれます。"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"画面の拡大の制御"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"時刻をテキストで入力するモードに切り替えます。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"時刻を時計で入力するモードに切り替えます。"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自動入力のオプション"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"保存して自動入力で使用"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"コンテンツを自動入力できません"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
