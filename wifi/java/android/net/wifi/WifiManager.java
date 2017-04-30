@@ -40,6 +40,7 @@ import android.os.WorkSource;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
@@ -47,6 +48,7 @@ import com.android.server.net.NetworkPinner;
 
 import dalvik.system.CloseGuard;
 
+import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
@@ -850,6 +852,22 @@ public class WifiManager {
     private AsyncChannel mAsyncChannel;
     private CountDownLatch mConnected;
     private Looper mLooper;
+
+    /* LocalOnlyHotspot callback message types */
+    /** @hide */
+    public static final int HOTSPOT_STARTED = 0;
+    /** @hide */
+    public static final int HOTSPOT_STOPPED = 1;
+    /** @hide */
+    public static final int HOTSPOT_FAILED = 2;
+    /** @hide */
+    public static final int HOTSPOT_OBSERVER_REGISTERED = 3;
+
+    private final Object mLock = new Object(); // lock guarding access to the following vars
+    @GuardedBy("mLock")
+    private LocalOnlyHotspotCallbackProxy mLOHSCallbackProxy;
+    @GuardedBy("mLock")
+    private LocalOnlyHotspotObserverProxy mLOHSObserverProxy;
 
     /**
      * Create a new WifiManager instance.
@@ -1864,12 +1882,27 @@ public class WifiManager {
      * operating status.
      * @param handler Handler to be used for callbacks.  If the caller passes a null Handler, the
      * main thread will be used.
-     *
-     * @hide
      */
     public void startLocalOnlyHotspot(LocalOnlyHotspotCallback callback,
             @Nullable Handler handler) {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+            LocalOnlyHotspotCallbackProxy proxy =
+                    new LocalOnlyHotspotCallbackProxy(this, looper, callback);
+            try {
+                WifiConfiguration config = mService.startLocalOnlyHotspot(
+                        proxy.getMessenger(), new Binder());
+                if (config == null) {
+                    // Send message to the proxy to make sure we call back on the correct thread
+                    proxy.notifyFailed(
+                            LocalOnlyHotspotCallback.ERROR_INCOMPATIBLE_MODE);
+                    return;
+                }
+                mLOHSCallbackProxy = proxy;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -1886,7 +1919,9 @@ public class WifiManager {
      * @hide
      */
     public void cancelLocalOnlyHotspotRequest() {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            stopLocalOnlyHotspot();
+        }
     }
 
     /**
@@ -1900,7 +1935,18 @@ public class WifiManager {
      *  method on their LocalOnlyHotspotReservation.
      */
     private void stopLocalOnlyHotspot() {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            if (mLOHSCallbackProxy == null) {
+                // nothing to do, the callback was already cleaned up.
+                return;
+            }
+            mLOHSCallbackProxy = null;
+            try {
+                mService.stopLocalOnlyHotspot();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -1922,7 +1968,18 @@ public class WifiManager {
      */
     public void watchLocalOnlyHotspot(LocalOnlyHotspotObserver observer,
             @Nullable Handler handler) {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+            mLOHSObserverProxy = new LocalOnlyHotspotObserverProxy(this, looper, observer);
+            try {
+                mService.startWatchLocalOnlyHotspot(
+                        mLOHSObserverProxy.getMessenger(), new Binder());
+                mLOHSObserverProxy.registered();
+            } catch (RemoteException e) {
+                mLOHSObserverProxy = null;
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -1932,9 +1989,19 @@ public class WifiManager {
      * @hide
      */
     public void unregisterLocalOnlyHotspotObserver() {
-        throw new UnsupportedOperationException("LocalOnlyHotspot is still in development");
+        synchronized (mLock) {
+            if (mLOHSObserverProxy == null) {
+                // nothing to do, the callback was already cleaned up
+                return;
+            }
+            mLOHSObserverProxy = null;
+            try {
+                mService.stopWatchLocalOnlyHotspot();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
-
 
     /**
      * Gets the Wi-Fi enabled state.
@@ -2205,8 +2272,6 @@ public class WifiManager {
      * any further callbacks. If the LocalOnlyHotspot is stopped due to a
      * user triggered mode change, applications will be notified via the {@link
      * LocalOnlyHotspotCallback#onStopped()} callback.
-     *
-     * @hide
      */
     public class LocalOnlyHotspotReservation implements AutoCloseable {
 
@@ -2249,8 +2314,6 @@ public class WifiManager {
 
     /**
      * Callback class for applications to receive updates about the LocalOnlyHotspot status.
-     *
-     * @hide
      */
     public static class LocalOnlyHotspotCallback {
         public static final int ERROR_NO_CHANNEL = 1;
@@ -2283,6 +2346,88 @@ public class WifiManager {
     }
 
     /**
+     * Callback proxy for LocalOnlyHotspotCallback objects.
+     */
+    private static class LocalOnlyHotspotCallbackProxy {
+        private final Handler mHandler;
+        private final WeakReference<WifiManager> mWifiManager;
+        private final Looper mLooper;
+        private final Messenger mMessenger;
+
+        /**
+         * Constructs a {@link LocalOnlyHotspotCallback} using the specified looper.  All callbacks
+         * will be delivered on the thread of the specified looper.
+         *
+         * @param manager WifiManager
+         * @param looper Looper for delivering callbacks
+         * @param callback LocalOnlyHotspotCallback to notify the calling application.
+         */
+        LocalOnlyHotspotCallbackProxy(WifiManager manager, Looper looper,
+                final LocalOnlyHotspotCallback callback) {
+            mWifiManager = new WeakReference<>(manager);
+            mLooper = looper;
+
+            mHandler = new Handler(looper) {
+                @Override
+                public void handleMessage(Message msg) {
+                    Log.d(TAG, "LocalOnlyHotspotCallbackProxy: handle message what: "
+                            + msg.what + " msg: " + msg);
+
+                    WifiManager manager = mWifiManager.get();
+                    if (manager == null) {
+                        Log.w(TAG, "LocalOnlyHotspotCallbackProxy: handle message post GC");
+                        return;
+                    }
+
+                    switch (msg.what) {
+                        case HOTSPOT_STARTED:
+                            WifiConfiguration config = (WifiConfiguration) msg.obj;
+                            if (config == null) {
+                                Log.e(TAG, "LocalOnlyHotspotCallbackProxy: config cannot be null.");
+                                callback.onFailed(LocalOnlyHotspotCallback.ERROR_GENERIC);
+                                return;
+                            }
+                            callback.onStarted(manager.new LocalOnlyHotspotReservation(config));
+                            break;
+                        case HOTSPOT_STOPPED:
+                            Log.w(TAG, "LocalOnlyHotspotCallbackProxy: hotspot stopped");
+                            callback.onStopped();
+                            break;
+                        case HOTSPOT_FAILED:
+                            int reasonCode = msg.arg1;
+                            Log.w(TAG, "LocalOnlyHotspotCallbackProxy: failed to start.  reason: "
+                                    + reasonCode);
+                            callback.onFailed(reasonCode);
+                            Log.w(TAG, "done with the callback...");
+                            break;
+                        default:
+                            Log.e(TAG, "LocalOnlyHotspotCallbackProxy unhandled message.  type: "
+                                    + msg.what);
+                    }
+                }
+            };
+            mMessenger = new Messenger(mHandler);
+        }
+
+        public Messenger getMessenger() {
+            return mMessenger;
+        }
+
+        /**
+         * Helper method allowing the the incoming application call to move the onFailed callback
+         * over to the desired callback thread.
+         *
+         * @param reason int representing the error type
+         */
+        public void notifyFailed(int reason) throws RemoteException {
+            Message msg = Message.obtain();
+            msg.what = HOTSPOT_FAILED;
+            msg.arg1 = reason;
+            mMessenger.send(msg);
+        }
+    }
+
+    /**
      * LocalOnlyHotspotSubscription that is an AutoCloseable object for tracking applications
      * watching for LocalOnlyHotspot changes.
      *
@@ -2291,7 +2436,6 @@ public class WifiManager {
     public class LocalOnlyHotspotSubscription implements AutoCloseable {
         private final CloseGuard mCloseGuard = CloseGuard.get();
 
-        /** @hide */
         @VisibleForTesting
         public LocalOnlyHotspotSubscription() {
             mCloseGuard.open("close");
@@ -2341,6 +2485,75 @@ public class WifiManager {
          * LocalOnlyHotspot stopped.
          */
         public void onStopped() {};
+    }
+
+    /**
+     * Callback proxy for LocalOnlyHotspotObserver objects.
+     */
+    private static class LocalOnlyHotspotObserverProxy {
+        private final Handler mHandler;
+        private final WeakReference<WifiManager> mWifiManager;
+        private final Looper mLooper;
+        private final Messenger mMessenger;
+
+        /**
+         * Constructs a {@link LocalOnlyHotspotObserverProxy} using the specified looper.
+         * All callbacks will be delivered on the thread of the specified looper.
+         *
+         * @param manager WifiManager
+         * @param looper Looper for delivering callbacks
+         * @param observer LocalOnlyHotspotObserver to notify the calling application.
+         */
+        LocalOnlyHotspotObserverProxy(WifiManager manager, Looper looper,
+                final LocalOnlyHotspotObserver observer) {
+            mWifiManager = new WeakReference<>(manager);
+            mLooper = looper;
+
+            mHandler = new Handler(looper) {
+                @Override
+                public void handleMessage(Message msg) {
+                    Log.d(TAG, "LocalOnlyHotspotObserverProxy: handle message what: "
+                            + msg.what + " msg: " + msg);
+
+                    WifiManager manager = mWifiManager.get();
+                    if (manager == null) {
+                        Log.w(TAG, "LocalOnlyHotspotObserverProxy: handle message post GC");
+                        return;
+                    }
+
+                    switch (msg.what) {
+                        case HOTSPOT_OBSERVER_REGISTERED:
+                            observer.onRegistered(manager.new LocalOnlyHotspotSubscription());
+                            break;
+                        case HOTSPOT_STARTED:
+                            WifiConfiguration config = (WifiConfiguration) msg.obj;
+                            if (config == null) {
+                                Log.e(TAG, "LocalOnlyHotspotObserverProxy: config cannot be null.");
+                                return;
+                            }
+                            observer.onStarted(config);
+                            break;
+                        case HOTSPOT_STOPPED:
+                            observer.onStopped();
+                            break;
+                        default:
+                            Log.e(TAG, "LocalOnlyHotspotObserverProxy unhandled message.  type: "
+                                    + msg.what);
+                    }
+                }
+            };
+            mMessenger = new Messenger(mHandler);
+        }
+
+        public Messenger getMessenger() {
+            return mMessenger;
+        }
+
+        public void registered() throws RemoteException {
+            Message msg = Message.obtain();
+            msg.what = HOTSPOT_OBSERVER_REGISTERED;
+            mMessenger.send(msg);
+        }
     }
 
     // Ensure that multiple ServiceHandler threads do not interleave message dispatch.
