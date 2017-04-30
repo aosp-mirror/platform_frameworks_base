@@ -184,7 +184,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = mContext.bindServiceAsUser(intent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
+                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                            | Context.BIND_IMPORTANT_BACKGROUND,
                     new UserHandle(job.getUserId()));
             if (!binding) {
                 if (DEBUG) {
@@ -253,6 +254,20 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
 
     long getTimeoutElapsed() {
         return mTimeoutElapsed;
+    }
+
+    boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId) {
+        final JobStatus executing = getRunningJob();
+        if (executing != null && (userId == UserHandle.USER_ALL || userId == executing.getUserId())
+                && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
+                && (!matchJobId || jobId == executing.getJobId())) {
+            if (mVerb == VERB_EXECUTING) {
+                mParams.setStopReason(JobParameters.REASON_TIMEOUT);
+                sendStopMessageLocked();
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

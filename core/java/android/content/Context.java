@@ -323,6 +323,12 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * @hide Flag for {@link #bindService}: like {@link #BIND_NOT_FOREGROUND}, but puts it
+     * up in to the important background state (instead of transient).
+     */
+    public static final int BIND_IMPORTANT_BACKGROUND = 0x00800000;
+
+    /**
      * @hide Flag for {@link #bindService}: allows application hosting service to manage whitelists
      * such as temporary allowing a {@code PendingIntent} to bypass Power Save mode.
      */
