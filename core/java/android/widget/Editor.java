@@ -106,7 +106,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.textclassifier.TextClassificationResult;
+import android.view.textclassifier.TextClassification;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
@@ -3886,14 +3886,14 @@ public class Editor {
 
         private void updateAssistMenuItem(Menu menu) {
             menu.removeItem(TextView.ID_ASSIST);
-            final TextClassificationResult textClassificationResult =
-                    getSelectionActionModeHelper().getTextClassificationResult();
-            if (textClassificationResult != null) {
-                final Drawable icon = textClassificationResult.getIcon();
-                final CharSequence label = textClassificationResult.getLabel();
+            final TextClassification textClassification =
+                    getSelectionActionModeHelper().getTextClassification();
+            if (textClassification != null) {
+                final Drawable icon = textClassification.getIcon();
+                final CharSequence label = textClassification.getLabel();
                 final OnClickListener onClickListener =
-                        textClassificationResult.getOnClickListener();
-                final Intent intent = textClassificationResult.getIntent();
+                        textClassification.getOnClickListener();
+                final Intent intent = textClassification.getIntent();
                 if ((icon != null || !TextUtils.isEmpty(label))
                         && (onClickListener != null || intent != null)) {
                     menu.add(TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST, label)
@@ -3902,7 +3902,7 @@ public class Editor {
                     mMetricsLogger.write(
                             new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
                                     .setType(MetricsEvent.TYPE_OPEN)
-                                    .setSubtype(textClassificationResult.getLogType()));
+                                    .setSubtype(textClassification.getLogType()));
                 }
             }
         }
@@ -3916,24 +3916,24 @@ public class Editor {
             if (customCallback != null && customCallback.onActionItemClicked(mode, item)) {
                 return true;
             }
-            final TextClassificationResult textClassificationResult =
-                    getSelectionActionModeHelper().getTextClassificationResult();
-            if (TextView.ID_ASSIST == item.getItemId() && textClassificationResult != null) {
+            final TextClassification textClassification =
+                    getSelectionActionModeHelper().getTextClassification();
+            if (TextView.ID_ASSIST == item.getItemId() && textClassification != null) {
                 final OnClickListener onClickListener =
-                        textClassificationResult.getOnClickListener();
+                        textClassification.getOnClickListener();
                 if (onClickListener != null) {
                     onClickListener.onClick(mTextView);
                 } else {
-                    final Intent intent = textClassificationResult.getIntent();
+                    final Intent intent = textClassification.getIntent();
                     if (intent != null) {
-                        TextClassificationResult.createStartActivityOnClickListener(
+                        TextClassification.createStartActivityOnClickListener(
                                 mTextView.getContext(), intent)
                                 .onClick(mTextView);
                     }
                 }
                 mMetricsLogger.action(
                         MetricsEvent.ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST,
-                        textClassificationResult.getLogType());
+                        textClassification.getLogType());
                 stopTextActionMode();
                 return true;
             }
