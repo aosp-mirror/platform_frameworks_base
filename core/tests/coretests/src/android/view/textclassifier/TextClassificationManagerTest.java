@@ -102,31 +102,31 @@ public class TextClassificationManagerTest {
     }
 
     @Test
-    public void testTextClassificationResult() {
+    public void testClassifyText() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Contact me at droid@android.com";
         String classifiedText = "droid@android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
-        assertThat(mClassifier.getTextClassificationResult(text, startIndex, endIndex, LOCALES),
-                isTextClassificationResult(classifiedText, TextClassifier.TYPE_EMAIL));
+        assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
+                isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
     }
 
     @Test
-    public void testTextClassificationResult_url() {
+    public void testTextClassifyText_url() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Visit http://www.android.com for more information";
         String classifiedText = "http://www.android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
-        assertThat(mClassifier.getTextClassificationResult(text, startIndex, endIndex, LOCALES),
-                isTextClassificationResult(classifiedText, TextClassifier.TYPE_URL));
+        assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
+                isTextClassification(classifiedText, TextClassifier.TYPE_URL));
     }
 
     @Test
-    public void testTextClassificationResult_nullLocaleList() {
+    public void testTextClassifyText_nullLocaleList() {
         if (isTextClassifierDisabled()) return;
 
         String text = "Contact me at droid@android.com";
@@ -134,8 +134,8 @@ public class TextClassificationManagerTest {
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
         LocaleList nullLocales = null;
-        assertThat(mClassifier.getTextClassificationResult(text, startIndex, endIndex, nullLocales),
-                isTextClassificationResult(classifiedText, TextClassifier.TYPE_EMAIL));
+        assertThat(mClassifier.classifyText(text, startIndex, endIndex, nullLocales),
+                isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
     }
 
     @Test
@@ -186,13 +186,13 @@ public class TextClassificationManagerTest {
         };
     }
 
-    private static Matcher<TextClassificationResult> isTextClassificationResult(
+    private static Matcher<TextClassification> isTextClassification(
             final String text, final String type) {
-        return new BaseMatcher<TextClassificationResult>() {
+        return new BaseMatcher<TextClassification>() {
             @Override
             public boolean matches(Object o) {
-                if (o instanceof TextClassificationResult) {
-                    TextClassificationResult result = (TextClassificationResult) o;
+                if (o instanceof TextClassification) {
+                    TextClassification result = (TextClassification) o;
                     return text.equals(result.getText())
                             && result.getEntityCount() > 0
                             && type.equals(result.getEntity(0));
