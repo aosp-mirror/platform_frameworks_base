@@ -10,6 +10,7 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_AlarmManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_am_BatteryStatsService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_connectivity_Vpn.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp \
     $(LOCAL_REL_DIR)/com_android_server_ConsumerIrService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_HardwarePropertiesManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_hdmi_HdmiCecController.cpp \
@@ -63,6 +64,7 @@ LOCAL_SHARED_LIBRARIES += \
     liblog \
     libhardware \
     libhardware_legacy \
+    libhidlbase \
     libkeystore_binder \
     libnativehelper \
     libutils \
@@ -94,6 +96,7 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.light@2.0 \
     android.hardware.power@1.0 \
     android.hardware.power@1.1 \
+    android.hardware.tetheroffload.config@1.0 \
     android.hardware.thermal@1.0 \
     android.hardware.tv.cec@1.0 \
     android.hardware.tv.input@1.0 \
