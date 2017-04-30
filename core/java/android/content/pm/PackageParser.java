@@ -3437,7 +3437,8 @@ public class PackageParser {
                     false)) {
                 // Check if persistence is based on a feature being present
                 final String requiredFeature = sa.getNonResourceString(
-                    com.android.internal.R.styleable.AndroidManifestApplication_persistentFeature);
+                    com.android.internal.R.styleable.
+                    AndroidManifestApplication_persistentWhenFeatureAvailable);
                 if (requiredFeature == null || mCallback.hasFeature(requiredFeature)) {
                     ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
                 }
