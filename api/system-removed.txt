@@ -124,6 +124,10 @@ package android.content.pm {
     method public abstract boolean setInstantAppCookie(byte[]);
   }
 
+  public class ResolveInfo implements android.os.Parcelable {
+    field public deprecated boolean instantAppAvailable;
+  }
+
   public final class SharedLibraryInfo implements android.os.Parcelable {
     method public boolean isBuiltin();
     method public boolean isDynamic();
