@@ -2808,7 +2808,7 @@ public final class ActiveServices {
     void removeUninstalledPackageLocked(String packageName, int userId) {
         ServiceMap smap = mServiceMap.get(userId);
         if (smap != null && smap.mActiveForegroundApps.size() > 0) {
-            for (int i = smap.mActiveForegroundApps.size(); i >= 0; i--) {
+            for (int i = smap.mActiveForegroundApps.size()-1; i >= 0; i--) {
                 ActiveForegroundApp aa = smap.mActiveForegroundApps.valueAt(i);
                 if (aa.mPackageName.equals(packageName)) {
                     smap.mActiveForegroundApps.removeAt(i);
