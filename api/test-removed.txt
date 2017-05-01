@@ -1,7 +1,57 @@
 package android.app {
 
+  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+    method public deprecated boolean enterPictureInPictureMode(android.app.PictureInPictureArgs);
+    method public deprecated void setPictureInPictureArgs(android.app.PictureInPictureArgs);
+  }
+
+  public class ActivityManager {
+    method public static deprecated int getMaxNumPictureInPictureActions();
+  }
+
+  public class KeyguardManager {
+    method public deprecated void dismissKeyguard(android.app.Activity, android.app.KeyguardManager.KeyguardDismissCallback, android.os.Handler);
+  }
+
   public class Notification implements android.os.Parcelable {
+    method public deprecated java.lang.String getChannel();
+    method public deprecated long getTimeout();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
+  }
+
+  public static class Notification.Builder {
+    method public deprecated android.app.Notification.Builder setChannel(java.lang.String);
+    method public deprecated android.app.Notification.Builder setTimeout(long);
+  }
+
+  public static final class Notification.TvExtender implements android.app.Notification.Extender {
+    method public deprecated java.lang.String getChannel();
+  }
+
+  public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
+    method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
+    method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
+    method public void copyOnlySet(android.app.PictureInPictureArgs);
+    method public java.util.List<android.app.RemoteAction> getActions();
+    method public float getAspectRatio();
+    method public android.util.Rational getAspectRatioRational();
+    method public android.graphics.Rect getSourceRectHint();
+    method public android.graphics.Rect getSourceRectHintInsets();
+    method public boolean hasSetActions();
+    method public boolean hasSetAspectRatio();
+    method public boolean hasSourceBoundsHint();
+    method public boolean hasSourceBoundsHintInsets();
+    method public deprecated void setSourceRectHintInsets(android.graphics.Rect);
+    method public void truncateActions(int);
+    field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
+  }
+
+  public static class PictureInPictureArgs.Builder {
+    ctor public PictureInPictureArgs.Builder();
+    method public android.app.PictureInPictureArgs build();
+    method public android.app.PictureInPictureArgs.Builder setActions(java.util.List<android.app.RemoteAction>);
+    method public android.app.PictureInPictureArgs.Builder setAspectRatio(android.util.Rational);
+    method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
   }
 
   public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
@@ -221,6 +271,10 @@ package android.os {
     ctor public RecoverySystem();
   }
 
+  public class TestLooperManager {
+    method public deprecated android.os.MessageQueue getQueue();
+  }
+
   public class UserManager {
     method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
     method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
@@ -378,6 +432,14 @@ package android.provider {
 
   public static final class Telephony.Sms.Intents {
     field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+  }
+
+}
+
+package android.speech.tts {
+
+  public abstract class UtteranceProgressListener {
+    method public deprecated void onUtteranceRangeStart(java.lang.String, int, int);
   }
 
 }

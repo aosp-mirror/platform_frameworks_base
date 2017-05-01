@@ -28,10 +28,8 @@ import java.util.List;
 /**
  * Represents a set of parameters used to initialize and update an Activity in picture-in-picture
  * mode.
- *
- * TODO: Make this final after we remove PictureInPictureArgs
  */
-public class PictureInPictureParams implements Parcelable {
+public final class PictureInPictureParams implements Parcelable {
 
     /**
      * Builder class for {@link PictureInPictureParams} objects.
@@ -63,7 +61,7 @@ public class PictureInPictureParams implements Parcelable {
 
         /**
          * Sets the user actions.  If there are more than
-         * {@link ActivityManager#getMaxNumPictureInPictureActions()} actions, then the input list
+         * {@link Activity#getMaxNumPictureInPictureActions()} actions, then the input list
          * will be truncated to that number.
          *
          * @param actions the new actions to show in the picture-in-picture menu.
@@ -120,25 +118,22 @@ public class PictureInPictureParams implements Parcelable {
     /**
      * The expected aspect ratio of the picture-in-picture.
      */
-    // TODO: Make private once we removed PictureInPictureArgs
     @Nullable
-    protected Rational mAspectRatio;
+    private Rational mAspectRatio;
 
     /**
      * The set of actions that are associated with this activity when in picture-in-picture.
      */
-    // TODO: Make private once we removed PictureInPictureArgs
     @Nullable
-    protected List<RemoteAction> mUserActions;
+    private List<RemoteAction> mUserActions;
 
     /**
      * The source bounds hint used when entering picture-in-picture, relative to the window bounds.
      * We can use this internally for the transition into picture-in-picture to ensure that a
      * particular source rect is visible throughout the whole transition.
      */
-    // TODO: Make private once we removed PictureInPictureArgs
     @Nullable
-    protected Rect mSourceRectHint;
+    private Rect mSourceRectHint;
 
     /**
      * The content insets that are used with the source hint rect for the transition into PiP where
@@ -147,15 +142,12 @@ public class PictureInPictureParams implements Parcelable {
     @Nullable
     private Rect mSourceRectHintInsets;
 
-    /**
-     * TO BE REMOVED
-     */
-    @Deprecated
+    /** {@hide} */
     PictureInPictureParams() {
-        // TODO: Remove once we remove PictureInPictureArgs
     }
 
-    private PictureInPictureParams(Parcel in) {
+    /** {@hide} */
+    PictureInPictureParams(Parcel in) {
         if (in.readInt() != 0) {
             mAspectRatio = new Rational(in.readInt(), in.readInt());
         }
@@ -171,7 +163,8 @@ public class PictureInPictureParams implements Parcelable {
         }
     }
 
-    private PictureInPictureParams(Rational aspectRatio, List<RemoteAction> actions,
+    /** {@hide} */
+    PictureInPictureParams(Rational aspectRatio, List<RemoteAction> actions,
             Rect sourceRectHint) {
         mAspectRatio = aspectRatio;
         mUserActions = actions;
@@ -206,6 +199,11 @@ public class PictureInPictureParams implements Parcelable {
             return mAspectRatio.floatValue();
         }
         return 0f;
+    }
+
+    /** @hide */
+    public Rational getAspectRatioRational() {
+        return mAspectRatio;
     }
 
     /**
