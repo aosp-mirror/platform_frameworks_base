@@ -19,6 +19,7 @@
 
 #include "com_android_server_radio_Tuner.h"
 
+#include "com_android_server_radio_convert.h"
 #include "com_android_server_radio_Tuner_TunerCallback.h"
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
@@ -104,6 +105,13 @@ void setHalTuner(JNIEnv *env, jobject obj, sp<ITuner> halTuner) {
     ctx.mHalTuner = halTuner;
 }
 
+sp<ITuner> getHalTuner(jlong nativeContext) {
+    AutoMutex _l(gContextMutex);
+    auto tuner = getNativeContext(nativeContext).mHalTuner;
+    LOG_ALWAYS_FATAL_IF(tuner == nullptr, "HAL tuner not set");
+    return tuner;
+}
+
 sp<ITunerCallback> getNativeCallback(JNIEnv *env, jobject obj) {
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(env, obj);
@@ -114,7 +122,7 @@ Region getRegion(JNIEnv *env, jobject obj) {
     return static_cast<Region>(env->GetIntField(obj, gjni.Tuner.region));
 }
 
-static void close(JNIEnv *env, jobject obj, jlong nativeContext) {
+static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
     ALOGI("Closing tuner %p", ctx.mHalTuner.get());
@@ -123,10 +131,42 @@ static void close(JNIEnv *env, jobject obj, jlong nativeContext) {
     ctx.mNativeCallback = nullptr;
 }
 
+static void nativeSetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext, jobject config) {
+    ALOGV("nativeSetConfiguration()");
+    auto halTuner = getHalTuner(nativeContext);
+
+    Region region_unused;
+    BandConfig bandConfigHal = convert::BandConfigToHal(env, config, region_unused);
+
+    convert::ThrowIfFailed(env, halTuner->setConfiguration(bandConfigHal));
+}
+
+static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext,
+        Region region) {
+    ALOGV("nativeSetConfiguration()");
+    auto halTuner = getHalTuner(nativeContext);
+
+    BandConfig halConfig;
+    Result halResult;
+    auto hidlResult = halTuner->getConfiguration([&](Result result, const BandConfig& config) {
+        halResult = result;
+        halConfig = config;
+    });
+    if (convert::ThrowIfFailed(env, hidlResult)) {
+        return nullptr;
+    }
+
+    return convert::BandConfigFromHal(env, halConfig, region).release();
+}
+
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "(Landroid/hardware/radio/ITunerCallback;)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
-    { "nativeClose", "(J)V", (void*)close },
+    { "nativeClose", "(J)V", (void*)nativeClose },
+    { "nativeSetConfiguration", "(JLandroid/hardware/radio/RadioManager$BandConfig;)V",
+            (void*)nativeSetConfiguration },
+    { "nativeGetConfiguration", "(JI)Landroid/hardware/radio/RadioManager$BandConfig;",
+            (void*)nativeGetConfiguration },
 };
 
 } // namespace Tuner

@@ -28,10 +28,12 @@ namespace server {
 namespace radio {
 namespace convert {
 
+using hardware::Return;
 using hardware::hidl_vec;
 
 using V1_0::Band;
 using V1_0::Deemphasis;
+using V1_0::Result;
 using V1_0::Rds;
 
 static struct {
@@ -61,6 +63,47 @@ static struct {
         jfieldID spacing;
     } BandDescriptor;
 } gjni;
+
+template <typename T>
+bool ThrowIfFailedCommon(JNIEnv *env, const hardware::Return<T> &hidlResult) {
+    if (hidlResult.isOk()) return false;
+
+    jniThrowExceptionFmt(env, "java/lang/RuntimeException",
+            "HIDL call failed: %s", hidlResult.description().c_str());
+    return true;
+}
+
+bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult) {
+    return ThrowIfFailedCommon(env, hidlResult);
+}
+
+bool ThrowIfFailed(JNIEnv *env, const hardware::Return<V1_0::Result> &hidlResult) {
+    if (ThrowIfFailedCommon(env, hidlResult)) return true;
+
+    Result result = hidlResult;
+    switch (result) {
+        case Result::OK:
+            return false;
+        case Result::NOT_INITIALIZED:
+            jniThrowException(env, "java/lang/RuntimeException", "Result::NOT_INITIALIZED");
+            return true;
+        case Result::INVALID_ARGUMENTS:
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                    "Result::INVALID_ARGUMENTS");
+            return true;
+        case Result::INVALID_STATE:
+            jniThrowException(env, "java/lang/IllegalStateException", "Result::INVALID_STATE");
+            return true;
+        case Result::TIMEOUT:
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "Result::TIMEOUT (unexpected here)");
+            return true;
+        default:
+            jniThrowExceptionFmt(env, "java/lang/RuntimeException",
+                    "Unknown failure, result: %d", result);
+            return true;
+    }
+}
 
 static Rds RdsForRegion(bool rds, Region region) {
     if (!rds) return Rds::NONE;
@@ -95,6 +138,7 @@ static Deemphasis DeemphasisForRegion(Region region) {
 }
 
 JavaRef BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
+    ALOGV("BandConfigFromHal()");
     EnvWrapper wrap(env);
 
     jint spacing = config.spacings.size() > 0 ? config.spacings[0] : 0;
@@ -122,6 +166,7 @@ JavaRef BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region re
 }
 
 V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region) {
+    ALOGV("BandConfigToHal()");
     auto jDescriptor = env->GetObjectField(jConfig, gjni.BandConfig.descriptor);
     if (jDescriptor == nullptr) {
         ALOGE("Descriptor is missing");
