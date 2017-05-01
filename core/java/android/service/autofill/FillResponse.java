@@ -30,6 +30,7 @@ import android.view.autofill.AutofillManager;
 import android.widget.RemoteViews;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Response for a {@link
@@ -258,12 +259,17 @@ public final class FillResponse implements Parcelable {
          * @param ids id of Views that when focused will display the authentication UI affordance.
          *
          * @return This builder.
+         * @throw {@link IllegalArgumentException} if {@code ids} is {@code null} or empty, or if
+         * neither {@code authentication} nor {@code presentation} is non-{@code null}.
+         *
          * @see android.app.PendingIntent#getIntentSender()
          */
         public @NonNull Builder setAuthentication(@NonNull AutofillId[] ids,
                 @Nullable IntentSender authentication, @Nullable RemoteViews presentation) {
             throwIfDestroyed();
-            // TODO(b/37424539): assert ids is not null nor empty once old version is removed
+            if (ids == null || ids.length == 0) {
+                throw new IllegalArgumentException("ids cannot be null or empry");
+            }
             if (authentication == null ^ presentation == null) {
                 throw new IllegalArgumentException("authentication and presentation"
                         + " must be both non-null or null");
@@ -272,17 +278,6 @@ public final class FillResponse implements Parcelable {
             mPresentation = presentation;
             mAuthenticationIds = ids;
             return this;
-        }
-
-        /**
-         * TODO(b/37424539): will be removed once clients use the version that takes ids
-         * @hide
-         * @deprecated
-         */
-        @Deprecated
-        public @NonNull Builder setAuthentication(@Nullable IntentSender authentication,
-                @Nullable RemoteViews presentation) {
-            return setAuthentication(null, authentication, presentation);
         }
 
         /**
@@ -396,6 +391,7 @@ public final class FillResponse implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
+        // TODO: create a dump() method instead
         return new StringBuilder(
                 "FillResponse : [mRequestId=" + mRequestId)
                 .append(", datasets=").append(mDatasets)
@@ -403,10 +399,8 @@ public final class FillResponse implements Parcelable {
                 .append(", clientState=").append(mClientState != null)
                 .append(", hasPresentation=").append(mPresentation != null)
                 .append(", hasAuthentication=").append(mAuthentication != null)
-                .append(", authenticationSize=").append(mAuthenticationIds != null
-                        ? mAuthenticationIds.length : "N/A")
-                .append(", ignoredIdsSize=").append(mIgnoredIds != null
-                    ? mIgnoredIds.length : "N/A")
+                .append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds))
+                .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
                 .append("]")
                 .toString();
     }
@@ -447,8 +441,16 @@ public final class FillResponse implements Parcelable {
             }
             builder.setSaveInfo(parcel.readParcelable(null));
             builder.setClientState(parcel.readParcelable(null));
-            builder.setAuthentication(parcel.readParcelableArray(null, AutofillId.class),
-                    parcel.readParcelable(null), parcel.readParcelable(null));
+
+            // Sets authentication state.
+            final AutofillId[] authenticationIds = parcel.readParcelableArray(null,
+                    AutofillId.class);
+            final IntentSender authentication = parcel.readParcelable(null);
+            final RemoteViews presentation = parcel.readParcelable(null);
+            if (authenticationIds != null) {
+                builder.setAuthentication(authenticationIds, authentication, presentation);
+            }
+
             builder.setIgnoredIds(parcel.readParcelableArray(null, AutofillId.class));
             final FillResponse response = builder.build();
 
