@@ -3353,6 +3353,8 @@
         android:protectionLevel="signature" />
 
     <!-- Must be required by system apps when accessing restricted VR APIs.
+         @hide
+         @SystemApi
          <p>Protection level: signature -->
     <permission android:name="android.permission.RESTRICTED_VR_ACCESS"
         android:protectionLevel="signature|preinstalled" />
