@@ -41,11 +41,13 @@ public abstract class NetworkRecommendationProvider {
     private static final boolean VERBOSE = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
     /** The key into the callback Bundle where the RecommendationResult will be found.
      * @deprecated to be removed.
+     * @removed
      */
     public static final String EXTRA_RECOMMENDATION_RESULT =
             "android.net.extra.RECOMMENDATION_RESULT";
     /** The key into the callback Bundle where the sequence will be found.
      * @deprecated to be removed.
+     * @removed
      */
     public static final String EXTRA_SEQUENCE = "android.net.extra.SEQUENCE";
     private final IBinder mService;
@@ -54,6 +56,7 @@ public abstract class NetworkRecommendationProvider {
      * Constructs a new instance.
      * @param handler indicates which thread to use when handling requests. Cannot be {@code null}.
      * @deprecated use {@link #NetworkRecommendationProvider(Context, Executor)}
+     * @removed
      */
     public NetworkRecommendationProvider(Handler handler) {
         if (handler == null) {
@@ -82,6 +85,7 @@ public abstract class NetworkRecommendationProvider {
      *                 available it must be passed into
      *                 {@link ResultCallback#onResult(RecommendationResult)}.
      * @deprecated to be removed.
+     * @removed
      */
     public void onRequestRecommendation(RecommendationRequest request, ResultCallback callback) {}
 
@@ -107,6 +111,7 @@ public abstract class NetworkRecommendationProvider {
      * is available.
      *
      * @deprecated to be removed.
+     * @removed
      */
     public static class ResultCallback {
         private final IRemoteCallback mCallback;
