@@ -2229,12 +2229,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return mLastNonFullscreenBounds;
     }
 
-    boolean canMatchRootAffinity() {
-        // We don't allow root affinity matching on the pinned stack as no other task should
-        // be launching in it based on affinity.
-        return rootAffinity != null && getStackId() != PINNED_STACK_ID;
-    }
-
     void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
         for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
