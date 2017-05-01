@@ -238,6 +238,14 @@ package android.net {
     method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
   }
 
+  public deprecated class NetworkBadging {
+    method public static android.graphics.drawable.Drawable getWifiIcon(int, int, android.content.res.Resources.Theme);
+    field public static final int BADGING_4K = 30; // 0x1e
+    field public static final int BADGING_HD = 20; // 0x14
+    field public static final int BADGING_NONE = 0; // 0x0
+    field public static final int BADGING_SD = 10; // 0xa
+  }
+
   public abstract class NetworkRecommendationProvider {
     ctor public deprecated NetworkRecommendationProvider(android.os.Handler);
     method public deprecated void onRequestRecommendation(android.net.RecommendationRequest, android.net.NetworkRecommendationProvider.ResultCallback);
