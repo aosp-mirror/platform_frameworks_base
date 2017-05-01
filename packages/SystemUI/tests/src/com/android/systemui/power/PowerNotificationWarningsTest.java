@@ -24,7 +24,6 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -129,17 +128,32 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowTemperatureWarning_NotifyAsUser() {
-        mPowerNotificationWarnings.showTemperatureWarning();
+    public void testShowHighTemperatureWarning_NotifyAsUser() {
+        mPowerNotificationWarnings.showHighTemperatureWarning();
         verify(mMockNotificationManager, times(1))
                 .notifyAsUser(anyString(), eq(SystemMessage.NOTE_HIGH_TEMP), any(), any());
     }
 
     @Test
-    public void testDismissTemperatureWarning_CancelAsUser() {
-        mPowerNotificationWarnings.showTemperatureWarning();
-        mPowerNotificationWarnings.dismissTemperatureWarning();
+    public void testDismissHighTemperatureWarning_CancelAsUser() {
+        mPowerNotificationWarnings.showHighTemperatureWarning();
+        mPowerNotificationWarnings.dismissHighTemperatureWarning();
         verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
                 eq(SystemMessage.NOTE_HIGH_TEMP), any());
+    }
+
+    @Test
+    public void testShowThermalShutdownWarning_NotifyAsUser() {
+        mPowerNotificationWarnings.showThermalShutdownWarning();
+        verify(mMockNotificationManager, times(1))
+                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_THERMAL_SHUTDOWN), any(), any());
+    }
+
+    @Test
+    public void testDismissThermalShutdownWarning_CancelAsUser() {
+        mPowerNotificationWarnings.showThermalShutdownWarning();
+        mPowerNotificationWarnings.dismissThermalShutdownWarning();
+        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
+                eq(SystemMessage.NOTE_THERMAL_SHUTDOWN), any());
     }
 }
