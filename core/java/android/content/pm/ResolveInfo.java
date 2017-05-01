@@ -71,6 +71,10 @@ public class ResolveInfo implements Parcelable {
     /**
      * Whether or not an instant app is available for the resolved intent.
      */
+    public boolean isInstantAppAvailable;
+
+    /** @removed */
+    @Deprecated
     public boolean instantAppAvailable;
 
     /**
@@ -330,7 +334,8 @@ public class ResolveInfo implements Parcelable {
         system = orig.system;
         targetUserId = orig.targetUserId;
         handleAllWebDataURI = orig.handleAllWebDataURI;
-        instantAppAvailable = orig.instantAppAvailable;
+        isInstantAppAvailable = orig.isInstantAppAvailable;
+        instantAppAvailable = isInstantAppAvailable;
     }
 
     public String toString() {
@@ -394,7 +399,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(noResourceId ? 1 : 0);
         dest.writeInt(iconResourceId);
         dest.writeInt(handleAllWebDataURI ? 1 : 0);
-        dest.writeInt(instantAppAvailable ? 1 : 0);
+        dest.writeInt(isInstantAppAvailable ? 1 : 0);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -442,7 +447,7 @@ public class ResolveInfo implements Parcelable {
         noResourceId = source.readInt() != 0;
         iconResourceId = source.readInt();
         handleAllWebDataURI = source.readInt() != 0;
-        instantAppAvailable = source.readInt() != 0;
+        instantAppAvailable = isInstantAppAvailable = source.readInt() != 0;
     }
 
     public static class DisplayNameComparator
