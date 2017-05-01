@@ -291,12 +291,10 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona o contido dunha ventá coa que estás interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar a exploración táctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Os elementos que toques pronunciaranse en voz alta e a pantalla poderá explorarse mediante xestos."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar a accesibilidade web mellorada"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"É posible que se instalen scripts para que o contido da aplicación resulte máis accesible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar o texto que escribes"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclúe datos persoais como números e contrasinais de tarxetas de crédito."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar ampliación da pantalla"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlar o nivel do zoom e o posicionamento da pantalla"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla o nivel do zoom e o posicionamento da pantalla"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Realizar xestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Podes tocar, pasar o dedo, beliscar e realizar outros xestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Xestos de impresión dixital"</string>
@@ -443,8 +441,8 @@
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permite á aplicación crear sockets de rede e utilizar protocolos de rede personalizados. O navegador e outras aplicacións ofrecen medios para enviar datos a Internet, polo que non se require este permiso para enviar datos a Internet."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"cambiar a conectividade de rede"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permite á aplicación cambiar o estado da conectividade de rede."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"cambiar conectividade de ancoraxe á rede"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite á aplicación cambiar o estado da conectividade de rede ancorada."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"cambiar conectividade de conexión compartida"</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permite á aplicación cambiar o estado da conectividade da conexión compartida."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"ver conexións wifi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Permite á aplicación ver información acerca das redes wifi, como se a wifi está activada e o nome dos dispositivos wifi conectados."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"conectar e desconectar da wifi"</string>
@@ -546,8 +544,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permite a esta aplicación recibir información acerca das transferencias actuais de Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"eliminar certificados DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite a unha aplicación eliminar os certificados DRM. As aplicacións normais non o deberían precisar nunca."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"vincular a un servizo de mensaxería"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxería. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"vincular a un servizo de mensaxaría"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxaría. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular aos servizos do operador"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite ao titular vincularse aos servizos do operador. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"acceso ao modo Non molestar"</string>
@@ -600,9 +598,9 @@
     <item msgid="2374913952870110618">"Personalizado"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Particular"</item>
+    <item msgid="6880257626740047286">"Casa"</item>
     <item msgid="5629153956045109251">"Traballo"</item>
-    <item msgid="4966604264500343469">"Outros"</item>
+    <item msgid="4966604264500343469">"Outro"</item>
     <item msgid="4932682847595299369">"Personalizado"</item>
   </string-array>
   <string-array name="imAddressTypes">
@@ -652,9 +650,9 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Aniversario"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Outros"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizado"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Inicio"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Particular"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Traballo"</string>
-    <string name="emailTypeOther" msgid="2923008695272639549">"Outros"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Outro"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Móbil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Personalizado"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Particular"</string>
@@ -859,7 +857,7 @@
     <string name="searchview_description_query" msgid="5911778593125355124">"Consulta de busca"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Borrar consulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Enviar consulta"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"Busca de voz"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Busca por voz"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Activar a exploración táctil?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quere activar a exploración táctil. Cando a exploración táctil estea activada, poderás escoitar ou ver descricións do contido seleccionado ou realizar xestos para interactuar coa tableta."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quere activar a exploración táctil. Cando a exploración táctil estea activada, poderás escoitar ou ver descricións do contido seleccionado ou realizar xestos para interactuar co teléfono."</string>
@@ -1119,7 +1117,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"A aplicación %1$s quere conectarse á rede wifi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Unha aplicación"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Inicia Wi-Fi Direct. Esta acción desactivará o cliente e a zona interactiva da wifi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Inicia Wi-Fi Direct. Esta acción desactivará a zona ou o cliente wifi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Non se puido iniciar Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct está activado"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Toca para acceder á configuración"</string>
@@ -1289,7 +1287,7 @@
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo de coche activado"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Toca para saír do modo de coche."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Ancoraxe á rede ou zona Wi-Fi activada"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Conexión compartida ou zona wifi activada"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Tocar para configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Volver"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Seguinte"</string>
@@ -1709,7 +1707,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Toca para ver os ficheiros"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fixar"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Soltar"</string>
-    <string name="app_info" msgid="6856026610594615344">"Información da aplicación"</string>
+    <string name="app_info" msgid="6856026610594615344">"Información de aplicacións"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Queres restablecer o dispositivo?"</string>
     <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Toca aquí para restablecer o dispositivo"</string>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Cambia ao modo de entrada de texto para introducir a hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Cambiar ao modo de reloxo para introducir a hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcións de autocompletar"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Garda a información no servizo Autocompletar"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Os contidos non se poden autocompletar"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Queres gardar o contido en: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Queres gardar <xliff:g id="TYPE">%1$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

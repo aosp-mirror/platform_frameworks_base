@@ -272,7 +272,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"सम्पर्कहरू"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"तपाईँको सम्पर्कमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"यस यन्त्रको स्थानमाथि पहुँच गर्नुहोस्"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"यस यन्त्रको स्थानमाथि पहुँच"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"पात्रो"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तपाईँको अन्तरक्रिया भइरहेको विन्डोको सामग्रीको निरीक्षण गर्नुहोस्।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छोएर गरिने खोजलाई सुचारु गर्नुहोस्"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ट्याप गरिएका वस्तुहरू चर्को स्वरमा बोलिने छन् र इसाराहरूको प्रयोग गरेर स्क्रिनमा अन्वेषण गर्न सकिन्छ।"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"उच्च वेब पहुँचलाई सुचारु गर्नुहोस्"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"अनुप्रयोगको सामग्रीलाई थप पहुँचयोग्य बनाउन लिपिहरू स्थापना गर्न सक्नु हुन्छ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"आफुले टाइप गरेको पाठको निरीक्षण गर्नुहोस्"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"व्यक्तिगत डेटा जस्तै क्रेडिट कार्ड नम्बरहरू र पासवर्डहरू समावेश गर्दछ।"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"प्रदर्शन आवर्धन नियन्त्रण गर्नुहोस्"</string>
@@ -1745,8 +1743,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"समय इनपुट गर्न पाठ इनपुट मोडमा स्विच गर्नुहोस्।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"समय इनपुट गर्न घडी मोडमा स्विच गर्नुहोस्।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"स्वतः भरणका विकल्पहरू"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"स्वत: भरणका लागि सुरक्षित गर्नुहोस्‌"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"सामग्रीहरूलाई स्वत: भरण गर्न मिल्दैन"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> लाई &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>

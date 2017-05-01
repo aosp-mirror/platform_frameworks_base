@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo da janela com a qual você está interagindo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar por toque"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Itens tocados serão falados em voz alta, e a tela poderá ser explorada por meio de gestos."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ativar acessibilidade na Web aprimorada"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Scripts podem ser instalados para tornar o conteúdo do app mais acessível."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar o texto digitado"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclui dados pessoais, como números de cartão de crédito e senhas."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar ampliação da tela"</string>
@@ -1610,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado pelo seu administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Excluído pelo seu administrador"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Para ajudar a melhorar a duração da bateria, o economizador de bateria reduz o desempenho e os limites de vibração do dispositivo, os serviços de localização e a maioria dos dados de segundo plano. E-mail, mensagens e outros aplicativos que dependem de sincronização não podem ser atualizados, a não ser que você os abra.\n\nO economizador de bateria é desligado automaticamente quando o dispositivo está sendo carregado."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"A economia de bateria reduz o desempenho e os limites de vibração do dispositivo, os serviços de localização e a maioria dos dados em segundo plano para aumentar a duração da bateria. E-mails, mensagens e outros aplicativos que dependem de sincronização não serão atualizados, a não ser que você os abra.\n\nA economia de bateria é desligada automaticamente quando o dispositivo está sendo carregado."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode significar que as imagens não serão exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Alterne para o modo de entrada de texto para informar o horário."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Alterne para o modo de relógio para informar o horário."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opções de preenchimento automático"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Salvar no Preenchimento automático"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Não é possível preencher os conteúdos automaticamente"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Salvar em &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Salvar <xliff:g id="TYPE">%1$s</xliff:g> em &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Dati mobili disattivati"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modalità aereo."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN attiva."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nessuna SIM presente."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambio rete operatore."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Visualizza i dettagli relativi alla batteria"</string>
@@ -469,6 +468,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Sei collegato a <xliff:g id="APPLICATION">%1$s</xliff:g>, che consente di monitorare la tua attività di rete personale, inclusi siti web, email e app."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g> ed è collegato a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g> ed è collegato a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nSei collegato anche a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Il dispositivo resterà bloccato fino allo sblocco manuale"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ricevi notifiche più velocemente"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Visualizza prima di sbloccare"</string>
@@ -702,10 +703,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notifica di <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"L\'app potrebbe non funzionare con lo schermo diviso."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"L\'app non supporta la modalità Schermo diviso."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"L\'app potrebbe non funzionare su un display secondario."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"L\'app non supporta l\'avvio su display secondari."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Apri le impostazioni."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Apri le impostazioni rapide."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Chiudi le impostazioni rapide."</string>

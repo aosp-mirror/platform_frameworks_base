@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查您使用中的視窗內容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"開啟「輕觸探索」功能"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"朗讀您輕按的項目，並可讓您使用手勢探索螢幕。"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"開啟增強版網頁無障礙設定"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"可能會安裝程式碼，使應用程式內容更易於存取。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"記錄您輸入的文字"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包括個人資料，如信用卡號碼和密碼。"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控制顯示屏的放大功能"</string>
@@ -1028,7 +1026,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"「<xliff:g id="APPLICATION">%1$s</xliff:g>」不斷停止運作"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"「<xliff:g id="PROCESS">%1$s</xliff:g>」不斷停止運作"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"再次開啟應用程式"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"傳送意見反映"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"傳送意見"</string>
     <string name="aerr_close" msgid="2991640326563991340">"關閉"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"忽略直至裝置重新啟動"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"等一下"</string>
@@ -1610,7 +1608,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"已由您的管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由您的管理員刪除"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"為延長電池壽命，省電模式會降低裝置效能，並限制震動、位置資訊服務及大部分背景數據傳輸。如電郵、短訊及其他使用同步功能的應用程式沒有開啟，便不會自動更新。\n\n裝置充電時，省電模式會自動關閉。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式雖可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要啟用數據節省程式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"切換至文字輸入模式即可輸入時間。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"切換至時鐘模式即可輸入時間。"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自動填入選項"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"儲存資料，方便您自動填入"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"無法自動填入內容"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"要儲存至「&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;」嗎？"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;」嗎？"</string>

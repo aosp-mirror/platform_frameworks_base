@@ -287,16 +287,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упатува и управува со телефонски повици"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"пристапува до податоците од сензорите за виталните знаци"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Врати содржина на прозорец"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Провери ја содржината на прозорецот со кој се комуницира."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преземе содржина на прозорец"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ја следи содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Вклучи „Истражувај со допир“"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Допрените ставки ќе се изговорат на глас и екранот може да се истражува со движења."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Вклучи подобрена пристапност кон веб"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"За содржината на апликацијата да биде подостапна, може да се инсталираат скрипти."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Набљудувај го напишаниот текст"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Го следи напишаниот текст"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Опфаќа лични податоци како што се броеви на кредитни картички и лозинки."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Контролирајте го зголемувањето на екранот"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Контролирајте го нивото на зумирање и позиционирање на екранот."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Го контролира зголемувањето на екранот"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Го контролира нивото на зумирање и позиционирање на екранот."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Користете движења"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Движења за отпечатоци"</string>
@@ -652,7 +650,7 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Годишнина"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Други"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Приспособени"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Почетна страница"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Приватна е-пошта"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Работа"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Други"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мобилен"</string>
@@ -1002,9 +1000,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Отвори со"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отвори со %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Отвори"</string>
-    <string name="whichEditApplication" msgid="144727838241402655">"Уреди со"</string>
-    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Уреди со %1$s"</string>
-    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Уреди"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Измени со"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Измени со %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Измени"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Сподели со"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Сподели со %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Сподели"</string>
@@ -1076,7 +1074,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата на својот процес од <xliff:g id="SIZE">%2$s</xliff:g>. Достапна ви е слика од меморијата да ја споделите со неговиот програмер. Бидете внимателни: сликата од меморијата може да содржи кои било од вашите лични информации до кои апликацијата има пристап."</string>
     <string name="sendText" msgid="5209874571959469142">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Јачина на звук на ѕвонче"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Јачина на звук на медиуми"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Јачина на аудио/видео звук"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Се репродуцира преку Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Поставено ѕвонење на тивко"</string>
     <string name="volume_call" msgid="3941680041282788711">"Јачина на звук на дојдовен повик"</string>
@@ -1087,7 +1085,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Јачина на звук на повик"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Јачина на звук на медиуми"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Јачина на аудио/видео звук"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Јачина на звук на известување"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Стандардна (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1365,7 +1363,7 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"УСБ-меморија"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> УСБ-меморија"</string>
     <string name="storage_usb" msgid="3017954059538517278">"УСБ меморија"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Уреди"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Измени"</string>
     <string name="data_usage_warning_title" msgid="3620440638180218181">"Известување за потрошен сообраќај"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Допрете за употреба и поставки."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Постигна лимит за 2G-3G податоци"</string>
@@ -1742,8 +1740,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Префрлете се на режимот за внесување текст за да внесете време."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Префрлете се на режимот за часовник за да внесете време."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Опции за автоматско пополнување"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Зачувајте за автоматско пополнување"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Содржините не може автоматски да се пополнат"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Да се зачува во &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Да се зачува <xliff:g id="TYPE">%1$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

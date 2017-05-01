@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ඔබ අන්තර්ක්‍රියාකාරී වන කවුළුවේ අන්තර්ගතය පරීක්ෂා කරන්න."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ස්පර්ශයෙන් ගවේෂණය සක්‍රිය කරන්න"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"තට්ටු කළ අයිතම හඬ නගා කියවනු ඇති අතර ඉංගිති භාවිතයෙන් තිරය ගවේෂණය කිරීමට හැකිය."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"උසස් වෙබ් ප්‍රවේශ්‍යතාව සක්‍රිය කරන්න"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"යෙදුම් අන්තර්ගතයට ප්‍රවේශ්‍යතාවය වැඩිවන ලෙස සකස් කිරීමට ඇතැම් විට ස්ක්‍රිප්ට් ස්ථාපනය කර ඇත."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ඔබ ටයිප් කළ පෙළ බලන්න"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ණයවරපත් අංක සහ මුරපද වැනි පුද්ගලික දත්ත ඇතුළත් වේ."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"සංදර්ශනයේ විශාලනය පාලනය කරන්න"</string>
@@ -1741,8 +1739,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"වේලා ආදානය සඳහා ආදාන ප්‍රකාරය වෙත මාරු වෙන්න."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"වේලා ආදානය සඳහා ඔරලෝසු ප්‍රකාරය වෙත මාරු වෙන්න."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ස්වයංක්‍රිය පිරවුම් විකල්ප"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"ස්වයං පිරවුම සඳහා සුරකින්න"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"අන්තර්ගතය ස්වයං පිරවුම් කළ නොහැකිය"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; වෙත සුරකින්නද?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; වෙත සුරකින්නද?"</string>

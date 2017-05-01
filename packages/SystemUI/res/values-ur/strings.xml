@@ -155,10 +155,9 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"موبائل ڈیٹا"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"موبائل ڈیٹا آن ہے"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"موبائل ڈیٹا آف ہے"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"بلوٹوتھ مربوط کرنا۔"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"بلوٹوتھ ٹیتھرنگ۔"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ہوائی جہاز وضع۔"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"‏VPN آن ہے۔"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏کوئی SIM کارڈ نہیں ہے۔"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"کیریئر نیٹ ورک تبدیل ہو رہا ہے۔"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"بیٹری کی تفصیلات کھولیں"</string>
@@ -306,13 +305,13 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"کوئی آلات دستیاب نہیں ہیں"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"چمکیلا پن"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"رنگ تبدیل کریں"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"رنگ پلٹیں"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"رنگ کی اصلاح کی وضع"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"مزید ترتیبات"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"ہو گیا"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"مربوط"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"مربوط ہو رہا ہے…"</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"مربوط کرنا"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ٹیتھرنگ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ہاٹ اسپاٹ"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"اطلاعات"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"فلیش لائٹ"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"آپ <xliff:g id="APPLICATION">%1$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نجی نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ پروفائل <xliff:g id="APPLICATION">%2$s</xliff:g> سے منسلک ہے جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے دفتری نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nمزید معلومات کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ پروفائل <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> سے منسلک ہے جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے دفتری نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nآپ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> سے بھی منسلک ہیں، جو آپ کے ذاتی نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"آلہ اس وقت تک مقفل رہے گا جب تک آپ دستی طور پر اسے غیر مقفل نہ کریں"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"تیزی سے اطلاعات حاصل کریں"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"غیر مقفل کرنے سے پہلے انہیں دیکھیں"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> اطلاع: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ممکن ہے کہ ایپ سپلٹ اسکرین کے ساتھ کام نہ کرے۔"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ایپ سپلٹ اسکرین کو سپورٹ نہیں کرتی۔"</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"یہ ایپ شاید ثانوی ڈسپلے پر کام نہ کرے۔"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"یہ ایپ ثانوی ڈسپلیز پر شروعات کا تعاون نہیں کرتی ہے۔"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ترتیبات کھولیں۔"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"فوری ترتیبات کھولیں۔"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"فوری ترتیبات بند کریں۔"</string>

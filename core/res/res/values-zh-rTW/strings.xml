@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查你存取的視窗內容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"啟用輕觸探索功能"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"朗讀你輕觸的項目，而且可讓你用手勢探索螢幕。"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"啟用強化網頁協助工具"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"可能會安裝程式碼，使應用程式內容更易於存取。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"記錄你輸入的文字"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包括個人資料，如信用卡號碼和密碼。"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控管顯示畫面放大功能"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"切換至文字輸入模式來輸入時間。"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"切換至時鐘模式來輸入時間。"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自動填入選項"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"儲存以便用於自動填入"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"無法自動填入內容"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"要儲存到「<xliff:g id="LABEL">%1$s</xliff:g>」嗎？"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存到「<xliff:g id="LABEL">%2$s</xliff:g>」嗎？"</string>

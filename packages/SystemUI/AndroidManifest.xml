@@ -544,6 +544,17 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ForegroundServicesDialog"
+            android:process=":fgservices"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:theme="@*android:style/Theme.DeviceDefault.Settings.Dialog">
+            <intent-filter android:priority="1">
+                <action android:name="android.settings.FOREGROUND_SERVICES_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"

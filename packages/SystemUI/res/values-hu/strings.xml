@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobiladatok kikapcsolva"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth megosztása."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Repülőgép üzemmód."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN bekapcsolva."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nincs SIM-kártya."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Szolgáltatói hálózat váltása."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Az akkumulátorral kapcsolatos részletek megnyitása"</string>
@@ -359,7 +358,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ez letiltja az ÖSSZES hanghatást és rezgést, beleértve az ébresztések, zeneszámok, videók és játékok hangjait is."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"A kevésbé sürgős értesítések lentebb vannak"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Koppintson rá ismét a megnyitáshoz"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Koppintson ismét a megnyitáshoz"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Húzza felfelé az ujját a feloldáshoz"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Az eszközt az Ön szervezete kezeli"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> felügyeli."</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Ön a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazáshoz csatlakozik, amely figyelheti személyes hálózati tevékenységét, beleértve az e-maileket, alkalmazásokat és webhelyeket."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> kezeli. A profil csatlakozik a(z) <xliff:g id="APPLICATION">%2$s</xliff:g> alkalmazáshoz, amely figyelheti az Ön hálózati tevékenységeit, beleértve az e-maileket, alkalmazásokat és webhelyeket.\n\nTovábbi információért forduljon a rendszergazdához."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> kezeli. A profil csatlakozik a(z) <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> alkalmazáshoz, amely figyelheti az Ön hálózati tevékenységeit, beleértve az e-maileket, alkalmazásokat és webhelyeket.\n\nCsatlakoztatta továbbá a(z) <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> alkalmazást, amely figyelheti az Ön személyes hálózati tevékenységeit."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Az eszköz addig zárolva marad, amíg kézileg fel nem oldja"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Gyorsabban megkaphatja az értesítéseket"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Már a képernyőzár feloldása előtt megtekintheti őket"</string>
@@ -606,7 +607,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numerikus: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Rendszer"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Otthon"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Kezdőoldal"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Legutóbbiak"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Vissza"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Értesítések"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-értesítések: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Az alkalmazás nem támogatja a másodlagos kijelzőn történő indítást."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Beállítások megnyitása."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Gyorsbeállítások megnyitása."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Gyorsbeállítások bezárása"</string>

@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"モバイルデータ OFF"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothテザリング。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"機内モード。"</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN は ON です。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIMカードが挿入されていません。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"携帯通信会社のネットワークを変更します。"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"電池の詳細情報を開きます"</string>
@@ -469,6 +468,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"「<xliff:g id="APPLICATION">%1$s</xliff:g>」に接続しています。このアプリはあなたの個人のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION">%2$s</xliff:g> に接続しています。このアプリはあなたの仕事のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION_WORK">%2$s</xliff:g> に接続しています。このアプリはあなたの仕事のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を管理できます。\n\nまた、<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> にも接続しているため、あなたの個人のネットワーク アクティビティも監視できます。"</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"手動でロックを解除するまでロックされたままとなります"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"通知をすばやく確認できます"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ロックを解除する前にご確認ください"</string>
@@ -702,10 +703,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> の通知: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"アプリは分割画面では動作しないことがあります。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"アプリで分割画面がサポートされていません。"</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"アプリは 2 次画面では動作しないことがあります。"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"アプリは 2 次画面での起動に対応していません"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"設定を開きます。"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"クイック設定を開きます。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"クイック設定を閉じます。"</string>

@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобилниот интернет е исклучен"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Се поврзува со Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим на работа во авион."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN е вклучена."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Нема СИМ-картичка"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Променување на мрежата на операторот."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Отвори ги деталите за батеријата"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, којашто може да ја следи вашата лична активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Профилот е поврзан на <xliff:g id="APPLICATION">%2$s</xliff:g>, што може да ја следи вашата работна активност на мрежата, заедно со е-пораките, апликациите и веб-сајтовите.\n\nЗа повеќе информации, контактирајте со вашиот администратор."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Профилот е поврзан на <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, што може да ја следи вашата работна активност на мрежата, заедно со е-пораките, апликациите и веб-сајтовите.\n\nПоврзани сте и на <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, што може да ја следи вашата лична активност на мрежата."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Уредот ќе остане заклучен додека рачно не го отклучите"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Добивајте известувања побрзо"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Видете ги пред да отклучите"</string>
@@ -664,7 +665,7 @@
     <string name="right_icon" msgid="3952104823293824311">"Десна икона"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Повлечете за додавање плочки"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Повлечете тука за да се отстрани"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"Уреди"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Измени"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Време"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Прикажи часови, минути и секунди"</item>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Известување од <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Апликацијата можеби нема да работи во поделен екран."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Апликацијата не поддржува поделен екран."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Аппликацијата може да не функционира на второстепен екран."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Апликацијата не поддржува стартување на второстепени екрани."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Отворете ги поставките."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Отворете ги брзите поставки."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Затворете ги брзите поставки."</string>

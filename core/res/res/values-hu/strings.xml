@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"A használt ablak tartalmának vizsgálata."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Felfedezés érintéssel bekapcsolása"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"A megérintett elemeket a rendszer hangosan kimondja, a képernyő pedig felfedezhető kézmozdulatok használatával."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Internetes kisegítő lehetőségek bővítése"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Szkripteket lehet telepíteni, hogy könnyebb legyen hozzáférni az alkalmazások tartalmához."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"A gépelt szöveg figyelése"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Beleértve a személyes adatokat, például a hitelkártyaszámokat és jelszavakat."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"A kijelző nagyításának vezérlése"</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Időbevitelhez váltson szövegbeviteli módba."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Időbevitelhez váltson óramódba."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Az automatikus kitöltés beállítási lehetőségei"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Mentés az Automatikus kitöltéshez"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"A tartalmakat nem lehet automatikusan kitölteni"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Menti ide: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Menti a következőt: <xliff:g id="TYPE">%1$s</xliff:g> ide: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

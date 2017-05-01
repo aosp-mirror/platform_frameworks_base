@@ -212,6 +212,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Context.BIND_AUTO_CREATE
             | Context.BIND_NOT_VISIBLE
             | Context.BIND_NOT_FOREGROUND
+            | Context.BIND_IMPORTANT_BACKGROUND
             | Context.BIND_SHOWING_UI;
 
     /**

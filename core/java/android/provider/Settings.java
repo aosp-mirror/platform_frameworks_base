@@ -724,6 +724,19 @@ public final class Settings {
             "android.settings.APPLICATION_DETAILS_SETTINGS";
 
     /**
+     * Activity Action: Show list of applications that have been running
+     * foreground services (to the user "running in the background").
+     * <p>
+     * Input: Extras "packages" is a string array of package names.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_FOREGROUND_SERVICES_SETTINGS =
+            "android.settings.FOREGROUND_SERVICES_SETTINGS";
+
+    /**
      * Activity Action: Show screen for controlling which apps can ignore battery optimizations.
      * <p>
      * Input: Nothing.
@@ -9002,13 +9015,30 @@ public final class Settings {
          * Activity manager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
-         * "enforce_bg_check=true,max_cached_processes=24"
+         * "gc_timeout=5000,max_cached_processes=24"
          *
          * The following keys are supported:
          *
          * <pre>
-         * enforce_bg_check                     (boolean)
          * max_cached_processes                 (int)
+         * background_settle_time               (long)
+         * foreground_service_ui_min_time       (long)
+         * content_provider_retain_time         (long)
+         * gc_timeout                           (long)
+         * gc_min_interval                      (long)
+         * full_pss_min_interval                (long)
+         * full_pss_lowered_interval            (long)
+         * power_check_delay                    (long)
+         * wake_lock_min_check_duration         (long)
+         * cpu_min_check_duration               (long)
+         * service_usage_interaction_time       (long)
+         * usage_stats_interaction_interval     (long)
+         * service_restart_duration             (long)
+         * service_reset_run_duration           (long)
+         * service_restart_duration_factor      (int)
+         * service_min_restart_time_between     (long)
+         * service_max_inactivity               (long)
+         * service_bg_start_timeout             (long)
          * </pre>
          *
          * <p>

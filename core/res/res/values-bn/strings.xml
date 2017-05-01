@@ -291,8 +291,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপনি ইন্টারঅ্যাক্ট করছেন এমন একটি উইন্ডোর সামগ্রীকে সযত্নে নিরীক্ষণ করে৷"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পর্শের মাধ্যমে অন্বেষণ করা চালু করুন"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"যে আইটেমগুলিতে আলতো চেপেছেন সেগুলি সশব্দে বলবে এবং ইঙ্গিতগুলি ব্যবহার করে স্ক্রীন অন্বেষণ করা যাবে৷"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"উন্নত ওয়েব অ্যাক্সেসযোগ্যতা চালু করুন"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"অ্যাপ্লিকেশানের সামগ্রীকে আরো অ্যাক্সেসযোগ্য করতে স্ক্রিপ্টগুলি ইনস্টল করা হতে পারে৷"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"আপনার লেখা পাঠ্যকে নিরীক্ষণ করে"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্রেডিট কার্ডের নম্বর ও পাসওয়ার্ডগুলির মতো ব্যক্তিগত তথ্য অন্তর্ভুক্ত করে৷"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"প্রদর্শনের বৃহত্তরীকরণ ব্যবস্থা নিয়ন্ত্রণ করুন"</string>
@@ -1108,7 +1106,7 @@
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"মোবাইল ডেটা"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="6862614801537202646">"ব্লুটুথ"</item>
     <item msgid="5447331121797802871">"ইথারনেট"</item>
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
@@ -1740,8 +1738,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"সময় ইনপুট দেওয়ার জন্য পাঠ্য ইনপুট মোডে যান।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"সময় ইনপুট দেওয়ার জন্য ঘড়ি মোডে যান।"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"আপনাআপনি পূরণ করার বিকল্পগুলি"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"স্বতঃপূর্ণর জন্য সংরক্ষণ করুন"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"বিষয়বস্তুগুলি অটো-ফিল করা যাবে না"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; এ সংরক্ষণ করবেন?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> কে &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;এ সংরক্ষণ করবেন?"</string>

@@ -157,8 +157,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобильдік деректер өшірулі"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth тетеринг."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ұшақ режимі."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN қосулы."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM картасы жоқ."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Оператор желісі өзгертілуде."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Батарея мәліметтерін ашу"</string>
@@ -467,6 +466,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Жеке желідегі әрекеттеріңізді, соның ішінде электрондық пошта хабарларын, қолданбаларды және вебсайттарды бақылай алатын <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына қосылғансыз."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION">%2$s</xliff:g> қолданбасына қосылған.\n\nҚосымша ақпарат алу үшін әкімшіге хабарласыңыз."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> қолданбасына қосылған.\n\nСондай-ақ сіз жеке желідегі белсенділігіңізді бақылай алатын <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> қолданбасына қосылғансыз."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Қолмен бекітпесін ашқанша құрылғы бекітілген күйде қалады"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Хабарландыруларды тезірек алу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Бекітпесін ашу алдында оларды көру"</string>
@@ -700,10 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> хабарландыруы: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Қолданба бөлінген экранда жұмыс істемеуі мүмкін."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Қодланба бөлінген экранды қолдамайды."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Қолданба қосымша дисплейде жұмыс істемеуі мүмкін."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Қолданба қосымша дисплейлерде іске қосуды қолдамайды."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Параметрлерді ашу."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Жылдам параметрлерді ашу."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Жылдам параметрлерді жабу."</string>

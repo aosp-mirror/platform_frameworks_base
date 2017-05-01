@@ -158,8 +158,7 @@
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobilni podaci su isključeni"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Dijeljenje Bluetooth veze."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Način rada u avionu."</string>
-    <!-- no translation found for accessibility_vpn_on (5993385083262856059) -->
-    <skip />
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN uključen."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nema SIM kartice."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Promjena mreže operatera."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Otvori detalje o potrošnji baterije"</string>
@@ -352,7 +351,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Do kraja punjenja preostalo <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Ne puni se"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Mreža može \n biti nadzirana"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Traži"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Pretraživanje"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Povucite gore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Povucite lijevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Zvukovi i vibracije vas neće uznemiravati, osim alarma, podsjetnika, događaja i pozivalaca koje odredite."</string>
@@ -469,6 +468,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Povezani ste na aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g>, koja može pratiti vaše privatne aktivnosti na mreži, uključujući e-poštu, aplikacije i web stranice."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Vašim radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan s aplikacijom <xliff:g id="APPLICATION">%2$s</xliff:g>, koja može pratiti vašu aktivnost na radnoj mreži, uključujući e-poruke, aplikacije i web lokacije.\n\nZa više informacija, obratite se svom administratoru."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan s aplikacijom <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, koja može pratiti vašu aktivnost na radnoj mreži, uključujući e-poruke, aplikacije i web lokacije.\n\nPovezani ste i sa aplikacijom <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, koja može pratiti vašu aktivnost na privatnoj mreži."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Uređaj će ostati zaključan dok ga ručno ne otključate"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Brže primaj obavještenja"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Vidi ih prije otključavanja"</string>
@@ -660,7 +661,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"Prebacivač tastatura"</string>
     <string name="save" msgid="2311877285724540644">"Sačuvaj"</string>
-    <string name="reset" msgid="2448168080964209908">"Ponovno pokretanje"</string>
+    <string name="reset" msgid="2448168080964209908">"Vrati na zadano"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Podesite širinu dugmeta"</string>
     <string name="clipboard" msgid="1313879395099896312">"Međumemorija"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Prilagođeno dugme za navigaciju"</string>
@@ -706,10 +707,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> obavještenje: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Aplikacija možda neće raditi na podijeljenom ekranu"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikacija ne podržava dijeljenje ekrana."</string>
-    <!-- no translation found for forced_resizable_secondary_display (4230857851756391925) -->
-    <skip />
-    <!-- no translation found for activity_launch_on_secondary_display_failed_text (7793821742158306742) -->
-    <skip />
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Aplikacija možda neće raditi na sekundarnom ekranu."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Aplikacija ne podržava pokretanje na sekundarnim ekranima."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Otvori postavke."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Otvoriti brze postavke."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Zatvoriti brze postavke."</string>
@@ -754,7 +753,7 @@
     <string name="tuner_app" msgid="3507057938640108777">"Aplikacija <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozorenja"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snimci ekrana"</string>
-    <string name="notification_channel_general" msgid="4525309436693914482">"Općenite poruke"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Opće poruke"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Pohrana"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant-aplikacije"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Za instant aplikacije nije potrebna instalacija"</string>

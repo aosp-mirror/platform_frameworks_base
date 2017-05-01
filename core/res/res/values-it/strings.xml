@@ -291,11 +291,9 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Gli elementi toccati verranno pronunciati ad alta voce e sarà possibile esplorare lo schermo utilizzando i gesti."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Attivare accessibilità web migliorata"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Potrebbero essere installati script per rendere più accessibili i contenuti delle app."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Osservare il testo digitato"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sono inclusi dati personali come numeri di carte di credito e password."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlla l\'ingrandimento del display"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controllare l\'ingrandimento del display"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlla il livello di zoom e la posizione del display."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Esegui gesti"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Consente di toccare, far scorrere, pizzicare ed eseguire altri gesti."</string>
@@ -1739,8 +1737,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Passa alla modalità di immissione testo per inserire l\'ora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Passa alla modalità orologio per inserire l\'ora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opzioni di compilazione automatica"</string>
-    <!-- no translation found for autofill_save_accessibility_title (7244365268417107822) -->
-    <skip />
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Salva per Compilazione automatica"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Impossibile compilare automaticamente i contenuti"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Salvare in &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Salvare <xliff:g id="TYPE">%1$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
