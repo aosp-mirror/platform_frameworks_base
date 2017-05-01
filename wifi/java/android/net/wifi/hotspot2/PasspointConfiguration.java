@@ -144,12 +144,12 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    private long mSubscriptionCreationTimeInMs = Long.MIN_VALUE;
-    public void setSubscriptionCreationTimeInMs(long subscriptionCreationTimeInMs) {
-        mSubscriptionCreationTimeInMs = subscriptionCreationTimeInMs;
+    private long mSubscriptionCreationTimeInMillis = Long.MIN_VALUE;
+    public void setSubscriptionCreationTimeInMillis(long subscriptionCreationTimeInMillis) {
+        mSubscriptionCreationTimeInMillis = subscriptionCreationTimeInMillis;
     }
-    public long getSubscriptionCreationTimeInMs() {
-        return mSubscriptionCreationTimeInMs;
+    public long getSubscriptionCreationTimeInMillis() {
+        return mSubscriptionCreationTimeInMillis;
     }
 
     /**
@@ -158,12 +158,12 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    private long mSubscriptionExpirationTimeInMs = Long.MIN_VALUE;
-    public void setSubscriptionExpirationTimeInMs(long subscriptionExpirationTimeInMs) {
-        mSubscriptionExpirationTimeInMs = subscriptionExpirationTimeInMs;
+    private long mSubscriptionExpirationTimeInMillis = Long.MIN_VALUE;
+    public void setSubscriptionExpirationTimeInMillis(long subscriptionExpirationTimeInMillis) {
+        mSubscriptionExpirationTimeInMillis = subscriptionExpirationTimeInMillis;
     }
-    public long getSubscriptionExpirationTimeInMs() {
-        return mSubscriptionExpirationTimeInMs;
+    public long getSubscriptionExpirationTimeInMillis() {
+        return mSubscriptionExpirationTimeInMillis;
     }
 
     /**
@@ -197,12 +197,12 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    private long mUsageLimitStartTimeInMs = Long.MIN_VALUE;
-    public void setUsageLimitStartTimeInMs(long usageLimitStartTimeInMs) {
-        mUsageLimitStartTimeInMs = usageLimitStartTimeInMs;
+    private long mUsageLimitStartTimeInMillis = Long.MIN_VALUE;
+    public void setUsageLimitStartTimeInMillis(long usageLimitStartTimeInMillis) {
+        mUsageLimitStartTimeInMillis = usageLimitStartTimeInMillis;
     }
-    public long getUsageLimitStartTimeInMs() {
-        return mUsageLimitStartTimeInMs;
+    public long getUsageLimitStartTimeInMillis() {
+        return mUsageLimitStartTimeInMillis;
     }
 
     /**
@@ -263,11 +263,11 @@ public final class PasspointConfiguration implements Parcelable {
         }
         mUpdateIdentifier = source.mUpdateIdentifier;
         mCredentialPriority = source.mCredentialPriority;
-        mSubscriptionCreationTimeInMs = source.mSubscriptionCreationTimeInMs;
-        mSubscriptionExpirationTimeInMs = source.mSubscriptionExpirationTimeInMs;
+        mSubscriptionCreationTimeInMillis = source.mSubscriptionCreationTimeInMillis;
+        mSubscriptionExpirationTimeInMillis = source.mSubscriptionExpirationTimeInMillis;
         mSubscriptionType = source.mSubscriptionType;
         mUsageLimitDataLimit = source.mUsageLimitDataLimit;
-        mUsageLimitStartTimeInMs = source.mUsageLimitStartTimeInMs;
+        mUsageLimitStartTimeInMillis = source.mUsageLimitStartTimeInMillis;
         mUsageLimitTimeLimitInMinutes = source.mUsageLimitTimeLimitInMinutes;
         mUsageLimitUsageTimePeriodInMinutes = source.mUsageLimitUsageTimePeriodInMinutes;
     }
@@ -286,11 +286,11 @@ public final class PasspointConfiguration implements Parcelable {
         writeTrustRootCerts(dest, mTrustRootCertList);
         dest.writeInt(mUpdateIdentifier);
         dest.writeInt(mCredentialPriority);
-        dest.writeLong(mSubscriptionCreationTimeInMs);
-        dest.writeLong(mSubscriptionExpirationTimeInMs);
+        dest.writeLong(mSubscriptionCreationTimeInMillis);
+        dest.writeLong(mSubscriptionExpirationTimeInMillis);
         dest.writeString(mSubscriptionType);
         dest.writeLong(mUsageLimitUsageTimePeriodInMinutes);
-        dest.writeLong(mUsageLimitStartTimeInMs);
+        dest.writeLong(mUsageLimitStartTimeInMillis);
         dest.writeLong(mUsageLimitDataLimit);
         dest.writeLong(mUsageLimitTimeLimitInMinutes);
     }
@@ -313,11 +313,11 @@ public final class PasspointConfiguration implements Parcelable {
                 && isTrustRootCertListEquals(mTrustRootCertList, that.mTrustRootCertList)
                 && mUpdateIdentifier == that.mUpdateIdentifier
                 && mCredentialPriority == that.mCredentialPriority
-                && mSubscriptionCreationTimeInMs == that.mSubscriptionCreationTimeInMs
-                && mSubscriptionExpirationTimeInMs == that.mSubscriptionExpirationTimeInMs
+                && mSubscriptionCreationTimeInMillis == that.mSubscriptionCreationTimeInMillis
+                && mSubscriptionExpirationTimeInMillis == that.mSubscriptionExpirationTimeInMillis
                 && TextUtils.equals(mSubscriptionType, that.mSubscriptionType)
                 && mUsageLimitUsageTimePeriodInMinutes == that.mUsageLimitUsageTimePeriodInMinutes
-                && mUsageLimitStartTimeInMs == that.mUsageLimitStartTimeInMs
+                && mUsageLimitStartTimeInMillis == that.mUsageLimitStartTimeInMillis
                 && mUsageLimitDataLimit == that.mUsageLimitDataLimit
                 && mUsageLimitTimeLimitInMinutes == that.mUsageLimitTimeLimitInMinutes;
     }
@@ -325,9 +325,9 @@ public final class PasspointConfiguration implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mHomeSp, mCredential, mPolicy, mSubscriptionUpdate, mTrustRootCertList,
-                mUpdateIdentifier, mCredentialPriority, mSubscriptionCreationTimeInMs,
-                mSubscriptionExpirationTimeInMs, mUsageLimitUsageTimePeriodInMinutes,
-                mUsageLimitStartTimeInMs, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes);
+                mUpdateIdentifier, mCredentialPriority, mSubscriptionCreationTimeInMillis,
+                mSubscriptionExpirationTimeInMillis, mUsageLimitUsageTimePeriodInMinutes,
+                mUsageLimitStartTimeInMillis, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes);
     }
 
     @Override
@@ -336,13 +336,13 @@ public final class PasspointConfiguration implements Parcelable {
         builder.append("UpdateIdentifier: ").append(mUpdateIdentifier).append("\n");
         builder.append("CredentialPriority: ").append(mCredentialPriority).append("\n");
         builder.append("SubscriptionCreationTime: ").append(
-                mSubscriptionCreationTimeInMs != Long.MIN_VALUE
-                ? new Date(mSubscriptionCreationTimeInMs) : "Not specified").append("\n");
+                mSubscriptionCreationTimeInMillis != Long.MIN_VALUE
+                ? new Date(mSubscriptionCreationTimeInMillis) : "Not specified").append("\n");
         builder.append("SubscriptionExpirationTime: ").append(
-                mSubscriptionExpirationTimeInMs != Long.MIN_VALUE
-                ? new Date(mSubscriptionExpirationTimeInMs) : "Not specified").append("\n");
-        builder.append("UsageLimitStartTime: ").append(mUsageLimitStartTimeInMs != Long.MIN_VALUE
-                ? new Date(mUsageLimitStartTimeInMs) : "Not specified").append("\n");
+                mSubscriptionExpirationTimeInMillis != Long.MIN_VALUE
+                ? new Date(mSubscriptionExpirationTimeInMillis) : "Not specified").append("\n");
+        builder.append("UsageLimitStartTime: ").append(mUsageLimitStartTimeInMillis != Long.MIN_VALUE
+                ? new Date(mUsageLimitStartTimeInMillis) : "Not specified").append("\n");
         builder.append("UsageTimePeriod: ").append(mUsageLimitUsageTimePeriodInMinutes)
                 .append("\n");
         builder.append("UsageLimitDataLimit: ").append(mUsageLimitDataLimit).append("\n");
@@ -433,11 +433,11 @@ public final class PasspointConfiguration implements Parcelable {
                 config.setTrustRootCertList(readTrustRootCerts(in));
                 config.setUpdateIdentifier(in.readInt());
                 config.setCredentialPriority(in.readInt());
-                config.setSubscriptionCreationTimeInMs(in.readLong());
-                config.setSubscriptionExpirationTimeInMs(in.readLong());
+                config.setSubscriptionCreationTimeInMillis(in.readLong());
+                config.setSubscriptionExpirationTimeInMillis(in.readLong());
                 config.setSubscriptionType(in.readString());
                 config.setUsageLimitUsageTimePeriodInMinutes(in.readLong());
-                config.setUsageLimitStartTimeInMs(in.readLong());
+                config.setUsageLimitStartTimeInMillis(in.readLong());
                 config.setUsageLimitDataLimit(in.readLong());
                 config.setUsageLimitTimeLimitInMinutes(in.readLong());
                 return config;
