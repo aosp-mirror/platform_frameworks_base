@@ -2503,7 +2503,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                                 tempRect /* outStackBounds */,
                                 otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
 
-                        resizeStackLocked(i, tempRect,
+                        resizeStackLocked(i, !tempRect.isEmpty() ? tempRect : null,
                                 !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
                                 tempOtherTaskInsetBounds, preserveWindows,
                                 true /* allowResizeInDockedMode */, deferResume);
