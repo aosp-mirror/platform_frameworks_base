@@ -3251,9 +3251,10 @@ public class AudioService extends IAudioService.Stub
                         if (deviceList.size() > 0) {
                             btDevice = deviceList.get(0);
                             int state = mA2dp.getConnectionState(btDevice);
+                            int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
                             int delay = checkSendBecomingNoisyIntent(
-                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                                                (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+                                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, intState,
+                                    AudioSystem.DEVICE_NONE);
                             queueMsgUnderWakeLock(mAudioHandler,
                                     MSG_SET_A2DP_SINK_CONNECTION_STATE,
                                     state,
@@ -3381,9 +3382,8 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
                 if (toRemove != null) {
-                    int delay = checkSendBecomingNoisyIntent(
-                                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                                        0);
+                    int delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                            0, AudioSystem.DEVICE_NONE);
                     for (int i = 0; i < toRemove.size(); i++) {
                         makeA2dpDeviceUnavailableLater(toRemove.valueAt(i), delay);
                     }
@@ -3919,7 +3919,7 @@ public class AudioService extends IAudioService.Stub
                 Slog.i(TAG, "setWiredDeviceConnectionState(" + state + " nm: " + name + " addr:"
                         + address + ")");
             }
-            int delay = checkSendBecomingNoisyIntent(type, state);
+            int delay = checkSendBecomingNoisyIntent(type, state, AudioSystem.DEVICE_NONE);
             queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
                     0 /* arg1 unused */,
@@ -3931,14 +3931,25 @@ public class AudioService extends IAudioService.Stub
 
     public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state, int profile)
     {
+        if (mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE)) {
+            return 0;
+        }
+        return setBluetoothA2dpDeviceConnectionStateInt(
+                device, state, profile, AudioSystem.DEVICE_NONE);
+    }
+
+    public int setBluetoothA2dpDeviceConnectionStateInt(
+            BluetoothDevice device, int state, int profile, int musicDevice)
+    {
         int delay;
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK) {
             throw new IllegalArgumentException("invalid profile " + profile);
         }
         synchronized (mConnectedDevices) {
             if (profile == BluetoothProfile.A2DP) {
+                int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
                 delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                                                (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+                        intState, musicDevice);
             } else {
                 delay = 0;
             }
@@ -5162,16 +5173,21 @@ public class AudioService extends IAudioService.Stub
 
         int device = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
         synchronized (mConnectedDevices) {
+            if (mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE)) {
+                return;
+            }
             final String key = makeDeviceListKey(device, address);
             final DeviceListSpec deviceSpec = mConnectedDevices.get(key);
             if (deviceSpec != null) {
                 // Device is connected
+               int musicDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
                if (AudioSystem.handleDeviceConfigChange(device, address,
                         btDevice.getName()) != AudioSystem.AUDIO_STATUS_OK) {
                    // force A2DP device disconnection in case of error so that AudioService state is
                    // consistent with audio policy manager state
-                   setBluetoothA2dpDeviceConnectionState(
-                           btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP_SINK);
+                   setBluetoothA2dpDeviceConnectionStateInt(
+                           btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP,
+                           musicDevice);
                }
             }
         }
@@ -5242,7 +5258,9 @@ public class AudioService extends IAudioService.Stub
 
     // must be called before removing the device from mConnectedDevices
     // Called synchronized on mConnectedDevices
-    private int checkSendBecomingNoisyIntent(int device, int state) {
+    // musicDevice argument is used when not AudioSystem.DEVICE_NONE instead of querying
+    // from AudioSystem
+    private int checkSendBecomingNoisyIntent(int device, int state, int musicDevice) {
         int delay = 0;
         if ((state == 0) && ((device & mBecomingNoisyIntentDevices) != 0)) {
             int devices = 0;
@@ -5253,8 +5271,13 @@ public class AudioService extends IAudioService.Stub
                     devices |= dev;
                 }
             }
-            int musicDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
-            if ((device == musicDevice) && (device == devices)) {
+            if (musicDevice == AudioSystem.DEVICE_NONE) {
+                musicDevice = getDeviceForStream(AudioSystem.STREAM_MUSIC);
+            }
+            // ignore condition on device being actually used for music when in communication
+            // because music routing is altered in this case.
+            if (((device == musicDevice) || isInCommunication()) && (device == devices)) {
+                mAudioHandler.removeMessages(MSG_BROADCAST_AUDIO_BECOMING_NOISY);
                 sendMsg(mAudioHandler,
                         MSG_BROADCAST_AUDIO_BECOMING_NOISY,
                         SENDMSG_REPLACE,
