@@ -271,6 +271,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Абвесткi"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Дэманстрацыйны рэжым для пунктаў продажу"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Падключэнне USB"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Бяспечны рэжым"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Сістэма Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Пераключыцца на асабісты"</string>
@@ -293,12 +303,12 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"рабіць тэлефонныя выклікі і кіраваць імі"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Датчыкі цела"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"атрымліваць з датчыка даныя асноўных фізіялагічных паказчыкаў"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымайце змесцiва акна"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Вывучыце змесцiва акна, з якiм вы працуеце."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключыце Explore by Touch"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымліваць змесціва вакна"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Аналізаваць змесціва актыўнага вакна."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключаць Азнаямленне дотыкам"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Элементы, да якіх дакрануліся, будуць агучаны, а экранам можна даследаваць пры дапамозе жэстаў."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Глядзiце, што набiраеце"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Уключае ў сябе асабістыя дадзеныя, такія як нумары крэдытных карт і паролі."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Праглядаць тэкст, які вы набіраеце"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"У тым ліку асабістыя даныя, такія як нумары крэдытных карт і паролі."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Кіраваць павелічэннем дысплэя"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Кіраваць маштабам дысплэя і пазіцыянаваннем."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Выконваць жэсты"</string>

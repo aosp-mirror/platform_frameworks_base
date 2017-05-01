@@ -268,6 +268,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Obaveštenja"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Režim demonstracije za maloprodajne objekte"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB veza"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Bezbedni režim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android sistem"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Pređi na Lični profil"</string>
@@ -1630,7 +1640,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao je administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi produžila vreme trajanja baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Imejl, razmena poruka i druge aplikacije koje se oslanjaju na sinhronizaciju možda neće da se ažuriraju ako ih ne otvorite.\n\nUšteda baterije se automatski isključuje kada se uređaj puni."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi produžila vreme trajanja baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Imejl, razmena poruka i druge aplikacije koje se oslanjaju na sinhronizaciju neće se ažurirati dok ih ne otvorite.\n\nUšteda baterije se automatski isključuje kada se uređaj puni."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
