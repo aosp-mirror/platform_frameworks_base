@@ -3241,7 +3241,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertNull(mService.getShortcutsForTest().get(USER_10).getLastKnownLauncher());
 
         // Try stopping the user
-        mService.handleCleanupUser(USER_10);
+        mService.handleStopUser(USER_10);
 
         // Now it's unloaded.
         assertEquals(1, mService.getShortcutsForTest().size());
@@ -6106,7 +6106,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEmpty(mManager.getPinnedShortcuts());
         });
         // Send add broadcast, but the user is not running, so should be ignored.
-        mService.handleCleanupUser(USER_10);
+        mService.handleStopUser(USER_10);
         mRunningUsers.put(USER_10, false);
         mUnlockedUsers.put(USER_10, false);
 
