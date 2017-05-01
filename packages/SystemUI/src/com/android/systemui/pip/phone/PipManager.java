@@ -103,6 +103,7 @@ public class PipManager implements BasePipManager {
             // Re-enable touches after the animation completes
             mTouchHandler.setTouchEnabled(true);
             mTouchHandler.onPinnedStackAnimationEnded();
+            mMenuController.onPinnedStackAnimationEnded();
         }
 
         @Override
