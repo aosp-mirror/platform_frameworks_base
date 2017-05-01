@@ -4217,7 +4217,9 @@ public class NotificationManagerService extends SystemService {
         if (wasPosted) {
             // status bar
             if (r.getNotification().getSmallIcon() != null) {
-                r.isCanceled = true;
+                if (reason != REASON_SNOOZED) {
+                    r.isCanceled = true;
+                }
                 mListeners.notifyRemovedLocked(r.sbn, reason);
                 mHandler.post(new Runnable() {
                     @Override
@@ -4340,9 +4342,11 @@ public class NotificationManagerService extends SystemService {
                         updateLightsLocked();
                     } else {
                         // No notification was found, assume that it is snoozed and cancel it.
-                        final boolean wasSnoozed = mSnoozeHelper.cancel(userId, pkg, tag, id);
-                        if (wasSnoozed) {
-                            savePolicyFile();
+                        if (reason != REASON_SNOOZED) {
+                            final boolean wasSnoozed = mSnoozeHelper.cancel(userId, pkg, tag, id);
+                            if (wasSnoozed) {
+                                savePolicyFile();
+                            }
                         }
                     }
                 }
@@ -4472,7 +4476,7 @@ public class NotificationManagerService extends SystemService {
     void snoozeNotificationInt(String key, long duration, String snoozeCriterionId,
             ManagedServiceInfo listener) {
         String listenerName = listener == null ? null : listener.component.toShortString();
-        if (duration <= 0 && snoozeCriterionId == null) {
+        if (duration <= 0 && snoozeCriterionId == null || key == null) {
             return;
         }
 
