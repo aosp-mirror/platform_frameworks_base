@@ -167,15 +167,9 @@ public class SnoozeHelper {
                 for (Map.Entry<String, NotificationRecord> record : records) {
                     final StatusBarNotification sbn = record.getValue().sbn;
                     if (Objects.equals(sbn.getTag(), tag) && sbn.getId() == id) {
-                        key = record.getKey();
+                        record.getValue().isCanceled = true;
+                        return true;
                     }
-                }
-                if (key != null) {
-                    recordsForPkg.remove(key);
-                    cancelAlarm(userId, pkg, key);
-                    mPackages.remove(key);
-                    mUsers.remove(key);
-                    return true;
                 }
             }
         }
@@ -190,7 +184,7 @@ public class SnoozeHelper {
         final int N = userIds.length;
         for (int i = 0; i < N; i++) {
             final ArrayMap<String, ArrayMap<String, NotificationRecord>> snoozedPkgs =
-                    mSnoozedNotifications.remove(userIds[i]);
+                    mSnoozedNotifications.get(userIds[i]);
             if (snoozedPkgs != null) {
                 final int M = snoozedPkgs.size();
                 for (int j = 0; j < M; j++) {
@@ -198,10 +192,7 @@ public class SnoozeHelper {
                     if (records != null) {
                         int P = records.size();
                         for (int k = 0; k < P; k++) {
-                            final String key = records.keyAt(k);
-                            cancelAlarm(userId, snoozedPkgs.keyAt(j), key);
-                            mPackages.remove(key);
-                            mUsers.remove(key);
+                            records.valueAt(k).isCanceled = true;
                         }
                     }
                 }
@@ -215,28 +206,15 @@ public class SnoozeHelper {
         if (mSnoozedNotifications.containsKey(userId)) {
             if (mSnoozedNotifications.get(userId).containsKey(pkg)) {
                 ArrayMap<String, NotificationRecord> records =
-                        mSnoozedNotifications.get(userId).remove(pkg);
+                        mSnoozedNotifications.get(userId).get(pkg);
                 int N = records.size();
                 for (int i = 0; i < N; i++) {
-                    final String key = records.keyAt(i);
-                    cancelAlarm(userId, pkg, key);
-                    mPackages.remove(key);
-                    mUsers.remove(key);
+                    records.valueAt(i).isCanceled = true;
                 }
                 return true;
             }
         }
         return false;
-    }
-
-    private void cancelAlarm(int userId, String pkg, String key) {
-        long identity = Binder.clearCallingIdentity();
-        try {
-            final PendingIntent pi = createPendingIntent(pkg, key, userId);
-            mAm.cancel(pi);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     /**
@@ -250,6 +228,10 @@ public class SnoozeHelper {
         }
         ArrayMap<String, NotificationRecord> pkgRecords = records.get(record.sbn.getPackageName());
         if (pkgRecords == null) {
+            return;
+        }
+        NotificationRecord existing = pkgRecords.get(record.getKey());
+        if (existing != null && existing.isCanceled) {
             return;
         }
         pkgRecords.put(record.getKey(), record);
@@ -274,8 +256,10 @@ public class SnoozeHelper {
             return;
         }
         final NotificationRecord record = pkgRecords.remove(key);
+        mPackages.remove(key);
+        mUsers.remove(key);
 
-        if (record != null) {
+        if (record != null && !record.isCanceled) {
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
                     .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
@@ -309,10 +293,12 @@ public class SnoozeHelper {
                         mPackages.remove(groupSummaryKey);
                         mUsers.remove(groupSummaryKey);
 
-                        MetricsLogger.action(record.getLogMaker()
-                                .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
-                                .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
-                        mCallback.repost(userId, record);
+                        if (record != null && !record.isCanceled) {
+                            MetricsLogger.action(record.getLogMaker()
+                                    .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
+                                    .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
+                            mCallback.repost(userId, record);
+                        }
                     }
                 }
             }
