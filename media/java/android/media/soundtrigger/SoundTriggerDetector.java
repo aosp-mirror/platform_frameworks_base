@@ -137,7 +137,7 @@ public final class SoundTriggerDetector {
         }
 
         /**
-         * Gets the raw audio that triggered the keyphrase.
+         * Gets the raw audio that triggered the detector.
          * This may be null if the trigger audio isn't available.
          * If non-null, the format of the audio can be obtained by calling
          * {@link #getCaptureAudioFormat()}.
@@ -147,6 +147,24 @@ public final class SoundTriggerDetector {
         @Nullable
         public byte[] getTriggerAudio() {
             if (mTriggerAvailable) {
+                return mData;
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * Gets the opaque data passed from the detection engine for the event.
+         * This may be null if it was not populated by the engine, or if the data is known to
+         * contain the trigger audio.
+         *
+         * @see #getTriggerAudio
+         *
+         * @hide
+         */
+        @Nullable
+        public byte[] getData() {
+            if (!mTriggerAvailable) {
                 return mData;
             } else {
                 return null;
