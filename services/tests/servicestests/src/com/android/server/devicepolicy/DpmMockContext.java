@@ -233,6 +233,10 @@ public class DpmMockContext extends MockContext {
             return 0;
         }
 
+        public String settingsGlobalGetString(String name) {
+            return "";
+        }
+
         public void securityLogSetLoggingEnabledProperty(boolean enabled) {
         }
 
