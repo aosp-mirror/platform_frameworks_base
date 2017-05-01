@@ -95,7 +95,7 @@ public final class AutofillManager {
      * Type: {@link android.os.Bundle}
      */
     public static final String EXTRA_CLIENT_STATE =
-            "android.view.autofill.extra.EXTRA_CLIENT_STATE";
+            "android.view.autofill.extra.CLIENT_STATE";
 
     static final String SESSION_ID_TAG = "android:sessionId";
     static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";

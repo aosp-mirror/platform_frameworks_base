@@ -58,9 +58,15 @@ public class TestLooperManager {
     /**
      * Returns the {@link MessageQueue} this object is wrapping.
      */
-    public MessageQueue getQueue() {
+    public MessageQueue getMessageQueue() {
         checkReleased();
         return mQueue;
+    }
+
+    /** @removed */
+    @Deprecated
+    public MessageQueue getQueue() {
+        return getMessageQueue();
     }
 
     /**
