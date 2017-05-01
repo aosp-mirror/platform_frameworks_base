@@ -27,7 +27,7 @@ import java.io.PrintWriter;
  *
  * @hide
  */
-public class CompatibilityDisplayProperties implements Parcelable {
+public class Vr2dDisplayProperties implements Parcelable {
 
    /**
     * The actual width, height and dpi.
@@ -36,7 +36,7 @@ public class CompatibilityDisplayProperties implements Parcelable {
     private final int mHeight;
     private final int mDpi;
 
-    public CompatibilityDisplayProperties(int width, int height, int dpi) {
+    public Vr2dDisplayProperties(int width, int height, int dpi) {
         mWidth = width;
         mHeight = height;
         mDpi = dpi;
@@ -52,7 +52,7 @@ public class CompatibilityDisplayProperties implements Parcelable {
 
     @Override
     public String toString() {
-        return "CompatibilityDisplayProperties{" +
+        return "Vr2dDisplayProperties{" +
                 "mWidth=" + mWidth +
                 ", mHeight=" + mHeight +
                 ", mDpi=" + mDpi +
@@ -64,7 +64,7 @@ public class CompatibilityDisplayProperties implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        CompatibilityDisplayProperties that = (CompatibilityDisplayProperties) o;
+        Vr2dDisplayProperties that = (Vr2dDisplayProperties) o;
 
         if (getWidth() != that.getWidth()) return false;
         if (getHeight() != that.getHeight()) return false;
@@ -83,27 +83,27 @@ public class CompatibilityDisplayProperties implements Parcelable {
         dest.writeInt(mDpi);
     }
 
-    public static final Parcelable.Creator<CompatibilityDisplayProperties> CREATOR
-            = new Parcelable.Creator<CompatibilityDisplayProperties>() {
+    public static final Parcelable.Creator<Vr2dDisplayProperties> CREATOR
+            = new Parcelable.Creator<Vr2dDisplayProperties>() {
         @Override
-        public CompatibilityDisplayProperties createFromParcel(Parcel source) {
-            return new CompatibilityDisplayProperties(source);
+        public Vr2dDisplayProperties createFromParcel(Parcel source) {
+            return new Vr2dDisplayProperties(source);
         }
 
         @Override
-        public CompatibilityDisplayProperties[] newArray(int size) {
-            return new CompatibilityDisplayProperties[size];
+        public Vr2dDisplayProperties[] newArray(int size) {
+            return new Vr2dDisplayProperties[size];
         }
     };
 
-    private CompatibilityDisplayProperties(Parcel source) {
+    private Vr2dDisplayProperties(Parcel source) {
         mWidth = source.readInt();
         mHeight = source.readInt();
         mDpi = source.readInt();
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "CompatibilityDisplayProperties:");
+        pw.println(prefix + "Vr2dDisplayProperties:");
         pw.println(prefix + "  width=" + mWidth);
         pw.println(prefix + "  height=" + mHeight);
         pw.println(prefix + "  dpi=" + mDpi);
