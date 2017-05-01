@@ -55,6 +55,7 @@ interface IPowerManager
     void rebootSafeMode(boolean confirm, boolean wait);
     void shutdown(boolean confirm, String reason, boolean wait);
     void crash(String message);
+    int getLastShutdownReason();
 
     void setStayOnSetting(int val);
     void boostScreenBrightness(long time);
