@@ -555,8 +555,8 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public void onCleanupUser(int userHandle) {
-            mService.handleCleanupUser(userHandle);
+        public void onStopUser(int userHandle) {
+            mService.handleStopUser(userHandle);
         }
 
         @Override
@@ -606,9 +606,9 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /** lifecycle event */
-    void handleCleanupUser(int userId) {
+    void handleStopUser(int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "handleCleanupUser: user=" + userId);
+            Slog.d(TAG, "handleStopUser: user=" + userId);
         }
         synchronized (mLock) {
             unloadUserLocked(userId);
@@ -3777,7 +3777,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 Slog.i(TAG, "cmd: handleUnloadUser: user=" + mUserId);
 
-                ShortcutService.this.handleCleanupUser(mUserId);
+                ShortcutService.this.handleStopUser(mUserId);
             }
         }
 
