@@ -2494,9 +2494,8 @@ public class Notification implements Parcelable
         }
     }
 
-    /**
-     * Returns the id of the channel this notification posts to.
-     */
+    /** @removed */
+    @Deprecated
     public String getChannel() {
         return mChannelId;
     }
@@ -2508,10 +2507,8 @@ public class Notification implements Parcelable
         return mChannelId;
     }
 
-    /**
-     * Returns the time at which this notification should be canceled by the system, if it's not
-     * canceled already.
-     */
+    /** @removed */
+    @Deprecated
     public long getTimeout() {
         return mTimeout;
     }
@@ -2811,9 +2808,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Specifies the channel the notification should be delivered on.
-         */
+        /** @removed */
+        @Deprecated
         public Builder setChannel(String channelId) {
             mN.mChannelId = channelId;
             return this;
@@ -2827,10 +2823,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Specifies a duration in milliseconds after which this notification should be canceled,
-         * if it is not already canceled.
-         */
+        /** @removed */
+        @Deprecated
         public Builder setTimeout(long durationMs) {
             mN.mTimeout = durationMs;
             return this;
@@ -8040,9 +8034,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Returns the id of the channel this notification posts to on TV.
-         */
+        /** @removed */
+        @Deprecated
         public String getChannel() {
             return mChannelId;
         }

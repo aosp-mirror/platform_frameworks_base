@@ -1127,13 +1127,7 @@ public class ActivityManager {
                     com.android.internal.R.bool.config_supportsSplitScreenMultiWindow);
     }
 
-    /**
-     * Return the number of actions that will be displayed in the picture-in-picture UI when the
-     * user interacts with the activity currently in picture-in-picture mode. This number may change
-     * if the global configuration changes (ie. if the device is plugged into an external display).
-     *
-     * TO BE REMOVED
-     */
+    /** @removed */
     @Deprecated
     public static int getMaxNumPictureInPictureActions() {
         return 3;
