@@ -1714,7 +1714,7 @@ public final class BluetoothDevice implements Parcelable {
      *             an d{@link BluetoothDevice#PHY_LE_CODED_MASK}. This option does not take effect
      *             if {@code autoConnect} is set to true.
      * @param handler The handler to use for the callback. If {@code null}, callbacks will happen
-     *             on the service's main thread.
+     *             on an un-specified background thread.
      * @throws NullPointerException if callback is null
      */
     public BluetoothGatt connectGatt(Context context, boolean autoConnect,
@@ -1722,9 +1722,6 @@ public final class BluetoothDevice implements Parcelable {
                                      Handler handler) {
         if (callback == null)
             throw new NullPointerException("callback is null");
-
-        if (handler == null)
-            handler = new Handler(Looper.getMainLooper());
 
         // TODO(Bluetooth) check whether platform support BLE
         //     Do the check here or in GattServer?
