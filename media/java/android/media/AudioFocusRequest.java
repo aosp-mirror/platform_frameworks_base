@@ -357,6 +357,20 @@ public final class AudioFocusRequest {
         }
 
         /**
+         * @hide
+         * Internal listener setter, no null checks on listener nor handler
+         * @param listener
+         * @param handler
+         * @return this {@code Builder} instance.
+         */
+        @NonNull Builder setOnAudioFocusChangeListenerInt(
+                OnAudioFocusChangeListener listener, Handler handler) {
+            mFocusListener = listener;
+            mListenerHandler = handler;
+            return this;
+        }
+
+        /**
          * Sets the listener called when audio focus changes after being requested with
          *   {@link AudioManager#requestAudioFocus(AudioFocusRequest)}, and until being abandoned
          *   with {@link AudioManager#abandonAudioFocusRequest(AudioFocusRequest)}.
