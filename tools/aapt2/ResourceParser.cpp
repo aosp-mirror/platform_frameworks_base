@@ -802,7 +802,7 @@ bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* o
     }
 
     struct SymbolComparator {
-        bool operator()(const Attribute::Symbol& a, const Attribute::Symbol& b) {
+        bool operator()(const Attribute::Symbol& a, const Attribute::Symbol& b) const {
             return a.symbol.name.value() < b.symbol.name.value();
         }
     };
