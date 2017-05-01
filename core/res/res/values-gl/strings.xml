@@ -29,10 +29,10 @@
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> días"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> hrs"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> hr"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> hrs"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> hr <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> hr <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
     <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> minuto"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> seg"</string>
@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertas"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demostración comercial"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"conexión USB"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Cambiar ao perfil persoal"</string>
@@ -293,8 +303,8 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Os elementos que toques pronunciaranse en voz alta e a pantalla poderá explorarse mediante xestos."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar o texto que escribes"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclúe datos persoais como números e contrasinais de tarxetas de crédito."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar ampliación da pantalla"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla o nivel do zoom e o posicionamento da pantalla"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar a ampliación da pantalla"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla o nivel do zoom e o posicionamento da pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Realizar xestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Podes tocar, pasar o dedo, beliscar e realizar outros xestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Xestos de impresión dixital"</string>
@@ -1609,7 +1619,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado polo teu administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizado polo teu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado polo teu administrador"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Para axudar a mellorar a duración da batería, a función aforro de batería reduce o rendemento do teu dispositivo e limita a vibración, os servizos de localización e a maioría dos datos en segundo plano. É posible que o correo electrónico, as mensaxes e outras aplicacións que dependen da sincronización non se actualicen a menos que os abras. \n\nA función aforro de batería desactívase automaticamente cando pos a cargar o teu dispositivo."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Para axudar a mellorar a duración da batería, a función de aforro da batería reduce o rendemento do teu dispositivo e limita a vibración, os servizos de localización e a maioría dos datos en segundo plano. É posible que o correo electrónico, as mensaxes e outras aplicacións que dependen da sincronización non se actualicen a menos que os abras. \n\nA función de aforro da batería desactívase automaticamente cando pos a cargar o teu dispositivo."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para contribuír a reducir o uso de datos, o Economizador de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Queres activar o economizador de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>

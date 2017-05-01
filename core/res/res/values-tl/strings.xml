@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Mga Alerto"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Retail demo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Koneksyon ng USB"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Lumipat sa Personal"</string>
@@ -277,7 +287,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"i-access ang iyong kalendaryo"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"magpadala at tumingin ng mga mensaheng SMS"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Imbakan"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Storage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"i-access ang mga larawan, media at file sa iyong device"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"mag-record ng audio"</string>
@@ -575,7 +585,7 @@
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Itakda ang pandaigdigang proxy ng device na gagamitin habang naka-enable ang patakaran. Ang may-ari ng device lang ang makakapagtakda sa pandaigdigang proxy."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Itakda screen lock password expiration"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Baguhin kung gaano kadalas dapat palitan ang password, PIN o pattern sa screen lock."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng imbakan"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng storage"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Hilinging naka-encrypt ang nakaimbak na data ng app."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Huwag paganahin mga camera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Pigilan ang paggamit sa lahat ng camera ng device."</string>

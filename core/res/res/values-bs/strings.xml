@@ -268,6 +268,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozorenja"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Promotivna demonstracija u maloprodaji"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB veza"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Siguran način rada"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android sistem"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Prebacite se na lični"</string>
@@ -998,7 +1008,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Akcije za tekst"</string>
     <string name="email" msgid="4560673117055050403">"E-pošta"</string>
-    <string name="dial" msgid="4204975095406423102">"Telefon"</string>
+    <string name="dial" msgid="4204975095406423102">"Pozovi"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
     <string name="browse" msgid="6079864138582486027">"Pretraži"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>
@@ -1184,7 +1194,7 @@
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Postavljanje vremena"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Postavljanje datuma"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Postaviti"</string>
-    <string name="date_time_done" msgid="2507683751759308828">"Završeno"</string>
+    <string name="date_time_done" msgid="2507683751759308828">"Gotovo"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NOVO: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> omogućava."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nisu potrebne dozvole"</string>
@@ -1436,7 +1446,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Bežični prikaz"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Prebacuj"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Poveži na uređaj"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prebaci ekran na uređaj"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emitiranje ekrana na uređaj"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Traženje uređajā…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Postavke"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Prekini vezu"</string>
@@ -1615,7 +1625,7 @@
     <string name="immersive_cling_title" msgid="8394201622932303336">"Prikazuje se cijeli ekran"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Da izađete, prevucite nadolje odozgo."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Razumijem"</string>
-    <string name="done_label" msgid="2093726099505892398">"Završeno"</string>
+    <string name="done_label" msgid="2093726099505892398">"Gotovo"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kružni klizač za odabir sata"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Kružni klizač za minute"</string>
     <string name="select_hours" msgid="6043079511766008245">"Odaberite sat"</string>
