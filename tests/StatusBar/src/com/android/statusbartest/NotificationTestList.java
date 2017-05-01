@@ -385,6 +385,23 @@ public class NotificationTestList extends TestActivity
                     mNM.notify("timeout_min", 7013, n);
                 }
             },
+            new Test("Too many cancels") {
+                public void run()
+                {
+                    mNM.cancelAll();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Cancel then post")
+                            .setContentText("instead of just updating the existing notification")
+                            .build();
+                    mNM.notify("cancel_madness", 7014, n);
+                }
+            },
         new Test("Off") {
             public void run() {
                 PowerManager pm = (PowerManager) NotificationTestList.this.getSystemService(
