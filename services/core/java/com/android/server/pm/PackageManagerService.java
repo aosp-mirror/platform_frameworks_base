@@ -6509,7 +6509,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     ephemeralInstaller.filter = new IntentFilter(intent.getAction());
                     ephemeralInstaller.filter.addDataPath(
                             intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
-                    ephemeralInstaller.instantAppAvailable = true;
+                    ephemeralInstaller.isInstantAppAvailable = true;
                     result.add(ephemeralInstaller);
                 }
             }
@@ -12636,7 +12636,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             res.iconResourceId = info.icon;
             res.system = res.activityInfo.applicationInfo.isSystemApp();
-            res.instantAppAvailable = userState.instantApp;
+            res.isInstantAppAvailable = userState.instantApp;
             return res;
         }
 
