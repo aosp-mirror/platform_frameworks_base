@@ -4360,8 +4360,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getName(),
-                            // TODO: Remove cast for lib version once internally we support longs.
-                            (int) libInfo.getVersion(), libInfo.getType(),
+                            libInfo.getVersion(), libInfo.getType(),
                             libInfo.getDeclaringPackage(), getPackagesUsingSharedLibraryLPr(libInfo,
                             flags, userId));
 
@@ -17750,8 +17749,7 @@ public class PackageManagerService extends IPackageManager.Stub
         for (int i = 0; i < versionCount; i++) {
             SharedLibraryEntry libEntry = versionedLib.valueAt(i);
             if (versionsCallerCanSee != null && versionsCallerCanSee.indexOfKey(
-                    // TODO: Remove cast for lib version once internally we support longs.
-                    (int) libEntry.info.getVersion()) < 0) {
+                    libEntry.info.getVersion()) < 0) {
                 continue;
             }
             // TODO: We will change version code to long, so in the new API it is long
