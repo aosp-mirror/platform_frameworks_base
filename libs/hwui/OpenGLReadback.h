@@ -18,6 +18,9 @@
 
 #include "Readback.h"
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 namespace android {
 namespace uirenderer {
 
