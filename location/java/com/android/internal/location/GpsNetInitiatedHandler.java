@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.R;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.TelephonyProperties;
@@ -364,7 +365,8 @@ public class GpsNetInitiatedHandler {
 
         // Construct Notification
         if (mNiNotificationBuilder == null) {
-            mNiNotificationBuilder = new Notification.Builder(mContext)
+            mNiNotificationBuilder = new Notification.Builder(mContext,
+                SystemNotificationChannels.NETWORK_ALERTS)
                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_gps_on)
                     .setWhen(0)
                     .setOngoing(true)
