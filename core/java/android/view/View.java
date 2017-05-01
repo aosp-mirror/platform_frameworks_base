@@ -19801,18 +19801,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Check whether we need to draw a default focus highlight when this view gets focused,
      * which requires:
      * <ul>
-     *     <li>In the background, {@link android.R.attr#state_focused} is not defined.</li>
+     *     <li>In both background and foreground, {@link android.R.attr#state_focused}
+     *         is not defined.</li>
      *     <li>This view is not in touch mode.</li>
      *     <li>This view doesn't opt out for a default focus highlight, via
      *         {@link #setDefaultFocusHighlightEnabled(boolean)}.</li>
      *     <li>This view is attached to window.</li>
      * </ul>
      * @return {@code true} if a default focus highlight is needed.
+     * @hide
      */
-    private boolean isDefaultFocusHighlightNeeded(Drawable background) {
-        final boolean hasFocusStateSpecified = background == null || !background.isStateful()
-                || !background.hasFocusStateSpecified();
-        return !isInTouchMode() && getDefaultFocusHighlightEnabled() && hasFocusStateSpecified
+    @TestApi
+    public boolean isDefaultFocusHighlightNeeded(Drawable background, Drawable foreground) {
+        final boolean lackFocusState = (background == null || !background.isStateful()
+                || !background.hasFocusStateSpecified())
+                && (foreground == null || !foreground.isStateful()
+                || !foreground.hasFocusStateSpecified());
+        return !isInTouchMode() && getDefaultFocusHighlightEnabled() && lackFocusState
                 && isAttachedToWindow() && sUseDefaultFocusHighlight;
     }
 
@@ -19824,7 +19829,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void switchDefaultFocusHighlight() {
         if (isFocused()) {
-            final boolean needed = isDefaultFocusHighlightNeeded(mBackground);
+            final boolean needed = isDefaultFocusHighlightNeeded(mBackground,
+                    mForegroundInfo == null ? null : mForegroundInfo.mDrawable);
             final boolean active = mDefaultFocusHighlight != null;
             if (needed && !active) {
                 setDefaultFocusHighlight(getDefaultFocusHighlightDrawable());
