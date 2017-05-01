@@ -536,4 +536,8 @@
     <dimen name="item_touch_helper_max_drag_scroll_per_frame">20dp</dimen>
     <dimen name="item_touch_helper_swipe_escape_velocity">120dp</dimen>
     <dimen name="item_touch_helper_swipe_escape_max_velocity">800dp</dimen>
+
+    <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
+    <dimen name="autofill_dataset_picker_max_size">90%</dimen>
+
 </resources>
