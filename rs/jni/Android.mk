@@ -18,7 +18,8 @@ LOCAL_SHARED_LIBRARIES := \
     libgui \
     libjnigraphics
 
-LOCAL_STATIC_LIBRARIES :=
+LOCAL_HEADER_LIBRARIES := \
+    libbase_headers
 
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
