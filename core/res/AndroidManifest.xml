@@ -1879,20 +1879,20 @@
         android:protectionLevel="signature" />
 
     <!-- Allows a companion app to run in the background.
-         <p>Protection level: signature
+         <p>Protection level: normal
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"
                 android:label="@string/permlab_runInBackground"
                 android:description="@string/permdesc_runInBackground"
-                android:protectionLevel="signature" />
+                android:protectionLevel="normal" />
 
     <!-- Allows a companion app to use data in the background.
-         <p>Protection level: signature
+         <p>Protection level: normal
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND"
                 android:label="@string/permlab_useDataInBackground"
                 android:description="@string/permdesc_useDataInBackground"
-                android:protectionLevel="signature" />
+                android:protectionLevel="normal" />
 
 
     <!-- ================================== -->
