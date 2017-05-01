@@ -89,6 +89,9 @@ public class StatusBarIconView extends AnimatedImageView {
     };
 
     private boolean mAlwaysScaleIcon;
+    private int mStatusBarIconDrawingSizeDark = 1;
+    private int mStatusBarIconDrawingSize = 1;
+    private int mStatusBarIconSize = 1;
     private StatusBarIcon mIcon;
     @ViewDebug.ExportedProperty private String mSlot;
     private Drawable mNumberBackground;
@@ -139,7 +142,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setColor(context.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
         setNotification(notification);
-        maybeUpdateIconScale();
+        maybeUpdateIconScaleDimens();
         setScaleType(ScaleType.CENTER);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         if (mNotification != null) {
@@ -149,18 +152,30 @@ public class StatusBarIconView extends AnimatedImageView {
         reloadDimens();
     }
 
-    private void maybeUpdateIconScale() {
+    private void maybeUpdateIconScaleDimens() {
         // We do not resize and scale system icons (on the right), only notification icons (on the
         // left).
         if (mNotification != null || mAlwaysScaleIcon) {
-            updateIconScale();
+            updateIconScaleDimens();
         }
     }
 
-    private void updateIconScale() {
+    private void updateIconScaleDimens() {
         Resources res = mContext.getResources();
-        final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-        final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
+        mStatusBarIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        mStatusBarIconDrawingSizeDark =
+                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
+        mStatusBarIconDrawingSize =
+                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
+        updateIconScale();
+    }
+
+    private void updateIconScale() {
+        final float imageBounds = NotificationUtils.interpolate(
+                mStatusBarIconDrawingSize,
+                mStatusBarIconDrawingSizeDark,
+                mDarkAmount);
+        final int outerBounds = mStatusBarIconSize;
         mIconScale = (float)imageBounds / (float)outerBounds;
     }
 
@@ -174,7 +189,7 @@ public class StatusBarIconView extends AnimatedImageView {
         int density = newConfig.densityDpi;
         if (density != mDensity) {
             mDensity = density;
-            maybeUpdateIconScale();
+            maybeUpdateIconScaleDimens();
             updateDrawable();
             reloadDimens();
         }
@@ -198,7 +213,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mDozer = new NotificationIconDozeHelper(context);
         mBlocked = false;
         mAlwaysScaleIcon = true;
-        updateIconScale();
+        updateIconScaleDimens();
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
@@ -681,6 +696,7 @@ public class StatusBarIconView extends AnimatedImageView {
     public void setDark(boolean dark, boolean fade, long delay) {
         mDozer.setIntensityDark(f -> {
             mDarkAmount = f;
+            updateIconScale();
             updateDecorColor();
             updateIconColor();
         }, dark, fade, delay);
