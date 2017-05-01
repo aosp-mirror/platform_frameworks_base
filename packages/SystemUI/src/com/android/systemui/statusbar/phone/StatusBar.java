@@ -4632,6 +4632,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         return (mNavigationBar != null ? (NavigationBarView) mNavigationBar.getView() : null);
     }
 
+    public View getNavigationBarWindow() {
+        return mNavigationBarView;
+    }
+
     public KeyguardBottomAreaView getKeyguardBottomAreaView() {
         return mKeyguardBottomArea;
     }
