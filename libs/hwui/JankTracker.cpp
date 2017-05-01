@@ -291,7 +291,6 @@ void JankTracker::addFrame(const FrameInfo& frame) {
                 / kSlowFrameBucketIntervalMs;
         framebucket = std::min(framebucket,
                 static_cast<uint32_t>(mData->slowFrameCounts.size() - 1));
-        framebucket = std::max(framebucket, 0u);
         mData->slowFrameCounts[framebucket]++;
     }
 
