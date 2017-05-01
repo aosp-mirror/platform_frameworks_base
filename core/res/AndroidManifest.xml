@@ -377,8 +377,6 @@
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_PROGRESS" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_DONE" />
 
-    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_SUBSCRIPTION_CHANGED" />
-    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_SUBINFO_CONTENT_CHANGE" />
@@ -446,6 +444,8 @@
     <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_UNREGISTERED" />
     <protected-broadcast android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
     <protected-broadcast android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION" />
 
     <protected-broadcast android:name="com.android.bluetooth.btservice.action.ALARM_WAKEUP" />
