@@ -182,13 +182,13 @@ class TransportManager {
 
     String[] getBoundTransportNames() {
         synchronized (mTransportLock) {
-            return mBoundTransports.keySet().toArray(new String[0]);
+            return mBoundTransports.keySet().toArray(new String[mBoundTransports.size()]);
         }
     }
 
     ComponentName[] getAllTransportCompenents() {
         synchronized (mTransportLock) {
-            return mValidTransports.keySet().toArray(new ComponentName[0]);
+            return mValidTransports.keySet().toArray(new ComponentName[mValidTransports.size()]);
         }
     }
 
