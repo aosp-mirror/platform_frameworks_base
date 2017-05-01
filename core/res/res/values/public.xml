@@ -2786,7 +2786,7 @@
         <public name="appCategory" />
         <public name="autoSizeMaxTextSize" />
         <public name="__removed2" />
-        <public name="restartOnConfigChanges" />
+        <public name="recreateOnConfigChanges" />
         <public name="certDigest" />
         <public name="splitName" />
         <public name="colorMode" />

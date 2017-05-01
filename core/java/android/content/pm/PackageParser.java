@@ -201,10 +201,10 @@ public class PackageParser {
     private static final String META_DATA_INSTANT_APPS = "instantapps.clients.allowed";
 
     /**
-     * Bit mask of all the valid bits that can be set in restartOnConfigChanges.
+     * Bit mask of all the valid bits that can be set in recreateOnConfigChanges.
      * @hide
      */
-    private static final int RESTART_ON_CONFIG_CHANGES_MASK =
+    private static final int RECREATE_ON_CONFIG_CHANGES_MASK =
             ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
 
     // These are the tags supported by child packages
@@ -4219,7 +4219,7 @@ public class PackageParser {
                     ActivityManager.getDefaultAppRecentsLimitStatic());
             a.info.configChanges = getActivityConfigChanges(
                     sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0),
-                    sa.getInt(R.styleable.AndroidManifestActivity_restartOnConfigChanges, 0));
+                    sa.getInt(R.styleable.AndroidManifestActivity_recreateOnConfigChanges, 0));
             a.info.softInputMode = sa.getInt(
                     R.styleable.AndroidManifestActivity_windowSoftInputMode, 0);
 
@@ -4523,13 +4523,13 @@ public class PackageParser {
 
     /**
      * @param configChanges The bit mask of configChanges fetched from AndroidManifest.xml.
-     * @param restartOnConfigChanges The bit mask restartOnConfigChanges fetched from
-     *                               AndroidManifest.xml.
+     * @param recreateOnConfigChanges The bit mask recreateOnConfigChanges fetched from
+     *                                AndroidManifest.xml.
      * @hide Exposed for unit testing only.
      */
     @TestApi
-    public static int getActivityConfigChanges(int configChanges, int restartOnConfigChanges) {
-        return configChanges | ((~restartOnConfigChanges) & RESTART_ON_CONFIG_CHANGES_MASK);
+    public static int getActivityConfigChanges(int configChanges, int recreateOnConfigChanges) {
+        return configChanges | ((~recreateOnConfigChanges) & RECREATE_ON_CONFIG_CHANGES_MASK);
     }
 
     private void parseLayout(Resources res, AttributeSet attrs, Activity a) {
