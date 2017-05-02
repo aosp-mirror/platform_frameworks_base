@@ -550,15 +550,11 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         boolean kept = true;
         if (updatedConfig) {
             final ActivityRecord r = topRunningActivityLocked();
-            if (r != null) {
+            if (r != null && !deferResume) {
                 kept = r.ensureActivityConfigurationLocked(0 /* globalChanges */, preserveWindow);
-
-                if (!deferResume) {
-                    // All other activities must be made visible with their correct configuration.
-                    mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
-                    if (!kept) {
-                        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                    }
+                mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
+                if (!kept) {
+                    mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
         }
