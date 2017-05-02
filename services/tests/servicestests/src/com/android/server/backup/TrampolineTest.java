@@ -18,6 +18,7 @@ package com.android.server.backup;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -31,6 +32,7 @@ import android.app.backup.BackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
+import android.app.backup.ISelectBackupTransportCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +56,9 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @Presubmit
@@ -568,9 +573,30 @@ public class TrampolineTest {
     }
 
     @Test
-    public void selectBackupTransportAsync_calledBeforeInitialize_ignored() throws RemoteException {
-        mTrampoline.selectBackupTransportAsync(TRANSPORT_COMPONENT_NAME, null);
+    public void selectBackupTransportAsync_calledBeforeInitialize_ignored() throws Exception {
+        LinkedBlockingQueue<Integer> q = new LinkedBlockingQueue();
+        mTrampoline.selectBackupTransportAsync(
+                TRANSPORT_COMPONENT_NAME,
+                new ISelectBackupTransportCallback() {
+                    @Override
+                    public void onSuccess(String transportName) throws RemoteException {
+
+                    }
+
+                    @Override
+                    public void onFailure(int reason) throws RemoteException {
+                        q.offer(reason);
+                    }
+
+                    @Override
+                    public IBinder asBinder() {
+                        return null;
+                    }
+                });
         verifyNoMoreInteractions(mBackupManagerServiceMock);
+        Integer errorCode = q.poll(5, TimeUnit.SECONDS);
+        assertNotNull(errorCode);
+        assertEquals(BackupManager.ERROR_BACKUP_NOT_ALLOWED, (int) errorCode);
     }
 
     @Test
