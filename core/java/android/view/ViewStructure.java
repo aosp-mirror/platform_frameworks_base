@@ -374,13 +374,6 @@ public abstract class ViewStructure {
     public abstract Rect getTempRect();
 
     /**
-     * @deprecated - use {@link #setWebDomain(String)} instead.
-     * @hide
-     */
-    @Deprecated
-    public abstract void setUrl(String url);
-
-    /**
      * Sets the Web domain represented by this node.
      *
      * <p>Typically used when the view is a container for an HTML document.
