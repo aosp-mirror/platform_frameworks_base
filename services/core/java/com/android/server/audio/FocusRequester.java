@@ -342,6 +342,7 @@ public class FocusRequester {
                 mFocusLossWasNotified = false;
                 // before dispatching a focus loss, check if the following conditions are met:
                 // 1/ the framework is not supposed to notify the focus loser on a DUCK loss
+                //    (i.e. it has a focus controller that implements a ducking policy)
                 // 2/ it is a DUCK loss
                 // 3/ the focus loser isn't flagged as pausing in a DUCK loss
                 // if they are, do not notify the focus loser
@@ -365,7 +366,14 @@ public class FocusRequester {
                         && fr != null) {
                     // candidate for enforcement by the framework
                     if (fr.mCallingUid != this.mCallingUid) {
-                        handled = mFocusController.duckPlayers(fr, this);
+                        if ((mGrantFlags
+                                & AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS) != 0) {
+                            // the focus loser declared it would pause instead of duck, let it
+                            // handle it (the framework doesn't pause for apps)
+                            handled = false;
+                        } else {
+                            handled = mFocusController.duckPlayers(fr, this);
+                        }
                     } // else: the focus change is within the same app, so let the dispatching
                       //       happen as if the framework was not involved.
                 }
