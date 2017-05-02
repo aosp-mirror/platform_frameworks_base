@@ -188,9 +188,16 @@ public class StatusBarIconView extends AnimatedImageView {
         if (mIcon == null) {
             return false;
         }
-        Drawable drawable = getIcon(mIcon);
+        Drawable drawable;
+        try {
+            drawable = getIcon(mIcon);
+        } catch (OutOfMemoryError e) {
+            Log.w(TAG, "OOM while inflating " + mIcon.icon + " for slot " + mSlot);
+            return false;
+        }
+
         if (drawable == null) {
-            Log.w(TAG, "No icon for slot " + mSlot);
+            Log.w(TAG, "No icon for slot " + mSlot + "; " + mIcon.icon);
             return false;
         }
         if (withClear) {
