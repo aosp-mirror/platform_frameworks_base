@@ -1477,35 +1477,6 @@ endif
 
 include $(BUILD_JAVA_LIBRARY)
 
-# ====  c++ proto device library  ==============================
-include $(CLEAR_VARS)
-LOCAL_MODULE := libplatformprotos
-# b/34740546, work around clang-tidy segmentation fault.
-LOCAL_TIDY_CHECKS := -modernize*
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
-LOCAL_PROTOC_FLAGS := \
-    --include_source_info \
-    -Iexternal/protobuf/src
-LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto)
-include $(BUILD_STATIC_LIBRARY)
-
-# ====  c++ proto host library  ==============================
-include $(CLEAR_VARS)
-LOCAL_MODULE := libplatformprotos
-# b/34740546, work around clang-tidy segmentation fault.
-LOCAL_TIDY_CHECKS := -modernize*
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
-LOCAL_PROTOC_FLAGS := \
-    --include_source_info \
-    -Iexternal/protobuf/src
-LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto)
-include $(BUILD_HOST_SHARED_LIBRARY)
-
-
 # ====  java proto host library  ==============================
 include $(CLEAR_VARS)
 LOCAL_MODULE := platformprotos
