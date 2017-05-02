@@ -16,6 +16,10 @@
 
 package android.net.nsd;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.Preconditions.checkStringNotEmpty;
+
 import android.annotation.SdkConstant;
 import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -240,12 +244,12 @@ public final class NsdManager {
         return name;
     }
 
+    private static int FIRST_LISTENER_KEY = 1;
+
     private final INsdManager mService;
     private final Context mContext;
 
-    private static final int INVALID_LISTENER_KEY = 0;
-    private static final int BUSY_LISTENER_KEY = -1;
-    private int mListenerKey = 1;
+    private int mListenerKey = FIRST_LISTENER_KEY;
     private final SparseArray mListenerMap = new SparseArray();
     private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<>();
     private final Object mMapLock = new Object();
@@ -311,7 +315,6 @@ public final class NsdManager {
         public void onServiceFound(NsdServiceInfo serviceInfo);
 
         public void onServiceLost(NsdServiceInfo serviceInfo);
-
     }
 
     /** Interface for callback invocation for service registration */
@@ -342,8 +345,9 @@ public final class NsdManager {
 
         @Override
         public void handleMessage(Message message) {
-            if (DBG) Log.d(TAG, "received " + nameOf(message.what));
-            switch (message.what) {
+            final int what = message.what;
+            final int key = message.arg2;
+            switch (what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
                     return;
@@ -356,19 +360,26 @@ public final class NsdManager {
                 default:
                     break;
             }
-            Object listener = getListener(message.arg2);
+            final Object listener;
+            final NsdServiceInfo ns;
+            synchronized (mMapLock) {
+                listener = mListenerMap.get(key);
+                ns = mServiceMap.get(key);
+            }
             if (listener == null) {
                 Log.d(TAG, "Stale key " + message.arg2);
                 return;
             }
-            NsdServiceInfo ns = getNsdService(message.arg2);
-            switch (message.what) {
+            if (DBG) {
+                Log.d(TAG, "received " + nameOf(what) + " for key " + key + ", service " + ns);
+            }
+            switch (what) {
                 case DISCOVER_SERVICES_STARTED:
                     String s = getNsdServiceInfoType((NsdServiceInfo) message.obj);
                     ((DiscoveryListener) listener).onDiscoveryStarted(s);
                     break;
                 case DISCOVER_SERVICES_FAILED:
-                    removeListener(message.arg2);
+                    removeListener(key);
                     ((DiscoveryListener) listener).onStartDiscoveryFailed(getNsdServiceInfoType(ns),
                             message.arg1);
                     break;
@@ -381,16 +392,16 @@ public final class NsdManager {
                 case STOP_DISCOVERY_FAILED:
                     // TODO: failure to stop discovery should be internal and retried internally, as
                     // the effect for the client is indistinguishable from STOP_DISCOVERY_SUCCEEDED
-                    removeListener(message.arg2);
+                    removeListener(key);
                     ((DiscoveryListener) listener).onStopDiscoveryFailed(getNsdServiceInfoType(ns),
                             message.arg1);
                     break;
                 case STOP_DISCOVERY_SUCCEEDED:
-                    removeListener(message.arg2);
+                    removeListener(key);
                     ((DiscoveryListener) listener).onDiscoveryStopped(getNsdServiceInfoType(ns));
                     break;
                 case REGISTER_SERVICE_FAILED:
-                    removeListener(message.arg2);
+                    removeListener(key);
                     ((RegistrationListener) listener).onRegistrationFailed(ns, message.arg1);
                     break;
                 case REGISTER_SERVICE_SUCCEEDED:
@@ -398,7 +409,7 @@ public final class NsdManager {
                             (NsdServiceInfo) message.obj);
                     break;
                 case UNREGISTER_SERVICE_FAILED:
-                    removeListener(message.arg2);
+                    removeListener(key);
                     ((RegistrationListener) listener).onUnregistrationFailed(ns, message.arg1);
                     break;
                 case UNREGISTER_SERVICE_SUCCEEDED:
@@ -408,11 +419,11 @@ public final class NsdManager {
                     ((RegistrationListener) listener).onServiceUnregistered(ns);
                     break;
                 case RESOLVE_SERVICE_FAILED:
-                    removeListener(message.arg2);
+                    removeListener(key);
                     ((ResolveListener) listener).onResolveFailed(ns, message.arg1);
                     break;
                 case RESOLVE_SERVICE_SUCCEEDED:
-                    removeListener(message.arg2);
+                    removeListener(key);
                     ((ResolveListener) listener).onServiceResolved((NsdServiceInfo) message.obj);
                     break;
                 default:
@@ -422,40 +433,27 @@ public final class NsdManager {
         }
     }
 
-    // if the listener is already in the map, reject it.  Otherwise, add it and
-    // return its key.
+    private int nextListenerKey() {
+        // Ensure mListenerKey >= FIRST_LISTENER_KEY;
+        mListenerKey = Math.max(FIRST_LISTENER_KEY, mListenerKey + 1);
+        return mListenerKey;
+    }
+
+    // Assert that the listener is not in the map, then add it and returns its key
     private int putListener(Object listener, NsdServiceInfo s) {
-        if (listener == null) return INVALID_LISTENER_KEY;
-        int key;
+        checkListener(listener);
+        final int key;
         synchronized (mMapLock) {
             int valueIndex = mListenerMap.indexOfValue(listener);
-            if (valueIndex != -1) {
-                return BUSY_LISTENER_KEY;
-            }
-            do {
-                key = mListenerKey++;
-            } while (key == INVALID_LISTENER_KEY);
+            checkArgument(valueIndex == -1, "listener already in use");
+            key = nextListenerKey();
             mListenerMap.put(key, listener);
             mServiceMap.put(key, s);
         }
         return key;
     }
 
-    private Object getListener(int key) {
-        if (key == INVALID_LISTENER_KEY) return null;
-        synchronized (mMapLock) {
-            return mListenerMap.get(key);
-        }
-    }
-
-    private NsdServiceInfo getNsdService(int key) {
-        synchronized (mMapLock) {
-            return mServiceMap.get(key);
-        }
-    }
-
     private void removeListener(int key) {
-        if (key == INVALID_LISTENER_KEY) return;
         synchronized (mMapLock) {
             mListenerMap.remove(key);
             mServiceMap.remove(key);
@@ -463,16 +461,15 @@ public final class NsdManager {
     }
 
     private int getListenerKey(Object listener) {
+        checkListener(listener);
         synchronized (mMapLock) {
             int valueIndex = mListenerMap.indexOfValue(listener);
-            if (valueIndex != -1) {
-                return mListenerMap.keyAt(valueIndex);
-            }
+            checkArgument(valueIndex != -1, "listener not registered");
+            return mListenerMap.keyAt(valueIndex);
         }
-        return INVALID_LISTENER_KEY;
     }
 
-    private String getNsdServiceInfoType(NsdServiceInfo s) {
+    private static String getNsdServiceInfoType(NsdServiceInfo s) {
         if (s == null) return "?";
         return s.getServiceType();
     }
@@ -482,7 +479,9 @@ public final class NsdManager {
      */
     private void init() {
         final Messenger messenger = getMessenger();
-        if (messenger == null) throw new RuntimeException("Failed to initialize");
+        if (messenger == null) {
+            fatal("Failed to obtain service Messenger");
+        }
         HandlerThread t = new HandlerThread("NsdManager");
         t.start();
         mHandler = new ServiceHandler(t.getLooper());
@@ -490,8 +489,13 @@ public final class NsdManager {
         try {
             mConnected.await();
         } catch (InterruptedException e) {
-            Log.e(TAG, "interrupted wait at init");
+            fatal("Interrupted wait at init");
         }
+    }
+
+    private static void fatal(String msg) {
+        Log.e(TAG, msg);
+        throw new RuntimeException(msg);
     }
 
     /**
@@ -513,23 +517,10 @@ public final class NsdManager {
      */
     public void registerService(NsdServiceInfo serviceInfo, int protocolType,
             RegistrationListener listener) {
-        if (TextUtils.isEmpty(serviceInfo.getServiceName()) ||
-                TextUtils.isEmpty(serviceInfo.getServiceType())) {
-            throw new IllegalArgumentException("Service name or type cannot be empty");
-        }
-        if (serviceInfo.getPort() <= 0) {
-            throw new IllegalArgumentException("Invalid port number");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
-        }
-        if (protocolType != PROTOCOL_DNS_SD) {
-            throw new IllegalArgumentException("Unsupported protocol");
-        }
+        checkArgument(serviceInfo.getPort() > 0, "Invalid port number");
+        checkServiceInfo(serviceInfo);
+        checkProtocol(protocolType);
         int key = putListener(listener, serviceInfo);
-        if (key == BUSY_LISTENER_KEY) {
-            throw new IllegalArgumentException("listener already in use");
-        }
         mAsyncChannel.sendMessage(REGISTER_SERVICE, 0, key, serviceInfo);
     }
 
@@ -548,12 +539,6 @@ public final class NsdManager {
      */
     public void unregisterService(RegistrationListener listener) {
         int id = getListenerKey(listener);
-        if (id == INVALID_LISTENER_KEY) {
-            throw new IllegalArgumentException("listener not registered");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
-        }
         mAsyncChannel.sendMessage(UNREGISTER_SERVICE, 0, id);
     }
 
@@ -586,25 +571,13 @@ public final class NsdManager {
      * Cannot be null. Cannot be in use for an active service discovery.
      */
     public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
-        }
-        if (TextUtils.isEmpty(serviceType)) {
-            throw new IllegalArgumentException("Service type cannot be empty");
-        }
-
-        if (protocolType != PROTOCOL_DNS_SD) {
-            throw new IllegalArgumentException("Unsupported protocol");
-        }
+        checkStringNotEmpty(serviceType, "Service type cannot be empty");
+        checkProtocol(protocolType);
 
         NsdServiceInfo s = new NsdServiceInfo();
         s.setServiceType(serviceType);
 
         int key = putListener(listener, s);
-        if (key == BUSY_LISTENER_KEY) {
-            throw new IllegalArgumentException("listener already in use");
-        }
-
         mAsyncChannel.sendMessage(DISCOVER_SERVICES, 0, key, s);
     }
 
@@ -626,12 +599,6 @@ public final class NsdManager {
      */
     public void stopServiceDiscovery(DiscoveryListener listener) {
         int id = getListenerKey(listener);
-        if (id == INVALID_LISTENER_KEY) {
-            throw new IllegalArgumentException("service discovery not active on listener");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
-        }
         mAsyncChannel.sendMessage(STOP_DISCOVERY, 0, id);
     }
 
@@ -645,19 +612,8 @@ public final class NsdManager {
      * Cannot be in use for an active service resolution.
      */
     public void resolveService(NsdServiceInfo serviceInfo, ResolveListener listener) {
-        if (TextUtils.isEmpty(serviceInfo.getServiceName()) ||
-                TextUtils.isEmpty(serviceInfo.getServiceType())) {
-            throw new IllegalArgumentException("Service name or type cannot be empty");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
-        }
-
+        checkServiceInfo(serviceInfo);
         int key = putListener(listener, serviceInfo);
-
-        if (key == BUSY_LISTENER_KEY) {
-            throw new IllegalArgumentException("listener already in use");
-        }
         mAsyncChannel.sendMessage(RESOLVE_SERVICE, 0, key, serviceInfo);
     }
 
@@ -671,10 +627,10 @@ public final class NsdManager {
     }
 
     /**
-     * Get a reference to NetworkService handler. This is used to establish
+     * Get a reference to NsdService handler. This is used to establish
      * an AsyncChannel communication with the service
      *
-     * @return Messenger pointing to the NetworkService handler
+     * @return Messenger pointing to the NsdService handler
      */
     private Messenger getMessenger() {
         try {
@@ -682,5 +638,19 @@ public final class NsdManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private static void checkListener(Object listener) {
+        checkNotNull(listener, "listener cannot be null");
+    }
+
+    private static void checkProtocol(int protocolType) {
+        checkArgument(protocolType == PROTOCOL_DNS_SD, "Unsupported protocol");
+    }
+
+    private static void checkServiceInfo(NsdServiceInfo serviceInfo) {
+        checkNotNull(serviceInfo, "NsdServiceInfo cannot be null");
+        checkStringNotEmpty(serviceInfo.getServiceName(),"Service name cannot be empty");
+        checkStringNotEmpty(serviceInfo.getServiceType(), "Service type cannot be empty");
     }
 }
