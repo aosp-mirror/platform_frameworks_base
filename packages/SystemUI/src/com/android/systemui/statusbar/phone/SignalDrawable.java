@@ -57,12 +57,12 @@ public class SignalDrawable extends Drawable {
     private static final int LEVEL_MASK = 0xff;
     private static final int NUM_LEVEL_SHIFT = 8;
     private static final int NUM_LEVEL_MASK = 0xff << NUM_LEVEL_SHIFT;
-    public static final int STATE_SHIFT = 16;
-    public static final int STATE_MASK = 0xff << STATE_SHIFT;
-    public static final int STATE_NONE = 0;
-    public static final int STATE_EMPTY = 1;
-    public static final int STATE_CUT = 2;
-    public static final int STATE_CARRIER_CHANGE = 3;
+    private static final int STATE_SHIFT = 16;
+    private static final int STATE_MASK = 0xff << STATE_SHIFT;
+    private static final int STATE_NONE = 0;
+    private static final int STATE_EMPTY = 1;
+    private static final int STATE_CUT = 2;
+    private static final int STATE_CARRIER_CHANGE = 3;
 
     private static final long DOT_DELAY = 1000;
 

@@ -724,6 +724,19 @@ public final class Settings {
             "android.settings.APPLICATION_DETAILS_SETTINGS";
 
     /**
+     * Activity Action: Show list of applications that have been running
+     * foreground services (to the user "running in the background").
+     * <p>
+     * Input: Extras "packages" is a string array of package names.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_FOREGROUND_SERVICES_SETTINGS =
+            "android.settings.FOREGROUND_SERVICES_SETTINGS";
+
+    /**
      * Activity Action: Show screen for controlling which apps can ignore battery optimizations.
      * <p>
      * Input: Nothing.
@@ -6622,6 +6635,13 @@ public final class Settings {
         public static final String PAYMENT_SERVICE_SEARCH_URI = "payment_service_search_uri";
 
         /**
+         * This is the query URI for finding a auto fill service to install.
+         *
+         * @hide
+         */
+        public static final String AUTOFILL_SERVICE_SEARCH_URI = "autofill_service_search_uri";
+
+        /**
          * If enabled, apps should try to skip any introductory hints on first launch. This might
          * apply to users that are already familiar with the environment or temporary users.
          * <p>
@@ -7087,6 +7107,12 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR);
             INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_TYPEFACE);
             INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_FONT_SCALE);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_CAPTIONING_WINDOW_COLOR);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_DISPLAY_DALTONIZER);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_AUTOCLICK_DELAY);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_AUTOCLICK_ENABLED);
+            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_LARGE_POINTER_ICON);
 
             INSTANT_APP_SETTINGS.add(DEFAULT_INPUT_METHOD);
             INSTANT_APP_SETTINGS.add(ENABLED_INPUT_METHODS);
@@ -7733,13 +7759,36 @@ public final class Settings {
                 "location_background_throttle_interval_ms";
 
         /**
+         * Most frequent location update interval in milliseconds that proximity alert is allowed
+         * to request.
+         * @hide
+         */
+        public static final String LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS =
+                "location_background_throttle_proximity_alert_interval_ms";
+
+        /**
          * Packages that are whitelisted for background throttling (throttling will not be applied).
          * @hide
          */
         public static final String LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
             "location_background_throttle_package_whitelist";
 
-       /**
+        /**
+         * The interval in milliseconds at which wifi scan requests will be throttled when they are
+         * coming from the background.
+         * @hide
+         */
+        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS =
+                "wifi_scan_background_throttle_interval_ms";
+
+        /**
+         * Packages that are whitelisted to be exempt for wifi background throttling.
+         * @hide
+         */
+        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
+                "wifi_scan_background_throttle_package_whitelist";
+
+        /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
         * @hide
@@ -8966,13 +9015,30 @@ public final class Settings {
          * Activity manager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
-         * "enforce_bg_check=true,max_cached_processes=24"
+         * "gc_timeout=5000,max_cached_processes=24"
          *
          * The following keys are supported:
          *
          * <pre>
-         * enforce_bg_check                     (boolean)
          * max_cached_processes                 (int)
+         * background_settle_time               (long)
+         * foreground_service_ui_min_time       (long)
+         * content_provider_retain_time         (long)
+         * gc_timeout                           (long)
+         * gc_min_interval                      (long)
+         * full_pss_min_interval                (long)
+         * full_pss_lowered_interval            (long)
+         * power_check_delay                    (long)
+         * wake_lock_min_check_duration         (long)
+         * cpu_min_check_duration               (long)
+         * service_usage_interaction_time       (long)
+         * usage_stats_interaction_interval     (long)
+         * service_restart_duration             (long)
+         * service_reset_run_duration           (long)
+         * service_restart_duration_factor      (int)
+         * service_min_restart_time_between     (long)
+         * service_max_inactivity               (long)
+         * service_bg_start_timeout             (long)
          * </pre>
          *
          * <p>

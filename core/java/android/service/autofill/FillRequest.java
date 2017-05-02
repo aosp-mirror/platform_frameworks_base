@@ -29,6 +29,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a request to an {@link AutofillService autofill provider}
@@ -96,7 +97,7 @@ public final class FillRequest implements Parcelable {
     /**
      * @return The contexts associated with each previous fill request.
      */
-    public @NonNull ArrayList<FillContext> getFillContexts() {
+    public @NonNull List<FillContext> getFillContexts() {
         return mContexts;
     }
 

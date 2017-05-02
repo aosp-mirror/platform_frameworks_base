@@ -24,7 +24,7 @@ import java.util.List;
  * The interface the clients top-level file download listener will satisfy.
  * @hide
  */
-interface IMbmsDownloadManagerListener
+interface IMbmsDownloadManagerCallback
 {
     void error(int errorCode, String message);
 

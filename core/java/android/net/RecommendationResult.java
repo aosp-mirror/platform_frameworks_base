@@ -18,12 +18,10 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.net.wifi.WifiConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 /**
@@ -32,8 +30,8 @@ import com.android.internal.util.Preconditions;
  * @see {@link NetworkScoreManager#requestRecommendation(RecommendationRequest)}.
  * @hide
  * @deprecated to be removed.
+ * @removed
  */
-@SystemApi
 public final class RecommendationResult implements Parcelable {
     private final WifiConfiguration mWifiConfiguration;
 

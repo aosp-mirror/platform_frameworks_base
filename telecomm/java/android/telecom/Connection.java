@@ -551,6 +551,24 @@ public abstract class Connection extends Conferenceable {
     public static final String EVENT_CALL_REMOTELY_UNHELD =
             "android.telecom.event.CALL_REMOTELY_UNHELD";
 
+    /**
+     * Connection event used to inform an {@link InCallService} which initiated a call handover via
+     * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has
+     * successfully completed.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_COMPLETE =
+            "android.telecom.event.HANDOVER_COMPLETE";
+
+    /**
+     * Connection event used to inform an {@link InCallService} which initiated a call handover via
+     * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has failed
+     * to complete.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_FAILED =
+            "android.telecom.event.HANDOVER_FAILED";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 

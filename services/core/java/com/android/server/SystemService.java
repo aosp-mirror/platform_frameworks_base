@@ -173,6 +173,9 @@ public abstract class SystemService {
      * state they maintain for running users.  This is called prior to sending the SHUTDOWN
      * broadcast to the user; it is a good place to stop making use of any resources of that
      * user (such as binding to a service running in the user).
+     *
+     * <p>NOTE: This is the last callback where the callee may access the target user's CE storage.
+     *
      * @param userHandle The identifier of the user.
      */
     public void onStopUser(int userHandle) {}
@@ -181,6 +184,10 @@ public abstract class SystemService {
      * Called when an existing user is stopping, for system services to finalize any per-user
      * state they maintain for running users.  This is called after all application process
      * teardown of the user is complete.
+     *
+     * <p>NOTE: When this callback is called, the CE storage for the target user may not be
+     * accessible already.  Use {@link #onStopUser} instead if you need to access the CE storage.
+     *
      * @param userHandle The identifier of the user.
      */
     public void onCleanupUser(int userHandle) {}

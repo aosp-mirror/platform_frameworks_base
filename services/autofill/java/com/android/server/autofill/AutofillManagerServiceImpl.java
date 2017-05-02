@@ -16,11 +16,10 @@
 
 package com.android.server.autofill;
 
-import static android.view.autofill.AutofillManager.FLAG_START_SESSION;
+import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.NO_SESSION;
 
-import static com.android.server.autofill.Helper.DEBUG;
-import static com.android.server.autofill.Helper.VERBOSE;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,12 +47,9 @@ import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
 import android.util.LocalLog;
-import android.util.Log;
-import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
@@ -271,14 +267,14 @@ final class AutofillManagerServiceImpl {
         }
 
         final String historyItem =
-                "id=" + newSession.getId() + " uid=" + uid + " s=" + mInfo.getServiceInfo().packageName
+                "id=" + newSession.id + " uid=" + uid + " s=" + mInfo.getServiceInfo().packageName
                         + " u=" + mUserId + " i=" + autofillId + " b=" + virtualBounds + " hc=" +
                         hasCallback + " f=" + flags;
         mRequestsHistory.log(historyItem);
 
-        newSession.updateLocked(autofillId, virtualBounds, value, FLAG_START_SESSION);
+        newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
 
-        return newSession.getId();
+        return newSession.id;
     }
 
     void finishSessionLocked(int sessionId, int uid) {
@@ -288,14 +284,15 @@ final class AutofillManagerServiceImpl {
 
         final Session session = mSessions.get(sessionId);
         if (session == null || uid != session.uid) {
-            Slog.w(TAG, "finishSessionLocked(): no session for " + sessionId + "(" + uid + ")");
+            if (sVerbose) {
+                Slog.v(TAG, "finishSessionLocked(): no session for " + sessionId + "(" + uid + ")");
+            }
             return;
         }
 
         final boolean finished = session.showSaveLocked();
-        if (DEBUG) {
-            Log.d(TAG, "finishSessionLocked(): session finished on save? " + finished);
-        }
+        if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
+
         if (finished) {
             session.removeSelfLocked();
         }
@@ -342,7 +339,7 @@ final class AutofillManagerServiceImpl {
         do {
             tries++;
             if (tries > MAX_SESSION_ID_CREATE_TRIES) {
-                Log.w(TAG, "Cannot create session in " + MAX_SESSION_ID_CREATE_TRIES + " tries");
+                Slog.w(TAG, "Cannot create session in " + MAX_SESSION_ID_CREATE_TRIES + " tries");
                 return null;
             }
 
@@ -350,9 +347,9 @@ final class AutofillManagerServiceImpl {
         } while (sessionId == NO_SESSION || mSessions.indexOfKey(sessionId) >= 0);
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
-                sessionId, uid, activityToken, windowToken, appCallbackToken, hasCallback, flags,
+                sessionId, uid, activityToken, windowToken, appCallbackToken, hasCallback,
                 mInfo.getServiceInfo().getComponentName(), packageName);
-        mSessions.put(newSession.getId(), newSession);
+        mSessions.put(newSession.id, newSession);
 
         return newSession;
     }
@@ -396,17 +393,17 @@ final class AutofillManagerServiceImpl {
     }
 
     void updateSessionLocked(int sessionId, int uid, AutofillId autofillId, Rect virtualBounds,
-            AutofillValue value, int flags) {
+            AutofillValue value, int action, int flags) {
         final Session session = mSessions.get(sessionId);
         if (session == null || session.uid != uid) {
-            if (VERBOSE) {
+            if (sVerbose) {
                 Slog.v(TAG, "updateSessionLocked(): session gone for " + sessionId + "(" + uid
                         + ")");
             }
             return;
         }
 
-        session.updateLocked(autofillId, virtualBounds, value, flags);
+        session.updateLocked(autofillId, virtualBounds, value, action, flags);
     }
 
     void removeSessionLocked(int sessionId) {
@@ -426,9 +423,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void destroyLocked() {
-        if (VERBOSE) {
-            Slog.v(TAG, "destroyLocked()");
-        }
+        if (sVerbose) Slog.v(TAG, "destroyLocked()");
 
         final int numSessions = mSessions.size();
         for (int i = 0; i < numSessions; i++) {
@@ -518,12 +513,6 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Default component: ");
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
-
-        if (VERBOSE && mInfo != null) {
-            // ServiceInfo dump is too noisy and redundant (it can be obtained through other dumps)
-            pw.print(prefix); pw.println("ServiceInfo:");
-            mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), prefix + prefix);
-        }
 
         final int size = mSessions.size();
         if (size == 0) {

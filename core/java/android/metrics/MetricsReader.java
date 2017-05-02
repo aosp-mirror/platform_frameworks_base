@@ -93,6 +93,7 @@ public class MetricsReader {
             }
             final LogMaker log = new LogMaker(objects)
                     .setTimestamp(eventTimestampMs)
+                    .setUid(event.getUid())
                     .setProcessId(event.getProcessId());
             if (log.getCategory() == MetricsEvent.METRICS_CHECKPOINT) {
                 if (log.getSubtype() == mCheckpointTag) {
@@ -155,11 +156,13 @@ public class MetricsReader {
     public static class Event {
         long mTimeMillis;
         int mPid;
+        int mUid;
         Object mData;
 
-        public Event(long timeMillis, int pid, Object data) {
+        public Event(long timeMillis, int pid, int uid, Object data) {
             mTimeMillis = timeMillis;
             mPid = pid;
+            mUid = uid;
             mData = data;
         }
 
@@ -167,6 +170,7 @@ public class MetricsReader {
             mTimeMillis = TimeUnit.MILLISECONDS.convert(
                     nativeEvent.getTimeNanos(), TimeUnit.NANOSECONDS);
             mPid = nativeEvent.getProcessId();
+            mUid = nativeEvent.getUid();
             mData = nativeEvent.getData();
         }
 
@@ -176,6 +180,10 @@ public class MetricsReader {
 
         public int getProcessId() {
             return mPid;
+        }
+
+        public int getUid() {
+            return mUid;
         }
 
         public Object getData() {

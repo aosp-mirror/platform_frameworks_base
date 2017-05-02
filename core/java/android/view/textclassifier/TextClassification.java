@@ -33,12 +33,12 @@ import java.util.List;
 /**
  * Information for generating a widget to handle classified text.
  */
-public final class TextClassificationResult {
+public final class TextClassification {
 
     /**
      * @hide
      */
-    static final TextClassificationResult EMPTY = new TextClassificationResult.Builder().build();
+    static final TextClassification EMPTY = new TextClassification.Builder().build();
 
     @NonNull private final String mText;
     @Nullable private final Drawable mIcon;
@@ -49,7 +49,7 @@ public final class TextClassificationResult {
     @NonNull private final List<String> mEntities;
     private int mLogType;
 
-    private TextClassificationResult(
+    private TextClassification(
             @NonNull String text,
             Drawable icon,
             String label,
@@ -147,7 +147,7 @@ public final class TextClassificationResult {
 
     @Override
     public String toString() {
-        return String.format("TextClassificationResult {"
+        return String.format("TextClassification {"
                         + "text=%s, entities=%s, label=%s, intent=%s}",
                 mText, mEntityConfidence, mLabel, mIntent);
     }
@@ -167,7 +167,7 @@ public final class TextClassificationResult {
     }
 
     /**
-     * Builder for building {@link TextClassificationResult}s.
+     * Builder for building {@link TextClassification} objects.
      */
     public static final class Builder {
 
@@ -244,10 +244,10 @@ public final class TextClassificationResult {
         }
 
         /**
-         * Builds an returns a {@link TextClassificationResult}.
+         * Builds and returns a {@link TextClassification} object.
          */
-        public TextClassificationResult build() {
-            return new TextClassificationResult(
+        public TextClassification build() {
+            return new TextClassification(
                     mText, mIcon, mLabel, mIntent, mOnClickListener, mEntityConfidence, mLogType);
         }
     }

@@ -36,6 +36,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -64,9 +65,14 @@ import android.util.Log;
 import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;
 
+import dalvik.system.VMRuntime;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,9 +84,9 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public static final String TAG = "PackageManagerTests";
 
-    public final long MAX_WAIT_TIME = 25 * 1000;
+    public static final long MAX_WAIT_TIME = 25 * 1000;
 
-    public final long WAIT_TIME_INCR = 5 * 1000;
+    public static final long WAIT_TIME_INCR = 5 * 1000;
 
     private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec";
 
@@ -3859,6 +3865,117 @@ public class PackageManagerTests extends AndroidTestCase {
         int retCode = PackageManager.INSTALL_FAILED_DEXOPT;
         installFromRawResource("install.apk", R.raw.install_bad_dex, 0, true, true, retCode,
                 PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+
+    private static class TestDexModuleRegisterCallback
+            extends PackageManager.DexModuleRegisterCallback {
+        private String mDexModulePath = null;
+        private boolean mSuccess = false;
+        private String mMessage = null;
+        CountDownLatch doneSignal = new CountDownLatch(1);
+
+        @Override
+        public void onDexModuleRegistered(String dexModulePath, boolean success, String message) {
+            mDexModulePath = dexModulePath;
+            mSuccess = success;
+            mMessage = message;
+            doneSignal.countDown();
+        }
+
+        boolean waitTillDone() {
+            long startTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() - startTime < MAX_WAIT_TIME) {
+                try {
+                    return doneSignal.await(MAX_WAIT_TIME, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Interrupted during sleep", e);
+                }
+            }
+            return false;
+        }
+
+    }
+
+    // Verify that the base code path cannot be registered.
+    public void testRegisterDexModuleBaseCode() throws Exception {
+        PackageManager pm = getPm();
+        ApplicationInfo info = getContext().getApplicationInfo();
+        TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+        pm.registerDexModule(info.getBaseCodePath(), callback);
+        assertTrue(callback.waitTillDone());
+        assertEquals(info.getBaseCodePath(), callback.mDexModulePath);
+        assertFalse("BaseCodePath should not be registered", callback.mSuccess);
+    }
+
+    // Verify thatmodules which are not own by the calling package are not registered.
+    public void testRegisterDexModuleNotOwningModule() throws Exception {
+        TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+        String moduleBelongingToOtherPackage = "/data/user/0/com.google.android.gms/module.apk";
+        getPm().registerDexModule(moduleBelongingToOtherPackage, callback);
+        assertTrue(callback.waitTillDone());
+        assertEquals(moduleBelongingToOtherPackage, callback.mDexModulePath);
+        assertTrue(callback.waitTillDone());
+        assertFalse("Only modules belonging to the calling package can be registered",
+                callback.mSuccess);
+    }
+
+    // Verify that modules owned by the package are successfully registered.
+    public void testRegisterDexModuleSuccessfully() throws Exception {
+        ApplicationInfo info = getContext().getApplicationInfo();
+        // Copy the main apk into the data folder and use it as a "module".
+        File dexModuleDir = new File(info.dataDir, "module-dir");
+        File dexModule = new File(dexModuleDir, "module.apk");
+        try {
+            assertNotNull(FileUtils.createDir(
+                    dexModuleDir.getParentFile(), dexModuleDir.getName()));
+            Files.copy(Paths.get(info.getBaseCodePath()), dexModule.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+            TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+            getPm().registerDexModule(dexModule.toString(), callback);
+            assertTrue(callback.waitTillDone());
+            assertEquals(dexModule.toString(), callback.mDexModulePath);
+            assertTrue(callback.waitTillDone());
+            assertTrue(callback.mMessage, callback.mSuccess);
+
+            // NOTE:
+            // This actually verifies internal behaviour which might change. It's not
+            // ideal but it's the best we can do since there's no other place we can currently
+            // write a better test.
+            for(String isa : getAppDexInstructionSets(info)) {
+                Files.exists(Paths.get(dexModuleDir.toString(), "oat", isa, "module.odex"));
+                Files.exists(Paths.get(dexModuleDir.toString(), "oat", isa, "module.vdex"));
+            }
+        } finally {
+            FileUtils.deleteContentsAndDir(dexModuleDir);
+        }
+    }
+
+    // If the module does not exist on disk we should get a failure.
+    public void testRegisterDexModuleNotExists() throws Exception {
+        ApplicationInfo info = getContext().getApplicationInfo();
+        String nonExistentApk = Paths.get(info.dataDir, "non-existent.apk").toString();
+        TestDexModuleRegisterCallback callback = new TestDexModuleRegisterCallback();
+        getPm().registerDexModule(nonExistentApk, callback);
+        assertTrue(callback.waitTillDone());
+        assertEquals(nonExistentApk, callback.mDexModulePath);
+        assertTrue(callback.waitTillDone());
+        assertFalse("DexModule registration should fail", callback.mSuccess);
+    }
+
+    // Copied from com.android.server.pm.InstructionSets because we don't have access to it here.
+    private static String[] getAppDexInstructionSets(ApplicationInfo info) {
+        if (info.primaryCpuAbi != null) {
+            if (info.secondaryCpuAbi != null) {
+                return new String[] {
+                        VMRuntime.getInstructionSet(info.primaryCpuAbi),
+                        VMRuntime.getInstructionSet(info.secondaryCpuAbi) };
+            } else {
+                return new String[] {
+                        VMRuntime.getInstructionSet(info.primaryCpuAbi) };
+            }
+        }
+
+        return new String[] { VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]) };
     }
 
     /*---------- Recommended install location tests ----*/

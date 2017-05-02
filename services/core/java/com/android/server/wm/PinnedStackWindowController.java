@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+
 import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
@@ -39,6 +41,42 @@ public class PinnedStackWindowController extends StackWindowController {
     public PinnedStackWindowController(int stackId, PinnedStackWindowListener listener,
             int displayId, boolean onTop, Rect outBounds) {
         super(stackId, listener, displayId, onTop, outBounds, WindowManagerService.getInstance());
+    }
+
+    /**
+     * @param useExistingStackBounds Apply {@param aspectRatio} to the existing target stack bounds
+     *                               if possible
+     */
+    public Rect getPictureInPictureBounds(float aspectRatio, boolean useExistingStackBounds) {
+        synchronized (mWindowMap) {
+            if (!mService.mSupportsPictureInPicture || mContainer == null) {
+                return null;
+            }
+
+            final Rect stackBounds;
+            final DisplayContent displayContent = mContainer.getDisplayContent();
+            if (displayContent == null) {
+                return null;
+            }
+
+            final PinnedStackController pinnedStackController =
+                    displayContent.getPinnedStackController();
+            if (useExistingStackBounds) {
+                // If the stack exists, then use its final bounds to calculate the new aspect ratio
+                // bounds
+                stackBounds = new Rect();
+                mContainer.getAnimationOrCurrentBounds(stackBounds);
+            } else {
+                // Otherwise, just calculate the aspect ratio bounds from the default bounds
+                stackBounds = pinnedStackController.getDefaultBounds();
+            }
+
+            if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
+                return pinnedStackController.transformBoundsToAspectRatio(stackBounds, aspectRatio);
+            } else {
+                return stackBounds;
+            }
+        }
     }
 
     /**
@@ -104,8 +142,7 @@ public class PinnedStackWindowController extends StackWindowController {
                 return;
             }
 
-            final int displayId = mContainer.getDisplayContent().getDisplayId();
-            final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio,
+            final Rect toBounds = getPictureInPictureBounds(aspectRatio,
                     true /* useExistingStackBounds */);
             final Rect targetBounds = new Rect();
             mContainer.getAnimationOrCurrentBounds(targetBounds);

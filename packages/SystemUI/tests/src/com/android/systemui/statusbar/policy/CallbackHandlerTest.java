@@ -114,26 +114,33 @@ public class CallbackHandlerTest {
         boolean wide = true;
         int subId = 5;
         boolean roaming = true;
-        boolean isEmergency = true;
-        mHandler.setMobileDataIndicators(status, type, in, out, typeDescription,
-                subId, roaming, isEmergency);
+        mHandler.setMobileDataIndicators(status, qs, type, qsType, in, out, typeDescription,
+                description, wide, subId, roaming);
         waitForCallbacks();
 
         ArgumentCaptor<IconState> statusArg = ArgumentCaptor.forClass(IconState.class);
+        ArgumentCaptor<IconState> qsArg = ArgumentCaptor.forClass(IconState.class);
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> qsTypeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Boolean> inArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<String> typeContentArg = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> descArg = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Boolean> wideArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Integer> subIdArg = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(mSignalCallback).setMobileDataIndicators(statusArg.capture(),
-                typeIconArg.capture(), inArg.capture(),
-                outArg.capture(), typeContentArg.capture(),
-                subIdArg.capture(), eq(roaming), eq(isEmergency));
+                qsArg.capture(), typeIconArg.capture(), qsTypeIconArg.capture(), inArg.capture(),
+                outArg.capture(), typeContentArg.capture(), descArg.capture(), wideArg.capture(),
+                subIdArg.capture(), eq(roaming));
         assertEquals(status, statusArg.getValue());
+        assertEquals(qs, qsArg.getValue());
         assertEquals(type, (int) typeIconArg.getValue());
+        assertEquals(qsType, (int) qsTypeIconArg.getValue());
         assertEquals(in, (boolean) inArg.getValue());
         assertEquals(out, (boolean) outArg.getValue());
         assertEquals(typeDescription, typeContentArg.getValue());
+        assertEquals(description, descArg.getValue());
+        assertEquals(wide, (boolean) wideArg.getValue());
         assertEquals(subId, (int) subIdArg.getValue());
     }
 

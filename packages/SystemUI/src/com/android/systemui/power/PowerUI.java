@@ -31,6 +31,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -92,6 +93,10 @@ public class PowerUI extends SystemUI {
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
+
+        // Check to see if we need to let the user know that the phone previously shut down due
+        // to the temperature being too high.
+        showThermalShutdownDialog();
 
         initTemperatureWarning();
     }
@@ -256,6 +261,13 @@ public class PowerUI extends SystemUI {
         updateTemperatureWarning();
     }
 
+    private void showThermalShutdownDialog() {
+        if (mPowerManager.getLastShutdownReason()
+                == PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN) {
+            mWarnings.showThermalShutdownWarning();
+        }
+    }
+
     private void updateTemperatureWarning() {
         float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
                 HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
@@ -268,9 +280,9 @@ public class PowerUI extends SystemUI {
             if (statusBar != null && !statusBar.isDeviceInVrMode()
                     && temp >= mThresholdTemp) {
                 logAtTemperatureThreshold(temp);
-                mWarnings.showTemperatureWarning();
+                mWarnings.showHighTemperatureWarning();
             } else {
-                mWarnings.dismissTemperatureWarning();
+                mWarnings.dismissHighTemperatureWarning();
             }
         }
 
@@ -369,8 +381,9 @@ public class PowerUI extends SystemUI {
         void showInvalidChargerWarning();
         void updateLowBatteryWarning();
         boolean isInvalidChargerWarningShowing();
-        void dismissTemperatureWarning();
-        void showTemperatureWarning();
+        void dismissHighTemperatureWarning();
+        void showHighTemperatureWarning();
+        void showThermalShutdownWarning();
         void dump(PrintWriter pw);
         void userSwitched();
     }

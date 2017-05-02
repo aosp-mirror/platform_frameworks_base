@@ -49,7 +49,7 @@ public class AlsaCardsParser {
 
         public AlsaCardRecord() {}
 
-        public boolean parse(String line, int lineIndex) {
+        private boolean parse(String line, int lineIndex) {
             int tokenIndex = 0;
             int delimIndex = 0;
 
@@ -258,7 +258,7 @@ public class AlsaCardsParser {
     //
     // Logging
     //
-    public void Log(String heading) {
+    private void Log(String heading) {
         if (DEBUG) {
             Slog.i(TAG, heading);
             for (AlsaCardRecord cardRec : mCardRecords) {
@@ -267,7 +267,7 @@ public class AlsaCardsParser {
         }
     }
 
-    static public void LogDevices(String caption, ArrayList<AlsaCardRecord> deviceList) {
+    static private void LogDevices(String caption, ArrayList<AlsaCardRecord> deviceList) {
         Slog.d(TAG, caption + " ----------------");
         int listIndex = 0;
         for (AlsaCardRecord device : deviceList) {

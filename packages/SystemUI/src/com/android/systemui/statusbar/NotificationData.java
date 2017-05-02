@@ -24,6 +24,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
@@ -32,6 +33,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -41,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -83,6 +86,7 @@ public class NotificationData {
         public List<SnoozeCriterion> snoozeCriteria;
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
+        private ArraySet<AsyncTask> mRunningTasks = new ArraySet();
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -210,6 +214,29 @@ public class NotificationData {
             mCachedContrastColor = contrasted;
             return mCachedContrastColor;
         }
+
+        /**
+         * Abort all existing inflation tasks
+         */
+        public void abortInflation() {
+            for (AsyncTask task : mRunningTasks) {
+                task.cancel(true /* mayInterruptIfRunning */);
+            }
+            mRunningTasks.clear();
+        }
+
+        public void addInflationTask(AsyncTask asyncInflationTask) {
+            mRunningTasks.add(asyncInflationTask);
+        }
+
+        public void onInflationTaskFinished(AsyncTask asyncInflationTask) {
+            mRunningTasks.remove(asyncInflationTask);
+        }
+
+        @VisibleForTesting
+        public ArraySet<AsyncTask> getRunningTasks() {
+            return mRunningTasks;
+        }
     }
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
@@ -302,12 +329,12 @@ public class NotificationData {
         return mEntries.get(key);
     }
 
-    public void add(Entry entry, RankingMap ranking) {
+    public void add(Entry entry) {
         synchronized (mEntries) {
             mEntries.put(entry.notification.getKey(), entry);
         }
         mGroupManager.onEntryAdded(entry);
-        updateRankingAndSort(ranking);
+        updateRankingAndSort(mRankingMap);
     }
 
     public Entry remove(String key, RankingMap ranking) {

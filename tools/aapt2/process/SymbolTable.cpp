@@ -34,6 +34,21 @@ using android::StringPiece;
 
 namespace aapt {
 
+SymbolTable::SymbolTable(NameMangler* mangler)
+    : mangler_(mangler),
+      delegate_(util::make_unique<DefaultSymbolTableDelegate>()),
+      cache_(200),
+      id_cache_(200) {
+}
+
+void SymbolTable::SetDelegate(std::unique_ptr<ISymbolTableDelegate> delegate) {
+  CHECK(delegate != nullptr) << "can't set a nullptr delegate";
+  delegate_ = std::move(delegate);
+
+  // Clear the cache in case this delegate changes the order of lookup.
+  cache_.clear();
+}
+
 void SymbolTable::AppendSource(std::unique_ptr<ISymbolSource> source) {
   sources_.push_back(std::move(source));
 
@@ -75,28 +90,27 @@ const SymbolTable::Symbol* SymbolTable::FindByName(const ResourceName& name) {
     mangled_name = &mangled_name_impl.value();
   }
 
-  for (auto& symbolSource : sources_) {
-    std::unique_ptr<Symbol> symbol = symbolSource->FindByName(*mangled_name);
-    if (symbol) {
-      // Take ownership of the symbol into a shared_ptr. We do this because
-      // LruCache doesn't support unique_ptr.
-      std::shared_ptr<Symbol> shared_symbol(std::move(symbol));
-
-      // Since we look in the cache with the unmangled, but package prefixed
-      // name, we must put the same name into the cache.
-      cache_.put(*name_with_package, shared_symbol);
-
-      if (shared_symbol->id) {
-        // The symbol has an ID, so we can also cache this!
-        id_cache_.put(shared_symbol->id.value(), shared_symbol);
-      }
-
-      // Returns the raw pointer. Callers are not expected to hold on to this
-      // between calls to Find*.
-      return shared_symbol.get();
-    }
+  std::unique_ptr<Symbol> symbol = delegate_->FindByName(*mangled_name, sources_);
+  if (symbol == nullptr) {
+    return nullptr;
   }
-  return nullptr;
+
+  // Take ownership of the symbol into a shared_ptr. We do this because
+  // LruCache doesn't support unique_ptr.
+  std::shared_ptr<Symbol> shared_symbol(std::move(symbol));
+
+  // Since we look in the cache with the unmangled, but package prefixed
+  // name, we must put the same name into the cache.
+  cache_.put(*name_with_package, shared_symbol);
+
+  if (shared_symbol->id) {
+    // The symbol has an ID, so we can also cache this!
+    id_cache_.put(shared_symbol->id.value(), shared_symbol);
+  }
+
+  // Returns the raw pointer. Callers are not expected to hold on to this
+  // between calls to Find*.
+  return shared_symbol.get();
 }
 
 const SymbolTable::Symbol* SymbolTable::FindById(const ResourceId& id) {
@@ -105,20 +119,19 @@ const SymbolTable::Symbol* SymbolTable::FindById(const ResourceId& id) {
   }
 
   // We did not find it in the cache, so look through the sources.
-  for (auto& symbolSource : sources_) {
-    std::unique_ptr<Symbol> symbol = symbolSource->FindById(id);
-    if (symbol) {
-      // Take ownership of the symbol into a shared_ptr. We do this because LruCache
-      // doesn't support unique_ptr.
-      std::shared_ptr<Symbol> shared_symbol(std::move(symbol));
-      id_cache_.put(id, shared_symbol);
-
-      // Returns the raw pointer. Callers are not expected to hold on to this
-      // between calls to Find*.
-      return shared_symbol.get();
-    }
+  std::unique_ptr<Symbol> symbol = delegate_->FindById(id, sources_);
+  if (symbol == nullptr) {
+    return nullptr;
   }
-  return nullptr;
+
+  // Take ownership of the symbol into a shared_ptr. We do this because LruCache
+  // doesn't support unique_ptr.
+  std::shared_ptr<Symbol> shared_symbol(std::move(symbol));
+  id_cache_.put(id, shared_symbol);
+
+  // Returns the raw pointer. Callers are not expected to hold on to this
+  // between calls to Find*.
+  return shared_symbol.get();
 }
 
 const SymbolTable::Symbol* SymbolTable::FindByReference(const Reference& ref) {
@@ -138,6 +151,28 @@ const SymbolTable::Symbol* SymbolTable::FindByReference(const Reference& ref) {
     symbol = FindByName(ref.name.value());
   }
   return symbol;
+}
+
+std::unique_ptr<SymbolTable::Symbol> DefaultSymbolTableDelegate::FindByName(
+    const ResourceName& name, const std::vector<std::unique_ptr<ISymbolSource>>& sources) {
+  for (auto& source : sources) {
+    std::unique_ptr<SymbolTable::Symbol> symbol = source->FindByName(name);
+    if (symbol) {
+      return symbol;
+    }
+  }
+  return {};
+}
+
+std::unique_ptr<SymbolTable::Symbol> DefaultSymbolTableDelegate::FindById(
+    ResourceId id, const std::vector<std::unique_ptr<ISymbolSource>>& sources) {
+  for (auto& source : sources) {
+    std::unique_ptr<SymbolTable::Symbol> symbol = source->FindById(id);
+    if (symbol) {
+      return symbol;
+    }
+  }
+  return {};
 }
 
 std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(

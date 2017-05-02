@@ -100,6 +100,13 @@
     <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Мобилни оператер је привремено суспендовао гласовне и хитне позиве на овој локацији"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Повезивање са мрежом није успело"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Да бисте побољшали пријем, пробајте да промените изабрани тип у одељку Систем &gt; Мрежа и интернет &gt; Мобилне мреже &gt; Жељени тип мреже."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Обавештења"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Преусмеравање позива"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Режим за хитан повратни позив"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Обавештења за мобилне податке"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-ови"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Поруке говорне поште"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Позивање преко Wi-Fi мреже"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Корисник захтева ПОТПУН режим TTY"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Корисник захтева ПРЕНОС ЗВУКА за режим TTY"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Корисник захтева ПРЕНОС ГЛАСА за режим TTY"</string>
@@ -261,6 +268,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Обавештења"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Режим демонстрације за малопродајне објекте"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB веза"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Безбедни режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android систем"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Пређи на Лични профил"</string>
@@ -287,8 +304,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Проверава садржај прозора са којим остварујете интеракцију."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Укључи Истраживања додиром"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ставке које додирнете ће бити изговорене наглас, а можете да се крећете по екрану покретима."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Укључи побољшану приступачност веба"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могу да се инсталирају скрипте да би садржај апликација био приступачнији."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Прати текст који уносите"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Обухвата личне податке као што су бројеви кредитних картица и лозинке."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Управљај увећањем приказа"</string>
@@ -1625,7 +1640,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирао је администратор"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избрисао је администратор"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Да би продужила време трајања батерије, уштеда батерије смањује перформансе уређаја и ограничава вибрацију, услуге локације и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију можда неће да се ажурирају ако их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Да би продужила време трајања батерије, уштеда батерије смањује перформансе уређаја и ограничава вибрацију, услуге локације и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију неће се ажурирати док их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Укључити Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Укључи"</string>
@@ -1763,11 +1778,12 @@
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Пређите у режим уноса текста ради уноса времена."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Пређите у режим сата ради уноса времена."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Опције аутоматског попуњавања"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Сачувајте за аутоматско попуњавање"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Садржај не може аутоматски да се попуни"</string>
-    <string name="autofill_save_title" msgid="7081244500504163245">"Желите ли да сачувате у: <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Желите ли да сачувате ставку <xliff:g id="TYPE">%1$s</xliff:g> у: <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_2types" msgid="8875796560521962098">"Желите ли да сачувате ставке <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> у <xliff:g id="LABEL">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6889899028382843493">"Желите ли да сачувате ставке <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> у <xliff:g id="LABEL">%4$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Желите ли да сачувате у: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Желите ли да сачувате ставку <xliff:g id="TYPE">%1$s</xliff:g> у: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Желите ли да сачувате ставке <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> у: &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Желите ли да сачувате ставке <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> у: &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Сачувај"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Не, хвала"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"лозинка"</string>

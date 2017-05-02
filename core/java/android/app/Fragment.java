@@ -2309,7 +2309,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * enabled.
      *
      * @see Activity#postponeEnterTransition()
-     * @see FragmentTransaction#setAllowOptimization(boolean)
+     * @see FragmentTransaction#setReorderingAllowed(boolean)
      */
     public void postponeEnterTransition() {
         ensureAnimationInfo().mEnterTransitionPostponed = true;

@@ -19,6 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Xavfsiz haydash"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Harakat xavfsizligi va amaldagi qonunchilikka doim rioya qiling. Yo‘l ko‘rsatmalari noaniq, chala, xavfli, mos emas, taqiqlangan yoki ma’muriy hududlarni kesib o‘tadigan bo‘lishi mumkin. Biznes ma’lumotlari ham noaniq yoki chala bo‘lishi mumkin. Ma’lumotlar real vaqt rejimida bo‘lmasligi hamda joylashuv ma’lumotining aniqligi kafolatlanmaydi. Avtomobilni haydash mobaynida Android Auto xizmati bilan bog‘liq bo‘lmagan hollarda mobil qurilma yoki ilovalardan foydalanmang."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Noma’lum"</string>
 </resources>

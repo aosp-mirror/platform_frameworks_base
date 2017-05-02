@@ -19,6 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"ຂັບຂີ່ຢ່າງປອດໄພ"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"ຮູ້ຈັກສະພາບການຂັບຂີ່ຢ່າງຄົບຖ້ວນ ແລະ ປະຕິບັດຕາມກົດໝາຍທີ່ນຳໃຊ້ສະເໝີ. ຄຳແນະນຳເສັ້ນທາງອາດຈະບໍ່ຖືກຕ້ອງ, ບໍ່ຄົບຖ້ວນ, ອັນຕະລາຍ, ບໍ່ເໝາະສົມ, ຖືກຫ້າມ ຫຼື ກ່ຽວຂ້ອງກັບການຂ້າມເຂດປົກຄອງ. ຂໍ້ມູນທຸລະກິດອາດຈະບໍ່ຖືກຕ້ອງ ຫຼື ບໍ່ຄົບຖ້ວນ. ຂໍ້ມູນບໍ່ແມ່ນຂໍ້ມູນສົດ ແລະ ບໍ່ສາມາດຮັບປະກັນຄວາມຖືກຕ້ອງຂອງສະຖານທີ່ໄດ້. ຢ່າໃຊ້ອຸປະກອນມືຖືຂອງທ່ານ ຫຼື ໃຊ້ແອັບທີ່ບໍ່ມີໄວ້ສຳລັບ Android Auto ໃນຂະນະທີ່ຂັບຂີ່."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"ບໍ່​ຮູ້ຈັກ"</string>
 </resources>

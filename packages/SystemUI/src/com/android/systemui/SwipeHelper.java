@@ -50,7 +50,7 @@ public class SwipeHelper implements Gefingerpoken {
     public static final int X = 0;
     public static final int Y = 1;
 
-    private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
+    private float SWIPE_ESCAPE_VELOCITY = 500f; // dp/sec
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
     private int MAX_ESCAPE_ANIMATION_DURATION = 400; // ms
     private int MAX_DISMISS_VELOCITY = 4000; // dp/sec
@@ -58,6 +58,9 @@ public class SwipeHelper implements Gefingerpoken {
 
     static final float SWIPE_PROGRESS_FADE_END = 0.5f; // fraction of thumbnail width
                                               // beyond which swipe progress->0
+    public static final float SWIPED_FAR_ENOUGH_SIZE_FRACTION = 0.6f;
+    static final float MAX_SCROLL_SIZE_FRACTION = 0.3f;
+
     private float mMinSwipeProgress = 0f;
     private float mMaxSwipeProgress = 1f;
 
@@ -369,9 +372,8 @@ public class SwipeHelper implements Gefingerpoken {
         // if the language is rtl we prefer swiping to the left
         boolean animateLeftForRtl = velocity == 0 && (getTranslation(animView) == 0 || isDismissAll)
                 && isLayoutRtl;
-        boolean animateLeft = velocity < 0
-                || (velocity == 0 && getTranslation(animView) < 0 && !isDismissAll);
-
+        boolean animateLeft = (Math.abs(velocity) > getEscapeVelocity() && velocity < 0) ||
+                (getTranslation(animView) < 0 && !isDismissAll);
         if (animateLeft || animateLeftForRtl || animateUpForMenu) {
             newPos = -getSize(animView);
         } else {
@@ -590,7 +592,7 @@ public class SwipeHelper implements Gefingerpoken {
                     // maxScrollDistance
                     if (CONSTRAIN_SWIPE && !mCallback.canChildBeDismissed(mCurrView)) {
                         float size = getSize(mCurrView);
-                        float maxScrollDistance = 0.25f * size;
+                        float maxScrollDistance = MAX_SCROLL_SIZE_FRACTION * size;
                         if (absDelta >= size) {
                             delta = delta > 0 ? maxScrollDistance : -maxScrollDistance;
                         } else {
@@ -652,7 +654,8 @@ public class SwipeHelper implements Gefingerpoken {
 
     protected boolean swipedFarEnough() {
         float translation = getTranslation(mCurrView);
-        return DISMISS_IF_SWIPED_FAR_ENOUGH && Math.abs(translation) > 0.4 * getSize(mCurrView);
+        return DISMISS_IF_SWIPED_FAR_ENOUGH
+                && Math.abs(translation) > SWIPED_FAR_ENOUGH_SIZE_FRACTION * getSize(mCurrView);
     }
 
     public boolean isDismissGesture(MotionEvent ev) {

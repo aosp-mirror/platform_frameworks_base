@@ -89,7 +89,7 @@ public class KeyguardIndicationController {
     private int mChargingWattage;
     private String mMessageToShowOnScreenOn;
 
-    private KeyguardUpdateMonitorCallback mUpdateMonitor;
+    private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
 
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mDozing;
@@ -153,10 +153,10 @@ public class KeyguardIndicationController {
      * same instance.
      */
     protected KeyguardUpdateMonitorCallback getKeyguardCallback() {
-        if (mUpdateMonitor == null) {
-            mUpdateMonitor = new BaseKeyguardCallback();
+        if (mUpdateMonitorCallback == null) {
+            mUpdateMonitorCallback = new BaseKeyguardCallback();
         }
-        return mUpdateMonitor;
+        return mUpdateMonitorCallback;
     }
 
     private void updateDisclosure() {
@@ -200,6 +200,15 @@ public class KeyguardIndicationController {
      * Sets the active controller managing changes and callbacks to user information.
      */
     public void setUserInfoController(UserInfoController userInfoController) {
+    }
+
+    /**
+     * Returns the indication text indicating that trust has been granted.
+     *
+     * @return {@code null} or an empty string if a trust indication text should not be shown.
+     */
+    protected String getTrustIndication() {
+        return null;
     }
 
     /**
@@ -250,7 +259,7 @@ public class KeyguardIndicationController {
         }
     }
 
-    private void updateIndication() {
+    protected final void updateIndication() {
         if (TextUtils.isEmpty(mTransientIndication)) {
             mWakeLock.setAcquired(false);
         }
@@ -270,14 +279,19 @@ public class KeyguardIndicationController {
                 return;
             }
 
-            if (!mUserManager.isUserUnlocked(ActivityManager.getCurrentUser())) {
+            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            int userId = ActivityManager.getCurrentUser();
+            String trustIndication = getTrustIndication();
+            if (!mUserManager.isUserUnlocked(userId)) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
                 mTextView.setTextColor(Color.WHITE);
-
             } else if (!TextUtils.isEmpty(mTransientIndication)) {
                 mTextView.switchIndication(mTransientIndication);
                 mTextView.setTextColor(mTransientTextColor);
-
+            } else if (!TextUtils.isEmpty(trustIndication)
+                    && updateMonitor.getUserHasTrust(userId)) {
+                mTextView.switchIndication(trustIndication);
+                mTextView.setTextColor(Color.WHITE);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
                 if (DEBUG_CHARGING_SPEED) {

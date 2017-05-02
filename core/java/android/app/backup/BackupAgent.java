@@ -133,8 +133,6 @@ public abstract class BackupAgent extends ContextWrapper {
 
     Handler mHandler = null;
 
-    private long mBackupQuotaBytes = -1;
-
     Handler getHandler() {
         if (mHandler == null) {
             mHandler = new Handler(Looper.getMainLooper());
@@ -183,21 +181,6 @@ public abstract class BackupAgent extends ContextWrapper {
      * Agents do not need to override this method.
      */
     public void onDestroy() {
-    }
-
-    /**
-     * Returns the quota in bytes for the currently requested backup operation. The value can
-     * vary for each operation depending on the type of backup being done.
-     *
-     * <p>Can be called only from {@link BackupAgent#onFullBackup(FullBackupDataOutput)} or
-     * {@link BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}.
-     */
-    public long getBackupQuota() {
-        if (mBackupQuotaBytes < 0) {
-            throw new IllegalStateException(
-                    "Backup quota is available only during backup operations.");
-        }
-        return mBackupQuotaBytes;
     }
 
     /**
@@ -918,10 +901,8 @@ public abstract class BackupAgent extends ContextWrapper {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
-            mBackupQuotaBytes = quotaBytes;
-
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
-            BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
+            BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor(), quotaBytes);
 
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
@@ -936,9 +917,6 @@ public abstract class BackupAgent extends ContextWrapper {
                 // in case the app code has side effects (since apps cannot provide this
                 // guarantee themselves).
                 waitForSharedPrefs();
-
-                // Unset quota after onBackup is done.
-                mBackupQuotaBytes = -1;
 
                 Binder.restoreCallingIdentity(ident);
                 try {
@@ -997,8 +975,6 @@ public abstract class BackupAgent extends ContextWrapper {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
-            mBackupQuotaBytes = quotaBytes;
-
             if (DEBUG) Log.v(TAG, "doFullBackup() invoked");
 
             // Ensure that any SharedPreferences writes have landed *before*
@@ -1006,7 +982,7 @@ public abstract class BackupAgent extends ContextWrapper {
             waitForSharedPrefs();
 
             try {
-                BackupAgent.this.onFullBackup(new FullBackupDataOutput(data));
+                BackupAgent.this.onFullBackup(new FullBackupDataOutput(data, quotaBytes));
             } catch (IOException ex) {
                 Log.d(TAG, "onFullBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw new RuntimeException(ex);
@@ -1016,9 +992,6 @@ public abstract class BackupAgent extends ContextWrapper {
             } finally {
                 // ... and then again after, as in the doBackup() case
                 waitForSharedPrefs();
-
-                // Unset quota after onFullBackup is done.
-                mBackupQuotaBytes = -1;
 
                 // Send the EOD marker indicating that there is no more data
                 // forthcoming from this agent.
@@ -1046,9 +1019,7 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder) {
             // Ensure that we're running with the app's normal permission level
             final long ident = Binder.clearCallingIdentity();
-            FullBackupDataOutput measureOutput = new FullBackupDataOutput();
-
-            mBackupQuotaBytes = quotaBytes;
+            FullBackupDataOutput measureOutput = new FullBackupDataOutput(quotaBytes);
 
             waitForSharedPrefs();
             try {
@@ -1060,8 +1031,6 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onFullBackup[M] (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
-                // Unset quota after onFullBackup is done.
-                mBackupQuotaBytes = -1;
                 Binder.restoreCallingIdentity(ident);
                 try {
                     callbackBinder.opComplete(token, measureOutput.getSize());

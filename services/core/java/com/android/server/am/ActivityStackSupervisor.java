@@ -110,7 +110,6 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.IActivityContainerCallback;
-import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
@@ -157,7 +156,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -1129,7 +1127,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mActivitiesWaitingForVisibleActivity.remove(r);
 
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
-            if (mWaitingForActivityVisible.get(i).matches(r)) {
+            if (mWaitingForActivityVisible.get(i).matches(r.realActivity)) {
                 mWaitingForActivityVisible.remove(i);
             }
         }
@@ -1143,7 +1141,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         boolean changed = false;
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             final WaitInfo w = mWaitingForActivityVisible.get(i);
-            if (w.matches(r)) {
+            if (w.matches(r.realActivity)) {
                 final WaitResult result = w.getResult();
                 changed = true;
                 result.timeout = false;
@@ -2505,7 +2503,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                                 tempRect /* outStackBounds */,
                                 otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
 
-                        resizeStackLocked(i, tempRect,
+                        resizeStackLocked(i, !tempRect.isEmpty() ? tempRect : null,
                                 !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
                                 tempOtherTaskInsetBounds, preserveWindows,
                                 true /* allowResizeInDockedMode */, deferResume);
@@ -2979,8 +2977,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Calculate the default bounds (don't use existing stack bounds as we may have just created
         // the stack
-        final Rect destBounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
-                aspectRatio, false /* useExistingStackBounds */);
+        final Rect destBounds = stack.getPictureInPictureBounds(aspectRatio,
+                false /* useExistingStackBounds */);
 
         stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
                 true /* schedulePipModeChangedOnAnimationEnd */);
@@ -3944,10 +3942,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     private StackInfo getStackInfoLocked(ActivityStack stack) {
-        final ActivityDisplay display = mActivityDisplays.get(DEFAULT_DISPLAY);
+        final int displayId = stack.mDisplayId;
+        final ActivityDisplay display = mActivityDisplays.get(displayId);
         StackInfo info = new StackInfo();
         stack.getWindowContainerBounds(info.bounds);
-        info.displayId = DEFAULT_DISPLAY;
+        info.displayId = displayId;
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null) == STACK_VISIBLE;
@@ -4356,13 +4355,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 case IDLE_TIMEOUT_MSG: {
                     if (DEBUG_IDLE) Slog.d(TAG_IDLE,
                             "handleMessage: IDLE_TIMEOUT_MSG: r=" + msg.obj);
-                    if (mService.mDidDexOpt) {
-                        mService.mDidDexOpt = false;
-                        Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
-                        nmsg.obj = msg.obj;
-                        mHandler.sendMessageDelayed(nmsg, IDLE_TIMEOUT);
-                        return;
-                    }
                     // We don't at this point know if the activity is fullscreen,
                     // so we need to be conservative and assume it isn't.
                     activityIdleInternal((ActivityRecord) msg.obj,
@@ -4388,11 +4380,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     }
                 } break;
                 case LAUNCH_TIMEOUT_MSG: {
-                    if (mService.mDidDexOpt) {
-                        mService.mDidDexOpt = false;
-                        mHandler.sendEmptyMessageDelayed(LAUNCH_TIMEOUT_MSG, LAUNCH_TIMEOUT);
-                        return;
-                    }
                     synchronized (mService) {
                         if (mLaunchingActivity.isHeld()) {
                             Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
@@ -5140,10 +5127,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             this.mResult = result;
         }
 
-        public boolean matches(ActivityRecord record) {
-            return mTargetComponent == null ||
-                    (TextUtils.equals(mTargetComponent.getPackageName(), record.info.packageName)
-                            && TextUtils.equals(mTargetComponent.getClassName(), record.info.name));
+        public boolean matches(ComponentName targetComponent) {
+            return mTargetComponent == null || mTargetComponent.equals(targetComponent);
         }
 
         public WaitResult getResult() {

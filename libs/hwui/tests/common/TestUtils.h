@@ -88,7 +88,8 @@ namespace uirenderer {
     }; \
     INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL); \
     INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); \
+    /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
+    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */ \
     void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
 
 /**
@@ -111,7 +112,8 @@ namespace uirenderer {
         static void doTheThing(renderthread::RenderThread& renderThread); \
     }; \
     INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); \
+    /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
+    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */ \
     void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
 
 /**

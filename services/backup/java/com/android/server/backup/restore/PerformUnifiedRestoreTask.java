@@ -377,7 +377,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // Pull the Package Manager metadata from the restore set first
             mCurrentPackage = new PackageInfo();
             mCurrentPackage.packageName = RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL;
-            mPmAgent = new PackageManagerBackupAgent(backupManagerService.getPackageManager(), null);
+            mPmAgent = new PackageManagerBackupAgent(backupManagerService.getPackageManager(),
+                    null);
             mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
             if (RefactoredBackupManagerService.MORE_DEBUG) {
                 Slog.v(RefactoredBackupManagerService.TAG, "initiating restore for PMBA");
@@ -503,7 +504,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
                             metaInfo.versionCode);
-                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
+                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+                            monitoringExtras,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY, false);
                     mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                             BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
@@ -524,7 +526,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION,
                             metaInfo.versionCode);
-                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
+                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+                            monitoringExtras,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY, true);
                     mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                             BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
@@ -1029,7 +1032,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             try {
                 while (mEngine.isRunning()) {
                     // Tell it to be sure to leave the agent instance up after finishing
-                    mEngine.restoreOneFile(mEngineStream, false);
+                    mEngine.restoreOneFile(mEngineStream, false, mEngine.mBuffer,
+                            mEngine.mOnlyPackage, mEngine.mAllowApks, mEngine.mEphemeralOpToken,
+                            mEngine.mMonitor);
                 }
             } finally {
                 // Because mEngineStream adopted its underlying FD, this also

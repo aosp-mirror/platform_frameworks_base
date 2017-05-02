@@ -26,6 +26,8 @@ import java.util.Collection;
 public class MetricsReaderTest extends TestCase {
     private static final int FULL_N = 10;
     private static final int CHECKPOINTED_N = 4;
+    private static final int PID = 1;
+    private static final int UID = 2;
 
     class FakeLogReader extends MetricsReader.LogReader {
         MetricsReader.Event[] mEvents;
@@ -36,7 +38,8 @@ public class MetricsReaderTest extends TestCase {
             for (int i = 0; i < FULL_N; i++) {
                 mEvents[i] = new MetricsReader.Event(
                         1000L + i,
-                        1,
+                        PID,
+                        UID,
                         new LogMaker(i).serialize());
             }
         }
@@ -86,6 +89,13 @@ public class MetricsReaderTest extends TestCase {
             LogMaker log = mReader.next();
             assertEquals(i, log.getCategory());
         }
+    }
+
+    public void testPidUid() {
+        mReader.read(0);
+        LogMaker log = mReader.next();
+        assertEquals(PID, log.getProcessId());
+        assertEquals(UID, log.getUid());
     }
 
     public void testBlockingRead_readResetsHorizon() {

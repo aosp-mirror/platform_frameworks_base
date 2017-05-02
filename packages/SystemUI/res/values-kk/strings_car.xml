@@ -19,6 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Қауіпсіз жүргізу"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Жүргізу жағдайларын толығымен ұғыныңыз және тиісті заңдарды әрқашан сақтаңыз. Бағыттар дәл емес, толық емес, қауіпті, жарамсыз, тыйым салынған болуы немесе әкімшілік аумақтарды қиып өтуі мүмкін. Іскери ақпарат та дәл емес немесе толық емес болуы мүмкін. Деректер нақты уақыттағы деректер емес және орын дәлдігіне кепілдік берілмейді. Жүргізу кезінде мобильді құрылғыңызды ұстамаңыз немесе Android Auto қолданбасына арналмаған қолданбаларды пайдаланбаңыз."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Белгісіз"</string>
 </resources>

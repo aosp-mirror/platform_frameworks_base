@@ -45,7 +45,6 @@ static jmethodID gConfig_ctorID;
 static jfieldID gDisplay_EGLDisplayFieldID;
 static jfieldID gContext_EGLContextFieldID;
 static jfieldID gSurface_EGLSurfaceFieldID;
-static jfieldID gSurface_NativePixelRefFieldID;
 static jfieldID gConfig_EGLConfigFieldID;
 
 static inline EGLDisplay getDisplay(JNIEnv* env, jobject o) {
@@ -84,7 +83,6 @@ static void nativeClassInit(JNIEnv *_env, jclass eglImplClass)
 
     jclass surface_class = _env->FindClass("com/google/android/gles_jni/EGLSurfaceImpl");
     gSurface_EGLSurfaceFieldID = _env->GetFieldID(surface_class, "mEGLSurface", "J");
-    gSurface_NativePixelRefFieldID = _env->GetFieldID(surface_class, "mNativePixelRef", "J");
 }
 
 static const jint gNull_attrib_base[] = {EGL_NONE};
@@ -398,14 +396,6 @@ static jboolean jni_eglDestroySurface(JNIEnv *_env, jobject _this, jobject displ
     }
     EGLDisplay dpy = getDisplay(_env, display);
     EGLSurface sur = getSurface(_env, surface);
-
-    if (sur) {
-        SkPixelRef* ref = (SkPixelRef*)(_env->GetLongField(surface,
-                gSurface_NativePixelRefFieldID));
-        if (ref) {
-            SkSafeUnref(ref);
-        }
-    }
     return EglBoolToJBool(eglDestroySurface(dpy, sur));
 }
 

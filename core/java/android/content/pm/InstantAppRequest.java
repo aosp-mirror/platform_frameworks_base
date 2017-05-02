@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.content.Intent;
+import android.os.Bundle;
 
 /**
  * Information needed to make an instant application resolution request.
@@ -33,13 +34,18 @@ public final class InstantAppRequest {
     public final String callingPackage;
     /** ID of the user requesting the instant application */
     public final int userId;
+    /**
+     * Optional extra bundle provided by the source application to the installer for additional
+     * verification. */
+    public final Bundle verificationBundle;
 
     public InstantAppRequest(AuxiliaryResolveInfo responseObj, Intent origIntent,
-            String resolvedType, String callingPackage, int userId) {
+            String resolvedType, String callingPackage, int userId, Bundle verificationBundle) {
         this.responseObj = responseObj;
         this.origIntent = origIntent;
         this.resolvedType = resolvedType;
         this.callingPackage = callingPackage;
         this.userId = userId;
+        this.verificationBundle = verificationBundle;
     }
 }

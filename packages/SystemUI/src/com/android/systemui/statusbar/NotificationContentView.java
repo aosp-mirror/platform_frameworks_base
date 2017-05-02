@@ -1363,4 +1363,11 @@ public class NotificationContentView extends FrameLayout {
     public void setIsLowPriority(boolean isLowPriority) {
         mIsLowPriority = isLowPriority;
     }
+
+    public boolean isDimmable() {
+        if (!mContractedWrapper.isDimmable()) {
+            return false;
+        }
+        return true;
+    }
 }

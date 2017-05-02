@@ -448,10 +448,13 @@ public final class LoadedApk {
             }
         }
 
+        // Prepend the shared libraries, maintaining their original order where possible.
         if (sharedLibraries != null) {
+            int index = 0;
             for (String lib : sharedLibraries) {
                 if (!outZipPaths.contains(lib)) {
-                    outZipPaths.add(0, lib);
+                    outZipPaths.add(index, lib);
+                    index++;
                 }
             }
         }

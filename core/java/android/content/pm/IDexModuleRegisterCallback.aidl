@@ -14,21 +14,15 @@
 ** limitations under the License.
 */
 
-package android.telephony.mbms;
+package android.content.pm;
 
-import android.telephony.mbms.DownloadRequest;
-import android.telephony.mbms.FileInfo;
+import android.os.Bundle;
 
 /**
- * The optional interface used by download clients to track progress.
+ * Callback for registering a dex module with the Package Manager.
+ *
  * @hide
  */
-interface IDownloadListener
-{
-    /**
-     * Gives progress callbacks for a given DownloadRequest.  Includes a FileInfo
-     * as the list of files may not have been known at request-time.
-     */
-    void progress(in DownloadRequest request, in FileInfo fileInfo, int downloadSize,
-            int currentSize, int decodedPercent);
+oneway interface IDexModuleRegisterCallback {
+    void onDexModuleRegistered(in String dexModulePath, in boolean success, in String message);
 }

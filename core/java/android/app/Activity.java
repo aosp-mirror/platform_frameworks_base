@@ -2050,20 +2050,10 @@ public class Activity extends ContextThemeWrapper
         enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
     }
 
-    /**
-     * TO BE REMOVED
-     */
+    /** @removed */
     @Deprecated
     public boolean enterPictureInPictureMode(@NonNull PictureInPictureArgs args) {
-        try {
-            if (args == null) {
-                throw new IllegalArgumentException("Expected non-null picture-in-picture args");
-            }
-            updatePictureInPictureParamsForContentInsets(args);
-            return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, args);
-        } catch (RemoteException e) {
-            return false;
-        }
+        return enterPictureInPictureMode(PictureInPictureArgs.convert(args));
     }
 
     /**
@@ -2095,11 +2085,10 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    /**
-     * TO BE REMOVED
-     */
+    /** @removed */
+    @Deprecated
     public void setPictureInPictureArgs(@NonNull PictureInPictureArgs args) {
-        setPictureInPictureParams(args);
+        setPictureInPictureParams(PictureInPictureArgs.convert(args));
     }
 
     /**
@@ -2172,6 +2161,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #onConfigurationChanged(Configuration)
      * @see View#onMovedToDisplay(int, Configuration)
+     * @hide
      */
     public void onMovedToDisplay(int displayId, Configuration config) {
     }

@@ -2445,7 +2445,7 @@ public class AudioManager {
         }
 
         final AudioFocusRequest afr = new AudioFocusRequest.Builder(durationHint)
-                .setOnAudioFocusChangeListener(l, null /* no Handler for this legacy API */)
+                .setOnAudioFocusChangeListenerInt(l, null /* no Handler for this legacy API */)
                 .setAudioAttributes(requestAttributes)
                 .setAcceptsDelayedFocusGain((flags & AUDIOFOCUS_FLAG_DELAY_OK)
                         == AUDIOFOCUS_FLAG_DELAY_OK)

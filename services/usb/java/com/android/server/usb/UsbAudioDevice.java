@@ -36,8 +36,8 @@ public final class UsbAudioDevice {
     // This member is a combination of the above bit-flags
     public final int mDeviceClass;
 
-    public String mDeviceName = "";
-    public String mDeviceDescription = "";
+    private String mDeviceName = "";
+    private String mDeviceDescription = "";
 
     public UsbAudioDevice(int card, int device,
             boolean hasPlayback, boolean hasCapture, int deviceClass) {
@@ -59,8 +59,19 @@ public final class UsbAudioDevice {
         return sb.toString();
     }
 
-    public String toShortString() {
+    // called by logDevices
+    String toShortString() {
         return "[card:" + mCard + " device:" + mDevice + " " + mDeviceName + "]";
     }
+
+    String getDeviceName() {
+        return mDeviceName;
+    }
+
+    void setDeviceNameAndDescription(String deviceName, String deviceDescription) {
+        mDeviceName = deviceName;
+        mDeviceDescription = deviceDescription;
+    }
+
 }
 

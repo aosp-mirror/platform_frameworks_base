@@ -26,7 +26,7 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.view.ActionMode;
-import android.view.textclassifier.TextClassificationResult;
+import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextSelection;
 import android.widget.Editor.SelectionModifierCursorController;
@@ -52,7 +52,7 @@ final class SelectionActionModeHelper {
     private final Editor mEditor;
     private final TextClassificationHelper mTextClassificationHelper;
 
-    private TextClassificationResult mTextClassificationResult;
+    private TextClassification mTextClassification;
     private AsyncTask mTextClassificationAsyncTask;
 
     private final SelectionInfo mSelectionInfo = new SelectionInfo();
@@ -107,8 +107,8 @@ final class SelectionActionModeHelper {
     }
 
     @Nullable
-    public TextClassificationResult getTextClassificationResult() {
-        return mTextClassificationResult;
+    public TextClassification getTextClassification() {
+        return mTextClassification;
     }
 
     public void onDestroyActionMode() {
@@ -121,7 +121,7 @@ final class SelectionActionModeHelper {
             mTextClassificationAsyncTask.cancel(true);
             mTextClassificationAsyncTask = null;
         }
-        mTextClassificationResult = null;
+        mTextClassification = null;
     }
 
     private boolean isNoOpTextClassifier() {
@@ -140,9 +140,9 @@ final class SelectionActionModeHelper {
                 textView.getSelectionStart(), textView.getSelectionEnd());
         if (result != null && text instanceof Spannable) {
             Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
-            mTextClassificationResult = result.mResult;
+            mTextClassification = result.mClassification;
         } else {
-            mTextClassificationResult = null;
+            mTextClassification = null;
         }
         if (mEditor.startSelectionActionModeInternal()) {
             final SelectionModifierCursorController controller = mEditor.getSelectionController();
@@ -158,7 +158,7 @@ final class SelectionActionModeHelper {
     }
 
     private void invalidateActionMode(@Nullable SelectionResult result) {
-        mTextClassificationResult = result != null ? result.mResult : null;
+        mTextClassification = result != null ? result.mClassification : null;
         final ActionMode actionMode = mEditor.getTextActionMode();
         if (actionMode != null) {
             actionMode.invalidate();
@@ -332,7 +332,7 @@ final class SelectionActionModeHelper {
             return new SelectionResult(
                     mSelectionStart,
                     mSelectionEnd,
-                    mTextClassifier.getTextClassificationResult(
+                    mTextClassifier.classifyText(
                             mTrimmedText, mRelativeStart, mRelativeEnd, mLocales));
         }
 
@@ -361,12 +361,12 @@ final class SelectionActionModeHelper {
     private static final class SelectionResult {
         private final int mStart;
         private final int mEnd;
-        private final TextClassificationResult mResult;
+        private final TextClassification mClassification;
 
-        SelectionResult(int start, int end, TextClassificationResult result) {
+        SelectionResult(int start, int end, TextClassification classification) {
             mStart = start;
             mEnd = end;
-            mResult = Preconditions.checkNotNull(result);
+            mClassification = Preconditions.checkNotNull(classification);
         }
     }
 }

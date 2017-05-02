@@ -44,7 +44,8 @@ public class PerformInitializeTask implements Runnable {
         try {
             for (String transportName : mQueue) {
                 IBackupTransport transport =
-                        backupManagerService.getTransportManager().getTransportBinder(transportName);
+                        backupManagerService.getTransportManager().getTransportBinder(
+                                transportName);
                 if (transport == null) {
                     Slog.e(
                             RefactoredBackupManagerService.TAG,

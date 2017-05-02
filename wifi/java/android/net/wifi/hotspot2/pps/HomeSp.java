@@ -74,9 +74,15 @@ public final class HomeSp implements Parcelable {
      * Icon URL of this home service provider.
      */
     private String mIconUrl = null;
+    /**
+     * @hide
+     */
     public void setIconUrl(String iconUrl) {
         mIconUrl = iconUrl;
     }
+    /**
+     * @hide
+     */
     public String getIconUrl() {
         return mIconUrl;
     }
@@ -89,9 +95,15 @@ public final class HomeSp implements Parcelable {
      * string is assumed to be encoded using UTF-8.
      */
     private Map<String, Long> mHomeNetworkIds = null;
+    /**
+     * @hide
+     */
     public void setHomeNetworkIds(Map<String, Long> homeNetworkIds) {
         mHomeNetworkIds = homeNetworkIds;
     }
+    /**
+     * @hide
+     */
     public Map<String, Long> getHomeNetworkIds() {
         return mHomeNetworkIds;
     }
@@ -107,9 +119,15 @@ public final class HomeSp implements Parcelable {
      * (MO) tree for more detail.
      */
     private long[] mMatchAllOis = null;
+    /**
+     * @hide
+     */
     public void setMatchAllOis(long[] matchAllOis) {
         mMatchAllOis = matchAllOis;
     }
+    /**
+     * @hide
+     */
     public long[] getMatchAllOis() {
         return mMatchAllOis;
     }
@@ -128,9 +146,15 @@ public final class HomeSp implements Parcelable {
      * (MO) tree for more detail.
      */
     private long[] mMatchAnyOis = null;
+    /**
+     * @hide
+     */
     public void setMatchAnyOis(long[] matchAnyOis) {
         mMatchAnyOis = matchAnyOis;
     }
+    /**
+     * @hide
+     */
     public long[] getMatchAnyOis() {
         return mMatchAnyOis;
     }
@@ -142,9 +166,15 @@ public final class HomeSp implements Parcelable {
      * operator merges between the providers.
      */
     private String[] mOtherHomePartners = null;
+    /**
+     * @hide
+     */
     public void setOtherHomePartners(String[] otherHomePartners) {
         mOtherHomePartners = otherHomePartners;
     }
+    /**
+     * @hide
+     */
     public String[] getOtherHomePartners() {
         return mOtherHomePartners;
     }

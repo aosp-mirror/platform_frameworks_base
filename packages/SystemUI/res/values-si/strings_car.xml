@@ -19,6 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"ආරක්ෂිතව රිය පදවන්න"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"රිය පැදවීම් තත්ත්වයන් ගැන පූර්ණ අවධානයෙන් සිටින්න, සැම විටම අදාළ සියලු නීතිවලට ගරු කරන්න. මග පෙන්වීම් නිවැරදි නොවීමට, අසම්පූර්ණ වීමට, භයානක වීමට, නුසුදුසු වීමට, තහනම් ඒවා වීමට, හෝ පරිපාලන ප්‍රදේශ තරණයට අදාළ ඒවා වීමට හැකිය. දත්ත තථ්‍ය කාල නොවීමට හැකි අතර, ස්ථාන නිරවද්‍යතාව සහතික කළ නොහැකිය. රිය පදවන අතරතුර ඔබේ ජංගම උපාංගය භාවිත කිරීම හෝ Android Auto සඳහා නිපදවා නැති යෙදුම් භාවිත කිරීම නොකරන්න."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"නොදනී"</string>
 </resources>

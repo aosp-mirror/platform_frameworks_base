@@ -29,10 +29,12 @@ import android.view.ViewStructure.HtmlInfo.Builder;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Assist data automatically created by the platform's implementation of Assist and Autofill.
@@ -62,6 +64,7 @@ public class AssistStructure implements Parcelable {
 
     ComponentName mActivityComponent;
     private boolean mIsHomeActivity;
+    private int mFlags;
 
     final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
 
@@ -184,6 +187,7 @@ public class AssistStructure implements Parcelable {
             mSanitizeOnWrite = as.mSanitizeOnWrite;
             mWriteStructure = as.waitForReady();
             ComponentName.writeToParcel(as.mActivityComponent, out);
+            out.writeInt(as.mFlags);
             out.writeLong(as.mAcquisitionStartTime);
             out.writeLong(as.mAcquisitionEndTime);
             mNumWindows = as.mWindowNodes.size();
@@ -338,6 +342,7 @@ public class AssistStructure implements Parcelable {
         void go() {
             fetchData();
             mActivityComponent = ComponentName.readFromParcel(mCurParcel);
+            mFlags = mCurParcel.readInt();
             mAcquisitionStartTime = mCurParcel.readLong();
             mAcquisitionEndTime = mCurParcel.readLong();
             final int N = mCurParcel.readInt();
@@ -473,7 +478,7 @@ public class AssistStructure implements Parcelable {
         final int mDisplayId;
         final ViewNode mRoot;
 
-        WindowNode(AssistStructure assist, ViewRootImpl root, boolean forAutoFill) {
+        WindowNode(AssistStructure assist, ViewRootImpl root, boolean forAutoFill, int flags) {
             View view = root.getView();
             Rect rect = new Rect();
             view.getBoundsOnScreen(rect);
@@ -488,8 +493,9 @@ public class AssistStructure implements Parcelable {
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
-                    // NOTE: flags are currently not supported, hence 0
-                    view.onProvideAutofillStructure(builder, 0);
+                    final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                            ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+                    view.onProvideAutofillStructure(builder, autofillFlags);
                 } else {
                     // This is a secure window, so it doesn't want a screenshot, and that
                     // means we should also not copy out its view hierarchy for Assist
@@ -499,8 +505,9 @@ public class AssistStructure implements Parcelable {
                 }
             }
             if (forAutoFill) {
-                // NOTE: flags are currently not supported, hence 0
-                view.dispatchProvideAutofillStructure(builder, 0);
+                final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                        ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+                view.dispatchProvideAutofillStructure(builder, autofillFlags);
             } else {
                 view.dispatchProvideStructure(builder);
             }
@@ -1788,7 +1795,7 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public ArrayList<Pair<String, String>> getAttributes() {
+        public List<Pair<String, String>> getAttributes() {
             if (mAttributes == null && mNames != null) {
                 mAttributes = new ArrayList<>(mNames.length);
                 for (int i = 0; i < mNames.length; i++) {
@@ -1869,20 +1876,22 @@ public class AssistStructure implements Parcelable {
     }
 
     /** @hide */
-    public AssistStructure(Activity activity, boolean forAutoFill) {
+    public AssistStructure(Activity activity, boolean forAutoFill, int flags) {
         mHaveData = true;
         mActivityComponent = activity.getComponentName();
+        mFlags = flags;
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
         for (int i=0; i<views.size(); i++) {
             ViewRootImpl root = views.get(i);
-            mWindowNodes.add(new WindowNode(this, root, forAutoFill));
+            mWindowNodes.add(new WindowNode(this, root, forAutoFill, flags));
         }
     }
 
     public AssistStructure() {
         mHaveData = true;
         mActivityComponent = null;
+        mFlags = 0;
     }
 
     /** @hide */
@@ -1909,6 +1918,7 @@ public class AssistStructure implements Parcelable {
         }
         Log.i(TAG, "Activity: " + mActivityComponent.flattenToShortString());
         Log.i(TAG, "Sanitize on write: " + mSanitizeOnWrite);
+        Log.i(TAG, "Flags: " + mFlags);
         final int N = getWindowNodeCount();
         for (int i=0; i<N; i++) {
             WindowNode node = getWindowNodeAt(i);
@@ -2021,10 +2031,16 @@ public class AssistStructure implements Parcelable {
         return mActivityComponent;
     }
 
+    /** @hide */
+    public int getFlags() {
+        return mFlags;
+    }
+
     /**
      * Returns whether the activity associated with this AssistStructure was the home activity
-     * at the time the assist data was acquired.
+     * (Launcher) at the time the assist data was acquired.
      * @return Whether the activity was the home activity.
+     * @see android.content.Intent#CATEGORY_HOME
      */
     public boolean isHomeActivity() {
         return mIsHomeActivity;

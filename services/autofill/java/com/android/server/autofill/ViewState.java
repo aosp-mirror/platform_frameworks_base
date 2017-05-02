@@ -16,7 +16,8 @@
 
 package com.android.server.autofill;
 
-import static com.android.server.autofill.Helper.DEBUG;
+import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -61,19 +62,19 @@ final class ViewState {
     public static final int STATE_STARTED_PARTITION = 0x20;
     /** User select a dataset in this view, but service must authenticate first. */
     public static final int STATE_WAITING_DATASET_AUTH = 0x40;
-    // TODO(b/37424539): temporary workaround until partitioning supports auth
-    public static final int STATE_WAITING_RESPONSE_AUTH = 0x80;
+    /** Service does not care about this view. */
+    public static final int STATE_IGNORED = 0x80;
 
     public final AutofillId id;
+
     private final Listener mListener;
     private final Session mSession;
-    private FillResponse mResponse;
 
+    private FillResponse mResponse;
     private AutofillValue mInitialValue;
     private AutofillValue mCurrentValue;
     private AutofillValue mAutofilledValue;
     private Rect mVirtualBounds;
-
     private int mState;
 
     ViewState(Session session, AutofillId id, AutofillValue value, Listener listener, int state) {
@@ -172,9 +173,7 @@ final class ViewState {
      */
     void maybeCallOnFillReady() {
         if ((mState & (STATE_AUTOFILLED | STATE_WAITING_DATASET_AUTH)) != 0) {
-            if (DEBUG) {
-                Slog.d(TAG, "Ignoring UI for " + id + " on " + getStateAsString());
-            }
+            if (sDebug) Slog.d(TAG, "Ignoring UI for " + id + " on " + getStateAsString());
             return;
         }
         // First try the current response associated with this View.
@@ -201,7 +200,16 @@ final class ViewState {
     void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("id:" ); pw.println(this.id);
         pw.print(prefix); pw.print("state:" ); pw.println(getStateAsString());
-        pw.print(prefix); pw.print("has response:" ); pw.println(mResponse != null);
+        pw.print(prefix); pw.print("response:");
+        if (mResponse == null) {
+            pw.println("N/A");
+        } else {
+            if (sVerbose) {
+                pw.println(mResponse);
+            } else {
+                pw.println(mResponse.getRequestId());
+            }
+        }
         pw.print(prefix); pw.print("initialValue:" ); pw.println(mInitialValue);
         pw.print(prefix); pw.print("currentValue:" ); pw.println(mCurrentValue);
         pw.print(prefix); pw.print("autofilledValue:" ); pw.println(mAutofilledValue);

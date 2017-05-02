@@ -36,7 +36,7 @@
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Pripojte nabíjačku."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Odomknete stlačením tlačidla ponuky."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Sieť je zablokovaná"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Nie je vložená SIM karta"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Žiadna SIM karta"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"V tablete nie je žiadna SIM karta."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"V telefóne nie je žiadna SIM karta."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Vložte SIM kartu."</string>

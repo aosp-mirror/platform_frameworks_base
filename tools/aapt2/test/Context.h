@@ -52,13 +52,25 @@ class Context : public IAaptContext {
     return compilation_package_.value();
   }
 
+  void SetCompilationPackage(const android::StringPiece& package) {
+    compilation_package_ = package.to_string();
+  }
+
   uint8_t GetPackageId() override {
     CHECK(bool(package_id_)) << "package ID not set";
     return package_id_.value();
   }
 
+  void SetPackageId(uint8_t package_id) {
+    package_id_ = package_id;
+  }
+
   NameMangler* GetNameMangler() override {
     return &name_mangler_;
+  }
+
+  void SetNameManglerPolicy(const NameManglerPolicy& policy) {
+    name_mangler_ = NameMangler(policy);
   }
 
   bool IsVerbose() override {

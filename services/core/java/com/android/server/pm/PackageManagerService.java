@@ -127,6 +127,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
+import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.FallbackCategoryProvider;
@@ -739,11 +740,122 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     final SparseArray<Map<String, Integer>> mChangedPackagesSequenceNumbers = new SparseArray<>();
 
-    final PackageParser.Callback mPackageParserCallback = new PackageParser.Callback() {
-        @Override public boolean hasFeature(String feature) {
+    class PackageParserCallback implements PackageParser.Callback {
+        @Override public final boolean hasFeature(String feature) {
             return PackageManagerService.this.hasSystemFeature(feature, 0);
         }
+
+        final List<PackageParser.Package> getStaticOverlayPackagesLocked(
+                Collection<PackageParser.Package> allPackages, String targetPackageName) {
+            List<PackageParser.Package> overlayPackages = null;
+            for (PackageParser.Package p : allPackages) {
+                if (targetPackageName.equals(p.mOverlayTarget) && p.mIsStaticOverlay) {
+                    if (overlayPackages == null) {
+                        overlayPackages = new ArrayList<PackageParser.Package>();
+                    }
+                    overlayPackages.add(p);
+                }
+            }
+            if (overlayPackages != null) {
+                Comparator<PackageParser.Package> cmp = new Comparator<PackageParser.Package>() {
+                    public int compare(PackageParser.Package p1, PackageParser.Package p2) {
+                        return p1.mOverlayPriority - p2.mOverlayPriority;
+                    }
+                };
+                Collections.sort(overlayPackages, cmp);
+            }
+            return overlayPackages;
+        }
+
+        final String[] getStaticOverlayPathsLocked(Collection<PackageParser.Package> allPackages,
+                String targetPackageName, String targetPath) {
+            if ("android".equals(targetPackageName)) {
+                // Static RROs targeting to "android", ie framework-res.apk, are already applied by
+                // native AssetManager.
+                return null;
+            }
+            List<PackageParser.Package> overlayPackages =
+                    getStaticOverlayPackagesLocked(allPackages, targetPackageName);
+            if (overlayPackages == null || overlayPackages.isEmpty()) {
+                return null;
+            }
+            List<String> overlayPathList = null;
+            for (PackageParser.Package overlayPackage : overlayPackages) {
+                if (targetPath == null) {
+                    if (overlayPathList == null) {
+                        overlayPathList = new ArrayList<String>();
+                    }
+                    overlayPathList.add(overlayPackage.baseCodePath);
+                    continue;
+                }
+
+                try {
+                    // Creates idmaps for system to parse correctly the Android manifest of the
+                    // target package.
+                    //
+                    // OverlayManagerService will update each of them with a correct gid from its
+                    // target package app id.
+                    mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
+                            UserHandle.getSharedAppGid(
+                                    UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
+                    if (overlayPathList == null) {
+                        overlayPathList = new ArrayList<String>();
+                    }
+                    overlayPathList.add(overlayPackage.baseCodePath);
+                } catch (InstallerException e) {
+                    Slog.e(TAG, "Failed to generate idmap for " + targetPath + " and " +
+                            overlayPackage.baseCodePath);
+                }
+            }
+            return overlayPathList == null ? null : overlayPathList.toArray(new String[0]);
+        }
+
+        String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
+            synchronized (mPackages) {
+                return getStaticOverlayPathsLocked(
+                        mPackages.values(), targetPackageName, targetPath);
+            }
+        }
+
+        @Override public final String[] getOverlayApks(String targetPackageName) {
+            return getStaticOverlayPaths(targetPackageName, null);
+        }
+
+        @Override public final String[] getOverlayPaths(String targetPackageName,
+                String targetPath) {
+            return getStaticOverlayPaths(targetPackageName, targetPath);
+        }
     };
+
+    class ParallelPackageParserCallback extends PackageParserCallback {
+        List<PackageParser.Package> mOverlayPackages = null;
+
+        void findStaticOverlayPackages() {
+            synchronized (mPackages) {
+                for (PackageParser.Package p : mPackages.values()) {
+                    if (p.mIsStaticOverlay) {
+                        if (mOverlayPackages == null) {
+                            mOverlayPackages = new ArrayList<PackageParser.Package>();
+                        }
+                        mOverlayPackages.add(p);
+                    }
+                }
+            }
+        }
+
+        @Override
+        synchronized String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
+            // We can trust mOverlayPackages without holding mPackages because package uninstall
+            // can't happen while running parallel parsing.
+            // Moreover holding mPackages on each parsing thread causes dead-lock.
+            return mOverlayPackages == null ? null :
+                    getStaticOverlayPathsLocked(mOverlayPackages, targetPackageName, targetPath);
+        }
+    }
+
+    final PackageParser.Callback mPackageParserCallback = new PackageParserCallback();
+    final ParallelPackageParserCallback mParallelPackageParserCallback =
+            new ParallelPackageParserCallback();
 
     public static final class SharedLibraryEntry {
         public final String path;
@@ -2452,6 +2564,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_TRUSTED_OVERLAY, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
+
+            mParallelPackageParserCallback.findStaticOverlayPackages();
 
             // Find base frameworks (resource packages without code).
             scanDirTracedLI(frameworkDir, mDefParseFlags
@@ -4247,8 +4361,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getName(),
-                            // TODO: Remove cast for lib version once internally we support longs.
-                            (int) libInfo.getVersion(), libInfo.getType(),
+                            libInfo.getVersion(), libInfo.getType(),
                             libInfo.getDeclaringPackage(), getPackagesUsingSharedLibraryLPr(libInfo,
                             flags, userId));
 
@@ -5820,10 +5933,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
             Intent origIntent, String resolvedType, String callingPackage,
-            int userId) {
+            Bundle verificationBundle, int userId) {
         final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
                 new InstantAppRequest(responseObj, origIntent, resolvedType,
-                        callingPackage, userId));
+                        callingPackage, userId, verificationBundle));
         mHandler.sendMessage(msg);
     }
 
@@ -6372,7 +6485,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
             final InstantAppRequest requestObject = new InstantAppRequest(
                     null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                    null /*callingPackage*/, userId);
+                    null /*callingPackage*/, userId, null /*verificationBundle*/);
             final AuxiliaryResolveInfo auxiliaryResponse =
                     InstantAppResolver.doInstantAppResolutionPhaseOne(
                             mContext, mInstantAppResolverConnection, requestObject);
@@ -6396,7 +6509,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     ephemeralInstaller.filter = new IntentFilter(intent.getAction());
                     ephemeralInstaller.filter.addDataPath(
                             intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
-                    ephemeralInstaller.instantAppAvailable = true;
+                    ephemeralInstaller.isInstantAppAvailable = true;
                     result.add(ephemeralInstaller);
                 }
             }
@@ -7856,7 +7969,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " flags=0x" + Integer.toHexString(parseFlags));
         }
         ParallelPackageParser parallelPackageParser = new ParallelPackageParser(
-                mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir, mPackageParserCallback);
+                mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir,
+                mParallelPackageParserCallback);
 
         // Submit files for parsing in parallel
         int fileCount = 0;
@@ -8554,7 +8668,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // are verify-profile but for preopted apps there's no profile.
             // Do a hacky check to ensure that if we have no profiles (a reasonable indication
             // that before the OTA the app was preopted) the app gets compiled with a non-profile
-            // filter (by default interpret-only).
+            // filter (by default 'quicken').
             // Note that at this stage unused apps are already filtered.
             if (isSystemApp(pkg) &&
                     DexFile.isProfileGuidedCompilerFilter(compilerFilter) &&
@@ -8612,6 +8726,31 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
         mDexManager.notifyDexLoad(ai, dexPaths, loaderIsa, userId);
+    }
+
+    @Override
+    public void registerDexModule(String packageName, String dexModulePath, boolean isSharedModule,
+            IDexModuleRegisterCallback callback) {
+        int userId = UserHandle.getCallingUserId();
+        ApplicationInfo ai = getApplicationInfo(packageName, /*flags*/ 0, userId);
+        DexManager.RegisterDexModuleResult result;
+        if (ai == null) {
+            Slog.w(TAG, "Registering a dex module for a package that does not exist for the" +
+                     " calling user. package=" + packageName + ", user=" + userId);
+            result = new DexManager.RegisterDexModuleResult(false, "Package not installed");
+        } else {
+            result = mDexManager.registerDexModule(ai, dexModulePath, isSharedModule, userId);
+        }
+
+        if (callback != null) {
+            mHandler.post(() -> {
+                try {
+                    callback.onDexModuleRegistered(dexModulePath, result.success, result.message);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to callback after module registration " + dexModulePath, e);
+                }
+            });
+        }
     }
 
     @Override
@@ -12497,7 +12636,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             res.iconResourceId = info.icon;
             res.system = res.activityInfo.applicationInfo.isSystemApp();
-            res.instantAppAvailable = userState.instantApp;
+            res.isInstantAppAvailable = userState.instantApp;
             return res;
         }
 
@@ -17075,10 +17214,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageParser.Permission perm = pkg.permissions.get(i);
                 BasePermission bp = mSettings.mPermissions.get(perm.info.name);
 
-                // Don't allow anyone but the platform to define ephemeral permissions.
+                // Don't allow anyone but the system to define ephemeral permissions.
                 if ((perm.info.protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0
-                        && !PLATFORM_PACKAGE_NAME.equals(pkg.packageName)) {
-                    Slog.w(TAG, "Package " + pkg.packageName
+                        && !systemApp) {
+                    Slog.w(TAG, "Non-System package " + pkg.packageName
                             + " attempting to delcare ephemeral permission "
                             + perm.info.name + "; Removing ephemeral.");
                     perm.info.protectionLevel &= ~PermissionInfo.PROTECTION_FLAG_EPHEMERAL;
@@ -17636,8 +17775,7 @@ public class PackageManagerService extends IPackageManager.Stub
         for (int i = 0; i < versionCount; i++) {
             SharedLibraryEntry libEntry = versionedLib.valueAt(i);
             if (versionsCallerCanSee != null && versionsCallerCanSee.indexOfKey(
-                    // TODO: Remove cast for lib version once internally we support longs.
-                    (int) libEntry.info.getVersion()) < 0) {
+                    libEntry.info.getVersion()) < 0) {
                 continue;
             }
             // TODO: We will change version code to long, so in the new API it is long
@@ -20571,6 +20709,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public static final int DUMP_DEXOPT = 1 << 20;
         public static final int DUMP_COMPILER_STATS = 1 << 21;
         public static final int DUMP_ENABLED_OVERLAYS = 1 << 22;
+        public static final int DUMP_CHANGES = 1 << 23;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -20816,6 +20955,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_COMPILER_STATS);
             } else if ("enabled-overlays".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_ENABLED_OVERLAYS);
+            } else if ("changes".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_CHANGES);
             } else if ("write".equals(cmd)) {
                 synchronized (mPackages) {
                     mSettings.writeLPr();
@@ -21144,6 +21285,31 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
                 mSettings.dumpSharedUsersLPr(pw, packageName, permissionNames, dumpState, checkin);
+            }
+
+            if (dumpState.isDumping(DumpState.DUMP_CHANGES)) {
+                if (dumpState.onTitlePrinted()) pw.println();
+                pw.println("Package Changes:");
+                pw.print("  Sequence number="); pw.println(mChangedPackagesSequenceNumber);
+                final int K = mChangedPackages.size();
+                for (int i = 0; i < K; i++) {
+                    final SparseArray<String> changes = mChangedPackages.valueAt(i);
+                    pw.print("  User "); pw.print(mChangedPackages.keyAt(i)); pw.println(":");
+                    final int N = changes.size();
+                    if (N == 0) {
+                        pw.print("    "); pw.println("No packages changed");
+                    } else {
+                        for (int j = 0; j < N; j++) {
+                            final String pkgName = changes.valueAt(j);
+                            final int sequenceNumber = changes.keyAt(j);
+                            pw.print("    ");
+                            pw.print("seq=");
+                            pw.print(sequenceNumber);
+                            pw.print(", package=");
+                            pw.println(pkgName);
+                        }
+                    }
+                }
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS) && packageName == null) {
@@ -23427,9 +23593,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         @Override
         public void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
-                Intent origIntent, String resolvedType, String callingPackage, int userId) {
+                Intent origIntent, String resolvedType, String callingPackage,
+                Bundle verificationBundle, int userId) {
             PackageManagerService.this.requestInstantAppResolutionPhaseTwo(
-                    responseObj, origIntent, resolvedType, callingPackage, userId);
+                    responseObj, origIntent, resolvedType, callingPackage, verificationBundle,
+                    userId);
         }
 
         @Override
@@ -23572,6 +23740,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public void removeIsolatedUid(int isolatedUid) {
             synchronized (mPackages) {
                 mIsolatedOwners.delete(isolatedUid);
+            }
+        }
+
+        @Override
+        public int getUidTargetSdkVersion(int uid) {
+            synchronized (mPackages) {
+                return getUidTargetSdkVersionLockedLPr(uid);
             }
         }
     }

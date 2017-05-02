@@ -95,6 +95,7 @@ class KeyguardController {
             return;
         }
         mKeyguardShowing = showing;
+        dismissDockedStackIfNeeded();
         if (showing) {
             mKeyguardGoingAway = false;
             mDismissalRequested = false;

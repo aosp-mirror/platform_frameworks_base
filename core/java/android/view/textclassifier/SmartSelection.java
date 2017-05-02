@@ -75,6 +75,20 @@ final class SmartSelection {
         nativeClose(mCtx);
     }
 
+    /**
+     * Returns the language of the model.
+     */
+    public static String getLanguage(int fd) {
+        return nativeGetLanguage(fd);
+    }
+
+    /**
+     * Returns the version of the model.
+     */
+    public static int getVersion(int fd) {
+        return nativeGetVersion(fd);
+    }
+
     private static native long nativeNew(int fd);
 
     private static native int[] nativeSuggest(
@@ -84,6 +98,10 @@ final class SmartSelection {
             long context, String text, int selectionBegin, int selectionEnd, int hintFlags);
 
     private static native void nativeClose(long context);
+
+    private static native String nativeGetLanguage(int fd);
+
+    private static native int nativeGetVersion(int fd);
 
     /** Classification result for classifyText method. */
     static final class ClassificationResult {

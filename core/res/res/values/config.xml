@@ -2877,4 +2877,13 @@
 
     <!-- The apps that need to be hidden when they are disabled -->
     <string-array name="config_hideWhenDisabled_packageNames"></string-array>
+
+    <!-- Additional non-platform defined global settings exposed to Instant Apps -->
+    <string-array name="config_allowedGlobalInstantAppSettings"></string-array>
+
+    <!-- Additional non-platform defined system settings exposed to Instant Apps -->
+    <string-array name="config_allowedSystemInstantAppSettings"></string-array>
+
+    <!-- Additional non-platform defined secure settings exposed to Instant Apps -->
+    <string-array name="config_allowedSecureInstantAppSettings"></string-array>
 </resources>

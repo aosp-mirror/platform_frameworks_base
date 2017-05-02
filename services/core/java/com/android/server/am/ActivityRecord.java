@@ -2328,6 +2328,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return true;
         }
 
+        // TODO: We should add ActivityRecord.shouldBeVisible() that checks if the activity should
+        // be visible based on the stack, task, and lockscreen state and use that here instead. The
+        // method should be based on the logic in ActivityStack.ensureActivitiesVisibleLocked().
         // Skip updating configuration for activity is a stack that shouldn't be visible.
         if (stack.shouldBeVisible(null /* starting */) == STACK_INVISIBLE) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
