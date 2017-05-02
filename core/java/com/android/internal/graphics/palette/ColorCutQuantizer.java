@@ -376,7 +376,9 @@ final class ColorCutQuantizer {
             for (int i = mLowerIndex, count = 0; i <= mUpperIndex; i++)  {
                 count += hist[colors[i]];
                 if (count >= midPoint) {
-                    return i;
+                    // we never want to split on the upperIndex, as this will result in the same
+                    // box
+                    return Math.min(mUpperIndex - 1, i);
                 }
             }
 
