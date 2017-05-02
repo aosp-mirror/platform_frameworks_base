@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Underretninger"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo til udstilling i butik"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-forbindelse"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Sikker tilstand"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Skift til Tilpasset"</string>
@@ -317,8 +327,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillader, at appen kan modtage og behandle sms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-beskeder"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-beskeder, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-beskeder for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-besked om en nødsituation."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-meddelelser"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-meddelelser, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-meddelelser for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læse feeds, jeg abonnerer på"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillader, at appen kan hente oplysninger om de feeds, der synkroniseres."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"Send og se sms-beskeder"</string>
@@ -1074,19 +1084,19 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Processen <xliff:g id="PROC">%1$s</xliff:g> har overskredet sin proceshukommelsesgrænse på <xliff:g id="SIZE">%2$s</xliff:g>. En heap dump er tilgængelig og kan deles med udvikleren. Vær forsigtig: Denne heap dump kan indeholde dine personlige oplysninger, som appen har adgang til."</string>
     <string name="sendText" msgid="5209874571959469142">"Vælg en handling for teksten"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Lydstyrke for opkald"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Medielydstyrke"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Lydstyrke for medier"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspilning via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Lydløs ringetone er angivet"</string>
     <string name="volume_call" msgid="3941680041282788711">"Lydstyrke for opkald"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Lydstyrke for Bluetooth under opkald"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Lydstyrke for alarm"</string>
-    <string name="volume_notification" msgid="2422265656744276715">"Lydstyrke for meddelelser"</string>
+    <string name="volume_notification" msgid="2422265656744276715">"Lydstyrke for underretninger"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Lydstyrke"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Lydstyrke for bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Lydstyrke for ringetone"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Lydstyrke for opkald"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Medielydstyrke"</string>
-    <string name="volume_icon_description_notification" msgid="7044986546477282274">"Lydstyrke for meddelelser"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Lydstyrke for medier"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"Lydstyrke for underretninger"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standardringetone"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Standard (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ingen"</string>
@@ -1609,7 +1619,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet af din administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batterisparefunktionen hjælper med at forlænge batteriets levetid ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. E-mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen slukker automatisk, når enheden oplader."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktion forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå Datasparefunktion til?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå til"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1731,13 +1741,13 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB-fejlretning"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"time"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minut"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"Indstil klokkeslæt"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"Angiv klokkeslæt"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Angiv et gyldigt klokkeslæt"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Angiv klokkeslæt"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Skift til teksttilstand for at angive klokkeslæt."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Skift til urtilstand for at angive klokkeslæt."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Valgmuligheder for AutoFyld"</string>
-    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Gem til AutoFyld"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Gem i AutoFyld"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Indhold kan ikke udfyldes automatisk"</string>
     <string name="autofill_save_title" msgid="3345527308992082601">"Vil du gemme i &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vil du gemme <xliff:g id="TYPE">%1$s</xliff:g> i &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>

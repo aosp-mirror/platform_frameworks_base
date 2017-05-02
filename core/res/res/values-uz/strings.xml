@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ogohlantirishlar"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo rejim"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB orqali ulanish"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Xavfsiz usul"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android tizimi"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Shaxsiy profilga o‘tish"</string>
@@ -722,7 +732,7 @@
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Televizorda SIM karta yo‘q."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefoningizda SIM karta yo‘q."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM kartani soling."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta solinmagan yoki uni o‘qib bo‘lmaydi. SIM kartani soling."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta solinmagan yoki u yaroqsiz. SIM kartani soling."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Foydalanib bo‘lmaydigan SIM karta."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM kartangiz butunlay bloklab qo‘yilgan.\n Yangi SIM karta olish uchun aloqa operatoringiz bilan bog‘laning."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Avvalgi musiqa"</string>
@@ -1174,7 +1184,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB jihozga ulangan"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Boshqa parametrlarini ko‘rish uchun bosing."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"O‘chirib qo‘yish uchun bu yerga bosing."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Faolsizlantirish uchun bu yerga bosing."</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
     <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Xatoliklar hisoboti olinmoqda…"</string>

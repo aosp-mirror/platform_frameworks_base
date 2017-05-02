@@ -72,8 +72,8 @@
     <string name="ClirMmi" msgid="7784673673446833091">"本機號碼"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"連接線識別功能"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"連接線識別限制"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"來電轉接"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"來電待接"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"來電轉駁"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"來電等候"</string>
     <string name="BaMmi" msgid="455193067926770581">"通話限制"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"密碼更改"</string>
     <string name="PinMmi" msgid="3113117780361190304">"更改 PIN"</string>
@@ -100,13 +100,13 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連接網絡"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"如要改善接收品質，請前往 [系統] &gt; [網絡與互聯網] &gt; [流動網絡] &gt; [偏好的網絡類型]，然後變更所選的網絡類型。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"通知"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"來電轉接"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"來電轉駁"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"緊急回撥模式"</string>
     <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"流動數據通知"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"短訊"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"留言訊息"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
-    <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 模式 (FULL)"</string>
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 完整模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"對方曾要求 TTY 模式 (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"對方曾要求 TTY 模式 (VCO)"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"對方曾要求 TTY 模式 (OFF)"</string>
@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"通知"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"零售示範"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 連線"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"切換至個人設定檔"</string>
