@@ -18,7 +18,6 @@ package com.android.settingslib.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
-import android.content.res.Resources;
 import android.provider.Settings;
 import android.view.accessibility.AccessibilityManager;
 
@@ -54,9 +53,5 @@ public class AccessibilityButtonHelper {
 
     public static boolean isRequested(Context ctx) {
         return isRequestedByMagnification(ctx) || isRequestedByAccessibilityService(ctx);
-    }
-
-    public static boolean isDeviceSupported(Resources res) {
-        return res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
     }
 }
