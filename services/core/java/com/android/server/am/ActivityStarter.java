@@ -1045,9 +1045,6 @@ class ActivityStarter {
             sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
             reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
-            if (outActivity != null && outActivity.length > 0) {
-                outActivity[0] = reusedActivity;
-            }
 
             if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                 // We don't need to start a new activity, and the client said not to do anything
@@ -1062,6 +1059,9 @@ class ActivityStarter {
                 // We didn't do anything...  but it was needed (a.k.a., client don't use that
                 // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
                 resumeTargetStackIfNeeded();
+                if (outActivity.length > 0) {
+                    outActivity[0] = reusedActivity;
+                }
                 return START_TASK_TO_FRONT;
             }
         }
