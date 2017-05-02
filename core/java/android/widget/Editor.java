@@ -841,7 +841,7 @@ public class Editor {
      * Adjusts selection to the word under last touch offset. Return true if the operation was
      * successfully performed.
      */
-    private boolean selectCurrentWord() {
+    boolean selectCurrentWord() {
         if (!mTextView.canSelectText()) {
             return false;
         }
@@ -2186,7 +2186,7 @@ public class Editor {
     }
 
     void onTouchUpEvent(MotionEvent event) {
-        if (getSelectionActionModeHelper().resetOriginalSelection(
+        if (getSelectionActionModeHelper().resetSelection(
                 getTextView().getOffsetForPosition(event.getX(), event.getY()))) {
             return;
         }
