@@ -286,9 +286,7 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
             createProcessUniqueId()));
 
     // If the current context is protected, inform the producer.
-    if (isProtectedContext()) {
-        consumer->setConsumerUsageBits(GRALLOC_USAGE_PROTECTED);
-    }
+    consumer->setConsumerIsProtected(isProtectedContext());
 
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
     SurfaceTexture_setProducer(env, thiz, producer);
