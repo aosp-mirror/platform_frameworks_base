@@ -267,7 +267,7 @@
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"קנה מידה למשך זמן אנימציה"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"צור הדמיית תצוגות משניות"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"אפליקציות"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"אל תשמור פעילויות"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"ללא שמירת פעילויות"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"השמד כל פעילות ברגע שהמשתמש עוזב אותה"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"מגבלה של תהליכים ברקע"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"‏הצג את כל פריטי ה-ANR"</string>
@@ -302,12 +302,12 @@
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏יישום WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏הגדרת יישום WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"אפשרות זו כבר אינה תקפה. נסה שוב."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"המר להצפנת קבצים"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"המרה לצורך הצפנת קבצים"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"המר..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"הצפנת קבצים כבר מוגדרת"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"המרה להצפנה מבוססת קבצים"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"המר את מחיצת הנתונים להצפנה מבוססת-קבצים.\n אזהרה!! פעולה זו תמחק את כל הנתונים.\n תכונה זו זמינה בגרסת אלפא וייתכן שלא תפעל כראוי.\n הקש על \'מחק והמר...\' כדי להמשיך."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"מחק והמר..."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"המר את מחיצת הנתונים להצפנה מבוססת-קבצים.\n אזהרה!! פעולה זו תמחק את כל הנתונים.\n תכונה זו זמינה בגרסת אלפא וייתכן שלא תפעל כראוי.\n הקש על \'מחיקה והמרה…\' כדי להמשיך."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"מחיקה והמרה…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"מצב צבע התמונה"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"‏שימוש ב-sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"מושבת"</string>

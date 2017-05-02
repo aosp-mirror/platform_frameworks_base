@@ -28,7 +28,7 @@
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Sifatsiz tarmoq sababli ulanib bo‘lmadi"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi ulanishini o‘rnatib bo‘lmadi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Tasdiqdan o‘tishda muammo"</string>
-    <string name="wifi_not_in_range" msgid="1136191511238508967">"Aloqada emas"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"Xizmat doirasidan tashqarida"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Avtomatik ravishda ulanilmaydi"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Internet aloqasi yo‘q"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> tomonidan saqlangan"</string>
