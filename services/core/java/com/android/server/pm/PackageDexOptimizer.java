@@ -24,6 +24,7 @@ import android.content.pm.PackageParser;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Log;
@@ -54,6 +55,7 @@ import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
+import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getNonProfileGuidedCompilerFilter;
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
@@ -67,13 +69,17 @@ public class PackageDexOptimizer {
     public static final int DEX_OPT_SKIPPED = 0;
     public static final int DEX_OPT_PERFORMED = 1;
     public static final int DEX_OPT_FAILED = -1;
+    // One minute over PM WATCHDOG_TIMEOUT
+    private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
 
     /** Special library name that skips shared libraries check during compilation. */
     public static final String SKIP_SHARED_LIBRARY_CHECK = "&";
 
+    @GuardedBy("mInstallLock")
     private final Installer mInstaller;
     private final Object mInstallLock;
 
+    @GuardedBy("mInstallLock")
     private final PowerManager.WakeLock mDexoptWakeLock;
     private volatile boolean mSystemReady;
 
@@ -111,21 +117,12 @@ public class PackageDexOptimizer {
             return DEX_OPT_SKIPPED;
         }
         synchronized (mInstallLock) {
-            // During boot the system doesn't need to instantiate and obtain a wake lock.
-            // PowerManager might not be ready, but that doesn't mean that we can't proceed with
-            // dexopt.
-            final boolean useLock = mSystemReady;
-            if (useLock) {
-                mDexoptWakeLock.setWorkSource(new WorkSource(pkg.applicationInfo.uid));
-                mDexoptWakeLock.acquire();
-            }
+            final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
                 return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
                         targetCompilationFilter, packageStats, isUsedByOtherApps);
             } finally {
-                if (useLock) {
-                    mDexoptWakeLock.release();
-                }
+                releaseWakeLockLI(acquireTime);
             }
         }
     }
@@ -250,22 +247,46 @@ public class PackageDexOptimizer {
     public int dexOptSecondaryDexPath(ApplicationInfo info, String path, Set<String> isas,
             String compilerFilter, boolean isUsedByOtherApps) {
         synchronized (mInstallLock) {
-            // During boot the system doesn't need to instantiate and obtain a wake lock.
-            // PowerManager might not be ready, but that doesn't mean that we can't proceed with
-            // dexopt.
-            final boolean useLock = mSystemReady;
-            if (useLock) {
-                mDexoptWakeLock.setWorkSource(new WorkSource(info.uid));
-                mDexoptWakeLock.acquire();
-            }
+            final long acquireTime = acquireWakeLockLI(info.uid);
             try {
                 return dexOptSecondaryDexPathLI(info, path, isas, compilerFilter,
                         isUsedByOtherApps);
             } finally {
-                if (useLock) {
-                    mDexoptWakeLock.release();
-                }
+                releaseWakeLockLI(acquireTime);
             }
+        }
+    }
+
+    @GuardedBy("mInstallLock")
+    private long acquireWakeLockLI(final int uid) {
+        // During boot the system doesn't need to instantiate and obtain a wake lock.
+        // PowerManager might not be ready, but that doesn't mean that we can't proceed with
+        // dexopt.
+        if (!mSystemReady) {
+            return -1;
+        }
+        mDexoptWakeLock.setWorkSource(new WorkSource(uid));
+        mDexoptWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+        return SystemClock.elapsedRealtime();
+    }
+
+    @GuardedBy("mInstallLock")
+    private void releaseWakeLockLI(final long acquireTime) {
+        if (acquireTime < 0) {
+            return;
+        }
+        try {
+            if (mDexoptWakeLock.isHeld()) {
+                mDexoptWakeLock.release();
+            }
+            final long duration = SystemClock.elapsedRealtime() - acquireTime;
+            if (duration >= WAKELOCK_TIMEOUT_MS) {
+                Slog.wtf(TAG, "WakeLock " + mDexoptWakeLock.getTag()
+                        + " time out. Operation took " + duration + " ms. Thread: "
+                        + Thread.currentThread().getName());
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Error while releasing " + mDexoptWakeLock.getTag() + " lock", e);
         }
     }
 
