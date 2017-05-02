@@ -230,6 +230,7 @@ public class Typeface {
 
             FontFamily fontFamily = new FontFamily();
             for (final FontFileResourceEntry fontFile : filesEntry.getEntries()) {
+                // TODO: Add ttc and variation font support. (b/37853920)
                 if (!fontFamily.addFontFromAssetManager(mgr, fontFile.getFileName(),
                         0 /* resourceCookie */, false /* isAsset */, 0 /* ttcIndex */,
                         fontFile.getWeight(), fontFile.isItalic() ? STYLE_ITALIC : STYLE_NORMAL,
@@ -237,11 +238,9 @@ public class Typeface {
                     return null;
                 }
             }
-            // Due to backward compatibility, even if the font is not supported by our font stack,
-            // we need to place the empty font at the first place. The typeface with empty font
-            // behaves different from default typeface especially in fallback font selection.
-            fontFamily.allowUnsupportedFont();
-            fontFamily.freeze();
+            if (!fontFamily.freeze()) {
+                return null;
+            }
             FontFamily[] familyChain = { fontFamily };
             typeface = createFromFamiliesWithDefault(familyChain,
                     RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
