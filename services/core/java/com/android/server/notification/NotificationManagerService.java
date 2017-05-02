@@ -1477,7 +1477,7 @@ public class NotificationManagerService extends SystemService {
                 return ;
             }
 
-            final boolean isSystemToast = isCallerSystem() || ("android".equals(pkg));
+            final boolean isSystemToast = isCallerSystemOrPhone() || ("android".equals(pkg));
             final boolean isPackageSuspended =
                     isPackageSuspendedForUser(pkg, Binder.getCallingUid());
 
@@ -1581,12 +1581,10 @@ public class NotificationManagerService extends SystemService {
                     Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
             // Don't allow client applications to cancel foreground service notis or autobundled
             // summaries.
+            final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
+                    (Notification.FLAG_FOREGROUND_SERVICE | Notification.FLAG_AUTOGROUP_SUMMARY);
             cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(), pkg, tag, id, 0,
-                    (Binder.getCallingUid() == Process.SYSTEM_UID
-                            ? 0 : Notification.FLAG_FOREGROUND_SERVICE)
-                            | (Binder.getCallingUid() == Process.SYSTEM_UID
-                            ? 0 : Notification.FLAG_AUTOGROUP_SUMMARY), false, userId,
-                    REASON_APP_CANCEL, null);
+                    mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
         }
 
         @Override
@@ -2452,7 +2450,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void enforceSystemOrSystemUI(String message) {
-            if (isCallerSystem()) return;
+            if (isCallerSystemOrPhone()) return;
             getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
                     message);
         }
@@ -3276,7 +3274,7 @@ public class NotificationManagerService extends SystemService {
 
     private int resolveNotificationUid(String opPackageName, int callingUid, int userId) {
         // The system can post notifications on behalf of any package it wants
-        if (isCallerSystem() && opPackageName != null && !"android".equals(opPackageName)) {
+        if (isCallerSystemOrPhone() && opPackageName != null && !"android".equals(opPackageName)) {
             try {
                 return getContext().getPackageManager()
                         .getPackageUidAsUser(opPackageName, userId);
@@ -3295,7 +3293,8 @@ public class NotificationManagerService extends SystemService {
     private boolean checkDisqualifyingFeatures(int userId, int callingUid, int id, String tag,
             NotificationRecord r) {
         final String pkg = r.sbn.getPackageName();
-        final boolean isSystemNotification = isUidSystem(callingUid) || ("android".equals(pkg));
+        final boolean isSystemNotification =
+                isUidSystemOrPhone(callingUid) || ("android".equals(pkg));
         final boolean isNotificationFromListener = mListeners.isListenerPackage(pkg);
 
         // Limit the number of notifications that any given package except the android
@@ -4192,7 +4191,7 @@ public class NotificationManagerService extends SystemService {
             mNotificationsByKey.remove(recordInList.sbn.getKey());
             wasPosted = true;
         }
-        if ((recordInList = findNotificationByListLocked(mEnqueuedNotifications, r.getKey()))
+        while ((recordInList = findNotificationByListLocked(mEnqueuedNotifications, r.getKey()))
                 != null) {
             mEnqueuedNotifications.remove(recordInList);
         }
@@ -4686,24 +4685,30 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    protected boolean isUidSystem(int uid) {
+    protected boolean isCallingUidSystem() {
+        final int uid = Binder.getCallingUid();
+        return uid == Process.SYSTEM_UID;
+    }
+
+    protected boolean isUidSystemOrPhone(int uid) {
         final int appid = UserHandle.getAppId(uid);
         return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
     }
 
-    protected boolean isCallerSystem() {
-        return isUidSystem(Binder.getCallingUid());
+    // TODO: Most calls should probably move to isCallerSystem.
+    protected boolean isCallerSystemOrPhone() {
+        return isUidSystemOrPhone(Binder.getCallingUid());
     }
 
     private void checkCallerIsSystem() {
-        if (isCallerSystem()) {
+        if (isCallerSystemOrPhone()) {
             return;
         }
         throw new SecurityException("Disallowed call for uid " + Binder.getCallingUid());
     }
 
     private void checkCallerIsSystemOrSameApp(String pkg) {
-        if (isCallerSystem()) {
+        if (isCallerSystemOrPhone()) {
             return;
         }
         checkCallerIsSameApp(pkg);
@@ -4711,7 +4716,7 @@ public class NotificationManagerService extends SystemService {
 
     private boolean isCallerInstantApp(String pkg) {
         // System is always allowed to act for ephemeral apps.
-        if (isCallerSystem()) {
+        if (isCallerSystemOrPhone()) {
             return false;
         }
 
