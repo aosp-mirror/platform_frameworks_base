@@ -536,9 +536,9 @@ public abstract class PlayerBase {
             throw new IllegalArgumentException("Use of STREAM_ACCESSIBILITY is reserved for "
                     + "volume control");
         }
-        Log.e(className, "Use of stream types is deprecated for operations other than " +
-                "volume control.");
-        Log.e(className, "See the documentation of " + opName + " for what to use instead with " +
+        Log.w(className, "Use of stream types is deprecated for operations other than " +
+                "volume control");
+        Log.w(className, "See the documentation of " + opName + " for what to use instead with " +
                 "android.media.AudioAttributes to qualify your playback use case");
     }
 }
