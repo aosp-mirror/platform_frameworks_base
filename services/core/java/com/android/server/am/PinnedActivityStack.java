@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.app.RemoteAction;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
@@ -50,8 +51,21 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
 
     void animateResizePinnedStack(Rect sourceHintBounds, Rect toBounds, int animationDuration,
             boolean schedulePipModeChangedOnAnimationEnd) {
-        getWindowContainerController().animateResizePinnedStack(toBounds, sourceHintBounds,
-                animationDuration, schedulePipModeChangedOnAnimationEnd);
+        if (skipResizeAnimation(toBounds == null /* toFullscreen */)) {
+            mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
+        } else {
+            getWindowContainerController().animateResizePinnedStack(toBounds, sourceHintBounds,
+                    animationDuration, schedulePipModeChangedOnAnimationEnd);
+        }
+    }
+
+    private boolean skipResizeAnimation(boolean toFullscreen) {
+        if (!toFullscreen) {
+            return false;
+        }
+        final Configuration parentConfig = getParent().getConfiguration();
+        final ActivityRecord top = topRunningNonOverlayTaskActivity();
+        return top != null && !top.isConfigurationCompatible(parentConfig);
     }
 
     void setPictureInPictureAspectRatio(float aspectRatio) {
