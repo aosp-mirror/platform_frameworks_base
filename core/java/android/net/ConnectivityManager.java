@@ -3381,6 +3381,22 @@ public class ConnectivityManager {
     }
 
     /**
+     * Requests that the system open the captive portal app on the specified network.
+     *
+     * @param network The network to log into.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    public void startCaptivePortalApp(Network network) {
+        try {
+            mService.startCaptivePortalApp(network);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * It is acceptable to briefly use multipath data to provide seamless connectivity for
      * time-sensitive user-facing operations when the system default network is temporarily
      * unresponsive. The amount of data should be limited (less than one megabyte for every call to
