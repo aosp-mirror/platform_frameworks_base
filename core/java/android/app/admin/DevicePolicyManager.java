@@ -7636,6 +7636,7 @@ public class DevicePolicyManager {
      * empty set if none have been set.
      */
     public @NonNull Set<String> getAffiliationIds(@NonNull ComponentName admin) {
+        throwIfParentInstance("getAffiliationIds");
         try {
             return new ArraySet<>(mService.getAffiliationIds(admin));
         } catch (RemoteException e) {
