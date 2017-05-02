@@ -503,7 +503,7 @@ interface IPackageManager {
      *   {@link android.content.pm.IDexModuleRegisterCallback.IDexModuleRegisterCallback#onDexModuleRegistered}
      *   will be called once the registration finishes.
      */
-     void registerDexModule(in String packageName, in String dexModulePath,
+     oneway void registerDexModule(in String packageName, in String dexModulePath,
              in boolean isSharedModule, IDexModuleRegisterCallback callback);
 
     /**
