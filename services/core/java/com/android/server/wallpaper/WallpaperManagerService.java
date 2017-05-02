@@ -592,9 +592,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     class WallpaperConnection extends IWallpaperConnection.Stub
             implements ServiceConnection {
 
-        /** Time in milliseconds until we expect the wallpaper to reconnect (unless we're in the
-         *  middle of an update). If exceeded, the wallpaper gets reset to the system default. */
-        private static final long WALLPAPER_RECONNECT_TIMEOUT_MS = 5000;
+        /**
+         * Time in milliseconds until we expect the wallpaper to reconnect (unless we're in the
+         * middle of an update). If exceeded, the wallpaper gets reset to the system default.
+         * FIXME(ewol): Adjusted from 5s to 15s for Wear.
+         */
+        private static final long WALLPAPER_RECONNECT_TIMEOUT_MS = 15000;
 
         final WallpaperInfo mInfo;
         final Binder mToken = new Binder();
