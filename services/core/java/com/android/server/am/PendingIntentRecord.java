@@ -271,10 +271,15 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                     resolvedType = key.requestResolvedType;
                 }
 
+                final int callingUid = Binder.getCallingUid();
+                final int callingPid = Binder.getCallingPid();
+
+                final long origId = Binder.clearCallingIdentity();
+
                 if (whitelistDuration > 0) {
                     StringBuilder tag = new StringBuilder(64);
                     tag.append("pendingintent:");
-                    UserHandle.formatUid(tag, Binder.getCallingUid());
+                    UserHandle.formatUid(tag, callingUid);
                     tag.append(":");
                     if (finalIntent.getAction() != null) {
                         tag.append(finalIntent.getAction());
@@ -283,11 +288,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                     } else if (finalIntent.getData() != null) {
                         tag.append(finalIntent.getData());
                     }
-                    owner.tempWhitelistForPendingIntentLocked(Binder.getCallingPid(),
-                            Binder.getCallingUid(), uid, whitelistDuration, tag.toString());
+                    owner.tempWhitelistForPendingIntentLocked(callingPid,
+                            callingUid, uid, whitelistDuration, tag.toString());
                 }
-
-                final long origId = Binder.clearCallingIdentity();
 
                 boolean sendFinish = finishedReceiver != null;
                 int userId = key.userId;
