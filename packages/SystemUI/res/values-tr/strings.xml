@@ -761,4 +761,8 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Bitiş: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Koru"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Değiştir"</string>
+    <!-- no translation found for running_foreground_services_title (381024150898615683) -->
+    <skip />
+    <!-- no translation found for running_foreground_services_msg (6326247670075574355) -->
+    <skip />
 </resources>
