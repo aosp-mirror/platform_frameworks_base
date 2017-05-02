@@ -388,6 +388,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Wakelocks
     private final static String WAKELOCK_KEY = "GnssLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
+    private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderXtraDownload";
+    private final PowerManager.WakeLock mDownloadXtraWakeLock;
 
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
@@ -722,6 +724,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
         mWakeLock.setReferenceCounted(true);
 
+        // Create a separate wake lock for xtra downloader as it may be released due to timeout.
+        mDownloadXtraWakeLock = mPowerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, DOWNLOAD_EXTRA_WAKELOCK_KEY);
+        mDownloadXtraWakeLock.setReferenceCounted(true);
+
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
@@ -1026,7 +1033,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mDownloadXtraDataPending = STATE_DOWNLOADING;
 
         // hold wake lock while task runs
-        mWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
+        mDownloadXtraWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
         Log.i(TAG, "WakeLock acquired by handleDownloadXtraData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
@@ -1048,13 +1055,17 @@ public class GnssLocationProvider implements LocationProviderInterface {
                             mXtraBackOff.nextBackoffMillis());
                 }
 
-                // release wake lock held by task
-                if (mWakeLock.isHeld()) {
-                    mWakeLock.release();
-                } else {
-                    Log.e(TAG, "WakeLock expired before release in handleDownloadXtraData()");
+                // Release wake lock held by task, synchronize on mLock in case multiple
+                // download tasks overrun.
+                synchronized (mLock) {
+                    if (mDownloadXtraWakeLock.isHeld()) {
+                        mDownloadXtraWakeLock.release();
+                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                    } else {
+                        Log.e(TAG, "WakeLock expired before release in "
+                                + "handleDownloadXtraData()");
+                    }
                 }
-                Log.i(TAG, "WakeLock released by handleDownloadXtraData()");
             }
         });
     }
