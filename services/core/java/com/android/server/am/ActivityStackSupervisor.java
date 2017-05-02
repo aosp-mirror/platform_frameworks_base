@@ -3043,11 +3043,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     if (!mTmpFindTaskResult.matchedByRootAffinity) {
                         return mTmpFindTaskResult.r;
                     } else if (mTmpFindTaskResult.r.getDisplayId() == displayId) {
+                        // Note: since the traversing through the stacks is top down, the floating
+                        // tasks should always have lower priority than any affinity-matching tasks
+                        // in the fullscreen stacks
                         affinityMatch = mTmpFindTaskResult.r;
                     }
                 }
             }
         }
+
         if (DEBUG_TASKS && affinityMatch == null) Slog.d(TAG_TASKS, "No task found");
         return affinityMatch;
     }
