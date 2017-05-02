@@ -154,10 +154,10 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_COPY = 5;
     private static final int MENU_ITEM_ORDER_PASTE = 6;
     private static final int MENU_ITEM_ORDER_SHARE = 7;
-    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 8;
-    private static final int MENU_ITEM_ORDER_SELECT_ALL = 9;
-    private static final int MENU_ITEM_ORDER_REPLACE = 10;
-    private static final int MENU_ITEM_ORDER_AUTOFILL = 11;
+    private static final int MENU_ITEM_ORDER_SELECT_ALL = 8;
+    private static final int MENU_ITEM_ORDER_REPLACE = 9;
+    private static final int MENU_ITEM_ORDER_AUTOFILL = 10;
+    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
 
     // Each Editor manages its own undo stack.
@@ -2634,9 +2634,9 @@ public class Editor {
                 .setAlphabeticShortcut('v')
                 .setEnabled(mTextView.canPaste())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+        menu.add(Menu.NONE, TextView.ID_PASTE_AS_PLAIN_TEXT, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
                 com.android.internal.R.string.paste_as_plain_text)
-                .setEnabled(mTextView.canPaste())
+                .setEnabled(mTextView.canPasteAsPlainText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
                 com.android.internal.R.string.share)
@@ -3775,7 +3775,6 @@ public class Editor {
             mode.setSubtitle(null);
             mode.setTitleOptionalHint(true);
             populateMenuWithItems(menu);
-            updateAssistMenuItem(menu);
 
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
@@ -3843,8 +3842,18 @@ public class Editor {
                         .setShowAsAction(mode);
             }
 
+            if (mTextView.canPasteAsPlainText()) {
+                menu.add(
+                        Menu.NONE,
+                        TextView.ID_PASTE_AS_PLAIN_TEXT,
+                        MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+                        com.android.internal.R.string.paste_as_plain_text)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }
+
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
+            updateAssistMenuItem(menu);
         }
 
         @Override
