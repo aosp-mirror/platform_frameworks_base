@@ -59,9 +59,15 @@ public final class Credential implements Parcelable {
      * Using Long.MIN_VALUE to indicate unset value.
      */
     private long mCreationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setCreationTimeInMillis(long creationTimeInMillis) {
         mCreationTimeInMillis = creationTimeInMillis;
     }
+    /**
+     * @hide
+     */
     public long getCreationTimeInMillis() {
         return mCreationTimeInMillis;
     }
@@ -72,9 +78,15 @@ public final class Credential implements Parcelable {
     * Using Long.MIN_VALUE to indicate unset value.
      */
     private long mExpirationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setExpirationTimeInMillis(long expirationTimeInMillis) {
         mExpirationTimeInMillis = expirationTimeInMillis;
     }
+    /**
+     * @hide
+     */
     public long getExpirationTimeInMillis() {
         return mExpirationTimeInMillis;
     }
@@ -98,9 +110,15 @@ public final class Credential implements Parcelable {
      * Protocol) authentication.
      */
     private boolean mCheckAaaServerCertStatus = false;
+    /**
+     * @hide
+     */
     public void setCheckAaaServerCertStatus(boolean checkAaaServerCertStatus) {
         mCheckAaaServerCertStatus = checkAaaServerCertStatus;
     }
+    /**
+     * @hide
+     */
     public boolean getCheckAaaServerCertStatus() {
         return mCheckAaaServerCertStatus;
     }
@@ -166,9 +184,15 @@ public final class Credential implements Parcelable {
          * Flag indicating if the password is machine managed.
          */
         private boolean mMachineManaged = false;
+        /**
+         * @hide
+         */
         public void setMachineManaged(boolean machineManaged) {
             mMachineManaged = machineManaged;
         }
+        /**
+         * @hide
+         */
         public boolean getMachineManaged() {
             return mMachineManaged;
         }
@@ -177,9 +201,15 @@ public final class Credential implements Parcelable {
          * The name of the application used to generate the password.
          */
         private String mSoftTokenApp = null;
+        /**
+         * @hide
+         */
         public void setSoftTokenApp(String softTokenApp) {
             mSoftTokenApp = softTokenApp;
         }
+        /**
+         * @hide
+         */
         public String getSoftTokenApp() {
             return mSoftTokenApp;
         }
@@ -188,9 +218,15 @@ public final class Credential implements Parcelable {
          * Flag indicating if this credential is usable on other mobile devices as well.
          */
         private boolean mAbleToShare = false;
+        /**
+         * @hide
+         */
         public void setAbleToShare(boolean ableToShare) {
             mAbleToShare = ableToShare;
         }
+        /**
+         * @hide
+         */
         public boolean getAbleToShare() {
             return mAbleToShare;
         }

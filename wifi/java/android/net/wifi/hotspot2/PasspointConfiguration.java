@@ -80,9 +80,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Configurations under Policy subtree.
      */
     private Policy mPolicy = null;
+    /**
+     * @hide
+     */
     public void setPolicy(Policy policy) {
         mPolicy = policy;
     }
+    /**
+     * @hide
+     */
     public Policy getPolicy() {
         return mPolicy;
     }
@@ -91,9 +97,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Meta data for performing subscription update.
      */
     private UpdateParameter mSubscriptionUpdate = null;
+    /**
+     * @hide
+     */
     public void setSubscriptionUpdate(UpdateParameter subscriptionUpdate) {
         mSubscriptionUpdate = subscriptionUpdate;
     }
+    /**
+     * @hide
+     */
     public UpdateParameter getSubscriptionUpdate() {
         return mSubscriptionUpdate;
     }
@@ -104,9 +116,15 @@ public final class PasspointConfiguration implements Parcelable {
      * identity during EAP authentication.
      */
     private Map<String, byte[]> mTrustRootCertList = null;
+    /**
+     * @hide
+     */
     public void setTrustRootCertList(Map<String, byte[]> trustRootCertList) {
         mTrustRootCertList = trustRootCertList;
     }
+    /**
+     * @hide
+     */
     public Map<String, byte[]> getTrustRootCertList() {
         return mTrustRootCertList;
     }
@@ -118,9 +136,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Use Integer.MIN_VALUE to indicate unset value.
      */
     private int mUpdateIdentifier = Integer.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setUpdateIdentifier(int updateIdentifier) {
         mUpdateIdentifier = updateIdentifier;
     }
+    /**
+     * @hide
+     */
     public int getUpdateIdentifier() {
         return mUpdateIdentifier;
     }
@@ -131,9 +155,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Use Integer.MIN_VALUE to indicate unset value.
      */
     private int mCredentialPriority = Integer.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setCredentialPriority(int credentialPriority) {
         mCredentialPriority = credentialPriority;
     }
+    /**
+     * @hide
+     */
     public int getCredentialPriority() {
         return mCredentialPriority;
     }
@@ -145,9 +175,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Use Long.MIN_VALUE to indicate unset value.
      */
     private long mSubscriptionCreationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setSubscriptionCreationTimeInMillis(long subscriptionCreationTimeInMillis) {
         mSubscriptionCreationTimeInMillis = subscriptionCreationTimeInMillis;
     }
+    /**
+     * @hide
+     */
     public long getSubscriptionCreationTimeInMillis() {
         return mSubscriptionCreationTimeInMillis;
     }
@@ -159,9 +195,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Use Long.MIN_VALUE to indicate unset value.
      */
     private long mSubscriptionExpirationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setSubscriptionExpirationTimeInMillis(long subscriptionExpirationTimeInMillis) {
         mSubscriptionExpirationTimeInMillis = subscriptionExpirationTimeInMillis;
     }
+    /**
+     * @hide
+     */
     public long getSubscriptionExpirationTimeInMillis() {
         return mSubscriptionExpirationTimeInMillis;
     }
@@ -171,9 +213,15 @@ public final class PasspointConfiguration implements Parcelable {
      * specific.
      */
     private String mSubscriptionType = null;
+    /**
+     * @hide
+     */
     public void setSubscriptionType(String subscriptionType) {
         mSubscriptionType = subscriptionType;
     }
+    /**
+     * @hide
+     */
     public String getSubscriptionType() {
         return mSubscriptionType;
     }
@@ -184,9 +232,15 @@ public final class PasspointConfiguration implements Parcelable {
      * “pay as you go” - PAYG service). A non-zero value specifies the usage interval in minutes.
      */
     private long mUsageLimitUsageTimePeriodInMinutes = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setUsageLimitUsageTimePeriodInMinutes(long usageLimitUsageTimePeriodInMinutes) {
         mUsageLimitUsageTimePeriodInMinutes = usageLimitUsageTimePeriodInMinutes;
     }
+    /**
+     * @hide
+     */
     public long getUsageLimitUsageTimePeriodInMinutes() {
         return mUsageLimitUsageTimePeriodInMinutes;
     }
@@ -198,9 +252,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Use Long.MIN_VALUE to indicate unset value.
      */
     private long mUsageLimitStartTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setUsageLimitStartTimeInMillis(long usageLimitStartTimeInMillis) {
         mUsageLimitStartTimeInMillis = usageLimitStartTimeInMillis;
     }
+    /**
+     * @hide
+     */
     public long getUsageLimitStartTimeInMillis() {
         return mUsageLimitStartTimeInMillis;
     }
@@ -212,9 +272,15 @@ public final class PasspointConfiguration implements Parcelable {
      * Use Long.MIN_VALUE to indicate unset value.
      */
     private long mUsageLimitDataLimit = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setUsageLimitDataLimit(long usageLimitDataLimit) {
         mUsageLimitDataLimit = usageLimitDataLimit;
     }
+    /**
+     * @hide
+     */
     public long getUsageLimitDataLimit() {
         return mUsageLimitDataLimit;
     }
@@ -224,9 +290,15 @@ public final class PasspointConfiguration implements Parcelable {
      * A value of zero indicate unlimited time usage.
      */
     private long mUsageLimitTimeLimitInMinutes = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
     public void setUsageLimitTimeLimitInMinutes(long usageLimitTimeLimitInMinutes) {
         mUsageLimitTimeLimitInMinutes = usageLimitTimeLimitInMinutes;
     }
+    /**
+     * @hide
+     */
     public long getUsageLimitTimeLimitInMinutes() {
         return mUsageLimitTimeLimitInMinutes;
     }
