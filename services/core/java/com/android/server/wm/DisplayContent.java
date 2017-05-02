@@ -1503,8 +1503,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mImeWindowsContainers.forAllWindows(callback, traverseTopToBottom);
     }
 
-    @Override
-    int getOrientation() {
+    /**
+     * Returns the orientation that this display should be in factoring in its children containers.
+     *
+     * @param includeAppContainers True if then app containers (stacks, tasks, ...) should be
+     *                             factored in when determining the orientation. If false only
+     *                             non-app/system containers will be used to determine the returned
+     *                             orientation.
+     * @return The orientation the display should be in.
+     */
+    int getOrientation(boolean includeAppContainers) {
         final WindowManagerPolicy policy = mService.mPolicy;
 
         if (mService.mDisplayFrozen) {
@@ -1533,8 +1541,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        // Top system windows are not requesting an orientation. Start searching from apps.
-        return mTaskStackContainers.getOrientation();
+        // Top system windows are not requesting an orientation. Get orientation from app containers
+        // if allowed. Otherwise, return the last orientation.
+        return includeAppContainers ? mTaskStackContainers.getOrientation() : mLastOrientation;
+    }
+
+    @Override
+    int getOrientation() {
+        return getOrientation(true /* includeAppContainers */);
     }
 
     void updateDisplayInfo() {

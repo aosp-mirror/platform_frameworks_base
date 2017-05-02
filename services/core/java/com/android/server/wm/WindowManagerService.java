@@ -2373,7 +2373,7 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized(mWindowMap) {
                 config = updateOrientationFromAppTokensLocked(currentConfig, freezeThisOneIfNeeded,
-                        displayId);
+                        displayId, true /* includeAppContainers */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2383,13 +2383,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private Configuration updateOrientationFromAppTokensLocked(Configuration currentConfig,
-            IBinder freezeThisOneIfNeeded, int displayId) {
+            IBinder freezeThisOneIfNeeded, int displayId, boolean includeAppContainers) {
         if (!mDisplayReady) {
             return null;
         }
         Configuration config = null;
 
-        if (updateOrientationFromAppTokensLocked(false, displayId)) {
+        if (updateOrientationFromAppTokensLocked(false, displayId, includeAppContainers)) {
             // If we changed the orientation but mOrientationChangeComplete is already true,
             // we used seamless rotation, and we don't need to freeze the screen.
             if (freezeThisOneIfNeeded != null && !mRoot.mOrientationChangeComplete) {
@@ -2427,6 +2427,11 @@ public class WindowManagerService extends IWindowManager.Stub
         return config;
     }
 
+    boolean updateOrientationFromAppTokensLocked(boolean inTransaction, int displayId) {
+        return updateOrientationFromAppTokensLocked(inTransaction, displayId,
+                false /* includeAppContainers */);
+    }
+
     /**
      * Determine the new desired orientation of the display, returning a non-null new Configuration
      * if it has changed from the current orientation.  IF TRUE IS RETURNED SOMEONE MUST CALL
@@ -2437,13 +2442,25 @@ public class WindowManagerService extends IWindowManager.Stub
      * The orientation is computed from non-application windows first. If none of the
      * non-application windows specify orientation, the orientation is computed from application
      * tokens.
+     *
+     * @param inTransaction True if we are currently in a surface transaction.
+     * @param displayId Id of the display to update orientation for.
+     * @param includeAppContainers True if then app containers (stacks, tasks, ...) should be
+     *                             factored in when determining the orientation. If false only
+     *                             non-app/system containers will be used to determine the returned
+     *                             orientation.
+     *                             NOTE: Only call originating from activity manager are expected to
+     *                             set this to true as it needs to synchronize several app states
+     *                             like visibility with the update of display orientation.
+     * @return True if the display orientation was updated.
      * @see android.view.IWindowManager#updateOrientationFromAppTokens(Configuration, IBinder, int)
      */
-    boolean updateOrientationFromAppTokensLocked(boolean inTransaction, int displayId) {
-        long ident = Binder.clearCallingIdentity();
+    private boolean updateOrientationFromAppTokensLocked(boolean inTransaction, int displayId,
+            boolean includeAppContainers) {
+        final long ident = Binder.clearCallingIdentity();
         try {
             final DisplayContent dc = mRoot.getDisplayContent(displayId);
-            final int req = dc.getOrientation();
+            final int req = dc.getOrientation(includeAppContainers);
             if (req != dc.getLastOrientation()) {
                 dc.setLastOrientation(req);
                 //send a message to Policy indicating orientation change to take
