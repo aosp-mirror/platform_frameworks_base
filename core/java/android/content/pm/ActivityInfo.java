@@ -883,9 +883,12 @@ public class ActivityInfo extends ComponentInfo
     /**
      * Screen rotation animation desired by the activity, with values as defined
      * for {@link android.view.WindowManager.LayoutParams#rotationAnimation}.
+     *
+     * -1 means to use the system default.
+     *
      * @hide
      */
-    public int rotationAnimation = ROTATION_ANIMATION_ROTATE;
+    public int rotationAnimation = -1;
 
     /** @hide */
     public static final int LOCK_TASK_LAUNCH_MODE_DEFAULT = 0;
