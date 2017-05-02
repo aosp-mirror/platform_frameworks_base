@@ -197,11 +197,13 @@ public class NetworkMonitor extends StateMachine {
     public static final int EVENT_PROVISIONING_NOTIFICATION = BASE + 10;
 
     /**
-     * Message to self indicating sign-in app should be launched.
+     * Message indicating sign-in app should be launched.
      * Sent by mLaunchCaptivePortalAppBroadcastReceiver when the
-     * user touches the sign in notification.
+     * user touches the sign in notification, or sent by
+     * ConnectivityService when the user touches the "sign into
+     * network" button in the wifi access point detail page.
      */
-    private static final int CMD_LAUNCH_CAPTIVE_PORTAL_APP = BASE + 11;
+    public static final int CMD_LAUNCH_CAPTIVE_PORTAL_APP = BASE + 11;
 
     /**
      * Retest network to see if captive portal is still in place.
