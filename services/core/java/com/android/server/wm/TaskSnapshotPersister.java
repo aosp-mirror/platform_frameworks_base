@@ -24,6 +24,7 @@ import android.annotation.TestApi;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -266,12 +267,13 @@ class TaskSnapshotPersister {
             final File file = getBitmapFile(mTaskId, mUserId);
             final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
             final Bitmap bitmap = Bitmap.createHardwareBitmap(mSnapshot.getSnapshot());
-            final Bitmap reduced = Bitmap.createScaledBitmap(bitmap,
+            final Bitmap swBitmap = bitmap.copy(Config.ARGB_8888, false /* isMutable */);
+            final Bitmap reduced = Bitmap.createScaledBitmap(swBitmap,
                     (int) (bitmap.getWidth() * REDUCED_SCALE),
                     (int) (bitmap.getHeight() * REDUCED_SCALE), true /* filter */);
             try {
                 FileOutputStream fos = new FileOutputStream(file);
-                bitmap.compress(JPEG, QUALITY, fos);
+                swBitmap.compress(JPEG, QUALITY, fos);
                 fos.close();
                 FileOutputStream reducedFos = new FileOutputStream(reducedFile);
                 reduced.compress(JPEG, QUALITY, reducedFos);
