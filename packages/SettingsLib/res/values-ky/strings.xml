@@ -216,7 +216,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергиликтүү терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергиликтүү буйрук кабыгын сунуштаган терминалга уруксат берүү"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP текшерүү"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP текшерүү арактн коюу"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP текшерүү тартиби"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Жөндөө"</string>
     <string name="debug_app" msgid="8349591734751384446">"Жөндөөчү колдонмону тандоо"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Эч бир жөндөөчү колдонмо орнотулган жок."</string>
@@ -299,15 +299,15 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Иштеп турат. Которуштуруу үчүн таптап коюңуз."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Иштеп жаткан кызматтар"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Учурда иштеп жаткан кызматтарды көрүү жана көзөмөлдөө"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView аткарылышы"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView кызматы"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView аткарылышын коюу"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Тандалган нерсе жараксыз болуп калган. Кайра аракет кылыңыз."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Файл шифрлөөсүнө айландыруу"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Файлдарды шифрлөөгө өтүү"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Айландыруу…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Файл мурунтан эле шифрленген"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Файл негизиндеги шифрлөөгө айландырылууда"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Дайындардын бөлүнүшүн файл негизиндеги шифрлөөгө айландыруу.\n !!Эскертүү!! Бул бардык дайындарыңызды тазалайт.\n Бул функция - альфа жана туура иштебеши мүмкүн.\n Улантуу үчүн \'Сүрүп салуу жана айландыруу…\' дегенди басыңыз."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"Сүрүп салуу жана айландыруу…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Айрым файлдарды шифрлөөгө өтөсүз.\n !!Эскертүү!! Ушуну менен бардык дайындар өчөт.\n Бул альфа версия болгондуктан, функция талаптагыдай иштебеши мүмкүн.\n Улантуу үчүн \'Өчүрүп туруп, кийинкиге өтүү…\' дегенди басыңыз."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Өчүрүп туруп, кийинкиге өтүү…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Сүрөт түсү режими"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB колдонуңуз"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Токтотулган"</string>
