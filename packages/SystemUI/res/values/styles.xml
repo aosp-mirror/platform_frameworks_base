@@ -82,6 +82,56 @@
         <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
     </style>
 
+    <!-- HybridNotification themes and styles -->
+
+    <style name="HybridNotification">
+        <item name="hybridNotificationStyle">@style/hybrid_notification</item>
+        <item name="hybridNotificationTitleStyle">@style/hybrid_notification_title</item>
+        <item name="hybridNotificationTextStyle">@style/hybrid_notification_text</item>
+    </style>
+
+    <style name="HybridNotification.Ambient">
+        <item name="hybridNotificationStyle">@style/hybrid_notification_ambient</item>
+        <item name="hybridNotificationTitleStyle">@style/hybrid_notification_title_ambient</item>
+        <item name="hybridNotificationTextStyle">@style/hybrid_notification_text_ambient</item>
+    </style>
+
+    <style name="hybrid_notification_ambient">
+        <item name="android:paddingStart">@*android:dimen/notification_extra_margin_ambient</item>
+        <item name="android:paddingEnd">@*android:dimen/notification_extra_margin_ambient</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingBottom">23.5dp</item>
+    </style>
+
+    <style name="hybrid_notification">
+        <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
+        <item name="android:paddingEnd">12dp</item>
+    </style>
+
+    <style name="hybrid_notification_title_ambient">
+        <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
+        <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#ffffffff</item>
+    </style>
+
+    <style name="hybrid_notification_title">
+        <item name="android:paddingEnd">4dp</item>
+    </style>
+
+    <style name="hybrid_notification_text_ambient">
+        <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
+        <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#eeffffff</item>
+        <item name="android:layout_marginTop">4dp</item>
+    </style>
+
+    <style name="hybrid_notification_text">
+        <item name="android:paddingEnd">4dp</item>
+    </style>
+
+
     <style name="TextAppearance.StatusBar.HeadsUp"
         parent="@*android:style/TextAppearance.StatusBar">
     </style>

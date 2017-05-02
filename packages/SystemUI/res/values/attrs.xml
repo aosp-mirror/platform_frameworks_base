@@ -108,6 +108,12 @@
         <attr name="android:layout" />
     </declare-styleable>
 
+    <declare-styleable name="HybridNotificationTheme">
+        <attr name="hybridNotificationStyle" format="reference" />
+        <attr name="hybridNotificationTitleStyle" format="reference" />
+        <attr name="hybridNotificationTextStyle" format="reference" />
+    </declare-styleable>
+
     <declare-styleable name="AutoSizingList">
         <!-- Whether AutoSizingList will show only as many items as fit on screen and
              remove extra items instead of scrolling. -->
