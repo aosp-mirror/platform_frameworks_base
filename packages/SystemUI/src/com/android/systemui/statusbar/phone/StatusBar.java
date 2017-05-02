@@ -1010,12 +1010,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 new IconManager((ViewGroup) mKeyguardStatusBar.findViewById(R.id.statusIcons)));
         mIconController = Dependency.get(StatusBarIconController.class);
 
-        if (!ActivityManager.isHighEndGfx()) {
-            mStatusBarWindow.setBackground(null);
-            mNotificationPanel.setBackground(new FastColorDrawable(context.getColor(
-                    R.color.notification_panel_solid_background)));
-        }
-
         mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow, mGroupManager);
         mHeadsUpManager.setBar(this);
         mHeadsUpManager.addListener(this);

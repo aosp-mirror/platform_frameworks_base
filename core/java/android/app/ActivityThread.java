@@ -5472,15 +5472,6 @@ public final class ActivityThread {
         android.ddm.DdmHandleAppName.setAppName(data.processName,
                                                 UserHandle.myUserId());
 
-        if (data.persistent) {
-            // Persistent processes on low-memory devices do not get to
-            // use hardware accelerated drawing, since this can add too much
-            // overhead to the process.
-            if (!ActivityManager.isHighEndGfx()) {
-                ThreadedRenderer.disable(false);
-            }
-        }
-
         if (mProfiler.profileFd != null) {
             mProfiler.startProfiling();
         }
