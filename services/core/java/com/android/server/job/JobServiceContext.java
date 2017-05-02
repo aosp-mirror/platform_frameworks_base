@@ -184,8 +184,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = mContext.bindServiceAsUser(intent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                            | Context.BIND_IMPORTANT_BACKGROUND,
+                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
                     new UserHandle(job.getUserId()));
             if (!binding) {
                 if (DEBUG) {
