@@ -11,12 +11,12 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CALLING_PACKAGE_NAME;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CLASS_NAME;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_IS_EPHEMERAL;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_STARTING_WINDOW_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CLASS_NAME;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_LAUNCH_TOKEN;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_COLD_LAUNCH;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_HOT_LAUNCH;
@@ -194,6 +194,11 @@ class ActivityMetricsLogger {
         final int stackId = launchedActivity != null && launchedActivity.getStack() != null
                 ? launchedActivity.getStack().mStackId
                 : INVALID_STACK_ID;
+
+        if (mCurrentTransitionStartTime == INVALID_START_TIME) {
+            return;
+        }
+
         final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
         if (launchedActivity != null && info != null) {
             info.launchedActivity = launchedActivity;
@@ -269,6 +274,25 @@ class ActivityMetricsLogger {
         }
         if (allStacksWindowsDrawn()) {
             reset(false /* abort */);
+        }
+    }
+
+    /**
+     * Notifies the tracker that the visibility of an app is changing.
+     *
+     * @param activityRecord the app that is changing its visibility
+     * @param visible whether it's going to be visible or not
+     */
+    void notifyVisibilityChanged(ActivityRecord activityRecord, boolean visible) {
+        final StackTransitionInfo info = mStackTransitionInfo.get(activityRecord.getStackId());
+
+        // If we have an active transition that's waiting on a certain activity that will be
+        // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
+        if (info != null && !visible && info.launchedActivity == activityRecord) {
+            mStackTransitionInfo.remove(activityRecord.getStackId());
+            if (mStackTransitionInfo.size() == 0) {
+                reset(true /* abort */);
+            }
         }
     }
 
