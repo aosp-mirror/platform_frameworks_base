@@ -35,6 +35,7 @@ import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.assist.AssistStructure;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11040,6 +11041,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && getSelectionEnd() >= 0
                 && ((ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE))
                         .hasPrimaryClip());
+    }
+
+    boolean canPasteAsPlainText() {
+        if (!canPaste()) {
+            return false;
+        }
+
+        final ClipData clipData =
+                ((ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE))
+                        .getPrimaryClip();
+        final ClipDescription description = clipData.getDescription();
+        final boolean isPlainType = description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
+        final CharSequence text = clipData.getItemAt(0).getText();
+        if (isPlainType && (text instanceof Spanned)) {
+            Spanned spanned = (Spanned) text;
+            if (TextUtils.hasStyleSpan(spanned)) {
+                return true;
+            }
+        }
+        return description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML);
     }
 
     boolean canProcessText() {
