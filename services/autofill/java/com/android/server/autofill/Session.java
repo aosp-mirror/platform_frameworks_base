@@ -221,7 +221,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 final int numContexts = mContexts.size();
                 for (int i = 0; i < numContexts; i++) {
-                    fillStructureWithAllowedValues(mContexts.get(i).getStructure());
+                    fillStructureWithAllowedValues(mContexts.get(i).getStructure(), flags);
                 }
 
                 request = new FillRequest(requestId, mContexts, mClientState, flags);
@@ -235,10 +235,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Updates values of the nodes in the structure so that:
      * - proper node is focused
      * - autofillValue is sent back to service when it was previously autofilled
+     * - autofillValue is sent in the view used to force a request
      *
      * @param structure The structure to be filled
+     * @param flags The flags that started the session
      */
-    private void fillStructureWithAllowedValues(@NonNull AssistStructure structure) {
+    private void fillStructureWithAllowedValues(@NonNull AssistStructure structure, int flags) {
         final int numViewStates = mViewStates.size();
         for (int i = 0; i < numViewStates; i++) {
             final ViewState viewState = mViewStates.valueAt(i);
@@ -257,8 +259,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             if (mCurrentViewId != null) {
                 overlay.focused = mCurrentViewId.equals(viewState.id);
+                if (overlay.focused && (flags & FLAG_MANUAL_REQUEST) != 0) {
+                    overlay.value = node.getAutofillValue();
+                }
             }
-
             node.setAutofillOverlay(overlay);
         }
     }
