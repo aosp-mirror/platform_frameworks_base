@@ -325,9 +325,6 @@ public class MidiService extends IMidiManager.Stub {
                 }
                 IBinder binder = server.asBinder();
                 try {
-                    if (mDeviceInfo == null) {
-                        mDeviceInfo = server.getDeviceInfo();
-                    }
                     binder.linkToDeath(this, 0);
                     mServer = server;
                 } catch (RemoteException e) {
