@@ -462,7 +462,7 @@ interface IPackageManager {
      *
      * See PackageManager.NOTIFY_PACKAGE_USE_* for reasons.
      */
-    void notifyPackageUse(String packageName, int reason);
+    oneway void notifyPackageUse(String packageName, int reason);
 
     /**
      * Notify the package manager that a list of dex files have been loaded.
@@ -471,7 +471,8 @@ interface IPackageManager {
      * @param dexPats the list of the dex files paths that have been loaded
      * @param loaderIsa the ISA of the loader process
      */
-    void notifyDexLoad(String loadingPackageName, in List<String> dexPaths, String loaderIsa);
+    oneway void notifyDexLoad(String loadingPackageName, in List<String> dexPaths,
+            String loaderIsa);
 
     /**
      * Ask the package manager to perform a dex-opt for the given reason. The package
