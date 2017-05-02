@@ -271,6 +271,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"התראות"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"הדגמה לקמעונאים"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"‏חיבור USB"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"מצב בטוח"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏מערכת Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"עבור ל\'אישי\'"</string>
@@ -1009,7 +1019,7 @@
     <string name="delete" msgid="6098684844021697789">"מחק"</string>
     <string name="copyUrl" msgid="2538211579596067402">"העתק כתובת אתר"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"בחר טקסט"</string>
-    <string name="undo" msgid="7905788502491742328">"בטל"</string>
+    <string name="undo" msgid="7905788502491742328">"ביטול"</string>
     <string name="redo" msgid="7759464876566803888">"בצע מחדש"</string>
     <string name="autofill" msgid="3035779615680565188">"מילוי אוטומטי"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"בחירת טקסט"</string>
@@ -1066,7 +1076,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"האפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> נעצרת שוב ושוב"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"האפליקציה <xliff:g id="PROCESS">%1$s</xliff:g> נעצרת שוב ושוב"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"פתח שוב את האפליקציה"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"שלח משוב"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"משוב"</string>
     <string name="aerr_close" msgid="2991640326563991340">"סגור"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"השתק עד הפעלה מחדש של המכשיר"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"המתן"</string>
@@ -1181,7 +1191,7 @@
     <string name="sms_short_code_details" msgid="5873295990846059400">"הדבר "<b>"עלול לגרום לחיובים"</b>" בחשבון המכשיר הנייד שלך."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"הדבר יגרום לחיובים בחשבון המכשיר הנייד שלך."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"שלח"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"בטל"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ביטול"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"זכור את הבחירה שלי"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"‏ניתן לשנות זאת מאוחר יותר ב\'הגדרות\' &gt; \'אפליקציות\'"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"אפשר תמיד"</string>
@@ -1198,7 +1208,7 @@
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"‏ה-SIM החדש הוכנס"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"הקש כדי להגדיר"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"הגדרת שעה"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"הגדר תאריך"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"הגדרת תאריך"</string>
     <string name="date_time_set" msgid="5777075614321087758">"הגדר"</string>
     <string name="date_time_done" msgid="2507683751759308828">"בוצע"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"חדש: "</font></string>
@@ -1223,7 +1233,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"שתף"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"לא, אין מצב"</string>
     <string name="select_input_method" msgid="8547250819326693584">"שינוי מקלדת"</string>
-    <string name="show_ime" msgid="2506087537466597099">"השאר אותו במסך בזמן שהמקלדת הפיזית פעילה"</string>
+    <string name="show_ime" msgid="2506087537466597099">"תישאר במסך בזמן שהמקלדת הפיזית פעילה"</string>
     <string name="hardware" msgid="194658061510127999">"הצג מקלדת וירטואלית"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"הגדרת מקלדת פיזית"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"הקש כדי לבחור שפה ופריסה"</string>
@@ -1358,13 +1368,13 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"בטל את פעולות המחיקה"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"אל תעשה דבר כרגע"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"בחר חשבון"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"הוסף חשבון"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"הוסף חשבון"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"הוספת חשבון"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"הוספת חשבון"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"הוסף"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"הפחת"</string>
     <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> גע והחזק."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"הסט למעלה כדי להוסיף ולמטה כדי להפחית."</string>
-    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"הוסף דקה"</string>
+    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"הוספת דקה"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"הפחת דקה"</string>
     <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"הוסף שעה"</string>
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"הפחת שעה"</string>
@@ -1403,7 +1413,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"‏כונן USB של <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"‏אחסון USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ערוך"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"התראה לשימוש בנתונים"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"התראה על שימוש בנתונים"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"הקש כדי להציג נתוני שימוש והגדרות."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"‏הגעת למגבלת הנתונים של 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"‏הגעת למגבלת הנתונים של 4G"</string>
@@ -1487,7 +1497,7 @@
     <string name="kg_login_instructions" msgid="1100551261265506448">"‏כדי לבטל את הנעילה, היכנס באמצעות חשבון Google שלך."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"שם משתמש (אימייל)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"סיסמה"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"היכנס"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"כניסה"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"שם משתמש או סיסמה לא חוקיים."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏שכחת את שם המשתמש או הסיסמה?\nהיכנס לכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"בודק חשבון…"</string>
@@ -1776,7 +1786,7 @@
     <string name="demo_restarting_message" msgid="952118052531642451">"מאפס את המכשיר…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"האם לאפס את המכשיר?"</string>
     <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"תאבד את כל השינויים וההדגמה תתחיל שוב בעוד <xliff:g id="TIMEOUT">%1$s</xliff:g> שניות…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"בטל"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ביטול"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"אפס עכשיו"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> הושבת"</string>
     <string name="conference_call" msgid="3751093130790472426">"שיחת ועידה"</string>
@@ -1793,9 +1803,9 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"‏ניקוי באגים ב-USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"שעה"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"דקה"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"הגדר שעה"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"הגדרת שעה"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"הזן שעה חוקית"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"הקלד את השעה"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"מהי השעה הנכונה"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"העבר למצב קלט טקסט לצורך הזנת השעה"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"העבר למצב שעון לצורך הזנת השעה"</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"אפשרויות מילוי אוטומטי"</string>

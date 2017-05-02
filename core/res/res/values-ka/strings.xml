@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"გაფრთხილებები"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"დემო-რეჟიმი საცალო მოვაჭრეებისთვის"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB კავშირი"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"უსაფრთხო რეჟიმი"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-ის სისტემა"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"პირად პროფილზე გადართვა"</string>

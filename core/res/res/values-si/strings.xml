@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ඇඟවීම්"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"සිල්ලර ආදර්ශනය"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB සම්බන්ධතාවය"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"ආරක්‍ෂිත ආකාරය"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android පද්ධතිය"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"පුද්ගලික වෙත මාරු වන්න"</string>
@@ -1610,7 +1620,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ඔබගේ පරිපාලක මඟින් ස්ථාපනය කර ඇත"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊ-තැපැල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව ක්‍රියාත්මක වේ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ක්‍රියාත්මක කරන්න"</string>

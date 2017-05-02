@@ -265,6 +265,16 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Эскертүүлөр"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Чекене соода дүкөнү үчүн демо режим"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB аркылуу туташуу"</string>
+    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
+    <skip />
+    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
+    <skip />
+    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
+    <skip />
+    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
+    <skip />
+    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Коопсуз режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android тутуму"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Жеке профилге которулуу"</string>
@@ -1412,7 +1422,7 @@
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Түзмөккө туташуу"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Сырткы экранга чыгаруу"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Түзмөктөр изделүүдө..."</string>
-    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Тууралоолор"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Жөндөөлөр"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Ажыратуу"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Скандоодо..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Туташууда..."</string>
@@ -1466,7 +1476,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып салуу"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Атайын мүмкүнчүлүктөр функциясынын кыска жолу колдонулсунбу?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Кыска жол функциясы күйгүзүлгөн учурда үн көзөмөлдөөчү баскычтарды басып, 3 секунд кармап турсаңыз, атайын мүмкүнчүлүктөр функциясы иштетилет.\n\n Учурдагы атайын мүмкүнчүлүктөр функциясы:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Функцияны Жөндөөлөр &gt; атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн, анын кыска жолу күйгүзүлгөндө, үндү катуулатуу/акырындатуу баскычын үч секунддай кое бербей басып туруңуз.\n\n Учурдагы атайын мүмкүнчүлүктөрдүн жөндөөлөрү:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nЖөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Кыска жолду өчүрүү"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Кыска жолду колдонуу"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Атайын мүмкүнчүлүктөр кыска жолу <xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын күйгүздү"</string>
