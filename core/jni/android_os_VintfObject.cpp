@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 #define LOG_TAG "VintfObject"
 //#define LOG_NDEBUG 0
+#include <android-base/logging.h>
+
+#include <vector>
+#include <string>
 
 #include <JNIHelp.h>
 #include <vintf/VintfObject.h>
@@ -23,31 +27,48 @@
 
 #include "core_jni_helpers.h"
 
+static jclass gString;
+
 namespace android {
 
-using vintf::HalManifest;
-using vintf::RuntimeInfo;
 using vintf::VintfObject;
 using vintf::gHalManifestConverter;
+using vintf::gCompatibilityMatrixConverter;
+using vintf::XmlConverter;
 
-static jstring android_os_VintfObject_getDeviceManifest(JNIEnv* env, jclass clazz)
-{
-    const HalManifest *manifest = VintfObject::GetDeviceHalManifest();
-    if (manifest == nullptr) {
-        return nullptr;
+static inline jobjectArray toJavaStringArray(JNIEnv* env, const std::vector<std::string>& v) {
+    jobjectArray ret = env->NewObjectArray(v.size(), gString, NULL /* init element */);
+    for (size_t i = 0; i < v.size(); ++i) {
+        env->SetObjectArrayElement(ret, i, env->NewStringUTF(v[i].c_str()));
     }
-    std::string xml = gHalManifestConverter(*manifest);
-    return env->NewStringUTF(xml.c_str());
+    return ret;
 }
 
-static jstring android_os_VintfObject_getFrameworkManifest(JNIEnv* env, jclass clazz)
-{
-    const HalManifest *manifest = VintfObject::GetFrameworkHalManifest();
-    if (manifest == nullptr) {
-        return nullptr;
+template<typename T>
+static void tryAddSchema(const T* object, const XmlConverter<T>& converter,
+        const std::string& description,
+        std::vector<std::string>* cStrings) {
+    if (object == nullptr) {
+        LOG(WARNING) << __FUNCTION__ << "Cannot get " << description;
+    } else {
+        cStrings->push_back(converter(*object));
     }
-    std::string xml = gHalManifestConverter(*manifest);
-    return env->NewStringUTF(xml.c_str());
+}
+
+static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass clazz)
+{
+    std::vector<std::string> cStrings;
+
+    tryAddSchema(VintfObject::GetDeviceHalManifest(), gHalManifestConverter,
+            "device manifest", &cStrings);
+    tryAddSchema(VintfObject::GetFrameworkHalManifest(), gHalManifestConverter,
+            "framework manifest", &cStrings);
+    tryAddSchema(VintfObject::GetDeviceCompatibilityMatrix(), gCompatibilityMatrixConverter,
+            "device compatibility matrix", &cStrings);
+    tryAddSchema(VintfObject::GetFrameworkCompatibilityMatrix(), gCompatibilityMatrixConverter,
+            "framework compatibility matrix", &cStrings);
+
+    return toJavaStringArray(env, cStrings);
 }
 
 static jint android_os_VintfObject_verify(JNIEnv *env, jclass clazz, jobjectArray packageInfo) {
@@ -66,15 +87,18 @@ static jint android_os_VintfObject_verify(JNIEnv *env, jclass clazz, jobjectArra
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gVintfObjectMethods[] = {
-    {"getDeviceManifest",    "()Ljava/lang/String;",   (void*)android_os_VintfObject_getDeviceManifest},
-    {"getFrameworkManifest", "()Ljava/lang/String;",   (void*)android_os_VintfObject_getFrameworkManifest},
-    {"verify",               "([Ljava/lang/String;)I", (void*)android_os_VintfObject_verify},
+    {"report", "()[Ljava/lang/String;", (void*)android_os_VintfObject_report},
+    {"verify", "([Ljava/lang/String;)I", (void*)android_os_VintfObject_verify},
 };
+
 
 const char* const kVintfObjectPathName = "android/os/VintfObject";
 
 int register_android_os_VintfObject(JNIEnv* env)
 {
+
+    gString = MakeGlobalRefOrDie(env, FindClassOrDie(env, "java/lang/String"));
+
     return RegisterMethodsOrDie(env, kVintfObjectPathName, gVintfObjectMethods,
             NELEM(gVintfObjectMethods));
 }

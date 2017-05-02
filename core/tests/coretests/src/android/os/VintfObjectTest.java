@@ -26,5 +26,8 @@ public class VintfObjectTest extends TestCase {
         // From /system/manifest.xml
         assertTrue(String.join("", xmls).contains(
                 "<manifest version=\"1.0\" type=\"framework\">"));
+        // From /system/compatibility-matrix.xml
+        assertTrue(String.join("", xmls).contains(
+                "<compatibility-matrix version=\"1.0\" type=\"framework\">"));
     }
 }
