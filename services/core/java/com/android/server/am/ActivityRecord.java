@@ -2278,7 +2278,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     /** Returns true if the configuration is compatible with this activity. */
-    private boolean isConfigurationCompatible(Configuration config) {
+    boolean isConfigurationCompatible(Configuration config) {
         final int orientation = mWindowContainerController != null
                 ? mWindowContainerController.getOrientation() : info.screenOrientation;
         if (isFixedOrientationPortrait(orientation)
