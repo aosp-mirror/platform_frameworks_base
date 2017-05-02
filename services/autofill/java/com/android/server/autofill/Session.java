@@ -922,6 +922,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
             }
+
+            if (ArrayUtils.contains(response.getAuthenticationIds(), id)) {
+                return false;
+            }
         }
 
         return true;
@@ -943,8 +947,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.v(TAG,
                             "Creating viewState for " + id + " on " + getActionAsString(action));
                 }
-                viewState = new ViewState(this, id, value, this, ViewState.STATE_INITIAL);
+                boolean isIgnored = isIgnoredLocked(id);
+                viewState = new ViewState(this, id, value, this,
+                        isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
+                if (isIgnored) {
+                    if (sDebug) Slog.d(TAG, "updateLocked(): ignoring view " + id);
+                    return;
+                }
             } else {
                 if (sVerbose) Slog.v(TAG, "Ignored " + getActionAsString(action) + " for " + id);
                 return;
@@ -983,16 +993,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 break;
             case ACTION_VIEW_ENTERED:
                 if (shouldStartNewPartitionLocked(id)) {
-                    // TODO(b/37424539): proper implementation
-                    if (mResponseWaitingAuth != null) {
-                        viewState.setState(ViewState.STATE_WAITING_RESPONSE_AUTH);
-                    } else {
-                        if (sDebug) {
-                            Slog.d(TAG, "Starting partition for view id " + viewState.id);
-                        }
-                        viewState.setState(ViewState.STATE_STARTED_PARTITION);
-                        requestNewFillResponseLocked(flags);
+                    if (sDebug) {
+                        Slog.d(TAG, "Starting partition for view id " + viewState.id);
                     }
+                    viewState.setState(ViewState.STATE_STARTED_PARTITION);
+                    requestNewFillResponseLocked(flags);
                 }
 
                 // Remove the UI if the ViewState has changed.
@@ -1013,6 +1018,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             default:
                 Slog.w(TAG, "updateLocked(): unknown action: " + action);
         }
+    }
+
+    /**
+     * Checks whether a view should be ignored.
+     */
+    private boolean isIgnoredLocked(AutofillId id) {
+        if (mResponses == null || mResponses.size() == 0) {
+            return false;
+        }
+        // Always check the latest response only
+        final FillResponse response = mResponses.valueAt(mResponses.size() - 1);
+        return ArrayUtils.contains(response.getIgnoredIds(), id);
     }
 
     @Override
@@ -1149,18 +1166,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final SaveInfo saveInfo = response.getSaveInfo();
         if (saveInfo != null) {
             final AutofillId[] requiredIds = saveInfo.getRequiredIds();
-            for (int i = 0; i < requiredIds.length; i++) {
-                final AutofillId id = requiredIds[i];
+            for (AutofillId id : requiredIds) {
                 createOrUpdateViewStateLocked(id, state, null);
             }
             final AutofillId[] optionalIds = saveInfo.getOptionalIds();
             if (optionalIds != null) {
-                for (int i = 0; i < optionalIds.length; i++) {
-                    final AutofillId id = optionalIds[i];
+                for (AutofillId id : optionalIds) {
                     createOrUpdateViewStateLocked(id, state, null);
                 }
             }
         }
+
+        final AutofillId[] authIds = response.getAuthenticationIds();
+        if (authIds != null) {
+            for (AutofillId id : authIds) {
+                createOrUpdateViewStateLocked(id, state, null);
+            }
+        }
+
     }
 
     /**
