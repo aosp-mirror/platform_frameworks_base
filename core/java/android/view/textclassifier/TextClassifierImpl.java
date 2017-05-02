@@ -44,6 +44,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -71,6 +72,8 @@ final class TextClassifierImpl implements TextClassifier {
     private static final String LOG_TAG = "TextClassifierImpl";
     private static final String MODEL_DIR = "/etc/textclassifier/";
     private static final String MODEL_FILE_REGEX = "textclassifier\\.smartselection\\.(.*)\\.model";
+    private static final String UPDATED_MODEL_FILE_PATH =
+            "/data/misc/textclassifier/textclassifier.smartselection.model";
 
     private final Context mContext;
 
@@ -127,7 +130,7 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     @Override
-    public TextClassificationResult getTextClassificationResult(
+    public TextClassification classifyText(
             @NonNull CharSequence text, int startIndex, int endIndex,
             @Nullable LocaleList defaultLocales) {
         validateInput(text, startIndex, endIndex);
@@ -138,7 +141,7 @@ final class TextClassifierImpl implements TextClassifier {
                         .classifyText(string, startIndex, endIndex,
                                 getHintFlags(string, startIndex, endIndex));
                 if (results.length > 0) {
-                    final TextClassificationResult classificationResult =
+                    final TextClassification classificationResult =
                             createClassificationResult(
                                     results, string.subSequence(startIndex, endIndex));
                     // TODO: Added this log for debug only. Remove before release.
@@ -152,7 +155,7 @@ final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting assist info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.getTextClassificationResult(
+        return TextClassifier.NO_OP.classifyText(
                 text, startIndex, endIndex, defaultLocales);
     }
 
@@ -175,18 +178,77 @@ final class TextClassifierImpl implements TextClassifier {
         synchronized (mSmartSelectionLock) {
             localeList = localeList == null ? LocaleList.getEmptyLocaleList() : localeList;
             final Locale locale = findBestSupportedLocaleLocked(localeList);
+            if (locale == null) {
+                throw new FileNotFoundException("No file for null locale");
+            }
             if (mSmartSelection == null || !Objects.equals(mLocale, locale)) {
                 destroySmartSelectionIfExistsLocked();
-                mSmartSelection = new SmartSelection(
-                        ParcelFileDescriptor.open(
-                                // findBestSupportedLocaleLocked should have initialized
-                                // mModelFilePaths
-                                new File(mModelFilePaths.get(locale)),
-                                ParcelFileDescriptor.MODE_READ_ONLY)
-                                .getFd());
+                mSmartSelection = new SmartSelection(getFdLocked(locale));
                 mLocale = locale;
             }
             return mSmartSelection;
+        }
+    }
+
+    @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
+    private int getFdLocked(Locale locale) throws FileNotFoundException {
+        ParcelFileDescriptor updateFd;
+        try {
+            updateFd = ParcelFileDescriptor.open(
+                    new File(UPDATED_MODEL_FILE_PATH), ParcelFileDescriptor.MODE_READ_ONLY);
+        } catch (FileNotFoundException e) {
+            updateFd = null;
+        }
+        ParcelFileDescriptor factoryFd;
+        try {
+            final String factoryModelFilePath = getFactoryModelFilePathsLocked().get(locale);
+            if (factoryModelFilePath != null) {
+                factoryFd = ParcelFileDescriptor.open(
+                        new File(factoryModelFilePath), ParcelFileDescriptor.MODE_READ_ONLY);
+            } else {
+                factoryFd = null;
+            }
+        } catch (FileNotFoundException e) {
+            factoryFd = null;
+        }
+
+        if (updateFd == null) {
+            if (factoryFd != null) {
+                return factoryFd.getFd();
+            } else {
+                throw new FileNotFoundException(
+                        String.format("No model file found for %s", locale));
+            }
+        }
+
+        final int updateFdInt = updateFd.getFd();
+        final boolean localeMatches = Objects.equals(
+                locale.getLanguage().trim().toLowerCase(),
+                SmartSelection.getLanguage(updateFdInt).trim().toLowerCase());
+        if (factoryFd == null) {
+            if (localeMatches) {
+                return updateFdInt;
+            } else {
+                closeAndLogError(updateFd);
+                throw new FileNotFoundException(
+                        String.format("No model file found for %s", locale));
+            }
+        }
+
+        if (!localeMatches) {
+            closeAndLogError(updateFd);
+            return factoryFd.getFd();
+        }
+
+        final int updateVersion = SmartSelection.getVersion(updateFdInt);
+        final int factoryFdInt = factoryFd.getFd();
+        final int factoryVersion = SmartSelection.getVersion(factoryFdInt);
+        if (updateVersion > factoryVersion) {
+            closeAndLogError(factoryFd);
+            return updateFdInt;
+        } else {
+            closeAndLogError(updateFd);
+            return factoryFdInt;
         }
     }
 
@@ -206,11 +268,18 @@ final class TextClassifierImpl implements TextClassifier {
                 ? LocaleList.getDefault().toLanguageTags()
                 : localeList.toLanguageTags() + "," + LocaleList.getDefault().toLanguageTags();
         final List<Locale.LanguageRange> languageRangeList = Locale.LanguageRange.parse(languages);
-        return Locale.lookup(languageRangeList, loadModelFilePathsLocked().keySet());
+
+        final List<Locale> supportedLocales =
+                new ArrayList<>(getFactoryModelFilePathsLocked().keySet());
+        final Locale updatedModelLocale = getUpdatedModelLocale();
+        if (updatedModelLocale != null) {
+            supportedLocales.add(updatedModelLocale);
+        }
+        return Locale.lookup(languageRangeList, supportedLocales);
     }
 
     @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
-    private Map<Locale, String> loadModelFilePathsLocked() {
+    private Map<Locale, String> getFactoryModelFilePathsLocked() {
         if (mModelFilePaths == null) {
             final Map<Locale, String> modelFilePaths = new HashMap<>();
             final File modelsDir = new File(MODEL_DIR);
@@ -233,9 +302,23 @@ final class TextClassifierImpl implements TextClassifier {
         return mModelFilePaths;
     }
 
-    private TextClassificationResult createClassificationResult(
+    @Nullable
+    private Locale getUpdatedModelLocale() {
+        try {
+            final ParcelFileDescriptor updateFd = ParcelFileDescriptor.open(
+                    new File(UPDATED_MODEL_FILE_PATH), ParcelFileDescriptor.MODE_READ_ONLY);
+            final Locale locale = Locale.forLanguageTag(
+                    SmartSelection.getLanguage(updateFd.getFd()));
+            closeAndLogError(updateFd);
+            return locale;
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+
+    private TextClassification createClassificationResult(
             SmartSelection.ClassificationResult[] classifications, CharSequence text) {
-        final TextClassificationResult.Builder builder = new TextClassificationResult.Builder()
+        final TextClassification.Builder builder = new TextClassification.Builder()
                 .setText(text.toString());
 
         final int size = classifications.length;
@@ -258,7 +341,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
         if (resolveInfo != null && resolveInfo.activityInfo != null) {
             builder.setIntent(intent)
-                    .setOnClickListener(TextClassificationResult.createStartActivityOnClickListener(
+                    .setOnClickListener(TextClassification.createStartActivityOnClickListener(
                             mContext, intent));
 
             final String packageName = resolveInfo.activityInfo.packageName;
@@ -316,6 +399,17 @@ final class TextClassifierImpl implements TextClassifier {
             }
         }
         return type;
+    }
+
+    /**
+     * Closes the ParcelFileDescriptor and logs any errors that occur.
+     */
+    private static void closeAndLogError(ParcelFileDescriptor fd) {
+        try {
+            fd.close();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error closing file.", e);
+        }
     }
 
     /**

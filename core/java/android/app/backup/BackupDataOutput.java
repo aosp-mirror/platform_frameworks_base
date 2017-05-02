@@ -62,16 +62,37 @@ import java.io.IOException;
  * @see BackupAgent
  */
 public class BackupDataOutput {
+    final long mQuota;
     long mBackupWriter;
+
+    /**
+     * Construct a BackupDataOutput purely for data-stream manipulation.  This instance will
+     * not report usable quota information.
+     * @hide */
+    @SystemApi
+    public BackupDataOutput(FileDescriptor fd) {
+        this(fd, -1);
+    }
 
     /** @hide */
     @SystemApi
-    public BackupDataOutput(FileDescriptor fd) {
+    public BackupDataOutput(FileDescriptor fd, long quota) {
         if (fd == null) throw new NullPointerException();
+        mQuota = quota;
         mBackupWriter = ctor(fd);
         if (mBackupWriter == 0) {
             throw new RuntimeException("Native initialization failed with fd=" + fd);
         }
+    }
+
+    /**
+     * Returns the quota in bytes for the application's current backup operation.  The
+     * value can vary for each operation.
+     *
+     * @see FullBackupDataOutput#getQuota()
+     */
+    public long getQuota() {
+        return mQuota;
     }
 
     /**

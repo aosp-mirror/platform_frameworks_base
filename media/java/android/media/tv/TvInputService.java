@@ -745,7 +745,7 @@ public abstract class TvInputService extends Service {
          * Called when the application sets the surface.
          *
          * <p>The TV input service should render video onto the given surface. When called with
-         * {@code null}, the input service should immediately release any references to the
+         * {@code null}, the input service should immediately free any references to the
          * currently set surface and stop using it.
          *
          * @param surface The surface to be used for video rendering. Can be {@code null}.

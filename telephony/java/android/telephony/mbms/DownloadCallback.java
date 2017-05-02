@@ -20,7 +20,7 @@ package android.telephony.mbms;
  * A optional listener class used by download clients to track progress.
  * @hide
  */
-public class DownloadListener extends IDownloadListener.Stub {
+public class DownloadCallback extends IDownloadCallback.Stub {
     /**
      * Gives process callbacks for a given DownloadRequest.
      * request indicates which download is being referenced.

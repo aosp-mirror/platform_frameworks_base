@@ -1192,6 +1192,9 @@
         <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network
         activity.</string>
 
+    <!-- Indication on the keyguard that appears when a trust agents unlocks the device. [CHAR LIMIT=40] -->
+    <string name="keyguard_indication_trust_granted">Unlocked for <xliff:g id="user_name" example="John Doe">%1$s</xliff:g></string>
+
     <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
     <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>
 
@@ -2029,5 +2032,11 @@
 
     <!-- Do Not Disturb button to change the current settings [CHAR LIMIT=20] -->
     <string name="qs_dnd_replace">Replace</string>
+
+    <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
+    <string name="running_foreground_services_title">Apps running in background</string>
+
+    <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
+    <string name="running_foreground_services_msg">Tap for details on battery and data usage</string>
 
 </resources>

@@ -118,7 +118,8 @@ struct LinkOptions {
 
 class LinkContext : public IAaptContext {
  public:
-  LinkContext() : name_mangler_({}), symbols_(&name_mangler_) {
+  LinkContext(IDiagnostics* diagnostics)
+      : diagnostics_(diagnostics), name_mangler_({}), symbols_(&name_mangler_) {
   }
 
   PackageType GetPackageType() override {
@@ -130,7 +131,7 @@ class LinkContext : public IAaptContext {
   }
 
   IDiagnostics* GetDiagnostics() override {
-    return &diagnostics_;
+    return diagnostics_;
   }
 
   NameMangler* GetNameMangler() override {
@@ -181,13 +182,69 @@ class LinkContext : public IAaptContext {
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
   PackageType package_type_ = PackageType::kApp;
-  StdErrDiagnostics diagnostics_;
+  IDiagnostics* diagnostics_;
   NameMangler name_mangler_;
   std::string compilation_package_;
   uint8_t package_id_ = 0x0;
   SymbolTable symbols_;
   bool verbose_ = false;
   int min_sdk_version_ = 0;
+};
+
+// A custom delegate that generates compatible pre-O IDs for use with feature splits.
+// Feature splits use package IDs > 7f, which in Java (since Java doesn't have unsigned ints)
+// is interpreted as a negative number. Some verification was wrongly assuming negative values
+// were invalid.
+//
+// This delegate will attempt to masquerade any '@id/' references with ID 0xPPTTEEEE,
+// where PP > 7f, as 0x7fPPEEEE. Any potential overlapping is verified and an error occurs if such
+// an overlap exists.
+class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
+ public:
+  FeatureSplitSymbolTableDelegate(IAaptContext* context) : context_(context) {
+  }
+
+  virtual ~FeatureSplitSymbolTableDelegate() = default;
+
+  virtual std::unique_ptr<SymbolTable::Symbol> FindByName(
+      const ResourceName& name,
+      const std::vector<std::unique_ptr<ISymbolSource>>& sources) override {
+    std::unique_ptr<SymbolTable::Symbol> symbol =
+        DefaultSymbolTableDelegate::FindByName(name, sources);
+    if (symbol == nullptr) {
+      return {};
+    }
+
+    // Check to see if this is an 'id' with the target package.
+    if (name.type == ResourceType::kId && symbol->id) {
+      ResourceId* id = &symbol->id.value();
+      if (id->package_id() > kAppPackageId) {
+        // Rewrite the resource ID to be compatible pre-O.
+        ResourceId rewritten_id(kAppPackageId, id->package_id(), id->entry_id());
+
+        // Check that this doesn't overlap another resource.
+        if (DefaultSymbolTableDelegate::FindById(rewritten_id, sources) != nullptr) {
+          // The ID overlaps, so log a message (since this is a weird failure) and fail.
+          context_->GetDiagnostics()->Error(DiagMessage() << "Failed to rewrite " << name
+                                                          << " for pre-O feature split support");
+          return {};
+        }
+
+        if (context_->IsVerbose()) {
+          context_->GetDiagnostics()->Note(DiagMessage() << "rewriting " << name << " (" << *id
+                                                         << ") -> (" << rewritten_id << ")");
+        }
+
+        *id = rewritten_id;
+      }
+    }
+    return symbol;
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(FeatureSplitSymbolTableDelegate);
+
+  IAaptContext* context_;
 };
 
 static bool FlattenXml(xml::XmlResource* xml_res, const StringPiece& path,
@@ -1463,6 +1520,19 @@ class LinkCommand {
     context_->GetExternalSymbols()->PrependSource(
         util::make_unique<ResourceTableSymbolSource>(&final_table_));
 
+    // Workaround for pre-O runtime that would treat negative resource IDs
+    // (any ID with a package ID > 7f) as invalid. Intercept any ID (PPTTEEEE) with PP > 0x7f
+    // and type == 'id', and return the ID 0x7fPPEEEE. IDs don't need to be real resources, they
+    // are just identifiers.
+    if (context_->GetMinSdkVersion() < SDK_O && context_->GetPackageType() == PackageType::kApp) {
+      if (context_->IsVerbose()) {
+        context_->GetDiagnostics()->Note(DiagMessage()
+                                         << "enabling pre-O feature split ID rewriting");
+      }
+      context_->GetExternalSymbols()->SetDelegate(
+          util::make_unique<FeatureSplitSymbolTableDelegate>(context_));
+    }
+
     ReferenceLinker linker;
     if (!linker.Consume(context_, &final_table_)) {
       context_->GetDiagnostics()->Error(DiagMessage() << "failed linking references");
@@ -1736,8 +1806,8 @@ class LinkCommand {
   std::map<size_t, std::string> shared_libs_;
 };
 
-int Link(const std::vector<StringPiece>& args) {
-  LinkContext context;
+int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
+  LinkContext context(diagnostics);
   LinkOptions options;
   std::vector<std::string> overlay_arg_list;
   std::vector<std::string> extra_java_packages;

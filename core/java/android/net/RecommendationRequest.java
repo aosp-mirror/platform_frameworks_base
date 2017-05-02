@@ -17,7 +17,6 @@
 package android.net;
 
 
-import android.annotation.SystemApi;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.os.Parcel;
@@ -31,8 +30,8 @@ import com.android.internal.annotations.VisibleForTesting;
  * @see {@link NetworkScoreManager#requestRecommendation(RecommendationRequest)}.
  * @hide
  * @deprecated to be removed.
+ * @removed
  */
-@SystemApi
 public final class RecommendationRequest implements Parcelable {
     private final ScanResult[] mScanResults;
     private final WifiConfiguration mDefaultConfig;
@@ -45,8 +44,8 @@ public final class RecommendationRequest implements Parcelable {
      * Builder class for constructing {@link RecommendationRequest} instances.
      * @hide
      * @deprecated to be removed.
+     * @removed
      */
-    @SystemApi
     public static final class Builder {
         private ScanResult[] mScanResults;
         private WifiConfiguration mDefaultConfig;

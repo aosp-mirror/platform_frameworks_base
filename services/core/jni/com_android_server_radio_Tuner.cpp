@@ -46,8 +46,12 @@ using V1_1::ProgramListResult;
 
 static Mutex gContextMutex;
 
-static jclass gTunerClass;
-static jfieldID gNativeContextId;
+static struct {
+    struct {
+        jfieldID nativeContext;
+        jfieldID region;
+    } Tuner;
+} gjni;
 
 struct TunerContext {
     TunerContext() {}
@@ -69,7 +73,7 @@ static TunerContext& getNativeContext(jlong nativeContextHandle) {
  * Always lock gContextMutex when using native context.
  */
 static TunerContext& getNativeContext(JNIEnv *env, jobject obj) {
-    return getNativeContext(env->GetLongField(obj, gNativeContextId));
+    return getNativeContext(env->GetLongField(obj, gjni.Tuner.nativeContext));
 }
 
 static jlong nativeInit(JNIEnv *env, jobject obj, jobject clientCallback) {
@@ -106,6 +110,10 @@ sp<ITunerCallback> getNativeCallback(JNIEnv *env, jobject obj) {
     return ctx.mNativeCallback;
 }
 
+Region getRegion(JNIEnv *env, jobject obj) {
+    return static_cast<Region>(env->GetIntField(obj, gjni.Tuner.region));
+}
+
 static void close(JNIEnv *env, jobject obj, jlong nativeContext) {
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
@@ -125,12 +133,14 @@ static const JNINativeMethod gTunerMethods[] = {
 } // namespace radio
 } // namespace server
 
-void register_android_server_radio_Tuner(JNIEnv *env) {
+void register_android_server_radio_Tuner(JavaVM *vm, JNIEnv *env) {
     using namespace server::radio::Tuner;
 
+    register_android_server_radio_Tuner_TunerCallback(vm, env);
+
     auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
-    gTunerClass = MakeGlobalRefOrDie(env, tunerClass);
-    gNativeContextId = GetFieldIDOrDie(env, gTunerClass, "mNativeContext", "J");
+    gjni.Tuner.nativeContext = GetFieldIDOrDie(env, tunerClass, "mNativeContext", "J");
+    gjni.Tuner.region = GetFieldIDOrDie(env, tunerClass, "mRegion", "I");
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/radio/Tuner",
             gTunerMethods, NELEM(gTunerMethods));

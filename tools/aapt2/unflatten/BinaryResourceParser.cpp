@@ -439,11 +439,10 @@ std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& na
     if (file_ref != nullptr) {
       file_ref->file = files_->FindFile(*file_ref->path);
       if (file_ref->file == nullptr) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "resource " << name << " for config '"
+        context_->GetDiagnostics()->Warn(DiagMessage() << "resource " << name << " for config '"
                                                         << config << "' is a file reference to '"
                                                         << *file_ref->path
                                                         << "' but no such path exists");
-        return {};
       }
     }
   }

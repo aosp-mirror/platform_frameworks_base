@@ -36,6 +36,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.support.annotation.VisibleForTesting;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -71,6 +72,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String ACTION_DISMISSED_WARNING = "PNW.dismissedWarning";
     private static final String ACTION_CLICKED_TEMP_WARNING = "PNW.clickedTempWarning";
     private static final String ACTION_DISMISSED_TEMP_WARNING = "PNW.dismissedTempWarning";
+    private static final String ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING =
+            "PNW.clickedThermalShutdownWarning";
+    private static final String ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING =
+            "PNW.dismissedThermalShutdownWarning";
 
     private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -95,8 +100,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private boolean mPlaySound;
     private boolean mInvalidCharger;
     private SystemUIDialog mSaverConfirmation;
-    private boolean mTempWarning;
+    private boolean mHighTempWarning;
     private SystemUIDialog mHighTempDialog;
+    private SystemUIDialog mThermalShutdownDialog;
 
     public PowerNotificationWarnings(Context context, NotificationManager notificationManager,
             StatusBar statusBar) {
@@ -113,8 +119,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         pw.print("mInvalidCharger="); pw.println(mInvalidCharger);
         pw.print("mShowing="); pw.println(SHOWING_STRINGS[mShowing]);
         pw.print("mSaverConfirmation="); pw.println(mSaverConfirmation != null ? "not null" : null);
-        pw.print("mTempWarning="); pw.println(mTempWarning);
+        pw.print("mHighTempWarning="); pw.println(mHighTempWarning);
         pw.print("mHighTempDialog="); pw.println(mHighTempDialog != null ? "not null" : null);
+        pw.print("mThermalShutdownDialog=");
+        pw.println(mThermalShutdownDialog != null ? "not null" : null);
     }
 
     @Override
@@ -212,29 +220,29 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     @Override
-    public void dismissTemperatureWarning() {
-        if (!mTempWarning) {
+    public void dismissHighTemperatureWarning() {
+        if (!mHighTempWarning) {
             return;
         }
-        mTempWarning = false;
-        dismissTemperatureWarningInternal();
+        mHighTempWarning = false;
+        dismissHighTemperatureWarningInternal();
     }
 
     /**
-     * Internal only version of {@link #dismissTemperatureWarning()} that simply dismisses
+     * Internal only version of {@link #dismissHighTemperatureWarning()} that simply dismisses
      * the notification. As such, the notification will not show again until
-     * {@link #dismissTemperatureWarning()} is called.
+     * {@link #dismissHighTemperatureWarning()} is called.
      */
-    private void dismissTemperatureWarningInternal() {
+    private void dismissHighTemperatureWarningInternal() {
         mNoMan.cancelAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, UserHandle.ALL);
     }
 
     @Override
-    public void showTemperatureWarning() {
-        if (mTempWarning) {
+    public void showHighTemperatureWarning() {
+        if (mHighTempWarning) {
             return;
         }
-        mTempWarning = true;
+        mHighTempWarning = true;
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.ALERTS)
                         .setSmallIcon(R.drawable.ic_device_thermostat_24)
@@ -249,10 +257,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);
-
     }
 
-    private void showTemperatureDialog() {
+    private void showHighTemperatureDialog() {
         if (mHighTempDialog != null) return;
         final SystemUIDialog d = new SystemUIDialog(mContext);
         d.setIconAttribute(android.R.attr.alertDialogIcon);
@@ -263,6 +270,44 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.setOnDismissListener(dialog -> mHighTempDialog = null);
         d.show();
         mHighTempDialog = d;
+    }
+
+    @VisibleForTesting
+    void dismissThermalShutdownWarning() {
+        mNoMan.cancelAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_THERMAL_SHUTDOWN, UserHandle.ALL);
+    }
+
+    private void showThermalShutdownDialog() {
+        if (mThermalShutdownDialog != null) return;
+        final SystemUIDialog d = new SystemUIDialog(mContext);
+        d.setIconAttribute(android.R.attr.alertDialogIcon);
+        d.setTitle(R.string.thermal_shutdown_title);
+        d.setMessage(R.string.thermal_shutdown_dialog_message);
+        d.setPositiveButton(com.android.internal.R.string.ok, null);
+        d.setShowForAllUsers(true);
+        d.setOnDismissListener(dialog -> mThermalShutdownDialog = null);
+        d.show();
+        mThermalShutdownDialog = d;
+    }
+
+    @Override
+    public void showThermalShutdownWarning() {
+        final Notification.Builder nb =
+                new Notification.Builder(mContext, NotificationChannels.ALERTS)
+                        .setSmallIcon(R.drawable.ic_device_thermostat_24)
+                        .setWhen(0)
+                        .setShowWhen(false)
+                        .setContentTitle(mContext.getString(R.string.thermal_shutdown_title))
+                        .setContentText(mContext.getString(R.string.thermal_shutdown_message))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setContentIntent(pendingBroadcast(ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING))
+                        .setDeleteIntent(
+                                pendingBroadcast(ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING))
+                        .setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
+        SystemUI.overrideNotificationAppName(mContext, nb);
+        final Notification n = nb.build();
+        mNoMan.notifyAsUser(
+                TAG_TEMPERATURE, SystemMessage.NOTE_THERMAL_SHUTDOWN, n, UserHandle.ALL);
     }
 
     @Override
@@ -380,6 +425,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_DISMISSED_WARNING);
             filter.addAction(ACTION_CLICKED_TEMP_WARNING);
             filter.addAction(ACTION_DISMISSED_TEMP_WARNING);
+            filter.addAction(ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING);
+            filter.addAction(ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
                     android.Manifest.permission.STATUS_BAR_SERVICE, mHandler);
         }
@@ -397,10 +444,15 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             } else if (action.equals(ACTION_DISMISSED_WARNING)) {
                 dismissLowBatteryWarning();
             } else if (ACTION_CLICKED_TEMP_WARNING.equals(action)) {
-                dismissTemperatureWarningInternal();
-                showTemperatureDialog();
+                dismissHighTemperatureWarningInternal();
+                showHighTemperatureDialog();
             } else if (ACTION_DISMISSED_TEMP_WARNING.equals(action)) {
-                dismissTemperatureWarningInternal();
+                dismissHighTemperatureWarningInternal();
+            } else if (ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING.equals(action)) {
+                dismissThermalShutdownWarning();
+                showThermalShutdownDialog();
+            } else if (ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING.equals(action)) {
+                dismissThermalShutdownWarning();
             }
         }
     }

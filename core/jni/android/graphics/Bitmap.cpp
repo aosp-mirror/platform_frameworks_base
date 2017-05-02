@@ -751,30 +751,53 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 
 static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
         SkBitmap::Allocator* alloc) {
+    LOG_ALWAYS_FATAL_IF(kIndex_8_SkColorType == dstCT, "Error, cannot copyTo kIndex8.");
+
+    SkPixmap srcPM;
+    if (!src.peekPixels(&srcPM)) {
+        return false;
+    }
+
+    SkImageInfo dstInfo = srcPM.info().makeColorType(dstCT);
+    switch (dstCT) {
+        case kRGB_565_SkColorType:
+            // copyTo() has never been strict on alpha type.  Here we set the src to opaque to
+            // allow the call to readPixels() to succeed and preserve this lenient behavior.
+            if (kOpaque_SkAlphaType != srcPM.alphaType()) {
+                srcPM = SkPixmap(srcPM.info().makeAlphaType(kOpaque_SkAlphaType), srcPM.addr(),
+                                 srcPM.rowBytes(), srcPM.ctable());
+                dstInfo = dstInfo.makeAlphaType(kOpaque_SkAlphaType);
+            }
+            break;
+        case kRGBA_F16_SkColorType:
+            // The caller does not have an opportunity to pass a dst color space.  Assume that
+            // they want linear sRGB.
+            dstInfo = dstInfo.makeColorSpace(SkColorSpace::MakeSRGBLinear());
+
+            if (!srcPM.colorSpace()) {
+                // Skia needs a color space to convert to F16.  nullptr should be treated as sRGB.
+                srcPM.setColorSpace(SkColorSpace::MakeSRGB());
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (!dst->setInfo(dstInfo)) {
+        return false;
+    }
+    if (!dst->tryAllocPixels(alloc, nullptr)) {
+        return false;
+    }
+
     // Skia does not support copying from kAlpha8 to types that are not alpha only.
     // We will handle this case here.
-    if (kAlpha_8_SkColorType == src.colorType() && kAlpha_8_SkColorType != dstCT) {
-        SkPixmap srcPixmap;
-        if (!src.peekPixels(&srcPixmap)) {
-            return false;
-        }
-
-        SkImageInfo dstInfo = src.info().makeColorType(dstCT);
-        if (dstCT == kRGBA_F16_SkColorType) {
-             dstInfo = dstInfo.makeColorSpace(SkColorSpace::MakeSRGBLinear());
-        }
-        if (!dst->setInfo(dstInfo)) {
-            return false;
-        }
-        if (!dst->tryAllocPixels(alloc, nullptr)) {
-            return false;
-        }
-
+    if (kAlpha_8_SkColorType == srcPM.colorType() && kAlpha_8_SkColorType != dstCT) {
         switch (dstCT) {
             case kRGBA_8888_SkColorType:
             case kBGRA_8888_SkColorType: {
                 for (int y = 0; y < src.height(); y++) {
-                    const uint8_t* srcRow = srcPixmap.addr8(0, y);
+                    const uint8_t* srcRow = srcPM.addr8(0, y);
                     uint32_t* dstRow = dst->getAddr32(0, y);
                     ToColor_SA8(dstRow, srcRow, src.width(), nullptr);
                 }
@@ -789,7 +812,7 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
             }
             case kRGBA_F16_SkColorType: {
                for (int y = 0; y < src.height(); y++) {
-                   const uint8_t* srcRow = srcPixmap.addr8(0, y);
+                   const uint8_t* srcRow = srcPM.addr8(0, y);
                    void* dstRow = dst->getAddr(0, y);
                    ToF16_SA8(dstRow, srcRow, src.width());
                }
@@ -800,7 +823,25 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
         }
     }
 
-    return src.copyTo(dst, dstCT, alloc);
+    SkPixmap dstPM;
+    if (!dst->peekPixels(&dstPM)) {
+        return false;
+    }
+
+    // Skia needs a color space to convert from F16.  nullptr should be treated as sRGB.
+    if (kRGBA_F16_SkColorType == srcPM.colorType() && !dstPM.colorSpace()) {
+        dstPM.setColorSpace(SkColorSpace::MakeSRGB());
+    }
+
+    // readPixels does not support color spaces with parametric transfer functions.  This
+    // works around that restriction when the color spaces are equal.
+    if (kRGBA_F16_SkColorType != dstCT && kRGBA_F16_SkColorType != srcPM.colorType() &&
+            dstPM.colorSpace() == srcPM.colorSpace()) {
+        dstPM.setColorSpace(nullptr);
+        srcPM.setColorSpace(nullptr);
+    }
+
+    return srcPM.readPixels(dstPM);
 }
 
 static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
@@ -1550,7 +1591,7 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
 
     SkBitmap result;
     HeapAllocator allocator;
-    if (!src.copyTo(&result, hwuiBitmap.info().colorType(), &allocator)) {
+    if (!bitmapCopyTo(&result, hwuiBitmap.info().colorType(), src, &allocator)) {
         doThrowRE(env, "Could not copy a hardware bitmap.");
         return NULL;
     }

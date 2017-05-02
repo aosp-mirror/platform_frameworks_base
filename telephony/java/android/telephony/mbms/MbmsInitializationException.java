@@ -11,16 +11,22 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.server.autofill.ui;
+package android.telephony.mbms;
 
-final class Helper {
+/** @hide */
+public class MbmsInitializationException extends Exception {
+    private final int mErrorCode;
 
-    static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
-    static final boolean VERBOSE = false;
-    private Helper() {
-        throw new UnsupportedOperationException("contains static members only");
+    /** @hide */
+    public MbmsInitializationException(int errorCode) {
+        super();
+        mErrorCode = errorCode;
+    }
+
+    public int getErrorCode() {
+        return mErrorCode;
     }
 }

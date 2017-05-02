@@ -43,6 +43,15 @@ public final class PhoneAccount implements Parcelable {
 
     /**
      * {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which determines the
+     * sort order for {@link PhoneAccount}s from the same
+     * {@link android.telecom.ConnectionService}.
+     * @hide
+     */
+    public static final String EXTRA_SORT_ORDER =
+            "android.telecom.extra.SORT_ORDER";
+
+    /**
+     * {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which determines the
      * maximum permitted length of a call subject specified via the
      * {@link TelecomManager#EXTRA_CALL_SUBJECT} extra on an
      * {@link android.content.Intent#ACTION_CALL} intent.  Ultimately a {@link ConnectionService} is
@@ -94,6 +103,18 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final String EXTRA_SUPPORTS_HANDOVER_FROM =
             "android.telecom.extra.SUPPORTS_HANDOVER_FROM";
+
+
+    /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
+     * indicates whether a Self-Managed {@link PhoneAccount} should log its calls to the call log.
+     * <p>
+     * By default, Self-Managed {@link PhoneAccount}s do not log their calls to the call log.
+     * Setting this extra to {@code true} provides a means for them to log their calls.
+     * @hide
+     */
+    public static final String EXTRA_LOG_SELF_MANAGED_CALLS =
+            "android.telecom.extra.LOG_SELF_MANAGED_CALLS";
 
     /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for

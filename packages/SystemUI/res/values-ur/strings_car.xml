@@ -19,6 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"احتیاط سے گاڑی چلائیں"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"‏گاڑی چلاتے وقت اپنے گردونواح سے مکمل طور پر باخبر رہیں اور ہمیشہ قابل اطلاق قوانین کی پابندی کریں۔ ہدایات غلط، نامکمل، خطرناک، موزوں نہیں، ممنوع یا انتظامی علاقوں میں سے گزرنے کے متعلق ہو سکتی ہیں۔ کاروباری معلومات بھی غلط یا نامکمل ہو سکتی ہے۔ گاڑی چلاتے وقت اپنا موبائل آلہ یا وہ ایپس استعمال نہ کریں جو Android Auto کیلئے نہیں ہیں۔"</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"نامعلوم"</string>
 </resources>

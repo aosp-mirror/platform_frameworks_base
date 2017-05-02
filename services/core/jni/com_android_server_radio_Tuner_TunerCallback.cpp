@@ -19,6 +19,9 @@
 
 #include "com_android_server_radio_Tuner_TunerCallback.h"
 
+#include "com_android_server_radio_convert.h"
+#include "com_android_server_radio_Tuner.h"
+
 #include <core_jni_helpers.h>
 #include <utils/Log.h>
 #include <JNIHelp.h>
@@ -91,11 +94,13 @@ Return<void> TunerCallback::hardwareFailure() {
 Return<void> TunerCallback::configChange(Result result, const BandConfig& config) {
     ALOGV("configChange(%d)", result);
 
-    mCallbackThread.enqueue([result, this](JNIEnv *env) {
+    mCallbackThread.enqueue([result, config, this](JNIEnv *env) {
         if (result == Result::OK) {
-            // TODO(b/36863239): convert parameter
+            auto region = getRegion(env, mTuner);
+            auto jConfig = convert::BandConfigFromHal(env, config, region);
+            if (jConfig == nullptr) return;
             env->CallVoidMethod(mClientCallback, gITunerCallbackMethods.onConfigurationChanged,
-                    nullptr);
+                    jConfig.get());
         } else {
             env->CallVoidMethod(mClientCallback, gITunerCallbackMethods.onError,
                     TunerError::CONFIG);

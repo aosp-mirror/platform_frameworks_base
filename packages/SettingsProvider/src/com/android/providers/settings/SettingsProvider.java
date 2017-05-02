@@ -35,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -184,6 +185,26 @@ public class SettingsProvider extends ContentProvider {
 
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
+
+    // Overlay specified settings whitelisted for Instant Apps
+    private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
+    private static final Set<String> OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS = new ArraySet<>();
+    private static final Set<String> OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS = new ArraySet<>();
+
+    static {
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedGlobalInstantAppSettings)) {
+            OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS.add(name);
+        }
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedSystemInstantAppSettings)) {
+            OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS.add(name);
+        }
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedSecureInstantAppSettings)) {
+            OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS.add(name);
+        }
+    }
 
     // Changes to these global settings are synchronously persisted
     private static final Set<String> CRITICAL_GLOBAL_SETTINGS = new ArraySet<>();
@@ -1629,6 +1650,19 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    private Set<String> getOverlayInstantAppAccessibleSettings(int settingsType) {
+        switch (settingsType) {
+            case SETTINGS_TYPE_GLOBAL:
+                return OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SYSTEM:
+                return OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SECURE:
+                return OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS;
+            default:
+                throw new IllegalArgumentException("Invalid settings type: " + settingsType);
+        }
+    }
+
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
         boolean instantApp;
         if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
@@ -1652,7 +1686,8 @@ public class SettingsProvider extends ContentProvider {
         if (!ai.isInstantApp()) {
             return;
         }
-        if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)) {
+        if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)
+                && !getOverlayInstantAppAccessibleSettings(settingsType).contains(settingName)) {
             throw new SecurityException("Setting " + settingName + " is not accessible from"
                     + " ephemeral package " + getCallingPackage());
         }

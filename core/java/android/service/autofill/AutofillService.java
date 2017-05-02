@@ -119,7 +119,7 @@ public abstract class AutofillService extends Service {
                 try {
                     onFillRequest(request, cancellation, fillCallback);
                 } catch (AbstractMethodError e) {
-                    final ArrayList<FillContext> contexts = request.getFillContexts();
+                    final List<FillContext> contexts = request.getFillContexts();
                     onFillRequest(contexts.get(contexts.size() - 1).getStructure(),
                             request.getClientState(), request.getFlags(), cancellation,
                             fillCallback);

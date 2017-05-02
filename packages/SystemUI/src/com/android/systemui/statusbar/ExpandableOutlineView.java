@@ -45,7 +45,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
-            int translation = mShouldTranslateContents ? 0 : (int) getTranslation();
+            int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
             if (!mCustomOutline) {
                 outline.setRoundRect(translation,
                         mClipTopAmount,

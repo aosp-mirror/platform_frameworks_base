@@ -25,6 +25,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.NonNull;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -61,7 +62,6 @@ public class SnoozeHelper {
     private static final String REPOST_ACTION = SnoozeHelper.class.getSimpleName() + ".EVALUATE";
     private static final int REQUEST_CODE_REPOST = 1;
     private static final String REPOST_SCHEME = "repost";
-    private static final String EXTRA_PKG = "pkg";
     private static final String EXTRA_KEY = "key";
     private static final String EXTRA_USER_ID = "userId";
 
@@ -98,7 +98,7 @@ public class SnoozeHelper {
     protected Collection<NotificationRecord> getSnoozed(int userId, String pkg) {
         if (mSnoozedNotifications.containsKey(userId)
                 && mSnoozedNotifications.get(userId).containsKey(pkg)) {
-            mSnoozedNotifications.get(userId).get(pkg).values();
+            return mSnoozedNotifications.get(userId).get(pkg).values();
         }
         return Collections.EMPTY_LIST;
     }
@@ -106,16 +106,18 @@ public class SnoozeHelper {
     protected @NonNull List<NotificationRecord> getSnoozed() {
         List<NotificationRecord> snoozedForUser = new ArrayList<>();
         int[] userIds = mUserProfiles.getCurrentProfileIds();
-        final int N = userIds.length;
-        for (int i = 0; i < N; i++) {
-            final ArrayMap<String, ArrayMap<String, NotificationRecord>> snoozedPkgs =
-                    mSnoozedNotifications.get(userIds[i]);
-            if (snoozedPkgs != null) {
-                final int M = snoozedPkgs.size();
-                for (int j = 0; j < M; j++) {
-                    final ArrayMap<String, NotificationRecord> records = snoozedPkgs.valueAt(j);
-                    if (records != null) {
-                        snoozedForUser.addAll(records.values());
+        if (userIds != null) {
+            final int N = userIds.length;
+            for (int i = 0; i < N; i++) {
+                final ArrayMap<String, ArrayMap<String, NotificationRecord>> snoozedPkgs =
+                        mSnoozedNotifications.get(userIds[i]);
+                if (snoozedPkgs != null) {
+                    final int M = snoozedPkgs.size();
+                    for (int j = 0; j < M; j++) {
+                        final ArrayMap<String, NotificationRecord> records = snoozedPkgs.valueAt(j);
+                        if (records != null) {
+                            snoozedForUser.addAll(records.values());
+                        }
                     }
                 }
             }
@@ -165,15 +167,9 @@ public class SnoozeHelper {
                 for (Map.Entry<String, NotificationRecord> record : records) {
                     final StatusBarNotification sbn = record.getValue().sbn;
                     if (Objects.equals(sbn.getTag(), tag) && sbn.getId() == id) {
-                        key = record.getKey();
+                        record.getValue().isCanceled = true;
+                        return true;
                     }
-                }
-                if (key != null) {
-                    recordsForPkg.remove(key);
-                    cancelAlarm(userId, pkg, key);
-                    mPackages.remove(key);
-                    mUsers.remove(key);
-                    return true;
                 }
             }
         }
@@ -188,7 +184,7 @@ public class SnoozeHelper {
         final int N = userIds.length;
         for (int i = 0; i < N; i++) {
             final ArrayMap<String, ArrayMap<String, NotificationRecord>> snoozedPkgs =
-                    mSnoozedNotifications.remove(userIds[i]);
+                    mSnoozedNotifications.get(userIds[i]);
             if (snoozedPkgs != null) {
                 final int M = snoozedPkgs.size();
                 for (int j = 0; j < M; j++) {
@@ -196,10 +192,7 @@ public class SnoozeHelper {
                     if (records != null) {
                         int P = records.size();
                         for (int k = 0; k < P; k++) {
-                            final String key = records.keyAt(k);
-                            cancelAlarm(userId, snoozedPkgs.keyAt(j), key);
-                            mPackages.remove(key);
-                            mUsers.remove(key);
+                            records.valueAt(k).isCanceled = true;
                         }
                     }
                 }
@@ -213,28 +206,15 @@ public class SnoozeHelper {
         if (mSnoozedNotifications.containsKey(userId)) {
             if (mSnoozedNotifications.get(userId).containsKey(pkg)) {
                 ArrayMap<String, NotificationRecord> records =
-                        mSnoozedNotifications.get(userId).remove(pkg);
+                        mSnoozedNotifications.get(userId).get(pkg);
                 int N = records.size();
                 for (int i = 0; i < N; i++) {
-                    final String key = records.keyAt(i);
-                    cancelAlarm(userId, pkg, key);
-                    mPackages.remove(key);
-                    mUsers.remove(key);
+                    records.valueAt(i).isCanceled = true;
                 }
                 return true;
             }
         }
         return false;
-    }
-
-    private void cancelAlarm(int userId, String pkg, String key) {
-        long identity = Binder.clearCallingIdentity();
-        try {
-            final PendingIntent pi = createPendingIntent(pkg, key, userId);
-            mAm.cancel(pi);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     /**
@@ -248,6 +228,10 @@ public class SnoozeHelper {
         }
         ArrayMap<String, NotificationRecord> pkgRecords = records.get(record.sbn.getPackageName());
         if (pkgRecords == null) {
+            return;
+        }
+        NotificationRecord existing = pkgRecords.get(record.getKey());
+        if (existing != null && existing.isCanceled) {
             return;
         }
         pkgRecords.put(record.getKey(), record);
@@ -272,12 +256,52 @@ public class SnoozeHelper {
             return;
         }
         final NotificationRecord record = pkgRecords.remove(key);
+        mPackages.remove(key);
+        mUsers.remove(key);
 
-        if (record != null) {
+        if (record != null && !record.isCanceled) {
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
                     .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
             mCallback.repost(userId, record);
+        }
+    }
+
+    protected void repostGroupSummary(String pkg, int userId, String groupKey) {
+        if (mSnoozedNotifications.containsKey(userId)) {
+            ArrayMap<String, ArrayMap<String, NotificationRecord>> keysByPackage
+                    = mSnoozedNotifications.get(userId);
+
+            if (keysByPackage != null && keysByPackage.containsKey(pkg)) {
+                ArrayMap<String, NotificationRecord> recordsByKey = keysByPackage.get(pkg);
+
+                if (recordsByKey != null) {
+                    String groupSummaryKey = null;
+                    int N = recordsByKey.size();
+                    for (int i = 0; i < N; i++) {
+                        final NotificationRecord potentialGroupSummary = recordsByKey.valueAt(i);
+                        if (potentialGroupSummary.sbn.isGroup()
+                                && potentialGroupSummary.getNotification().isGroupSummary()
+                                && groupKey.equals(potentialGroupSummary.getGroupKey())) {
+                            groupSummaryKey = potentialGroupSummary.getKey();
+                            break;
+                        }
+                    }
+
+                    if (groupSummaryKey != null) {
+                        NotificationRecord record = recordsByKey.remove(groupSummaryKey);
+                        mPackages.remove(groupSummaryKey);
+                        mUsers.remove(groupSummaryKey);
+
+                        if (record != null && !record.isCanceled) {
+                            MetricsLogger.action(record.getLogMaker()
+                                    .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
+                                    .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
+                            mCallback.repost(userId, record);
+                        }
+                    }
+                }
+            }
         }
     }
 

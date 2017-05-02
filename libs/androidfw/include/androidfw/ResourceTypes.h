@@ -1610,6 +1610,8 @@ public:
     // the given package.
     status_t addMapping(const String16& packageName, uint8_t packageId);
 
+    void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
+
     // Performs the actual conversion of build-time resource ID to run-time
     // resource ID.
     status_t lookupResourceId(uint32_t* resId) const;

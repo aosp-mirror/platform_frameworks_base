@@ -156,9 +156,9 @@ public final class FingerprintGestureController {
             FingerprintGestureCallback callback = handlerMap.keyAt(i);
             Handler handler = handlerMap.valueAt(i);
             if (handler != null) {
-                handler.post(() -> callback.onGesture(gesture));
+                handler.post(() -> callback.onGestureDetected(gesture));
             } else {
-                callback.onGesture(gesture);
+                callback.onGestureDetected(gesture);
             }
         }
     }
@@ -180,6 +180,6 @@ public final class FingerprintGestureController {
          * @param gesture The id of the gesture that was detected. For example,
          * {@link #FINGERPRINT_GESTURE_SWIPE_RIGHT}.
          */
-        public void onGesture(int gesture) {}
+        public void onGestureDetected(int gesture) {}
     }
 }

@@ -81,7 +81,7 @@ interface IWifiManager
 
     boolean disableNetwork(int netId);
 
-    void startScan(in ScanSettings requested, in WorkSource ws);
+    void startScan(in ScanSettings requested, in WorkSource ws, in String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
 
@@ -130,6 +130,14 @@ interface IWifiManager
     boolean startSoftAp(in WifiConfiguration wifiConfig);
 
     boolean stopSoftAp();
+
+    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder);
+
+    void stopLocalOnlyHotspot();
+
+    void startWatchLocalOnlyHotspot(in Messenger messenger, in IBinder binder);
+
+    void stopWatchLocalOnlyHotspot();
 
     int getWifiApEnabledState();
 

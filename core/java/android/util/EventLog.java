@@ -68,6 +68,7 @@ public class EventLog {
         private static final int THREAD_OFFSET = 8;
         private static final int SECONDS_OFFSET = 12;
         private static final int NANOSECONDS_OFFSET = 16;
+        private static final int UID_OFFSET = 24;
 
         // Layout for event log v1 format, v2 and v3 use HEADER_SIZE_OFFSET
         private static final int V1_PAYLOAD_START = 20;
@@ -89,6 +90,20 @@ public class EventLog {
         /** @return the process ID which wrote the log entry */
         public int getProcessId() {
             return mBuffer.getInt(PROCESS_OFFSET);
+        }
+
+        /**
+         * @return the UID which wrote the log entry
+         * @hide
+         */
+        @SystemApi
+        public int getUid() {
+            try {
+                return mBuffer.getInt(UID_OFFSET);
+            } catch (IndexOutOfBoundsException e) {
+                // buffer won't contain the UID if the caller doesn't have permission.
+                return -1;
+            }
         }
 
         /** @return the thread ID which wrote the log entry */

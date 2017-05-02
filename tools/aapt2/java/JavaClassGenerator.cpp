@@ -31,6 +31,7 @@
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "SdkConstants.h"
 #include "ValueVisitor.h"
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
@@ -430,9 +431,15 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
                                          const ResourceEntry& entry, ClassDefinition* out_class_def,
                                          MethodDefinition* out_rewrite_method,
                                          std::ostream* out_r_txt) {
+  ResourceId real_id = id;
+  if (context_->GetMinSdkVersion() < SDK_O && name.type == ResourceType::kId &&
+      id.package_id() > kAppPackageId) {
+    real_id = ResourceId(kAppPackageId, id.package_id(), id.entry_id());
+  }
+
   const std::string field_name = TransformToFieldName(name.entry);
   std::unique_ptr<ResourceMember> resource_member =
-      util::make_unique<ResourceMember>(field_name, id);
+      util::make_unique<ResourceMember>(field_name, real_id);
 
   // Build the comments and annotations for this entry.
   AnnotationProcessor* processor = resource_member->GetCommentBuilder();
@@ -458,7 +465,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
   out_class_def->AddMember(std::move(resource_member));
 
   if (out_r_txt != nullptr) {
-    *out_r_txt << "int " << name.type << " " << field_name << " " << id << "\n";
+    *out_r_txt << "int " << name.type << " " << field_name << " " << real_id << "\n";
   }
 
   if (out_rewrite_method != nullptr) {

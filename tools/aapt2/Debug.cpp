@@ -274,7 +274,13 @@ class XmlPrinter : public xml::Visitor {
       if (!attr.namespace_uri.empty()) {
         std::cerr << attr.namespace_uri << ":";
       }
-      std::cerr << attr.name << "=" << attr.value << "\n";
+      std::cerr << attr.name;
+
+      if (attr.compiled_attribute) {
+        std::cerr << "(" << attr.compiled_attribute.value().id.value_or_default(ResourceId(0x0))
+                  << ")";
+      }
+      std::cerr << "=" << attr.value << "\n";
     }
 
     const size_t previous_size = prefix_.size();

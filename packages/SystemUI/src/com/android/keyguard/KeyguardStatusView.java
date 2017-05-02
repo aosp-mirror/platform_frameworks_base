@@ -38,7 +38,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ChargingView;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout {
@@ -121,6 +120,7 @@ public class KeyguardStatusView extends GridLayout {
         mClockView = findViewById(R.id.clock_view);
         mDateView.setShowCurrentUserTime(true);
         mClockView.setShowCurrentUserTime(true);
+        mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
         mVisibleInDoze = new View[]{mBatteryDoze, mClockView};

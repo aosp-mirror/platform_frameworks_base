@@ -48,7 +48,7 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"APAGAR"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notificacións"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ancorado"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Conexión compartida por Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurar métodos de entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclado físico"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Queres permitir que a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda ao dispositivo USB?"</string>
@@ -155,8 +155,9 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Datos móbiles"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Os datos móbiles están activados"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Os datos móbiles están desactivados"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoraxe de Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conexión compartida por Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"A VPN está activada."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Non hai tarxeta SIM"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambio de rede do operador."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir os detalles da batería"</string>
@@ -228,8 +229,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Activouse a lanterna."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Desactivouse a inversión da cor."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Activouse a inversión da cor."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Desactivouse a zona interactiva móbil."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Activouse a zona interactiva móbil."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Desactivouse a zona wifi móbil."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Activouse a zona wifi móbil."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Detívose a emisión en pantalla."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Modo de traballo desactivado."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Modo de traballo activado."</string>
@@ -243,7 +244,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Os datos 4G están en pausa"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Pausáronse os datos móbiles"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Os datos están en pausa"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Alcanzouse o límite de datos establecido. Xa non usarás os datos móbiles.\n\nSe continúas, pódense aplicar cargos polo uso de datos."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Alcanzouse o límite de datos que fixaches. Xa non estás usando datos móbiles.\n\nSe os reactivas, pódense aplicar cargos polo seu uso."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Retomar"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sen Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectada"</string>
@@ -276,7 +277,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivado"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Non hai dispositivos sincronizados dispoñibles"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillo"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotación automática"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Xirar automaticamente"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Xirar a pantalla automaticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"Modo <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotación bloqueada"</string>
@@ -312,7 +313,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Feito"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Conectado"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Conectando..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Ancoraxe á rede"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Conexión compartida"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona wifi"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificacións"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lanterna"</string>
@@ -429,8 +430,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"O perfil de traballo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"O perfil persoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"O dispositivo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for monitoring_title_device_owned (1652495295941959815) -->
-    <skip />
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Xestión de dispositivos"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Supervisión do perfil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Supervisión de rede"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
@@ -439,18 +439,14 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Desactivar VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconectar VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"Ver políticas"</string>
-    <!-- no translation found for monitoring_description_named_management (5281789135578986303) -->
-    <skip />
-    <!-- no translation found for monitoring_description_management (4573721970278370790) -->
-    <skip />
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"O teu dispositivo está xestionado por <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nO administrador pode controlar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co dispositivo e a información de localización deste último.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"A túa organización xestiona o teu dispositivo.\n\nO administrador pode controlar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co dispositivo e a información de localización deste último.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"A túa organización instalou unha autoridade de certificación neste dispositivo. É posible que se controle ou se modifique o teu tráfico de rede segura."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"A túa organización instalou unha autoridade de certificación no teu perfil de traballo. É posible que se controle ou se modifique o teu tráfico de rede segura."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"Este dispositivo ten unha autoridade de certificación instalada. É posible que se controle ou se modifique o teu tráfico de rede segura."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"O administrador activou o rexistro na rede, que controla o tráfico do teu dispositivo."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7403457334088909254) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (4198511413729213802) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Estás conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Estás conectado a <xliff:g id="VPN_APP_0">%1$s</xliff:g> e a <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que poden controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"O teu perfil de traballo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"O teu perfil persoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"O teu dispositivo está xestionado por <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
@@ -472,6 +468,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Estás conectado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode supervisar a túa actividade persoal na rede, incluídos os correos electrónicos, as aplicacións e os sitios web."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> xestiona o teu perfil de traballo, que está conectado a <xliff:g id="APPLICATION">%2$s</xliff:g>. Esta aplicación pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, contacta co administrador."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> xestiona o teu perfil de traballo, que está conectado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>. Esta aplicación pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web.\n\nTamén estás conectado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pode controlar a túa actividade persoal na rede."</string>
+    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"O dispositivo permanecerá bloqueado ata que o desbloquees manualmente"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recibir notificacións máis rápido"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Consúltaas antes de desbloquear"</string>
@@ -705,6 +703,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Pode que a aplicación non funcione coa pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"A aplicación non é compatible coa función de pantalla dividida."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"É posible que a aplicación non funcione nunha pantalla secundaria."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"A aplicación non se pode iniciar en pantallas secundarias."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Abrir configuración."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir a configuración rápida."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Pechar a configuración rápida."</string>
@@ -753,9 +753,8 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Almacenamento"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Aplicacións instantáneas"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"As aplicacións instantáneas non precisan instalación."</string>
-    <string name="app_info" msgid="6856026610594615344">"Información da aplicación"</string>
-    <!-- no translation found for go_to_web (1106022723459948514) -->
-    <skip />
+    <string name="app_info" msgid="6856026610594615344">"Información de aplicacións"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"Acceder á web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Datos móbiles"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"A wifi está desactivada"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"O Bluetooth está desactivado"</string>

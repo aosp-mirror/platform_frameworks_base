@@ -148,7 +148,7 @@ public class PackageParser {
     private static final String PROPERTY_CHILD_PACKAGES_ENABLED =
             "persist.sys.child_packages_enabled";
 
-    private static final boolean MULTI_PACKAGE_APK_ENABLED =
+    private static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
             SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
 
     private static final int MAX_PACKAGES_PER_APK = 5;
@@ -201,10 +201,10 @@ public class PackageParser {
     private static final String META_DATA_INSTANT_APPS = "instantapps.clients.allowed";
 
     /**
-     * Bit mask of all the valid bits that can be set in restartOnConfigChanges.
+     * Bit mask of all the valid bits that can be set in recreateOnConfigChanges.
      * @hide
      */
-    private static final int RESTART_ON_CONFIG_CHANGES_MASK =
+    private static final int RECREATE_ON_CONFIG_CHANGES_MASK =
             ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
 
     // These are the tags supported by child packages
@@ -547,6 +547,8 @@ public class PackageParser {
      */
     public interface Callback {
         boolean hasFeature(String feature);
+        String[] getOverlayPaths(String targetPackageName, String targetPath);
+        String[] getOverlayApks(String targetPackageName);
     }
 
     /**
@@ -562,6 +564,14 @@ public class PackageParser {
 
         @Override public boolean hasFeature(String feature) {
             return mPm.hasSystemFeature(feature);
+        }
+
+        @Override public String[] getOverlayPaths(String targetPackageName, String targetPath) {
+            return null;
+        }
+
+        @Override public String[] getOverlayApks(String targetPackageName) {
+            return null;
         }
     }
 
@@ -1054,7 +1064,19 @@ public class PackageParser {
 
         try {
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
-            return fromCacheEntry(bytes);
+            Package p = fromCacheEntry(bytes);
+            if (mCallback != null) {
+                String[] overlayApks = mCallback.getOverlayApks(p.packageName);
+                if (overlayApks != null && overlayApks.length > 0) {
+                    for (String overlayApk : overlayApks) {
+                        // If a static RRO is updated, return null.
+                        if (!isCacheUpToDate(new File(overlayApk), cacheFile)) {
+                            return null;
+                        }
+                    }
+                }
+            }
+            return p;
         } catch (Exception e) {
             Slog.w(TAG, "Error reading package cache: ", e);
 
@@ -1238,7 +1260,7 @@ public class PackageParser {
             parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
 
             final String[] outError = new String[1];
-            final Package pkg = parseBaseApk(res, parser, flags, outError);
+            final Package pkg = parseBaseApk(apkPath, res, parser, flags, outError);
             if (pkg == null) {
                 throw new PackageParserException(mParseError,
                         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
@@ -1938,6 +1960,7 @@ public class PackageParser {
      * need to consider whether they should be supported by split APKs and child
      * packages.
      *
+     * @param apkPath The package apk file path
      * @param res The resources from which to resolve values
      * @param parser The manifest parser
      * @param flags Flags how to parse
@@ -1947,7 +1970,7 @@ public class PackageParser {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    private Package parseBaseApk(Resources res, XmlResourceParser parser, int flags,
+    private Package parseBaseApk(String apkPath, Resources res, XmlResourceParser parser, int flags,
             String[] outError) throws XmlPullParserException, IOException {
         final String splitName;
         final String pkgName;
@@ -1965,6 +1988,15 @@ public class PackageParser {
         } catch (PackageParserException e) {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
             return null;
+        }
+
+        if (mCallback != null) {
+            String[] overlayPaths = mCallback.getOverlayPaths(pkgName, apkPath);
+            if (overlayPaths != null && overlayPaths.length > 0) {
+                for (String overlayPath : overlayPaths) {
+                    res.getAssets().addOverlayPath(overlayPath);
+                }
+            }
         }
 
         final Package pkg = new Package(pkgName);
@@ -3268,8 +3300,8 @@ public class PackageParser {
         a.info.targetPackage = str != null ? str.intern() : null;
 
         str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestInstrumentation_targetProcess);
-        a.info.targetProcess = str != null ? str.intern() : null;
+                com.android.internal.R.styleable.AndroidManifestInstrumentation_targetProcesses);
+        a.info.targetProcesses = str != null ? str.intern() : null;
 
         a.info.handleProfiling = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestInstrumentation_handleProfiling,
@@ -3405,7 +3437,8 @@ public class PackageParser {
                     false)) {
                 // Check if persistence is based on a feature being present
                 final String requiredFeature = sa.getNonResourceString(
-                    com.android.internal.R.styleable.AndroidManifestApplication_persistentFeature);
+                    com.android.internal.R.styleable.
+                    AndroidManifestApplication_persistentWhenFeatureAvailable);
                 if (requiredFeature == null || mCallback.hasFeature(requiredFeature)) {
                     ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
                 }
@@ -4186,7 +4219,7 @@ public class PackageParser {
                     ActivityManager.getDefaultAppRecentsLimitStatic());
             a.info.configChanges = getActivityConfigChanges(
                     sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0),
-                    sa.getInt(R.styleable.AndroidManifestActivity_restartOnConfigChanges, 0));
+                    sa.getInt(R.styleable.AndroidManifestActivity_recreateOnConfigChanges, 0));
             a.info.softInputMode = sa.getInt(
                     R.styleable.AndroidManifestActivity_windowSoftInputMode, 0);
 
@@ -4490,13 +4523,13 @@ public class PackageParser {
 
     /**
      * @param configChanges The bit mask of configChanges fetched from AndroidManifest.xml.
-     * @param restartOnConfigChanges The bit mask restartOnConfigChanges fetched from
-     *                               AndroidManifest.xml.
+     * @param recreateOnConfigChanges The bit mask recreateOnConfigChanges fetched from
+     *                                AndroidManifest.xml.
      * @hide Exposed for unit testing only.
      */
     @TestApi
-    public static int getActivityConfigChanges(int configChanges, int restartOnConfigChanges) {
-        return configChanges | ((~restartOnConfigChanges) & RESTART_ON_CONFIG_CHANGES_MASK);
+    public static int getActivityConfigChanges(int configChanges, int recreateOnConfigChanges) {
+        return configChanges | ((~recreateOnConfigChanges) & RECREATE_ON_CONFIG_CHANGES_MASK);
     }
 
     private void parseLayout(Resources res, AttributeSet attrs, Activity a) {
@@ -7205,8 +7238,8 @@ public class PackageParser {
                 info.targetPackage = info.targetPackage.intern();
             }
 
-            if (info.targetProcess != null) {
-                info.targetProcess = info.targetProcess.intern();
+            if (info.targetProcesses != null) {
+                info.targetProcesses = info.targetProcesses.intern();
             }
         }
 

@@ -58,12 +58,18 @@ public final class Credential implements Parcelable {
      * of milliseconds since January 1, 1970, 00:00:00 GMT.
      * Using Long.MIN_VALUE to indicate unset value.
      */
-    private long mCreationTimeInMs = Long.MIN_VALUE;
-    public void setCreationTimeInMs(long creationTimeInMs) {
-        mCreationTimeInMs = creationTimeInMs;
+    private long mCreationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
+    public void setCreationTimeInMillis(long creationTimeInMillis) {
+        mCreationTimeInMillis = creationTimeInMillis;
     }
-    public long getCreationTimeInMs() {
-        return mCreationTimeInMs;
+    /**
+     * @hide
+     */
+    public long getCreationTimeInMillis() {
+        return mCreationTimeInMillis;
     }
 
     /**
@@ -71,12 +77,18 @@ public final class Credential implements Parcelable {
      * of milliseconds since January 1, 1970, 00:00:00 GMT.
     * Using Long.MIN_VALUE to indicate unset value.
      */
-    private long mExpirationTimeInMs = Long.MIN_VALUE;
-    public void setExpirationTimeInMs(long expirationTimeInMs) {
-        mExpirationTimeInMs = expirationTimeInMs;
+    private long mExpirationTimeInMillis = Long.MIN_VALUE;
+    /**
+     * @hide
+     */
+    public void setExpirationTimeInMillis(long expirationTimeInMillis) {
+        mExpirationTimeInMillis = expirationTimeInMillis;
     }
-    public long getExpirationTimeInMs() {
-        return mExpirationTimeInMs;
+    /**
+     * @hide
+     */
+    public long getExpirationTimeInMillis() {
+        return mExpirationTimeInMillis;
     }
 
     /**
@@ -98,9 +110,15 @@ public final class Credential implements Parcelable {
      * Protocol) authentication.
      */
     private boolean mCheckAaaServerCertStatus = false;
+    /**
+     * @hide
+     */
     public void setCheckAaaServerCertStatus(boolean checkAaaServerCertStatus) {
         mCheckAaaServerCertStatus = checkAaaServerCertStatus;
     }
+    /**
+     * @hide
+     */
     public boolean getCheckAaaServerCertStatus() {
         return mCheckAaaServerCertStatus;
     }
@@ -166,9 +184,15 @@ public final class Credential implements Parcelable {
          * Flag indicating if the password is machine managed.
          */
         private boolean mMachineManaged = false;
+        /**
+         * @hide
+         */
         public void setMachineManaged(boolean machineManaged) {
             mMachineManaged = machineManaged;
         }
+        /**
+         * @hide
+         */
         public boolean getMachineManaged() {
             return mMachineManaged;
         }
@@ -177,9 +201,15 @@ public final class Credential implements Parcelable {
          * The name of the application used to generate the password.
          */
         private String mSoftTokenApp = null;
+        /**
+         * @hide
+         */
         public void setSoftTokenApp(String softTokenApp) {
             mSoftTokenApp = softTokenApp;
         }
+        /**
+         * @hide
+         */
         public String getSoftTokenApp() {
             return mSoftTokenApp;
         }
@@ -188,9 +218,15 @@ public final class Credential implements Parcelable {
          * Flag indicating if this credential is usable on other mobile devices as well.
          */
         private boolean mAbleToShare = false;
+        /**
+         * @hide
+         */
         public void setAbleToShare(boolean ableToShare) {
             mAbleToShare = ableToShare;
         }
+        /**
+         * @hide
+         */
         public boolean getAbleToShare() {
             return mAbleToShare;
         }
@@ -720,8 +756,8 @@ public final class Credential implements Parcelable {
      */
     public Credential(Credential source) {
         if (source != null) {
-            mCreationTimeInMs = source.mCreationTimeInMs;
-            mExpirationTimeInMs = source.mExpirationTimeInMs;
+            mCreationTimeInMillis = source.mCreationTimeInMillis;
+            mExpirationTimeInMillis = source.mExpirationTimeInMillis;
             mRealm = source.mRealm;
             mCheckAaaServerCertStatus = source.mCheckAaaServerCertStatus;
             if (source.mUserCredential != null) {
@@ -749,8 +785,8 @@ public final class Credential implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(mCreationTimeInMs);
-        dest.writeLong(mExpirationTimeInMs);
+        dest.writeLong(mCreationTimeInMillis);
+        dest.writeLong(mExpirationTimeInMillis);
         dest.writeString(mRealm);
         dest.writeInt(mCheckAaaServerCertStatus ? 1 : 0);
         dest.writeParcelable(mUserCredential, flags);
@@ -772,8 +808,8 @@ public final class Credential implements Parcelable {
 
         Credential that = (Credential) thatObject;
         return TextUtils.equals(mRealm, that.mRealm)
-                && mCreationTimeInMs == that.mCreationTimeInMs
-                && mExpirationTimeInMs == that.mExpirationTimeInMs
+                && mCreationTimeInMillis == that.mCreationTimeInMillis
+                && mExpirationTimeInMillis == that.mExpirationTimeInMillis
                 && mCheckAaaServerCertStatus == that.mCheckAaaServerCertStatus
                 && (mUserCredential == null ? that.mUserCredential == null
                     : mUserCredential.equals(that.mUserCredential))
@@ -788,7 +824,7 @@ public final class Credential implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mRealm, mCreationTimeInMs, mExpirationTimeInMs,
+        return Objects.hash(mRealm, mCreationTimeInMillis, mExpirationTimeInMillis,
                 mCheckAaaServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
                 mCaCertificate, mClientCertificateChain, mClientPrivateKey);
     }
@@ -797,10 +833,10 @@ public final class Credential implements Parcelable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Realm: ").append(mRealm).append("\n");
-        builder.append("CreationTime: ").append(mCreationTimeInMs != Long.MIN_VALUE
-                ? new Date(mCreationTimeInMs) : "Not specified").append("\n");
-        builder.append("ExpirationTime: ").append(mExpirationTimeInMs != Long.MIN_VALUE
-                ? new Date(mExpirationTimeInMs) : "Not specified").append("\n");
+        builder.append("CreationTime: ").append(mCreationTimeInMillis != Long.MIN_VALUE
+                ? new Date(mCreationTimeInMillis) : "Not specified").append("\n");
+        builder.append("ExpirationTime: ").append(mExpirationTimeInMillis != Long.MIN_VALUE
+                ? new Date(mExpirationTimeInMillis) : "Not specified").append("\n");
         builder.append("CheckAAAServerStatus: ").append(mCheckAaaServerCertStatus).append("\n");
         if (mUserCredential != null) {
             builder.append("UserCredential Begin ---\n");
@@ -863,8 +899,8 @@ public final class Credential implements Parcelable {
             @Override
             public Credential createFromParcel(Parcel in) {
                 Credential credential = new Credential();
-                credential.setCreationTimeInMs(in.readLong());
-                credential.setExpirationTimeInMs(in.readLong());
+                credential.setCreationTimeInMillis(in.readLong());
+                credential.setExpirationTimeInMillis(in.readLong());
                 credential.setRealm(in.readString());
                 credential.setCheckAaaServerCertStatus(in.readInt() != 0);
                 credential.setUserCredential(in.readParcelable(null));

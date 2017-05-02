@@ -35,9 +35,10 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Utility methods for working with network badging.
  *
- * @hide
+ * @removed
+ *
  */
-@SystemApi
+@Deprecated
 public class NetworkBadging {
 
     @IntDef({BADGING_NONE, BADGING_SD, BADGING_HD, BADGING_4K})

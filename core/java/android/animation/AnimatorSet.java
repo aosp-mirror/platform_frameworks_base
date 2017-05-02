@@ -930,12 +930,14 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     }
 
     /**
-     * Gets the current position of the animation in time, which is equal to the current
-     * time minus the time that the animation started. An animation that is not yet started will
-     * return a value of zero, unless the animation has has its play time set via
-     * {@link #setCurrentPlayTime(long)}, in which case it will return the time that was set.
+     * Returns the milliseconds elapsed since the start of the animation.
      *
-     * @return The current position in time of the animation.
+     * <p>For ongoing animations, this method returns the current progress of the animation in
+     * terms of play time. For an animation that has not yet been started: if the animation has been
+     * seeked to a certain time via {@link #setCurrentPlayTime(long)}, the seeked play time will
+     * be returned; otherwise, this method will return 0.
+     *
+     * @return the current position in time of the animation in milliseconds
      */
     public long getCurrentPlayTime() {
         if (mSeekState.isActive()) {

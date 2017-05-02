@@ -77,9 +77,6 @@ public class QuickStatusBarHeader extends RelativeLayout {
 
         BatteryMeterView battery = findViewById(R.id.battery);
         battery.setForceShowPercent(true);
-        // Don't show the Wi-Fi indicator here, because it is shown just below in the tile.
-        SignalClusterView signalCluster = findViewById(R.id.signal_cluster);
-        signalCluster.setForceBlockWifi();
 
         mActivityStarter = Dependency.get(ActivityStarter.class);
     }

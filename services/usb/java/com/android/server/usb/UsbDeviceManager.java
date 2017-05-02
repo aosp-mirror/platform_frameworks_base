@@ -424,6 +424,8 @@ public class UsbDeviceManager {
         private boolean mSinkPower;
         private boolean mConfigured;
         private boolean mUsbDataUnlocked;
+        private boolean mAudioAccessoryConnected;
+        private boolean mAudioAccessorySupported;
         private String mCurrentFunctions;
         private boolean mCurrentFunctionsApplied;
         private UsbAccessory mCurrentAccessory;
@@ -534,30 +536,13 @@ public class UsbDeviceManager {
         }
 
         public void updateHostState(UsbPort port, UsbPortStatus status) {
-            boolean hostConnected = status.getCurrentDataRole() == UsbPort.DATA_ROLE_HOST;
-            boolean sourcePower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SOURCE;
-            boolean sinkPower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SINK;
-            // Ideally we want to see if PR_SWAP and DR_SWAP is supported.
-            // But, this should be suffice, since, all four combinations are only supported
-            // when PR_SWAP and DR_SWAP are supported.
-            boolean supportsAllCombinations = status.isRoleCombinationSupported(
-                    UsbPort.POWER_ROLE_SOURCE, UsbPort.DATA_ROLE_HOST)
-                    && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
-                    UsbPort.DATA_ROLE_HOST)
-                    && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SOURCE,
-                    UsbPort.DATA_ROLE_DEVICE)
-                    && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
-                    UsbPort.DATA_ROLE_HOST);
-
             if (DEBUG) {
                 Slog.i(TAG, "updateHostState " + port + " status=" + status);
             }
 
             SomeArgs args = SomeArgs.obtain();
-            args.argi1 = hostConnected ? 1 : 0;
-            args.argi2 = sourcePower ? 1 : 0;
-            args.argi3 = sinkPower ? 1 : 0;
-            args.argi4 = supportsAllCombinations ? 1 : 0;
+            args.arg1 = port;
+            args.arg2 = status;
 
             removeMessages(MSG_UPDATE_PORT_STATE);
             Message msg = obtainMessage(MSG_UPDATE_PORT_STATE, args);
@@ -931,10 +916,26 @@ public class UsbDeviceManager {
                 case MSG_UPDATE_PORT_STATE:
                     SomeArgs args = (SomeArgs) msg.obj;
                     boolean prevHostConnected = mHostConnected;
-                    mHostConnected = (args.argi1 == 1);
-                    mSourcePower = (args.argi2 == 1);
-                    mSinkPower = (args.argi3 == 1);
-                    mSupportsAllCombinations = (args.argi4 == 1);
+                    UsbPort port = (UsbPort) args.arg1;
+                    UsbPortStatus status = (UsbPortStatus) args.arg2;
+                    mHostConnected = status.getCurrentDataRole() == UsbPort.DATA_ROLE_HOST;
+                    mSourcePower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SOURCE;
+                    mSinkPower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SINK;
+                    mAudioAccessoryConnected =
+                            (status.getCurrentMode() == UsbPort.MODE_AUDIO_ACCESSORY);
+                    mAudioAccessorySupported = port.isModeSupported(UsbPort.MODE_AUDIO_ACCESSORY);
+                    // Ideally we want to see if PR_SWAP and DR_SWAP is supported.
+                    // But, this should be suffice, since, all four combinations are only supported
+                    // when PR_SWAP and DR_SWAP are supported.
+                    mSupportsAllCombinations = status.isRoleCombinationSupported(
+                            UsbPort.POWER_ROLE_SOURCE, UsbPort.DATA_ROLE_HOST)
+                            && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
+                            UsbPort.DATA_ROLE_HOST)
+                            && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SOURCE,
+                            UsbPort.DATA_ROLE_DEVICE)
+                            && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
+                            UsbPort.DATA_ROLE_HOST);
+
                     args.recycle();
                     updateUsbNotification(false);
                     if (mBootCompleted) {
@@ -1076,7 +1077,10 @@ public class UsbDeviceManager {
             int id = 0;
             int titleRes = 0;
             Resources r = mContext.getResources();
-            if (mConnected) {
+            if (mAudioAccessoryConnected && !mAudioAccessorySupported) {
+                titleRes = com.android.internal.R.string.usb_unsupported_audio_accessory_title;
+                id = SystemMessage.NOTE_USB_AUDIO_ACCESSORY_NOT_SUPPORTED;
+            } else if (mConnected) {
                 if (!mUsbDataUnlocked) {
                     if (mSourcePower) {
                         titleRes = com.android.internal.R.string.usb_supplying_notification_title;
@@ -1123,18 +1127,43 @@ public class UsbDeviceManager {
                     mUsbNotificationId = 0;
                 }
                 if (id != 0) {
-                    CharSequence message = r.getText(
-                            com.android.internal.R.string.usb_notification_message);
+                    CharSequence message;
                     CharSequence title = r.getText(titleRes);
+                    PendingIntent pi;
+                    String channel;
 
-                    Intent intent = Intent.makeRestartActivityTask(
-                            new ComponentName("com.android.settings",
-                                    "com.android.settings.deviceinfo.UsbModeChooserActivity"));
-                    PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
-                            intent, 0, null, UserHandle.CURRENT);
+                    if (titleRes
+                            != com.android.internal.R.string
+                            .usb_unsupported_audio_accessory_title) {
+                        Intent intent = Intent.makeRestartActivityTask(
+                                new ComponentName("com.android.settings",
+                                        "com.android.settings.deviceinfo.UsbModeChooserActivity"));
+                        pi = PendingIntent.getActivityAsUser(mContext, 0,
+                                intent, 0, null, UserHandle.CURRENT);
+                        channel = SystemNotificationChannels.USB;
+                        message = r.getText(
+                                com.android.internal.R.string.usb_notification_message);
+                    } else {
+                        final Intent intent = new Intent();
+                        intent.setClassName("com.android.settings",
+                                "com.android.settings.HelpTrampoline");
+                        intent.putExtra(Intent.EXTRA_TEXT,
+                                "help_url_audio_accessory_not_supported");
+
+                        if (mContext.getPackageManager().resolveActivity(intent, 0) != null) {
+                            pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+                        } else {
+                            pi = null;
+                        }
+
+                        channel = SystemNotificationChannels.ALERTS;
+                        message = r.getText(
+                                com.android.internal.R.string
+                                        .usb_unsupported_audio_accessory_message);
+                    }
 
                     Notification notification =
-                            new Notification.Builder(mContext, SystemNotificationChannels.USB)
+                            new Notification.Builder(mContext, channel)
                                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                                     .setWhen(0)
                                     .setOngoing(true)
@@ -1148,6 +1177,7 @@ public class UsbDeviceManager {
                                     .setContentIntent(pi)
                                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                                     .build();
+
                     mNotificationManager.notifyAsUser(null, id, notification,
                             UserHandle.ALL);
                     mUsbNotificationId = id;
@@ -1230,6 +1260,8 @@ public class UsbDeviceManager {
             pw.println("  mSinkPower: " + mSinkPower);
             pw.println("  mUsbCharging: " + mUsbCharging);
             pw.println("  mHideUsbNotification: " + mHideUsbNotification);
+            pw.println("  mAudioAccessoryConnected: " + mAudioAccessoryConnected);
+
             try {
                 pw.println("  Kernel state: "
                         + FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());

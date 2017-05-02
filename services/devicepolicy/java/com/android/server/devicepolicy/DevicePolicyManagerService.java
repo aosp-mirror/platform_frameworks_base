@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
@@ -4665,19 +4666,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final long ident = mInjector.binderClearCallingIdentity();
             try {
                 // Evict key
-                if ((flags & DevicePolicyManager.FLAG_EVICT_CE_KEY) != 0) {
-                    enforceManagedProfile(callingUserId, "set FLAG_EVICT_CE_KEY");
+                if ((flags & DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY) != 0) {
+                    enforceManagedProfile(
+                            callingUserId, "set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
                     if (!isProfileOwner(admin.info.getComponent(), callingUserId)) {
-                        throw new SecurityException(
-                               "Only profile owner admins can set FLAG_EVICT_CE_KEY");
+                        throw new SecurityException("Only profile owner admins can set "
+                                + "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
                     }
                     if (parent) {
                         throw new IllegalArgumentException(
-                                "Cannot set FLAG_EVICT_CE_KEY for the parent");
+                                "Cannot set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY for the parent");
                     }
                     if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
                         throw new UnsupportedOperationException(
-                                "FLAG_EVICT_CE_KEY only applies to FBE devices");
+                                "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY only applies to FBE devices");
                     }
                     mUserManager.evictCredentialEncryptionKey(callingUserId);
                 }
@@ -10105,14 +10107,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        if (ids == null) {
+            throw new IllegalArgumentException("ids must not be null");
+        }
+        for (String id : ids) {
+            if (TextUtils.isEmpty(id)) {
+                throw new IllegalArgumentException("ids must not contain empty string");
+            }
+        }
 
-        Preconditions.checkNotNull(admin);
-        Preconditions.checkCollectionElementsNotNull(ids, "ids");
-
-        final Set<String> affiliationIds = new ArraySet<String>(ids);
-        Preconditions.checkArgument(
-                !affiliationIds.contains(""), "ids must not contain empty strings");
-
+        final Set<String> affiliationIds = new ArraySet<>(ids);
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -10933,8 +10937,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!expectedPackageName.equals(info.serviceInfo.packageName)) {
             throw new SecurityException("Only allow to bind service in " + expectedPackageName);
         }
-        if (info.serviceInfo.exported) {
-            throw new SecurityException("The service must be unexported");
+        // STOPSHIP(b/37624960): Remove info.serviceInfo.exported before release.
+        if (info.serviceInfo.exported && !BIND_DEVICE_ADMIN.equals(info.serviceInfo.permission)) {
+            throw new SecurityException(
+                    "Service must be protected by BIND_DEVICE_ADMIN permission");
         }
         // It is the system server to bind the service, it would be extremely dangerous if it
         // can be exploited to bind any service. Set the component explicitly to make sure we

@@ -19,6 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Drejtoje makinën në mënyrë të sigurt"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Ji plotësisht i vetëdijshëm për kushtet e lëvizjes me makinë dhe respekto gjithmonë ligjet përkatëse. Udhëzimet mund të jenë të pasakta, jo të plota, të rrezikshme, të papërshtatshme, të ndaluara ose mund të përfshijnë kalimin në zona administrative. Informacionet e biznesit mund të jenë po ashtu të pasakta ose jo të plota. Të dhënat nuk janë në kohë reale dhe saktësia e vendndodhjes nuk mund të garantohet. Gjatë drejtimit të makinës mos e përdor pajisjen celulare ose mos përdor aplikacionet që nuk janë të planifikuara për Android Auto."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"E panjohur"</string>
 </resources>

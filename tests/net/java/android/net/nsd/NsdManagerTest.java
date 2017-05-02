@@ -18,6 +18,7 @@ package android.net.nsd;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.reset;
@@ -42,9 +43,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Consumer;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NsdManagerTest {
+
+    static final int PROTOCOL = NsdManager.PROTOCOL_DNS_SD;
 
     @Mock Context mContext;
     @Mock INsdManager mService;
@@ -101,7 +106,128 @@ public class NsdManagerTest {
 
         verify(listener1, timeout(mTimeoutMs).times(1)).onServiceResolved(reply);
         verify(listener2, timeout(mTimeoutMs).times(1)).onServiceResolved(reply);
-   }
+    }
+
+    @Test
+    public void testRegisterService() {
+        NsdManager manager = makeManager();
+
+        NsdServiceInfo request1 = new NsdServiceInfo("a_name", "a_type");
+        NsdServiceInfo request2 = new NsdServiceInfo("another_name", "another_type");
+        request1.setPort(2201);
+        request2.setPort(2202);
+        NsdManager.RegistrationListener listener1 = mock(NsdManager.RegistrationListener.class);
+        NsdManager.RegistrationListener listener2 = mock(NsdManager.RegistrationListener.class);
+
+        // Register two services
+        manager.registerService(request1, PROTOCOL, listener1);
+        int key1 = verifyRequest(NsdManager.REGISTER_SERVICE);
+
+        manager.registerService(request2, PROTOCOL, listener2);
+        int key2 = verifyRequest(NsdManager.REGISTER_SERVICE);
+
+        // First reques fails, second request succeeds
+        sendResponse(NsdManager.REGISTER_SERVICE_SUCCEEDED, 0, key2, request2);
+        verify(listener2, timeout(mTimeoutMs).times(1)).onServiceRegistered(request2);
+
+        int err = 1;
+        sendResponse(NsdManager.REGISTER_SERVICE_FAILED, err, key1, request1);
+        verify(listener1, timeout(mTimeoutMs).times(1)).onRegistrationFailed(request1, err);
+
+        // Client retries first request, it succeeds
+        manager.registerService(request1, PROTOCOL, listener1);
+        int key3 = verifyRequest(NsdManager.REGISTER_SERVICE);
+
+        sendResponse(NsdManager.REGISTER_SERVICE_SUCCEEDED, 0, key3, request1);
+        verify(listener1, timeout(mTimeoutMs).times(1)).onServiceRegistered(request1);
+
+        // First request is unregistered, it succeeds
+        manager.unregisterService(listener1);
+        int key3again = verifyRequest(NsdManager.UNREGISTER_SERVICE);
+        assertEquals(key3, key3again);
+
+        sendResponse(NsdManager.UNREGISTER_SERVICE_SUCCEEDED, 0, key3again, null);
+        verify(listener1, timeout(mTimeoutMs).times(1)).onServiceUnregistered(request1);
+
+        // Second request is unregistered, it fails
+        manager.unregisterService(listener2);
+        int key2again = verifyRequest(NsdManager.UNREGISTER_SERVICE);
+        assertEquals(key2, key2again);
+
+        sendResponse(NsdManager.UNREGISTER_SERVICE_FAILED, err, key2again, null);
+        verify(listener2, timeout(mTimeoutMs).times(1)).onUnregistrationFailed(request2, err);
+
+        // TODO: do not unregister listener until service is unregistered
+        // Client retries unregistration of second request, it succeeds
+        //manager.unregisterService(listener2);
+        //int key2yetAgain = verifyRequest(NsdManager.UNREGISTER_SERVICE);
+        //assertEquals(key2, key2yetAgain);
+
+        //sendResponse(NsdManager.UNREGISTER_SERVICE_SUCCEEDED, 0, key2yetAgain, null);
+        //verify(listener2, timeout(mTimeoutMs).times(1)).onServiceUnregistered(request2);
+    }
+
+    @Test
+    public void testInvalidCalls() {
+        NsdManager manager = new NsdManager(mContext, mService);
+
+        NsdManager.RegistrationListener listener1 = mock(NsdManager.RegistrationListener.class);
+        NsdManager.DiscoveryListener listener2 = mock(NsdManager.DiscoveryListener.class);
+        NsdManager.ResolveListener listener3 = mock(NsdManager.ResolveListener.class);
+
+        NsdServiceInfo invalidService = new NsdServiceInfo(null, null);
+        NsdServiceInfo validService = new NsdServiceInfo("a_name", "a_type");
+        validService.setPort(2222);
+
+        // Service registration
+        //  - invalid arguments
+        mustFail(() -> { manager.unregisterService(null); });
+        mustFail(() -> { manager.registerService(null, -1, null); });
+        mustFail(() -> { manager.registerService(null, PROTOCOL, listener1); });
+        mustFail(() -> { manager.registerService(invalidService, PROTOCOL, listener1); });
+        mustFail(() -> { manager.registerService(validService, -1, listener1); });
+        mustFail(() -> { manager.registerService(validService, PROTOCOL, null); });
+        manager.registerService(validService, PROTOCOL, listener1);
+        //  - listener already registered
+        mustFail(() -> { manager.registerService(validService, PROTOCOL, listener1); });
+        manager.unregisterService(listener1);
+        // TODO: make listener immediately reusable
+        //mustFail(() -> { manager.unregisterService(listener1); });
+        //manager.registerService(validService, PROTOCOL, listener1);
+
+        // Discover service
+        //  - invalid arguments
+        mustFail(() -> { manager.stopServiceDiscovery(null); });
+        mustFail(() -> { manager.discoverServices(null, -1, null); });
+        mustFail(() -> { manager.discoverServices(null, PROTOCOL, listener2); });
+        mustFail(() -> { manager.discoverServices("a_service", -1, listener2); });
+        mustFail(() -> { manager.discoverServices("a_service", PROTOCOL, null); });
+        manager.discoverServices("a_service", PROTOCOL, listener2);
+        //  - listener already registered
+        mustFail(() -> { manager.discoverServices("another_service", PROTOCOL, listener2); });
+        manager.stopServiceDiscovery(listener2);
+        // TODO: make listener immediately reusable
+        //mustFail(() -> { manager.stopServiceDiscovery(listener2); });
+        //manager.discoverServices("another_service", PROTOCOL, listener2);
+
+        // Resolver service
+        //  - invalid arguments
+        mustFail(() -> { manager.resolveService(null, null); });
+        mustFail(() -> { manager.resolveService(null, listener3); });
+        mustFail(() -> { manager.resolveService(invalidService, listener3); });
+        mustFail(() -> { manager.resolveService(validService, null); });
+        manager.resolveService(validService, listener3);
+        //  - listener already registered:w
+        mustFail(() -> { manager.resolveService(validService, listener3); });
+    }
+
+    public void mustFail(Runnable fn) {
+        try {
+            fn.run();
+            fail();
+        } catch (Exception expected) {
+        }
+    }
 
     NsdManager makeManager() {
         NsdManager manager = new NsdManager(mContext, mService);

@@ -1710,19 +1710,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
 
     /**
-     * Activity Action: Launch application uninstaller.
-     * <p>
-     * Input: The data must be a package: URI whose scheme specific part is
-     * the package name of the current installed package to be uninstalled.
-     * You can optionally supply {@link #EXTRA_RETURN_RESULT}.
-     * <p>
-     * Output: Nothing.
-     * </p>
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_CLEAR_PACKAGE = "android.intent.action.CLEAR_PACKAGE";
-
-    /**
      * Specify whether the package should be uninstalled for all users.
      * @hide because these should not be part of normal application flow.
      */
@@ -1838,6 +1825,14 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SystemApi
     public static final String EXTRA_SPLIT_NAME = "android.intent.extra.SPLIT_NAME";
+
+    /**
+     * Intent extra: A {@link ComponentName} value.
+     * <p>
+     * Type: String
+     * </p>
+     */
+    public static final String EXTRA_COMPONENT_NAME = "android.intent.extra.COMPONENT_NAME";
 
     /**
      * Intent extra: An extra for specifying whether a result is needed.
@@ -3228,6 +3223,7 @@ public class Intent implements Parcelable, Cloneable {
      * caused the broadcast.
      * @hide
      */
+    @SystemApi
     public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
 
     /**
@@ -3387,32 +3383,6 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String
             ACTION_DYNAMIC_SENSOR_CHANGED = "android.intent.action.DYNAMIC_SENSOR_CHANGED";
-
-    /**
-     * Broadcast Action: The default subscription has changed.  This has the following
-     * extra values:</p>
-     * The {@link #EXTRA_SUBSCRIPTION_INDEX} extra indicates the current default subscription index
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_SUBSCRIPTION_CHANGED";
-
-    /**
-     * Broadcast Action: The default sms subscription has changed.  This has the following
-     * extra values:</p>
-     * {@link #EXTRA_SUBSCRIPTION_INDEX} extra indicates the current default sms
-     * subscription index
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
-
-    /**
-     * Integer extra used with {@link #ACTION_DEFAULT_SUBSCRIPTION_CHANGED} and
-     * {@link #ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED} to indicate the subscription
-     * which has changed.
-     */
-    public static final String EXTRA_SUBSCRIPTION_INDEX = "android.intent.extra.SUBSCRIPTION_INDEX";
 
     /**
      * Deprecated - use ACTION_FACTORY_RESET instead.
@@ -4420,6 +4390,21 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_VERSION_CODE = "android.intent.extra.VERSION_CODE";
+
+    /**
+     * The app that triggered the ephemeral installation.
+     * @hide
+     */
+    public static final String EXTRA_CALLING_PACKAGE
+            = "android.intent.extra.CALLING_PACKAGE";
+
+    /**
+     * Optional calling app provided bundle containing additional launch information the
+     * installer may use.
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_BUNDLE
+            = "android.intent.extra.VERIFICATION_BUNDLE";
 
     /**
      * A Bundle forming a mapping of potential target package names to different extras Bundles

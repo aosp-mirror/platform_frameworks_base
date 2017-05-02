@@ -903,10 +903,10 @@ public final class PpsMoParser {
         for (PPSNode child: node.getChildren()) {
             switch (child.getName()) {
                 case NODE_CREATION_DATE:
-                    credential.setCreationTimeInMs(parseDate(getPpsNodeValue(child)));
+                    credential.setCreationTimeInMillis(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_EXPIRATION_DATE:
-                    credential.setExpirationTimeInMs(parseDate(getPpsNodeValue(child)));
+                    credential.setExpirationTimeInMillis(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_USERNAME_PASSWORD:
                     credential.setUserCredential(parseUserCredential(child));
@@ -1517,10 +1517,10 @@ public final class PpsMoParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_CREATION_DATE:
-                    config.setSubscriptionCreationTimeInMs(parseDate(getPpsNodeValue(child)));
+                    config.setSubscriptionCreationTimeInMillis(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_EXPIRATION_DATE:
-                    config.setSubscriptionExpirationTimeInMs(parseDate(getPpsNodeValue(child)));
+                    config.setSubscriptionExpirationTimeInMillis(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_TYPE_OF_SUBSCRIPTION:
                     config.setSubscriptionType(getPpsNodeValue(child));
@@ -1555,7 +1555,7 @@ public final class PpsMoParser {
                     config.setUsageLimitDataLimit(parseLong(getPpsNodeValue(child), 10));
                     break;
                 case NODE_START_DATE:
-                    config.setUsageLimitStartTimeInMs(parseDate(getPpsNodeValue(child)));
+                    config.setUsageLimitStartTimeInMillis(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_TIME_LIMIT:
                     config.setUsageLimitTimeLimitInMinutes(parseLong(getPpsNodeValue(child), 10));

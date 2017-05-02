@@ -15,17 +15,16 @@
  */
 package com.android.test.split.feature.one;
 
-import com.android.test.split.feature.ActivityMain;
-
+import android.app.Activity;
 import android.widget.TextView;
 import android.os.Bundle;
 
-public class One extends ActivityMain {
+public class One extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((TextView) findViewById(com.android.test.split.feature.R.id.text))
-                .setText(R.string.feature_string);
+        setContentView(R.layout.main);
+        ((TextView) findViewById(R.id.text)).setText(R.string.feature_string);
     }
 }

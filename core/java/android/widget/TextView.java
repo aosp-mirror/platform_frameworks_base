@@ -125,6 +125,7 @@ import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -393,6 +394,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mPreDrawListenerDetached;
 
     private TextClassifier mTextClassifier;
+
+    // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
+    // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
+    // the view hierarchy. On the other hand, if the user is using the movement key to traverse
+    // views (i.e. the first movement was to traverse out of this view, or this view was traversed
+    // into by the user holding the movement key down) then we shouldn't prevent the focus from
+    // changing.
+    private boolean mPreventDefaultMovement;
 
     private TextUtils.TruncateAt mEllipsize;
 
@@ -903,10 +912,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         break;
 
                     case com.android.internal.R.styleable.TextAppearance_fontFamily:
-                        try {
-                            fontTypeface = appearance.getFont(attr);
-                        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-                            // Expected if it is not a font resource.
+                        if (!context.isRestricted()) {
+                            try {
+                                fontTypeface = appearance.getFont(attr);
+                            } catch (UnsupportedOperationException
+                                    | Resources.NotFoundException e) {
+                                // Expected if it is not a font resource.
+                            }
                         }
                         if (fontTypeface == null) {
                             fontFamily = appearance.getString(attr);
@@ -1220,11 +1232,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_fontFamily:
-                    try {
-                        fontTypeface = a.getFont(attr);
-                    } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-                        // Expected if it is not a resource reference or if it is a reference to
-                        // another resource type.
+                    if (!context.isRestricted()) {
+                        try {
+                            fontTypeface = a.getFont(attr);
+                        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
+                            // Expected if it is not a resource reference or if it is a reference to
+                            // another resource type.
+                        }
                     }
                     if (fontTypeface == null) {
                         fontFamily = a.getString(attr);
@@ -3371,10 +3385,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Typeface fontTypeface = null;
         String fontFamily = null;
-        try {
-            fontTypeface = ta.getFont(R.styleable.TextAppearance_fontFamily);
-        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-            // Expected if it is not a font resource.
+        if (!context.isRestricted()) {
+            try {
+                fontTypeface = ta.getFont(R.styleable.TextAppearance_fontFamily);
+            } catch (UnsupportedOperationException | Resources.NotFoundException e) {
+                // Expected if it is not a font resource.
+            }
         }
         if (fontTypeface == null) {
             fontFamily = ta.getString(R.styleable.TextAppearance_fontFamily);
@@ -3886,26 +3902,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * are invalid. If a specified axis name is not defined in the font, the settings will be
      * ignored.
      *
+     * <p>
+     * Examples,
+     * <ul>
+     * <li>Set font width to 150.
      * <pre>
-     *   textView.setFontVariationSettings("'wdth' 1.0");
-     *   textView.setFontVariationSettings("'AX  ' 1.8, 'FB  ' 2.0");
+     * <code>
+     *   TextView textView = (TextView) findViewById(R.id.textView);
+     *   textView.setFontVariationSettings("'wdth' 150");
+     * </code>
      * </pre>
+     * </li>
+     *
+     * <li>Set the font slant to 20 degrees and ask for italic style.
+     * <pre>
+     * <code>
+     *   TextView textView = (TextView) findViewById(R.id.textView);
+     *   textView.setFontVariationSettings("'slnt' 20, 'ital' 1");
+     * </code>
+     * </pre>
+     * </p>
+     * </li>
+     * </ul>
      *
      * @param fontVariationSettings font variation settings. You can pass null or empty string as
      *                              no variation settings.
-     *
      * @return true if the given settings is effective to at least one font file underlying this
      *         TextView. This function also returns true for empty settings string. Otherwise
      *         returns false.
      *
-     * @throws FontVariationAxis.InvalidFormatException
-     *         If given string is not a valid font variation settings format.
+     * @throws IllegalArgumentException If given string is not a valid font variation settings
+     *                                  format.
      *
      * @see #getFontVariationSettings()
-     * @see Paint#getFontVariationSettings() Paint.getFontVariationSettings()
+     * @see FontVariationAxis
      */
-    public boolean setFontVariationSettings(@Nullable String fontVariationSettings)
-            throws FontVariationAxis.InvalidFormatException {
+    public boolean setFontVariationSettings(@Nullable String fontVariationSettings) {
         final String existingSettings = mTextPaint.getFontVariationSettings();
         if (fontVariationSettings == existingSettings
                 || (fontVariationSettings != null
@@ -7137,6 +7169,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return KEY_EVENT_NOT_HANDLED;
         }
 
+        // If this is the initial keydown, we don't want to prevent a movement away from this view.
+        // While this shouldn't be necessary because any time we're preventing default movement we
+        // should be restricting the focus to remain within this view, thus we'll also receive
+        // the key up event, occasionally key up events will get dropped and we don't want to
+        // prevent the user from traversing out of this on the next key down.
+        if (event.getRepeatCount() == 0 && !KeyEvent.isModifierKey(keyCode)) {
+            mPreventDefaultMovement = false;
+        }
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
                 if (event.hasNoModifiers()) {
@@ -7268,16 +7309,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             if (doDown) {
                 if (mMovement.onKeyDown(this, (Spannable) mText, keyCode, event)) {
+                    if (event.getRepeatCount() == 0 && !KeyEvent.isModifierKey(keyCode)) {
+                        mPreventDefaultMovement = true;
+                    }
                     return KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD;
                 }
             }
-            // Consume arrows to prevent focus leaving the editor.
-            if (isDirectionalNavigationKey(keyCode)) {
+            // Consume arrows from keyboard devices to prevent focus leaving the editor.
+            // DPAD/JOY devices (Gamepads, TV remotes) often lack a TAB key so allow those
+            // to move focus with arrows.
+            if (event.getSource() == InputDevice.SOURCE_KEYBOARD
+                    && isDirectionalNavigationKey(keyCode)) {
                 return KEY_EVENT_HANDLED;
             }
         }
 
-        return KEY_EVENT_NOT_HANDLED;
+        return mPreventDefaultMovement && !KeyEvent.isModifierKey(keyCode)
+                ? KEY_EVENT_HANDLED : KEY_EVENT_NOT_HANDLED;
     }
 
     /**
@@ -7308,6 +7356,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (!isEnabled()) {
             return super.onKeyUp(keyCode, event);
+        }
+
+        if (!KeyEvent.isModifierKey(keyCode)) {
+            mPreventDefaultMovement = false;
         }
 
         switch (keyCode) {
@@ -9286,6 +9338,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void notifyAutoFillManagerAfterTextChangedIfNeeded() {
+        // It is important to not check whether the view is important for autofill
+        // since the user can trigger autofill manually on not important views.
         if (!isAutofillable()) {
             return;
         }
@@ -9296,6 +9350,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             afm.notifyValueChanged(TextView.this);
         }
+    }
+
+    private boolean isAutofillable() {
+        // It is important to not check whether the view is important for autofill
+        // since the user can trigger autofill manually on not important views.
+        return getAutofillType() != AUTOFILL_TYPE_NONE;
     }
 
     void updateAfterEdit() {
@@ -10174,6 +10234,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean canRequestAutofill() {
+        if (!isAutofillable()) {
+            return false;
+        }
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
             return afm.isEnabled();

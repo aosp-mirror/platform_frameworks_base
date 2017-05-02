@@ -550,6 +550,12 @@ public abstract class WallpaperService extends Service {
          * This will trigger a {@link #onComputeWallpaperColors()} call.
          */
         public void invalidateColors() {
+            try {
+                mConnection.onWallpaperColorsChanged(onComputeWallpaperColors());
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't invalidate wallpaper colors because " +
+                        "wallpaper connection was lost", e);
+            }
         }
 
         /**
@@ -562,7 +568,7 @@ public abstract class WallpaperService extends Service {
         public @Nullable WallpaperColors onComputeWallpaperColors() {
             return null;
         }
-        
+
         protected void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
             out.print(prefix); out.print("mInitializing="); out.print(mInitializing);
                     out.print(" mDestroyed="); out.println(mDestroyed);
@@ -1199,6 +1205,7 @@ public abstract class WallpaperService extends Service {
                     mEngine = engine;
                     mActiveEngines.add(engine);
                     engine.attach(this);
+                    engine.invalidateColors();
                     return;
                 }
                 case DO_DETACH: {

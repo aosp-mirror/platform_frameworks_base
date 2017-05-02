@@ -53,54 +53,9 @@
             android:alpha="0.0"
             />
     </FrameLayout>
-    <ViewStub
-        android:id="@+id/connected_device_signals_stub"
-        android:layout="@layout/connected_device_signal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <LinearLayout
-        android:id="@+id/mobile_signal_group"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        >
-    </LinearLayout>
-    <View
-        android:id="@+id/wifi_signal_spacer"
-        android:layout_width="@dimen/status_bar_wifi_signal_spacer_width"
-        android:layout_height="4dp"
-        android:visibility="gone"
-        />
-    <FrameLayout
-        android:id="@+id/no_sims_combo"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:contentDescription="@string/accessibility_no_sims">
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneLightTheme"
-            android:id="@+id/no_sims"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:src="@drawable/stat_sys_no_sims"
-            />
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="@style/DualToneDarkTheme"
-            android:id="@+id/no_sims_dark"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:src="@drawable/stat_sys_no_sims"
-            android:alpha="0.0"
-            />
-    </FrameLayout>
-    <View
-        android:id="@+id/wifi_airplane_spacer"
-        android:layout_width="@dimen/status_bar_airplane_spacer_width"
-        android:layout_height="4dp"
-        android:visibility="gone"
-        />
     <FrameLayout
         android:layout_height="17dp"
-        android:layout_width="wrap_content"
-        android:paddingStart="2dp">
+        android:layout_width="wrap_content">
         <ImageView
             android:id="@+id/wifi_in"
             android:layout_height="wrap_content"
@@ -142,6 +97,50 @@
             android:layout_width="wrap_content"
             />
     </FrameLayout>
+    <View
+        android:id="@+id/wifi_signal_spacer"
+        android:layout_width="@dimen/status_bar_wifi_signal_spacer_width"
+        android:layout_height="4dp"
+        android:visibility="gone"
+        />
+    <ViewStub
+        android:id="@+id/connected_device_signals_stub"
+        android:layout="@layout/connected_device_signal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:id="@+id/mobile_signal_group"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        >
+    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/no_sims_combo"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:contentDescription="@string/accessibility_no_sims">
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:theme="@style/DualToneLightTheme"
+            android:id="@+id/no_sims"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:src="@drawable/stat_sys_no_sims"
+            />
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:theme="@style/DualToneDarkTheme"
+            android:id="@+id/no_sims_dark"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:src="@drawable/stat_sys_no_sims"
+            android:alpha="0.0"
+            />
+    </FrameLayout>
+    <View
+        android:id="@+id/wifi_airplane_spacer"
+        android:layout_width="@dimen/status_bar_airplane_spacer_width"
+        android:layout_height="4dp"
+        android:visibility="gone"
+        />
     <ImageView
         android:id="@+id/airplane"
         android:layout_height="wrap_content"

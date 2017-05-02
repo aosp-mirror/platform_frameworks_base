@@ -458,42 +458,45 @@ public class ActivityManager {
     /** @hide Process is important to the user, but not something they are aware of. */
     public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 7;
 
+    /** @hide Process is in the background transient so we will try to keep running. */
+    public static final int PROCESS_STATE_TRANSIENT_BACKGROUND = 8;
+
     /** @hide Process is in the background running a backup/restore operation. */
-    public static final int PROCESS_STATE_BACKUP = 8;
+    public static final int PROCESS_STATE_BACKUP = 9;
 
     /** @hide Process is in the background, but it can't restore its state so we want
      * to try to avoid killing it. */
-    public static final int PROCESS_STATE_HEAVY_WEIGHT = 9;
+    public static final int PROCESS_STATE_HEAVY_WEIGHT = 10;
 
     /** @hide Process is in the background running a service.  Unlike oom_adj, this level
      * is used for both the normal running in background state and the executing
      * operations state. */
-    public static final int PROCESS_STATE_SERVICE = 10;
+    public static final int PROCESS_STATE_SERVICE = 11;
 
     /** @hide Process is in the background running a receiver.   Note that from the
      * perspective of oom_adj receivers run at a higher foreground level, but for our
      * prioritization here that is not necessary and putting them below services means
      * many fewer changes in some process states as they receive broadcasts. */
-    public static final int PROCESS_STATE_RECEIVER = 11;
+    public static final int PROCESS_STATE_RECEIVER = 12;
 
     /** @hide Process is in the background but hosts the home activity. */
-    public static final int PROCESS_STATE_HOME = 12;
+    public static final int PROCESS_STATE_HOME = 13;
 
     /** @hide Process is in the background but hosts the last shown activity. */
-    public static final int PROCESS_STATE_LAST_ACTIVITY = 13;
+    public static final int PROCESS_STATE_LAST_ACTIVITY = 14;
 
     /** @hide Process is being cached for later use and contains activities. */
-    public static final int PROCESS_STATE_CACHED_ACTIVITY = 14;
+    public static final int PROCESS_STATE_CACHED_ACTIVITY = 15;
 
     /** @hide Process is being cached for later use and is a client of another cached
      * process that contains activities. */
-    public static final int PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 15;
+    public static final int PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 16;
 
     /** @hide Process is being cached for later use and is empty. */
-    public static final int PROCESS_STATE_CACHED_EMPTY = 16;
+    public static final int PROCESS_STATE_CACHED_EMPTY = 17;
 
     /** @hide Process does not exist. */
-    public static final int PROCESS_STATE_NONEXISTENT = 17;
+    public static final int PROCESS_STATE_NONEXISTENT = 18;
 
     /** @hide The lowest process state number */
     public static final int MIN_PROCESS_STATE = PROCESS_STATE_PERSISTENT;
@@ -503,7 +506,7 @@ public class ActivityManager {
 
     /** @hide Should this process state be considered a background state? */
     public static final boolean isProcStateBackground(int procState) {
-        return procState >= PROCESS_STATE_BACKUP;
+        return procState >= PROCESS_STATE_TRANSIENT_BACKGROUND;
     }
 
     /** @hide requestType for assist context: only basic information. */
@@ -1140,13 +1143,7 @@ public class ActivityManager {
                     com.android.internal.R.bool.config_supportsSplitScreenMultiWindow);
     }
 
-    /**
-     * Return the number of actions that will be displayed in the picture-in-picture UI when the
-     * user interacts with the activity currently in picture-in-picture mode. This number may change
-     * if the global configuration changes (ie. if the device is plugged into an external display).
-     *
-     * TO BE REMOVED
-     */
+    /** @removed */
     @Deprecated
     public static int getMaxNumPictureInPictureActions() {
         return 3;
@@ -3159,10 +3156,15 @@ public class ActivityManager {
          * before {@link Build.VERSION_CODES#O}.  Since the {@link Build.VERSION_CODES#O} SDK,
          * the value of {@link #IMPORTANCE_PERCEPTIBLE} has been fixed.
          *
-         * @deprecated Use {@link #IMPORTANCE_PERCEPTIBLE} instead.
+         * <p>The system will return this value instead of {@link #IMPORTANCE_PERCEPTIBLE}
+         * on Android versions below {@link Build.VERSION_CODES#O}.
+         *
+         * <p>On Android version {@link Build.VERSION_CODES#O} and later, this value will still be
+         * returned for apps with the target API level below {@link Build.VERSION_CODES#O}.
+         * For apps targeting version {@link Build.VERSION_CODES#O} and later,
+         * the correct value {@link #IMPORTANCE_PERCEPTIBLE} will be returned.
          */
-        @Deprecated
-        public static final int IMPORTANCE_PERCEPTIBLE_DEPRECATED = 130;
+        public static final int IMPORTANCE_PERCEPTIBLE_PRE_26 = 130;
 
         /**
          * Constant for {@link #importance}: This process is not something the user
@@ -3176,11 +3178,17 @@ public class ActivityManager {
          * before {@link Build.VERSION_CODES#O}.  Since the {@link Build.VERSION_CODES#O} SDK,
          * the value of {@link #IMPORTANCE_CANT_SAVE_STATE} has been fixed.
          *
-         * @deprecated Use {@link #IMPORTANCE_CANT_SAVE_STATE} instead.
+         * <p>The system will return this value instead of {@link #IMPORTANCE_CANT_SAVE_STATE}
+         * on Android versions below {@link Build.VERSION_CODES#O}.
+         *
+         * <p>On Android version {@link Build.VERSION_CODES#O} after, this value will still be
+         * returned for apps with the target API level below {@link Build.VERSION_CODES#O}.
+         * For apps targeting version {@link Build.VERSION_CODES#O} and later,
+         * the correct value {@link #IMPORTANCE_CANT_SAVE_STATE} will be returned.
+         *
          * @hide
          */
-        @Deprecated
-        public static final int IMPORTANCE_CANT_SAVE_STATE_DEPRECATED = 170;
+        public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
         /**
          * Constant for {@link #importance}: This process is running an
@@ -3238,7 +3246,7 @@ public class ActivityManager {
                 return IMPORTANCE_SERVICE;
             } else if (procState > PROCESS_STATE_HEAVY_WEIGHT) {
                 return IMPORTANCE_CANT_SAVE_STATE;
-            } else if (procState >= PROCESS_STATE_IMPORTANT_BACKGROUND) {
+            } else if (procState >= PROCESS_STATE_TRANSIENT_BACKGROUND) {
                 return IMPORTANCE_PERCEPTIBLE;
             } else if (procState >= PROCESS_STATE_IMPORTANT_FOREGROUND) {
                 return IMPORTANCE_VISIBLE;
@@ -3260,15 +3268,25 @@ public class ActivityManager {
          */
         public static @Importance int procStateToImportanceForClient(int procState,
                 Context clientContext) {
+            return procStateToImportanceForTargetSdk(procState,
+                    clientContext.getApplicationInfo().targetSdkVersion);
+        }
+
+        /**
+         * See {@link #procStateToImportanceForClient}.
+         * @hide
+         */
+        public static @Importance int procStateToImportanceForTargetSdk(int procState,
+                int targetSdkVersion) {
             final int importance = procStateToImportance(procState);
 
             // For pre O apps, convert to the old, wrong values.
-            if (clientContext.getApplicationInfo().targetSdkVersion < VERSION_CODES.O) {
+            if (targetSdkVersion < VERSION_CODES.O) {
                 switch (importance) {
                     case IMPORTANCE_PERCEPTIBLE:
-                        return IMPORTANCE_PERCEPTIBLE_DEPRECATED;
+                        return IMPORTANCE_PERCEPTIBLE_PRE_26;
                     case IMPORTANCE_CANT_SAVE_STATE:
-                        return IMPORTANCE_CANT_SAVE_STATE_DEPRECATED;
+                        return IMPORTANCE_CANT_SAVE_STATE_PRE_26;
                 }
             }
             return importance;
@@ -3285,7 +3303,7 @@ public class ActivityManager {
             } else if (importance > IMPORTANCE_CANT_SAVE_STATE) {
                 return PROCESS_STATE_HEAVY_WEIGHT;
             } else if (importance >= IMPORTANCE_PERCEPTIBLE) {
-                return PROCESS_STATE_IMPORTANT_BACKGROUND;
+                return PROCESS_STATE_TRANSIENT_BACKGROUND;
             } else if (importance >= IMPORTANCE_VISIBLE) {
                 return PROCESS_STATE_IMPORTANT_FOREGROUND;
             } else if (importance >= IMPORTANCE_TOP_SLEEPING) {

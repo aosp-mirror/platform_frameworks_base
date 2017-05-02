@@ -245,6 +245,9 @@ class ActivityStarter {
             ActivityRecord[] outActivity, ActivityStackSupervisor.ActivityContainer container,
             TaskRecord inTask) {
         int err = ActivityManager.START_SUCCESS;
+        // Pull the optional Ephemeral Installer-only bundle out of the options early.
+        final Bundle verificationBundle
+                = options != null ? options.popAppVerificationBundle() : null;
 
         ProcessRecord callerApp = null;
         if (caller != null) {
@@ -466,7 +469,7 @@ class ActivityStarter {
         // app [on install success].
         if (rInfo != null && rInfo.auxiliaryInfo != null) {
             intent = createLaunchIntent(rInfo.auxiliaryInfo, ephemeralIntent,
-                    callingPackage, resolvedType, userId);
+                    callingPackage, verificationBundle, resolvedType, userId);
             resolvedType = null;
             callingUid = realCallingUid;
             callingPid = realCallingPid;
@@ -522,14 +525,16 @@ class ActivityStarter {
      * Creates a launch intent for the given auxiliary resolution data.
      */
     private @NonNull Intent createLaunchIntent(@NonNull AuxiliaryResolveInfo auxiliaryResponse,
-            Intent originalIntent, String callingPackage, String resolvedType, int userId) {
+            Intent originalIntent, String callingPackage, Bundle verificationBundle,
+            String resolvedType, int userId) {
         if (auxiliaryResponse.needsPhaseTwo) {
             // request phase two resolution
             mService.getPackageManagerInternalLocked().requestInstantAppResolutionPhaseTwo(
-                    auxiliaryResponse, originalIntent, resolvedType, callingPackage, userId);
+                    auxiliaryResponse, originalIntent, resolvedType, callingPackage,
+                    verificationBundle, userId);
         }
         return InstantAppResolver.buildEphemeralInstallerIntent(originalIntent,
-            callingPackage, resolvedType, userId, auxiliaryResponse.packageName,
+            callingPackage, verificationBundle, resolvedType, userId, auxiliaryResponse.packageName,
             auxiliaryResponse.splitName, auxiliaryResponse.versionCode,
             auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
     }

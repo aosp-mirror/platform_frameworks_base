@@ -1916,7 +1916,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         try {
-            final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0, userId);
+            final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
+                    userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
             if (uid < 0) {
                 return JobSchedulerShellCommand.CMD_ERR_NO_PACKAGE;
             }
@@ -1938,6 +1939,25 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         } catch (RemoteException e) {
             // can't happen
+        }
+        return 0;
+    }
+
+    // Shell command infrastructure: immediately timeout currently executing jobs
+    int executeTimeoutCommand(PrintWriter pw, String pkgName, int userId,
+            boolean hasJobId, int jobId) {
+        if (DEBUG) {
+            Slog.v(TAG, "executeTimeoutCommand(): " + pkgName + "/" + userId + " " + jobId);
+        }
+
+        synchronized (mLock) {
+            boolean foundSome = false;
+            for (int i=0; i<mActiveServices.size(); i++) {
+                mActiveServices.get(i).timeoutIfExecutingLocked(pkgName, userId, hasJobId, jobId);
+            }
+            if (!foundSome) {
+                pw.println("No matching executing jobs found.");
+            }
         }
         return 0;
     }
