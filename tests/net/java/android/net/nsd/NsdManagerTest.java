@@ -49,6 +49,8 @@ import java.util.function.Consumer;
 @SmallTest
 public class NsdManagerTest {
 
+    static final int PROTOCOL = NsdManager.PROTOCOL_DNS_SD;
+
     @Mock Context mContext;
     @Mock INsdManager mService;
     MockServiceHandler mServiceHandler;
@@ -107,6 +109,65 @@ public class NsdManagerTest {
     }
 
     @Test
+    public void testRegisterService() {
+        NsdManager manager = makeManager();
+
+        NsdServiceInfo request1 = new NsdServiceInfo("a_name", "a_type");
+        NsdServiceInfo request2 = new NsdServiceInfo("another_name", "another_type");
+        request1.setPort(2201);
+        request2.setPort(2202);
+        NsdManager.RegistrationListener listener1 = mock(NsdManager.RegistrationListener.class);
+        NsdManager.RegistrationListener listener2 = mock(NsdManager.RegistrationListener.class);
+
+        // Register two services
+        manager.registerService(request1, PROTOCOL, listener1);
+        int key1 = verifyRequest(NsdManager.REGISTER_SERVICE);
+
+        manager.registerService(request2, PROTOCOL, listener2);
+        int key2 = verifyRequest(NsdManager.REGISTER_SERVICE);
+
+        // First reques fails, second request succeeds
+        sendResponse(NsdManager.REGISTER_SERVICE_SUCCEEDED, 0, key2, request2);
+        verify(listener2, timeout(mTimeoutMs).times(1)).onServiceRegistered(request2);
+
+        int err = 1;
+        sendResponse(NsdManager.REGISTER_SERVICE_FAILED, err, key1, request1);
+        verify(listener1, timeout(mTimeoutMs).times(1)).onRegistrationFailed(request1, err);
+
+        // Client retries first request, it succeeds
+        manager.registerService(request1, PROTOCOL, listener1);
+        int key3 = verifyRequest(NsdManager.REGISTER_SERVICE);
+
+        sendResponse(NsdManager.REGISTER_SERVICE_SUCCEEDED, 0, key3, request1);
+        verify(listener1, timeout(mTimeoutMs).times(1)).onServiceRegistered(request1);
+
+        // First request is unregistered, it succeeds
+        manager.unregisterService(listener1);
+        int key3again = verifyRequest(NsdManager.UNREGISTER_SERVICE);
+        assertEquals(key3, key3again);
+
+        sendResponse(NsdManager.UNREGISTER_SERVICE_SUCCEEDED, 0, key3again, null);
+        verify(listener1, timeout(mTimeoutMs).times(1)).onServiceUnregistered(request1);
+
+        // Second request is unregistered, it fails
+        manager.unregisterService(listener2);
+        int key2again = verifyRequest(NsdManager.UNREGISTER_SERVICE);
+        assertEquals(key2, key2again);
+
+        sendResponse(NsdManager.UNREGISTER_SERVICE_FAILED, err, key2again, null);
+        verify(listener2, timeout(mTimeoutMs).times(1)).onUnregistrationFailed(request2, err);
+
+        // TODO: do not unregister listener until service is unregistered
+        // Client retries unregistration of second request, it succeeds
+        //manager.unregisterService(listener2);
+        //int key2yetAgain = verifyRequest(NsdManager.UNREGISTER_SERVICE);
+        //assertEquals(key2, key2yetAgain);
+
+        //sendResponse(NsdManager.UNREGISTER_SERVICE_SUCCEEDED, 0, key2yetAgain, null);
+        //verify(listener2, timeout(mTimeoutMs).times(1)).onServiceUnregistered(request2);
+    }
+
+    @Test
     public void testInvalidCalls() {
         NsdManager manager = new NsdManager(mContext, mService);
 
@@ -118,38 +179,36 @@ public class NsdManagerTest {
         NsdServiceInfo validService = new NsdServiceInfo("a_name", "a_type");
         validService.setPort(2222);
 
-        int protocol = NsdManager.PROTOCOL_DNS_SD;
-
         // Service registration
         //  - invalid arguments
         mustFail(() -> { manager.unregisterService(null); });
         mustFail(() -> { manager.registerService(null, -1, null); });
-        mustFail(() -> { manager.registerService(null, protocol, listener1); });
-        mustFail(() -> { manager.registerService(invalidService, protocol, listener1); });
+        mustFail(() -> { manager.registerService(null, PROTOCOL, listener1); });
+        mustFail(() -> { manager.registerService(invalidService, PROTOCOL, listener1); });
         mustFail(() -> { manager.registerService(validService, -1, listener1); });
-        mustFail(() -> { manager.registerService(validService, protocol, null); });
-        manager.registerService(validService, protocol, listener1);
+        mustFail(() -> { manager.registerService(validService, PROTOCOL, null); });
+        manager.registerService(validService, PROTOCOL, listener1);
         //  - listener already registered
-        mustFail(() -> { manager.registerService(validService, protocol, listener1); });
+        mustFail(() -> { manager.registerService(validService, PROTOCOL, listener1); });
         manager.unregisterService(listener1);
         // TODO: make listener immediately reusable
         //mustFail(() -> { manager.unregisterService(listener1); });
-        //manager.registerService(validService, protocol, listener1);
+        //manager.registerService(validService, PROTOCOL, listener1);
 
         // Discover service
         //  - invalid arguments
         mustFail(() -> { manager.stopServiceDiscovery(null); });
         mustFail(() -> { manager.discoverServices(null, -1, null); });
-        mustFail(() -> { manager.discoverServices(null, protocol, listener2); });
+        mustFail(() -> { manager.discoverServices(null, PROTOCOL, listener2); });
         mustFail(() -> { manager.discoverServices("a_service", -1, listener2); });
-        mustFail(() -> { manager.discoverServices("a_service", protocol, null); });
-        manager.discoverServices("a_service", protocol, listener2);
+        mustFail(() -> { manager.discoverServices("a_service", PROTOCOL, null); });
+        manager.discoverServices("a_service", PROTOCOL, listener2);
         //  - listener already registered
-        mustFail(() -> { manager.discoverServices("another_service", protocol, listener2); });
+        mustFail(() -> { manager.discoverServices("another_service", PROTOCOL, listener2); });
         manager.stopServiceDiscovery(listener2);
         // TODO: make listener immediately reusable
         //mustFail(() -> { manager.stopServiceDiscovery(listener2); });
-        //manager.discoverServices("another_service", protocol, listener2);
+        //manager.discoverServices("another_service", PROTOCOL, listener2);
 
         // Resolver service
         //  - invalid arguments
