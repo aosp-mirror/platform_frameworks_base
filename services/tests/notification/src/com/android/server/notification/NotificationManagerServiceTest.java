@@ -104,7 +104,12 @@ public class NotificationManagerServiceTest {
         public TestableNotificationManagerService(Context context) { super(context); }
 
         @Override
-        protected boolean isCallerSystem() {
+        protected boolean isCallingUidSystem() {
+            return true;
+        }
+
+        @Override
+        protected boolean isCallerSystemOrPhone() {
             return true;
         }
 
@@ -411,6 +416,21 @@ public class NotificationManagerServiceTest {
     }
 
     @Test
+    public void testCancelAfterSecondEnqueueDoesNotSpecifyForegroundFlag() throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags =
+                Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        sbn.getNotification().flags = Notification.FLAG_ONGOING_EVENT;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+    }
+
+    @Test
     public void testFindGroupNotificationsLocked() throws Exception {
         // make sure the same notification can be found in both lists and returned
         final NotificationRecord group1 = generateNotificationRecord(
@@ -448,7 +468,6 @@ public class NotificationManagerServiceTest {
             assertTrue(record.sbn.getId() == 1 || record.sbn.getId() == 4);
         }
     }
-
 
     @Test
     public void testTvExtenderChannelOverride_onTv() throws Exception {

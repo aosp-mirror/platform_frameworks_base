@@ -234,6 +234,12 @@ public class DeviceIdleController extends SystemService
     private final ArrayMap<String, Integer> mPowerSaveWhitelistAppsExceptIdle = new ArrayMap<>();
 
     /**
+     * Package names the user has white-listed using commandline option to opt out of
+     * power save restrictions, except for device idle mode.
+     */
+    private final ArraySet<String> mPowerSaveWhitelistUserAppsExceptIdle = new ArraySet<>();
+
+    /**
      * Package names the system has white-listed to opt out of power save restrictions for
      * all modes.
      */
@@ -1506,6 +1512,45 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    public boolean addPowerSaveWhitelistExceptIdleInternal(String name) {
+        synchronized (this) {
+            try {
+                final ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(name,
+                        PackageManager.MATCH_ANY_USER);
+                if (mPowerSaveWhitelistAppsExceptIdle.put(name, UserHandle.getAppId(ai.uid))
+                        == null) {
+                    mPowerSaveWhitelistUserAppsExceptIdle.add(name);
+                    reportPowerSaveWhitelistChangedLocked();
+                    mPowerSaveWhitelistExceptIdleAppIdArray = buildAppIdArray(
+                            mPowerSaveWhitelistAppsExceptIdle, mPowerSaveWhitelistUserApps,
+                            mPowerSaveWhitelistExceptIdleAppIds);
+                }
+                return true;
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        }
+    }
+
+    public void resetPowerSaveWhitelistExceptIdleInternal() {
+        synchronized (this) {
+            if (mPowerSaveWhitelistAppsExceptIdle.removeAll(
+                    mPowerSaveWhitelistUserAppsExceptIdle)) {
+                reportPowerSaveWhitelistChangedLocked();
+                mPowerSaveWhitelistExceptIdleAppIdArray = buildAppIdArray(
+                        mPowerSaveWhitelistAppsExceptIdle, mPowerSaveWhitelistUserApps,
+                        mPowerSaveWhitelistExceptIdleAppIds);
+                mPowerSaveWhitelistUserAppsExceptIdle.clear();
+            }
+        }
+    }
+
+    public boolean getPowerSaveWhitelistExceptIdleInternal(String name) {
+        synchronized (this) {
+            return mPowerSaveWhitelistAppsExceptIdle.containsKey(name);
+        }
+    }
+
     public String[] getSystemPowerWhitelistExceptIdleInternal() {
         synchronized (this) {
             int size = mPowerSaveWhitelistAppsExceptIdle.size();
@@ -2556,6 +2601,12 @@ public class DeviceIdleController extends SystemService
         pw.println("    Print currently whitelisted apps.");
         pw.println("  whitelist [package ...]");
         pw.println("    Add (prefix with +) or remove (prefix with -) packages.");
+        pw.println("  except-idle-whitelist [package ...|reset]");
+        pw.println("    Prefix the package with '+' to add it to whitelist or "
+                + "'=' to check if it is already whitelisted");
+        pw.println("    [reset] will reset the whitelist to it's original state");
+        pw.println("    Note that unlike <whitelist> cmd, "
+                + "changes made using this won't be persisted across boots");
         pw.println("  tempwhitelist");
         pw.println("    Print packages that are temporarily whitelisted.");
         pw.println("  tempwhitelist [-u USER] [-d DURATION] [package ..]");
@@ -2872,6 +2923,43 @@ public class DeviceIdleController extends SystemService
                 }
             } else {
                 dumpTempWhitelistSchedule(pw, false);
+            }
+        } else if ("except-idle-whitelist".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                String arg = shell.getNextArg();
+                if (arg == null) {
+                    pw.println("No arguments given");
+                    return -1;
+                } else if ("reset".equals(arg)) {
+                    resetPowerSaveWhitelistExceptIdleInternal();
+                } else {
+                    do {
+                        if (arg.length() < 1 || (arg.charAt(0) != '-'
+                                && arg.charAt(0) != '+' && arg.charAt(0) != '=')) {
+                            pw.println("Package must be prefixed with +, -, or =: " + arg);
+                            return -1;
+                        }
+                        char op = arg.charAt(0);
+                        String pkg = arg.substring(1);
+                        if (op == '+') {
+                            if (addPowerSaveWhitelistExceptIdleInternal(pkg)) {
+                                pw.println("Added: " + pkg);
+                            } else {
+                                pw.println("Unknown package: " + pkg);
+                            }
+                        } else if (op == '=') {
+                            pw.println(getPowerSaveWhitelistExceptIdleInternal(pkg));
+                        } else {
+                            pw.println("Unknown argument: " + arg);
+                            return -1;
+                        }
+                    } while ((arg = shell.getNextArg()) != null);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         } else {
             return shell.handleDefaultCommands(cmd);
