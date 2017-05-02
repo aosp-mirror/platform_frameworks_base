@@ -23,10 +23,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -52,6 +54,8 @@ final class FillUi {
 
     private static final int VISIBLE_OPTIONS_MAX_COUNT = 3;
 
+    private static final TypedValue sTempTypedValue = new TypedValue();
+
     interface Callback {
         void onResponsePicked(@NonNull FillResponse response);
         void onDatasetPicked(@NonNull Dataset dataset);
@@ -63,8 +67,12 @@ final class FillUi {
         void startIntentSender(IntentSender intentSender);
     }
 
+    private final @NonNull Point mTempPoint = new Point();
+
     private final @NonNull AutofillWindowPresenter mWindowPresenter =
             new AutofillWindowPresenter();
+
+    private final @NonNull Context mContext;
 
     private final @NonNull AnchoredWindow mWindow;
 
@@ -84,6 +92,7 @@ final class FillUi {
     FillUi(@NonNull Context context, @NonNull FillResponse response,
             @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
             @NonNull Callback callback) {
+        mContext = context;
         mCallback = callback;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -115,13 +124,18 @@ final class FillUi {
                 mWindow = null;
                 return;
             }
-            final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            content.measure(widthMeasureSpec, heightMeasureSpec);
+
+            Point maxSize = mTempPoint;
+            resolveMaxWindowSize(context, maxSize);
+            final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.x,
+                    MeasureSpec.AT_MOST);
+            final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
+                    MeasureSpec.AT_MOST);
+
+            decor.measure(widthMeasureSpec, heightMeasureSpec);
             decor.setOnClickListener(v -> mCallback.onResponsePicked(response));
-            // TODO(b/37567439): temporary limiting maximum height and minimum width
-            mContentWidth = Math.max(content.getMeasuredWidth(), 1000);
-            mContentHeight = Math.min(content.getMeasuredHeight(), 500);
+            mContentWidth = content.getMeasuredWidth();
+            mContentHeight = content.getMeasuredHeight();
 
             mWindow = new AnchoredWindow(decor);
             mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
@@ -245,6 +259,9 @@ final class FillUi {
             return changed;
         }
 
+        Point maxSize = mTempPoint;
+        resolveMaxWindowSize(mContext, maxSize);
+
         mContentWidth = 0;
         mContentHeight = 0;
 
@@ -254,12 +271,14 @@ final class FillUi {
         for (int i = 0; i < itemCount; i++) {
             View view = mAdapter.getItem(i).getView();
             view.measure(widthMeasureSpec, heightMeasureSpec);
-            final int newContentWidth = Math.max(mContentWidth, view.getMeasuredWidth());
+            final int clampedMeasuredWidth = Math.min(view.getMeasuredWidth(), maxSize.x);
+            final int newContentWidth = Math.max(mContentWidth, clampedMeasuredWidth);
             if (newContentWidth != mContentWidth) {
                 mContentWidth = newContentWidth;
                 changed = true;
             }
-            final int newContentHeight = mContentHeight + view.getMeasuredHeight();
+            final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
+            final int newContentHeight = mContentHeight + clampedMeasuredHeight;
             if (newContentHeight != mContentHeight) {
                 mContentHeight = newContentHeight;
                 changed = true;
@@ -272,6 +291,17 @@ final class FillUi {
         if (mDestroyed) {
             throw new IllegalStateException("cannot interact with a destroyed instance");
         }
+    }
+
+    private static void resolveMaxWindowSize(Context context, Point outPoint) {
+        context.getDisplay().getSize(outPoint);
+        TypedValue typedValue = sTempTypedValue;
+        context.getTheme().resolveAttribute(R.attr.autofillDatasetPickerMaxWidth,
+                typedValue, true);
+        outPoint.x = (int) typedValue.getFraction(outPoint.x, outPoint.x);
+        context.getTheme().resolveAttribute(R.attr.autofillDatasetPickerMaxHeight,
+                typedValue, true);
+        outPoint.y = (int) typedValue.getFraction(outPoint.y, outPoint.y);
     }
 
     private static class ViewItem {

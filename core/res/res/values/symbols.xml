@@ -239,7 +239,8 @@
   <java-symbol type="attr" name="accessibilityFocusedDrawable"/>
   <java-symbol type="attr" name="isLightTheme"/>
   <java-symbol type="attr" name="autofilledHighlight"/>
-
+  <java-symbol type="attr" name="autofillDatasetPickerMaxWidth"/>
+  <java-symbol type="attr" name="autofillDatasetPickerMaxHeight"/>
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
   <java-symbol type="bool" name="config_avoidGfxAccel" />
@@ -2917,6 +2918,7 @@
   <java-symbol type="string" name="autofill_save_type_email_address" />
   <java-symbol type="drawable" name="autofill_dataset_picker_background" />
   <java-symbol type="style" name="AutofillDatasetPicker" />
+  <java-symbol type="dimen" name="autofill_dataset_picker_max_size"/>
 
   <!-- Accessibility fingerprint gestures -->
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />
@@ -3019,4 +3021,5 @@
   <java-symbol type="array" name="config_allowedGlobalInstantAppSettings" />
   <java-symbol type="array" name="config_allowedSystemInstantAppSettings" />
   <java-symbol type="array" name="config_allowedSecureInstantAppSettings" />
+
 </resources>
