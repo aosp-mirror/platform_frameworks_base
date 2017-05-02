@@ -2675,6 +2675,7 @@ public class Notification implements Parcelable
         private int mActionBarColor = COLOR_INVALID;
         private int mBackgroundColor = COLOR_INVALID;
         private int mForegroundColor = COLOR_INVALID;
+        private int mBackgroundColorHint = COLOR_INVALID;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -3839,6 +3840,13 @@ public class Notification implements Parcelable
                             backgroundColor);
                     mSecondaryTextColor = NotificationColorUtil.resolveSecondaryColor(mContext,
                             backgroundColor);
+                    if (backgroundColor != COLOR_DEFAULT
+                            && (mBackgroundColorHint != COLOR_INVALID || isColorized())) {
+                        mPrimaryTextColor = NotificationColorUtil.findAlphaToMeetContrast(
+                                mPrimaryTextColor, backgroundColor, 4.5);
+                        mSecondaryTextColor = NotificationColorUtil.findAlphaToMeetContrast(
+                                mSecondaryTextColor, backgroundColor, 4.5);
+                    }
                 } else {
                     double backLum = NotificationColorUtil.calculateLuminance(backgroundColor);
                     double textLum = NotificationColorUtil.calculateLuminance(mForegroundColor);
@@ -4659,10 +4667,26 @@ public class Notification implements Parcelable
             if (mCachedContrastColorIsFor == mN.color && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
-            final int contrasted = NotificationColorUtil.resolveContrastColor(mContext, mN.color);
 
+            int color;
+            int background = mBackgroundColorHint;
+            if (mBackgroundColorHint == COLOR_INVALID) {
+                background = mContext.getColor(
+                        com.android.internal.R.color.notification_material_background_color);
+            }
+            if (mN.color == COLOR_DEFAULT) {
+                ensureColors();
+                color = mSecondaryTextColor;
+            } else {
+                color = NotificationColorUtil.resolveContrastColor(mContext, mN.color,
+                        background);
+            }
+            if (Color.alpha(color) < 255) {
+                // alpha doesn't go well for color filters, so let's blend it manually
+                color = NotificationColorUtil.compositeColors(color, background);
+            }
             mCachedContrastColorIsFor = mN.color;
-            return mCachedContrastColor = contrasted;
+            return mCachedContrastColor = color;
         }
 
         int resolveAmbientColor() {
@@ -4879,7 +4903,8 @@ public class Notification implements Parcelable
             if (isColorized()) {
                 return mBackgroundColor != COLOR_INVALID ? mBackgroundColor : mN.color;
             } else {
-                return COLOR_DEFAULT;
+                return mBackgroundColorHint != COLOR_INVALID ? mBackgroundColorHint
+                        : COLOR_DEFAULT;
             }
         }
 
@@ -4909,6 +4934,17 @@ public class Notification implements Parcelable
             mForegroundColor = foregroundColor;
             mTextColorsAreForBackground = COLOR_INVALID;
             ensureColors();
+        }
+
+        /**
+         * Sets the background color for this notification to be a different one then the default.
+         * This is mainly used to calculate contrast and won't necessarily be applied to the
+         * background.
+         *
+         * @hide
+         */
+        public void setBackgroundColorHint(int backgroundColor) {
+            mBackgroundColorHint = backgroundColor;
         }
     }
 

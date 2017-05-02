@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.Abortable;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationContentView;
@@ -521,6 +522,11 @@ public class NotificationInflater {
                         mSbn.getNotification());
                 Context packageContext = mSbn.getPackageContext(mContext);
                 Notification notification = mSbn.getNotification();
+                if (mIsLowPriority) {
+                    int backgroundColor = mContext.getColor(
+                            R.color.notification_material_background_low_priority_color);
+                    recoveredBuilder.setBackgroundColorHint(backgroundColor);
+                }
                 if (notification.isMediaNotification()) {
                     MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
                             packageContext);

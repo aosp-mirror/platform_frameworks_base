@@ -201,13 +201,15 @@ public class NotificationData {
             }
         }
 
-        public int getContrastedColor(Context context, boolean ambient) {
-            int rawColor = ambient ? Notification.COLOR_DEFAULT :
+        public int getContrastedColor(Context context, boolean isLowPriority,
+                int backgroundColor) {
+            int rawColor = isLowPriority ? Notification.COLOR_DEFAULT :
                     notification.getNotification().color;
             if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
-            final int contrasted = NotificationColorUtil.resolveContrastColor(context, rawColor);
+            final int contrasted = NotificationColorUtil.resolveContrastColor(context, rawColor,
+                    backgroundColor);
             mCachedContrastColorIsFor = rawColor;
             mCachedContrastColor = contrasted;
             return mCachedContrastColor;
