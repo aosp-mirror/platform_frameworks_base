@@ -29,6 +29,8 @@ package android.app {
   }
 
   public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
+    ctor public deprecated PictureInPictureArgs();
+    ctor public deprecated PictureInPictureArgs(float, java.util.List<android.app.RemoteAction>);
     method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
     method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
     method public void copyOnlySet(android.app.PictureInPictureArgs);
@@ -41,6 +43,9 @@ package android.app {
     method public boolean hasSetAspectRatio();
     method public boolean hasSourceBoundsHint();
     method public boolean hasSourceBoundsHintInsets();
+    method public deprecated void setActions(java.util.List<android.app.RemoteAction>);
+    method public deprecated void setAspectRatio(float);
+    method public deprecated void setSourceRectHint(android.graphics.Rect);
     method public deprecated void setSourceRectHintInsets(android.graphics.Rect);
     method public void truncateActions(int);
     field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
