@@ -27,6 +27,7 @@
 #include <androidfw/Asset.h>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
+#include <android-base/macros.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
