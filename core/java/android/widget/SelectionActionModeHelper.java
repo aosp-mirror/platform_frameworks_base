@@ -98,8 +98,8 @@ final class SelectionActionModeHelper {
         }
     }
 
-    public boolean resetOriginalSelection(int textIndex) {
-        if (mSelectionInfo.resetOriginalSelection(textIndex, mEditor.getTextView().getText())) {
+    public boolean resetSelection(int textIndex) {
+        if (mSelectionInfo.resetSelection(textIndex, mEditor)) {
             invalidateActionModeAsync();
             return true;
         }
@@ -177,9 +177,9 @@ final class SelectionActionModeHelper {
 
     /**
      * Holds information about the selection and uses it to decide on whether or not to update
-     * the selection when resetOriginalSelection is called.
-     * The expected UX here is to allow the user to re-snap the selection back to the original word
-     * that was selected with one tap on that word.
+     * the selection when resetSelection is called.
+     * The expected UX here is to allow the user to select a word inside of the "smart selection" on
+     * a single tap.
      */
     private static final class SelectionInfo {
 
@@ -212,14 +212,14 @@ final class SelectionActionModeHelper {
             mResetOriginal = false;
         }
 
-        public boolean resetOriginalSelection(int textIndex, CharSequence text) {
+        public boolean resetSelection(int textIndex, Editor editor) {
+            final CharSequence text = editor.getTextView().getText();
             if (mResetOriginal
-                    && textIndex >= mOriginalStart && textIndex <= mOriginalEnd
+                    && textIndex >= mSelectionStart && textIndex <= mSelectionEnd
                     && text instanceof Spannable) {
-                Selection.setSelection((Spannable) text, mOriginalStart, mOriginalEnd);
                 // Only allow a reset once.
                 mResetOriginal = false;
-                return true;
+                return editor.selectCurrentWord();
             }
             return false;
         }
