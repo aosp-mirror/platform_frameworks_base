@@ -165,6 +165,17 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         createMenuViews();
     }
 
+    @Override
+    public void onConfigurationChanged() {
+        mParent.post(new Runnable() {
+            @Override
+            public void run() {
+                mIconsPlaced = false; // Force icons to be re-placed
+                setMenuLocation();
+            }
+        });
+    }
+
     private void createMenuViews() {
         // Filter the menu items based on the notification
         if (mParent != null && mParent.getStatusBarNotification() != null) {
@@ -459,22 +470,17 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     private void setMenuLocation() {
         boolean showOnLeft = mTranslation > 0;
-        if ((mIconsPlaced && showOnLeft == mOnLeft) || mSnapping || mParent == null) {
+        if ((mIconsPlaced && showOnLeft == mOnLeft) || mSnapping
+                || !mMenuContainer.isAttachedToWindow()) {
             // Do nothing
             return;
         }
-        final boolean isRtl = mParent.isLayoutRtl();
         final int count = mMenuContainer.getChildCount();
-        final int width = mParent.getWidth();
         for (int i = 0; i < count; i++) {
             final View v = mMenuContainer.getChildAt(i);
-            final float left = isRtl
-                    ? -(width - mHorizSpaceForIcon * (i + 1))
-                    : i * mHorizSpaceForIcon;
-            final float right = isRtl
-                    ? -i * mHorizSpaceForIcon
-                    : width - (mHorizSpaceForIcon * (i + 1));
-            v.setTranslationX(showOnLeft ? left : right);
+            final float left = i * mHorizSpaceForIcon;
+            final float right = mParent.getWidth() - (mHorizSpaceForIcon * (i + 1));
+            v.setX(showOnLeft ? left : right);
         }
         mOnLeft = showOnLeft;
         mIconsPlaced = true;
