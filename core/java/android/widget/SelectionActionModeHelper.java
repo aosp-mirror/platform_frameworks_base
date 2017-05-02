@@ -33,6 +33,7 @@ import android.widget.Editor.SelectionModifierCursorController;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -310,6 +311,13 @@ final class SelectionActionModeHelper {
         /** End index relative to mTrimmedText */
         private int mRelativeEnd;
 
+        /** Information about the last classified text to avoid re-running a query. */
+        private CharSequence mLastClassificationText;
+        private int mLastClassificationSelectionStart;
+        private int mLastClassificationSelectionEnd;
+        private LocaleList mLastClassificationLocales;
+        private SelectionResult mLastClassificationResult;
+
         TextClassificationHelper(TextClassifier textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             reset(textClassifier, text, selectionStart, selectionEnd, locales);
@@ -328,12 +336,25 @@ final class SelectionActionModeHelper {
 
         @WorkerThread
         public SelectionResult classifyText() {
-            trimText();
-            return new SelectionResult(
-                    mSelectionStart,
-                    mSelectionEnd,
-                    mTextClassifier.classifyText(
-                            mTrimmedText, mRelativeStart, mRelativeEnd, mLocales));
+            if (!Objects.equals(mText, mLastClassificationText)
+                    || mSelectionStart != mLastClassificationSelectionStart
+                    || mSelectionEnd != mLastClassificationSelectionEnd
+                    || !Objects.equals(mLocales, mLastClassificationLocales)) {
+
+                mLastClassificationText = mText;
+                mLastClassificationSelectionStart = mSelectionStart;
+                mLastClassificationSelectionEnd = mSelectionEnd;
+                mLastClassificationLocales = mLocales;
+
+                trimText();
+                mLastClassificationResult = new SelectionResult(
+                        mSelectionStart,
+                        mSelectionEnd,
+                        mTextClassifier.classifyText(
+                                mTrimmedText, mRelativeStart, mRelativeEnd, mLocales));
+
+            }
+            return mLastClassificationResult;
         }
 
         @WorkerThread
