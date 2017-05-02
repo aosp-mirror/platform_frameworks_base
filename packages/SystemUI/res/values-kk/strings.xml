@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Жеке желідегі әрекеттеріңізді, соның ішінде электрондық пошта хабарларын, қолданбаларды және вебсайттарды бақылай алатын <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына қосылғансыз."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION">%2$s</xliff:g> қолданбасына қосылған.\n\nҚосымша ақпарат алу үшін әкімшіге хабарласыңыз."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> қолданбасына қосылған.\n\nСондай-ақ сіз жеке желідегі белсенділігіңізді бақылай алатын <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> қолданбасына қосылғансыз."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> үшін құлпы ашылды"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Қолмен бекітпесін ашқанша құрылғы бекітілген күйде қалады"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Хабарландыруларды тезірек алу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Бекітпесін ашу алдында оларды көру"</string>
@@ -763,4 +762,8 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> дейін"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Қалсын"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ауыстыру"</string>
+    <!-- no translation found for running_foreground_services_title (381024150898615683) -->
+    <skip />
+    <!-- no translation found for running_foreground_services_msg (6326247670075574355) -->
+    <skip />
 </resources>
