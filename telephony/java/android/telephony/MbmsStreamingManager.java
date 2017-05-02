@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.mbms.IMbmsStreamingManagerCallback;
@@ -96,15 +95,15 @@ public class MbmsStreamingManager {
     /**
      * Create a new MbmsStreamingManager using the given subscription ID.
      *
-     * Note that this call will bind a remote service and that may take a bit.  This
-     * may throw an {@link MbmsException}, indicating errors that may happen during
-     * the initialization or binding process.
+     * Note that this call will bind a remote service. You may not call this method on your app's
+     * main thread. This may throw an {@link MbmsException}, indicating errors that may happen
+     * during the initialization or binding process.
      *
-     * @param context
-     * @param listener
-     * @param streamingAppName
-     * @param subscriptionId
-     * @return
+     * @param context The {@link Context} to use.
+     * @param listener A callback object on which you wish to receive results of asynchronous
+     *                 operations.
+     * @param streamingAppName The name of the streaming app, as specified by the carrier.
+     * @param subscriptionId The subscription ID to use.
      */
     public static MbmsStreamingManager create(Context context,
             IMbmsStreamingManagerCallback listener, String streamingAppName, int subscriptionId)
@@ -117,9 +116,7 @@ public class MbmsStreamingManager {
 
     /**
      * Create a new MbmsStreamingManager using the system default data subscription ID.
-     *
-     * Note that this call will bind a remote service and that may take a bit.  This
-     * may throw an IllegalArgumentException or RemoteException.
+     * See {@link #create(Context, IMbmsStreamingManagerCallback, String, int)}.
      */
     public static MbmsStreamingManager create(Context context,
             IMbmsStreamingManagerCallback listener, String streamingAppName)
@@ -156,19 +153,29 @@ public class MbmsStreamingManager {
      *
      * Multiple calls replace the list of serviceClasses of interest.
      *
-     * May throw an IllegalArgumentException or RemoteException.
+     * This may throw an {@link MbmsException} containing one of the following errors:
+     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
+     * {@link MbmsException#ERROR_NOT_YET_INITIALIZED}
+     * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
      *
-     * Synchronous responses include
-     * <li>SUCCESS</li>
-     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
-     *
-     * Asynchronous errors through the listener include any of the errors except
-     * <li>ERROR_MSDC_UNABLE_TO_)START_SERVICE</li>
-     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
-     * <li>ERROR_MSDC_END_OF_SESSION</li>
+     * Asynchronous error codes via the {@link IMbmsStreamingManagerCallback#error(int, String)}
+     * callback can include any of the errors except:
+     * {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}
+     * {@link MbmsException#ERROR_INVALID_SERVICE_ID}
+     * {@link MbmsException#ERROR_END_OF_SESSION}
      */
-    public int getStreamingServices(List<String> classList) {
-        return 0;
+    public void getStreamingServices(List<String> classList) throws MbmsException {
+        if (mService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+        try {
+            int returnCode = mService.getStreamingServices(mAppName, mSubscriptionId, classList);
+            if (returnCode != MbmsException.SUCCESS) {
+                throw new MbmsException(returnCode);
+            }
+        } catch (RemoteException e) {
+            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
+        }
     }
 
     /**
@@ -262,7 +269,7 @@ public class MbmsStreamingManager {
             } catch (RemoteException e) {
                 mService = null;
                 Log.e(LOG_TAG, "Service died before initialization");
-                throw new MbmsException(MbmsException.ERROR_INITIALIZATION_REMOTE_EXCEPTION);
+                throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
             }
         }
     }
