@@ -183,7 +183,9 @@ final class TextClassifierImpl implements TextClassifier {
             }
             if (mSmartSelection == null || !Objects.equals(mLocale, locale)) {
                 destroySmartSelectionIfExistsLocked();
-                mSmartSelection = new SmartSelection(getFdLocked(locale));
+                final ParcelFileDescriptor fd = getFdLocked(locale);
+                mSmartSelection = new SmartSelection(fd.getFd());
+                closeAndLogError(fd);
                 mLocale = locale;
             }
             return mSmartSelection;
@@ -191,7 +193,7 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
-    private int getFdLocked(Locale locale) throws FileNotFoundException {
+    private ParcelFileDescriptor getFdLocked(Locale locale) throws FileNotFoundException {
         ParcelFileDescriptor updateFd;
         try {
             updateFd = ParcelFileDescriptor.open(
@@ -214,7 +216,7 @@ final class TextClassifierImpl implements TextClassifier {
 
         if (updateFd == null) {
             if (factoryFd != null) {
-                return factoryFd.getFd();
+                return factoryFd;
             } else {
                 throw new FileNotFoundException(
                         String.format("No model file found for %s", locale));
@@ -227,7 +229,7 @@ final class TextClassifierImpl implements TextClassifier {
                 SmartSelection.getLanguage(updateFdInt).trim().toLowerCase());
         if (factoryFd == null) {
             if (localeMatches) {
-                return updateFdInt;
+                return updateFd;
             } else {
                 closeAndLogError(updateFd);
                 throw new FileNotFoundException(
@@ -237,18 +239,17 @@ final class TextClassifierImpl implements TextClassifier {
 
         if (!localeMatches) {
             closeAndLogError(updateFd);
-            return factoryFd.getFd();
+            return factoryFd;
         }
 
         final int updateVersion = SmartSelection.getVersion(updateFdInt);
-        final int factoryFdInt = factoryFd.getFd();
-        final int factoryVersion = SmartSelection.getVersion(factoryFdInt);
+        final int factoryVersion = SmartSelection.getVersion(factoryFd.getFd());
         if (updateVersion > factoryVersion) {
             closeAndLogError(factoryFd);
-            return updateFdInt;
+            return updateFd;
         } else {
             closeAndLogError(updateFd);
-            return factoryFdInt;
+            return factoryFd;
         }
     }
 
