@@ -23,10 +23,12 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1057,6 +1059,19 @@ public final class AccessibilityManager {
             mHighTextContrastStateChangeListeners.valueAt(i)
                     .post(() -> listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
+    }
+
+    /**
+     * Determines if the accessibility button within the system navigation area is supported.
+     *
+     * @return {@code true} if the accessibility button is supported on this device,
+     * {@code false} otherwise
+     * @hide
+     */
+    @SystemApi
+    public static boolean isAccessibilityButtonSupported() {
+        final Resources res = Resources.getSystem();
+        return res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
     }
 
     private final class MyCallback implements Handler.Callback {
