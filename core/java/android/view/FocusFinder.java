@@ -193,10 +193,14 @@ public class FocusFinder {
     private View findNextUserSpecifiedFocus(ViewGroup root, View focused, int direction) {
         // check for user specified next focus
         View userSetNextFocus = focused.findUserSetNextFocus(root, direction);
-        if (userSetNextFocus != null && userSetNextFocus.isFocusable()
-                && (!userSetNextFocus.isInTouchMode()
-                        || userSetNextFocus.isFocusableInTouchMode())) {
-            return userSetNextFocus;
+        while (userSetNextFocus != null) {
+            if (userSetNextFocus.isFocusable()
+                    && userSetNextFocus.getVisibility() == View.VISIBLE
+                    && (!userSetNextFocus.isInTouchMode()
+                            || userSetNextFocus.isFocusableInTouchMode())) {
+                return userSetNextFocus;
+            }
+            userSetNextFocus = userSetNextFocus.findUserSetNextFocus(root, direction);
         }
         return null;
     }
