@@ -603,15 +603,12 @@ public final class AutofillManagerService extends SystemService {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             boolean oldDebug = sDebug;
-            boolean oldVerbose = sVerbose;
             try {
                 synchronized (mLock) {
                     oldDebug = sDebug;
-                    oldVerbose = sVerbose;
                     setDebugLocked(true);
-                    setVerboseLocked(true);
                     pw.print("Debug mode: "); pw.println(oldDebug);
-                    pw.print("Verbose mode: "); pw.println(oldVerbose);
+                    pw.print("Verbose mode: "); pw.println(sVerbose);
                     pw.print("Disabled users: "); pw.println(mDisabledUsers);
                     final int size = mServicesCache.size();
                     pw.print("Cached services: ");
@@ -631,7 +628,6 @@ public final class AutofillManagerService extends SystemService {
                 mRequestsHistory.reverseDump(fd, pw, args);
             } finally {
                 setDebugLocked(oldDebug);
-                setVerboseLocked(oldVerbose);
             }
         }
 
