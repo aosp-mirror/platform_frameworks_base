@@ -1820,6 +1820,7 @@ android.text.FontConfig$Font$1
 android.text.GetChars
 android.text.GraphicsOperations
 android.text.Html
+android.text.Html$HtmlParser
 android.text.Hyphenator
 android.text.InputFilter
 android.text.InputType
