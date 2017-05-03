@@ -839,6 +839,10 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int NETWORK_SELECTION_ENABLE = 0;
         /**
+         * The starting index for network selection disabled reasons
+         */
+        public static final int NETWORK_SELECTION_DISABLED_STARTING_INDEX = 1;
+        /**
          * @deprecated it is not used any more.
          * This network is disabled because higher layer (>2) network is bad
          */
