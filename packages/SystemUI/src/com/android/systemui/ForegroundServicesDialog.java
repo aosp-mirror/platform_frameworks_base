@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -159,11 +160,13 @@ public final class ForegroundServicesDialog extends AlertActivity implements
     static private class PackageItemAdapter extends ArrayAdapter<ApplicationInfo> {
         final PackageManager mPm;
         final LayoutInflater mInflater;
+        final IconDrawableFactory mIconDrawableFactory;
 
         public PackageItemAdapter(Context context) {
             super(context, R.layout.foreground_service_item);
             mPm = context.getPackageManager();
             mInflater = LayoutInflater.from(context);
+            mIconDrawableFactory = IconDrawableFactory.newInstance(context, true);
         }
 
         public void setPackages(String[] packages) {
@@ -193,7 +196,7 @@ public final class ForegroundServicesDialog extends AlertActivity implements
             }
 
             ImageView icon = view.findViewById(R.id.app_icon);
-            icon.setImageDrawable(getItem(position).loadIcon(mPm));
+            icon.setImageDrawable(mIconDrawableFactory.getBadgedIcon(getItem(position)));
 
             TextView label = view.findViewById(R.id.app_name);
             label.setText(getItem(position).loadLabel(mPm));
