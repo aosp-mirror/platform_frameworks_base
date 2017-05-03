@@ -5870,10 +5870,9 @@ public class PackageManagerService extends IPackageManager.Stub
         return mEphemeralAppsDisabled;
     }
 
-    private boolean isEphemeralAllowed(
+    private boolean isInstantAppAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck) {
-        final int callingUser = UserHandle.getCallingUserId();
         if (mInstantAppResolverConnection == null) {
             return false;
         }
@@ -5973,7 +5972,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int i = 0; i < N; i++) {
                     ri = query.get(i);
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
-                        return ri;
+                        final String packageName = ri.activityInfo.packageName;
+                        final PackageSetting ps = mSettings.mPackages.get(packageName);
+                        final long packedStatus = getDomainVerificationStatusLPr(ps, userId);
+                        final int status = (int)(packedStatus >> 32);
+                        if (status != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
+                            return ri;
+                        }
                     }
                 }
                 ri = new ResolveInfo(mResolveInfo);
@@ -6417,7 +6422,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 result = filterIfNotSystemUser(mActivities.queryIntent(
                         intent, resolvedType, flags, userId), userId);
                 addEphemeral = !ephemeralDisabled
-                        && isEphemeralAllowed(intent, result, userId, false /*skipPackageCheck*/);
+                        && isInstantAppAllowed(intent, result, userId, false /*skipPackageCheck*/);
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
                 xpResolveInfo = queryCrossProfileIntents(
@@ -6474,50 +6479,99 @@ public class PackageManagerService extends IPackageManager.Stub
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
                     addEphemeral = !ephemeralDisabled
-                            && isEphemeralAllowed(
+                            && isInstantAppAllowed(
                                     intent, null /*result*/, userId, true /*skipPackageCheck*/);
                     result = new ArrayList<ResolveInfo>();
                 }
             }
         }
         if (addEphemeral) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
-            final InstantAppRequest requestObject = new InstantAppRequest(
-                    null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                    null /*callingPackage*/, userId, null /*verificationBundle*/);
-            final AuxiliaryResolveInfo auxiliaryResponse =
-                    InstantAppResolver.doInstantAppResolutionPhaseOne(
-                            mContext, mInstantAppResolverConnection, requestObject);
-            if (auxiliaryResponse != null) {
-                if (DEBUG_EPHEMERAL) {
-                    Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
-                }
-                final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-                final PackageSetting ps =
-                        mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);
-                if (ps != null) {
-                    ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
-                            mInstantAppInstallerActivity, 0, ps.readUserState(userId), userId);
-                    ephemeralInstaller.activityInfo.launchToken = auxiliaryResponse.token;
-                    ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
-                    // make sure this resolver is the default
-                    ephemeralInstaller.isDefault = true;
-                    ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
-                    // add a non-generic filter
-                    ephemeralInstaller.filter = new IntentFilter(intent.getAction());
-                    ephemeralInstaller.filter.addDataPath(
-                            intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
-                    ephemeralInstaller.isInstantAppAvailable = true;
-                    result.add(ephemeralInstaller);
-                }
-            }
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            result = maybeAddInstantAppInstaller(result, intent, resolvedType, flags, userId);
         }
         if (sortResult) {
             Collections.sort(result, mResolvePrioritySorter);
         }
         return applyPostResolutionFilter(result, instantAppPkgName);
+    }
+
+    private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
+            String resolvedType, int flags, int userId) {
+        // first, check to see if we've got an instant app already installed
+        final boolean alreadyResolvedLocally = (flags & PackageManager.MATCH_INSTANT) != 0;
+        boolean localInstantAppAvailable = false;
+        boolean blockResolution = false;
+        if (!alreadyResolvedLocally) {
+            final List<ResolveInfo> instantApps = mActivities.queryIntent(intent, resolvedType,
+                    flags
+                        | PackageManager.MATCH_INSTANT
+                        | PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY,
+                    userId);
+            for (int i = instantApps.size() - 1; i >= 0; --i) {
+                final ResolveInfo info = instantApps.get(i);
+                final String packageName = info.activityInfo.packageName;
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps.getInstantApp(userId)) {
+                    final long packedStatus = getDomainVerificationStatusLPr(ps, userId);
+                    final int status = (int)(packedStatus >> 32);
+                    final int linkGeneration = (int)(packedStatus & 0xFFFFFFFF);
+                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+                        // there's a local instant application installed, but, the user has
+                        // chosen to never use it; skip resolution and don't acknowledge
+                        // an instant application is even available
+                        if (DEBUG_EPHEMERAL) {
+                            Slog.v(TAG, "Instant app marked to never run; pkg: " + packageName);
+                        }
+                        blockResolution = true;
+                        break;
+                    } else {
+                        // we have a locally installed instant application; skip resolution
+                        // but acknowledge there's an instant application available
+                        if (DEBUG_EPHEMERAL) {
+                            Slog.v(TAG, "Found installed instant app; pkg: " + packageName);
+                        }
+                        localInstantAppAvailable = true;
+                        break;
+                    }
+                }
+            }
+        }
+        // no app installed, let's see if one's available
+        AuxiliaryResolveInfo auxiliaryResponse = null;
+        if (!localInstantAppAvailable && !blockResolution) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
+            final InstantAppRequest requestObject = new InstantAppRequest(
+                    null /*responseObj*/, intent /*origIntent*/, resolvedType,
+                    null /*callingPackage*/, userId, null /*verificationBundle*/);
+            auxiliaryResponse =
+                    InstantAppResolver.doInstantAppResolutionPhaseOne(
+                            mContext, mInstantAppResolverConnection, requestObject);
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+        if (localInstantAppAvailable || auxiliaryResponse != null) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
+            }
+            final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
+            final PackageSetting ps =
+                    mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);
+            if (ps != null) {
+                ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
+                        mInstantAppInstallerActivity, 0, ps.readUserState(userId), userId);
+                ephemeralInstaller.activityInfo.launchToken = auxiliaryResponse.token;
+                ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
+                // make sure this resolver is the default
+                ephemeralInstaller.isDefault = true;
+                ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                        | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+                // add a non-generic filter
+                ephemeralInstaller.filter = new IntentFilter(intent.getAction());
+                ephemeralInstaller.filter.addDataPath(
+                        intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
+                ephemeralInstaller.instantAppAvailable = true;
+                result.add(ephemeralInstaller);
+            }
+        }
+        return result;
     }
 
     private static class CrossProfileDomainInfo {
