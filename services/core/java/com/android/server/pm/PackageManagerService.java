@@ -445,7 +445,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * minute but we sometimes do very lengthy I/O operations on this thread,
      * such as installing multi-gigabyte applications, so ours needs to be longer.
      */
-    private static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
+    static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
 
     /**
      * Wall-clock timeout (in milliseconds) after which we *require* that an fstrim
