@@ -37,6 +37,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.ActionMode;
+import android.view.InputDevice;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -84,6 +85,8 @@ public class StatusBarWindowView extends FrameLayout {
     private ActionMode mFloatingActionMode;
     private FloatingToolbar mFloatingToolbar;
     private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
+    private boolean mTouchCancelled;
+    private boolean mTouchActive;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -239,9 +242,19 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN
-                && mNotificationPanel.isFullyCollapsed()) {
+        boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
+        if (isDown && mNotificationPanel.isFullyCollapsed()) {
             mNotificationPanel.startExpandLatencyTracking();
+        }
+        if (isDown) {
+            mTouchActive = true;
+            mTouchCancelled = false;
+        } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
+                || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+            mTouchActive = false;
+        }
+        if (mTouchCancelled) {
+            return false;
         }
         mFalsingManager.onTouchEvent(ev, getWidth(), getHeight());
         if (mBrightnessMirror != null && mBrightnessMirror.getVisibility() == VISIBLE) {
@@ -252,7 +265,7 @@ public class StatusBarWindowView extends FrameLayout {
                 return false;
             }
         }
-        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        if (isDown) {
             mStackScrollLayout.closeControlsIfOutsideTouch(ev);
         }
         if (mService.isDozing()) {
@@ -346,6 +359,18 @@ public class StatusBarWindowView extends FrameLayout {
     public void cancelExpandHelper() {
         if (mStackScrollLayout != null) {
             mStackScrollLayout.cancelExpandHelper();
+        }
+    }
+
+    public void cancelCurrentTouch() {
+        if (mTouchActive) {
+            final long now = SystemClock.uptimeMillis();
+            MotionEvent event = MotionEvent.obtain(now, now,
+                    MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+            dispatchTouchEvent(event);
+            event.recycle();
+            mTouchCancelled = true;
         }
     }
 
