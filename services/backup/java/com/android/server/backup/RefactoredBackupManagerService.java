@@ -212,7 +212,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // Timeout intervals for agent backup & restore operations
     public static final long TIMEOUT_BACKUP_INTERVAL = 30 * 1000;
     public static final long TIMEOUT_FULL_BACKUP_INTERVAL = 5 * 60 * 1000;
-    private static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
+    public static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
     public static final long TIMEOUT_RESTORE_INTERVAL = 60 * 1000;
     public static final long TIMEOUT_RESTORE_FINISHED_INTERVAL = 30 * 1000;
 

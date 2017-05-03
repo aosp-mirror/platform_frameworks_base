@@ -3866,9 +3866,14 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                         writeApkToBackup(mPackage, output);
                     }
 
+                    final boolean isSharedStorage =
+                            mPackage.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
+                    final long timeout = isSharedStorage ?
+                            TIMEOUT_SHARED_BACKUP_INTERVAL : TIMEOUT_FULL_BACKUP_INTERVAL;
+
                     if (DEBUG) Slog.d(TAG, "Calling doFullBackup() on " + mPackage.packageName);
-                    prepareOperationTimeout(mToken, TIMEOUT_FULL_BACKUP_INTERVAL,
-                            mTimeoutMonitor /* in parent class */, OP_TYPE_BACKUP_WAIT);
+                    prepareOperationTimeout(mToken, timeout, mTimeoutMonitor /* in parent class */,
+                            OP_TYPE_BACKUP_WAIT);
                     mAgent.doFullBackup(mPipe, mQuota, mToken, mBackupManagerBinder);
                 } catch (IOException e) {
                     Slog.e(TAG, "Error running full backup for " + mPackage.packageName);
@@ -7554,9 +7559,12 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         if (okay) {
                             boolean agentSuccess = true;
                             long toCopy = info.size;
+                            final boolean isSharedStorage = pkg.equals(SHARED_BACKUP_AGENT_PACKAGE);
+                            final long timeout = isSharedStorage ?
+                                    TIMEOUT_SHARED_BACKUP_INTERVAL : TIMEOUT_RESTORE_INTERVAL;
                             final int token = generateRandomIntegerToken();
                             try {
-                                prepareOperationTimeout(token, TIMEOUT_RESTORE_INTERVAL, null,
+                                prepareOperationTimeout(token, timeout, null,
                                         OP_TYPE_RESTORE_WAIT);
                                 if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
                                     if (DEBUG) Slog.d(TAG, "Restoring OBB file for " + pkg

@@ -120,13 +120,20 @@ public class FullBackupEngine {
                     writeApkToBackup(mPackage, output);
                 }
 
+                final boolean isSharedStorage =
+                        mPackage.packageName.equals(
+                                RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE);
+                final long timeout = isSharedStorage ?
+                        RefactoredBackupManagerService.TIMEOUT_SHARED_BACKUP_INTERVAL :
+                        RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+
                 if (RefactoredBackupManagerService.DEBUG) {
                     Slog.d(RefactoredBackupManagerService.TAG,
                             "Calling doFullBackup() on " + mPackage.packageName);
                 }
                 backupManagerService
                         .prepareOperationTimeout(mToken,
-                                RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
+                                timeout,
                                 mTimeoutMonitor /* in parent class */,
                                 RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
                 mAgent.doFullBackup(mPipe, mQuota, mToken,
