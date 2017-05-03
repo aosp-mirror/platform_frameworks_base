@@ -16,6 +16,7 @@ package com.android.systemui.plugins.qs;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
 
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -65,6 +66,10 @@ public interface QSTile {
     CharSequence getTileLabel();
 
     State getState();
+
+    default LogMaker populate(LogMaker logMaker) {
+        return logMaker;
+    }
 
     @ProvidesInterface(version = Callback.VERSION)
     public interface Callback {
