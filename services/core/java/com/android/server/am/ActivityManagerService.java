@@ -23810,6 +23810,34 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    public void waitForBroadcastIdle(PrintWriter pw) {
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastIdle()");
+        while (true) {
+            boolean idle = true;
+            synchronized (this) {
+                for (BroadcastQueue queue : mBroadcastQueues) {
+                    if (!queue.isIdle()) {
+                        final String msg = "Waiting for queue " + queue + " to become idle...";
+                        pw.println(msg);
+                        pw.flush();
+                        Slog.v(TAG, msg);
+                        idle = false;
+                    }
+                }
+            }
+
+            if (idle) {
+                final String msg = "All broadcast queues are idle!";
+                pw.println(msg);
+                pw.flush();
+                Slog.v(TAG, msg);
+                return;
+            } else {
+                SystemClock.sleep(1000);
+            }
+        }
+    }
+
     /**
      * Return the user id of the last resumed activity.
      */
