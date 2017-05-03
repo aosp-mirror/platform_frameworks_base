@@ -118,7 +118,7 @@ public class TextClassificationManagerTest {
         if (isTextClassifierDisabled()) return;
 
         String text = "Visit http://www.android.com for more information";
-        String classifiedText = "http://www.android.com";
+        String classifiedText = "www.android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
         assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
@@ -193,7 +193,19 @@ public class TextClassificationManagerTest {
             public boolean matches(Object o) {
                 if (o instanceof TextClassification) {
                     TextClassification result = (TextClassification) o;
-                    return text.equals(result.getText())
+                    final boolean typeRequirementSatisfied;
+                    switch (type) {
+                        case TextClassifier.TYPE_URL:
+                            String scheme = result.getIntent().getData().getScheme();
+                            typeRequirementSatisfied = "http".equalsIgnoreCase(scheme)
+                                    || "https".equalsIgnoreCase(scheme);
+                            break;
+                        default:
+                            typeRequirementSatisfied = true;
+                    }
+
+                    return typeRequirementSatisfied
+                            && text.equals(result.getText())
                             && result.getEntityCount() > 0
                             && type.equals(result.getEntity(0));
                     // TODO: Include other properties.
