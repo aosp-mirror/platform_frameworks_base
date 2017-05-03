@@ -534,7 +534,8 @@ class ActivityStarter {
                     verificationBundle, userId);
         }
         return InstantAppResolver.buildEphemeralInstallerIntent(originalIntent,
-            callingPackage, verificationBundle, resolvedType, userId, auxiliaryResponse.packageName,
+            auxiliaryResponse.failureIntent, callingPackage, verificationBundle,
+            resolvedType, userId, auxiliaryResponse.packageName,
             auxiliaryResponse.splitName, auxiliaryResponse.versionCode,
             auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
     }
