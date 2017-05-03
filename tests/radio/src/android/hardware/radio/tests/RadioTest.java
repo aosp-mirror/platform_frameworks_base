@@ -22,6 +22,7 @@ import android.hardware.radio.RadioTuner;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.*;
@@ -37,6 +39,7 @@ import static org.junit.Assume.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -48,6 +51,8 @@ public class RadioTest {
 
     public final Context mContext = InstrumentationRegistry.getContext();
 
+    private final int kConfigCallbacktimeoutNs = 10000;
+
     private RadioManager mRadioManager;
     private RadioTuner mRadioTuner;
     private final List<RadioManager.ModuleProperties> mModules = new ArrayList<>();
@@ -55,6 +60,9 @@ public class RadioTest {
 
     RadioManager.AmBandDescriptor mAmBandDescriptor;
     RadioManager.FmBandDescriptor mFmBandDescriptor;
+
+    RadioManager.BandConfig mAmBandConfig;
+    RadioManager.BandConfig mFmBandConfig;
 
     @Before
     public void setup() {
@@ -98,11 +106,14 @@ public class RadioTest {
         }
         assertNotNull(mAmBandDescriptor);
         assertNotNull(mFmBandDescriptor);
-        RadioManager.BandConfig fmBandConfig =
-            new RadioManager.FmBandConfig.Builder(mFmBandDescriptor).build();
+        mAmBandConfig = new RadioManager.AmBandConfig.Builder(mAmBandDescriptor).build();
+        mFmBandConfig = new RadioManager.FmBandConfig.Builder(mFmBandDescriptor).build();
 
-        mRadioTuner = mRadioManager.openTuner(module.getId(), fmBandConfig, true, mCallback, null);
+        mRadioTuner = mRadioManager.openTuner(module.getId(), mFmBandConfig, true, mCallback, null);
         assertNotNull(mRadioTuner);
+        verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
+        verify(mCallback, never()).onError(anyInt());
+        Mockito.reset(mCallback);
     }
 
     @Test
@@ -112,26 +123,59 @@ public class RadioTest {
     }
 
     @Test
-    public void testReopenTuner() {
+    public void testReopenTuner() throws Throwable {
         openTuner();
         mRadioTuner.close();
         mRadioTuner = null;
+        Thread.sleep(100);  // TODO(b/36122635): force reopen
         openTuner();
         verify(mCallback, never()).onError(anyInt());
     }
 
     @Test
-    @org.junit.Ignore("setConfiguration is not implemented yet")
     public void testSetAndGetConfiguration() {
         openTuner();
 
-        RadioManager.BandConfig amBandConfig =
-            new RadioManager.AmBandConfig.Builder(mAmBandDescriptor).build();
-        mRadioTuner.setConfiguration(amBandConfig);
+        // set
+        int ret = mRadioTuner.setConfiguration(mAmBandConfig);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
 
-        verify(mCallback, times(1)).onConfigurationChanged(any());
+        // get
+        RadioManager.BandConfig[] config = new RadioManager.BandConfig[1];
+        ret = mRadioTuner.getConfiguration(config);
+        assertEquals(RadioManager.STATUS_OK, ret);
+
         verify(mCallback, never()).onError(anyInt());
+        assertEquals(mAmBandConfig, config[0]);
+    }
 
-        // TODO(b/36863239): implement "get" too
+    @Test
+    public void testSetBadConfiguration() throws Throwable {
+        openTuner();
+
+        // set bad config
+        Constructor<RadioManager.AmBandConfig> configConstr =
+                RadioManager.AmBandConfig.class.getDeclaredConstructor(
+                        int.class, int.class, int.class, int.class, int.class, boolean.class);
+        configConstr.setAccessible(true);
+        RadioManager.AmBandConfig badConfig = configConstr.newInstance(
+                0 /*region*/, RadioManager.BAND_AM /*type*/,
+                10000 /*lowerLimit*/, 1 /*upperLimit*/, 100 /*spacing*/, false /*stereo*/);
+        int ret = mRadioTuner.setConfiguration(badConfig);
+        assertEquals(RadioManager.STATUS_BAD_VALUE, ret);
+        verify(mCallback, never()).onConfigurationChanged(any());
+
+        // set null config
+        ret = mRadioTuner.setConfiguration(null);
+        assertEquals(RadioManager.STATUS_BAD_VALUE, ret);
+        verify(mCallback, never()).onConfigurationChanged(any());
+
+        // setting good config should recover
+        ret = mRadioTuner.setConfiguration(mAmBandConfig);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
+
+        verify(mCallback, never()).onError(anyInt());
     }
 }

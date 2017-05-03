@@ -58,14 +58,28 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public int setConfiguration(RadioManager.BandConfig config) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            mTuner.setConfiguration(config);
+            return RadioManager.STATUS_OK;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Can't set configuration", e);
+            return RadioManager.STATUS_BAD_VALUE;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Override
     public int getConfiguration(RadioManager.BandConfig[] config) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        if (config == null || config.length != 1) {
+            throw new IllegalArgumentException("The argument must be an array of length 1");
+        }
+        try {
+            config[0] = mTuner.getConfiguration();
+            return RadioManager.STATUS_OK;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Override
