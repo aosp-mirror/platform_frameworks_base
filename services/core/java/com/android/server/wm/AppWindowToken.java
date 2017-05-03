@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -48,6 +49,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
 import android.annotation.NonNull;
+import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -1521,12 +1523,24 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return candidate;
     }
 
-    void setDisablePreviewSnapshots(boolean disable) {
+    /**
+     * See {@link Activity#setDisablePreviewScreenshots}.
+     */
+    void setDisablePreviewScreenshots(boolean disable) {
         mDisbalePreviewScreenshots = disable;
     }
 
-    boolean shouldDisablePreviewScreenshots() {
-        return mDisbalePreviewScreenshots;
+    /**
+     * Retrieves whether we'd like to generate a snapshot that's based solely on the theme. This is
+     * the case when preview screenshots are disabled {@link #setDisablePreviewScreenshots} or when
+     * we can't take a snapshot for other reasons, for example, if we have a secure window.
+     *
+     * @return True if we need to generate an app theme snapshot, false if we'd like to take a real
+     *         screenshot.
+     */
+    boolean shouldUseAppThemeSnapshot() {
+        return mDisbalePreviewScreenshots || forAllWindows(w -> (w.mAttrs.flags & FLAG_SECURE) != 0,
+                true /* topToBottom */);
     }
 
     @Override

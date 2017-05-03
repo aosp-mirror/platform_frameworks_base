@@ -36,7 +36,6 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IApplicationToken;
@@ -319,7 +318,7 @@ public class AppWindowContainerController
                         + " token: " + mToken);
                 return;
             }
-            mContainer.setDisablePreviewSnapshots(disable);
+            mContainer.setDisablePreviewScreenshots(disable);
         }
     }
 

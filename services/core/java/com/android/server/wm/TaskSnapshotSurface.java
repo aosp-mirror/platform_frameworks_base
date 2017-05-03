@@ -42,8 +42,11 @@ import static com.android.internal.policy.DecorView.getNavigationBarRect;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
+import android.app.ActivityThread;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
@@ -118,13 +121,8 @@ class TaskSnapshotSurface implements StartingSurface {
     private final Handler mHandler;
     private boolean mSizeMismatch;
     private final Paint mBackgroundPaint = new Paint();
-    private final Paint mStatusBarPaint = new Paint();
-    private final Paint mNavigationBarPaint = new Paint();
     private final int mStatusBarColor;
-    private final int mNavigationBarColor;
-    private final int mSysUiVis;
-    private final int mWindowFlags;
-    private final int mWindowPrivateFlags;
+    @VisibleForTesting final SystemBarBackgroundPainter mSystemBarBackgroundPainter;
 
     static TaskSnapshotSurface create(WindowManagerService service, AppWindowToken token,
             TaskSnapshot snapshot) {
@@ -224,15 +222,9 @@ class TaskSnapshotSurface implements StartingSurface {
         mTitle = title;
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mTaskBounds = taskBounds;
-        mSysUiVis = sysUiVis;
-        mWindowFlags = windowFlags;
-        mWindowPrivateFlags = windowPrivateFlags;
-        mStatusBarColor = DecorView.calculateStatusBarColor(windowFlags,
-                service.mContext.getColor(R.color.system_bar_background_semi_transparent),
-                statusBarColor);
-        mNavigationBarColor = navigationBarColor;
-        mStatusBarPaint.setColor(mStatusBarColor);
-        mNavigationBarPaint.setColor(navigationBarColor);
+        mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
+                windowPrivateFlags, sysUiVis, statusBarColor, navigationBarColor);
+        mStatusBarColor = statusBarColor;
     }
 
     @Override
@@ -258,6 +250,7 @@ class TaskSnapshotSurface implements StartingSurface {
         mStableInsets.set(stableInsets);
         mSizeMismatch = (mFrame.width() != mSnapshot.getSnapshot().getWidth()
                 || mFrame.height() != mSnapshot.getSnapshot().getHeight());
+        mSystemBarBackgroundPainter.setInsets(contentInsets, stableInsets);
     }
 
     private void drawSnapshot() {
@@ -346,7 +339,7 @@ class TaskSnapshotSurface implements StartingSurface {
 
     @VisibleForTesting
     void drawBackgroundAndBars(Canvas c, Rect frame) {
-        final int statusBarHeight = getStatusBarColorViewHeight();
+        final int statusBarHeight = mSystemBarBackgroundPainter.getStatusBarColorViewHeight();
         final boolean fillHorizontally = c.getWidth() > frame.right;
         final boolean fillVertically = c.getHeight() > frame.bottom;
         if (fillHorizontally) {
@@ -359,44 +352,7 @@ class TaskSnapshotSurface implements StartingSurface {
         if (fillVertically) {
             c.drawRect(0, frame.bottom, c.getWidth(), c.getHeight(), mBackgroundPaint);
         }
-        drawStatusBarBackground(c, frame, statusBarHeight);
-        drawNavigationBarBackground(c);
-    }
-
-    private int getStatusBarColorViewHeight() {
-        final boolean forceStatusBarBackground =
-                (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
-        if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                mSysUiVis, mStatusBarColor, mWindowFlags, forceStatusBarBackground)) {
-            return getColorViewTopInset(mStableInsets.top, mContentInsets.top);
-        } else {
-            return 0;
-        }
-    }
-
-    private boolean isNavigationBarColorViewVisible() {
-        return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                mSysUiVis, mNavigationBarColor, mWindowFlags, false /* force */);
-    }
-
-    @VisibleForTesting
-    void drawStatusBarBackground(Canvas c, Rect frame, int statusBarHeight) {
-        if (statusBarHeight > 0 && c.getWidth() > frame.right) {
-            final int rightInset = DecorView.getColorViewRightInset(mStableInsets.right,
-                    mContentInsets.right);
-            c.drawRect(frame.right, 0, c.getWidth() - rightInset, statusBarHeight, mStatusBarPaint);
-        }
-    }
-
-    @VisibleForTesting
-    void drawNavigationBarBackground(Canvas c) {
-        final Rect navigationBarRect = new Rect();
-        getNavigationBarRect(c.getWidth(), c.getHeight(), mStableInsets, mContentInsets,
-                navigationBarRect);
-        final boolean visible = isNavigationBarColorViewVisible();
-        if (visible && !navigationBarRect.isEmpty()) {
-            c.drawRect(navigationBarRect, mNavigationBarPaint);
-        }
+        mSystemBarBackgroundPainter.drawDecors(c, frame);
     }
 
     private void reportDrawn() {
@@ -447,6 +403,86 @@ class TaskSnapshotSurface implements StartingSurface {
                 boolean alwaysConsumeNavBar, int displayId) {
             if (reportDraw) {
                 sHandler.obtainMessage(MSG_REPORT_DRAW, mOuter).sendToTarget();
+            }
+        }
+    }
+
+    /**
+     * Helper class to draw the background of the system bars in regions the task snapshot isn't
+     * filling the window.
+     */
+    static class SystemBarBackgroundPainter {
+
+        private final Rect mContentInsets = new Rect();
+        private final Rect mStableInsets = new Rect();
+        private final Paint mStatusBarPaint = new Paint();
+        private final Paint mNavigationBarPaint = new Paint();
+        private final int mStatusBarColor;
+        private final int mNavigationBarColor;
+        private final int mWindowFlags;
+        private final int mWindowPrivateFlags;
+        private final int mSysUiVis;
+
+        SystemBarBackgroundPainter( int windowFlags, int windowPrivateFlags, int sysUiVis,
+                int statusBarColor, int navigationBarColor) {
+            mWindowFlags = windowFlags;
+            mWindowPrivateFlags = windowPrivateFlags;
+            mSysUiVis = sysUiVis;
+            final Context context = ActivityThread.currentActivityThread().getSystemUiContext();
+            mStatusBarColor = DecorView.calculateStatusBarColor(windowFlags,
+                    context.getColor(R.color.system_bar_background_semi_transparent),
+                    statusBarColor);
+            mNavigationBarColor = navigationBarColor;
+            mStatusBarPaint.setColor(mStatusBarColor);
+            mNavigationBarPaint.setColor(navigationBarColor);
+        }
+
+        void setInsets(Rect contentInsets, Rect stableInsets) {
+            mContentInsets.set(contentInsets);
+            mStableInsets.set(stableInsets);
+        }
+
+        int getStatusBarColorViewHeight() {
+            final boolean forceStatusBarBackground =
+                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
+            if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mSysUiVis, mStatusBarColor, mWindowFlags, forceStatusBarBackground)) {
+                return getColorViewTopInset(mStableInsets.top, mContentInsets.top);
+            } else {
+                return 0;
+            }
+        }
+
+        private boolean isNavigationBarColorViewVisible() {
+            return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mSysUiVis, mNavigationBarColor, mWindowFlags, false /* force */);
+        }
+
+        void drawDecors(Canvas c, @Nullable Rect alreadyDrawnFrame) {
+            drawStatusBarBackground(c, alreadyDrawnFrame, getStatusBarColorViewHeight());
+            drawNavigationBarBackground(c);
+        }
+
+        @VisibleForTesting
+        void drawStatusBarBackground(Canvas c, @Nullable Rect alreadyDrawnFrame,
+                int statusBarHeight) {
+            if (statusBarHeight > 0
+                    && (alreadyDrawnFrame == null || c.getWidth() > alreadyDrawnFrame.right)) {
+                final int rightInset = DecorView.getColorViewRightInset(mStableInsets.right,
+                        mContentInsets.right);
+                final int left = alreadyDrawnFrame != null ? alreadyDrawnFrame.right : 0;
+                c.drawRect(left, 0, c.getWidth() - rightInset, statusBarHeight, mStatusBarPaint);
+            }
+        }
+
+        @VisibleForTesting
+        void drawNavigationBarBackground(Canvas c) {
+            final Rect navigationBarRect = new Rect();
+            getNavigationBarRect(c.getWidth(), c.getHeight(), mStableInsets, mContentInsets,
+                    navigationBarRect);
+            final boolean visible = isNavigationBarColorViewVisible();
+            if (visible && !navigationBarRect.isEmpty()) {
+                c.drawRect(navigationBarRect, mNavigationBarPaint);
             }
         }
     }

@@ -31,11 +31,13 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.util.ArraySet;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.google.android.collect.Sets;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
 
 import java.io.PrintWriter;
 
@@ -206,7 +208,7 @@ class TaskSnapshotController {
         final AppWindowToken topChild = task.getTopChild();
         if (StackId.isHomeOrRecentsStack(task.mStack.mStackId)) {
             return SNAPSHOT_MODE_NONE;
-        } else if (topChild != null && topChild.shouldDisablePreviewScreenshots()) {
+        } else if (topChild != null && topChild.shouldUseAppThemeSnapshot()) {
             return SNAPSHOT_MODE_APP_THEME;
         } else {
             return SNAPSHOT_MODE_REAL;
@@ -227,6 +229,8 @@ class TaskSnapshotController {
             return null;
         }
         final int color = task.getTaskDescription().getBackgroundColor();
+        final int statusBarColor = task.getTaskDescription().getStatusBarColor();
+        final int navigationBarColor = task.getTaskDescription().getNavigationBarColor();
         final GraphicBuffer buffer = GraphicBuffer.create(mainWindow.getFrameLw().width(),
                 mainWindow.getFrameLw().height(),
                 RGBA_8888, USAGE_HW_TEXTURE | USAGE_SW_WRITE_RARELY | USAGE_SW_READ_NEVER);
@@ -235,6 +239,11 @@ class TaskSnapshotController {
         }
         final Canvas c = buffer.lockCanvas();
         c.drawColor(color);
+        final LayoutParams attrs = mainWindow.getAttrs();
+        final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
+                attrs.privateFlags, attrs.systemUiVisibility, statusBarColor, navigationBarColor);
+        decorPainter.setInsets(mainWindow.mContentInsets, mainWindow.mStableInsets);
+        decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
         buffer.unlockCanvasAndPost(c);
         return new TaskSnapshot(buffer, topChild.getConfiguration().orientation,
                 mainWindow.mStableInsets, false /* reduced */, 1.0f /* scale */);
