@@ -1258,6 +1258,10 @@ public final class ActiveServices {
 
             mAm.startAssociationLocked(callerApp.uid, callerApp.processName, callerApp.curProcState,
                     s.appInfo.uid, s.name, s.processName);
+            // Once the apps have become associated, if one of them is caller is ephemeral
+            // the target app should now be able to see the calling app
+            mAm.grantEphemeralAccessLocked(callerApp.userId, service,
+                    s.appInfo.uid, UserHandle.getAppId(callerApp.uid));
 
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
             ConnectionRecord c = new ConnectionRecord(b, activity,
