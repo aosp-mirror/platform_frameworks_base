@@ -16,14 +16,21 @@
 
 package android.text.format;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class DateFormatTest extends TestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class DateFormatTest {
 
-    @SmallTest
-    public void testHasDesignator() throws Exception {
+    @Test
+    public void testHasDesignator() {
         assertTrue(DateFormat.hasDesignator("hh:mm:ss", DateFormat.MINUTE));
         assertTrue(DateFormat.hasDesignator("myyyy", DateFormat.MINUTE));
         assertTrue(DateFormat.hasDesignator("mmm", DateFormat.MINUTE));
@@ -31,8 +38,8 @@ public class DateFormatTest extends TestCase {
         assertFalse(DateFormat.hasDesignator("hh:MM:ss", DateFormat.MINUTE));
     }
 
-    @SmallTest
-    public void testHasDesignatorEscaped() throws Exception {
+    @Test
+    public void testHasDesignatorEscaped() {
         assertTrue(DateFormat.hasDesignator("hh:mm 'LOL'", DateFormat.MINUTE));
 
         assertFalse(DateFormat.hasDesignator("hh:mm 'yyyy'", DateFormat.YEAR));

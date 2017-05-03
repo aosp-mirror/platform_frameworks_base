@@ -17,9 +17,14 @@
 package android.text.method;
 
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.InputType;
 import android.view.KeyEvent;
 import android.widget.TextView.BufferType;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test forward delete key handling of  {@link android.text.method.BaseKeyListener}.
@@ -27,6 +32,8 @@ import android.widget.TextView.BufferType;
  * Only contains edge cases. For normal cases, see {@see android.text.method.cts.ForwardDeleteTest}.
  * TODO: introduce test cases for surrogate pairs and replacement span.
  */
+@SmallTest
+@RunWith(AndroidJUnit4.class)
 public class ForwardDeleteTest extends KeyListenerTestCase {
     private static final BaseKeyListener mKeyListener = new BaseKeyListener() {
         public int getInputType() {
@@ -49,7 +56,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.mSelectionEnd = mTextView.getSelectionEnd();
     }
 
-    @SmallTest
+    @Test
     public void testCombiningEnclosingKeycaps() {
         EditorState state = new EditorState();
 
@@ -69,7 +76,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testVariationSelector() {
         EditorState state = new EditorState();
 
@@ -117,7 +124,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testEmojiZeroWidthJoinerSequence() {
         EditorState state = new EditorState();
 
@@ -160,7 +167,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testFlags() {
         EditorState state = new EditorState();
 
@@ -217,7 +224,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("| 'b'");
     }
 
-    @SmallTest
+    @Test
     public void testEmojiModifier() {
         EditorState state = new EditorState();
 
@@ -246,7 +253,7 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testMixedEdgeCases() {
         EditorState state = new EditorState();
 
