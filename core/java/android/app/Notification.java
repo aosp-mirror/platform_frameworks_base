@@ -4358,6 +4358,8 @@ public class Notification implements Parcelable
             mN.mLargeIcon = null;
             Bitmap largeIconLegacy = mN.largeIcon;
             mN.largeIcon = null;
+            ArrayList<Action> actions = mActions;
+            mActions = new ArrayList<>();
             Bundle publicExtras = new Bundle();
             publicExtras.putBoolean(EXTRA_SHOW_WHEN,
                     savedBundle.getBoolean(EXTRA_SHOW_WHEN));
@@ -4373,6 +4375,7 @@ public class Notification implements Parcelable
             mN.extras = savedBundle;
             mN.mLargeIcon = largeIcon;
             mN.largeIcon = largeIconLegacy;
+            mActions = actions;
             mStyle = style;
             return view;
         }
