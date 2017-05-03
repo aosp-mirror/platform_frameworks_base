@@ -6789,7 +6789,8 @@ public final class Settings {
          * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
          * @hide
          */
-        public static final String NIGHT_DISPLAY_CUSTOM_START_TIME = "night_display_custom_start_time";
+        public static final String NIGHT_DISPLAY_CUSTOM_START_TIME =
+                "night_display_custom_start_time";
 
         /**
          * Custom time when Night display is scheduled to deactivate.
@@ -6797,6 +6798,14 @@ public final class Settings {
          * @hide
          */
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
+
+        /**
+         * Time in milliseconds (since epoch) when Night display was last activated. Use to decide
+         * whether to apply the current activated state after a reboot or user change.
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_LAST_ACTIVATED_TIME =
+                "night_display_last_activated_time";
 
         /**
          * Names of the service components that the current user has explicitly allowed to
@@ -7024,6 +7033,7 @@ public final class Settings {
             NIGHT_DISPLAY_CUSTOM_END_TIME,
             NIGHT_DISPLAY_COLOR_TEMPERATURE,
             NIGHT_DISPLAY_AUTO_MODE,
+            NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
             NIGHT_DISPLAY_ACTIVATED,
             SYNC_PARENT_SOUNDS,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
