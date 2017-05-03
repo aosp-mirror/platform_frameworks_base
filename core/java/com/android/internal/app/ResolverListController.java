@@ -97,7 +97,8 @@ public class ResolverListController {
             final List<ResolveInfo> infos = mpm.queryIntentActivities(intent,
                     PackageManager.MATCH_DEFAULT_ONLY
                             | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
-                            | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0));
+                            | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0)
+                            | PackageManager.MATCH_INSTANT);
             if (infos != null) {
                 if (resolvedComponents == null) {
                     resolvedComponents = new ArrayList<>();
