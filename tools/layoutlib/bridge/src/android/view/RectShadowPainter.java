@@ -41,6 +41,11 @@ public class RectShadowPainter {
             return;
         }
 
+        if (elevation <= 0) {
+            // If elevation is 0, we don't need to paint the shadow
+            return;
+        }
+
         Rect originCanvasRect = canvas.getClipBounds();
         int saved = modifyCanvas(canvas);
         if (saved == -1) {
