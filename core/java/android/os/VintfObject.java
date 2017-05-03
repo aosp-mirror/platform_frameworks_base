@@ -26,17 +26,12 @@ public class VintfObject {
     private static final String LOG_TAG = "VintfObject";
 
     /**
-     * Slurps all device information (both manifests)
-     * and report it.
+     * Slurps all device information (both manifests and both matrices)
+     * and report them.
      * If any error in getting one of the manifests, it is not included in
      * the list.
      */
-    public static String[] report() {
-        ArrayList<String> ret = new ArrayList<>();
-        put(ret, getDeviceManifest(), "device manifest");
-        put(ret, getFrameworkManifest(), "framework manifest");
-        return ret.toArray(new String[0]);
-    }
+    public static native String[] report();
 
     /**
      * Verify that the given metadata for an OTA package is compatible with
@@ -50,15 +45,4 @@ public class VintfObject {
      */
     public static native int verify(String[] packageInfo);
 
-    // return null if any error, otherwise XML string.
-    private static native String getDeviceManifest();
-    private static native String getFrameworkManifest();
-
-    private static void put(ArrayList<String> list, String content, String message) {
-        if (content == null || content.length() == 0) {
-            Log.e(LOG_TAG, "Cannot get;" + message + "; check native logs for details.");
-            return;
-        }
-        list.add(content);
-    }
 }
