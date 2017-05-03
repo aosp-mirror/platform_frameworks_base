@@ -631,6 +631,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                  PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean callerCanScoreNetworks() {
+        return mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS) ==
+                PackageManager.PERMISSION_GRANTED;
+    }
+
     @Override
     public boolean clearScores() {
         // Only the active scorer or the system should be allowed to flush all scores.
@@ -651,9 +656,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean setActiveScorer(String packageName) {
         // Only the system can set the active scorer
-        if (!isCallerSystemProcess(getCallingUid()) && !callerCanRequestScores()) {
+        if (!isCallerSystemProcess(getCallingUid()) && !callerCanScoreNetworks()) {
             throw new SecurityException(
-                    "Caller is neither the system process nor a score requester.");
+                    "Caller is neither the system process or a network scorer.");
         }
 
         return mNetworkScorerAppManager.setActiveScorer(packageName);
