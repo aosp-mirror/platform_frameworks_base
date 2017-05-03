@@ -53,21 +53,21 @@ public class GlobalSortKeyComparatorTest {
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
-                        "", 1499), getDefaultChannel());
+                        "", 1499), getDefaultChannel(), true);
         left.setGlobalSortKey("first");
 
         NotificationRecord right = new NotificationRecord(InstrumentationRegistry.getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
-                        "", 1499), getDefaultChannel());
+                        "", 1499), getDefaultChannel(), true);
         right.setGlobalSortKey("second");
 
         NotificationRecord last = new NotificationRecord(InstrumentationRegistry.getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
-                        "", 1499), getDefaultChannel());
+                        "", 1499), getDefaultChannel(), true);
 
 
         final List<NotificationRecord> expected = new ArrayList<>();
@@ -93,13 +93,13 @@ public class GlobalSortKeyComparatorTest {
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
-                        "", 1499), getDefaultChannel());
+                        "", 1499), getDefaultChannel(), true);
 
         NotificationRecord right = new NotificationRecord(InstrumentationRegistry.getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
-                        "", 1499), getDefaultChannel());
+                        "", 1499), getDefaultChannel(), true);
         right.setGlobalSortKey("not null");
 
         final List<NotificationRecord> expected = new ArrayList<>();
@@ -124,14 +124,14 @@ public class GlobalSortKeyComparatorTest {
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
-                        "", 1499), getDefaultChannel());
+                        "", 1499), getDefaultChannel(), true);
         left.setGlobalSortKey("not null");
 
         NotificationRecord right = new NotificationRecord(InstrumentationRegistry.getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
-                        "", 1499), getDefaultChannel());
+                        "", 1499), getDefaultChannel(), true);
 
         final List<NotificationRecord> expected = new ArrayList<>();
         expected.add(left);

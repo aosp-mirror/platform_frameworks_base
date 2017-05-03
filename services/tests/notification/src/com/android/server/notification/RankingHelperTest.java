@@ -124,7 +124,7 @@ public class RankingHelperTest {
                 .build();
         mRecordGroupGSortA = new NotificationRecord(getContext(), new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, mNotiGroupGSortA, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getDefaultChannel(), false);
 
         mNotiGroupGSortB = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("B")
@@ -134,7 +134,7 @@ public class RankingHelperTest {
                 .build();
         mRecordGroupGSortB = new NotificationRecord(getContext(), new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, mNotiGroupGSortB, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getDefaultChannel(), false);
 
         mNotiNoGroup = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("C")
@@ -142,7 +142,7 @@ public class RankingHelperTest {
                 .build();
         mRecordNoGroup = new NotificationRecord(getContext(), new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, mNotiNoGroup, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getDefaultChannel(), false);
 
         mNotiNoGroup2 = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("D")
@@ -150,7 +150,7 @@ public class RankingHelperTest {
                 .build();
         mRecordNoGroup2 = new NotificationRecord(getContext(), new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, mNotiNoGroup2, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getDefaultChannel(), false);
 
         mNotiNoGroupSortA = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("E")
@@ -159,7 +159,7 @@ public class RankingHelperTest {
                 .build();
         mRecordNoGroupSortA = new NotificationRecord(getContext(), new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, mNotiNoGroupSortA, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
+                null, System.currentTimeMillis()), getDefaultChannel(), false);
 
         mAudioAttributes = new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
@@ -373,7 +373,7 @@ public class RankingHelperTest {
         assertNull(mHelper.getNotificationChannel(PKG, UID, channel1.getId(), false));
         assertNull(mHelper.getNotificationChannel(PKG, UID, channel3.getId(), false));
         assertNull(mHelper.getNotificationChannelGroup(ncg.getId(), PKG, UID));
-        //assertEquals(ncg2, mHelper.getNotificationChannelGroup(ncg2.getId(), PKG, UID));
+        assertEquals(ncg2, mHelper.getNotificationChannelGroup(ncg2.getId(), PKG, UID));
         assertEquals(channel2, mHelper.getNotificationChannel(PKG, UID, channel2.getId(), false));
     }
 
@@ -696,20 +696,14 @@ public class RankingHelperTest {
         // Returns only non-deleted channels
         List<NotificationChannel> channels =
                 mHelper.getNotificationChannels(PKG, UID, false).getList();
-        assertEquals(2, channels.size());   // Default channel + non-deleted channel
-        for (NotificationChannel nc : channels) {
-            if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(nc.getId())) {
-                compareChannels(channel2, nc);
-            }
-        }
+        assertEquals(1, channels.size());
+        compareChannels(channel2, channels.get(0));
 
         // Returns deleted channels too
         channels = mHelper.getNotificationChannels(PKG, UID, true).getList();
-        assertEquals(3, channels.size());               // Includes default channel
+        assertEquals(2, channels.size());
         for (NotificationChannel nc : channels) {
-            if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(nc.getId())) {
-                compareChannels(channelMap.get(nc.getId()), nc);
-            }
+            compareChannels(channelMap.get(nc.getId()), nc);
         }
     }
 
@@ -807,8 +801,8 @@ public class RankingHelperTest {
 
         mHelper.permanentlyDeleteNotificationChannels(PKG, UID);
 
-        // Only default channel remains
-        assertEquals(1, mHelper.getNotificationChannels(PKG, UID, true).getList().size());
+        // No channels remain
+        assertEquals(0, mHelper.getNotificationChannels(PKG, UID, true).getList().size());
     }
 
     @Test
@@ -857,13 +851,32 @@ public class RankingHelperTest {
 
         mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{PKG}, new int[]{UID});
 
-        assertEquals(0, mHelper.getNotificationChannels(PKG, UID, true).getList().size());
+        // since this is a pre upgrade app, clearing data should restore the default channel
+        assertEquals(1, mHelper.getNotificationChannels(PKG, UID, true).getList().size());
+        assertEquals(NotificationChannel.DEFAULT_CHANNEL_ID,
+                mHelper.getNotificationChannels(PKG, UID, true).getList().get(0).getId());
 
         // Not deleted
         mHelper.createNotificationChannel(PKG, UID, channel1, true);
-
         mHelper.onPackagesChanged(false, UserHandle.USER_SYSTEM, new String[]{PKG}, new int[]{UID});
-        assertEquals(2, mHelper.getNotificationChannels(PKG, UID, false).getList().size());
+        assertEquals(1, mHelper.getNotificationChannels(PKG, UID, false).getList().size());
+    }
+
+    @Test
+    public void testOnPackageChanged_packageRemoval_updatedPackage() throws Exception {
+        // Deleted
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(UPDATED_PKG, UID2, channel1, true);
+        mHelper.onPackagesChanged(
+                true, UserHandle.USER_SYSTEM, new String[]{UPDATED_PKG}, new int[]{UID2});
+        assertEquals(0, mHelper.getNotificationChannels(UPDATED_PKG, UID2, true).getList().size());
+
+        // Not deleted
+        mHelper.createNotificationChannel(UPDATED_PKG, UID2, channel1, true);
+        mHelper.onPackagesChanged(
+                false, UserHandle.USER_SYSTEM, new String[]{UPDATED_PKG}, new int[]{UID2});
+        assertEquals(1, mHelper.getNotificationChannels(UPDATED_PKG, UID2, false).getList().size());
     }
 
     @Test
@@ -884,7 +897,23 @@ public class RankingHelperTest {
 
         mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{PKG}, new int[]{UID});
 
-        assertEquals(0, mHelper.getNotificationChannelGroups(PKG, UID, true).getList().size());
+        // default channel restored
+        assertEquals(1, mHelper.getNotificationChannelGroups(PKG, UID, true).getList().size());
+        assertNull(mHelper.getNotificationChannelGroups(PKG, UID, true).getList().get(0).getId());
+    }
+
+    @Test
+    public void testOnPackageChanged_packageRemoval_groups_upgraded() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        mHelper.createNotificationChannelGroup(UPDATED_PKG, UID2, ncg, true);
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("group2", "name2");
+        mHelper.createNotificationChannelGroup(UPDATED_PKG, UID2, ncg2, true);
+
+        mHelper.onPackagesChanged(
+                true, UserHandle.USER_SYSTEM, new String[]{UPDATED_PKG}, new int[]{UID2});
+
+        assertEquals(0,
+                mHelper.getNotificationChannelGroups(UPDATED_PKG, UID2, true).getList().size());
     }
 
     @Test
@@ -958,9 +987,8 @@ public class RankingHelperTest {
         assertEquals(3, actual.size());
         for (NotificationChannelGroup group : actual) {
             if (group.getId() == null) {
-                assertEquals(2, group.getChannels().size()); // misc channel too
-                assertTrue(channel3.getId().equals(group.getChannels().get(0).getId())
-                        || channel3.getId().equals(group.getChannels().get(1).getId()));
+                assertEquals(1, group.getChannels().size());
+                assertTrue(channel3.getId().equals(group.getChannels().get(0).getId()));
             } else if (group.getId().equals(ncg.getId())) {
                 assertEquals(2, group.getChannels().size());
                 if (group.getChannels().get(0).getId().equals(channel1.getId())) {
@@ -994,12 +1022,8 @@ public class RankingHelperTest {
         List<NotificationChannelGroup> actual =
                 mHelper.getNotificationChannelGroups(PKG, UID, true).getList();
 
-        assertEquals(2, actual.size());
-        for (NotificationChannelGroup group : actual) {
-            if (Objects.equals(group.getId(), ncg.getId())) {
-                assertEquals(1, group.getChannels().size());
-            }
-        }
+        assertEquals(1, actual.size());
+        assertEquals(1, actual.get(0).getChannels().size());
     }
 
     @Test
