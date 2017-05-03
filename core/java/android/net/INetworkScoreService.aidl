@@ -45,7 +45,7 @@ interface INetworkScoreService
      * Set the active scorer and clear existing scores.
      * @param packageName the package name of the new scorer to use.
      * @return true if the operation succeeded, or false if the new package is not a valid scorer.
-     * @throws SecurityException if the caller is not the system.
+     * @throws SecurityException if the caller is not the system or a network scorer.
      */
     boolean setActiveScorer(in String packageName);
 
