@@ -1793,7 +1793,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // events to be intercepted and used to change focus. This would likely cause a
             // disappearance of the input method.
             inputMethod.getTouchableRegion(mTmpRegion);
-            mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
+            if (inputMethod.getDisplayId() == mDisplayId) {
+                mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
+            } else {
+                // IME is on a different display, so we need to update its tap detector.
+                // TODO(multidisplay): Remove when IME will always appear on same display.
+                inputMethod.getDisplayContent().setTouchExcludeRegion(null /* focusedTask */);
+            }
         }
         for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
             WindowState win = mTapExcludedWindows.get(i);
