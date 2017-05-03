@@ -76,10 +76,7 @@ public final class RecoverableSecurityException extends SecurityException implem
      *            {@link Activity#setResult(int)} before finishing to
      *            communicate the final status of the recovery. For example,
      *            apps that observe {@link Activity#RESULT_OK} may choose to
-     *            immediately retry their operation. If this exception was
-     *            thrown from a {@link ContentProvider}, you should also send
-     *            any relevant {@link ContentResolver#notifyChange} events to
-     *            trigger reloading of data.
+     *            immediately retry their operation.
      */
     public RecoverableSecurityException(Throwable cause, CharSequence userMessage,
             RemoteAction userAction) {
