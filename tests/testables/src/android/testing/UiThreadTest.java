@@ -20,8 +20,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * When applied to a class, all tests, befores, and afters will behave as if
- * they have @UiThreadTest applied to them.
+ * When applied to a class, all {@link org.junit.Test}s, {@link org.junit.After}s, and
+ * {@link org.junit.Before} will behave as if they have @UiThreadTest applied to them.
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

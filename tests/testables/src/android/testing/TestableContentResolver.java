@@ -27,7 +27,11 @@ import com.google.android.collect.Maps;
 import java.util.Map;
 
 /**
- * Alternative to a MockContentResolver that falls back to real providers.
+ * A version of ContentResolver that allows easy mocking of providers.
+ * By default it acts as a normal ContentResolver and returns all the
+ * same providers.
+ * @see #addProvider(String, ContentProvider)
+ * @see #setFallbackToExisting(boolean)
  */
 public class TestableContentResolver extends ContentResolver {
 

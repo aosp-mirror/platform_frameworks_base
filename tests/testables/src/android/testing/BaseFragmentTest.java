@@ -80,6 +80,10 @@ public abstract class BaseFragmentTest {
         });
     }
 
+    /**
+     * Allows tests to sub-class TestableContext if they want to provide any extended functionality
+     * or provide a {@link LeakCheck} to the TestableContext upon instantiation.
+     */
     protected TestableContext getContext() {
         return new TestableContext(InstrumentationRegistry.getContext());
     }

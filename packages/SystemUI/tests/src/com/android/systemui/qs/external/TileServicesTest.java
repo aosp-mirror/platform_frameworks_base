@@ -52,7 +52,6 @@ public class TileServicesTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        TestableLooper.get(this).setAsMainLooper();
         mManagers = new ArrayList<>();
         QSTileHost host = new QSTileHost(mContext, null,
                 mock(StatusBarIconController.class));
