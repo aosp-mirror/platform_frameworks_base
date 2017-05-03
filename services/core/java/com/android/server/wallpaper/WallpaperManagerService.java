@@ -52,9 +52,11 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -165,6 +167,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String WALLPAPER_LOCK_ORIG = "wallpaper_lock_orig";
     static final String WALLPAPER_LOCK_CROP = "wallpaper_lock";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
+    static final int MAX_WALLPAPER_EXTRACTION_AREA = 112 * 112;
 
     // All the various per-user state files we need to be aware of
     static final String[] sPerUserFiles = new String[] {
@@ -376,43 +379,89 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    /**
+     * We can easily extract colors from an ImageWallpaper since it's only a bitmap.
+     * In this case, using the crop is more than enough.
+     *
+     * In case of a live wallpaper, the best we can do is to extract colors from its
+     * preview image. Anyway, the live wallpaper can also implement the wallpaper colors API
+     * to report when colors change.
+     *
+     * @param wallpaper a wallpaper representation
+     */
     private void extractColors(WallpaperData wallpaper) {
         String cropFile = null;
+        Drawable thumbnail = null;
+        // This represents a maximum pixel count in an image.
+        // It prevents color extraction on big bitmaps.
         int wallpaperId = -1;
-        synchronized (mLock) {
-            // Only extract colors of ImageWallpaper or lock wallpapers (null)
-            final boolean supportedComponent = mImageWallpaper.equals(wallpaper.wallpaperComponent)
-                    || wallpaper.wallpaperComponent == null;
-            if (!supportedComponent)
-                return;
 
-            if (wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
-                cropFile = wallpaper.cropFile.getAbsolutePath();
+        synchronized (mLock) {
+            final boolean imageWallpaper = mImageWallpaper.equals(wallpaper.wallpaperComponent)
+                    || wallpaper.wallpaperComponent == null;
+            if (imageWallpaper) {
+                if (wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
+                    cropFile = wallpaper.cropFile.getAbsolutePath();
+                }
+            } else {
+                if (wallpaper.connection == null) {
+                    Slog.w(TAG, "Can't extract colors, wallpaper not connected. " +
+                            wallpaper.wallpaperId);
+                    return;
+                }
+                WallpaperInfo info = wallpaper.connection.mInfo;
+                if (info == null) {
+                    Slog.w(TAG, "Something is really wrong, live wallpaper doesn't have " +
+                           "a WallpaperInfo object! " + wallpaper.wallpaperId);
+                    return;
+                }
+                thumbnail = info.loadThumbnail(mContext.getPackageManager());
             }
+
             wallpaperId = wallpaper.wallpaperId;
         }
 
+        Bitmap bitmap = null;
         if (cropFile != null) {
-            final Bitmap bitmap = BitmapFactory.decodeFile(cropFile);
-            if (bitmap == null) {
-                Slog.w(TAG, "Cannot extract colors because wallpaper file could not be read.");
-                return;
+            bitmap = BitmapFactory.decodeFile(cropFile);
+        } else if (thumbnail != null) {
+            // Calculate how big the bitmap needs to be.
+            // This avoids unnecessary processing and allocation inside Palette.
+            final int requestedArea = thumbnail.getIntrinsicWidth() *
+                    thumbnail.getIntrinsicHeight();
+            double scale = 1;
+            if (requestedArea > MAX_WALLPAPER_EXTRACTION_AREA) {
+                scale = Math.sqrt(MAX_WALLPAPER_EXTRACTION_AREA / (double) requestedArea);
             }
-            Palette palette = Palette.from(bitmap).generate();
-            bitmap.recycle();
+            bitmap = Bitmap.createBitmap((int) (thumbnail.getIntrinsicWidth() * scale),
+                    (int) (thumbnail.getIntrinsicHeight() * scale), Bitmap.Config.ARGB_8888);
+            final Canvas bmpCanvas = new Canvas(bitmap);
+            thumbnail.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+            thumbnail.draw(bmpCanvas);
+        }
 
-            final List<Pair<Color, Integer>> colors = new ArrayList<>();
-            for (Palette.Swatch swatch : palette.getSwatches()) {
-                colors.add(new Pair<>(Color.valueOf(swatch.getRgb()),
-                        swatch.getPopulation()));
-            }
+        if (bitmap == null) {
+            Slog.w(TAG, "Cannot extract colors because wallpaper could not be read.");
+            return;
+        }
 
-            synchronized (mLock) {
-                if (wallpaper.wallpaperId == wallpaperId) {
-                    wallpaper.primaryColors = new WallpaperColors(colors);
-                } else {
-                    Slog.w(TAG, "Not setting primary colors since wallpaper changed");
-                }
+        Palette palette = Palette
+                .from(bitmap)
+                .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
+                .generate();
+        bitmap.recycle();
+
+        final List<Pair<Color, Integer>> colors = new ArrayList<>();
+        for (Palette.Swatch swatch : palette.getSwatches()) {
+            colors.add(new Pair<>(Color.valueOf(swatch.getRgb()),
+                    swatch.getPopulation()));
+        }
+
+        synchronized (mLock) {
+            if (wallpaper.wallpaperId == wallpaperId) {
+                wallpaper.primaryColors = new WallpaperColors(colors);
+            } else {
+                Slog.w(TAG, "Not setting primary colors since wallpaper changed");
             }
         }
     }
@@ -817,6 +866,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
          */
         @Override
         public void onWallpaperColorsChanged(WallpaperColors primaryColors) {
+            // Do not override default color extraction if API isn't implemented.
+            if (primaryColors == null) {
+                return;
+            }
+
             int which;
             synchronized (mLock) {
                 // Do not broadcast changes on ImageWallpaper since it's handled
