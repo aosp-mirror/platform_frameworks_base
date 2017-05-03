@@ -83,7 +83,7 @@ public class DozeUi implements DozeMachine.Part {
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:
-                pulseWhileDozing(DozeLog.PULSE_REASON_NOTIFICATION /* TODO */);
+                pulseWhileDozing(mMachine.getPulseReason());
                 break;
             case DOZE_PULSE_DONE:
                 mHost.abortPulsing();
