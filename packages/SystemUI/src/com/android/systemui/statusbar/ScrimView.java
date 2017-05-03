@@ -167,6 +167,10 @@ public class ScrimView extends View implements ConfigurationController.Configura
     }
 
     public void setColors(@NonNull ColorExtractor.GradientColors colors) {
+        setColors(colors, false);
+    }
+
+    public void setColors(@NonNull ColorExtractor.GradientColors colors, boolean animated) {
         if (colors == null) {
             throw new IllegalArgumentException("Colors cannot be null");
         }
@@ -174,7 +178,7 @@ public class ScrimView extends View implements ConfigurationController.Configura
             return;
         }
         mColors.set(colors);
-        updateColorWithTint();
+        updateColorWithTint(animated);
     }
 
     @VisibleForTesting
@@ -183,14 +187,18 @@ public class ScrimView extends View implements ConfigurationController.Configura
     }
 
     public void setTint(int color) {
+        setTint(color, false);
+    }
+
+    public void setTint(int color, boolean animated) {
         if (mTintColor == color) {
             return;
         }
         mTintColor = color;
-        updateColorWithTint();
+        updateColorWithTint(animated);
     }
 
-    private void updateColorWithTint() {
+    private void updateColorWithTint(boolean animated) {
         if (mDrawable instanceof GradientDrawable) {
             // Optimization to blend colors and avoid a color filter
             GradientDrawable drawable = (GradientDrawable) mDrawable;
@@ -199,7 +207,7 @@ public class ScrimView extends View implements ConfigurationController.Configura
                     tintAmount);
             int secondaryTinted = ColorUtils.blendARGB(mColors.getSecondaryColor(), mTintColor,
                     tintAmount);
-            drawable.setColors(mainTinted, secondaryTinted, false);
+            drawable.setColors(mainTinted, secondaryTinted, animated);
         } else {
             if (mColorFilter == null) {
                 mColorFilter = new PorterDuffColorFilter(mTintColor, PorterDuff.Mode.SRC_OVER);

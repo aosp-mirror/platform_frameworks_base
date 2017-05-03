@@ -277,8 +277,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 mScrimInFront.setColors(mLockColors);
                 mScrimBehind.setColors(mLockColors);
             } else {
-                mScrimInFront.setColors(mSystemColors);
-                mScrimBehind.setColors(mSystemColors);
+                mScrimInFront.setColors(mSystemColors, true);
+                mScrimBehind.setColors(mSystemColors, true);
             }
         }
 
