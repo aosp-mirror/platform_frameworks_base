@@ -165,7 +165,7 @@ public class NotificationManagerServiceTest {
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id, "tag", uid, 0,
                 nb.build(), new UserHandle(uid), null, 0);
-        return new NotificationRecord(mContext, sbn, channel);
+        return new NotificationRecord(mContext, sbn, channel, true);
     }
     private NotificationRecord generateNotificationRecord(NotificationChannel channel) {
         return generateNotificationRecord(channel, null);
@@ -184,7 +184,7 @@ public class NotificationManagerServiceTest {
         }
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", uid, 0,
                 nb.build(), new UserHandle(uid), null, 0);
-        return new NotificationRecord(mContext, sbn, channel);
+        return new NotificationRecord(mContext, sbn, channel, true);
     }
 
     @Test
