@@ -354,6 +354,8 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         // ZERO WIDTH JOINER + regional indicator symbol
         state.setByString("| U+1F469 U+200D U+1F1FA");
         forwardDelete(state, 0);
+        state.assertEquals("| U+1F1FA");
+        forwardDelete(state, 0);
         state.assertEquals("|");
 
         // Regional indicator symbol + end with ZERO WIDTH JOINER
@@ -363,6 +365,8 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
 
         // Regional indicator symbol + ZERO WIDTH JOINER
         state.setByString("| U+1F1FA U+200D U+1F469");
+        forwardDelete(state, 0);
+        state.assertEquals("| U+1F469");
         forwardDelete(state, 0);
         state.assertEquals("|");
 
@@ -383,6 +387,8 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
 
         // Emoji modifier + ZERO WIDTH JOINER
         state.setByString("| U+1F466 U+1F3FB U+200D U+1F469");
+        forwardDelete(state, 0);
+        state.assertEquals("| U+1F469");
         forwardDelete(state, 0);
         state.assertEquals("|");
 
