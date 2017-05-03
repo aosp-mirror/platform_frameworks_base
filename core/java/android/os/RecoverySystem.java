@@ -812,9 +812,11 @@ public class RecoverySystem {
             int timeTotal = -1;
             int uncryptTime = -1;
             int sourceVersion = -1;
-            int temperature_start = -1;
-            int temperature_end = -1;
-            int temperature_max = -1;
+            int temperatureStart = -1;
+            int temperatureEnd = -1;
+            int temperatureMax = -1;
+            int errorCode = -1;
+            int causeCode = -1;
 
             while ((line = in.readLine()) != null) {
                 // Here is an example of lines in last_install:
@@ -861,11 +863,15 @@ public class RecoverySystem {
                     bytesStashedInMiB = (bytesStashedInMiB == -1) ? scaled :
                             bytesStashedInMiB + scaled;
                 } else if (line.startsWith("temperature_start")) {
-                    temperature_start = scaled;
+                    temperatureStart = scaled;
                 } else if (line.startsWith("temperature_end")) {
-                    temperature_end = scaled;
+                    temperatureEnd = scaled;
                 } else if (line.startsWith("temperature_max")) {
-                    temperature_max = scaled;
+                    temperatureMax = scaled;
+                } else if (line.startsWith("error")) {
+                    errorCode = scaled;
+                } else if (line.startsWith("cause")) {
+                    causeCode = scaled;
                 }
             }
 
@@ -885,14 +891,20 @@ public class RecoverySystem {
             if (bytesStashedInMiB != -1) {
                 MetricsLogger.histogram(context, "ota_stashed_in_MiBs", bytesStashedInMiB);
             }
-            if (temperature_start != -1) {
-                MetricsLogger.histogram(context, "ota_temperature_start", temperature_start);
+            if (temperatureStart != -1) {
+                MetricsLogger.histogram(context, "ota_temperature_start", temperatureStart);
             }
-            if (temperature_end != -1) {
-                MetricsLogger.histogram(context, "ota_temperature_end", temperature_end);
+            if (temperatureEnd != -1) {
+                MetricsLogger.histogram(context, "ota_temperature_end", temperatureEnd);
             }
-            if (temperature_max != -1) {
-                MetricsLogger.histogram(context, "ota_temperature_max", temperature_max);
+            if (temperatureMax != -1) {
+                MetricsLogger.histogram(context, "ota_temperature_max", temperatureMax);
+            }
+            if (errorCode != -1) {
+                MetricsLogger.histogram(context, "ota_non_ab_error_code", errorCode);
+            }
+            if (causeCode != -1) {
+                MetricsLogger.histogram(context, "ota_non_ab_cause_code", causeCode);
             }
 
         } catch (IOException e) {
