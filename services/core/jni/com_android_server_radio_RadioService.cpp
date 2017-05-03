@@ -136,7 +136,7 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
     Region region;
     BandConfig bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
 
-    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback, region);
+    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback, region, withAudio);
     if (tuner == nullptr) {
         ALOGE("Unable to create new tuner object.");
         return nullptr;
@@ -184,7 +184,7 @@ void register_android_server_radio_RadioService(JNIEnv *env) {
     auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
     gTunerClass = MakeGlobalRefOrDie(env, tunerClass);
     gTunerCstor = GetMethodIDOrDie(env, tunerClass, "<init>",
-            "(Landroid/hardware/radio/ITunerCallback;I)V");
+            "(Landroid/hardware/radio/ITunerCallback;IZ)V");
 
     auto serviceClass = FindClassOrDie(env, "com/android/server/radio/RadioService");
     gServiceClass = MakeGlobalRefOrDie(env, serviceClass);

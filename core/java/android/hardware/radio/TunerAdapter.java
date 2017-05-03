@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,7 +64,8 @@ class TunerAdapter extends RadioTuner {
             Log.e(TAG, "Can't set configuration", e);
             return RadioManager.STATUS_BAD_VALUE;
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
         }
     }
 
@@ -78,20 +78,33 @@ class TunerAdapter extends RadioTuner {
             config[0] = mTuner.getConfiguration();
             return RadioManager.STATUS_OK;
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
         }
     }
 
     @Override
     public int setMute(boolean mute) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            mTuner.setMuted(mute);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Can't set muted", e);
+            return RadioManager.STATUS_ERROR;
+        } catch (RemoteException e) {
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
+        }
+        return RadioManager.STATUS_OK;
     }
 
     @Override
     public boolean getMute() {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            return mTuner.isMuted();
+        } catch (RemoteException e) {
+            Log.e(TAG, "service died", e);
+            return true;
+        }
     }
 
     @Override
@@ -126,7 +139,8 @@ class TunerAdapter extends RadioTuner {
         try {
             return mTuner.getProgramInformation(info);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
         }
     }
 

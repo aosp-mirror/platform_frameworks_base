@@ -92,6 +92,10 @@ public class RadioTest {
     }
 
     private void openTuner() {
+        openTuner(true);
+    }
+
+    private void openTuner(boolean withAudio) {
         assertNull(mRadioTuner);
 
         // find FM band and build its config
@@ -109,7 +113,8 @@ public class RadioTest {
         mAmBandConfig = new RadioManager.AmBandConfig.Builder(mAmBandDescriptor).build();
         mFmBandConfig = new RadioManager.FmBandConfig.Builder(mFmBandDescriptor).build();
 
-        mRadioTuner = mRadioManager.openTuner(module.getId(), mFmBandConfig, true, mCallback, null);
+        mRadioTuner = mRadioManager.openTuner(module.getId(),
+                mFmBandConfig, withAudio, mCallback, null);
         assertNotNull(mRadioTuner);
         verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
         verify(mCallback, never()).onError(anyInt());
@@ -177,5 +182,34 @@ public class RadioTest {
         verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
 
         verify(mCallback, never()).onError(anyInt());
+    }
+
+    @Test
+    public void testMute() {
+        openTuner();
+
+        boolean isMuted = mRadioTuner.getMute();
+        assertFalse(isMuted);
+
+        int ret = mRadioTuner.setMute(true);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        isMuted = mRadioTuner.getMute();
+        assertTrue(isMuted);
+
+        ret = mRadioTuner.setMute(false);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        isMuted = mRadioTuner.getMute();
+        assertFalse(isMuted);
+    }
+
+    @Test
+    public void testMuteNoAudio() {
+        openTuner(false);
+
+        int ret = mRadioTuner.setMute(false);
+        assertEquals(RadioManager.STATUS_ERROR, ret);
+
+        boolean isMuted = mRadioTuner.getMute();
+        assertTrue(isMuted);
     }
 }
