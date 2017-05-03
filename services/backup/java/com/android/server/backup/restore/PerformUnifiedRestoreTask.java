@@ -16,6 +16,10 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
+
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupDataInput;
@@ -392,7 +396,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // synchronous we also know that we should cancel the pending timeout
             // message.
             backupManagerService.getBackupHandler().removeMessages(
-                    RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
+                    MSG_RESTORE_OPERATION_TIMEOUT);
 
             // Verify that the backup set includes metadata.  If not, we can't do
             // signature/version verification etc, so we simply do not proceed with
@@ -409,7 +413,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         "Package manager restore metadata missing");
                 mStatus = BackupTransport.TRANSPORT_ERROR;
                 backupManagerService.getBackupHandler().removeMessages(
-                        RefactoredBackupManagerService.MSG_BACKUP_RESTORE_STEP, this);
+                        MSG_BACKUP_RESTORE_STEP, this);
                 executeNextState(UnifiedRestoreState.FINAL);
                 return;
             }
@@ -427,7 +431,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             mStatus = BackupTransport.TRANSPORT_ERROR;
             backupManagerService.getBackupHandler().removeMessages(
-                    RefactoredBackupManagerService.MSG_BACKUP_RESTORE_STEP, this);
+                    MSG_BACKUP_RESTORE_STEP, this);
             executeNextState(UnifiedRestoreState.FINAL);
             return;
         }
@@ -1072,8 +1076,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
 
         // Clear any ongoing session timeout.
-        backupManagerService.getBackupHandler().removeMessages(
-                RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
+        backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
         // If we have a PM token, we must under all circumstances be sure to
         // handshake when we've finished.
@@ -1089,7 +1092,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // We were invoked via an active restore session, not by the Package
             // Manager, so start up the session timeout again.
             backupManagerService.getBackupHandler().sendEmptyMessageDelayed(
-                    RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT,
+                    MSG_RESTORE_SESSION_TIMEOUT,
                     RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL);
         }
 
@@ -1116,7 +1119,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 PerformUnifiedRestoreTask task = backupManagerService.getPendingRestores().remove();
                 backupManagerService.getBackupHandler().sendMessage(
                         backupManagerService.getBackupHandler().obtainMessage(
-                                RefactoredBackupManagerService.MSG_BACKUP_RESTORE_STEP, task));
+                                MSG_BACKUP_RESTORE_STEP, task));
 
             } else {
                 backupManagerService.setRestoreInProgress(false);
@@ -1215,8 +1218,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // The caller is responsible for reestablishing the state machine; our
         // responsibility here is to clear the decks for whatever comes next.
-        backupManagerService.getBackupHandler().removeMessages(
-                RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT, this);
+        backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_OPERATION_TIMEOUT, this);
     }
 
     @Override
@@ -1306,7 +1308,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
         mState = nextState;
         Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                RefactoredBackupManagerService.MSG_BACKUP_RESTORE_STEP, this);
+                MSG_BACKUP_RESTORE_STEP, this);
         backupManagerService.getBackupHandler().sendMessage(msg);
     }
 

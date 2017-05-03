@@ -16,6 +16,8 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_INITIALIZE;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,7 +46,7 @@ public class RunInitializeReceiver extends BroadcastReceiver {
                 backupManagerService.getWakelock().acquire();
 
                 Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                        RefactoredBackupManagerService.MSG_RUN_INITIALIZE);
+                        MSG_RUN_INITIALIZE);
                 backupManagerService.getBackupHandler().sendMessage(msg);
             }
         }

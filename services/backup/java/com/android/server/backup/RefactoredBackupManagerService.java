@@ -18,6 +18,22 @@ package com.android.server.backup;
 
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
+import static com.android.server.backup.internal.BackupHandler.MSG_FULL_CONFIRMATION_TIMEOUT;
+import static com.android.server.backup.internal.BackupHandler.MSG_OP_COMPLETE;
+import static com.android.server.backup.internal.BackupHandler.MSG_REQUEST_BACKUP;
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
+import static com.android.server.backup.internal.BackupHandler.MSG_RETRY_CLEAR;
+import static com.android.server.backup.internal.BackupHandler.MSG_RETRY_INIT;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_BACKUP;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_RESTORE;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_BACKUP;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_INITIALIZE;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
+import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
+
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
@@ -189,27 +205,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     public static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     public static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
-    public static final int MSG_RUN_BACKUP = 1;
-    public static final int MSG_RUN_ADB_BACKUP = 2;
-    public static final int MSG_RUN_RESTORE = 3;
-    public static final int MSG_RUN_CLEAR = 4;
-    public static final int MSG_RUN_INITIALIZE = 5;
-    public static final int MSG_RUN_GET_RESTORE_SETS = 6;
-    public static final int MSG_RESTORE_SESSION_TIMEOUT = 8;
-    public static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
-    public static final int MSG_RUN_ADB_RESTORE = 10;
-    public static final int MSG_RETRY_INIT = 11;
-    public static final int MSG_RETRY_CLEAR = 12;
-    public static final int MSG_WIDGET_BROADCAST = 13;
-    public static final int MSG_RUN_FULL_TRANSPORT_BACKUP = 14;
-    public static final int MSG_REQUEST_BACKUP = 15;
-    public static final int MSG_SCHEDULE_BACKUP_PACKAGE = 16;
-    public static final int MSG_BACKUP_OPERATION_TIMEOUT = 17;
-    public static final int MSG_RESTORE_OPERATION_TIMEOUT = 18;
-
-    // backup task state machine tick
-    public static final int MSG_BACKUP_RESTORE_STEP = 20;
-    public static final int MSG_OP_COMPLETE = 21;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     private static final long TIMEOUT_INTERVAL = 10 * 1000;

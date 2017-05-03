@@ -16,6 +16,9 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
+import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
+
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupDataInput;
@@ -322,7 +325,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     // backup callback and returned.  Blow away the lingering (spurious)
                     // pending timeout message for it.
                     backupManagerService.getBackupHandler().removeMessages(
-                            RefactoredBackupManagerService.MSG_BACKUP_OPERATION_TIMEOUT);
+                            MSG_BACKUP_OPERATION_TIMEOUT);
                 }
             }
 
@@ -846,8 +849,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                                                 BackupManagerMonitor.EXTRA_LOG_ILLEGAL_KEY,
                                                 key));
                                 backupManagerService.getBackupHandler().removeMessages(
-                                        RefactoredBackupManagerService
-                                                .MSG_BACKUP_OPERATION_TIMEOUT);
+                                        MSG_BACKUP_OPERATION_TIMEOUT);
                                 BackupObserverUtils
                                         .sendBackupOnPackageResult(mObserver, pkgName,
                                                 BackupManager.ERROR_AGENT_FAILURE);
@@ -885,8 +887,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                         "operationComplete(): sending data to transport for "
                                 + pkgName);
             }
-            backupManagerService.getBackupHandler().removeMessages(
-                    RefactoredBackupManagerService.MSG_BACKUP_OPERATION_TIMEOUT);
+            backupManagerService.getBackupHandler().removeMessages(MSG_BACKUP_OPERATION_TIMEOUT);
             clearAgentState();
             backupManagerService.addBackupTrace("operation complete");
 
@@ -1115,7 +1116,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         backupManagerService.addBackupTrace("executeNextState => " + nextState);
         mCurrentState = nextState;
         Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                RefactoredBackupManagerService.MSG_BACKUP_RESTORE_STEP, this);
+                MSG_BACKUP_RESTORE_STEP, this);
         backupManagerService.getBackupHandler().sendMessage(msg);
     }
 }
