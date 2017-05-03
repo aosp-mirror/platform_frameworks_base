@@ -1059,7 +1059,7 @@ class ActivityStarter {
                 // We didn't do anything...  but it was needed (a.k.a., client don't use that
                 // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
                 resumeTargetStackIfNeeded();
-                if (outActivity.length > 0) {
+                if (outActivity != null && outActivity.length > 0) {
                     outActivity[0] = reusedActivity;
                 }
                 return START_TASK_TO_FRONT;
