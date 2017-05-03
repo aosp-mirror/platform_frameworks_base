@@ -613,9 +613,13 @@ public class PackageDexOptimizer {
 
         @Override
         protected int adjustDexoptNeeded(int dexoptNeeded) {
-            // Ensure compilation, no matter the current state.
-            // TODO: The return value is wrong when patchoat is needed.
-            return DexFile.DEX2OAT_FROM_SCRATCH;
+            if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
+                // Ensure compilation by pretending a compiler filter change on the
+                // apk/odex location (the reason for the '-'. A positive value means
+                // the 'oat' location).
+                return -DexFile.DEX2OAT_FOR_FILTER;
+            }
+            return dexoptNeeded;
         }
 
         @Override
