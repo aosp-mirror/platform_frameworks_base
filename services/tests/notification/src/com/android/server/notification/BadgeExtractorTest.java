@@ -69,7 +69,7 @@ public class BadgeExtractorTest {
         Notification n = builder.build();
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, mId, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel, true);
         return r;
     }
 
