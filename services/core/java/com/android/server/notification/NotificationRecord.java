@@ -85,6 +85,7 @@ public final class NotificationRecord {
     // to communicate with the ranking module.
     private float mContactAffinity;
     private boolean mRecentlyIntrusive;
+    private long mLastIntrusive;
 
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
@@ -515,10 +516,17 @@ public final class NotificationRecord {
 
     public void setRecentlyIntrusive(boolean recentlyIntrusive) {
         mRecentlyIntrusive = recentlyIntrusive;
+        if (recentlyIntrusive) {
+            mLastIntrusive = System.currentTimeMillis();
+        }
     }
 
     public boolean isRecentlyIntrusive() {
         return mRecentlyIntrusive;
+    }
+
+    public long getLastIntrusive() {
+        return mLastIntrusive;
     }
 
     public void setPackagePriority(int packagePriority) {
