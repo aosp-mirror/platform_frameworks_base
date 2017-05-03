@@ -16,16 +16,25 @@
 
 package android.text.method;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 
 import java.text.BreakIterator;
 import java.util.Locale;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 // TODO(Bug: 24062099): Add more tests for non-ascii text.
-public class WordIteratorTest  extends AndroidTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class WordIteratorTest {
 
-    @SmallTest
+    @Test
     public void testSetCharSequence() {
         final String text = "text";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -48,7 +57,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         wordIterator.setCharSequence(text, text.length(), text.length());
     }
 
-    @SmallTest
+    @Test
     public void testWindowWidth() {
         final String text = "aaaa bbbb cccc dddd eeee ffff gggg hhhh iiii jjjj kkkk llll mmmm nnnn";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -65,7 +74,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, wordIterator.following(expectedWindowEnd));
     }
 
-    @SmallTest
+    @Test
     public void testPreceding() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -105,7 +114,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(text.indexOf('j'), wordIterator.preceding(text.indexOf('l')));
     }
 
-    @SmallTest
+    @Test
     public void testFollowing() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -145,7 +154,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, wordIterator.following(text.length()));
     }
 
-    @SmallTest
+    @Test
     public void testIsBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -173,7 +182,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertTrue(wordIterator.isBoundary(text.length()));
     }
 
-    @SmallTest
+    @Test
     public void testNextBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -220,7 +229,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, currentOffset);
     }
 
-    @SmallTest
+    @Test
     public void testPrevBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -266,7 +275,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, currentOffset);
     }
 
-    @SmallTest
+    @Test
     public void testGetBeginning() {
         {
             final String text = "abc def-ghi. jkl";
@@ -340,7 +349,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testGetEnd() {
         {
             final String text = "abc def-ghi. jkl";
@@ -415,7 +424,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testGetPunctuationBeginning() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -450,7 +459,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(text.indexOf(';'), wordIterator.getPunctuationBeginning(text.length()));
     }
 
-    @SmallTest
+    @Test
     public void testGetPunctuationEnd() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -482,7 +491,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, wordIterator.getPunctuationEnd(text.length()));
     }
 
-    @SmallTest
+    @Test
     public void testIsAfterPunctuation() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -498,7 +507,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertFalse(wordIterator.isAfterPunctuation(text.length() + 1));
     }
 
-    @SmallTest
+    @Test
     public void testIsOnPunctuation() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -517,7 +526,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertFalse(wordIterator.isOnPunctuation(text.length() + 1));
     }
 
-    @SmallTest
+    @Test
     public void testApostropheMiddleOfWord() {
         // These tests confirm that the word "isn't" is treated like one word.
         final String text = "isn't he";

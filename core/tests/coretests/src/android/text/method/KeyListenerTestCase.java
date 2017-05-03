@@ -17,25 +17,19 @@
 package android.text.method;
 
 import android.app.Instrumentation;
-import android.test.InstrumentationTestCase;
+import android.support.test.InstrumentationRegistry;
 import android.view.KeyEvent;
 import android.widget.EditText;
 
-import com.android.frameworks.coretests.R;
-
-public abstract class KeyListenerTestCase extends InstrumentationTestCase {
-
+public abstract class KeyListenerTestCase {
     protected Instrumentation mInstrumentation;
     protected EditText mTextView;
 
     public KeyListenerTestCase() {
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mInstrumentation = getInstrumentation();
+    protected void setup() {
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mTextView = new EditText(mInstrumentation.getContext());
     }
 
