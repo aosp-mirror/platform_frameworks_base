@@ -69,6 +69,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
     private LeakCheck.Tracker mReceiver;
     private LeakCheck.Tracker mService;
     private LeakCheck.Tracker mComponent;
+    private TestableResources mTestableResources;
 
     public TestableContext(Context base) {
         this(base, null);
@@ -98,9 +99,37 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return super.getPackageManager();
     }
 
+    /**
+     * Makes sure the resources being returned by this TestableContext are a version of
+     * TestableResources.
+     * @see #getResources()
+     */
+    public void ensureTestableResources() {
+        if (mTestableResources == null) {
+            mTestableResources = new TestableResources(super.getResources());
+        }
+    }
+
+    /**
+     * Get (and create if necessary) {@link TestableResources} for this TestableContext.
+     */
+    public TestableResources getOrCreateTestableResources() {
+        ensureTestableResources();
+        return mTestableResources;
+    }
+
+    /**
+     * Returns a Resources instance for the test.
+     *
+     * By default this returns the same resources object that would come from the
+     * {@link ContextWrapper}, but if {@link #ensureTestableResources()} or
+     * {@link #getOrCreateTestableResources()} has been called, it will return resources gotten from
+     * {@link TestableResources}.
+     */
     @Override
     public Resources getResources() {
-        return super.getResources();
+        return mTestableResources != null ? mTestableResources.getResources()
+                : super.getResources();
     }
 
     public <T> void addMockSystemService(Class<T> service, T mock) {
