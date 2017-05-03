@@ -70,8 +70,6 @@ public class ImageGradientColorizer {
                 0, 0, 0, 1, 0,
         });
 
-        drawable.setColorFilter(new ColorMatrixColorFilter(m));
-        drawable.draw(canvas);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         LinearGradient linearGradient =  new LinearGradient(0, 0, size, 0,
                 new int[] {0, Color.argb(0.5f, 1, 1, 1), Color.BLACK},
@@ -83,14 +81,19 @@ public class ImageGradientColorizer {
         drawable.draw(fadeInCanvas);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
         fadeInCanvas.drawPaint(paint);
-        canvas.drawBitmap(fadeIn, 0, 0, null);
 
-        linearGradient = new LinearGradient(0, 0, size, 0,
-                new int[] {backgroundColor, Color.argb(0.5f, tr, tg, tb), 0},
+        Paint coloredPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        coloredPaint.setColorFilter(new ColorMatrixColorFilter(m));
+        coloredPaint.setAlpha((int) (0.5f * 255));
+        canvas.drawBitmap(fadeIn, 0, 0, coloredPaint);
+
+        linearGradient =  new LinearGradient(0, 0, size, 0,
+                new int[] {0, Color.argb(0.5f, 1, 1, 1), Color.BLACK},
                 new float[] {0.0f, 0.6f, 1.0f}, Shader.TileMode.CLAMP);
         paint.setShader(linearGradient);
-        paint.setXfermode(null);
-        canvas.drawPaint(paint);
+        fadeInCanvas.drawPaint(paint);
+        canvas.drawBitmap(fadeIn, 0, 0, null);
+
         return newBitmap;
     }
 }
