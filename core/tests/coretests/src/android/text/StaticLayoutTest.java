@@ -16,25 +16,30 @@
 
 package android.text;
 
+import static android.text.Layout.Alignment.ALIGN_NORMAL;
+import static org.junit.Assert.assertEquals;
+
 import android.graphics.Paint.FontMetricsInt;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
 import android.text.method.EditorState;
 import android.util.Log;
 
-import junit.framework.TestCase;
-
-import static android.text.Layout.Alignment.ALIGN_NORMAL;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests StaticLayout vertical metrics behavior.
  */
-public class StaticLayoutTest extends TestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class StaticLayoutTest {
     /**
      * Basic test showing expected behavior and relationship between font
      * metrics and line metrics.
      */
-    @SmallTest
+    @Test
     public void testGetters1() {
         LayoutBuilder b = builder();
         FontMetricsInt fmi = b.paint.getFontMetricsInt();
@@ -60,7 +65,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true with 1 line.
      * Top and bottom padding are affected, as is the line descent and height.
      */
-    @SmallTest
+    @Test
     public void testGetters2() {
         LayoutBuilder b = builder()
             .setIncludePad(true);
@@ -75,7 +80,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true wrapping to 2 lines.
      * Ascent of top line and descent of bottom line are affected.
      */
-    @SmallTest
+    @Test
     public void testGetters3() {
         LayoutBuilder b = builder()
             .setIncludePad(true)
@@ -92,7 +97,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true wrapping to 3 lines.
      * First line ascent is top, bottom line descent is bottom.
      */
-    @SmallTest
+    @Test
     public void testGetters4() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -112,7 +117,7 @@ public class StaticLayoutTest extends TestCase {
      * large text. See effect of leading. Currently, we don't expect there to
      * even be non-zero leading.
      */
-    @SmallTest
+    @Test
     public void testGetters5() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -139,7 +144,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true, spacingAdd = 2, wrapping
      * to 3 lines.
      */
-    @SmallTest
+    @Test
     public void testGetters6() {
         int spacingAdd = 2; // int so expressions return int
         LayoutBuilder b = builder()
@@ -160,7 +165,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true, spacingAdd = 2,
      * spacingMult = 1.5, wrapping to 3 lines.
      */
-    @SmallTest
+    @Test
     public void testGetters7() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -182,7 +187,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true, spacingAdd = 0,
      * spacingMult = 0.8 when wrapping to 3 lines.
      */
-    @SmallTest
+    @Test
     public void testGetters8() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -336,6 +341,7 @@ public class StaticLayoutTest extends TestCase {
      * Tests for keycap, variation selectors, flags are in CTS.
      * See {@link android.text.cts.StaticLayoutTest}.
      */
+    @Test
     public void testEmojiOffset() {
         EditorState state = new EditorState();
         TextPaint paint = new TextPaint();

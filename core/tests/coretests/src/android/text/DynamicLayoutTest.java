@@ -17,16 +17,28 @@
 package android.text;
 
 import static android.text.Layout.Alignment.ALIGN_NORMAL;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Paint.FontMetricsInt;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.style.ReplacementSpan;
-import junit.framework.TestCase;
 
-public class DynamicLayoutTest extends TestCase {
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class DynamicLayoutTest {
     private static final int WIDTH = 10000;
 
+    @Test
     public void testGetBlocksAlwaysNeedToBeRedrawn_en() {
         final SpannableStringBuilder builder = new SpannableStringBuilder();
         final DynamicLayout layout = new DynamicLayout(builder, new TextPaint(), WIDTH,
@@ -42,19 +54,7 @@ public class DynamicLayoutTest extends TestCase {
         assertNull(layout.getBlocksAlwaysNeedToBeRedrawn());
     }
 
-
-    private static class MockReplacementSpan extends ReplacementSpan {
-        @Override
-        public int getSize(Paint paint, CharSequence text, int start, int end, FontMetricsInt fm) {
-            return 10;
-        }
-
-        @Override
-        public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top,
-                int y, int bottom, Paint paint) {
-        }
-    }
-
+    @Test
     public void testGetBlocksAlwaysNeedToBeRedrawn_replacementSpan() {
         final SpannableStringBuilder builder = new SpannableStringBuilder();
         final DynamicLayout layout = new DynamicLayout(builder, new TextPaint(), WIDTH,
@@ -66,11 +66,17 @@ public class DynamicLayoutTest extends TestCase {
         builder.append("hijk lmn\n");
         assertNull(layout.getBlocksAlwaysNeedToBeRedrawn());
 
-        builder.setSpan(new MockReplacementSpan(), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ReplacementSpan mockReplacementSpan = mock(ReplacementSpan.class);
+        when(mockReplacementSpan.getSize(any(), any(), any(), any(), any()))
+            .thenReturn(10);
+        doNothing().when(mockReplacementSpan)
+            .draw(any(), any(), any(), any(), any(), any(), any(), any(), any());
+
+        builder.setSpan(mockReplacementSpan, 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         assertNotNull(layout.getBlocksAlwaysNeedToBeRedrawn());
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().contains(0));
 
-        builder.setSpan(new MockReplacementSpan(), 9, 13, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.setSpan(mockReplacementSpan, 9, 13, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().contains(0));
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().contains(1));
 
@@ -83,6 +89,7 @@ public class DynamicLayoutTest extends TestCase {
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().isEmpty());
     }
 
+    @Test
     public void testGetBlocksAlwaysNeedToBeRedrawn_thai() {
         final SpannableStringBuilder builder = new SpannableStringBuilder();
         final DynamicLayout layout = new DynamicLayout(builder, new TextPaint(), WIDTH,
