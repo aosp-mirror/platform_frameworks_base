@@ -124,7 +124,8 @@ public class WifiTracker {
     */
     private final Object mLock = new Object();
 
-    //visible to both worker and main thread. Guarded by #mInternalAccessPoints
+    //visible to both worker and main thread.
+    @GuardedBy("mLock")
     private final AccessPointListenerAdapter mAccessPointListenerAdapter
             = new AccessPointListenerAdapter();
 
@@ -1005,12 +1006,13 @@ public class WifiTracker {
         if (DBG) {
             Log.d(TAG, "Starting to copy AP items on the MainHandler");
         }
-        if (notifyListeners) {
-            notificationMap = mAccessPointListenerAdapter.mPendingNotifications.clone();
-        }
-
-        mAccessPointListenerAdapter.mPendingNotifications.clear();
         synchronized (mLock) {
+            if (notifyListeners) {
+                notificationMap = mAccessPointListenerAdapter.mPendingNotifications.clone();
+            }
+
+            mAccessPointListenerAdapter.mPendingNotifications.clear();
+
             for (AccessPoint internalAccessPoint : mInternalAccessPoints) {
                 AccessPoint accessPoint = oldAccessPoints.get(internalAccessPoint.mId);
                 if (accessPoint == null) {
