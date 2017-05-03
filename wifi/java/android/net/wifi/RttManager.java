@@ -660,10 +660,10 @@ public class RttManager {
         @Deprecated
         public int tx_rate;
 
-        /** average transmit rate. Unit (100kbps). */
+        /** average transmit rate. Unit (kbps). */
         public int txRate;
 
-        /** average receiving rate Unit (100kbps). */
+        /** average receiving rate Unit (kbps). */
         public int rxRate;
 
        /**
@@ -673,7 +673,7 @@ public class RttManager {
         @Deprecated
         public long rtt_ns;
 
-        /** average round trip time in 0.1 nano second. */
+        /** average round trip time in picoseconds. */
         public long rtt;
 
         /**
@@ -683,7 +683,7 @@ public class RttManager {
         @Deprecated
         public long rtt_sd_ns;
 
-        /** standard deviation of RTT in 0.1 ns. */
+        /** standard deviation of RTT in picoseconds. */
         public long rttStandardDeviation;
 
         /**
@@ -693,7 +693,7 @@ public class RttManager {
         @Deprecated
         public long rtt_spread_ns;
 
-        /** spread (i.e. max - min) RTT in 0.1 ns. */
+        /** spread (i.e. max - min) RTT in picoseconds. */
         public long rttSpread;
 
         /**
