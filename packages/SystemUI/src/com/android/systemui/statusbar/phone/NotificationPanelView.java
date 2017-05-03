@@ -185,6 +185,7 @@ public class NotificationPanelView extends PanelView implements
     private int mQsFalsingThreshold;
 
     private float mKeyguardStatusBarAnimateAlpha = 1f;
+    private float mQsClockAlphaOverride = 1f;
     private int mOldLayoutDirection;
     private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private boolean mIsExpansionFromHeadsUp;
@@ -500,7 +501,7 @@ public class NotificationPanelView extends PanelView implements
 
     private void updateClock(float alpha, float scale) {
         if (!mKeyguardStatusViewAnimating) {
-            mKeyguardStatusView.setAlpha(alpha);
+            mKeyguardStatusView.setAlpha(alpha * mQsClockAlphaOverride);
         }
         mKeyguardStatusView.setScaleX(scale);
         mKeyguardStatusView.setScaleY(scale);
@@ -1248,6 +1249,15 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBarState == StatusBarState.SHADE && mQsExpanded
                 && !mStackScrollerOverscrolling && mQsScrimEnabled) {
             mQsNavbarScrim.setAlpha(getQsExpansionFraction());
+        }
+
+        // Fade clock when QS is on top of it
+        float newClockAlpha = (height - mKeyguardStatusView.getY()) /
+                mKeyguardStatusView.getHeight();
+        newClockAlpha = 1 - MathUtils.constrain(newClockAlpha, 0, 1);
+        if (newClockAlpha != mQsClockAlphaOverride) {
+            mQsClockAlphaOverride = Interpolators.ALPHA_OUT.getInterpolation(newClockAlpha);
+            updateClock(mClockPositionResult.clockAlpha, mClockPositionResult.clockScale);
         }
 
         // Upon initialisation when we are not layouted yet we don't want to announce that we are

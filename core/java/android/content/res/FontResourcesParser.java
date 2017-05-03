@@ -19,6 +19,7 @@ import com.android.internal.R;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -34,6 +35,7 @@ import java.util.List;
  * @hide
  */
 public class FontResourcesParser {
+    private static final String TAG = "FontResourcesParser";
     private static final int NORMAL_WEIGHT = 400;
     private static final int ITALIC = 1;
 
@@ -79,12 +81,10 @@ public class FontResourcesParser {
         private boolean mItalic;
         private int mResourceId;
 
-        public FontFileResourceEntry(@NonNull String fileName, int weight, boolean italic,
-                int resourceId) {
+        public FontFileResourceEntry(@NonNull String fileName, int weight, boolean italic) {
             mFileName = fileName;
             mWeight = weight;
             mItalic = italic;
-            mResourceId = resourceId;
         }
 
         public @NonNull String getFileName() {
@@ -97,10 +97,6 @@ public class FontResourcesParser {
 
         public boolean isItalic() {
             return mItalic;
-        }
-
-        public int getResourceId() {
-            return mResourceId;
         }
     }
 
@@ -140,6 +136,7 @@ public class FontResourcesParser {
             return readFamily(parser, resources);
         } else {
             skip(parser);
+            Log.e(TAG, "Failed to find font-family tag");
             return null;
         }
     }
@@ -184,7 +181,10 @@ public class FontResourcesParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("font")) {
-                fonts.add(readFont(parser, resources));
+                final FontFileResourceEntry entry = readFont(parser, resources);
+                if (entry != null) {
+                    fonts.add(entry);
+                }
             } else {
                 skip(parser);
             }
@@ -203,12 +203,14 @@ public class FontResourcesParser {
         int weight = array.getInt(R.styleable.FontFamilyFont_fontWeight, NORMAL_WEIGHT);
         boolean isItalic = ITALIC == array.getInt(R.styleable.FontFamilyFont_fontStyle, 0);
         String filename = array.getString(R.styleable.FontFamilyFont_font);
-        int resourceId = array.getResourceId(R.styleable.FontFamilyFont_font, 0);
         array.recycle();
         while (parser.next() != XmlPullParser.END_TAG) {
             skip(parser);
         }
-        return new FontFileResourceEntry(filename, weight, isItalic, resourceId);
+        if (filename == null) {
+            return null;
+        }
+        return new FontFileResourceEntry(filename, weight, isItalic);
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {

@@ -463,7 +463,7 @@ interface IPackageManager {
      *
      * See PackageManager.NOTIFY_PACKAGE_USE_* for reasons.
      */
-    void notifyPackageUse(String packageName, int reason);
+    oneway void notifyPackageUse(String packageName, int reason);
 
     /**
      * Notify the package manager that a list of dex files have been loaded.
@@ -472,7 +472,8 @@ interface IPackageManager {
      * @param dexPats the list of the dex files paths that have been loaded
      * @param loaderIsa the ISA of the loader process
      */
-    void notifyDexLoad(String loadingPackageName, in List<String> dexPaths, String loaderIsa);
+    oneway void notifyDexLoad(String loadingPackageName, in List<String> dexPaths,
+            String loaderIsa);
 
     /**
      * Register an application dex module with the package manager.
@@ -503,7 +504,7 @@ interface IPackageManager {
      *   {@link android.content.pm.IDexModuleRegisterCallback.IDexModuleRegisterCallback#onDexModuleRegistered}
      *   will be called once the registration finishes.
      */
-     void registerDexModule(in String packageName, in String dexModulePath,
+     oneway void registerDexModule(in String packageName, in String dexModulePath,
              in boolean isSharedModule, IDexModuleRegisterCallback callback);
 
     /**

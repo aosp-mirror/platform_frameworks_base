@@ -26,6 +26,7 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -236,6 +237,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    @Ignore
     public void testFocusedWindowMultipleDisplays() throws Exception {
         // Create a focusable window and check that focus is calcualted correctly
         final WindowState window1 =

@@ -699,6 +699,14 @@ public final class BridgeTypedArray extends TypedArray {
         return ResourceHelper.getDrawable(value, mContext, mTheme);
     }
 
+    /**
+     * Version of {@link #getDrawable(int)} that accepts an override density.
+     * @hide
+     */
+    @Override
+    public Drawable getDrawableForDensity(int index, int density) {
+        return getDrawable(index);
+    }
 
     /**
      * Retrieve the Typeface for the attribute at <var>index</var>.

@@ -442,10 +442,12 @@ static void CameraMetadata_dump(JNIEnv *env, jobject thiz) {
 
         if (threadRet != 0) {
             close(writeFd);
+            close(readFd);
 
             jniThrowExceptionFmt(env, "java/io/IOException",
                     "Failed to create thread for writing (errno = %#x, message = '%s')",
                     threadRet, strerror(threadRet));
+            return;
         }
     }
 
@@ -476,6 +478,8 @@ static void CameraMetadata_dump(JNIEnv *env, jobject thiz) {
         } else if (!logLine.isEmpty()) {
             ALOGD("%s", logLine.string());
         }
+
+        close(readFd);
     }
 
     int res;

@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION">%2$s</xliff:g> मा जडान छ।\n\nथप जानकारीका लागि, आफ्ना प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> मा जडान छ। \n\nतपाईं आफ्नो व्यक्तिगत नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> मा पनि जडान हुनुहुन्छ।"</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> का लागि अनलक गरियो"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>
@@ -655,7 +654,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"किबोर्ड स्विचर"</string>
     <string name="save" msgid="2311877285724540644">"सुरक्षित गर्नुहोस्"</string>
-    <string name="reset" msgid="2448168080964209908">"पुनःसेट गर्नु"</string>
+    <string name="reset" msgid="2448168080964209908">"रिसेट गर्नुहोस्"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"बटनको चौडाइ समायोजन गर्नुहोस्"</string>
     <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"अनुकूलनको नेभिगेशन बटन"</string>
@@ -763,4 +762,8 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> सम्म"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"राख्नुहोस्"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"प्रतिस्थापन गर्नुहोस्"</string>
+    <!-- no translation found for running_foreground_services_title (381024150898615683) -->
+    <skip />
+    <!-- no translation found for running_foreground_services_msg (6326247670075574355) -->
+    <skip />
 </resources>

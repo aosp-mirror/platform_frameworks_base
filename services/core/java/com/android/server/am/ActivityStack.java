@@ -655,11 +655,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    final ActivityRecord topRunningActivityLocked() {
+    ActivityRecord topRunningActivityLocked() {
         return topRunningActivityLocked(false /* focusableOnly */);
     }
 
-    final ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
+    private ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked();
             if (r != null && (!focusableOnly || r.isFocusable())) {
@@ -669,7 +669,21 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return null;
     }
 
-    final ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
+    ActivityRecord topRunningNonOverlayTaskActivity() {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (!r.finishing && !r.mTaskOverlay) {
+                    return r;
+                }
+            }
+        }
+        return null;
+    }
+
+    ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -987,7 +1001,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 result.matchedByRootAffinity = false;
                 break;
             } else if (!isDocument && !taskIsDocument
-                    && result.r == null && task.canMatchRootAffinity()) {
+                    && result.r == null && task.rootAffinity != null) {
                 if (task.rootAffinity.equals(target.taskAffinity)) {
                     if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching affinity candidate!");
                     // It is possible for multiple tasks to have the same root affinity especially

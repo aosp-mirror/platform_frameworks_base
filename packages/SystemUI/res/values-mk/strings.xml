@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, којашто може да ја следи вашата лична активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Профилот е поврзан на <xliff:g id="APPLICATION">%2$s</xliff:g>, што може да ја следи вашата работна активност на мрежата, заедно со е-пораките, апликациите и веб-сајтовите.\n\nЗа повеќе информации, контактирајте со вашиот администратор."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Профилот е поврзан на <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, што може да ја следи вашата работна активност на мрежата, заедно со е-пораките, апликациите и веб-сајтовите.\n\nПоврзани сте и на <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, што може да ја следи вашата лична активност на мрежата."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Отклучен за <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Уредот ќе остане заклучен додека рачно не го отклучите"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Добивајте известувања побрзо"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Видете ги пред да отклучите"</string>
@@ -763,4 +762,8 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"До <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Задржи"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замени"</string>
+    <!-- no translation found for running_foreground_services_title (381024150898615683) -->
+    <skip />
+    <!-- no translation found for running_foreground_services_msg (6326247670075574355) -->
+    <skip />
 </resources>

@@ -39,8 +39,8 @@
     <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM karta yo‘q"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"Planshetingizda SIM karta yo‘q."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"Telefoningizda SIM karta yo‘q."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Telefonga SIM kartani joylashtiring."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM karta qo‘yilmagan yoki o‘qib bo‘lmayapti. SIM kartani joylashtiring."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Telefonga SIM karta soling."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM karta solinmagan yoki u yaroqsiz. SIM karta soling."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"Foydalanib bo‘lmaydigan SIM karta."</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"SIM kartangiz butunlay bloklab qo‘yilgan.\n Yangi SIM karta olish uchun aloqa operatoringiz bilan bog‘laning."</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM karta qulflangan."</string>

@@ -40,6 +40,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LocaleSpan;
 import android.text.style.MetricAffectingSpan;
+import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.ReplacementSpan;
@@ -56,6 +57,7 @@ import android.text.style.TtsSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.text.style.UpdateAppearance;
 import android.util.Log;
 import android.util.Printer;
 import android.view.View;
@@ -1901,6 +1903,22 @@ public class TextUtils {
      */
     public static CharSequence formatSelectedCount(int count) {
         return Resources.getSystem().getQuantityString(R.plurals.selected_count, count, count);
+    }
+
+    /**
+     * Returns whether or not the specified spanned text has a style span.
+     * @hide
+     */
+    public static boolean hasStyleSpan(@NonNull Spanned spanned) {
+        Preconditions.checkArgument(spanned != null);
+        final Class<?>[] styleClasses = {
+                CharacterStyle.class, ParagraphStyle.class, UpdateAppearance.class};
+        for (Class<?> clazz : styleClasses) {
+            if (spanned.nextSpanTransition(-1, spanned.length(), clazz) < spanned.length()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Object sLock = new Object();

@@ -789,7 +789,6 @@ public class ResourcesImpl {
                 final FontResourcesParser.FamilyResourceEntry familyEntry =
                         FontResourcesParser.parse(rp, wrapper);
                 if (familyEntry == null) {
-                    Log.e(TAG, "Failed to find font-family tag");
                     return null;
                 }
                 return Typeface.createFromResources(familyEntry, mAssets, file);
