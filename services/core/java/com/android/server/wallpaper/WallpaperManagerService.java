@@ -1262,13 +1262,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "clearWallpaper", null);
 
+        WallpaperData data = null;
         synchronized (mLock) {
             clearWallpaperLocked(false, which, userId, null);
+
+            if (which == FLAG_LOCK) {
+                data = mLockWallpaperMap.get(userId);
+            }
+            if (which == FLAG_SYSTEM || data == null) {
+                data = mWallpaperMap.get(userId);
+            }
         }
 
         // When clearing a wallpaper, broadcast new valid colors
-        WallpaperData data = getWallpaperSafeLocked(mCurrentUserId, which);
-        notifyWallpaperColorsChanged(data, which);
+        if (data != null) {
+            notifyWallpaperColorsChanged(data, which);
+        }
     }
 
     void clearWallpaperLocked(boolean defaultFailed, int which, int userId, IRemoteCallback reply) {
