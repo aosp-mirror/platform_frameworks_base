@@ -22,7 +22,6 @@ option java_outer_classname = "IncidentProtoMetadata";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
-import "frameworks/base/core/proto/android/service/graphicsstats.proto";
 import "frameworks/base/core/proto/android/service/fingerprint.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
@@ -66,5 +65,4 @@ message IncidentProto {
     android.service.notification.NotificationServiceDumpProto notification = 3004;
     android.service.pm.PackageServiceDumpProto package = 3008;
     android.service.power.PowerServiceDumpProto power = 3009;
-    android.service.GraphicsStatsServiceDumpProto graphicsstats = 3005;
 }
