@@ -607,6 +607,7 @@ final class TextClassifierImpl implements TextClassifier {
         @Nullable
         public static Intent create(Context context, String type, String text) {
             type = type.trim().toLowerCase(Locale.ENGLISH);
+            text = text.trim();
             switch (type) {
                 case TextClassifier.TYPE_EMAIL:
                     return new Intent(Intent.ACTION_SENDTO)
@@ -618,6 +619,9 @@ final class TextClassifierImpl implements TextClassifier {
                     return new Intent(Intent.ACTION_VIEW)
                             .setData(Uri.parse(String.format("geo:0,0?q=%s", text)));
                 case TextClassifier.TYPE_URL:
+                    if (!text.startsWith("https://") && !text.startsWith("http://")) {
+                        text = "http://" + text;
+                    }
                     return new Intent(Intent.ACTION_VIEW, Uri.parse(text))
                             .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
                 default:
