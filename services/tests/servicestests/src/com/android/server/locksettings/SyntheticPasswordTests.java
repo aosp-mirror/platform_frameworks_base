@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server;
+package com.android.server.locksettings;
 
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
@@ -24,12 +24,12 @@ import android.os.UserHandle;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
-import com.android.server.SyntheticPasswordManager.AuthenticationResult;
-import com.android.server.SyntheticPasswordManager.AuthenticationToken;
+import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
+import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
 
 
 /**
- * runtest frameworks-services -c com.android.server.SyntheticPasswordTests
+ * runtest frameworks-services -c com.android.server.locksettings.SyntheticPasswordTests
  */
 public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 

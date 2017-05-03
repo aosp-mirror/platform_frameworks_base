@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server;
+package com.android.server.locksettings;
 
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;

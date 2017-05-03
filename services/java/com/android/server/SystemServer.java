@@ -177,7 +177,7 @@ public final class SystemServer {
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
-            "com.android.server.LockSettingsService$Lifecycle";
+            "com.android.server.locksettings.LockSettingsService$Lifecycle";
     private static final String STORAGE_MANAGER_SERVICE_CLASS =
             "com.android.server.StorageManagerService$Lifecycle";
     private static final String STORAGE_STATS_SERVICE_CLASS =

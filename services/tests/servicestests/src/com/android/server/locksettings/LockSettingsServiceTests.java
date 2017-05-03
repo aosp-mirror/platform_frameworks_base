@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server;
+package com.android.server.locksettings;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
@@ -25,11 +25,11 @@ import android.service.gatekeeper.GateKeeperResponse;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
-import com.android.server.LockSettingsStorage.CredentialHash;
-import com.android.server.MockGateKeeperService.VerifyHandle;
+import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
+import com.android.server.locksettings.MockGateKeeperService.VerifyHandle;
 
 /**
- * runtest frameworks-services -c com.android.server.LockSettingsServiceTests
+ * runtest frameworks-services -c com.android.server.locksettings.LockSettingsServiceTests
  */
 public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
