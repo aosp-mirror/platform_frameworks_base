@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Message;
 import android.service.quicksettings.Tile;
@@ -30,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
@@ -179,7 +181,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     public void openDetails(String subPanel) {
         QSTile tile = getTile(subPanel);
-        showDetailAdapter(true, tile.getDetailAdapter(), new int[] {getWidth() / 2, 0});
+        showDetailAdapter(true, tile.getDetailAdapter(), new int[]{getWidth() / 2, 0});
     }
 
     private QSTile getTile(String subPanel) {
@@ -485,8 +487,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     private void logTiles() {
         for (int i = 0; i < mRecords.size(); i++) {
-            TileRecord tileRecord = mRecords.get(i);
-            mMetricsLogger.visible(tileRecord.tile.getMetricsCategory());
+            QSTile tile = mRecords.get(i).tile;
+            mMetricsLogger.write(tile.populate(new LogMaker(tile.getMetricsCategory())
+                    .setType(MetricsEvent.TYPE_OPEN)));
         }
     }
 
@@ -544,12 +547,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
         private static final int ANNOUNCE_FOR_ACCESSIBILITY = 3;
+
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_DETAIL) {
-                handleShowDetail((Record)msg.obj, msg.arg1 != 0);
+                handleShowDetail((Record) msg.obj, msg.arg1 != 0);
             } else if (msg.what == ANNOUNCE_FOR_ACCESSIBILITY) {
-                announceForAccessibility((CharSequence)msg.obj);
+                announceForAccessibility((CharSequence) msg.obj);
             }
         }
     }
@@ -569,8 +573,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     public interface QSTileLayout {
         void addTile(TileRecord tile);
+
         void removeTile(TileRecord tile);
+
         int getOffsetTop(TileRecord tile);
+
         boolean updateResources();
 
         void setListening(boolean listening);
