@@ -21,7 +21,10 @@ import android.graphics.Rect;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -34,6 +37,8 @@ import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
+
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
 
@@ -87,13 +92,15 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE
 class RootWindowContainer extends WindowContainer<DisplayContent> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootWindowContainer" : TAG_WM;
 
+    private static final int SET_SCREEN_BRIGHTNESS_OVERRIDE = 1;
+    private static final int SET_USER_ACTIVITY_TIMEOUT = 2;
+
     WindowManagerService mService;
 
     private boolean mWallpaperForceHidingChanged = false;
     private Object mLastWindowFreezeSource = null;
     private Session mHoldScreen = null;
     private float mScreenBrightness = -1;
-    private float mButtonBrightness = -1;
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
     // Following variables are for debugging screen wakelock only.
@@ -128,6 +135,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private final WindowLayersController mLayersController;
     final WallpaperController mWallpaperController;
 
+    private final Handler mHandler;
+
     private String mCloseSystemDialogsReason;
     private final Consumer<WindowState> mCloseSystemDialogsConsumer = w -> {
         if (w.mHasSurface) {
@@ -147,6 +156,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     RootWindowContainer(WindowManagerService service) {
         mService = service;
+        mHandler = new MyHandler(service.mH.getLooper());
         mLayersController = new WindowLayersController(mService);
         mWallpaperController = new WallpaperController(mService);
     }
@@ -552,7 +562,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         mHoldScreen = null;
         mScreenBrightness = -1;
-        mButtonBrightness = -1;
         mUserActivityTimeout = -1;
         mObscureApplicationContentOnSecondaryDisplays = false;
         mSustainedPerformanceModeCurrent = false;
@@ -702,20 +711,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         mService.setHoldScreenLocked(mHoldScreen);
         if (!mService.mDisplayFrozen) {
-            if (mScreenBrightness < 0 || mScreenBrightness > 1.0f) {
-                mService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(-1);
-            } else {
-                mService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
-                        toBrightnessOverride(mScreenBrightness));
-            }
-            if (mButtonBrightness < 0 || mButtonBrightness > 1.0f) {
-                mService.mPowerManagerInternal.setButtonBrightnessOverrideFromWindowManager(-1);
-            } else {
-                mService.mPowerManagerInternal.setButtonBrightnessOverrideFromWindowManager(
-                        toBrightnessOverride(mButtonBrightness));
-            }
-            mService.mPowerManagerInternal.setUserActivityTimeoutOverrideFromWindowManager(
-                    mUserActivityTimeout);
+            final int brightness = mScreenBrightness < 0 || mScreenBrightness > 1.0f
+                    ? -1 : toBrightnessOverride(mScreenBrightness);
+
+            // Post these on a handler such that we don't call into power manager service while
+            // holding the window manager lock to avoid lock contention with power manager lock.
+            mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, brightness, 0).sendToTarget();
+            mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
         }
 
         if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
@@ -863,9 +865,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             if (!syswin && w.mAttrs.screenBrightness >= 0 && mScreenBrightness < 0) {
                 mScreenBrightness = w.mAttrs.screenBrightness;
             }
-            if (!syswin && w.mAttrs.buttonBrightness >= 0 && mButtonBrightness < 0) {
-                mButtonBrightness = w.mAttrs.buttonBrightness;
-            }
             if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
                 mUserActivityTimeout = w.mAttrs.userActivityTimeout;
             }
@@ -933,6 +932,29 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     private static int toBrightnessOverride(float value) {
         return (int)(value * PowerManager.BRIGHTNESS_ON);
+    }
+
+    private final class MyHandler extends Handler {
+
+        public MyHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case SET_SCREEN_BRIGHTNESS_OVERRIDE:
+                    mService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
+                            msg.arg1);
+                    break;
+                case SET_USER_ACTIVITY_TIMEOUT:
+                    mService.mPowerManagerInternal.setUserActivityTimeoutOverrideFromWindowManager(
+                            (Long) msg.obj);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     void enableSurfaceTrace(ParcelFileDescriptor pfd) {
