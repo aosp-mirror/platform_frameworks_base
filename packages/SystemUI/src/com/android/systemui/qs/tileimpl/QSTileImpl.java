@@ -175,7 +175,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         mHandler.sendEmptyMessage(H.LONG_CLICK);
     }
 
-    protected LogMaker populate(LogMaker logMaker) {
+    public LogMaker populate(LogMaker logMaker) {
         if (mState instanceof BooleanState) {
             logMaker.addTaggedData(FIELD_QS_VALUE, ((BooleanState) mState).value ? 1 : 0);
         }
