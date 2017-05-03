@@ -998,9 +998,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
             if (mRssi != info.getRssi()) {
                 mRssi = info.getRssi();
                 updated = true;
+            } else if (mNetworkInfo.getDetailedState() != networkInfo.getDetailedState()) {
+                updated = true;
             }
             mInfo = info;
-            // TODO(b/37289220): compare NetworkInfo states and set updated = true if necessary
             mNetworkInfo = networkInfo;
         } else if (mInfo != null) {
             updated = true;
