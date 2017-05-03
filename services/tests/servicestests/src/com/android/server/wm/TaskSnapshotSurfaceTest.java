@@ -171,8 +171,22 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mSurface.drawStatusBarBackground(mockCanvas, new Rect(0, 0, 50, 100), 10);
+        mSurface.mSystemBarBackgroundPainter.drawStatusBarBackground(
+                mockCanvas, new Rect(0, 0, 50, 100), 10);
         verify(mockCanvas).drawRect(eq(50.0f), eq(0.0f), eq(90.0f), eq(10.0f), any());
+    }
+
+    @Test
+    public void testDrawStatusBarBackground_nullFrame() {
+        setupSurface(100, 100);
+        final Rect insets = new Rect(0, 10, 10, 0);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        final Canvas mockCanvas = mock(Canvas.class);
+        when(mockCanvas.getWidth()).thenReturn(100);
+        when(mockCanvas.getHeight()).thenReturn(100);
+        mSurface.mSystemBarBackgroundPainter.drawStatusBarBackground(
+                mockCanvas, null, 10);
+        verify(mockCanvas).drawRect(eq(0.0f), eq(0.0f), eq(90.0f), eq(10.0f), any());
     }
 
     @Test
@@ -183,7 +197,8 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mSurface.drawStatusBarBackground(mockCanvas, new Rect(0, 0, 100, 100), 10);
+        mSurface.mSystemBarBackgroundPainter.drawStatusBarBackground(
+                mockCanvas, new Rect(0, 0, 100, 100), 10);
         verify(mockCanvas, never()).drawRect(anyInt(), anyInt(), anyInt(), anyInt(), any());
     }
 
@@ -196,7 +211,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mSurface.drawNavigationBarBackground(mockCanvas);
+        mSurface.mSystemBarBackgroundPainter.drawNavigationBarBackground(mockCanvas);
         verify(mockCanvas).drawRect(eq(new Rect(0, 90, 100, 100)), any());
     }
 
@@ -209,7 +224,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mSurface.drawNavigationBarBackground(mockCanvas);
+        mSurface.mSystemBarBackgroundPainter.drawNavigationBarBackground(mockCanvas);
         verify(mockCanvas).drawRect(eq(new Rect(0, 0, 10, 100)), any());
     }
 
@@ -222,7 +237,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mSurface.drawNavigationBarBackground(mockCanvas);
+        mSurface.mSystemBarBackgroundPainter.drawNavigationBarBackground(mockCanvas);
         verify(mockCanvas).drawRect(eq(new Rect(90, 0, 100, 100)), any());
     }
 }
