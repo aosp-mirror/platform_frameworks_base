@@ -10,8 +10,9 @@
 #ifndef Movie_DEFINED
 #define Movie_DEFINED
 
-#include "SkRefCnt.h"
+#include "SkBitmap.h"
 #include "SkCanvas.h"
+#include "SkRefCnt.h"
 
 class SkStreamRewindable;
 
