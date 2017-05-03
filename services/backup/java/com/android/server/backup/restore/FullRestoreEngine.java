@@ -371,9 +371,14 @@ public class FullRestoreEngine extends RestoreEngine {
                     if (okay) {
                         boolean agentSuccess = true;
                         long toCopy = info.size;
+                        final boolean isSharedStorage = pkg.equals(
+                                RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE);
+                        final long timeout = isSharedStorage ?
+                                RefactoredBackupManagerService.TIMEOUT_SHARED_BACKUP_INTERVAL :
+                                RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL;
                         try {
                             backupManagerService.prepareOperationTimeout(token,
-                                    RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
+                                    timeout,
                                     mMonitorTask,
                                     RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT);
 
