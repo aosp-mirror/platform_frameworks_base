@@ -314,8 +314,6 @@ public class RankingHelperTest {
         assertEquals(channel1, mHelper.getNotificationChannel(PKG, UID, channel1.getId(), false));
         compareChannels(channel2,
                 mHelper.getNotificationChannel(PKG, UID, channel2.getId(), false));
-        assertNotNull(mHelper.getNotificationChannel(
-                PKG, UID, NotificationChannel.DEFAULT_CHANNEL_ID, false));
 
         List<NotificationChannelGroup> actualGroups =
                 mHelper.getNotificationChannelGroups(PKG, UID, false).getList();
@@ -381,12 +379,7 @@ public class RankingHelperTest {
 
     @Test
     public void testChannelXml_defaultChannelLegacyApp_noUserSettings() throws Exception {
-        NotificationChannel channel1 =
-                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_DEFAULT);
-
-        mHelper.createNotificationChannel(PKG, UID, channel1, true);
-
-        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false, channel1.getId(),
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false,
                 NotificationChannel.DEFAULT_CHANNEL_ID);
 
         loadStreamXml(baos);
@@ -401,16 +394,12 @@ public class RankingHelperTest {
 
     @Test
     public void testChannelXml_defaultChannelUpdatedApp_userSettings() throws Exception {
-        NotificationChannel channel1 =
-                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_MIN);
-        mHelper.createNotificationChannel(PKG, UID, channel1, true);
-
         final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG, UID,
                 NotificationChannel.DEFAULT_CHANNEL_ID, false);
         defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         mHelper.updateNotificationChannel(PKG, UID, defaultChannel);
 
-        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false, channel1.getId(),
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false,
                 NotificationChannel.DEFAULT_CHANNEL_ID);
 
         loadStreamXml(baos);
@@ -445,12 +434,9 @@ public class RankingHelperTest {
                 | NotificationChannel.USER_LOCKED_VISIBILITY,
                 updated1.getUserLockedFields());
 
-        // STOPSHIP - this should be reversed after the STOPSHIP is removed in the tested code.
         // No Default Channel created for updated packages
-        // assertEquals(null, mHelper.getNotificationChannel(UPDATED_PKG, UID2,
-        //         NotificationChannel.DEFAULT_CHANNEL_ID, false));
-        assertTrue(mHelper.getNotificationChannel(UPDATED_PKG, UID2,
-                NotificationChannel.DEFAULT_CHANNEL_ID, false) != null);
+        assertEquals(null, mHelper.getNotificationChannel(UPDATED_PKG, UID2,
+                NotificationChannel.DEFAULT_CHANNEL_ID, false));
     }
 
     @Test
@@ -466,12 +452,9 @@ public class RankingHelperTest {
         when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(upgraded);
         loadStreamXml(baos);
 
-        // STOPSHIP - this should be reversed after the STOPSHIP is removed in the tested code.
         // Default Channel should be gone.
-        // assertEquals(null, mHelper.getNotificationChannel(PKG, UID,
-        //         NotificationChannel.DEFAULT_CHANNEL_ID, false));
-        assertTrue(mHelper.getNotificationChannel(UPDATED_PKG, UID2,
-                NotificationChannel.DEFAULT_CHANNEL_ID, false) != null);
+        assertEquals(null, mHelper.getNotificationChannel(PKG, UID,
+                NotificationChannel.DEFAULT_CHANNEL_ID, false));
     }
 
     @Test
@@ -1067,7 +1050,7 @@ public class RankingHelperTest {
         for (int i = 0; i < numPackages; i++) {
             JSONObject object = actual.getJSONObject(i);
             assertTrue(expectedChannels.containsKey(object.get("packageName")));
-            assertEquals(expectedChannels.get(object.get("packageName")).intValue() + 1,
+            assertEquals(expectedChannels.get(object.get("packageName")).intValue(),
                     object.getInt("channelCount"));
         }
     }
