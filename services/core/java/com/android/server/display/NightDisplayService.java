@@ -47,7 +47,6 @@ import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
-import com.android.server.vr.VrManagerService;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Calendar;
@@ -62,7 +61,6 @@ public final class NightDisplayService extends SystemService
         implements NightDisplayController.Callback {
 
     private static final String TAG = "NightDisplayService";
-    private static final boolean DEBUG = false;
 
     /**
      * The transition time, in milliseconds, for Night Display to turn on/off.
@@ -151,8 +149,9 @@ public final class NightDisplayService extends SystemService
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            IVrManager vrManager = (IVrManager) getBinderService(Context.VR_SERVICE);
+        if (phase >= PHASE_SYSTEM_SERVICES_READY) {
+            final IVrManager vrManager = IVrManager.Stub.asInterface(
+                    getBinderService(Context.VR_SERVICE));
             if (vrManager != null) {
                 try {
                     vrManager.registerListener(mVrStateCallbacks);
@@ -160,7 +159,9 @@ public final class NightDisplayService extends SystemService
                     Slog.e(TAG, "Failed to register VR mode state listener: " + e);
                 }
             }
-        } else if (phase == PHASE_BOOT_COMPLETED) {
+        }
+
+        if (phase >= PHASE_BOOT_COMPLETED) {
             mBootCompleted = true;
 
             // Register listeners now that boot is complete.
@@ -284,11 +285,17 @@ public final class NightDisplayService extends SystemService
         if (mIsActivated == null || mIsActivated != activated) {
             Slog.i(TAG, activated ? "Turning on night display" : "Turning off night display");
 
-            if (mAutoMode != null) {
-                mAutoMode.onActivated(activated);
+            if (mIsActivated != null) {
+                Secure.putLongForUser(getContext().getContentResolver(),
+                        Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, System.currentTimeMillis(),
+                        mCurrentUser);
             }
 
             mIsActivated = activated;
+
+            if (mAutoMode != null) {
+                mAutoMode.onActivated(activated);
+            }
 
             applyTint(false);
         }
@@ -401,7 +408,7 @@ public final class NightDisplayService extends SystemService
      * Set the color transformation {@code MATRIX_NIGHT} to the given color temperature.
      *
      * @param colorTemperature color temperature in Kelvin
-     * @param outTemp the 4x4 display transformation matrix for that color temperature
+     * @param outTemp          the 4x4 display transformation matrix for that color temperature
      */
     private void setMatrix(int colorTemperature, float[] outTemp) {
         if (outTemp.length != 16) {
@@ -423,8 +430,22 @@ public final class NightDisplayService extends SystemService
         outTemp[10] = blue;
     }
 
+    private Calendar getLastActivatedTime() {
+        final ContentResolver cr = getContext().getContentResolver();
+        final long lastActivatedTimeMillis = Secure.getLongForUser(
+                cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, -1, mCurrentUser);
+        if (lastActivatedTimeMillis < 0) {
+            return null;
+        }
+
+        final Calendar lastActivatedTime = Calendar.getInstance();
+        lastActivatedTime.setTimeInMillis(lastActivatedTimeMillis);
+        return lastActivatedTime;
+    }
+
     private abstract class AutoMode implements NightDisplayController.Callback {
         public abstract void onStart();
+
         public abstract void onStop();
     }
 
@@ -438,7 +459,7 @@ public final class NightDisplayService extends SystemService
 
         private Calendar mLastActivatedTime;
 
-        public CustomAutoMode() {
+        CustomAutoMode() {
             mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
             mTimeChangedReceiver = new BroadcastReceiver() {
                 @Override
@@ -452,10 +473,10 @@ public final class NightDisplayService extends SystemService
             final Calendar now = Calendar.getInstance();
             final Calendar startTime = mStartTime.getDateTimeBefore(now);
             final Calendar endTime = mEndTime.getDateTimeAfter(startTime);
-            final boolean activated = now.before(endTime);
 
-            boolean setActivated = mIsActivated == null || mLastActivatedTime == null;
-            if (!setActivated && mIsActivated != activated) {
+            boolean activate = now.before(endTime);
+            if (mLastActivatedTime != null) {
+                // Convert mLastActivatedTime to the current timezone if needed.
                 final TimeZone currentTimeZone = now.getTimeZone();
                 if (!currentTimeZone.equals(mLastActivatedTime.getTimeZone())) {
                     final int year = mLastActivatedTime.get(Calendar.YEAR);
@@ -470,17 +491,16 @@ public final class NightDisplayService extends SystemService
                     mLastActivatedTime.set(Calendar.MINUTE, minute);
                 }
 
-                if (mIsActivated) {
-                    setActivated = now.before(mStartTime.getDateTimeBefore(mLastActivatedTime))
-                            || now.after(mEndTime.getDateTimeAfter(mLastActivatedTime));
-                } else {
-                    setActivated = now.before(mEndTime.getDateTimeBefore(mLastActivatedTime))
-                            || now.after(mStartTime.getDateTimeAfter(mLastActivatedTime));
+                // Maintain the existing activated state if within the current period.
+                if (mLastActivatedTime.before(now)
+                        && mLastActivatedTime.after(startTime)
+                        && (mLastActivatedTime.after(endTime) || now.before(endTime))) {
+                    activate = mController.isActivated();
                 }
             }
 
-            if (setActivated) {
-                mController.setActivated(activated);
+            if (mIsActivated == null || mIsActivated != activate) {
+                mController.setActivated(activate);
             }
             updateNextAlarm(mIsActivated, now);
         }
@@ -502,6 +522,8 @@ public final class NightDisplayService extends SystemService
             mStartTime = mController.getCustomStartTime();
             mEndTime = mController.getCustomEndTime();
 
+            mLastActivatedTime = getLastActivatedTime();
+
             // Force an update to initialize state.
             updateActivated();
         }
@@ -516,11 +538,8 @@ public final class NightDisplayService extends SystemService
 
         @Override
         public void onActivated(boolean activated) {
-            final Calendar now = Calendar.getInstance();
-            if (mIsActivated != null) {
-                mLastActivatedTime = now;
-            }
-            updateNextAlarm(activated, now);
+            mLastActivatedTime = getLastActivatedTime();
+            updateNextAlarm(activated, Calendar.getInstance());
         }
 
         @Override
@@ -550,33 +569,33 @@ public final class NightDisplayService extends SystemService
 
         private Calendar mLastActivatedTime;
 
-        public TwilightAutoMode() {
+        TwilightAutoMode() {
             mTwilightManager = getLocalService(TwilightManager.class);
         }
 
         private void updateActivated(TwilightState state) {
-            final boolean isNight = state != null && state.isNight();
-            boolean setActivated = mIsActivated == null || mIsActivated != isNight;
-            if (setActivated && state != null && mLastActivatedTime != null) {
+            boolean activate = state != null && state.isNight();
+            if (state != null && mLastActivatedTime != null) {
+                final Calendar now = Calendar.getInstance();
                 final Calendar sunrise = state.sunrise();
                 final Calendar sunset = state.sunset();
-                if (sunrise.before(sunset)) {
-                    setActivated = mLastActivatedTime.before(sunrise)
-                            || mLastActivatedTime.after(sunset);
-                } else {
-                    setActivated = mLastActivatedTime.before(sunset)
-                            || mLastActivatedTime.after(sunrise);
+
+                // Maintain the existing activated state if within the current period.
+                if (mLastActivatedTime.before(now)
+                        && (mLastActivatedTime.after(sunrise) ^ mLastActivatedTime.after(sunset))) {
+                    activate = mController.isActivated();
                 }
             }
 
-            if (setActivated) {
-                mController.setActivated(isNight);
+            if (mIsActivated == null || mIsActivated != activate) {
+                mController.setActivated(activate);
             }
         }
 
         @Override
         public void onStart() {
             mTwilightManager.registerListener(this, mHandler);
+            mLastActivatedTime = getLastActivatedTime();
 
             // Force an update to initialize state.
             updateActivated(mTwilightManager.getLastTwilightState());
@@ -591,7 +610,7 @@ public final class NightDisplayService extends SystemService
         @Override
         public void onActivated(boolean activated) {
             if (mIsActivated != null) {
-                mLastActivatedTime = Calendar.getInstance();
+                mLastActivatedTime = getLastActivatedTime();
             }
         }
 
