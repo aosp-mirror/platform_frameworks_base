@@ -1737,13 +1737,6 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setUrl(String url) {
-            if (url == null) return;
-
-            setWebDomain(url);
-        }
-
-        @Override
         public void setWebDomain(@Nullable String domain) {
             if (domain == null) {
                 mNode.mWebDomain = null;
