@@ -56,7 +56,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -597,6 +596,39 @@ public class TrampolineTest {
         Integer errorCode = q.poll(5, TimeUnit.SECONDS);
         assertNotNull(errorCode);
         assertEquals(BackupManager.ERROR_BACKUP_NOT_ALLOWED, (int) errorCode);
+    }
+
+    @Test
+    public void selectBackupTransportAsync_calledBeforeInitialize_ignored_nullListener()
+            throws Exception {
+        mTrampoline.selectBackupTransportAsync(TRANSPORT_COMPONENT_NAME, null);
+        verifyNoMoreInteractions(mBackupManagerServiceMock);
+        // No crash.
+    }
+
+    @Test
+    public void selectBackupTransportAsync_calledBeforeInitialize_ignored_listenerThrowException()
+            throws Exception {
+        mTrampoline.selectBackupTransportAsync(
+                TRANSPORT_COMPONENT_NAME,
+                new ISelectBackupTransportCallback() {
+                    @Override
+                    public void onSuccess(String transportName) throws RemoteException {
+
+                    }
+
+                    @Override
+                    public void onFailure(int reason) throws RemoteException {
+                        throw new RemoteException("Crash");
+                    }
+
+                    @Override
+                    public IBinder asBinder() {
+                        return null;
+                    }
+                });
+        verifyNoMoreInteractions(mBackupManagerServiceMock);
+        // No crash.
     }
 
     @Test
