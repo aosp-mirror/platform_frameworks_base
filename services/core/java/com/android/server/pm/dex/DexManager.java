@@ -62,6 +62,7 @@ public class DexManager {
     // Maps package name to code locations.
     // It caches the code locations for the installed packages. This allows for
     // faster lookups (no locks) when finding what package owns the dex file.
+    @GuardedBy("mPackageCodeLocationsCache")
     private final Map<String, PackageCodeLocations> mPackageCodeLocationsCache;
 
     // PackageDexUsage handles the actual I/O operations. It is responsible to
@@ -206,7 +207,7 @@ public class DexManager {
         // In case there was an update, write the package use info to disk async.
         // Note that we do the writing here and not in PackageDexUsage in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
-        // multiple updates in PackaeDexUsage before writing it).
+        // multiple updates in PackageDexUsage before writing it).
         if (mPackageDexUsage.clearUsedByOtherApps(packageName)) {
             mPackageDexUsage.maybeWriteAsync();
         }
@@ -226,7 +227,7 @@ public class DexManager {
         // In case there was an update, write the package use info to disk async.
         // Note that we do the writing here and not in PackageDexUsage in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
-        // multiple updates in PackaeDexUsage before writing it).
+        // multiple updates in PackageDexUsage before writing it).
         if (updated) {
             mPackageDexUsage.maybeWriteAsync();
         }
@@ -245,17 +246,22 @@ public class DexManager {
 
     private void cachePackageCodeLocation(String packageName, String baseCodePath,
             String[] splitCodePaths, String[] dataDirs, int userId) {
-        PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
-                new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
-        pcl.updateCodeLocation(baseCodePath, splitCodePaths);
-        if (dataDirs != null) {
-            for (String dataDir : dataDirs) {
-                // The set of data dirs includes deviceProtectedDataDir and
-                // credentialProtectedDataDir which might be null for shared
-                // libraries. Currently we don't track these but be lenient
-                // and check in case we ever decide to store their usage data.
-                if (dataDir != null) {
-                    pcl.mergeAppDataDirs(dataDir, userId);
+        synchronized (mPackageCodeLocationsCache) {
+            PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
+                    new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
+            // TODO(calin): We are forced to extend the scope of this synchronization because
+            // the values of the cache (PackageCodeLocations) are updated in place.
+            // Make PackageCodeLocations immutable to simplify the synchronization reasoning.
+            pcl.updateCodeLocation(baseCodePath, splitCodePaths);
+            if (dataDirs != null) {
+                for (String dataDir : dataDirs) {
+                    // The set of data dirs includes deviceProtectedDataDir and
+                    // credentialProtectedDataDir which might be null for shared
+                    // libraries. Currently we don't track these but be lenient
+                    // and check in case we ever decide to store their usage data.
+                    if (dataDir != null) {
+                        pcl.mergeAppDataDirs(dataDir, userId);
+                    }
                 }
             }
         }
@@ -527,10 +533,12 @@ public class DexManager {
         // The loadingPackage does not own the dex file.
         // Perform a reverse look-up in the cache to detect if any package has ownership.
         // Note that we can have false negatives if the cache falls out of date.
-        for (PackageCodeLocations pcl : mPackageCodeLocationsCache.values()) {
-            outcome = pcl.searchDex(dexPath, userId);
-            if (outcome != DEX_SEARCH_NOT_FOUND) {
-                return new DexSearchResult(pcl.mPackageName, outcome);
+        synchronized (mPackageCodeLocationsCache) {
+            for (PackageCodeLocations pcl : mPackageCodeLocationsCache.values()) {
+                outcome = pcl.searchDex(dexPath, userId);
+                if (outcome != DEX_SEARCH_NOT_FOUND) {
+                    return new DexSearchResult(pcl.mPackageName, outcome);
+                }
             }
         }
 
