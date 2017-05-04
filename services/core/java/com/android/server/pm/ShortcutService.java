@@ -1611,6 +1611,11 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     private void fixUpIncomingShortcutInfo(@NonNull ShortcutInfo shortcut, boolean forUpdate,
             boolean forPinRequest) {
+        if (shortcut.isReturnedByServer()) {
+            Log.w(TAG,
+                    "Re-publishing ShortcutInfo returned by server is not supported."
+                    + " Some information such as icon may lost from shortcut.");
+        }
         Preconditions.checkNotNull(shortcut, "Null shortcut detected");
         if (shortcut.getActivity() != null) {
             Preconditions.checkState(
@@ -1668,6 +1673,13 @@ public class ShortcutService extends IShortcutService.Stub {
         for (int i = shortcuts.size() - 1; i >= 0; i--) {
             shortcuts.get(i).setImplicitRank(i);
         }
+    }
+
+    private List<ShortcutInfo> setReturnedByServer(List<ShortcutInfo> shortcuts) {
+        for (int i = shortcuts.size() - 1; i >= 0; i--) {
+            shortcuts.get(i).setReturnedByServer();
+        }
+        return shortcuts;
     }
 
     // === APIs ===
@@ -2049,7 +2061,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
         ps.findAll(ret, query, cloneFlags);
 
-        return new ParceledListSlice<>(ret);
+        return new ParceledListSlice<>(setReturnedByServer(ret));
     }
 
     @Override
@@ -2406,7 +2418,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     });
                 }
             }
-            return ret;
+            return setReturnedByServer(ret);
         }
 
         private void getShortcutsInnerLocked(int launcherUserId, @NonNull String callingPackage,

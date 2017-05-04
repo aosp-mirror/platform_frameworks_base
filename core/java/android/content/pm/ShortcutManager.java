@@ -618,6 +618,10 @@ public class ShortcutManager {
     /**
      * Return all dynamic shortcuts from the caller app.
      *
+     * <p>This API is intended to be used for examining what shortcuts are currently published.
+     * Re-publishing returned {@link ShortcutInfo}s via APIs such as
+     * {@link #setDynamicShortcuts(List)} may cause loss of information such as icons.
+     *
      * @throws IllegalStateException when the user is locked.
      */
     @NonNull
@@ -632,6 +636,10 @@ public class ShortcutManager {
 
     /**
      * Return all static (manifest) shortcuts from the caller app.
+     *
+     * <p>This API is intended to be used for examining what shortcuts are currently published.
+     * Re-publishing returned {@link ShortcutInfo}s via APIs such as
+     * {@link #setDynamicShortcuts(List)} may cause loss of information such as icons.
      *
      * @throws IllegalStateException when the user is locked.
      */
@@ -696,6 +704,10 @@ public class ShortcutManager {
 
     /**
      * Return all pinned shortcuts from the caller app.
+     *
+     * <p>This API is intended to be used for examining what shortcuts are currently published.
+     * Re-publishing returned {@link ShortcutInfo}s via APIs such as
+     * {@link #setDynamicShortcuts(List)} may cause loss of information such as icons.
      *
      * @throws IllegalStateException when the user is locked.
      */
