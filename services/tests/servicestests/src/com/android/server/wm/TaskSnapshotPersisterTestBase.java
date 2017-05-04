@@ -68,7 +68,11 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     private void cleanDirectory() {
-        for (File file : new File(sFilesDir, "snapshots").listFiles()) {
+        final File[] files = new File(sFilesDir, "snapshots").listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
             if (!file.isDirectory()) {
                 file.delete();
             }
