@@ -1312,7 +1312,7 @@ public final class ActiveServices {
                 // This could have made the service more important.
                 mAm.updateLruProcessLocked(s.app, s.app.hasClientActivities
                         || s.app.treatLikeActivity, b.client);
-                mAm.updateOomAdjLocked(s.app);
+                mAm.updateOomAdjLocked(s.app, true);
             }
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
@@ -1427,12 +1427,14 @@ public final class ActiveServices {
                                 r.binding.service.app.hasClientActivities
                                 || r.binding.service.app.treatLikeActivity, null);
                     }
-                    mAm.updateOomAdjLocked(r.binding.service.app);
+                    mAm.updateOomAdjLocked(r.binding.service.app, false);
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+
+        mAm.updateOomAdjLocked();
 
         return true;
     }
@@ -2173,7 +2175,7 @@ public final class ActiveServices {
             bumpServiceExecutingLocked(r, execInFg, "start");
             if (!oomAdjusted) {
                 oomAdjusted = true;
-                mAm.updateOomAdjLocked(r.app);
+                mAm.updateOomAdjLocked(r.app, true);
             }
             if (r.fgRequired && !r.fgWaiting) {
                 if (!r.isForeground) {
@@ -2297,7 +2299,7 @@ public final class ActiveServices {
                 if (ibr.hasBound) {
                     try {
                         bumpServiceExecutingLocked(r, false, "bring down unbind");
-                        mAm.updateOomAdjLocked(r.app);
+                        mAm.updateOomAdjLocked(r.app, true);
                         ibr.hasBound = false;
                         ibr.requested = false;
                         r.app.thread.scheduleUnbindService(r,
@@ -2389,7 +2391,7 @@ public final class ActiveServices {
                     bumpServiceExecutingLocked(r, false, "destroy");
                     mDestroyingServices.add(r);
                     r.destroying = true;
-                    mAm.updateOomAdjLocked(r.app);
+                    mAm.updateOomAdjLocked(r.app, true);
                     r.app.thread.scheduleStopService(r);
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when destroying service "
@@ -2490,7 +2492,7 @@ public final class ActiveServices {
                         // it to go down there and we want it to start out near the top.
                         mAm.updateLruProcessLocked(s.app, false, null);
                     }
-                    mAm.updateOomAdjLocked(s.app);
+                    mAm.updateOomAdjLocked(s.app, true);
                     b.intent.hasBound = false;
                     // Assume the client doesn't want to know about a rebind;
                     // we will deal with that later if it asks for one.
@@ -2643,7 +2645,7 @@ public final class ActiveServices {
                     mDestroyingServices.remove(r);
                     r.bindings.clear();
                 }
-                mAm.updateOomAdjLocked(r.app);
+                mAm.updateOomAdjLocked(r.app, true);
             }
             r.executeFg = false;
             if (r.tracker != null) {
