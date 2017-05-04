@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.systemui.doze;
+package com.android.systemui.utils.hardware;
 
 import android.content.Context;
 import android.hardware.HardwareBuffer;
@@ -33,6 +33,8 @@ import android.util.ArraySet;
 import com.google.android.collect.Lists;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,18 +46,38 @@ import java.util.List;
  * Note that this class ignores the "Handler" argument, so the test is responsible for calling the
  * listener on the right thread.
  */
-public class SensorManagerFake extends SensorManager {
+public class FakeSensorManager extends SensorManager {
 
-    public MockSensor PROXIMITY;
+    private final MockProximitySensor mMockProximitySensor;
 
-    public SensorManagerFake(Context context) {
-        PROXIMITY = new MockSensor(context.getSystemService(SensorManager.class)
-                .getDefaultSensor(Sensor.TYPE_PROXIMITY));
+    public FakeSensorManager(Context context) throws Exception {
+        Sensor proxSensor = context.getSystemService(SensorManager.class)
+                .getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        if (proxSensor == null) {
+            // No prox? Let's create a fake one!
+            proxSensor = createSensor(Sensor.TYPE_PROXIMITY);
+        }
+        mMockProximitySensor = new MockProximitySensor(proxSensor);
+    }
+
+    public MockProximitySensor getMockProximitySensor() {
+        return mMockProximitySensor;
+    }
+
+    @Override
+    public Sensor getDefaultSensor(int type) {
+        Sensor s = super.getDefaultSensor(type);
+        if (s != null) {
+            return s;
+        }
+        // Our mock sensors aren't wakeup, and it's a pain to create them that way. Instead, just
+        // return non-wakeup sensors if we can't find a wakeup sensor.
+        return getDefaultSensor(type, false /* wakeup */);
     }
 
     @Override
     protected List<Sensor> getFullSensorList() {
-        return Lists.newArrayList(PROXIMITY.sensor);
+        return Lists.newArrayList(mMockProximitySensor.sensor);
     }
 
     @Override
@@ -65,8 +87,8 @@ public class SensorManagerFake extends SensorManager {
 
     @Override
     protected void unregisterListenerImpl(SensorEventListener listener, Sensor sensor) {
-        if (sensor == PROXIMITY.sensor || sensor == null) {
-            PROXIMITY.listeners.remove(listener);
+        if (sensor == mMockProximitySensor.sensor || sensor == null) {
+            mMockProximitySensor.listeners.remove(listener);
         }
     }
 
@@ -74,8 +96,8 @@ public class SensorManagerFake extends SensorManager {
     protected boolean registerListenerImpl(SensorEventListener listener, Sensor sensor,
             int delayUs,
             Handler handler, int maxReportLatencyUs, int reservedFlags) {
-        if (sensor == PROXIMITY.sensor) {
-            PROXIMITY.listeners.add(listener);
+        if (sensor == mMockProximitySensor.sensor) {
+            mMockProximitySensor.listeners.add(listener);
             return true;
         }
         return false;
@@ -141,11 +163,44 @@ public class SensorManagerFake extends SensorManager {
         return false;
     }
 
-    public class MockSensor {
+    private Sensor createSensor(int type) throws Exception {
+        Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
+        constr.setAccessible(true);
+        Sensor sensor = constr.newInstance();
+
+        setSensorType(sensor, type);
+        setSensorField(sensor, "mName", "Mock " + sensor.getStringType() + "/" + type);
+        setSensorField(sensor, "mVendor", "Mock Vendor");
+        setSensorField(sensor, "mVersion", 1);
+        setSensorField(sensor, "mHandle", -1);
+        setSensorField(sensor, "mMaxRange", 10);
+        setSensorField(sensor, "mResolution", 1);
+        setSensorField(sensor, "mPower", 1);
+        setSensorField(sensor, "mMinDelay", 1000);
+        setSensorField(sensor, "mMaxDelay", 1000000000);
+        setSensorField(sensor, "mFlags", 0);
+        setSensorField(sensor, "mId", -1);
+
+        return sensor;
+    }
+
+    private void setSensorField(Sensor sensor, String fieldName, Object value) throws Exception {
+        Field field = Sensor.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(sensor, value);
+    }
+
+    private void setSensorType(Sensor sensor, int type) throws Exception {
+        Method setter = Sensor.class.getDeclaredMethod("setType", Integer.TYPE);
+        setter.setAccessible(true);
+        setter.invoke(sensor, type);
+    }
+
+    public class MockProximitySensor {
         final Sensor sensor;
         final ArraySet<SensorEventListener> listeners = new ArraySet<>();
 
-        private MockSensor(Sensor sensor) {
+        private MockProximitySensor(Sensor sensor) {
             this.sensor = sensor;
         }
 
