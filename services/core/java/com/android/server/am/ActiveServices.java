@@ -166,8 +166,11 @@ public final class ActiveServices {
      */
     static final class ActiveForegroundApp {
         String mPackageName;
+        int mUid;
         CharSequence mLabel;
         boolean mShownWhileScreenOn;
+        boolean mAppOnTop;
+        boolean mShownWhileTop;
         long mStartTime;
         long mStartVisibleTime;
         long mEndTime;
@@ -728,11 +731,12 @@ public final class ActiveServices {
         synchronized (mAm) {
             final long now = SystemClock.elapsedRealtime();
             final long nowPlusMin = now + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME;
+            long nextUpdateTime = Long.MAX_VALUE;
             if (smap != null) {
                 for (int i = smap.mActiveForegroundApps.size()-1; i >= 0; i--) {
                     ActiveForegroundApp aa = smap.mActiveForegroundApps.valueAt(i);
                     if (aa.mEndTime != 0 && (mScreenOn || aa.mShownWhileScreenOn)) {
-                        if (aa.mEndTime < (aa.mStartVisibleTime
+                        if (!aa.mShownWhileTop && aa.mEndTime < (aa.mStartVisibleTime
                                 + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME)) {
                             // Check to see if this should still be displayed...  we continue
                             // until it has been shown for at least the timeout duration.
@@ -741,6 +745,12 @@ public final class ActiveServices {
                                 smap.mActiveForegroundApps.removeAt(i);
                                 smap.mActiveForegroundAppsChanged = true;
                                 continue;
+                            } else {
+                                long hideTime = aa.mStartVisibleTime
+                                        + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME;
+                                if (hideTime < nextUpdateTime) {
+                                    nextUpdateTime = hideTime;
+                                }
                             }
                         } else {
                             // This was up for longer than the timeout, so just remove immediately.
@@ -749,10 +759,17 @@ public final class ActiveServices {
                             continue;
                         }
                     }
-                    if (active == null) {
-                        active = new ArrayList<>();
+                    if (!aa.mAppOnTop) {
+                        if (active == null) {
+                            active = new ArrayList<>();
+                        }
+                        active.add(aa);
                     }
-                    active.add(aa);
+                }
+                smap.removeMessages(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
+                if (nextUpdateTime < Long.MAX_VALUE) {
+                    Message msg = smap.obtainMessage();
+                    smap.sendMessageAtTime(msg, nextUpdateTime);
                 }
             }
             if (!smap.mActiveForegroundAppsChanged) {
@@ -842,7 +859,7 @@ public final class ActiveServices {
             active.mNumActive--;
             if (active.mNumActive <= 0) {
                 active.mEndTime = SystemClock.elapsedRealtime();
-                if (active.mEndTime >= (active.mStartVisibleTime
+                if (active.mShownWhileTop || active.mEndTime >= (active.mStartVisibleTime
                         + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME)) {
                     // Have been active for long enough that we will remove it immediately.
                     smap.mActiveForegroundApps.remove(r.packageName);
@@ -883,6 +900,31 @@ public final class ActiveServices {
                                 nowElapsed + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME);
                     }
                 }
+            }
+        }
+    }
+
+    void foregroundServiceProcStateChangedLocked(UidRecord uidRec) {
+        ServiceMap smap = mServiceMap.get(UserHandle.getUserId(uidRec.uid));
+        if (smap != null) {
+            boolean changed = false;
+            for (int j = smap.mActiveForegroundApps.size()-1; j >= 0; j--) {
+                ActiveForegroundApp active = smap.mActiveForegroundApps.valueAt(j);
+                if (active.mUid == uidRec.uid) {
+                    if (uidRec.curProcState <= ActivityManager.PROCESS_STATE_TOP) {
+                        if (!active.mAppOnTop) {
+                            active.mAppOnTop = true;
+                            changed = true;
+                        }
+                        active.mShownWhileTop = true;
+                    } else if (active.mAppOnTop) {
+                        active.mAppOnTop = false;
+                        changed = true;
+                    }
+                }
+            }
+            if (changed) {
+                requestUpdateActiveForegroundAppsLocked(smap, 0);
             }
         }
     }
@@ -948,7 +990,13 @@ public final class ActiveServices {
                     if (active == null) {
                         active = new ActiveForegroundApp();
                         active.mPackageName = r.packageName;
+                        active.mUid = r.appInfo.uid;
                         active.mShownWhileScreenOn = mScreenOn;
+                        if (r.app != null) {
+                            active.mAppOnTop = active.mShownWhileTop =
+                                    r.app.uidRecord.curProcState
+                                            <= ActivityManager.PROCESS_STATE_TOP;
+                        }
                         active.mStartTime = active.mStartVisibleTime
                                 = SystemClock.elapsedRealtime();
                         smap.mActiveForegroundApps.put(r.packageName, active);
@@ -2786,6 +2834,9 @@ public final class ActiveServices {
                 if (!doit && didSomething) {
                     return true;
                 }
+                if (doit && filterByClasses == null) {
+                    forceStopPackageLocked(packageName, mServiceMap.valueAt(i).mUserId);
+                }
             }
         } else {
             ServiceMap smap = mServiceMap.get(userId);
@@ -2793,6 +2844,9 @@ public final class ActiveServices {
                 ArrayMap<ComponentName, ServiceRecord> items = smap.mServicesByName;
                 didSomething = collectPackageServicesLocked(packageName, filterByClasses,
                         evenPersistent, doit, killProcess, items);
+            }
+            if (doit && filterByClasses == null) {
+                forceStopPackageLocked(packageName, userId);
             }
         }
 
@@ -2802,10 +2856,11 @@ public final class ActiveServices {
             }
             mTmpCollectionResults.clear();
         }
+
         return didSomething;
     }
 
-    void removeUninstalledPackageLocked(String packageName, int userId) {
+    void forceStopPackageLocked(String packageName, int userId) {
         ServiceMap smap = mServiceMap.get(userId);
         if (smap != null && smap.mActiveForegroundApps.size() > 0) {
             for (int i = smap.mActiveForegroundApps.size()-1; i >= 0; i--) {
@@ -3636,6 +3691,10 @@ public final class ActiveServices {
                         }
                         pw.print("    mNumActive=");
                         pw.print(aa.mNumActive);
+                        pw.print(" mAppOnTop=");
+                        pw.print(aa.mAppOnTop);
+                        pw.print(" mShownWhileTop=");
+                        pw.print(aa.mShownWhileTop);
                         pw.print(" mShownWhileScreenOn=");
                         pw.println(aa.mShownWhileScreenOn);
                         pw.print("    mStartTime=");

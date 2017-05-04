@@ -103,7 +103,6 @@ final class ProcessRecord {
     int renderThreadTid;        // TID for RenderThread
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
-    boolean setIsForeground;    // Running foreground UI when last set?
     boolean notCachedSinceIdle; // Has this process not been in a cached state since last idle?
     boolean hasClientActivities;  // Are there any client services with activities?
     boolean hasStartedServices; // Are there any started services running in this process?
@@ -303,9 +302,8 @@ final class ProcessRecord {
                     pw.print(" hasAboveClient="); pw.print(hasAboveClient);
                     pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
         }
-        if (setIsForeground || foregroundServices || forcingToForeground != null) {
-            pw.print(prefix); pw.print("setIsForeground="); pw.print(setIsForeground);
-                    pw.print(" foregroundServices="); pw.print(foregroundServices);
+        if (foregroundServices || forcingToForeground != null) {
+            pw.print(prefix); pw.print("foregroundServices="); pw.print(foregroundServices);
                     pw.print(" forcingToForeground="); pw.println(forcingToForeground);
         }
         if (reportedInteraction || fgInteractionTime != 0) {
