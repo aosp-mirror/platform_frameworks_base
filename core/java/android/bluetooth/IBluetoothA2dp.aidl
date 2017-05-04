@@ -42,4 +42,7 @@ interface IBluetoothA2dp {
     oneway void setCodecConfigPreference(in BluetoothCodecConfig codecConfig);
     oneway void enableOptionalCodecs();
     oneway void disableOptionalCodecs();
+    int supportsOptionalCodecs(in BluetoothDevice device);
+    int getOptionalCodecsEnabled(in BluetoothDevice device);
+    oneway void setOptionalCodecsEnabled(in BluetoothDevice device, int value);
 }
