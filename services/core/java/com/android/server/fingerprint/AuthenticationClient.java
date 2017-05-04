@@ -34,8 +34,13 @@ import android.util.Slog;
 public abstract class AuthenticationClient extends ClientMonitor {
     private long mOpId;
 
-    public abstract boolean handleFailedAttempt();
+    public abstract int handleFailedAttempt();
     public abstract void resetFailedAttempts();
+
+    public static final int LOCKOUT_NONE = 0;
+    public static final int LOCKOUT_TIMED = 1;
+    public static final int LOCKOUT_PERMANENT = 2;
+
     private boolean mAlreadyCancelled;
 
     public AuthenticationClient(Context context, long halDeviceId, IBinder token,
@@ -79,19 +84,21 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 FingerprintUtils.vibrateFingerprintError(getContext());
             }
             // allow system-defined limit of number of attempts before giving up
-            boolean inLockoutMode =  handleFailedAttempt();
-            // send lockout event in case driver doesn't enforce it.
-            if (inLockoutMode) {
+            int lockoutMode =  handleFailedAttempt();
+            if (lockoutMode != LOCKOUT_NONE) {
                 try {
-                    Slog.w(TAG, "Forcing lockout (fp driver code should do this!)");
-                    stop(false); // cancel fingerprint authentication
-                    receiver.onError(getHalDeviceId(),
-                            FingerprintManager.FINGERPRINT_ERROR_LOCKOUT, 0 /* vendorCode */);
+                    Slog.w(TAG, "Forcing lockout (fp driver code should do this!), mode(" +
+                            lockoutMode + ")");
+                    stop(false);
+                    int errorCode = lockoutMode == LOCKOUT_TIMED ?
+                            FingerprintManager.FINGERPRINT_ERROR_LOCKOUT :
+                            FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
+                    receiver.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to notify lockout:", e);
                 }
             }
-            result |= inLockoutMode;
+            result |= lockoutMode != LOCKOUT_NONE; // in a lockout mode
         } else {
             if (receiver != null) {
                 FingerprintUtils.vibrateFingerprintSuccess(getContext());
