@@ -572,11 +572,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Determines whether to take full screen screenshots
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
 
-    // STOPSHIP: Update default to a smaller value.
     /**
      * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
      */
-    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 2000; // 2 sec
+    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 200; // 0.2 sec
 
     /**
      * State indicating that there is no need for any blocking for network.
@@ -4332,6 +4331,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         validateUid.idle = false;
                     }
                     validateUid.curProcState = validateUid.setProcState = item.processState;
+                    validateUid.lastDispatchedProcStateSeq = item.procStateSeq;
                 }
             }
         }
@@ -23800,11 +23800,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (totalTime >= mWaitForNetworkTimeoutMs) {
                     Slog.wtf(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
-                            + procStateSeq);
-                } else if (DEBUG_NETWORK ||  totalTime >= mWaitForNetworkTimeoutMs / 2) {
-                    Slog.d(TAG_NETWORK, "Total time waited for network rules to get updated: "
-                            + totalTime + ". Uid: " + callingUid + " procStateSeq: "
-                            + procStateSeq);
+                            + procStateSeq + " UidRec: " + record
+                            + " validateUidRec: " + mValidateUids.get(callingUid));
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
