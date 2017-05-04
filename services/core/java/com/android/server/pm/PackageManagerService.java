@@ -18541,11 +18541,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
         synchronized (mPackages) {
-            PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null) {
-                Log.i(TAG, "Package doesn't exist in set block uninstall " + packageName);
-                return false;
-            }
             // Cannot block uninstall of static shared libs as they are
             // considered a part of the using app (emulating static linking).
             // Also static libs are installed always on internal storage.
@@ -18555,12 +18550,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + " providing static shared library: " + pkg.staticSharedLibName);
                 return false;
             }
-            if (!ps.getInstalled(userId)) {
-                // Can't block uninstall for an app that is not installed or enabled.
-                Log.i(TAG, "Package not installed in set block uninstall " + packageName);
-                return false;
-            }
-            ps.setBlockUninstall(blockUninstall, userId);
+            mSettings.setBlockUninstallLPw(userId, packageName, blockUninstall);
             mSettings.writePackageRestrictionsLPr(userId);
         }
         return true;
@@ -18569,12 +18559,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean getBlockUninstallForUser(String packageName, int userId) {
         synchronized (mPackages) {
-            PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null) {
-                Log.i(TAG, "Package doesn't exist in get block uninstall " + packageName);
-                return false;
-            }
-            return ps.getBlockUninstall(userId);
+            return mSettings.getBlockUninstallLPr(userId, packageName);
         }
     }
 
@@ -18781,7 +18766,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     null /*lastDisableAppCaller*/,
                     null /*enabledComponents*/,
                     null /*disabledComponents*/,
-                    false /*blockUninstall*/,
                     ps.readUserState(nextUserId).domainVerificationStatus,
                     0, PackageManager.INSTALL_REASON_UNKNOWN);
         }

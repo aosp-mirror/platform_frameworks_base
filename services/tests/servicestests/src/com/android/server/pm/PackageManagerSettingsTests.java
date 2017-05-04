@@ -547,7 +547,6 @@ public class PackageManagerSettingsTests {
 
     private void verifyUserState(PackageUserState userState, PackageUserState oldUserState,
             boolean userStateChanged, boolean notLaunched, boolean stopped, boolean installed) {
-        assertThat(userState.blockUninstall, is(false));
         assertThat(userState.enabled, is(0));
         assertThat(userState.hidden, is(false));
         assertThat(userState.installed, is(installed));
