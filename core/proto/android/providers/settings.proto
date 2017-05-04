@@ -329,6 +329,8 @@ message GlobalSettingsProto {
     SettingProto max_notification_enqueue_rate = 284;
     SettingProto cell_on = 285;
     SettingProto network_recommendations_package = 286;
+    SettingProto bluetooth_a2dp_supports_optional_codecs_prefix = 287;
+    SettingProto bluetooth_a2dp_optional_codecs_enabled_prefix = 288;
 }
 
 message SecureSettingsProto {

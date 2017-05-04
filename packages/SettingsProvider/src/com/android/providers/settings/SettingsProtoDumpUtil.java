@@ -696,6 +696,12 @@ class SettingsProtoDumpUtil {
                 Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
                 GlobalSettingsProto.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX);
         dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
+                GlobalSettingsProto.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX);
+        dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
+                GlobalSettingsProto.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX);
+        dumpSetting(s, p,
                 Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
                 GlobalSettingsProto.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX);
         dumpSetting(s, p,
