@@ -2891,21 +2891,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final Rect frame = new Rect();
         final Rect stackBounds = new Rect();
 
-        boolean includeImeInScreenshot;
-        synchronized(mService.mWindowMap) {
-            final AppWindowToken imeTargetAppToken = mService.mInputMethodTarget != null
-                    ? mService.mInputMethodTarget.mAppToken : null;
-            // We only include the Ime in the screenshot if the app we are screenshoting is the IME
-            // target and isn't in multi-window mode. We don't screenshot the IME in multi-window
-            // mode because the frame of the IME might not overlap with that of the app.
-            // E.g. IME target app at the top in split-screen mode and the IME at the bottom
-            // overlapping with the bottom app.
-            includeImeInScreenshot = imeTargetAppToken != null
-                    && imeTargetAppToken.appToken != null
-                    && imeTargetAppToken.appToken.asBinder() == appToken
-                    && !mService.mInputMethodTarget.isInMultiWindowMode();
-        }
-
         final int aboveAppLayer = (mService.mPolicy.getWindowLayerFromTypeLw(TYPE_APPLICATION) + 1)
                 * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
         final MutableBoolean mutableIncludeFullDisplay = new MutableBoolean(includeFullDisplay);
@@ -2923,9 +2908,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     return false;
                 }
                 if (w.mIsImWindow) {
-                    if (!includeImeInScreenshot) {
-                        return false;
-                    }
+                    return false;
                 } else if (w.mIsWallpaper) {
                     // If this is the wallpaper layer and we're only looking for the wallpaper layer
                     // then the target window state is this one.
