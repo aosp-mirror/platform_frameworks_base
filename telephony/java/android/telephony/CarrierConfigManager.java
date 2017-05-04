@@ -880,13 +880,6 @@ public class CarrierConfigManager {
             "broadcast_emergency_call_state_changes_bool";
 
     /**
-     * Cell broadcast additional channels enbled by the carrier
-     * @hide
-     */
-    public static final String KEY_CARRIER_ADDITIONAL_CBS_CHANNELS_STRINGS =
-            "carrier_additional_cbs_channels_strings";
-
-    /**
       * Indicates whether STK LAUNCH_BROWSER command is disabled.
       * If {@code true}, then the browser will not be launched
       * on UI for the LAUNCH_BROWSER STK command.
