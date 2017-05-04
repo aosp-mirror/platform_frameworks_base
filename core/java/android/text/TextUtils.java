@@ -1921,6 +1921,22 @@ public class TextUtils {
         return false;
     }
 
+    /**
+     * If the {@code charSequence} is instance of {@link Spanned}, creates a new copy and
+     * {@link NoCopySpan}'s are removed from the copy. Otherwise the given {@code charSequence} is
+     * returned as it is.
+     *
+     * @hide
+     */
+    @Nullable
+    public static CharSequence trimNoCopySpans(@Nullable CharSequence charSequence) {
+        if (charSequence != null && charSequence instanceof Spanned) {
+            // SpannableStringBuilder copy constructor trims NoCopySpans.
+            return new SpannableStringBuilder(charSequence);
+        }
+        return charSequence;
+    }
+
     private static Object sLock = new Object();
 
     private static char[] sTemp = null;
