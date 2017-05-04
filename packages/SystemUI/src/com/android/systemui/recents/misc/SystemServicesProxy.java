@@ -158,7 +158,7 @@ public class SystemServicesProxy {
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
         public void onActivityPinned(String packageName) { }
         public void onActivityUnpinned() { }
-        public void onPinnedActivityRestartAttempt() { }
+        public void onPinnedActivityRestartAttempt(boolean clearedTask) { }
         public void onPinnedStackAnimationStarted() { }
         public void onPinnedStackAnimationEnded() { }
         public void onActivityForcedResizable(String packageName, int taskId, int reason) { }
@@ -223,10 +223,11 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt()
+        public void onPinnedActivityRestartAttempt(boolean clearedTask)
                 throws RemoteException{
             mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
-            mHandler.sendEmptyMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
+            mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, clearedTask ? 1 : 0, 0)
+                    .sendToTarget();
         }
 
         @Override
@@ -1294,7 +1295,8 @@ public class SystemServicesProxy {
                     }
                     case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedActivityRestartAttempt();
+                            mTaskStackListeners.get(i).onPinnedActivityRestartAttempt(
+                                    msg.arg1 != 0);
                         }
                         break;
                     }
