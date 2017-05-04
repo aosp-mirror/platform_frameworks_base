@@ -16,21 +16,20 @@
 
 package com.android.server.fingerprint;
 
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_FINGERPRINT;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.SynchronousUserSwitchObserver;
-import android.content.ComponentName;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -82,10 +81,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.LinkedList;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.
@@ -400,6 +399,10 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         ClientMonitor client = mCurrentClient;
         if (client != null && client.onRemoved(fingerId, groupId, remaining)) {
             removeClient(client);
+            // When the last fingerprint of a group is removed, update the authenticator id
+            if (!hasEnrolledFingerprints(groupId)) {
+                updateActiveGroup(groupId, null);
+            }
         }
         if (client instanceof InternalRemovalClient && !mUnknownFingerprints.isEmpty()) {
             cleanupUnknownFingerprints();
@@ -446,6 +449,9 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         ClientMonitor client = mCurrentClient;
         if (client != null && client.onEnrollResult(fingerId, groupId, remaining)) {
             removeClient(client);
+            // When enrollment finishes, update this group's authenticator id, as the HAL has
+            // already generated a new authenticator id when the new fingerprint is enrolled.
+            updateActiveGroup(groupId, null);
         }
     }
 
@@ -1382,7 +1388,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                     daemon.setActiveGroup(userId, fpDir.getAbsolutePath());
                     mCurrentUserId = userId;
                 }
-                mAuthenticatorIds.put(userId, daemon.getAuthenticatorId());
+                mAuthenticatorIds.put(userId,
+                        hasEnrolledFingerprints(userId) ? daemon.getAuthenticatorId() : 0L);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to setActiveGroup():", e);
             }
@@ -1436,7 +1443,6 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
      */
     public long getAuthenticatorId(String opPackageName) {
         final int userId = getUserOrWorkProfileId(opPackageName, UserHandle.getCallingUserId());
-        Long authenticatorId = mAuthenticatorIds.get(userId);
-        return authenticatorId != null ? authenticatorId : 0;
+        return mAuthenticatorIds.getOrDefault(userId, 0L);
     }
 }
