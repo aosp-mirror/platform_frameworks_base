@@ -1314,6 +1314,14 @@ public abstract class ConnectionService extends Service {
                 mAdapter.onRemoteRttRequest(id);
             }
         }
+
+        @Override
+        public void onPhoneAccountChanged(Connection c, PhoneAccountHandle pHandle) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.onPhoneAccountChanged(id, pHandle);
+            }
+        }
     };
 
     /** {@inheritDoc} */
