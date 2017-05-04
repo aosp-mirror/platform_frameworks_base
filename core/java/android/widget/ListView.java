@@ -49,7 +49,6 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
-import com.android.internal.util.Preconditions;
 
 import com.google.android.collect.Lists;
 
@@ -336,11 +335,6 @@ public class ListView extends AbsListView {
      * @param isSelectable whether the item is selectable
      */
     public void addHeaderView(View v, Object data, boolean isSelectable) {
-        Preconditions.checkState(
-                v.getParent() == null,
-                "The specified child already has a parent. "
-                + "You must call removeView() on the child's parent first.");
-
         final FixedViewInfo info = new FixedViewInfo();
         info.view = v;
         info.data = data;
@@ -435,11 +429,6 @@ public class ListView extends AbsListView {
      * @param isSelectable true if the footer view can be selected
      */
     public void addFooterView(View v, Object data, boolean isSelectable) {
-        Preconditions.checkState(
-                v.getParent() == null,
-                "The specified child already has a parent. "
-                + "You must call removeView() on the child's parent first.");
-
         final FixedViewInfo info = new FixedViewInfo();
         info.view = v;
         info.data = data;
