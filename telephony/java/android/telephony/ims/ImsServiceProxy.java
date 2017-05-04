@@ -120,7 +120,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public int startSession(PendingIntent incomingCallIntent, IImsRegistrationListener listener)
             throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).startSession(mSlotId, mSupportedFeature,
                     incomingCallIntent, listener);
         }
@@ -129,7 +129,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public void endSession(int sessionId) throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             getServiceInterface(mBinder).endSession(mSlotId, mSupportedFeature, sessionId);
         }
     }
@@ -138,7 +138,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public boolean isConnected(int callServiceType, int callType)
             throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).isConnected(mSlotId, mSupportedFeature,
                     callServiceType, callType);
         }
@@ -147,7 +147,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public boolean isOpened() throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).isOpened(mSlotId, mSupportedFeature);
         }
     }
@@ -156,7 +156,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public void addRegistrationListener(IImsRegistrationListener listener)
     throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             getServiceInterface(mBinder).addRegistrationListener(mSlotId, mSupportedFeature,
                     listener);
         }
@@ -166,7 +166,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public void removeRegistrationListener(IImsRegistrationListener listener)
             throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             getServiceInterface(mBinder).removeRegistrationListener(mSlotId, mSupportedFeature,
                     listener);
         }
@@ -176,7 +176,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public ImsCallProfile createCallProfile(int sessionId, int callServiceType, int callType)
             throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).createCallProfile(mSlotId, mSupportedFeature,
                     sessionId, callServiceType, callType);
         }
@@ -186,7 +186,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public IImsCallSession createCallSession(int sessionId, ImsCallProfile profile,
             IImsCallSessionListener listener) throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).createCallSession(mSlotId, mSupportedFeature,
                     sessionId, profile, listener);
         }
@@ -196,7 +196,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public IImsCallSession getPendingCallSession(int sessionId, String callId)
             throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).getPendingCallSession(mSlotId, mSupportedFeature,
                     sessionId, callId);
         }
@@ -205,7 +205,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public IImsUt getUtInterface() throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).getUtInterface(mSlotId, mSupportedFeature);
         }
     }
@@ -213,7 +213,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public IImsConfig getConfigInterface() throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).getConfigInterface(mSlotId, mSupportedFeature);
         }
     }
@@ -221,7 +221,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public void turnOnIms() throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             getServiceInterface(mBinder).turnOnIms(mSlotId, mSupportedFeature);
         }
     }
@@ -229,7 +229,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public void turnOffIms() throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             getServiceInterface(mBinder).turnOffIms(mSlotId, mSupportedFeature);
         }
     }
@@ -237,7 +237,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public IImsEcbm getEcbmInterface() throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).getEcbmInterface(mSlotId, mSupportedFeature);
         }
     }
@@ -246,7 +246,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     public void setUiTTYMode(int uiTtyMode, Message onComplete)
             throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             getServiceInterface(mBinder).setUiTTYMode(mSlotId, mSupportedFeature, uiTtyMode,
                     onComplete);
         }
@@ -255,7 +255,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
         synchronized (mLock) {
-            checkBinderConnection();
+            checkServiceIsReady();
             return getServiceInterface(mBinder).getMultiEndpointInterface(mSlotId,
                     mSupportedFeature);
         }
@@ -264,7 +264,8 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public int getFeatureStatus() {
         synchronized (mLock) {
-            if (mFeatureStatusCached != null) {
+            if (isBinderAlive() && mFeatureStatusCached != null) {
+                Log.i(LOG_TAG, "getFeatureStatus - returning cached: " + mFeatureStatusCached);
                 return mFeatureStatusCached;
             }
         }
@@ -277,6 +278,7 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
             // Cache only non-null value for feature status.
             mFeatureStatusCached = status;
         }
+        Log.i(LOG_TAG, "getFeatureStatus - returning " + status);
         return status;
     }
 
@@ -301,10 +303,28 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
         mStatusCallback = c;
     }
 
+    /**
+     * @return Returns true if the ImsService is ready to take commands, false otherwise. If this
+     * method returns false, it doesn't mean that the Binder connection is not available (use
+     * {@link #isBinderReady()} to check that), but that the ImsService is not accepting commands
+     * at this time.
+     *
+     * For example, for DSDS devices, only one slot can be {@link ImsFeature#STATE_READY} to take
+     * commands at a time, so the other slot must stay at {@link ImsFeature#STATE_NOT_AVAILABLE}.
+     */
+    public boolean isBinderReady() {
+        return isBinderAlive() && getFeatureStatus() == ImsFeature.STATE_READY;
+    }
+
     @Override
     public boolean isBinderAlive() {
-        return mIsAvailable && getFeatureStatus() == ImsFeature.STATE_READY && mBinder != null &&
-                mBinder.isBinderAlive();
+        return mIsAvailable && mBinder != null && mBinder.isBinderAlive();
+    }
+
+    protected void checkServiceIsReady() throws RemoteException {
+        if (!isBinderReady()) {
+            throw new RemoteException("ImsServiceProxy is not ready to accept commands.");
+        }
     }
 
     private IImsServiceController getServiceInterface(IBinder b) {
