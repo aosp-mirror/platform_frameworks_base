@@ -16,8 +16,6 @@
 
 package android.hardware.input;
 
-import com.android.internal.os.SomeArgs;
-
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -31,10 +29,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
-import android.os.Vibrator;
-import android.os.VibrationEffect;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemClock;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
@@ -45,6 +43,8 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
+
+import com.android.internal.os.SomeArgs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -319,6 +319,62 @@ public final class InputManager {
                 ids[i] = mInputDevices.keyAt(i);
             }
             return ids;
+        }
+    }
+
+    /**
+     * Returns true if an input device is enabled. Should return true for most
+     * situations. Some system apps may disable an input device, for
+     * example to prevent unwanted touch events.
+     *
+     * @param id The input device Id.
+     *
+     * @hide
+     */
+    public boolean isInputDeviceEnabled(int id) {
+        try {
+            return mIm.isInputDeviceEnabled(id);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not check enabled status of input device with id = " + id);
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables an InputDevice.
+     * <p>
+     * Requires {@link android.Manifest.permissions.DISABLE_INPUT_DEVICE}.
+     * </p>
+     *
+     * @param id The input device Id.
+     *
+     * @hide
+     */
+    public void enableInputDevice(int id) {
+        try {
+            mIm.enableInputDevice(id);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not enable input device with id = " + id);
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Disables an InputDevice.
+     * <p>
+     * Requires {@link android.Manifest.permissions.DISABLE_INPUT_DEVICE}.
+     * </p>
+     *
+     * @param id The input device Id.
+     *
+     * @hide
+     */
+    public void disableInputDevice(int id) {
+        try {
+            mIm.disableInputDevice(id);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not disable input device with id = " + id);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
