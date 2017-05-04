@@ -91,6 +91,7 @@ public class AppBackupUtils {
     /**
      * Old style: directly match the stored vs on device signature blocks.
      */
+    // TODO(b/37977154): Resolve questionable policies.
     public static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null) {
             return false;
@@ -110,7 +111,7 @@ public class AppBackupUtils {
         }
 
         // Allow unsigned apps, but not signed on one device and unsigned on the other
-        // !!! TODO: is this the right policy?
+        // TODO(b/37977154): is this the right policy?
         Signature[] deviceSigs = target.signatures;
         if (RefactoredBackupManagerService.MORE_DEBUG) {
             Slog.v(RefactoredBackupManagerService.TAG, "signaturesMatch(): stored=" + storedSigs
@@ -120,11 +121,12 @@ public class AppBackupUtils {
                 && (deviceSigs == null || deviceSigs.length == 0)) {
             return true;
         }
+        // TODO(b/37977154): This allows empty stored signature, is this right?
         if (storedSigs == null || deviceSigs == null) {
             return false;
         }
 
-        // !!! TODO: this demands that every stored signature match one
+        // TODO(b/37977154): this demands that every stored signature match one
         // that is present on device, and does not demand the converse.
         // Is this this right policy?
         int nStored = storedSigs.length;

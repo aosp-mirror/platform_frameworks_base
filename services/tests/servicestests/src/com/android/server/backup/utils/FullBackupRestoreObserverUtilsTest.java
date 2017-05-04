@@ -23,12 +23,19 @@ import static org.mockito.Mockito.verify;
 
 import android.app.backup.IFullBackupRestoreObserver;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@SmallTest
+@Presubmit
+@RunWith(AndroidJUnit4.class)
 public class FullBackupRestoreObserverUtilsTest {
     private static final String PACKAGE_NAME = "some.package";
     @Mock
