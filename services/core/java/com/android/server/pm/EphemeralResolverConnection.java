@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -206,7 +207,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
     private void handleBinderDiedLocked() {
         if (mRemoteInstance != null) {
-            mRemoteInstance.asBinder().unlinkToDeath(this, 0 /*flags*/);
+            try {
+                mRemoteInstance.asBinder().unlinkToDeath(this, 0 /*flags*/);
+            } catch (NoSuchElementException ignore) { }
         }
         mRemoteInstance = null;
     }
