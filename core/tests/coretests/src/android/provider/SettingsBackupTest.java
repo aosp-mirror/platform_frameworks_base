@@ -396,6 +396,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ANR_SHOW_BACKGROUND,
                  Settings.Secure.ASSISTANT,
                  Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
+                 Settings.Secure.ASSIST_GESTURE_ENABLED_KEYGUARD,
+                 Settings.Secure.ASSIST_GESTURE_ENABLED_SLEEP,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
