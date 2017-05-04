@@ -244,8 +244,8 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Called after virtual display Id is updated by
-     * {@link com.android.server.vr.CompatibilityDisplay} with a specific
-     * {@param compatibilityDisplayId}.
+     * {@link com.android.server.vr.Vr2dDisplay} with a specific
+     * {@param vr2dDisplayId}.
      */
-    public abstract void setVrCompatibilityDisplayId(int vrCompatibilityDisplayId);
+    public abstract void setVr2dDisplayId(int vr2dDisplayId);
 }

@@ -16,7 +16,7 @@
 
 package com.android.commands.vr;
 
-import android.app.CompatibilityDisplayProperties;
+import android.app.Vr2dDisplayProperties;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -39,7 +39,7 @@ public final class Vr extends BaseCommand {
 
     private static final String COMMAND_SET_PERSISTENT_VR_MODE_ENABLED =
         "set-persistent-vr-mode-enabled";
-    private static final String COMMAND_SET_COMPATIBILITY_DISPLAY_PROPERTIES =
+    private static final String COMMAND_SET_VR2D_DISPLAY_PROPERTIES =
         "set-display-props";
 
     private IVrManager mVrService;
@@ -63,8 +63,8 @@ public final class Vr extends BaseCommand {
 
         String command = nextArgRequired();
         switch (command) {
-            case COMMAND_SET_COMPATIBILITY_DISPLAY_PROPERTIES:
-                runSetCompatibilityDisplayProperties();
+            case COMMAND_SET_VR2D_DISPLAY_PROPERTIES:
+                runSetVr2dDisplayProperties();
                 break;
             case COMMAND_SET_PERSISTENT_VR_MODE_ENABLED:
                 runSetPersistentVrModeEnabled();
@@ -74,7 +74,7 @@ public final class Vr extends BaseCommand {
         }
     }
 
-    private void runSetCompatibilityDisplayProperties() throws RemoteException {
+    private void runSetVr2dDisplayProperties() throws RemoteException {
         String widthStr = nextArgRequired();
         int width = Integer.parseInt(widthStr);
 
@@ -84,11 +84,11 @@ public final class Vr extends BaseCommand {
         String dpiStr = nextArgRequired();
         int dpi = Integer.parseInt(dpiStr);
 
-        CompatibilityDisplayProperties compatDisplayProperties =
-                new CompatibilityDisplayProperties(width, height, dpi);
+        Vr2dDisplayProperties vr2dDisplayProperties =
+                new Vr2dDisplayProperties(width, height, dpi);
 
         try {
-            mVrService.setCompatibilityDisplayProperties(compatDisplayProperties);
+            mVrService.setVr2dDisplayProperties(vr2dDisplayProperties);
         } catch (RemoteException re) {
             System.err.println("Error: Can't set persistent mode " + re);
         }

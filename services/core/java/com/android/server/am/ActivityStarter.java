@@ -186,7 +186,7 @@ class ActivityStarter {
     private IVoiceInteractionSession mVoiceSession;
     private IVoiceInteractor mVoiceInteractor;
 
-    private boolean mUsingVrCompatibilityDisplay;
+    private boolean mUsingVr2dDisplay;
 
     private void reset() {
         mStartActivity = null;
@@ -226,14 +226,14 @@ class ActivityStarter {
         mVoiceSession = null;
         mVoiceInteractor = null;
 
-        mUsingVrCompatibilityDisplay = false;
+        mUsingVr2dDisplay = false;
     }
 
     ActivityStarter(ActivityManagerService service, ActivityStackSupervisor supervisor) {
         mService = service;
         mSupervisor = supervisor;
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
-        mUsingVrCompatibilityDisplay = false;
+        mUsingVr2dDisplay = false;
     }
 
     final int startActivityLocked(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
@@ -1476,12 +1476,12 @@ class ActivityStarter {
         }
 
         // Get the virtual display id from ActivityManagerService.
-        int displayId = mService.mVrCompatibilityDisplayId;
+        int displayId = mService.mVr2dDisplayId;
         if (displayId != INVALID_DISPLAY) {
             if (DEBUG_STACK) {
                 Slog.d(TAG, "getSourceDisplayId :" + displayId);
             }
-            mUsingVrCompatibilityDisplay = true;
+            mUsingVr2dDisplay = true;
             return displayId;
         }
 
@@ -2105,8 +2105,8 @@ class ActivityStarter {
             return mSupervisor.getValidLaunchStackOnDisplay(launchDisplayId, r);
         }
 
-        // If we are using Vr compatibility display, find the virtual display stack.
-        if (mUsingVrCompatibilityDisplay) {
+        // If we are using Vr2d display, find the virtual display stack.
+        if (mUsingVr2dDisplay) {
             ActivityStack as = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
             if (DEBUG_STACK) {
                 Slog.v(TAG, "Launch stack for app: " + r.toString() +
