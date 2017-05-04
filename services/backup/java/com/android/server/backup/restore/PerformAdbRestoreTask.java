@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
+
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.FullBackup;
@@ -722,7 +724,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                         "Agent failure restoring " + pkg + "; now ignoring");
                             }
                             backupManagerService.getBackupHandler().removeMessages(
-                                    RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
+                                    MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp, false);
                             mPackagePolicies.put(pkg, RestorePolicy.IGNORE);

@@ -572,11 +572,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Determines whether to take full screen screenshots
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
 
-    // STOPSHIP: Update default to a smaller value.
     /**
      * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
      */
-    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 2000; // 2 sec
+    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 200; // 0.2 sec
 
     /**
      * State indicating that there is no need for any blocking for network.
@@ -627,8 +626,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final VrController mVrController;
 
-    // VR Compatibility Display Id.
-    int mVrCompatibilityDisplayId = INVALID_DISPLAY;
+    // VR Vr2d Display Id.
+    int mVr2dDisplayId = INVALID_DISPLAY;
 
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
@@ -4312,6 +4311,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         validateUid.idle = false;
                     }
                     validateUid.curProcState = validateUid.setProcState = item.processState;
+                    validateUid.lastDispatchedProcStateSeq = item.procStateSeq;
                 }
             }
         }
@@ -23701,17 +23701,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         /**
          * Called after virtual display Id is updated by
-         * {@link com.android.server.vr.CompatibilityDisplay} with a specific
-         * {@param vrCompatibilityDisplayId}.
+         * {@link com.android.server.vr.Vr2dDisplay} with a specific
+         * {@param vrVr2dDisplayId}.
          */
         @Override
-        public void setVrCompatibilityDisplayId(int vrCompatibilityDisplayId) {
+        public void setVr2dDisplayId(int vr2dDisplayId) {
             if (DEBUG_STACK) {
-                Slog.d(TAG, "setVrCompatibilityDisplayId called for: " +
-                        vrCompatibilityDisplayId);
+                Slog.d(TAG, "setVr2dDisplayId called for: " +
+                        vr2dDisplayId);
             }
             synchronized (ActivityManagerService.this) {
-                mVrCompatibilityDisplayId = vrCompatibilityDisplayId;
+                mVr2dDisplayId = vr2dDisplayId;
             }
         }
     }
@@ -23775,11 +23775,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (totalTime >= mWaitForNetworkTimeoutMs) {
                     Slog.wtf(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
-                            + procStateSeq);
-                } else if (DEBUG_NETWORK ||  totalTime >= mWaitForNetworkTimeoutMs / 2) {
-                    Slog.d(TAG_NETWORK, "Total time waited for network rules to get updated: "
-                            + totalTime + ". Uid: " + callingUid + " procStateSeq: "
-                            + procStateSeq);
+                            + procStateSeq + " UidRec: " + record
+                            + " validateUidRec: " + mValidateUids.get(callingUid));
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

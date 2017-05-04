@@ -273,31 +273,21 @@ public class RankingHelper implements RankingConfig {
     }
 
     private boolean shouldHaveDefaultChannel(Record r) throws NameNotFoundException {
+        if (supportsChannels(r)) {
+            return false;
+        }
+
         final int userId = UserHandle.getUserId(r.uid);
-        final ApplicationInfo applicationInfo = mPm.getApplicationInfoAsUser(r.pkg, 0, userId);
-        if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
-            // Pre-O apps should have it.
-            return true;
+        final ApplicationInfo applicationInfo = mPm.getApplicationInfoAsUser(r.pkg,
+                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                userId);
+        if (applicationInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1) {
+            // O apps should not have the default channel.
+            return false;
         }
 
-        // STOPSHIP TODO: remove before release - O+ apps should never have a default channel.
-        // But for now, leave the default channel until an app has created its first channel.
-        boolean hasCreatedAChannel = false;
-        final int size = r.channels.size();
-        for (int i = 0; i < size; i++) {
-            final NotificationChannel notificationChannel = r.channels.valueAt(i);
-            if (notificationChannel != null &&
-                    !notificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
-                hasCreatedAChannel = true;
-                break;
-            }
-        }
-        if (!hasCreatedAChannel) {
-            return true;
-        }
-
-        // Otherwise, should not have the default channel.
-        return false;
+        // Otherwise, this app should have the default channel.
+        return true;
     }
 
     private void deleteDefaultChannelIfNeeded(Record r) throws NameNotFoundException {
@@ -516,6 +506,31 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
+    public boolean supportsChannels(String pkg, int uid) {
+        Record r = getOrCreateRecord(pkg, uid);
+
+        if (r == null) {
+            return false;
+        }
+
+        if (r.channels.size() == 1
+                && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean supportsChannels(Record r) {
+        if (r.channels.size() == 1
+                && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+            return false;
+        }
+
+        return (r.channels.size() > 0);
+    }
+
+    @Override
     public void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromTargetApp) {
         Preconditions.checkNotNull(pkg);
@@ -587,6 +602,10 @@ public class RankingHelper implements RankingConfig {
         r.channels.put(channel.getId(), channel);
         MetricsLogger.action(getChannelLog(channel, pkg).setType(
                 MetricsProto.MetricsEvent.TYPE_OPEN));
+
+        // Remove Default Channel.
+        r.channels.remove(NotificationChannel.DEFAULT_CHANNEL_ID);
+
         updateConfig();
     }
 
@@ -683,13 +702,7 @@ public class RankingHelper implements RankingConfig {
         if (r == null) {
             return;
         }
-        int N = r.channels.size() - 1;
-        for (int i = N; i >= 0; i--) {
-            String key = r.channels.keyAt(i);
-            if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(key)) {
-                r.channels.remove(key);
-            }
-        }
+        r.channels.clear();
         updateConfig();
     }
 
@@ -1041,6 +1054,8 @@ public class RankingHelper implements RankingConfig {
                 final int uid = uidList[i];
                 synchronized (mRecords) {
                     mRecords.remove(recordKey(pkg, uid));
+                    // reset to default settings and re-add misc channel for pre-O apps
+                    getOrCreateRecord(pkg, uid);
                 }
                 mRestoredWithoutUids.remove(pkg);
                 updated = true;

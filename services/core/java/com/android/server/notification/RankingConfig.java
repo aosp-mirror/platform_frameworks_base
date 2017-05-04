@@ -42,4 +42,6 @@ public interface RankingConfig {
     void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannels(String pkg, int uid);
     ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid, boolean includeDeleted);
+
+    boolean supportsChannels(String pkg, int uid);
 }

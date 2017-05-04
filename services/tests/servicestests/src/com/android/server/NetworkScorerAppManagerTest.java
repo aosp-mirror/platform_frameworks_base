@@ -228,30 +228,23 @@ public class NetworkScorerAppManagerTest {
     }
 
     @Test
-    public void testSetActiveScorer_nullPackage_validDefault() throws Exception {
-        String packageName = "package";
-        String defaultPackage = "defaultPackage";
-        setNetworkRecoPackageSetting(packageName);
-        setDefaultNetworkRecommendationPackage(defaultPackage);
-        final ComponentName recoComponent = new ComponentName(defaultPackage, "class1");
-        mockScoreNetworksGranted(recoComponent.getPackageName());
-        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */, null);
+    public void testSetActiveScorer_nullPackage_currentIsSet() throws Exception {
+        setNetworkRecoPackageSetting("package");
 
         assertTrue(mNetworkScorerAppManager.setActiveScorer(null));
         verify(mSettingsFacade).putString(mMockContext,
-                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, defaultPackage);
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, null);
+        verify(mSettingsFacade).putInt(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
+                NetworkScoreManager.RECOMMENDATIONS_ENABLED_FORCED_OFF);
     }
 
     @Test
-    public void testSetActiveScorer_nullPackage_invalidDefault() throws Exception {
-        String packageName = "package";
-        String defaultPackage = "defaultPackage";
-        setNetworkRecoPackageSetting(packageName);
-        setDefaultNetworkRecommendationPackage(defaultPackage);
+    public void testSetActiveScorer_nullPackage_currentIsNull() throws Exception {
+        setNetworkRecoPackageSetting(null);
 
-        assertFalse(mNetworkScorerAppManager.setActiveScorer(null));
-        verify(mSettingsFacade, never()).putString(any(),
-                eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE), any());
+        assertTrue(mNetworkScorerAppManager.setActiveScorer(null));
+        verify(mSettingsFacade, never()).putString(any(), any(), any());
     }
 
     @Test
@@ -266,6 +259,9 @@ public class NetworkScorerAppManagerTest {
         assertTrue(mNetworkScorerAppManager.setActiveScorer(newPackage));
         verify(mSettingsFacade).putString(mMockContext,
                 Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, newPackage);
+        verify(mSettingsFacade).putInt(mMockContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
+                NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON);
     }
 
     @Test
@@ -338,6 +334,32 @@ public class NetworkScorerAppManagerTest {
         verify(mSettingsFacade).putInt(mMockContext,
                 Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
                 NetworkScoreManager.RECOMMENDATIONS_ENABLED_OFF);
+    }
+
+    @Test
+    public void testUpdateState_currentPackageNull_defaultNull() throws Exception {
+        setDefaultNetworkRecommendationPackage(null);
+        setNetworkRecoPackageSetting(null);
+
+        mNetworkScorerAppManager.updateState();
+
+        verify(mSettingsFacade, never()).putString(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE), anyString());
+        verify(mSettingsFacade, never()).putInt(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED), anyInt());
+    }
+
+    @Test
+    public void testUpdateState_currentPackageEmpty_defaultEmpty() throws Exception {
+        setDefaultNetworkRecommendationPackage("");
+        setNetworkRecoPackageSetting("");
+
+        mNetworkScorerAppManager.updateState();
+
+        verify(mSettingsFacade, never()).putString(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE), anyString());
+        verify(mSettingsFacade, never()).putInt(any(),
+                eq(Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED), anyInt());
     }
 
     @Test

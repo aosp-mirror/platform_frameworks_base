@@ -22,5 +22,12 @@ import android.hardware.radio.RadioManager;
 interface ITuner {
     void close();
 
+    /**
+     * @throws IllegalArgumentException if config is not valid or null
+     */
+    void setConfiguration(in RadioManager.BandConfig config);
+
+    RadioManager.BandConfig getConfiguration();
+
     int getProgramInformation(out RadioManager.ProgramInfo[] infoOut);
 }

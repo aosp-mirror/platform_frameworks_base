@@ -2869,7 +2869,8 @@ public class NotificationManagerService extends SystemService {
                                 adjustedSbn.getUser(), GroupHelper.AUTOGROUP_KEY,
                                 System.currentTimeMillis());
                 summaryRecord = new NotificationRecord(getContext(), summarySbn,
-                        notificationRecord.getChannel());
+                        notificationRecord.getChannel(), mRankingHelper.supportsChannels(
+                                summarySbn.getPackageName(), summarySbn.getUid()));
                 summaries.put(pkg, summarySbn.getKey());
             }
         }
@@ -3189,12 +3190,6 @@ public class NotificationManagerService extends SystemService {
         final NotificationChannel channel = mRankingHelper.getNotificationChannel(pkg,
                 notificationUid, channelId, false /* includeDeleted */);
         if (channel == null) {
-            // STOPSHIP TODO: remove before release - should always throw without a valid channel.
-            if (channelId == null) {
-                Log.e(TAG, "Cannot post notification without channel ID when targeting O "
-                        + " - notification=" + notification);
-                return;
-            }
             final String noChannelStr = "No Channel found for "
                     + "pkg=" + pkg
                     + ", channelId=" + channelId
@@ -3211,18 +3206,13 @@ public class NotificationManagerService extends SystemService {
                     "Failed to post notification on channel \"" + channelId + "\"\n" +
                     "See log for more details");
             return;
-        } else if (channelId == null && shouldWarnUseChannels(pkg, notificationUid)) {
-            // STOPSHIP TODO: remove once default channel is removed for all apps that target O.
-            Log.e(TAG, "Developer Warning for package " + pkg
-                    + ", no channel specified for posted notification: " + notification);
-            doDebugOnlyToast("Developer warning for package \"" + pkg + "\"\n" +
-                    "Posted notification should specify a channel");
         }
 
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
-        final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
+        final NotificationRecord r = new NotificationRecord(getContext(), n, channel,
+                mRankingHelper.supportsChannels(pkg, notificationUid));
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id,tag, r)) {
             return;
@@ -3256,19 +3246,6 @@ public class NotificationManagerService extends SystemService {
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Unable to toast with text: " + toastText, e);
             }
-        }
-    }
-
-    // STOPSHIP - Remove once RankingHelper deletes default channel for all apps targeting O.
-    private boolean shouldWarnUseChannels(String pkg, int uid) {
-        try {
-            final int userId = UserHandle.getUserId(uid);
-            final ApplicationInfo applicationInfo =
-                    mPackageManagerClient.getApplicationInfoAsUser(pkg, 0, userId);
-            return applicationInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1;
-        } catch (NameNotFoundException e) {
-            Slog.e(TAG, e.toString());
-            return false;
         }
     }
 

@@ -1559,14 +1559,14 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setText(CharSequence text) {
             ViewNodeText t = getNodeText();
-            t.mText = text;
+            t.mText = TextUtils.trimNoCopySpans(text);
             t.mTextSelectionStart = t.mTextSelectionEnd = -1;
         }
 
         @Override
         public void setText(CharSequence text, int selectionStart, int selectionEnd) {
             ViewNodeText t = getNodeText();
-            t.mText = text;
+            t.mText = TextUtils.trimNoCopySpans(text);
             t.mTextSelectionStart = selectionStart;
             t.mTextSelectionEnd = selectionEnd;
         }
@@ -1734,13 +1734,6 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setDataIsSensitive(boolean sensitive) {
             mNode.mSanitized = !sensitive;
-        }
-
-        @Override
-        public void setUrl(String url) {
-            if (url == null) return;
-
-            setWebDomain(url);
         }
 
         @Override

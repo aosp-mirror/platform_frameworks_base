@@ -1086,6 +1086,7 @@ class AlarmManagerService extends SystemService {
         if (timeZoneWasChanged) {
             Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
                     | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
             intent.putExtra("time-zone", zone.getID());
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL);

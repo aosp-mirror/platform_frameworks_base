@@ -184,6 +184,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
 import android.util.DisplayMetrics;
@@ -512,6 +513,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mGoingToSleep;
     volatile boolean mRecentsVisible;
     volatile boolean mPictureInPictureVisible;
+    // Written by vr manager thread, only read in this class.
+    volatile private boolean mPersistentVrModeEnabled;
     volatile private boolean mDismissImeOnBackKeyPressed;
 
     // Used to hold the last user key used to wake the device.  This helps us prevent up events
@@ -777,6 +780,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mBugreportTvKey2Pressed;
     private boolean mBugreportTvScheduled;
 
+    private boolean mAccessibilityTvKey1Pressed;
+    private boolean mAccessibilityTvKey2Pressed;
+    private boolean mAccessibilityTvScheduled;
+
     /* The number of steps between min and max brightness */
     private static final int BRIGHTNESS_STEPS = 10;
 
@@ -821,6 +828,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_BACK_DELAYED_PRESS = 20;
     private static final int MSG_ACCESSIBILITY_SHORTCUT = 21;
     private static final int MSG_BUGREPORT_TV = 22;
+    private static final int MSG_ACCESSIBILITY_TV = 23;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -901,6 +909,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_BUGREPORT_TV:
                     takeBugreport();
+                    break;
+                case MSG_ACCESSIBILITY_TV:
+                    if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)) {
+                        accessibilityShortcutActivated();
+                    }
                     break;
             }
         }
@@ -1001,6 +1014,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     MyOrientationListener mOrientationListener;
+
+    final IPersistentVrStateCallbacks mPersistentVrModeListener =
+            new IPersistentVrStateCallbacks.Stub() {
+        @Override
+        public void onPersistentVrStateChanged(boolean enabled) {
+            mPersistentVrModeEnabled = enabled;
+        }
+    };
 
     private final StatusBarController mStatusBarController = new StatusBarController();
 
@@ -3308,6 +3329,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!down) {
                 cancelPreloadRecentApps();
 
+                if (mHasFeatureLeanback) {
+                    // Clear flags
+                    mAccessibilityTvKey2Pressed = down;
+                }
+
                 mHomePressed = false;
                 if (mHomeConsumed) {
                     mHomeConsumed = false;
@@ -3362,6 +3388,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     preloadRecentApps();
                 }
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+                if (mHasFeatureLeanback) {
+                    mAccessibilityTvKey2Pressed = down;
+                    if (interceptAccessibilityGestureTv()) {
+                        return -1;
+                    }
+                }
+
                 if (!keyguardOn) {
                     handleLongPressOnHome(event.getDeviceId());
                 }
@@ -3521,6 +3554,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (mHasFeatureLeanback && interceptBugreportGestureTv(keyCode, down)) {
             return -1;
+        } else if (mHasFeatureLeanback && keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            mAccessibilityTvKey1Pressed = down;
+            if (interceptAccessibilityGestureTv()) {
+                return -1;
+            }
         }
 
         // Toggle Caps Lock on META-ALT.
@@ -3737,6 +3775,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return mBugreportTvScheduled;
+    }
+
+    /**
+     * TV only: recognizes a remote control gesture as Accessibility shortcut.
+     * Shortcut: Long press (HOME + DPAD_CENTER)
+     */
+    private boolean interceptAccessibilityGestureTv() {
+        if (mAccessibilityTvKey1Pressed && mAccessibilityTvKey2Pressed) {
+            if (!mAccessibilityTvScheduled) {
+                mAccessibilityTvScheduled = true;
+                Message msg = Message.obtain(mHandler, MSG_ACCESSIBILITY_TV);
+                msg.setAsynchronous(true);
+                mHandler.sendMessage(msg);
+            }
+        } else if (mAccessibilityTvScheduled) {
+            mHandler.removeMessages(MSG_ACCESSIBILITY_TV);
+            mAccessibilityTvScheduled = false;
+        }
+        return mAccessibilityTvScheduled;
     }
 
     private void takeBugreport() {
@@ -6909,7 +6966,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || mAllowAllRotations == 1
                         || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                         || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER) {
-                    preferredRotation = sensorRotation;
+                    // In VrMode, we report the sensor as always being in default orientation so:
+                    // 1) The orientation doesn't change as the user moves their head.
+                    // 2) 2D apps within VR show in the device's default orientation.
+                    // This only overwrites the sensor-provided orientation and does not affect any
+                    // explicit orientation preferences specified by any activities.
+                    preferredRotation =
+                            mPersistentVrModeEnabled ? Surface.ROTATION_0 : sensorRotation;
                 } else {
                     preferredRotation = lastRotation;
                 }
@@ -7083,6 +7146,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardDelegate.onSystemReady();
 
         mVrManagerInternal = LocalServices.getService(VrManagerInternal.class);
+        if (mVrManagerInternal != null) {
+            mVrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
+        }
 
         readCameraLensCoverState();
         updateUiMode();
@@ -8215,6 +8281,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mDemoHdmiRotation="); pw.print(mDemoHdmiRotation);
                 pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
         pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
+        if (mHasFeatureLeanback) {
+            pw.print(prefix);
+            pw.print("mAccessibilityTvKey1Pressed="); pw.println(mAccessibilityTvKey1Pressed);
+            pw.print(prefix);
+            pw.print("mAccessibilityTvKey2Pressed="); pw.println(mAccessibilityTvKey2Pressed);
+            pw.print(prefix);
+            pw.print("mAccessibilityTvScheduled="); pw.println(mAccessibilityTvScheduled);
+        }
 
         mGlobalKeyManager.dump(prefix, pw);
         mStatusBarController.dump(pw, prefix);

@@ -279,6 +279,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                         }
 
                         MetricsLogger.action(mSv.getContext(), MetricsEvent.OVERVIEW_SCROLL);
+                        mLastY = mDownY = y;
                     }
                 }
                 if (mIsScrolling) {

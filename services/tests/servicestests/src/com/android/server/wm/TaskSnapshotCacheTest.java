@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -33,8 +34,7 @@ import org.junit.runner.RunWith;
  * runtest frameworks-services -c com.android.server.wm.TaskSnapshotCacheTest
  */
 @SmallTest
-// TODO(b/35196891): Add back to presubmit once the bug is fixed.
-//@Presubmit
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 

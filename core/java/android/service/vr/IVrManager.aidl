@@ -16,7 +16,7 @@
 
 package android.service.vr;
 
-import android.app.CompatibilityDisplayProperties;
+import android.app.Vr2dDisplayProperties;
 import android.service.vr.IVrStateCallbacks;
 import android.service.vr.IPersistentVrStateCallbacks;
 
@@ -68,16 +68,16 @@ interface IVrManager {
     void setPersistentVrModeEnabled(in boolean enabled);
 
     /**
-     * Sets the resolution and DPI of the compatibility virtual display used to display
+     * Sets the resolution and DPI of the vr2d virtual display used to display
      * 2D applications in VR mode.
      *
      * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
      *
-     * @param compatDisplayProperties Compatibitlity display properties to be set for
+     * @param vr2dDisplayProperties Vr2d display properties to be set for
      * the VR virtual display
      */
-    void setCompatibilityDisplayProperties(
-            in CompatibilityDisplayProperties compatDisplayProperties);
+    void setVr2dDisplayProperties(
+            in Vr2dDisplayProperties vr2dDisplayProperties);
 
     /**
      * Return current virtual display id.
@@ -85,7 +85,7 @@ interface IVrManager {
      * @return {@link android.view.Display.INVALID_DISPLAY} if there is no virtual display
      * currently, else return the display id of the virtual display
      */
-    int getCompatibilityDisplayId();
+    int getVr2dDisplayId();
 
     /**
      * Initiate connection for system controller data.

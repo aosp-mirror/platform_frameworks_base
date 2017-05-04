@@ -20,10 +20,17 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.support.annotation.VisibleForTesting;
 
-import com.android.systemui.plugins.doze.DozeProvider;
-
 /** WakeLock wrapper for testability */
-public interface WakeLock extends DozeProvider.WakeLock {
+public interface WakeLock {
+
+    /** @see android.os.PowerManager.WakeLock#acquire() */
+    void acquire();
+
+    /** @see android.os.PowerManager.WakeLock#release() */
+    void release();
+
+    /** @see android.os.PowerManager.WakeLock#wrap(Runnable) */
+    Runnable wrap(Runnable r);
 
     static WakeLock createPartial(Context context, String tag) {
         return wrap(createPartialInner(context, tag));

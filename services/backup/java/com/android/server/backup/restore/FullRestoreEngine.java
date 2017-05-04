@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
+
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.FullBackup;
@@ -371,9 +373,14 @@ public class FullRestoreEngine extends RestoreEngine {
                     if (okay) {
                         boolean agentSuccess = true;
                         long toCopy = info.size;
+                        final boolean isSharedStorage = pkg.equals(
+                                RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE);
+                        final long timeout = isSharedStorage ?
+                                RefactoredBackupManagerService.TIMEOUT_SHARED_BACKUP_INTERVAL :
+                                RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL;
                         try {
                             backupManagerService.prepareOperationTimeout(token,
-                                    RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
+                                    timeout,
                                     mMonitorTask,
                                     RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT);
 
@@ -489,7 +496,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             Slog.w(RefactoredBackupManagerService.TAG,
                                     "Agent failure restoring " + pkg + "; ending restore");
                             backupManagerService.getBackupHandler().removeMessages(
-                                    RefactoredBackupManagerService.MSG_RESTORE_OPERATION_TIMEOUT);
+                                    MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp);
                             mAgent = null;

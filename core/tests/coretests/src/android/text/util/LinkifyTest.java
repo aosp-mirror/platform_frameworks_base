@@ -16,45 +16,49 @@
 
 package android.text.util;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.LocaleList;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 
 import java.util.Locale;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * LinkifyTest tests {@link Linkify}.
  */
-public class LinkifyTest extends AndroidTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class LinkifyTest {
 
     private static final LocaleList LOCALE_LIST_US = new LocaleList(Locale.US);
     private LocaleList mOriginalLocales;
+    private Context mContext;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
+        mContext = InstrumentationRegistry.getContext();
         mOriginalLocales = LocaleList.getDefault();
         LocaleList.setDefault(LOCALE_LIST_US);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void teardown() {
         LocaleList.setDefault(mOriginalLocales);
-        super.tearDown();
     }
 
-    private Context createUsEnglishContext() {
-        final Configuration overrideConfig = new Configuration();
-        overrideConfig.setLocales(LOCALE_LIST_US);
-        return getContext().createConfigurationContext(overrideConfig);
-    }
-
-    @SmallTest
-    public void testNothing() throws Exception {
+    @Test
+    public void testNothing() {
         TextView tv;
 
         tv = new TextView(createUsEnglishContext());
@@ -64,8 +68,8 @@ public class LinkifyTest extends AndroidTestCase {
         assertTrue(tv.getUrls().length == 0);
     }
 
-    @SmallTest
-    public void testNormal() throws Exception {
+    @Test
+    public void testNormal() {
         TextView tv;
 
         tv = new TextView(createUsEnglishContext());
@@ -76,8 +80,8 @@ public class LinkifyTest extends AndroidTestCase {
         assertTrue(tv.getUrls().length == 2);
     }
 
-    @SmallTest
-    public void testUnclickable() throws Exception {
+    @Test
+    public void testUnclickable() {
         TextView tv;
 
         tv = new TextView(createUsEnglishContext());
@@ -87,5 +91,11 @@ public class LinkifyTest extends AndroidTestCase {
 
         assertFalse(tv.getMovementMethod() instanceof LinkMovementMethod);
         assertTrue(tv.getUrls().length == 2);
+    }
+
+    private Context createUsEnglishContext() {
+        final Configuration overrideConfig = new Configuration();
+        overrideConfig.setLocales(LOCALE_LIST_US);
+        return mContext.createConfigurationContext(overrideConfig);
     }
 }

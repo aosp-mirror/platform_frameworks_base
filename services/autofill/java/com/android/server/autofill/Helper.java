@@ -20,7 +20,9 @@ import android.annotation.NonNull;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
+import android.util.DebugUtils;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -39,6 +41,10 @@ public final class Helper {
      * {@code cmd autofill verbose [on|off]}.
      */
     public static boolean sVerbose = false;
+
+    private Helper() {
+        throw new UnsupportedOperationException("contains static members only");
+    }
 
     static void append(StringBuilder builder, Bundle bundle) {
         if (bundle == null || !sVerbose) {
@@ -62,8 +68,8 @@ public final class Helper {
         return builder.toString();
     }
 
-    private Helper() {
-        throw new UnsupportedOperationException("contains static members only");
+    static String getUpdateActionAsString(int action) {
+        return DebugUtils.flagsToString(AutofillManager.class, "ACTION_", action);
     }
 
     static ViewNode findViewNodeById(@NonNull AssistStructure structure, @NonNull AutofillId id) {

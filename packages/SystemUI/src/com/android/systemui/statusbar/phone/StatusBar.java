@@ -4062,7 +4062,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void showKeyguard() {
         mKeyguardRequested = true;
-        updateIsKeyguard();
+        // Unconditionally show keyguard again. There's some logic that relies on this
+        // being called even when the keyguard is already showing, e.g. for updating
+        // sensitiveness of notifications and making sure the panels are expanded.
+        showKeyguardImpl();
     }
 
     public boolean hideKeyguard() {
@@ -4075,7 +4078,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         // there's no surface we can show to the user.
         boolean keyguardForDozing = mDozingRequested && !mDeviceInteractive;
         boolean shouldBeKeyguard = mKeyguardRequested || keyguardForDozing;
-        if (shouldBeKeyguard && !mIsKeyguard) {
+        if (keyguardForDozing) {
+            updatePanelExpansionForKeyguard();
+        }
+        if (shouldBeKeyguard) {
             showKeyguardImpl();
         } else if (!shouldBeKeyguard && mIsKeyguard) {
             return hideKeyguardImpl();
@@ -4103,11 +4109,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Keyguard.
             mNotificationPanel.setTouchDisabled(true);
         }
-        if (mState == StatusBarState.KEYGUARD) {
-            instantExpandNotificationsPanel();
-        } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
-            instantCollapseNotificationPanel();
-        }
+        updatePanelExpansionForKeyguard();
         mLeaveOpenOnKeyguardHide = false;
         if (mDraggedDownRow != null) {
             mDraggedDownRow.setUserLocked(false);
@@ -4116,6 +4118,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mPendingRemoteInputView = null;
         mAssistManager.onLockscreenShown();
+    }
+
+    private void updatePanelExpansionForKeyguard() {
+        if (mState == StatusBarState.KEYGUARD) {
+            instantExpandNotificationsPanel();
+        } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
+            instantCollapseNotificationPanel();
+        }
     }
 
     private void onLaunchTransitionFadingEnded() {
@@ -4506,7 +4516,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void instantExpandNotificationsPanel() {
-
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true);
         mNotificationPanel.expand(false /* animate */);
@@ -5087,6 +5096,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDozingRequested = true;
                 DozeLog.traceDozing(mContext, mDozing);
                 updateDozing();
+
             }
         }
 

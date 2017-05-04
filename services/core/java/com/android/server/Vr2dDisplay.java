@@ -3,7 +3,7 @@ package com.android.server.vr;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.app.ActivityManagerInternal;
-import android.app.CompatibilityDisplayProperties;
+import android.app.Vr2dDisplayProperties;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,8 +31,8 @@ import com.android.server.vr.VrManagerService;
  * Creates a 2D Virtual Display while VR Mode is enabled. This display will be used to run and
  * render 2D app within a VR experience. For example, bringing up the 2D calculator app in VR.
  */
-class CompatibilityDisplay {
-    private final static String TAG = "CompatDisplay";
+class Vr2dDisplay {
+    private final static String TAG = "Vr2dDisplay";
     private final static boolean DEBUG = false;
 
     // TODO: Go over these values and figure out what is best
@@ -42,13 +42,13 @@ class CompatibilityDisplay {
     private final static int STOP_VIRTUAL_DISPLAY_DELAY_MILLIS = 2000;
 
     private final static String DEBUG_ACTION_SET_MODE =
-            "com.android.server.vr.CompatibilityDisplay.SET_MODE";
+            "com.android.server.vr.Vr2dDisplay.SET_MODE";
     private final static String DEBUG_EXTRA_MODE_ON =
-            "com.android.server.vr.CompatibilityDisplay.EXTRA_MODE_ON";
+            "com.android.server.vr.Vr2dDisplay.EXTRA_MODE_ON";
     private final static String DEBUG_ACTION_SET_SURFACE =
-            "com.android.server.vr.CompatibilityDisplay.SET_SURFACE";
+            "com.android.server.vr.Vr2dDisplay.SET_SURFACE";
     private final static String DEBUG_EXTRA_SURFACE =
-            "com.android.server.vr.CompatibilityDisplay.EXTRA_SURFACE";
+            "com.android.server.vr.Vr2dDisplay.EXTRA_SURFACE";
 
     /**
      * The default width of the VR virtual display
@@ -99,7 +99,7 @@ class CompatibilityDisplay {
     private boolean mIsVrModeOverrideEnabled;
     private boolean mIsVrModeEnabled;
 
-    public CompatibilityDisplay(DisplayManager displayManager,
+    public Vr2dDisplay(DisplayManager displayManager,
            ActivityManagerInternal activityManagerInternal, IVrManager vrManager) {
         mDisplayManager = displayManager;
         mActivityManagerInternal = activityManagerInternal;
@@ -190,7 +190,7 @@ class CompatibilityDisplay {
     }
 
     /**
-     * Sets the resolution and DPI of the compatibility virtual display used to display
+     * Sets the resolution and DPI of the Vr2d virtual display used to display
      * 2D applications in VR mode.
      *
      * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
@@ -198,7 +198,7 @@ class CompatibilityDisplay {
      * @param compatDisplayProperties Properties of the virtual display for 2D applications
      * in VR mode.
      */
-    public void setVirtualDisplayProperties(CompatibilityDisplayProperties compatDisplayProperties) {
+    public void setVirtualDisplayProperties(Vr2dDisplayProperties compatDisplayProperties) {
         synchronized(mVdLock) {
             if (DEBUG) {
                 Log.i(TAG, "VD setVirtualDisplayProperties: res = " +
@@ -273,13 +273,13 @@ class CompatibilityDisplay {
                     null /* Surface */, 0 /* flags */);
 
             if (mVirtualDisplay != null) {
-                mActivityManagerInternal.setVrCompatibilityDisplayId(
+                mActivityManagerInternal.setVr2dDisplayId(
                     mVirtualDisplay.getDisplay().getDisplayId());
                 // Now create the ImageReader to supply a Surface to the new virtual display.
                 startImageReader();
             } else {
                 Log.w(TAG, "Virtual display id is null after createVirtualDisplay");
-                mActivityManagerInternal.setVrCompatibilityDisplayId(INVALID_DISPLAY);
+                mActivityManagerInternal.setVr2dDisplayId(INVALID_DISPLAY);
                 return;
             }
         }
@@ -302,7 +302,7 @@ class CompatibilityDisplay {
                     } else {
                         Log.i(TAG, "Stopping Virtual Display");
                         synchronized (mVdLock) {
-                            mActivityManagerInternal.setVrCompatibilityDisplayId(INVALID_DISPLAY);
+                            mActivityManagerInternal.setVr2dDisplayId(INVALID_DISPLAY);
                             setSurfaceLocked(null); // clean up and release the surface first.
                             if (mVirtualDisplay != null) {
                                 mVirtualDisplay.release();

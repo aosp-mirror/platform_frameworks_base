@@ -16,6 +16,10 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_GET_RESTORE_SETS;
+import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
+
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
@@ -87,13 +91,12 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // We know we're doing legit work now, so halt the timeout
             // until we're done.  It gets started again when the result
             // comes in.
-            backupManagerService.getBackupHandler().removeMessages(
-                    RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
+            backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
             // spin off the transport request to our service thread
             backupManagerService.getWakelock().acquire();
             Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                    RefactoredBackupManagerService.MSG_RUN_GET_RESTORE_SETS,
+                    MSG_RUN_GET_RESTORE_SETS,
                     new RestoreGetSetsParams(mRestoreTransport, this, observer,
                             monitor));
             backupManagerService.getBackupHandler().sendMessage(msg);
@@ -150,7 +153,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                 if (token == mRestoreSets[i].token) {
                     // Real work, so stop the session timeout until we finalize the restore
                     backupManagerService.getBackupHandler().removeMessages(
-                            RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
+                            MSG_RESTORE_SESSION_TIMEOUT);
 
                     long oldId = Binder.clearCallingIdentity();
                     backupManagerService.getWakelock().acquire();
@@ -158,7 +161,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                         Slog.d(TAG, "restoreAll() kicking off");
                     }
                     Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                            RefactoredBackupManagerService.MSG_RUN_RESTORE);
+                            MSG_RUN_RESTORE);
                     msg.obj = new RestoreParams(mRestoreTransport, dirName,
                             observer, monitor, token);
                     backupManagerService.getBackupHandler().sendMessage(msg);
@@ -243,7 +246,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                 if (token == mRestoreSets[i].token) {
                     // Stop the session timeout until we finalize the restore
                     backupManagerService.getBackupHandler().removeMessages(
-                            RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
+                            MSG_RESTORE_SESSION_TIMEOUT);
 
                     long oldId = Binder.clearCallingIdentity();
                     backupManagerService.getWakelock().acquire();
@@ -251,7 +254,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                         Slog.d(TAG, "restoreSome() of " + packages.length + " packages");
                     }
                     Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                            RefactoredBackupManagerService.MSG_RUN_RESTORE);
+                            MSG_RUN_RESTORE);
                     msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, monitor,
                             token, packages, packages.length > 1);
                     backupManagerService.getBackupHandler().sendMessage(msg);
@@ -341,16 +344,14 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             }
 
             // Stop the session timeout until we finalize the restore
-            backupManagerService.getBackupHandler().removeMessages(
-                    RefactoredBackupManagerService.MSG_RESTORE_SESSION_TIMEOUT);
+            backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
             // Ready to go:  enqueue the restore request and claim success
             backupManagerService.getWakelock().acquire();
             if (RefactoredBackupManagerService.MORE_DEBUG) {
                 Slog.d(TAG, "restorePackage() : " + packageName);
             }
-            Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                    RefactoredBackupManagerService.MSG_RUN_RESTORE);
+            Message msg = backupManagerService.getBackupHandler().obtainMessage(MSG_RUN_RESTORE);
             msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, monitor,
                     token, app);
             backupManagerService.getBackupHandler().sendMessage(msg);
