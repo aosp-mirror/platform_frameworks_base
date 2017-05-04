@@ -2886,4 +2886,8 @@
 
     <!-- Additional non-platform defined secure settings exposed to Instant Apps -->
     <string-array name="config_allowedSecureInstantAppSettings"></string-array>
+
+    <!-- Handle volume keys directly in Window Manager without passing them to the foreground app -->
+    <bool name="config_handleVolumeKeysInWindowManager">false</bool>
+
 </resources>
