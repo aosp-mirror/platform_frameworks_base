@@ -327,8 +327,6 @@ public class TrustManagerService extends SystemService {
                     agentInfo.label = resolveInfo.loadLabel(pm);
                     agentInfo.icon = resolveInfo.loadIcon(pm);
                     agentInfo.settings = getSettingsAttrs(pm, resolveInfo);
-                    agentInfo.agent = new TrustAgentWrapper(mContext, this,
-                            new Intent().setComponent(name), userInfo.getUserHandle());
                 } else {
                     int index = mActiveAgents.indexOf(agentInfo);
                     agentInfo = mActiveAgents.valueAt(index);
@@ -363,6 +361,11 @@ public class TrustManagerService extends SystemService {
                             continue;
                         }
                     }
+                }
+
+                if (agentInfo.agent == null) {
+                    agentInfo.agent = new TrustAgentWrapper(mContext, this,
+                            new Intent().setComponent(name), userInfo.getUserHandle());
                 }
 
                 if (!mActiveAgents.contains(agentInfo)) {
