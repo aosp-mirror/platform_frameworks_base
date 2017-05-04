@@ -34,7 +34,7 @@ import android.graphics.drawable.Drawable;
  * A utility class to colorize bitmaps with a color gradient and a special blending mode
  */
 public class ImageGradientColorizer {
-    public Bitmap colorize(Drawable drawable, int backgroundColor) {
+    public Bitmap colorize(Drawable drawable, int backgroundColor, boolean isRtl) {
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
         int size = Math.min(width, height);
@@ -79,6 +79,12 @@ public class ImageGradientColorizer {
         Canvas fadeInCanvas = new Canvas(fadeIn);
         drawable.clearColorFilter();
         drawable.draw(fadeInCanvas);
+
+        if (isRtl) {
+            // Let's flip the gradient
+            fadeInCanvas.translate(size, 0);
+            fadeInCanvas.scale(-1, 1);
+        }
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
         fadeInCanvas.drawPaint(paint);
 
