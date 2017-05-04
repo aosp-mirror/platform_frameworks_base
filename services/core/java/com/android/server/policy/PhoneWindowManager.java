@@ -584,6 +584,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mTranslucentDecorEnabled = true;
     boolean mUseTvRouting;
 
+    private boolean mHandleVolumeKeysInWM;
+
     int mPointerLocationMode = 0; // guarded by mLock
 
     // The last window we were told about in focusChanged.
@@ -1937,6 +1939,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_shortPressOnSleepBehavior);
 
         mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
+
+        mHandleVolumeKeysInWM = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_handleVolumeKeysInWindowManager);
 
         readConfigurationDependentBehaviors();
 
@@ -3544,9 +3549,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP
                 || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
                 || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
-            if (mUseTvRouting) {
-                // On TVs volume keys never go to the foreground app.
+            if (mUseTvRouting || mHandleVolumeKeysInWM) {
+                // On TVs or when the configuration is enabled, volume keys never
+                // go to the foreground app.
                 dispatchDirectAudioEvent(event);
+                return -1;
+            }
+
+            // If the device is in Vr mode, drop the volume keys and don't
+            // forward it to the application/dispatch the audio event.
+            if (mPersistentVrModeEnabled) {
                 return -1;
             }
         } else if (keyCode == KeyEvent.KEYCODE_TAB && event.isMetaPressed()) {
@@ -5957,8 +5969,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 }
-                if (mUseTvRouting) {
-                    // On TVs, defer special key handlings to
+                if (mUseTvRouting || mHandleVolumeKeysInWM) {
+                    // Defer special key handlings to
                     // {@link interceptKeyBeforeDispatching()}.
                     result |= ACTION_PASS_TO_USER;
                 } else if ((result & ACTION_PASS_TO_USER) == 0) {
