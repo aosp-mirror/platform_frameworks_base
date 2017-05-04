@@ -132,9 +132,6 @@ public class PipMenuActivityController {
                 }
                 case MESSAGE_EXPAND_PIP: {
                     mListeners.forEach(l -> l.onPipExpand());
-                    // Preemptively mark the menu as invisible once we expand the PiP, but don't
-                    // resize as we will be animating the stack
-                    onMenuStateChanged(MENU_STATE_NONE, false /* resize */);
                     break;
                 }
                 case MESSAGE_MINIMIZE_PIP: {
@@ -143,9 +140,6 @@ public class PipMenuActivityController {
                 }
                 case MESSAGE_DISMISS_PIP: {
                     mListeners.forEach(l -> l.onPipDismiss());
-                    // Preemptively mark the menu as invisible once we dismiss the PiP, but don't
-                    // resize as we'll be removing the stack in place
-                    onMenuStateChanged(MENU_STATE_NONE, false /* resize */);
                     break;
                 }
                 case MESSAGE_SHOW_MENU: {
@@ -305,6 +299,15 @@ public class PipMenuActivityController {
                 Log.e(TAG, "Could not notify menu to hide", e);
             }
         }
+    }
+
+    /**
+     * Preemptively mark the menu as invisible, used when we are directly manipulating the pinned
+     * stack and don't want to trigger a resize which can animate the stack in a conflicting way
+     * (ie. when manually expanding or dismissing).
+     */
+    public void hideMenuWithoutResize() {
+        onMenuStateChanged(MENU_STATE_NONE, false /* resize */);
     }
 
     /**
