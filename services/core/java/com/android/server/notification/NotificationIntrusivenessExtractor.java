@@ -66,7 +66,11 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
 
             @Override
             public void applyChangesLocked(NotificationRecord record) {
-                record.setRecentlyIntrusive(false);
+                // there will be another reconsideration in the message queue HANG_TIME_MS
+                // from each time this record alerts, which can finally clear this flag.
+                if ((System.currentTimeMillis() - record.getLastIntrusive()) >= HANG_TIME_MS) {
+                    record.setRecentlyIntrusive(false);
+                }
             }
         };
     }
