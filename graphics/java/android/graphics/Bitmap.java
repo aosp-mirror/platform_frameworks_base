@@ -29,6 +29,10 @@ import android.os.StrictMode;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.DisplayListCanvas;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.OutputStream;
@@ -1171,6 +1175,82 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Creates a Bitmap from the given {@link Picture} source of recorded drawing commands.
+     *
+     * Equivalent to calling {@link #createBitmap(Picture, int, int, Config)} with
+     * width and height the same as the Picture's width and height and a Config.HARDWARE
+     * config.
+     *
+     * @param source The recorded {@link Picture} of drawing commands that will be
+     *               drawn into the returned Bitmap.
+     * @return An immutable bitmap with a HARDWARE config whose contents are created
+     * from the recorded drawing commands in the Picture source.
+     */
+    public static @NonNull Bitmap createBitmap(@NonNull Picture source) {
+        return createBitmap(source, source.getWidth(), source.getHeight(), Config.HARDWARE);
+    }
+
+    /**
+     * Creates a Bitmap from the given {@link Picture} source of recorded drawing commands.
+     *
+     * The bitmap will be immutable with the given width and height. If the width and height
+     * are not the same as the Picture's width & height, the Picture will be scaled to
+     * fit the given width and height.
+     *
+     * @param source The recorded {@link Picture} of drawing commands that will be
+     *               drawn into the returned Bitmap.
+     * @param width The width of the bitmap to create. The picture's width will be
+     *              scaled to match if necessary.
+     * @param height The height of the bitmap to create. The picture's height will be
+     *              scaled to match if necessary.
+     * @param config The {@link Config} of the created bitmap. If this is null then
+     *               the bitmap will be {@link Config#HARDWARE}.
+     *
+     * @return An immutable bitmap with a HARDWARE config whose contents are created
+     * from the recorded drawing commands in the Picture source.
+     */
+    public static @NonNull Bitmap createBitmap(@NonNull Picture source, int width, int height,
+            @NonNull Config config) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width & height must be > 0");
+        }
+        if (config == null) {
+            throw new IllegalArgumentException("Config must not be null");
+        }
+        if (source.requiresHardwareAcceleration() && config != Config.HARDWARE) {
+            StrictMode.noteSlowCall("GPU readback");
+        }
+        if (config == Config.HARDWARE || source.requiresHardwareAcceleration()) {
+            final RenderNode node = RenderNode.create("BitmapTemporary", null);
+            node.setLeftTopRightBottom(0, 0, width, height);
+            node.setClipToBounds(false);
+            final DisplayListCanvas canvas = node.start(width, height);
+            if (source.getWidth() != width || source.getHeight() != height) {
+                canvas.scale(width / (float) source.getWidth(),
+                        height / (float) source.getHeight());
+            }
+            canvas.drawPicture(source);
+            node.end(canvas);
+            Bitmap bitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
+            if (config != Config.HARDWARE) {
+                bitmap = bitmap.copy(config, false);
+            }
+            return bitmap;
+        } else {
+            Bitmap bitmap = Bitmap.createBitmap(width, height, config);
+            Canvas canvas = new Canvas(bitmap);
+            if (source.getWidth() != width || source.getHeight() != height) {
+                canvas.scale(width / (float) source.getWidth(),
+                        height / (float) source.getHeight());
+            }
+            canvas.drawPicture(source);
+            canvas.setBitmap(null);
+            bitmap.makeImmutable();
+            return bitmap;
+        }
+    }
+
+    /**
      * Returns an optional array of private data, used by the UI system for
      * some bitmaps. Not intended to be called by applications.
      */
@@ -1257,6 +1337,12 @@ public final class Bitmap implements Parcelable {
      */
     public final boolean isMutable() {
         return mIsMutable;
+    }
+
+    /** @hide */
+    public final void makeImmutable() {
+        // todo mIsMutable = false;
+        // todo nMakeImmutable();
     }
 
     /**
