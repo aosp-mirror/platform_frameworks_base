@@ -25,9 +25,13 @@ import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
+import static com.android.server.autofill.Helper.findViewNodeById;
+import static com.android.server.autofill.Helper.getUpdateActionAsString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
-import static com.android.server.autofill.Helper.findViewNodeById;
+import static com.android.server.autofill.ViewState.STATE_AUTOFILLED;
+import static com.android.server.autofill.ViewState.STATE_FILLABLE;
+import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -251,16 +255,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 continue;
             }
 
-            final AutofillValue initialValue = viewState.getInitialValue();
+            final AutofillValue currentValue = viewState.getCurrentValue();
             final AutofillValue filledValue = viewState.getAutofilledValue();
             final AutofillOverlay overlay = new AutofillOverlay();
-            if (filledValue != null && !filledValue.equals(initialValue)) {
-                overlay.value = filledValue;
+
+            // Sanitizes the value if the current value matches what the service sent.
+            if (filledValue != null && filledValue.equals(currentValue)) {
+                overlay.value = currentValue;
             }
+
             if (mCurrentViewId != null) {
+                // Updates the focus value.
                 overlay.focused = mCurrentViewId.equals(viewState.id);
+                // Sanitizes the value of the focused field in a manual request.
                 if (overlay.focused && (flags & FLAG_MANUAL_REQUEST) != 0) {
-                    overlay.value = node.getAutofillValue();
+                    overlay.value = currentValue;
                 }
             }
             node.setAutofillOverlay(overlay);
@@ -887,6 +896,40 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
+     * Starts (if necessary) a new fill request upon entering a view.
+     *
+     * <p>A new request will be started in 2 scenarios:
+     * <ol>
+     *   <li>If the user manually requested autofill after the view was already filled.
+     *   <li>If the view is part of a new partition.
+     * </ol>
+     *
+     * @param id The id of the view that is entered.
+     * @param viewState The view that is entered.
+     * @param flags The flag that was passed by the AutofillManager.
+     */
+    private void requestNewFillResponseIfNecessaryLocked(@NonNull AutofillId id,
+            @NonNull ViewState viewState, int flags) {
+        // First check if this is a manual request after view was autofilled.
+        final int state = viewState.getState();
+        final boolean restart = (state & STATE_AUTOFILLED) != 0
+                && (flags & FLAG_MANUAL_REQUEST) != 0;
+        if (restart) {
+            if (sDebug) Slog.d(TAG, "Re-starting session on view  " + id);
+            viewState.setState(STATE_RESTARTED_SESSION);
+            requestNewFillResponseLocked(flags);
+            return;
+        }
+
+        // If it's not, then check if it it should start a partition.
+        if (shouldStartNewPartitionLocked(id)) {
+            if (sDebug) Slog.d(TAG, "Starting partition for view id " + id);
+            viewState.setState(ViewState.STATE_STARTED_PARTITION);
+            requestNewFillResponseLocked(flags);
+        }
+    }
+
+    /**
      * Determines if a new partition should be started for an id.
      *
      * @param id The id of the view that is entered
@@ -942,6 +985,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        if (sVerbose) {
+            Slog.v(TAG, "updateLocked(): id=" + id + ", action=" + getUpdateActionAsString(action)
+                    + ", flags=" + flags);
+        }
         ViewState viewState = mViewStates.get(id);
 
         if (viewState == null) {
@@ -996,13 +1043,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 break;
             case ACTION_VIEW_ENTERED:
-                if (shouldStartNewPartitionLocked(id)) {
-                    if (sDebug) {
-                        Slog.d(TAG, "Starting partition for view id " + viewState.id);
-                    }
-                    viewState.setState(ViewState.STATE_STARTED_PARTITION);
-                    requestNewFillResponseLocked(flags);
-                }
+                requestNewFillResponseIfNecessaryLocked(id, viewState, flags);
 
                 // Remove the UI if the ViewState has changed.
                 if (mCurrentViewId != viewState.id) {
