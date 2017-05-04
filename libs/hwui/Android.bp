@@ -1,0 +1,385 @@
+cc_defaults {
+    name: "hwui_defaults",
+    defaults: [
+        "hwui_static_deps",
+
+        //"hwui_bugreport_font_cache_usage",
+        //"hwui_compile_for_perf",
+
+        // Enables fine-grained GLES error checking
+        // If enabled, every GLES call is wrapped & error checked
+        // Has moderate overhead
+        //"hwui_enable_opengl-validation",
+    ],
+
+    cflags: [
+        "-DEGL_EGLEXT_PROTOTYPES",
+        "-DGL_GLEXT_PROTOTYPES",
+        "-DATRACE_TAG=ATRACE_TAG_VIEW",
+        "-DLOG_TAG=\"OpenGLRenderer\"",
+        "-Wall",
+        "-Wno-unused-parameter",
+        "-Wunreachable-code",
+        "-Werror",
+        "-fvisibility=hidden",
+
+        // GCC false-positives on this warning, and since we -Werror that's
+        // a problem
+        "-Wno-free-nonheap-object",
+
+        // clang's warning is broken, see: https://llvm.org/bugs/show_bug.cgi?id=21629
+        "-Wno-missing-braces",
+
+        // TODO: Linear blending should be enabled by default, but we are
+        // TODO: making it an opt-in while it's a work in progress
+        //"-DANDROID_ENABLE_LINEAR_BLENDING",
+    ],
+
+    include_dirs: [
+        "external/skia/include/private",
+        "external/skia/src/core",
+        "external/skia/src/effects",
+        "external/skia/src/image",
+        "external/skia/src/utils",
+    ],
+
+    product_variables: {
+        device_uses_hwc2: {
+            cflags: ["-DUSE_HWC2"],
+        },
+    },
+}
+
+cc_defaults {
+    name: "hwui_static_deps",
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libutils",
+        "libEGL",
+        "libGLESv2",
+        "libvulkan",
+        "libskia",
+        "libui",
+        "libgui",
+        "libprotobuf-cpp-full",
+        "libharfbuzz_ng",
+        "libft2",
+        "libminikin",
+        "libandroidfw",
+        "libRScpp",
+    ],
+    static_libs: [
+        "libplatformprotos",
+    ],
+}
+
+cc_defaults {
+    name: "hwui_bugreport_font_cache_usage",
+    srcs: ["font/FontCacheHistoryTracker.cpp"],
+    cflags: ["-DBUGREPORT_FONT_CACHE_USAGE"],
+}
+
+cc_defaults {
+    name: "hwui_compile_for_perf",
+    // TODO: Non-arm?
+    cflags: [
+        "-fno-omit-frame-pointer",
+        "-marm",
+        "-mapcs",
+    ],
+}
+
+cc_defaults {
+    name: "hwui_debug",
+    cflags: ["-include debug/wrap_gles.h"],
+    srcs: [
+        "debug/wrap_gles.cpp",
+        "debug/DefaultGlesDriver.cpp",
+        "debug/GlesErrorCheckWrapper.cpp",
+        "debug/GlesDriver.cpp",
+        "debug/FatalBaseDriver.cpp",
+        "debug/NullGlesDriver.cpp",
+    ],
+    include_dirs: ["frameworks/native/opengl/libs/GLES2"],
+}
+
+cc_defaults {
+    name: "hwui_enable_opengl_validation",
+    defaults: ["hwui_debug"],
+    cflags: ["-DDEBUG_OPENGL=3"],
+    srcs: ["debug/wrap_gles.cpp"],
+    include_dirs: ["frameworks/native/opengl/libs/GLES2"],
+}
+
+// ------------------------
+// library
+// ------------------------
+
+cc_defaults {
+    name: "libhwui_defaults",
+    defaults: ["hwui_defaults"],
+    srcs: [
+        "hwui/Bitmap.cpp",
+        "font/CacheTexture.cpp",
+        "font/Font.cpp",
+        "hwui/Canvas.cpp",
+        "hwui/MinikinSkia.cpp",
+        "hwui/MinikinUtils.cpp",
+        "hwui/PaintImpl.cpp",
+        "hwui/Typeface.cpp",
+        "pipeline/skia/GLFunctorDrawable.cpp",
+        "pipeline/skia/LayerDrawable.cpp",
+        "pipeline/skia/RenderNodeDrawable.cpp",
+        "pipeline/skia/ReorderBarrierDrawables.cpp",
+        "pipeline/skia/SkiaDisplayList.cpp",
+        "pipeline/skia/SkiaOpenGLPipeline.cpp",
+        "pipeline/skia/SkiaOpenGLReadback.cpp",
+        "pipeline/skia/SkiaPipeline.cpp",
+        "pipeline/skia/SkiaProfileRenderer.cpp",
+        "pipeline/skia/SkiaRecordingCanvas.cpp",
+        "pipeline/skia/SkiaVulkanPipeline.cpp",
+        "renderstate/Blend.cpp",
+        "renderstate/MeshState.cpp",
+        "renderstate/OffscreenBufferPool.cpp",
+        "renderstate/PixelBufferState.cpp",
+        "renderstate/RenderState.cpp",
+        "renderstate/Scissor.cpp",
+        "renderstate/Stencil.cpp",
+        "renderstate/TextureState.cpp",
+        "renderthread/CanvasContext.cpp",
+        "renderthread/OpenGLPipeline.cpp",
+        "renderthread/DrawFrameTask.cpp",
+        "renderthread/EglManager.cpp",
+        "renderthread/VulkanManager.cpp",
+        "renderthread/RenderProxy.cpp",
+        "renderthread/RenderTask.cpp",
+        "renderthread/RenderThread.cpp",
+        "renderthread/TimeLord.cpp",
+        "renderthread/Frame.cpp",
+        "service/GraphicsStatsService.cpp",
+        "thread/TaskManager.cpp",
+        "utils/Blur.cpp",
+        "utils/Color.cpp",
+        "utils/GLUtils.cpp",
+        "utils/LinearAllocator.cpp",
+        "utils/StringUtils.cpp",
+        "utils/TestWindowContext.cpp",
+        "utils/VectorDrawableUtils.cpp",
+        "AmbientShadow.cpp",
+        "AnimationContext.cpp",
+        "Animator.cpp",
+        "AnimatorManager.cpp",
+        "BakedOpDispatcher.cpp",
+        "BakedOpRenderer.cpp",
+        "BakedOpState.cpp",
+        "Caches.cpp",
+        "CanvasState.cpp",
+        "ClipArea.cpp",
+        "DamageAccumulator.cpp",
+        "DeferredLayerUpdater.cpp",
+        "DeviceInfo.cpp",
+        "DisplayList.cpp",
+        "Extensions.cpp",
+        "FboCache.cpp",
+        "FontRenderer.cpp",
+        "FrameBuilder.cpp",
+        "FrameInfo.cpp",
+        "FrameInfoVisualizer.cpp",
+        "GammaFontRenderer.cpp",
+        "GlLayer.cpp",
+        "GlopBuilder.cpp",
+        "GpuMemoryTracker.cpp",
+        "GradientCache.cpp",
+        "Image.cpp",
+        "Interpolator.cpp",
+        "JankTracker.cpp",
+        "Layer.cpp",
+        "LayerBuilder.cpp",
+        "LayerUpdateQueue.cpp",
+        "Matrix.cpp",
+        "OpDumper.cpp",
+        "OpenGLReadback.cpp",
+        "Patch.cpp",
+        "PatchCache.cpp",
+        "PathCache.cpp",
+        "PathParser.cpp",
+        "PathTessellator.cpp",
+        "PixelBuffer.cpp",
+        "ProfileRenderer.cpp",
+        "Program.cpp",
+        "ProgramCache.cpp",
+        "Properties.cpp",
+        "PropertyValuesAnimatorSet.cpp",
+        "PropertyValuesHolder.cpp",
+        "RecordingCanvas.cpp",
+        "RenderBufferCache.cpp",
+        "RenderNode.cpp",
+        "RenderProperties.cpp",
+        "ResourceCache.cpp",
+        "ShadowTessellator.cpp",
+        "SkiaCanvas.cpp",
+        "SkiaCanvasProxy.cpp",
+        "SkiaShader.cpp",
+        "Snapshot.cpp",
+        "SpotShadow.cpp",
+        "TessellationCache.cpp",
+        "TextDropShadowCache.cpp",
+        "Texture.cpp",
+        "TextureCache.cpp",
+        "VectorDrawable.cpp",
+        "VkLayer.cpp",
+        "protos/hwui.proto",
+    ],
+
+    proto: {
+        export_proto_headers: true,
+    },
+
+    export_include_dirs: ["."],
+}
+
+cc_library {
+    name: "libhwui",
+    defaults: ["libhwui_defaults"],
+}
+
+// ------------------------
+// static library null gpu
+// ------------------------
+
+cc_library_static {
+    name: "libhwui_static_debug",
+    defaults: [
+        "libhwui_defaults",
+        "hwui_debug",
+    ],
+    cflags: ["-DHWUI_NULL_GPU"],
+    srcs: [
+        "debug/nullegl.cpp",
+    ],
+    export_include_dirs: ["."],
+}
+
+cc_defaults {
+    name: "hwui_test_defaults",
+    defaults: ["hwui_defaults"],
+    srcs: [
+        "tests/common/scenes/*.cpp",
+        "tests/common/LeakChecker.cpp",
+        "tests/common/TestListViewSceneBase.cpp",
+        "tests/common/TestContext.cpp",
+        "tests/common/TestScene.cpp",
+        "tests/common/TestUtils.cpp",
+    ],
+}
+
+// ------------------------
+// unit tests
+// ------------------------
+
+cc_test {
+    name: "hwui_unit_tests",
+    defaults: ["hwui_test_defaults"],
+
+    static_libs: [
+        "libgmock",
+        "libhwui_static_debug",
+    ],
+    shared_libs: ["libmemunreachable"],
+    cflags: [
+        "-include debug/wrap_gles.h",
+        "-DHWUI_NULL_GPU",
+    ],
+
+    srcs: [
+        "tests/unit/main.cpp",
+        "tests/unit/BakedOpDispatcherTests.cpp",
+        "tests/unit/BakedOpRendererTests.cpp",
+        "tests/unit/BakedOpStateTests.cpp",
+        "tests/unit/BitmapTests.cpp",
+        "tests/unit/CanvasContextTests.cpp",
+        "tests/unit/CanvasStateTests.cpp",
+        "tests/unit/ClipAreaTests.cpp",
+        "tests/unit/DamageAccumulatorTests.cpp",
+        "tests/unit/DeferredLayerUpdaterTests.cpp",
+        "tests/unit/DeviceInfoTests.cpp",
+        "tests/unit/FatVectorTests.cpp",
+        "tests/unit/FontRendererTests.cpp",
+        "tests/unit/FrameBuilderTests.cpp",
+        "tests/unit/GlopBuilderTests.cpp",
+        "tests/unit/GpuMemoryTrackerTests.cpp",
+        "tests/unit/GradientCacheTests.cpp",
+        "tests/unit/GraphicsStatsServiceTests.cpp",
+        "tests/unit/LayerUpdateQueueTests.cpp",
+        "tests/unit/LeakCheckTests.cpp",
+        "tests/unit/LinearAllocatorTests.cpp",
+        "tests/unit/MatrixTests.cpp",
+        "tests/unit/MeshStateTests.cpp",
+        "tests/unit/OffscreenBufferPoolTests.cpp",
+        "tests/unit/OpDumperTests.cpp",
+        "tests/unit/PathInterpolatorTests.cpp",
+        "tests/unit/RenderNodeDrawableTests.cpp",
+        "tests/unit/RecordingCanvasTests.cpp",
+        "tests/unit/RenderNodeTests.cpp",
+        "tests/unit/RenderPropertiesTests.cpp",
+        "tests/unit/SkiaBehaviorTests.cpp",
+        "tests/unit/SkiaDisplayListTests.cpp",
+        "tests/unit/SkiaPipelineTests.cpp",
+        "tests/unit/SkiaRenderPropertiesTests.cpp",
+        "tests/unit/SkiaCanvasTests.cpp",
+        "tests/unit/SnapshotTests.cpp",
+        "tests/unit/StringUtilsTests.cpp",
+        "tests/unit/TestUtilsTests.cpp",
+        "tests/unit/TextDropShadowCacheTests.cpp",
+        "tests/unit/TextureCacheTests.cpp",
+        "tests/unit/VectorDrawableTests.cpp",
+    ],
+}
+
+// ------------------------
+// Macro-bench app
+// ------------------------
+
+cc_benchmark {
+    name: "hwuimacro",
+    defaults: ["hwui_test_defaults"],
+
+    // set to libhwui_static_debug to skip actual GL commands
+    whole_static_libs: ["libhwui"],
+    shared_libs: ["libmemunreachable"],
+
+    srcs: [
+        "tests/macrobench/TestSceneRunner.cpp",
+        "tests/macrobench/main.cpp",
+    ],
+}
+
+// ------------------------
+// Micro-bench app
+// ---------------------
+
+cc_benchmark {
+    name: "hwuimicro",
+    defaults: ["hwui_test_defaults"],
+
+    cflags: [
+        "-include debug/wrap_gles.h",
+        "-DHWUI_NULL_GPU",
+    ],
+
+    whole_static_libs: ["libhwui_static_debug"],
+    shared_libs: ["libmemunreachable"],
+
+    srcs: [
+        "tests/microbench/main.cpp",
+        "tests/microbench/DisplayListCanvasBench.cpp",
+        "tests/microbench/FontBench.cpp",
+        "tests/microbench/FrameBuilderBench.cpp",
+        "tests/microbench/LinearAllocatorBench.cpp",
+        "tests/microbench/PathParserBench.cpp",
+        "tests/microbench/RenderNodeBench.cpp",
+        "tests/microbench/ShadowBench.cpp",
+        "tests/microbench/TaskManagerBench.cpp",
+    ],
+}
