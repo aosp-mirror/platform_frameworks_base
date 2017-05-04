@@ -1404,6 +1404,11 @@ public class Editor {
             // or double-clicks that could "dismiss" the floating toolbar.
             int delay = ViewConfiguration.getDoubleTapTimeout();
             mTextView.postDelayed(mShowFloatingToolbar, delay);
+
+            // This classifies the text and most likely returns before the toolbar is actually
+            // shown. If not, it will update the toolbar with the result when classification
+            // returns. We would rather not wait for a long running classification process.
+            invalidateActionModeAsync();
         }
     }
 
@@ -1853,7 +1858,7 @@ public class Editor {
             mInsertionPointCursorController.invalidateHandle();
         }
         if (mTextActionMode != null) {
-            invalidateActionModeAsync();
+            invalidateActionMode();
         }
     }
 
@@ -1945,12 +1950,12 @@ public class Editor {
                 if (mRestartActionModeOnNextRefresh) {
                     // To avoid distraction, newly start action mode only when selection action
                     // mode is being restarted.
-                    startSelectionActionMode();
+                    startSelectionActionModeAsync(false);
                 }
             } else if (selectionController == null || !selectionController.isActive()) {
                 // Insertion action mode is active. Avoid dismissing the selection.
                 stopTextActionModeWithPreservingSelection();
-                startSelectionActionMode();
+                startSelectionActionModeAsync(false);
             } else {
                 mTextActionMode.invalidateContentRect();
             }
@@ -2004,15 +2009,8 @@ public class Editor {
     /**
      * Asynchronously starts a selection action mode using the TextClassifier.
      */
-    void startSelectionActionModeAsync() {
-        getSelectionActionModeHelper().startActionModeAsync();
-    }
-
-    /**
-     * Synchronously starts a selection action mode without the TextClassifier.
-     */
-    void startSelectionActionMode() {
-        getSelectionActionModeHelper().startActionMode();
+    void startSelectionActionModeAsync(boolean adjustSelection) {
+        getSelectionActionModeHelper().startActionModeAsync(adjustSelection);
     }
 
     /**
@@ -2020,6 +2018,15 @@ public class Editor {
      */
     private void invalidateActionModeAsync() {
         getSelectionActionModeHelper().invalidateActionModeAsync();
+    }
+
+    /**
+     * Synchronously invalidates an action mode without the TextClassifier.
+     */
+    private void invalidateActionMode() {
+        if (mTextActionMode != null) {
+            mTextActionMode.invalidate();
+        }
     }
 
     private SelectionActionModeHelper getSelectionActionModeHelper() {
@@ -2075,7 +2082,7 @@ public class Editor {
         }
         if (mTextActionMode != null) {
             // Text action mode is already started
-            invalidateActionModeAsync();
+            invalidateActionMode();
             return false;
         }
 
@@ -4703,7 +4710,7 @@ public class Editor {
             }
             positionAtCursorOffset(offset, false);
             if (mTextActionMode != null) {
-                invalidateActionModeAsync();
+                invalidateActionMode();
             }
         }
 
@@ -4787,7 +4794,7 @@ public class Editor {
             }
             updateDrawable();
             if (mTextActionMode != null) {
-                invalidateActionModeAsync();
+                invalidateActionMode();
             }
         }
 
@@ -5414,13 +5421,8 @@ public class Editor {
                     resetDragAcceleratorState();
 
                     if (mTextView.hasSelection()) {
-                        // Do not invoke the text assistant if this was a drag selection.
-                        if (mHaventMovedEnoughToStartDrag) {
-                            startSelectionActionModeAsync();
-                        } else {
-                            startSelectionActionMode();
-                        }
-
+                        // Drag selection should not be adjusted by the text classifier.
+                        startSelectionActionModeAsync(mHaventMovedEnoughToStartDrag);
                     }
                     break;
             }

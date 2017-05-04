@@ -65,7 +65,7 @@ final class SelectionActionModeHelper {
                 textView.getTextClassifier(), textView.getText(), 0, 1, textView.getTextLocales());
     }
 
-    public void startActionModeAsync() {
+    public void startActionModeAsync(boolean adjustSelection) {
         cancelAsyncTask();
         if (isNoOpTextClassifier() || !hasSelection()) {
             // No need to make an async call for a no-op TextClassifier.
@@ -74,14 +74,14 @@ final class SelectionActionModeHelper {
         } else {
             resetTextClassificationHelper();
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
-                    mEditor.getTextView(), TIMEOUT_DURATION,
-                    mTextClassificationHelper::suggestSelection, this::startActionMode)
+                    mEditor.getTextView(),
+                    TIMEOUT_DURATION,
+                    adjustSelection
+                            ? mTextClassificationHelper::suggestSelection
+                            : mTextClassificationHelper::classifyText,
+                    this::startActionMode)
                     .execute();
         }
-    }
-
-    public void startActionMode() {
-        startActionMode(null);
     }
 
     public void invalidateActionModeAsync() {
