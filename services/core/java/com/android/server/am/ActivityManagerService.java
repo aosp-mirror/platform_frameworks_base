@@ -626,8 +626,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final VrController mVrController;
 
-    // VR Compatibility Display Id.
-    int mVrCompatibilityDisplayId = INVALID_DISPLAY;
+    // VR Vr2d Display Id.
+    int mVr2dDisplayId = INVALID_DISPLAY;
 
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
@@ -23726,17 +23726,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         /**
          * Called after virtual display Id is updated by
-         * {@link com.android.server.vr.CompatibilityDisplay} with a specific
-         * {@param vrCompatibilityDisplayId}.
+         * {@link com.android.server.vr.Vr2dDisplay} with a specific
+         * {@param vrVr2dDisplayId}.
          */
         @Override
-        public void setVrCompatibilityDisplayId(int vrCompatibilityDisplayId) {
+        public void setVr2dDisplayId(int vr2dDisplayId) {
             if (DEBUG_STACK) {
-                Slog.d(TAG, "setVrCompatibilityDisplayId called for: " +
-                        vrCompatibilityDisplayId);
+                Slog.d(TAG, "setVr2dDisplayId called for: " +
+                        vr2dDisplayId);
             }
             synchronized (ActivityManagerService.this) {
-                mVrCompatibilityDisplayId = vrCompatibilityDisplayId;
+                mVr2dDisplayId = vr2dDisplayId;
             }
         }
     }
