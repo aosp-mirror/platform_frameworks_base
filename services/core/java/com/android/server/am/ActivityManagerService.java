@@ -120,7 +120,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESS_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
@@ -19007,7 +19006,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                                         removeTasksByPackageNameLocked(ssp, userId);
 
-                                        mServices.removeUninstalledPackageLocked(ssp, userId);
+                                        mServices.forceStopPackageLocked(ssp, userId);
 
                                         // Hide the "unsupported display" dialog if necessary.
                                         if (mUnsupportedDisplaySizeDialog != null && ssp.equals(
@@ -22278,6 +22277,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (uidRec.curProcState > app.curProcState) {
                             uidRec.curProcState = app.curProcState;
                         }
+                        if (app.foregroundServices) {
+                            uidRec.foregroundServices = true;
+                        }
                     }
                 }
 
@@ -22519,6 +22521,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 uidRec.setWhitelist = uidRec.curWhitelist;
                 enqueueUidChangeLocked(uidRec, -1, uidChange);
                 noteUidProcessState(uidRec.uid, uidRec.curProcState);
+                if (uidRec.foregroundServices) {
+                    mServices.foregroundServiceProcStateChangedLocked(uidRec);
+                }
             }
         }
         if (mLocalPowerManager != null) {

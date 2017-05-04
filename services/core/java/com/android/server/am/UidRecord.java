@@ -35,6 +35,7 @@ public final class UidRecord {
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
     long lastBackgroundTime;
     boolean ephemeral;
+    boolean foregroundServices;
     boolean curWhitelist;
     boolean setWhitelist;
     boolean idle;
@@ -102,6 +103,7 @@ public final class UidRecord {
 
     public void reset() {
         curProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+        foregroundServices = false;
     }
 
     public void updateHasInternetPermission() {
@@ -130,6 +132,9 @@ public final class UidRecord {
         sb.append(ProcessList.makeProcStateString(curProcState));
         if (ephemeral) {
             sb.append(" ephemeral");
+        }
+        if (foregroundServices) {
+            sb.append(" fgServices");
         }
         if (curWhitelist) {
             sb.append(" whitelist");
