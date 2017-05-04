@@ -602,6 +602,31 @@ public final class AutofillManagerService extends SystemService {
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
+            boolean showHistory = true;
+            boolean uiOnly = false;
+            if (args != null) {
+                for (String arg : args) {
+                    switch(arg) {
+                        case "--no-history":
+                            showHistory = false;
+                            break;
+                        case "--ui-only":
+                            uiOnly = true;
+                            break;
+                        case "--help":
+                            pw.println("Usage: dumpsys autofill [--ui-only|--no-history]");
+                            return;
+                        default:
+                            throw new IllegalArgumentException("Invalid dump arg: " + arg);
+                    }
+                }
+            }
+
+            if (uiOnly) {
+                mUi.dump(pw);
+                return;
+            }
+
             boolean oldDebug = sDebug;
             try {
                 synchronized (mLock) {
@@ -624,8 +649,10 @@ public final class AutofillManagerService extends SystemService {
                     }
                     mUi.dump(pw);
                 }
-                pw.println("Requests history:");
-                mRequestsHistory.reverseDump(fd, pw, args);
+                if (showHistory) {
+                    pw.println("Requests history:");
+                    mRequestsHistory.reverseDump(fd, pw, args);
+                }
             } finally {
                 setDebugLocked(oldDebug);
             }
