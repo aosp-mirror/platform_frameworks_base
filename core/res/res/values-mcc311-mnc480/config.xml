@@ -62,4 +62,6 @@
 
     <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">true</string>
 
+    <bool name="config_use_sim_language_file">true</bool>
+
 </resources>
