@@ -19891,8 +19891,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * NOTE: For the pinned stack, this method is only called after the bounds animation has
-     *       animated the stack to the fullscreen.
+     * NOTE: For the pinned stack, this method is usually called after the bounds animation has
+     *       animated the stack to the fullscreen, but can also be called if we are relaunching an
+     *       activity and clearing the task at the same time.
      */
     @Override
     public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) {

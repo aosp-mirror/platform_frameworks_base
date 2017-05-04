@@ -625,7 +625,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt() {
+        public void onPinnedActivityRestartAttempt(boolean clearedTask) {
             if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
             if (!checkCurrentUserId(DEBUG)) {
                 return;
