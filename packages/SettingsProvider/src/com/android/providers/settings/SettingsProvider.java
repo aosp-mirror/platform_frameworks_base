@@ -2872,7 +2872,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 144;
+            private static final int SETTINGS_VERSION = 145;
 
             private final int mUserId;
 
@@ -3452,6 +3452,25 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 144;
+                }
+
+                if (currentVersion == 144) {
+                    // Version 145: Set the default value for WIFI_WAKEUP_AVAILABLE.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        final Setting currentSetting = globalSettings.getSettingLocked(
+                                Settings.Global.WIFI_WAKEUP_AVAILABLE);
+                        if (currentSetting.isNull()) {
+                            final int defaultValue = getContext().getResources().getInteger(
+                                    com.android.internal.R.integer.config_wifi_wakeup_available);
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
+                                    String.valueOf(defaultValue),
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 145;
                 }
 
                 // vXXX: Add new settings above this point.
