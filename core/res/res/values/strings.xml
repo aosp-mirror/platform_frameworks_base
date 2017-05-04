@@ -629,6 +629,9 @@
     <!-- Text shown when viewing channel settings for notifications related to network alerts -->
     <string name="notification_channel_network_alerts">Network alerts</string>
 
+    <!-- Text shown when viewing the channel settings for notification about open nearby wireless networks. -->
+    <string name="notification_channel_network_available">Network available</string>
+
     <!-- Text shown when viewing channel settings for notifications related to vpn status -->
     <string name="notification_channel_vpn">VPN status</string>
 
