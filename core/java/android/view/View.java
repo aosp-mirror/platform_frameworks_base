@@ -20419,9 +20419,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable private Drawable getAutofilledDrawable() {
         // Lazily load the isAutofilled drawable.
         if (mAttachInfo.mAutofilledDrawable == null) {
-            TypedArray a = mContext.getTheme().obtainStyledAttributes(AUTOFILL_HIGHLIGHT_ATTR);
+            Context rootContext = getRootView().getContext();
+            TypedArray a = rootContext.getTheme().obtainStyledAttributes(AUTOFILL_HIGHLIGHT_ATTR);
             int attributeResourceId = a.getResourceId(0, 0);
-            mAttachInfo.mAutofilledDrawable = mContext.getDrawable(attributeResourceId);
+            mAttachInfo.mAutofilledDrawable = rootContext.getDrawable(attributeResourceId);
             a.recycle();
         }
 
