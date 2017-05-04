@@ -843,6 +843,36 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testOnUserRemoved() throws Exception {
+        int[] user0Uids = {98, 235, 16, 3782};
+        int[] user1Uids = new int[user0Uids.length];
+        for (int i = 0; i < user0Uids.length; i++) {
+            user1Uids[i] = UserHandle.PER_USER_RANGE + user0Uids[i];
+
+            final ApplicationInfo legacy = new ApplicationInfo();
+            legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+            when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(legacy);
+
+            // create records with the default channel for all user 0 and user 1 uids
+            mHelper.getImportance(PKG, user0Uids[i]);
+            mHelper.getImportance(PKG, user1Uids[i]);
+        }
+
+        mHelper.onUserRemoved(1);
+
+        // user 0 records remain
+        for (int i = 0; i < user0Uids.length; i++) {
+            assertEquals(1,
+                    mHelper.getNotificationChannels(PKG, user0Uids[i], false).getList().size());
+        }
+        // user 1 records are gone
+        for (int i = 0; i < user1Uids.length; i++) {
+            assertEquals(0,
+                    mHelper.getNotificationChannels(PKG, user1Uids[i], false).getList().size());
+        }
+    }
+
+    @Test
     public void testOnPackageChanged_packageRemoval() throws Exception {
         // Deleted
         NotificationChannel channel1 =

@@ -884,6 +884,8 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 mZenModeHelper.onUserRemoved(user);
+                mRankingHelper.onUserRemoved(user);
+                savePolicyFile();
             } else if (action.equals(Intent.ACTION_USER_UNLOCKED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 mConditionProviders.onUserUnlocked(user);

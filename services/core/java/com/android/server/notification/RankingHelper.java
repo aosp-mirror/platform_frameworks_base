@@ -1040,6 +1040,18 @@ public class RankingHelper implements RankingConfig {
         return packageChannels;
     }
 
+    public void onUserRemoved(int userId) {
+        synchronized (mRecords) {
+            int N = mRecords.size();
+            for (int i = N - 1; i >= 0 ; i--) {
+                Record record = mRecords.valueAt(i);
+                if (UserHandle.getUserId(record.uid) == userId) {
+                    mRecords.removeAt(i);
+                }
+            }
+        }
+    }
+
     public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList,
             int[] uidList) {
         if (pkgList == null || pkgList.length == 0) {
