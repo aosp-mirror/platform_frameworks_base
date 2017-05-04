@@ -1691,7 +1691,6 @@ public class KeyguardViewMediator extends SystemUI {
             mHideAnimationRun = false;
             adjustStatusBarLocked();
             userActivity();
-
             mShowKeyguardWakeLock.release();
         }
         mKeyguardDisplayManager.show();
@@ -1718,6 +1717,7 @@ public class KeyguardViewMediator extends SystemUI {
                     flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
                 }
 
+                mUpdateMonitor.setKeyguardGoingAway(true /* goingAway */);
                 // Don't actually hide the Keyguard at the moment, wait for window
                 // manager until it tells us it's safe to do so with
                 // startKeyguardExitAnimation.
@@ -1799,6 +1799,7 @@ public class KeyguardViewMediator extends SystemUI {
             adjustStatusBarLocked();
             mDismissCallbackRegistry.notifyDismissSucceeded();
             sendUserPresentBroadcast();
+            mUpdateMonitor.setKeyguardGoingAway(false /* goingAway */);
         }
         Trace.endSection();
     }
