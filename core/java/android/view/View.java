@@ -7351,10 +7351,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
-        if (!hasIdentityMatrix()) {
-            structure.setTransformation(getMatrix());
+        if (!forAutofill) {
+            if (!hasIdentityMatrix()) {
+                structure.setTransformation(getMatrix());
+            }
+            structure.setElevation(getZ());
         }
-        structure.setElevation(getZ());
         structure.setVisibility(getVisibility());
         structure.setEnabled(isEnabled());
         if (isClickable()) {
