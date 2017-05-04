@@ -50,7 +50,11 @@ std::string findRootPath() {
 
 // No code left untested
 TEST(GraphicsStats, findRootPath) {
+#ifdef __LP64__
+    std::string expected = "/data/nativetest64/hwui_unit_tests";
+#else
     std::string expected = "/data/nativetest/hwui_unit_tests";
+#endif
     EXPECT_EQ(expected, findRootPath());
 }
 
