@@ -91,7 +91,7 @@ public abstract class RemovalClient extends ClientMonitor {
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to notify Removed:", e);
         }
-        return fingerId == 0;
+        return remaining == 0;
     }
 
     @Override
