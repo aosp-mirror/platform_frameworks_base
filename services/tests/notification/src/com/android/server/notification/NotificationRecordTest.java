@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -60,10 +61,6 @@ public class NotificationRecordTest {
     private final Context mMockContext = Mockito.mock(Context.class);
     @Mock PackageManager mPm;
 
-    // constants for targetSdk version. N is pre channels, O is post.
-    private final boolean N = false;
-    private final boolean O = true;
-
     private final String pkg = "com.android.server.notification";
     private final int uid = 9583;
     private final String pkg2 = "pkg2";
@@ -79,6 +76,7 @@ public class NotificationRecordTest {
             new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "test",
                     NotificationManager.IMPORTANCE_UNSPECIFIED);
     private android.os.UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
+    final ApplicationInfo legacy = new ApplicationInfo();
     final ApplicationInfo upgrade = new ApplicationInfo();
 
     private static final long[] CUSTOM_VIBRATION = new long[] {
@@ -102,13 +100,17 @@ public class NotificationRecordTest {
                 InstrumentationRegistry.getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
 
+        legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
         upgrade.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
-        when(mMockContext.getApplicationInfo()).thenReturn(upgrade);
+        try {
+            when(mPm.getApplicationInfoAsUser(eq(pkg), anyInt(), anyInt())).thenReturn(legacy);
+            when(mPm.getApplicationInfoAsUser(eq(pkg2), anyInt(), anyInt())).thenReturn(upgrade);
+        } catch (PackageManager.NameNotFoundException e) {}
     }
 
-    private StatusBarNotification getNotification(boolean supportsChannels, boolean noisy,
-            boolean defaultSound, boolean buzzy, boolean defaultVibration, boolean lights,
-            boolean defaultLights) {
+    private StatusBarNotification getNotification(boolean preO, boolean noisy, boolean defaultSound,
+            boolean buzzy, boolean defaultVibration, boolean lights, boolean defaultLights) {
+        when(mMockContext.getApplicationInfo()).thenReturn(preO ? legacy : upgrade);
         final Builder builder = new Builder(mMockContext)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -147,13 +149,13 @@ public class NotificationRecordTest {
         }
 
         builder.setDefaults(defaults);
-        if (supportsChannels) {
+        if (!preO) {
             builder.setChannelId(channelId);
         }
 
 
         Notification n = builder.build();
-        if (!supportsChannels) {
+        if (preO) {
             return new StatusBarNotification(pkg, pkg, id1, tag1, uid, uid, n,
                     mUser, null, uid);
         } else {
@@ -170,11 +172,11 @@ public class NotificationRecordTest {
     public void testSound_default_preUpgradeUsesNotification() throws Exception {
         defaultChannel.setSound(null, null);
         // pre upgrade, default sound.
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, record.getSound());
         assertEquals(Notification.AUDIO_ATTRIBUTES_DEFAULT, record.getAudioAttributes());
     }
@@ -183,11 +185,11 @@ public class NotificationRecordTest {
     public void testSound_custom_preUpgradeUsesNotification() throws Exception {
         defaultChannel.setSound(null, null);
         // pre upgrade, custom sound.
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(CUSTOM_SOUND, record.getSound());
         assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
     }
@@ -197,11 +199,11 @@ public class NotificationRecordTest {
         defaultChannel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
         // pre upgrade, default sound.
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(CUSTOM_SOUND, record.getSound());
         assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
     }
@@ -209,11 +211,11 @@ public class NotificationRecordTest {
     @Test
     public void testSound_noSound_preUpgrade() throws Exception {
         // pre upgrade, default sound.
-        StatusBarNotification sbn = getNotification(N, false /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
                 false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(null, record.getSound());
         assertEquals(Notification.AUDIO_ATTRIBUTES_DEFAULT, record.getAudioAttributes());
     }
@@ -222,11 +224,11 @@ public class NotificationRecordTest {
     public void testSound_default_upgradeUsesChannel() throws Exception {
         channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
         // post upgrade, default sound.
-        StatusBarNotification sbn = getNotification(O, true /* noisy */,
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel, O);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertEquals(CUSTOM_SOUND, record.getSound());
         assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
     }
@@ -235,11 +237,11 @@ public class NotificationRecordTest {
     public void testVibration_default_preUpgradeUsesNotification() throws Exception {
         defaultChannel.enableVibration(false);
         // pre upgrade, default vibration.
-        StatusBarNotification sbn = getNotification(N, false /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
                 false /* defaultSound */, true /* buzzy */, true /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertNotNull(record.getVibration());
     }
 
@@ -247,11 +249,11 @@ public class NotificationRecordTest {
     public void testVibration_custom_preUpgradeUsesNotification() throws Exception {
         defaultChannel.enableVibration(false);
         // pre upgrade, custom vibration.
-        StatusBarNotification sbn = getNotification(N, false /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
                 false /* defaultSound */, true /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(CUSTOM_VIBRATION, record.getVibration());
     }
 
@@ -260,11 +262,11 @@ public class NotificationRecordTest {
         defaultChannel.enableVibration(true);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_VIBRATION);
         // pre upgrade, custom vibration.
-        StatusBarNotification sbn = getNotification(N, false /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
                 false /* defaultSound */, true /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertTrue(!Objects.equals(CUSTOM_VIBRATION, record.getVibration()));
     }
 
@@ -272,20 +274,20 @@ public class NotificationRecordTest {
     public void testVibration_custom_upgradeUsesChannel() throws Exception {
         channel.enableVibration(true);
         // post upgrade, custom vibration.
-        StatusBarNotification sbn = getNotification(O, false /* noisy */,
+        StatusBarNotification sbn = getNotification(false /*preO */, false /* noisy */,
                 false /* defaultSound */, true /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel, O);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertEquals(CUSTOM_CHANNEL_VIBRATION, record.getVibration());
     }
 
     @Test
     public void testImportance_preUpgrade() throws Exception {
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(NotificationManager.IMPORTANCE_HIGH, record.getImportance());
     }
 
@@ -293,11 +295,11 @@ public class NotificationRecordTest {
     public void testImportance_locked_preUpgrade() throws Exception {
         defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(NotificationManager.IMPORTANCE_LOW, record.getImportance());
     }
 
@@ -305,39 +307,39 @@ public class NotificationRecordTest {
     public void testImportance_locked_unspecified_preUpgrade() throws Exception {
         defaultChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
 
-        NotificationRecord record =  new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(NotificationManager.IMPORTANCE_HIGH, record.getImportance());
     }
 
     @Test
     public void testImportance_upgrade() throws Exception {
-        StatusBarNotification sbn = getNotification(O, true /* noisy */,
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel, O);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertEquals(NotificationManager.IMPORTANCE_DEFAULT, record.getImportance());
     }
 
     @Test
     public void testLights_preUpgrade_noLight() throws Exception {
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertNull(record.getLight());
     }
 
 
     @Test
     public void testLights_preUpgrade() throws Exception {
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 true /* lights */, false /*defaultLights */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(CUSTOM_LIGHT, record.getLight());
     }
 
@@ -345,11 +347,11 @@ public class NotificationRecordTest {
     public void testLights_locked_preUpgrade() throws Exception {
         defaultChannel.enableLights(true);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_LIGHTS);
-        StatusBarNotification sbn = getNotification(N, true /* noisy */,
+        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 true /* lights */, false /*defaultLights */);
 
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, N);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertFalse(CUSTOM_LIGHT.equals(record.getLight()));
     }
 
@@ -364,10 +366,10 @@ public class NotificationRecordTest {
 
         NotificationRecord.Light expected = new NotificationRecord.Light(
                 defaultLightColor, defaultLightOn, defaultLightOff);
-        StatusBarNotification sbn = getNotification(O, true /* noisy */,
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 true /* lights */, true /*defaultLights */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel, O);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertEquals(expected, record.getLight());
     }
 
@@ -380,19 +382,19 @@ public class NotificationRecordTest {
 
         NotificationRecord.Light expected = new NotificationRecord.Light(
                 Color.BLUE, defaultLightOn, defaultLightOff);
-        StatusBarNotification sbn = getNotification(O, true /* noisy */,
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 true /* lights */, false /*defaultLights */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel, O);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertEquals(expected, record.getLight());
     }
 
     @Test
     public void testLights_upgrade_noLight() throws Exception {
-        StatusBarNotification sbn = getNotification(O, true /* noisy */,
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /*defaultLights */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel, O);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertNull(record.getLight());
     }
 }

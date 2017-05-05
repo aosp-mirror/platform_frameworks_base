@@ -116,7 +116,7 @@ public final class NotificationRecord {
     private int mSuppressedVisualEffects = 0;
     private String mUserExplanation;
     private String mPeopleExplanation;
-    private boolean mSupportsChannels = false;
+    private boolean mPreChannelsNotification = true;
     private Uri mSound;
     private long[] mVibration;
     private AudioAttributes mAttributes;
@@ -129,7 +129,7 @@ public final class NotificationRecord {
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
-            NotificationChannel channel, boolean supportsChannels)
+            NotificationChannel channel)
     {
         this.sbn = sbn;
         mOriginalFlags = sbn.getNotification().flags;
@@ -139,7 +139,7 @@ public final class NotificationRecord {
         mContext = context;
         stats = new NotificationUsageStats.SingleNotificationStats();
         mChannel = channel;
-        mSupportsChannels = supportsChannels;
+        mPreChannelsNotification = isPreChannelsNotification();
         mSound = calculateSound();
         mVibration = calculateVibration();
         mAttributes = calculateAttributes();
@@ -147,11 +147,27 @@ public final class NotificationRecord {
         mLight = calculateLights();
     }
 
+    private boolean isPreChannelsNotification() {
+        try {
+            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
+                  final ApplicationInfo applicationInfo =
+                        mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
+                                0, UserHandle.getUserId(sbn.getUid()));
+                if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+                    return true;
+                }
+            }
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "Can't find package", e);
+        }
+        return false;
+    }
+
     private Uri calculateSound() {
         final Notification n = sbn.getNotification();
 
         Uri sound = mChannel.getSound();
-        if (!mSupportsChannels && (getChannel().getUserLockedFields()
+        if (mPreChannelsNotification && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_SOUND) == 0) {
 
             final boolean useDefaultSound = (n.defaults & Notification.DEFAULT_SOUND) != 0;
@@ -176,7 +192,7 @@ public final class NotificationRecord {
                 : defaultLightColor;
         Light light = getChannel().shouldShowLights() ? new Light(channelLightColor,
                 defaultLightOn, defaultLightOff) : null;
-        if (!mSupportsChannels
+        if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_LIGHTS) == 0) {
             final Notification notification = sbn.getNotification();
@@ -207,7 +223,7 @@ public final class NotificationRecord {
         } else {
             vibration = null;
         }
-        if (!mSupportsChannels
+        if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
             final Notification notification = sbn.getNotification();
@@ -229,7 +245,7 @@ public final class NotificationRecord {
             attributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
         }
 
-        if (!mSupportsChannels
+        if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_SOUND) == 0) {
             if (n.audioAttributes != null) {
@@ -278,7 +294,7 @@ public final class NotificationRecord {
         stats.requestedImportance = requestedImportance;
         stats.isNoisy = mSound != null || mVibration != null;
 
-        if (!mSupportsChannels
+        if (mPreChannelsNotification
                 && (importance == IMPORTANCE_UNSPECIFIED
                 || (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0)) {
@@ -445,7 +461,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "mUpdateTimeMs=" + mUpdateTimeMs);
         pw.println(prefix + "mSuppressedVisualEffects= " + mSuppressedVisualEffects);
-        if (!mSupportsChannels) {
+        if (mPreChannelsNotification) {
             pw.println(prefix + String.format("defaults=0x%08x flags=0x%08x",
                     notification.defaults, notification.flags));
             pw.println(prefix + "n.sound=" + notification.sound);
