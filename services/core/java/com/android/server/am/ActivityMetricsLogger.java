@@ -10,6 +10,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_BIND_APPLICATION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CALLING_PACKAGE_NAME;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS;
@@ -78,7 +79,8 @@ class ActivityMetricsLogger {
         private int startResult;
         private boolean currentTransitionProcessRunning;
         private int windowsDrawnDelayMs;
-        private int startingWindowDelayMs;
+        private int startingWindowDelayMs = -1;
+        private int bindApplicationDelayMs = -1;
         private int reason = APP_TRANSITION_TIMEOUT;
         private boolean loggedWindowsDrawn;
         private boolean loggedStartingWindowDrawn;
@@ -296,6 +298,22 @@ class ActivityMetricsLogger {
         }
     }
 
+    /**
+     * Notifies the tracker that we called immediately before we call bindApplication on the client.
+     *
+     * @param app The client into which we'll call bindApplication.
+     */
+    void notifyBindApplication(ProcessRecord app) {
+        for (int i = mStackTransitionInfo.size() - 1; i >= 0; i--) {
+            final StackTransitionInfo info = mStackTransitionInfo.valueAt(i);
+
+            // App isn't attached to record yet, so match with info.
+            if (info.launchedActivity.appInfo == app.info) {
+                info.bindApplicationDelayMs = calculateCurrentDelay();
+            }
+        }
+    }
+
     private boolean allStacksWindowsDrawn() {
         for (int index = mStackTransitionInfo.size() - 1; index >= 0; index--) {
             if (!mStackTransitionInfo.valueAt(index).loggedWindowsDrawn) {
@@ -355,6 +373,10 @@ class ActivityMetricsLogger {
             if (info.startingWindowDelayMs != -1) {
                 builder.addTaggedData(APP_TRANSITION_STARTING_WINDOW_DELAY_MS,
                         info.startingWindowDelayMs);
+            }
+            if (info.bindApplicationDelayMs != -1) {
+                builder.addTaggedData(APP_TRANSITION_BIND_APPLICATION_DELAY_MS,
+                        info.bindApplicationDelayMs);
             }
             builder.addTaggedData(APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS, info.windowsDrawnDelayMs);
             mMetricsLogger.write(builder);
