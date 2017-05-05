@@ -776,7 +776,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // High level policy: apps are generally ineligible for backup if certain conditions apply
-    public static boolean appIsEligibleForBackup(ApplicationInfo app) {
+    public static boolean appIsEligibleForBackup(ApplicationInfo app, PackageManager pm) {
         // 1. their manifest states android:allowBackup="false"
         if ((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
             return false;
@@ -792,15 +792,18 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             return false;
         }
 
-        return true;
+        // Everything else checks out; the only remaining roadblock would be if the
+        // package were disabled
+        return !appIsDisabled(app, pm);
     }
 
-    // Checks if the app is in a stopped state, that means it won't receive broadcasts.
+    // Checks if the app is in a stopped state.  This is not part of the general "eligible for
+    // backup?" check because we *do* still need to restore data to apps in this state (e.g.
+    // newly-installing ones)
     private static boolean appIsStopped(ApplicationInfo app) {
         return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);
     }
 
-    // We also avoid backups of 'disabled' apps
     private static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
         switch (pm.getApplicationEnabledSetting(app.packageName)) {
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
@@ -1528,7 +1531,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                     foundApps.add(pkgName); // all apps that we've addressed already
                     try {
                         PackageInfo pkg = mPackageManager.getPackageInfo(pkgName, 0);
-                        if (appGetsFullBackup(pkg) && appIsEligibleForBackup(pkg.applicationInfo)) {
+                        if (appGetsFullBackup(pkg)
+                                && appIsEligibleForBackup(pkg.applicationInfo, mPackageManager)) {
                             schedule.add(new FullBackupEntry(pkgName, lastBackup));
                         } else {
                             if (DEBUG) {
@@ -1547,7 +1551,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 // New apps can arrive "out of band" via OTA and similar, so we also need to
                 // scan to make sure that we're tracking all full-backup candidates properly
                 for (PackageInfo app : apps) {
-                    if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
+                    if (appGetsFullBackup(app)
+                            && appIsEligibleForBackup(app.applicationInfo, mPackageManager)) {
                         if (!foundApps.contains(app.packageName)) {
                             if (MORE_DEBUG) {
                                 Slog.i(TAG, "New full backup app " + app.packageName + " found");
@@ -1576,7 +1581,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             changed = true;
             schedule = new ArrayList<FullBackupEntry>(apps.size());
             for (PackageInfo info : apps) {
-                if (appGetsFullBackup(info) && appIsEligibleForBackup(info.applicationInfo)) {
+                if (appGetsFullBackup(info)
+                        && appIsEligibleForBackup(info.applicationInfo, mPackageManager)) {
                     schedule.add(new FullBackupEntry(info.packageName, 0));
                 }
             }
@@ -2036,7 +2042,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 for (String packageName : pkgList) {
                     try {
                         PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
-                        if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
+                        if (appGetsFullBackup(app)
+                                && appIsEligibleForBackup(app.applicationInfo, mPackageManager)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob(0);
                         } else {
@@ -2440,7 +2447,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
-                if (!appIsEligibleForBackup(packageInfo.applicationInfo)) {
+                if (!appIsEligibleForBackup(packageInfo.applicationInfo, mPackageManager)) {
                     sendBackupOnPackageResult(observer, packageName,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
@@ -2949,7 +2956,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             try {
                 mCurrentPackage = mPackageManager.getPackageInfo(request.packageName,
                         PackageManager.GET_SIGNATURES);
-                if (!appIsEligibleForBackup(mCurrentPackage.applicationInfo)) {
+                if (!appIsEligibleForBackup(mCurrentPackage.applicationInfo, mPackageManager)) {
                     // The manifest has changed but we had a stale backup request pending.
                     // This won't happen again because the app won't be requesting further
                     // backups.
@@ -4397,7 +4404,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
             while (iter.hasNext()) {
                 PackageInfo pkg = iter.next().getValue();
-                if (!appIsEligibleForBackup(pkg.applicationInfo)
+                if (!appIsEligibleForBackup(pkg.applicationInfo, mPackageManager)
                         || appIsStopped(pkg.applicationInfo)) {
                     iter.remove();
                     if (DEBUG) {
@@ -4679,7 +4686,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                     PackageInfo info = mPackageManager.getPackageInfo(pkg,
                             PackageManager.GET_SIGNATURES);
                     mCurrentPackage = info;
-                    if (!appIsEligibleForBackup(info.applicationInfo)) {
+                    if (!appIsEligibleForBackup(info.applicationInfo, mPackageManager)) {
                         // Cull any packages that have indicated that backups are not permitted,
                         // that run as system-domain uids but do not define their own backup agents,
                         // as well as any explicit mention of the 'special' shared-storage agent
@@ -8634,7 +8641,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             continue;
                         }
 
-                        if (appIsEligibleForBackup(info.applicationInfo)) {
+                        if (appIsEligibleForBackup(info.applicationInfo, mPackageManager)) {
                             mAcceptSet.add(info);
                         }
                     } catch (NameNotFoundException e) {
@@ -10833,9 +10840,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         try {
             PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                     PackageManager.GET_SIGNATURES);
-            if (!appIsEligibleForBackup(packageInfo.applicationInfo) ||
-                    appIsStopped(packageInfo.applicationInfo) ||
-                    appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
+            if (!appIsEligibleForBackup(packageInfo.applicationInfo, mPackageManager) ||
+                    appIsStopped(packageInfo.applicationInfo)) {
                 return false;
             }
             IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
