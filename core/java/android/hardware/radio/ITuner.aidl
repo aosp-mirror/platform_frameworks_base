@@ -30,4 +30,11 @@ interface ITuner {
     RadioManager.BandConfig getConfiguration();
 
     int getProgramInformation(out RadioManager.ProgramInfo[] infoOut);
+
+    /**
+     * @throws IllegalStateException if tuner was opened without audio
+     */
+    void setMuted(boolean mute);
+
+    boolean isMuted();
 }

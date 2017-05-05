@@ -32,10 +32,13 @@ class Tuner extends ITuner.Stub {
     private final long mNativeContext;
 
     private final Object mLock = new Object();
+    private boolean mIsMuted = false;
     private int mRegion;  // TODO(b/36863239): find better solution to manage regions
+    private final boolean mWithAudio;
 
-    Tuner(@NonNull ITunerCallback clientCallback, int region) {
+    Tuner(@NonNull ITunerCallback clientCallback, int region, boolean withAudio) {
         mRegion = region;
+        mWithAudio = withAudio;
         mNativeContext = nativeInit(clientCallback);
     }
 
@@ -85,5 +88,30 @@ class Tuner extends ITuner.Stub {
         }
         Slog.d(TAG, "getProgramInformation()");
         return RadioManager.STATUS_INVALID_OPERATION;
+    }
+
+    @Override
+    public void setMuted(boolean mute) {
+        if (!mWithAudio) {
+            throw new IllegalStateException("Can't operate on mute - no audio requested");
+        }
+        synchronized (mLock) {
+            if (mIsMuted == mute) return;
+            mIsMuted = mute;
+
+            // TODO(b/34348946): notifify audio policy manager of media activity on radio audio
+            // device. This task is pulled directly from previous implementation of native service.
+        }
+    }
+
+    @Override
+    public boolean isMuted() {
+        if (!mWithAudio) {
+            Slog.w(TAG, "Tuner did not request audio, pretending it was muted");
+            return true;
+        }
+        synchronized (mLock) {
+            return mIsMuted;
+        }
     }
 }
