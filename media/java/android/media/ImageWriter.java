@@ -359,28 +359,14 @@ public class ImageWriter implements AutoCloseable {
             }
 
             ImageReader prevOwner = (ImageReader) image.getOwner();
-            // Only do the image attach for PRIVATE format images for now. Do the image
-            // copy for other formats. TODO: use attach for other formats to
-            // improve the performance, and fall back to copy when attach/detach
-            // fails. Right now, detach is guaranteed to fail as the buffer is
-            // locked when ImageReader#acquireNextImage is called. See bug 19962027.
-            if (image.getFormat() == ImageFormat.PRIVATE) {
-                prevOwner.detachImage(image);
-                attachAndQueueInputImage(image);
-                // This clears the native reference held by the original owner.
-                // When this Image is detached later by this ImageWriter, the
-                // native memory won't be leaked.
-                image.close();
-                return;
-            } else {
-                Image inputImage = dequeueInputImage();
-                inputImage.setTimestamp(image.getTimestamp());
-                inputImage.setCropRect(image.getCropRect());
-                ImageUtils.imageCopy(image, inputImage);
-                image.close();
-                image = inputImage;
-                ownedByMe = true;
-            }
+
+            prevOwner.detachImage(image);
+            attachAndQueueInputImage(image);
+            // This clears the native reference held by the original owner.
+            // When this Image is detached later by this ImageWriter, the
+            // native memory won't be leaked.
+            image.close();
+            return;
         }
 
         Rect crop = image.getCropRect();
