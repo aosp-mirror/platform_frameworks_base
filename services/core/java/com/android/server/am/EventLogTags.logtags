@@ -114,3 +114,14 @@ option java_package com.android.server.am
 
 # UserState has changed
 30051 am_user_state_changed (id|1|5),(state|1|5)
+
+# Note when any processes of a uid have started running
+30052 am_uid_running (UID|1|5)
+# Note when all processes of a uid have stopped.
+30053 am_uid_stopped (UID|1|5)
+# Note when the state of a uid has become active.
+30054 am_uid_active (UID|1|5)
+# Note when the state of a uid has become idle (background check enforced).
+30055 am_uid_idle (UID|1|5)
+# Note when a service is being forcibly stopped because its app went idle.
+30056 am_stop_idle_service (UID|1|5),(Component Name|3)
