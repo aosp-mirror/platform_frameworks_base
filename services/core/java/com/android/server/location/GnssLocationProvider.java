@@ -1184,18 +1184,26 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     @Override
     public int getStatus(Bundle extras) {
-        if (extras != null) {
-            extras.putInt("satellites", mSvCount);
-        }
+        setLocationExtras(extras);
         return mStatus;
     }
 
-    private void updateStatus(int status, int svCount) {
-        if (status != mStatus || svCount != mSvCount) {
+    private void updateStatus(int status, int svCount, int meanCn0, int maxCn0) {
+        if (status != mStatus || svCount != mSvCount || meanCn0 != mMeanCn0 || maxCn0 != mMaxCn0 ) {
             mStatus = status;
             mSvCount = svCount;
-            mLocationExtras.putInt("satellites", svCount);
+            mMeanCn0 = meanCn0;
+            mMaxCn0 = maxCn0;
+            setLocationExtras(mLocationExtras);
             mStatusUpdateTime = SystemClock.elapsedRealtime();
+        }
+    }
+
+    private void setLocationExtras(Bundle extras) {
+        if (extras != null) {
+            extras.putInt("satellites", mSvCount);
+            extras.putInt("meanCn0", mMeanCn0);
+            extras.putInt("maxCn0", mMaxCn0);
         }
     }
 
@@ -1449,7 +1457,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
             mFixRequestTime = System.currentTimeMillis();
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
@@ -1472,7 +1480,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             mLastFixTime = 0;
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
         }
     }
 
@@ -1558,7 +1566,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, true);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.AVAILABLE, mSvCount);
+            updateStatus(LocationProvider.AVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
         }
 
        if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
@@ -1622,15 +1630,21 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + svCount);
         }
-        // Calculate number of sets used in fix.
+        // Calculate number of satellites used in fix.
         int usedInFixCount = 0;
+        int maxCn0 = 0;
+        int meanCn0 = 0;
         for (int i = 0; i < svCount; i++) {
             if ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
                 ++usedInFixCount;
+                if (mCn0s[i] > maxCn0) {
+                    maxCn0 = (int)mCn0s[i];
+                }
+                meanCn0 += mCn0s[i];
             }
             if (VERBOSE) {
                 Log.v(TAG, "svid: " + (mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
-                        " cn0: " + mCn0s[i]/10 +
+                        " cn0: " + mCn0s[i] +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
                         " carrier frequency: " + mSvCarrierFreqs[i] +
@@ -1644,8 +1658,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
                         ? "" : "F"));
             }
         }
-        // return number of sets used in fix instead of total
-        updateStatus(mStatus, usedInFixCount);
+        if (usedInFixCount > 0) {
+            meanCn0 /= usedInFixCount;
+        }
+        // return number of sats used in fix instead of total reported
+        updateStatus(mStatus, usedInFixCount, meanCn0, maxCn0);
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
             System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
@@ -1653,7 +1670,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
         }
     }
 
@@ -2531,6 +2548,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private float mSvAzimuths[] = new float[MAX_SVS];
     private float mSvCarrierFreqs[] = new float[MAX_SVS];
     private int mSvCount;
+    private int mMeanCn0;
+    private int mMaxCn0;
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 
