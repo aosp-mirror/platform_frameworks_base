@@ -373,11 +373,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void onPackageBroadcastReceived(Intent intent, int userId) {
-        if (!mUserManager.isUserUnlockingOrUnlocked(userId) ||
-                isProfileWithLockedParent(userId)) {
-            return;
-        }
-
         final String action = intent.getAction();
         boolean added = false;
         boolean changed = false;
@@ -408,7 +403,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         synchronized (mLock) {
-            ensureGroupStateLoadedLocked(userId);
+            if (!mUserManager.isUserUnlockingOrUnlocked(userId) ||
+                    isProfileWithLockedParent(userId)) {
+                return;
+            }
+            ensureGroupStateLoadedLocked(userId, /* enforceUserUnlockingOrUnlocked */ false);
 
             Bundle extras = intent.getExtras();
 
@@ -844,7 +843,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         synchronized (mLock) {
-            ensureGroupStateLoadedLocked(userId);
+            ensureGroupStateLoadedLocked(userId, /* enforceUserUnlockingOrUnlocked */ false);
 
             // NOTE: The lookup is enforcing security across users by making
             // sure the caller can only access hosts it owns.
