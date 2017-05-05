@@ -40,6 +40,7 @@ import java.util.Locale;
 public class TextClassificationManagerTest {
 
     private static final LocaleList LOCALES = LocaleList.forLanguageTags("en");
+    private static final String NO_TYPE = null;
 
     private TextClassificationManager mTcm;
     private TextClassifier mClassifier;
@@ -99,6 +100,19 @@ public class TextClassificationManagerTest {
 
         assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, LOCALES),
                 isTextSelection(smartStartIndex, smartEndIndex, TextClassifier.TYPE_URL));
+    }
+
+    @Test
+    public void testSmartSelection_withEmoji() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "\uD83D\uDE02 Hello.";
+        String selected = "Hello";
+        int startIndex = text.indexOf(selected);
+        int endIndex = startIndex + selected.length();
+
+        assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, LOCALES),
+                isTextSelection(startIndex, endIndex, NO_TYPE));
     }
 
     @Test
@@ -172,10 +186,15 @@ public class TextClassificationManagerTest {
                     TextSelection selection = (TextSelection) o;
                     return startIndex == selection.getSelectionStartIndex()
                             && endIndex == selection.getSelectionEndIndex()
-                            && selection.getEntityCount() > 0
-                            && type.equals(selection.getEntity(0));
+                            && typeMatches(selection, type);
                 }
                 return false;
+            }
+
+            private boolean typeMatches(TextSelection selection, String type) {
+                return type == null
+                        || (selection.getEntityCount() > 0
+                                && type.trim().equalsIgnoreCase(selection.getEntity(0)));
             }
 
             @Override
