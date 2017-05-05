@@ -68,19 +68,19 @@ public class FontResourcesParserTest {
         assertEquals(4, fileEntries.length);
         FontFileResourceEntry font1 = fileEntries[0];
         assertEquals(400, font1.getWeight());
-        assertEquals(false, font1.isItalic());
+        assertEquals(0, font1.getItalic());
         assertEquals("res/font/samplefont.ttf", font1.getFileName());
         FontFileResourceEntry font2 = fileEntries[1];
         assertEquals(400, font2.getWeight());
-        assertEquals(true, font2.isItalic());
+        assertEquals(1, font2.getItalic());
         assertEquals("res/font/samplefont2.ttf", font2.getFileName());
         FontFileResourceEntry font3 = fileEntries[2];
         assertEquals(800, font3.getWeight());
-        assertEquals(false, font3.isItalic());
+        assertEquals(0, font3.getItalic());
         assertEquals("res/font/samplefont3.ttf", font3.getFileName());
         FontFileResourceEntry font4 = fileEntries[3];
         assertEquals(800, font4.getWeight());
-        assertEquals(true, font4.isItalic());
+        assertEquals(1, font4.getItalic());
         assertEquals("res/font/samplefont4.ttf", font4.getFileName());
     }
 
