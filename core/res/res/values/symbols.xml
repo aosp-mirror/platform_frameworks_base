@@ -1735,6 +1735,7 @@
   <java-symbol type="fraction" name="config_dimBehindFadeDuration" />
   <java-symbol type="dimen" name="default_minimal_size_resizable_task" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
+  <java-symbol type="bool" name="config_allowPriorityVibrationsInLowPowerMode" />
   <java-symbol type="fraction" name="config_autoBrightnessAdjustmentMaxGamma" />
   <java-symbol type="fraction" name="config_autoBrightnessDarkHorizonThresholdFactor" />
   <java-symbol type="integer" name="config_autoBrightnessAmbientLightHorizon"/>

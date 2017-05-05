@@ -86,6 +86,7 @@ public class VibratorService extends IVibratorService.Stub
 
     private int mCurVibUid = -1;
     private boolean mLowPowerMode;
+    private boolean mAllowPriorityVibrationsInLowPowerMode;
     private SettingsObserver mSettingObserver;
 
     native static boolean vibratorExists();
@@ -214,6 +215,9 @@ public class VibratorService extends IVibratorService.Stub
 
         mPreviousVibrationsLimit = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_previousVibrationsDumpLimit);
+
+        mAllowPriorityVibrationsInLowPowerMode = mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_allowPriorityVibrationsInLowPowerMode);
 
         mVibrations = new LinkedList<>();
         mPreviousVibrations = new LinkedList<>();
@@ -447,8 +451,7 @@ public class VibratorService extends IVibratorService.Stub
     // Lock held on mVibrations
     private void startVibrationLocked(final Vibration vib) {
         try {
-            if (mLowPowerMode
-                    && vib.mUsageHint != AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
+            if (!isAllowedToVibrate(vib)) {
                 return;
             }
 
@@ -482,6 +485,23 @@ public class VibratorService extends IVibratorService.Stub
             // called before startNextVibrationLocked or startVibrationLocked.
             mThread = new VibrateThread(vib);
             mThread.start();
+        }
+    }
+
+    private boolean isAllowedToVibrate(Vibration vib) {
+        if (mLowPowerMode) {
+            if (vib.mUsageHint == AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
+                return true;
+            } else if (mAllowPriorityVibrationsInLowPowerMode) {
+                if (vib.mUsageHint == AudioAttributes.USAGE_ALARM ||
+                        vib.mUsageHint == AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY ||
+                        vib.mUsageHint == AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return true;
         }
     }
 
