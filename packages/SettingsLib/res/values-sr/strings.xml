@@ -203,7 +203,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Дозволи лажне локације"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Дозволи лажне локације"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Омогући проверу атрибута за преглед"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Нека подаци за мобилне уређаје увек буду активни, чак и када је Wi‑Fi активан (ради брзе промене мреже)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Нека мобилни подаци увек буду активни, чак и када је Wi‑Fi активан (ради брзе промене мреже)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Дозволи отклањање USB грешака?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отклањање USB грешака намењено је само за сврхе програмирања. Користите га за копирање података са рачунара на уређај и обрнуто, инсталирање апликација на уређају без обавештења и читање података из евиденције."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Желите ли да опозовете приступ отклањању USB грешака са свих рачунара које сте претходно одобрили?"</string>
