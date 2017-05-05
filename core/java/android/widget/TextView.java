@@ -10385,14 +10385,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     positionInfoStartIndex + positionInfoLength,
                     viewportToContentHorizontalOffset(), viewportToContentVerticalOffset());
             CursorAnchorInfo cursorAnchorInfo = builder.setMatrix(null).build();
-            int[] locationOnScreen = getLocationOnScreen();
             for (int i = 0; i < positionInfoLength; i++) {
                 int flags = cursorAnchorInfo.getCharacterBoundsFlags(positionInfoStartIndex + i);
                 if ((flags & FLAG_HAS_VISIBLE_REGION) == FLAG_HAS_VISIBLE_REGION) {
                     RectF bounds = cursorAnchorInfo
                             .getCharacterBounds(positionInfoStartIndex + i);
                     if (bounds != null) {
-                        bounds.offset(locationOnScreen[0], locationOnScreen[1]);
+                        mapRectFromViewToScreenCoords(bounds, true);
                         boundingRects[i] = bounds;
                     }
                 }
