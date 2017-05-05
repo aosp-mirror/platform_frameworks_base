@@ -268,16 +268,11 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Обавештења"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Режим демонстрације за малопродајне објекте"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB веза"</string>
-    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
-    <skip />
-    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
-    <skip />
-    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
-    <skip />
-    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
-    <skip />
-    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
-    <skip />
+    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Апликације покренуте у позадини"</string>
+    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> је покренута у позадини"</string>
+    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Апликације (<xliff:g id="NUMBER">%1$d</xliff:g>) су покренуте у позадини"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Додирните да бисте прегледали детаље о батерији и потрошњи података"</string>
+    <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безбедни режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android систем"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Пређи на Лични профил"</string>
@@ -300,13 +295,13 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упућује телефонске позиве и управља њима"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Сензори за тело"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"приступа подацима сензора о виталним функцијама"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преузима садржај прозора"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"да преузима садржај прозора"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Проверава садржај прозора са којим остварујете интеракцију."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Укључи Истраживања додиром"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"да укључи Истраживања додиром"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ставке које додирнете ће бити изговорене наглас, а можете да се крећете по екрану покретима."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Прати текст који уносите"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"да прати текст који уносите"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Обухвата личне податке као што су бројеви кредитних картица и лозинке."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Управљај увећањем приказа"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"да управља увећањем приказа"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Управља нивоом зумирања приказа и одређивањем положаја."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Обављање покрета"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Може да додирује, листа, скупља приказ и обавља друге покрете."</string>
@@ -1053,7 +1048,7 @@
     <string name="noApplications" msgid="2991814273936504689">"Ниједна апликација не може да обавља ову радњу."</string>
     <string name="aerr_application" msgid="250320989337856518">"Апликација <xliff:g id="APPLICATION">%1$s</xliff:g> је заустављена"</string>
     <string name="aerr_process" msgid="6201597323218674729">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> је заустављен"</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> се стално зауставља"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> се стално зауставља(ју)"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> се стално зауставља"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Поново отвори апликацију"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Пошаљите повратне информације"</string>
@@ -1312,7 +1307,7 @@
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Додирните да бисте подесили"</string>
     <string name="upload_file" msgid="2897957172366730416">"Одабери датотеку"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Није изабрана ниједна датотека"</string>
-    <string name="reset" msgid="2448168080964209908">"Поново постави"</string>
+    <string name="reset" msgid="2448168080964209908">"Ресетуј"</string>
     <string name="submit" msgid="1602335572089911941">"Пошаљи"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим рада у аутомобилу је омогућен"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Додирните да бисте изашли из режима рада у аутомобилу."</string>
@@ -1346,7 +1341,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Избриши ставке"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Опозови брисања"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Не ради ништа за сада"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Избор налога"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Изаберите налог"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Додај налог"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Додај налог"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Повећавање"</string>
