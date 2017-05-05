@@ -47,7 +47,7 @@ public final class InstantAppResolveInfo implements Parcelable {
     private final int mVersionCode;
 
     public InstantAppResolveInfo(@NonNull InstantAppDigest digest, @Nullable String packageName,
-            @Nullable List<InstantAppIntentFilter> filters, int versionConde) {
+            @Nullable List<InstantAppIntentFilter> filters, int versionCode) {
         // validate arguments
         if ((packageName == null && (filters != null && filters.size() != 0))
                 || (packageName != null && (filters == null || filters.size() == 0))) {
@@ -61,7 +61,7 @@ public final class InstantAppResolveInfo implements Parcelable {
             mFilters = null;
         }
         mPackageName = packageName;
-        mVersionCode = versionConde;
+        mVersionCode = versionCode;
     }
 
     public InstantAppResolveInfo(@NonNull String hostName, @Nullable String packageName,
