@@ -171,7 +171,7 @@ public class GradientDrawable extends Drawable {
         // (avoiding banding) by merging the background solid color into
         // the gradient directly
         RadialGradient radialGradient = new RadialGradient(x, y, radius,
-                mMainColor, mSecondaryColor, Shader.TileMode.CLAMP);
+                mSecondaryColor, mMainColor, Shader.TileMode.CLAMP);
         mPaint.setShader(radialGradient);
     }
 
