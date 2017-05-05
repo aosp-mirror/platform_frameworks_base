@@ -6500,11 +6500,12 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId) {
         // first, check to see if we've got an instant app already installed
         final boolean alreadyResolvedLocally = (flags & PackageManager.MATCH_INSTANT) != 0;
-        boolean localInstantAppAvailable = false;
+        ResolveInfo localInstantApp = null;
         boolean blockResolution = false;
         if (!alreadyResolvedLocally) {
             final List<ResolveInfo> instantApps = mActivities.queryIntent(intent, resolvedType,
                     flags
+                        | PackageManager.GET_RESOLVED_FILTER
                         | PackageManager.MATCH_INSTANT
                         | PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY,
                     userId);
@@ -6531,7 +6532,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (DEBUG_EPHEMERAL) {
                             Slog.v(TAG, "Found installed instant app; pkg: " + packageName);
                         }
-                        localInstantAppAvailable = true;
+                        localInstantApp = info;
                         break;
                     }
                 }
@@ -6539,17 +6540,29 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         // no app installed, let's see if one's available
         AuxiliaryResolveInfo auxiliaryResponse = null;
-        if (!localInstantAppAvailable && !blockResolution) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
-            final InstantAppRequest requestObject = new InstantAppRequest(
-                    null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                    null /*callingPackage*/, userId, null /*verificationBundle*/);
-            auxiliaryResponse =
-                    InstantAppResolver.doInstantAppResolutionPhaseOne(
-                            mContext, mInstantAppResolverConnection, requestObject);
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        if (!blockResolution) {
+            if (localInstantApp == null) {
+                // we don't have an instant app locally, resolve externally
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
+                final InstantAppRequest requestObject = new InstantAppRequest(
+                        null /*responseObj*/, intent /*origIntent*/, resolvedType,
+                        null /*callingPackage*/, userId, null /*verificationBundle*/);
+                auxiliaryResponse =
+                        InstantAppResolver.doInstantAppResolutionPhaseOne(
+                                mContext, mInstantAppResolverConnection, requestObject);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            } else {
+                // we have an instant application locally, but, we can't admit that since
+                // callers shouldn't be able to determine prior browsing. create a dummy
+                // auxiliary response so the downstream code behaves as if there's an
+                // instant application available externally. when it comes time to start
+                // the instant application, we'll do the right thing.
+                final ApplicationInfo ai = localInstantApp.activityInfo.applicationInfo;
+                auxiliaryResponse = new AuxiliaryResolveInfo(
+                        ai.packageName, null /*splitName*/, ai.versionCode);
+            }
         }
-        if (localInstantAppAvailable || auxiliaryResponse != null) {
+        if (auxiliaryResponse != null) {
             if (DEBUG_EPHEMERAL) {
                 Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
             }
@@ -6569,7 +6582,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ephemeralInstaller.filter = new IntentFilter(intent.getAction());
                 ephemeralInstaller.filter.addDataPath(
                         intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
-                ephemeralInstaller.instantAppAvailable = true;
+                ephemeralInstaller.isInstantAppAvailable = true;
                 result.add(ephemeralInstaller);
             }
         }
