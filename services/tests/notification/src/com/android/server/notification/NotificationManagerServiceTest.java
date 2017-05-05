@@ -52,9 +52,9 @@ import android.graphics.Color;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
+import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -75,7 +75,7 @@ import com.android.server.lights.LightsManager;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-public class NotificationManagerServiceTest {
+public class NotificationManagerServiceTest extends NotificationTestCase {
     private static final long WAIT_FOR_IDLE_TIMEOUT = 2;
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int uid = Binder.getCallingUid();
@@ -86,7 +86,7 @@ public class NotificationManagerServiceTest {
     private IPackageManager mPackageManager;
     @Mock
     private PackageManager mPackageManagerClient;
-    private Context mContext = InstrumentationRegistry.getTargetContext();
+    private Context mContext = getContext();
     private final String PKG = mContext.getPackageName();
     private TestableLooper mTestableLooper;
     @Mock
@@ -122,6 +122,12 @@ public class NotificationManagerServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        // most tests assume badging is enabled
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 1,
+                UserHandle.getUserHandleForUid(uid).getIdentifier());
+
         mNotificationManagerService = new TestableNotificationManagerService(mContext);
 
         // MockPackageManager - default returns ApplicationInfo with matching calling UID

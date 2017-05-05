@@ -1434,6 +1434,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.DEVICE_PAIRED,
                 SecureSettingsProto.DEVICE_PAIRED);
+        dumpSetting(s, p,
+                Settings.Secure.NOTIFICATION_BADGING,
+                SecureSettingsProto.NOTIFICATION_BADGING);
     }
 
     private static void dumpProtoSystemSettingsLocked(

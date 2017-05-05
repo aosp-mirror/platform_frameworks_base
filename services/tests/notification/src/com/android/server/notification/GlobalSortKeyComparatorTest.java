@@ -25,7 +25,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -38,7 +37,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class GlobalSortKeyComparatorTest {
+public class GlobalSortKeyComparatorTest extends NotificationTestCase {
 
     private final String PKG = "PKG";
     private final int UID = 1111111;
@@ -46,24 +45,23 @@ public class GlobalSortKeyComparatorTest {
 
     @Test
     public void testComparator() throws Exception {
-        Notification n = new Notification.Builder(
-                InstrumentationRegistry.getContext(), TEST_CHANNEL_ID)
+        Notification n = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .build();
-        NotificationRecord left = new NotificationRecord(InstrumentationRegistry.getContext(),
+        NotificationRecord left = new NotificationRecord(getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
                         "", 1499), getDefaultChannel());
         left.setGlobalSortKey("first");
 
-        NotificationRecord right = new NotificationRecord(InstrumentationRegistry.getContext(),
+        NotificationRecord right = new NotificationRecord(getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
                         "", 1499), getDefaultChannel());
         right.setGlobalSortKey("second");
 
-        NotificationRecord last = new NotificationRecord(InstrumentationRegistry.getContext(),
+        NotificationRecord last = new NotificationRecord(getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
@@ -86,16 +84,15 @@ public class GlobalSortKeyComparatorTest {
 
     @Test
     public void testNoCrash_leftNull() throws Exception {
-        Notification n = new Notification.Builder(
-                InstrumentationRegistry.getContext(), TEST_CHANNEL_ID)
+        Notification n = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .build();
-        NotificationRecord left = new NotificationRecord(InstrumentationRegistry.getContext(),
+        NotificationRecord left = new NotificationRecord(getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
                         "", 1499), getDefaultChannel());
 
-        NotificationRecord right = new NotificationRecord(InstrumentationRegistry.getContext(),
+        NotificationRecord right = new NotificationRecord(getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
@@ -117,17 +114,16 @@ public class GlobalSortKeyComparatorTest {
 
     @Test
     public void testNoCrash_rightNull() throws Exception {
-        Notification n = new Notification.Builder(
-                InstrumentationRegistry.getContext(), TEST_CHANNEL_ID)
+        Notification n = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .build();
-        NotificationRecord left = new NotificationRecord(InstrumentationRegistry.getContext(),
+        NotificationRecord left = new NotificationRecord(getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),
                         "", 1499), getDefaultChannel());
         left.setGlobalSortKey("not null");
 
-        NotificationRecord right = new NotificationRecord(InstrumentationRegistry.getContext(),
+        NotificationRecord right = new NotificationRecord(getContext(),
                 new StatusBarNotification(PKG,
                         PKG, 1, "media", UID, UID, n,
                         new UserHandle(UserHandle.myUserId()),

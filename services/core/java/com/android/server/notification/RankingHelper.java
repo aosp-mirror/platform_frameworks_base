@@ -21,6 +21,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.Preconditions;
 
+import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -33,10 +35,14 @@ import android.content.pm.ParceledListSlice;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,6 +97,7 @@ public class RankingHelper implements RankingConfig {
     private final Context mContext;
     private final RankingHandler mRankingHandler;
     private final PackageManager mPm;
+    private SparseBooleanArray mBadgingEnabled;
 
     public RankingHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             NotificationUsageStats usageStats, String[] extractorNames) {
@@ -99,6 +106,8 @@ public class RankingHelper implements RankingConfig {
         mPm = pm;
 
         mPreliminaryComparator = new NotificationComparator(mContext);
+
+        updateBadgingEnabled();
 
         final int N = extractorNames.length;
         mSignalExtractors = new NotificationSignalExtractor[N];
@@ -1110,6 +1119,38 @@ public class RankingHelper implements RankingConfig {
                 .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE,
                         channel.getImportance());
     }
+
+    public void updateBadgingEnabled() {
+        if (mBadgingEnabled == null) {
+            mBadgingEnabled = new SparseBooleanArray();
+        }
+        boolean changed = false;
+        // update the cached values
+        for (int index = 0; index < mBadgingEnabled.size(); index++) {
+            int userId = mBadgingEnabled.keyAt(index);
+            final boolean oldValue = mBadgingEnabled.get(userId);
+            final boolean newValue = Secure.getIntForUser(mContext.getContentResolver(),
+                    Secure.NOTIFICATION_BADGING,
+                    DEFAULT_SHOW_BADGE ? 1 : 0, userId) != 0;
+            mBadgingEnabled.put(userId, newValue);
+            changed |= oldValue != newValue;
+        }
+        if (changed) {
+            mRankingHandler.requestSort(false);
+        }
+    }
+
+    public boolean badgingEnabled(UserHandle userHandle) {
+        int userId = userHandle.getIdentifier();
+        if (mBadgingEnabled.indexOfKey(userId) < 0) {
+            mBadgingEnabled.put(userId,
+                    Secure.getIntForUser(mContext.getContentResolver(),
+                            Secure.NOTIFICATION_BADGING,
+                            DEFAULT_SHOW_BADGE ? 1 : 0, userId) != 0);
+        }
+        return mBadgingEnabled.get(userId, DEFAULT_SHOW_BADGE);
+    }
+
 
     private static class Record {
         static int UNKNOWN_UID = UserHandle.USER_NULL;
