@@ -77,6 +77,7 @@ public class PipMotionHelper {
     private SurfaceFlingerVsyncChoreographer mVsyncChoreographer;
     private Handler mHandler;
 
+    private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
     private FlingAnimationUtils mFlingAnimationUtils;
 
@@ -93,10 +94,12 @@ public class PipMotionHelper {
             };
 
     public PipMotionHelper(Context context, IActivityManager activityManager,
-            PipSnapAlgorithm snapAlgorithm, FlingAnimationUtils flingAnimationUtils) {
+            PipMenuActivityController menuController, PipSnapAlgorithm snapAlgorithm,
+            FlingAnimationUtils flingAnimationUtils) {
         mContext = context;
         mHandler = BackgroundThread.getHandler();
         mActivityManager = activityManager;
+        mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
         mVsyncChoreographer = new SurfaceFlingerVsyncChoreographer(mHandler, mContext.getDisplay(),
@@ -148,6 +151,7 @@ public class PipMotionHelper {
      */
     void expandPip(boolean skipAnimation) {
         cancelAnimations();
+        mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
                 if (skipAnimation) {
@@ -168,6 +172,7 @@ public class PipMotionHelper {
      */
     void dismissPip() {
         cancelAnimations();
+        mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
                 mActivityManager.removeStack(PINNED_STACK_ID);
