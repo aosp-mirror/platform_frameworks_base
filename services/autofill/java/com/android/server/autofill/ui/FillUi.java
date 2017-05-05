@@ -398,6 +398,7 @@ final class FillUi {
             }
             return false;
         }
+
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -408,5 +409,21 @@ final class FillUi {
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
+        pw.print(prefix); pw.print("mWindow: ");
+        if (mWindow == null) {
+            pw.println("N/A");
+        } else {
+            final String prefix2 = prefix + "  ";
+            pw.println();
+            pw.print(prefix2); pw.print("showing: "); pw.println(mWindow.mShowing);
+            pw.print(prefix2); pw.print("view: "); pw.println(mWindow.mContentView);
+            pw.print(prefix2); pw.print("screen coordinates: ");
+            if (mWindow.mContentView == null) {
+                pw.println("N/A");
+            } else {
+                final int[] coordinates = mWindow.mContentView.getLocationOnScreen();
+                pw.print(coordinates[0]); pw.print("x"); pw.println(coordinates[1]);
+            }
+        }
     }
 }
