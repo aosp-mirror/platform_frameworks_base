@@ -3957,6 +3957,11 @@ message MetricsEvent {
     // OS: O
     RUNNING_BACKGROUND_APPS_DIALOG = 944;
 
+    // FIELD - The delay from the start of the transition until we just call bindApplication on the
+    // client.
+    // OS: O
+    APP_TRANSITION_BIND_APPLICATION_DELAY_MS = 945;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // OPEN: Settings > System > Languages & input > Advanced > Lift to open camera
