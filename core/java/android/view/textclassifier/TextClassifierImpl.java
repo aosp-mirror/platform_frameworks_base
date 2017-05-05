@@ -102,7 +102,9 @@ final class TextClassifierImpl implements TextClassifier {
                         string, selectionStartIndex, selectionEndIndex);
                 final int start = startEnd[0];
                 final int end = startEnd[1];
-                if (start >= 0 && end <= string.length() && start <= end) {
+                if (start <= end
+                        && start >= 0 && end <= string.length()
+                        && start <= selectionStartIndex && end >= selectionEndIndex) {
                     final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
                     final SmartSelection.ClassificationResult[] results =
                             smartSelection.classifyText(
