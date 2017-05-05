@@ -282,12 +282,17 @@ public final class AutoFillUI {
         pw.println("Autofill UI");
         final String prefix = "  ";
         final String prefix2 = "    ";
-        pw.print(prefix); pw.print("showsSaveUi: "); pw.println(mSaveUi != null);
         if (mFillUi != null) {
             pw.print(prefix); pw.println("showsFillUi: true");
             mFillUi.dump(pw, prefix2);
         } else {
             pw.print(prefix); pw.println("showsFillUi: false");
+        }
+        if (mSaveUi != null) {
+            pw.print(prefix); pw.println("showsSaveUi: true");
+            mSaveUi.dump(pw, prefix2);
+        } else {
+            pw.print(prefix); pw.println("showsSaveUi: false");
         }
     }
 

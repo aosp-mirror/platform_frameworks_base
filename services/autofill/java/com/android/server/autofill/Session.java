@@ -1043,6 +1043,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 break;
             case ACTION_VIEW_ENTERED:
+                if (sVerbose && virtualBounds != null) {
+                    Slog.w(TAG, "entered on virtual child " + id + ": " + virtualBounds);
+                }
                 requestNewFillResponseIfNecessaryLocked(id, viewState, flags);
 
                 // Remove the UI if the ViewState has changed.
