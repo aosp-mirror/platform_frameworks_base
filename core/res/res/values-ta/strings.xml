@@ -265,16 +265,11 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"விற்பனையாளர் டெமோ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB இணைப்பு"</string>
-    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
-    <skip />
-    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
-    <skip />
-    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
-    <skip />
-    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
-    <skip />
-    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
-    <skip />
+    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"பின்னணியில் இயங்கும் பயன்பாடுகள்"</string>
+    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடு பின்னணியில் இயங்குகிறது"</string>
+    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> பயன்பாடுகள் பின்னணியில் இயங்குகின்றன"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"பேட்டரி மற்றும் தரவு உபயோகம் குறித்த விவரங்களுக்கு, தட்டவும்"</string>
+    <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"பாதுகாப்பு பயன்முறை"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android அமைப்பு"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"தனிப்பட்ட சுயவிவரத்திற்கு மாறு"</string>
@@ -1183,6 +1178,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB, MIDIக்கு மட்டும்"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB துணைக்கருவியுடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"மேலும் விருப்பங்களுக்கு, தட்டவும்."</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"ஆடியோ துணைக்கருவி ஆதரிக்கப்படவில்லை"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"மேலும் தகவலுக்கு, தட்டவும்"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB பிழை திருத்தத்தை முடக்க, தட்டவும்."</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
