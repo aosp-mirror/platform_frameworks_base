@@ -43,10 +43,10 @@ import android.bluetooth.le.IScannerCallback;
 interface IBluetoothGatt {
     List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
 
-    void registerScanner(in IScannerCallback callback);
+    void registerScanner(in IScannerCallback callback, in WorkSource workSource);
     void unregisterScanner(in int scannerId);
     void startScan(in int scannerId, in ScanSettings settings, in List<ScanFilter> filters,
-                   in WorkSource workSource, in List scanStorages, in String callingPackage);
+                   in List scanStorages, in String callingPackage);
     void startScanForIntent(in PendingIntent intent, in ScanSettings settings, in List<ScanFilter> filters,
                             in String callingPackage);
     void stopScanForIntent(in PendingIntent intent, in String callingPackage);
