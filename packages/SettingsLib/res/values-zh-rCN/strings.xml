@@ -31,7 +31,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"不在范围内"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"无法自动连接"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"无法连接到互联网"</string>
-    <string name="saved_network" msgid="4352716707126620811">"已通过<xliff:g id="NAME">%1$s</xliff:g>保存"</string>
+    <string name="saved_network" msgid="4352716707126620811">"由<xliff:g id="NAME">%1$s</xliff:g>保存"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"已通过%1$s自动连接"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"已自动连接（通过网络评分服务提供方）"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已通过%1$s连接"</string>
