@@ -2869,8 +2869,7 @@ public class NotificationManagerService extends SystemService {
                                 adjustedSbn.getUser(), GroupHelper.AUTOGROUP_KEY,
                                 System.currentTimeMillis());
                 summaryRecord = new NotificationRecord(getContext(), summarySbn,
-                        notificationRecord.getChannel(), mRankingHelper.supportsChannels(
-                                summarySbn.getPackageName(), summarySbn.getUid()));
+                        notificationRecord.getChannel());
                 summaries.put(pkg, summarySbn.getKey());
             }
         }
@@ -3211,8 +3210,7 @@ public class NotificationManagerService extends SystemService {
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
-        final NotificationRecord r = new NotificationRecord(getContext(), n, channel,
-                mRankingHelper.supportsChannels(pkg, notificationUid));
+        final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id,tag, r)) {
             return;
