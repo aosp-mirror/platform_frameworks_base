@@ -186,6 +186,8 @@ final class Settings {
     private static final String TAG_PERMISSIONS = "perms";
     private static final String TAG_CHILD_PACKAGE = "child-package";
     private static final String TAG_USES_STATIC_LIB = "uses-static-lib";
+    private static final String TAG_BLOCK_UNINSTALL_PACKAGES = "block-uninstall-packages";
+    private static final String TAG_BLOCK_UNINSTALL = "block-uninstall";
 
     private static final String TAG_PERSISTENT_PREFERRED_ACTIVITIES =
             "persistent-preferred-activities";
@@ -215,6 +217,8 @@ final class Settings {
     // New name for the above attribute.
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_SUSPENDED = "suspended";
+    // Legacy, uninstall blocks are stored separately.
+    @Deprecated
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
     private static final String ATTR_ENABLED = "enabled";
     private static final String ATTR_ENABLED_CALLER = "enabledCaller";
@@ -270,6 +274,9 @@ final class Settings {
     // List of replaced system applications
     private final ArrayMap<String, PackageSetting> mDisabledSysPackages =
         new ArrayMap<String, PackageSetting>();
+
+    /** List of packages that are blocked for uninstall for specific users */
+    private final SparseArray<ArraySet<String>> mBlockUninstallPackages = new SparseArray<>();
 
     // Set of restored intent-filter verification states
     private final ArrayMap<String, IntentFilterVerificationInfo> mRestoredIntentFilterVerifications =
@@ -756,7 +763,6 @@ final class Settings {
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
-                                false /*blockUninstall*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
                                 0, PackageManager.INSTALL_REASON_UNKNOWN);
                     }
@@ -1614,6 +1620,34 @@ final class Settings {
         }
     }
 
+    void readBlockUninstallPackagesLPw(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        ArraySet<String> packages = new ArraySet<>();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_BLOCK_UNINSTALL)) {
+                String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
+                packages.add(packageName);
+            } else {
+                String msg = "Unknown element under " +  TAG_BLOCK_UNINSTALL_PACKAGES + ": " +
+                        parser.getName();
+                PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+        if (packages.isEmpty()) {
+            mBlockUninstallPackages.remove(userId);
+        } else {
+            mBlockUninstallPackages.put(userId, packages);
+        }
+    }
+
     void readPackageRestrictionsLPr(int userId) {
         if (DEBUG_MU) {
             Log.i(TAG, "Reading package restrictions for user=" + userId);
@@ -1662,7 +1696,6 @@ final class Settings {
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
-                                false /*blockUninstall*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
                                 0, PackageManager.INSTALL_REASON_UNKNOWN);
                     }
@@ -1768,9 +1801,12 @@ final class Settings {
                         }
                     }
 
+                    if (blockUninstall) {
+                        setBlockUninstallLPw(userId, name, true);
+                    }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, suspended, instantApp, enabledCaller, enabledComponents,
-                            disabledComponents, blockUninstall, verifState, linkGeneration,
+                            disabledComponents, verifState, linkGeneration,
                             installReason);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
@@ -1780,6 +1816,8 @@ final class Settings {
                     readCrossProfileIntentFiltersLPw(parser, userId);
                 } else if (tagName.equals(TAG_DEFAULT_APPS)) {
                     readDefaultAppsLPw(parser, userId);
+                } else if (tagName.equals(TAG_BLOCK_UNINSTALL_PACKAGES)) {
+                    readBlockUninstallPackagesLPw(parser, userId);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <stopped-packages>: "
                           + parser.getName());
@@ -1804,6 +1842,30 @@ final class Settings {
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages",
                     e);
         }
+    }
+
+    void setBlockUninstallLPw(int userId, String packageName, boolean blockUninstall) {
+        ArraySet<String> packages = mBlockUninstallPackages.get(userId);
+        if (blockUninstall) {
+            if (packages == null) {
+                packages = new ArraySet<String>();
+                mBlockUninstallPackages.put(userId, packages);
+            }
+            packages.add(packageName);
+        } else if (packages != null) {
+            packages.remove(packageName);
+            if (packages.isEmpty()) {
+                mBlockUninstallPackages.remove(userId);
+            }
+        }
+    }
+
+    boolean getBlockUninstallLPr(int userId, String packageName) {
+        ArraySet<String> packages = mBlockUninstallPackages.get(userId);
+        if (packages == null) {
+            return false;
+        }
+        return packages.contains(packageName);
     }
 
     private ArraySet<String> readComponentsLPr(XmlPullParser parser)
@@ -1976,6 +2038,20 @@ final class Settings {
         serializer.endTag(null, TAG_DEFAULT_APPS);
     }
 
+    void writeBlockUninstallPackagesLPr(XmlSerializer serializer, int userId)
+            throws IOException  {
+        ArraySet<String> packages = mBlockUninstallPackages.get(userId);
+        if (packages != null) {
+            serializer.startTag(null, TAG_BLOCK_UNINSTALL_PACKAGES);
+            for (int i = 0; i < packages.size(); i++) {
+                 serializer.startTag(null, TAG_BLOCK_UNINSTALL);
+                 serializer.attribute(null, ATTR_PACKAGE_NAME, packages.valueAt(i));
+                 serializer.endTag(null, TAG_BLOCK_UNINSTALL);
+            }
+            serializer.endTag(null, TAG_BLOCK_UNINSTALL_PACKAGES);
+        }
+    }
+
     void writePackageRestrictionsLPr(int userId) {
         if (DEBUG_MU) {
             Log.i(TAG, "Writing package restrictions for user=" + userId);
@@ -2038,9 +2114,6 @@ final class Settings {
                 if (ustate.suspended) {
                     serializer.attribute(null, ATTR_SUSPENDED, "true");
                 }
-                if (ustate.blockUninstall) {
-                    serializer.attribute(null, ATTR_BLOCK_UNINSTALL, "true");
-                }
                 if (ustate.instantApp) {
                     serializer.attribute(null, ATTR_INSTANT_APP, "true");
                 }
@@ -2091,6 +2164,7 @@ final class Settings {
             writePersistentPreferredActivitiesLPr(serializer, userId);
             writeCrossProfileIntentFiltersLPr(serializer, userId);
             writeDefaultAppsLPr(serializer, userId);
+            writeBlockUninstallPackagesLPr(serializer, userId);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
 
