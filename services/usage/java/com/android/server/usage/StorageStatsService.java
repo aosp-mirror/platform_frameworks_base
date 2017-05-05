@@ -16,6 +16,8 @@
 
 package com.android.server.usage;
 
+import static com.android.internal.util.ArrayUtils.defeatNullable;
+
 import android.app.AppOpsManager;
 import android.app.usage.ExternalStorageStats;
 import android.app.usage.IStorageStatsManager;
@@ -232,7 +234,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             enforcePermission(Binder.getCallingUid(), callingPackage);
         }
 
-        if (mPackage.getPackagesForUid(appInfo.uid).length == 1) {
+        if (defeatNullable(mPackage.getPackagesForUid(appInfo.uid)).length == 1) {
             // Only one package inside UID means we can fast-path
             return queryStatsForUid(volumeUuid, appInfo.uid, callingPackage);
         } else {
@@ -276,7 +278,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             enforcePermission(Binder.getCallingUid(), callingPackage);
         }
 
-        final String[] packageNames = mPackage.getPackagesForUid(uid);
+        final String[] packageNames = defeatNullable(mPackage.getPackagesForUid(uid));
         final long[] ceDataInodes = new long[packageNames.length];
         String[] codePaths = new String[0];
 
