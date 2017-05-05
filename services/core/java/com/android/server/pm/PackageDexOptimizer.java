@@ -52,7 +52,8 @@ import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getNonProfileGuidedCompilerFilter;
+import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
+import static dalvik.system.DexFile.getSafeModeCompilerFilter;
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
 /**
@@ -359,13 +360,7 @@ public class PackageDexOptimizer {
         int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         if (vmSafeMode) {
-            // For the compilation, it doesn't really matter what we return here because installd
-            // will replace the filter with 'quicken' anyway.
-            // However, we return a non profile guided filter so that we simplify the logic of
-            // merging profiles.
-            // TODO(calin): safe mode path could be simplified if we pass 'quicken' from
-            //              here rather than letting installd decide on the filter.
-            return getNonProfileGuidedCompilerFilter(targetCompilerFilter);
+            return getSafeModeCompilerFilter(targetCompilerFilter);
         }
 
         if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
