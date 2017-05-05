@@ -26,7 +26,6 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
 import static com.android.server.autofill.Helper.findViewNodeById;
-import static com.android.server.autofill.Helper.getUpdateActionAsString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.ViewState.STATE_AUTOFILLED;
@@ -679,6 +678,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         } else {
             final Parcelable result = data.getParcelable(
                     AutofillManager.EXTRA_AUTHENTICATION_RESULT);
+            if (sVerbose) Slog.d(TAG, "setAuthenticationResultLocked() for " + result);
+
             if (result instanceof FillResponse) {
                 FillResponse response = (FillResponse) result;
 
@@ -687,6 +688,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mResponseWaitingAuth = null;
                 if (requestIndex >= 0) {
                     response.setRequestId(mResponses.keyAt(requestIndex));
+                    if (response.getDatasets() == null || response.getDatasets().isEmpty()) {
+                        // TODO(b/37424539): there is a race condition that causes the authentication
+                        // dialog to be shown again after the service authreplied with a no-datasets
+                        // response. We're fixing it by hiding the UI when that happens, but that
+                        // sounds like a hack - hopefully the real problem will go away when we
+                        // refactor auth to support partitions; if it doesn't, we need to
+                        // investigate it further (it can be reproduced by running
+                        // LoginActivityTest.testFillResponseAuthServiceHasNoData())
+                        mUi.hideAll();
+                    }
                     processResponseLocked(response);
                 } else {
                     Slog.e(TAG, "Error cannot find id for auth response");
@@ -986,18 +997,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         if (sVerbose) {
-            Slog.v(TAG, "updateLocked(): id=" + id + ", action=" + getUpdateActionAsString(action)
-                    + ", flags=" + flags);
+            Slog.v(TAG, "updateLocked(): id=" + id + ", action=" + action + ", flags=" + flags);
         }
         ViewState viewState = mViewStates.get(id);
 
         if (viewState == null) {
             if (action == ACTION_START_SESSION || action == ACTION_VALUE_CHANGED
                     || action == ACTION_VIEW_ENTERED) {
-                if (sVerbose) {
-                    Slog.v(TAG,
-                            "Creating viewState for " + id + " on " + getActionAsString(action));
-                }
+                if (sVerbose) Slog.v(TAG, "Creating viewState for " + id + " on " + action);
                 boolean isIgnored = isIgnoredLocked(id);
                 viewState = new ViewState(this, id, value, this,
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
@@ -1007,7 +1014,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
             } else {
-                if (sVerbose) Slog.v(TAG, "Ignored " + getActionAsString(action) + " for " + id);
+                if (sVerbose) Slog.v(TAG, "Ignored action " + action + " for " + id);
                 return;
             }
         }
@@ -1056,6 +1063,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 break;
             case ACTION_VIEW_EXITED:
                 if (mCurrentViewId == viewState.id) {
+                    if (sVerbose) Slog.d(TAG, "Exiting view " + id);
                     mUi.hideFillUi(viewState.id);
                     mCurrentViewId = null;
                 }
@@ -1094,10 +1102,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         getUiForShowing().showFillUi(filledId, response, filterText, mPackageName);
-    }
-
-    String getActionAsString(int flag) {
-        return DebugUtils.flagsToString(AutofillManager.class, "ACTION_", flag);
     }
 
     boolean isDestroyed() {
@@ -1158,14 +1162,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private void processResponseLocked(@NonNull FillResponse response) {
+        final int requestId = response.getRequestId();
         if (sVerbose) {
-            Slog.v(TAG, "processResponseLocked(mCurrentViewId=" + mCurrentViewId + "):" + response);
+            Slog.v(TAG, "processResponseLocked(): mCurrentViewId=" + mCurrentViewId
+                    + ", reqId=" + requestId + ", resp=" + response);
         }
 
         if (mResponses == null) {
             mResponses = new SparseArray<>(4);
         }
-        final int requestId = response.getRequestId();
         mResponses.put(requestId, response);
         mClientState = response.getClientState();
 
