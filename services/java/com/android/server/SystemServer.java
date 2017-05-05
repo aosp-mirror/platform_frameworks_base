@@ -171,6 +171,8 @@ public final class SystemServer {
             "com.android.server.content.ContentService$Lifecycle";
     private static final String WALLPAPER_SERVICE_CLASS =
             "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
+    private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
+            "com.android.server.timezone.RulesManagerService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -975,6 +977,13 @@ public final class SystemServer {
                         R.bool.config_enableWallpaperService)) {
                 traceBeginAndSlog("StartWallpaperManagerService");
                 mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            }
+
+            if (!disableNonCoreServices && context.getResources().getBoolean(
+                        R.bool.config_enableUpdateableTimeZoneRules)) {
+                traceBeginAndSlog("StartTimeZoneRulesManagerService");
+                mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
 

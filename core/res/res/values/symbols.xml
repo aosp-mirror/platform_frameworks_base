@@ -275,6 +275,12 @@
   <java-symbol type="bool" name="split_action_bar_is_narrow" />
   <java-symbol type="bool" name="config_useVolumeKeySounds" />
   <java-symbol type="bool" name="config_enableWallpaperService" />
+  <java-symbol type="bool" name="config_enableUpdateableTimeZoneRules" />
+  <java-symbol type="bool" name="config_timeZoneRulesUpdateTrackingEnabled" />
+  <java-symbol type="string" name="config_timeZoneRulesUpdaterPackage" />
+  <java-symbol type="string" name="config_timeZoneRulesDataPackage" />
+  <java-symbol type="integer" name="config_timeZoneRulesCheckTimeMillisAllowed" />
+  <java-symbol type="integer" name="config_timeZoneRulesCheckRetryCount" />
   <java-symbol type="bool" name="config_sendAudioBecomingNoisy" />
   <java-symbol type="bool" name="config_enableScreenshotChord" />
   <java-symbol type="bool" name="config_bluetooth_default_profiles" />
