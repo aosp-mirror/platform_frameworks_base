@@ -2202,18 +2202,30 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    void prepareWindowToDisplayDuringRelayout(MergedConfiguration mergedConfiguration) {
-        if ((mAttrs.softInputMode & SOFT_INPUT_MASK_ADJUST)
-                == SOFT_INPUT_ADJUST_RESIZE) {
-            mLayoutNeeded = true;
-        }
-        if (isDrawnLw() && mService.okToDisplay()) {
-            mWinAnimator.applyEnterAnimationLocked();
-        }
+    void prepareWindowToDisplayDuringRelayout(MergedConfiguration mergedConfiguration,
+            boolean wasVisible) {
+        // We need to turn on screen regardless of visibility.
         if ((mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Relayout window turning screen on: " + this);
             mTurnOnScreen = true;
         }
+
+        // If we were already visible, skip rest of preparation.
+        if (wasVisible) {
+            if (DEBUG_VISIBILITY) Slog.v(TAG,
+                    "Already visible and does not turn on screen, skip preparing: " + this);
+            return;
+        }
+
+        if ((mAttrs.softInputMode & SOFT_INPUT_MASK_ADJUST)
+                == SOFT_INPUT_ADJUST_RESIZE) {
+            mLayoutNeeded = true;
+        }
+
+        if (isDrawnLw() && mService.okToDisplay()) {
+            mWinAnimator.applyEnterAnimationLocked();
+        }
+
         if (isConfigChanged()) {
             final Configuration globalConfig = mService.mRoot.getConfiguration();
             final Configuration overrideConfig = getMergedOverrideConfiguration();
@@ -4348,9 +4360,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastVisibleLayoutRotation = getDisplayContent().getRotation();
 
         mWinAnimator.mEnteringAnimation = true;
-        if (!wasVisible) {
-            prepareWindowToDisplayDuringRelayout(mergedConfiguration);
-        }
+
+        prepareWindowToDisplayDuringRelayout(mergedConfiguration, wasVisible);
+
         if ((attrChanges & FORMAT_CHANGED) != 0) {
             // If the format can't be changed in place, preserve the old surface until the app draws
             // on the new one. This prevents blinking when we change elevation of freeform and
