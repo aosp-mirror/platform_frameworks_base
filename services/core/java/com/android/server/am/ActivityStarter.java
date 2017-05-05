@@ -576,7 +576,7 @@ class ActivityStarter {
         }
 
         boolean clearedTask = (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
-                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
+                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK) && (mReuseTask != null);
         if (startedActivityStackId == PINNED_STACK_ID && (result == START_TASK_TO_FRONT
                 || result == START_DELIVERED_TO_TOP || clearedTask)) {
             // The activity was already running in the pinned stack so it wasn't started, but either
