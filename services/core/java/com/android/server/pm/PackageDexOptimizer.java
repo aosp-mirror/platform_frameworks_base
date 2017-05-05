@@ -47,7 +47,6 @@ import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_PROFILE_GUIDED;
 import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
-import static com.android.server.pm.Installer.DEXOPT_SAFEMODE;
 import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
 import static com.android.server.pm.Installer.DEXOPT_FORCE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
@@ -404,7 +403,6 @@ public class PackageDexOptimizer {
 
     private int getDexFlags(ApplicationInfo info, String compilerFilter) {
         int flags = info.flags;
-        boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         // Profile guide compiled oat files should not be public.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
@@ -412,7 +410,6 @@ public class PackageDexOptimizer {
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         int dexFlags =
                 (isPublic ? DEXOPT_PUBLIC : 0)
-                | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
                 | (debuggable ? DEXOPT_DEBUGGABLE : 0)
                 | profileFlag
                 | DEXOPT_BOOTCOMPLETE;
@@ -593,9 +590,6 @@ public class PackageDexOptimizer {
         }
         if ((flags & DEXOPT_PUBLIC) == DEXOPT_PUBLIC) {
             flagsList.add("public");
-        }
-        if ((flags & DEXOPT_SAFEMODE) == DEXOPT_SAFEMODE) {
-            flagsList.add("safemode");
         }
         if ((flags & DEXOPT_SECONDARY_DEX) == DEXOPT_SECONDARY_DEX) {
             flagsList.add("secondary");
