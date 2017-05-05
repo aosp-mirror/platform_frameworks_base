@@ -31,13 +31,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.UserInfo;
-import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.support.test.InstrumentationRegistry;
@@ -49,26 +46,17 @@ import android.util.Log;
 import android.util.LongSparseArray;
 
 import com.android.internal.os.AtomicFile;
-import com.android.internal.util.FastPrintWriter;
 import com.android.server.LocalServices;
 
-import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
@@ -783,31 +771,14 @@ public class PackageManagerSettingsTests {
 
     @Before
     public void createUserManagerServiceRef() throws ReflectiveOperationException {
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                Constructor<UserManagerService> umsc;
-                try {
-                    // unregister the user manager from the local service
-                    Method removeServiceForTest = LocalServices.class.getDeclaredMethod(
-                            "removeServiceForTest", Class.class);
-                    removeServiceForTest.invoke(null, UserManagerInternal.class);
-
-                    // now create a new user manager [which registers again with the local service]
-                    umsc = UserManagerService.class.getDeclaredConstructor(
-                            Context.class,
-                            PackageManagerService.class,
-                            Object.class,
-                            File.class);
-                    umsc.setAccessible(true);
-                    UserManagerService ums = umsc.newInstance(InstrumentationRegistry.getContext(),
-                            null /*PackageManagerService*/, new Object() /*packagesLock*/,
-                            new File(InstrumentationRegistry.getContext().getFilesDir(), "user"));
-                } catch (SecurityException
-                        | ReflectiveOperationException
-                        | IllegalArgumentException e) {
-                    fail("Could not create user manager service; " + e);
-                }
+        InstrumentationRegistry.getInstrumentation().runOnMainSync((Runnable) () -> {
+            try {
+                // unregister the user manager from the local service
+                LocalServices.removeServiceForTest(UserManagerInternal.class);
+                new UserManagerService(InstrumentationRegistry.getContext());
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail("Could not create user manager service; " + e);
             }
         });
     }
