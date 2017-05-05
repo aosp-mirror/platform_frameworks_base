@@ -3500,6 +3500,23 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return mService.mUserController.isCurrentProfileLocked(userId);
     }
 
+    /**
+     * Returns whether a stopping activity is present that should be stopped after visible, rather
+     * than idle.
+     * @return {@code true} if such activity is present. {@code false} otherwise.
+     */
+    boolean isStoppingNoHistoryActivity() {
+        // Activities that are marked as nohistory should be stopped immediately after the resumed
+        // activity has become visible.
+        for (ActivityRecord record : mStoppingActivities) {
+            if (record.isNoHistory()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(ActivityRecord idleActivity,
             boolean remove, boolean processPausingActivities) {
         ArrayList<ActivityRecord> stops = null;
