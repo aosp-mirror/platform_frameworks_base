@@ -2948,27 +2948,29 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
 
                 // Don't include wallpaper in bounds calculation
-                if (!mutableIncludeFullDisplay.value && includeDecor) {
-                    final TaskStack stack = w.getStack();
-                    if (stack != null) {
-                        stack.getBounds(frame);
-                    }
+                if (!w.mIsWallpaper && !mutableIncludeFullDisplay.value) {
+                    if (includeDecor) {
+                        final TaskStack stack = w.getStack();
+                        if (stack != null) {
+                            stack.getBounds(frame);
+                        }
 
-                    // We want to screenshot with the exact bounds of the surface of the app. Thus,
-                    // intersect it with the frame.
-                    frame.intersect(w.mFrame);
-                }else if (!mutableIncludeFullDisplay.value && !w.mIsWallpaper) {
-                    final Rect wf = w.mFrame;
-                    final Rect cr = w.mContentInsets;
-                    int left = wf.left + cr.left;
-                    int top = wf.top + cr.top;
-                    int right = wf.right - cr.right;
-                    int bottom = wf.bottom - cr.bottom;
-                    frame.union(left, top, right, bottom);
-                    w.getVisibleBounds(stackBounds);
-                    if (!Rect.intersects(frame, stackBounds)) {
-                        // Set frame empty if there's no intersection.
-                        frame.setEmpty();
+                        // We want to screenshot with the exact bounds of the surface of the app. Thus,
+                        // intersect it with the frame.
+                        frame.intersect(w.mFrame);
+                    } else {
+                        final Rect wf = w.mFrame;
+                        final Rect cr = w.mContentInsets;
+                        int left = wf.left + cr.left;
+                        int top = wf.top + cr.top;
+                        int right = wf.right - cr.right;
+                        int bottom = wf.bottom - cr.bottom;
+                        frame.union(left, top, right, bottom);
+                        w.getVisibleBounds(stackBounds);
+                        if (!Rect.intersects(frame, stackBounds)) {
+                            // Set frame empty if there's no intersection.
+                            frame.setEmpty();
+                        }
                     }
                 }
 
