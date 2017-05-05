@@ -34,11 +34,15 @@ namespace convert {
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
-JavaRef BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
-V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
-
 bool ThrowIfFailed(JNIEnv *env, const hardware::Return<V1_0::Result> &hidlResult);
 bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult);
+
+JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
+V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
+
+V1_0::Direction DirectionToHal(bool directionDown);
+
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info);
 
 } // namespace convert
 } // namespace radio

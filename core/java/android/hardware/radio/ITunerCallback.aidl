@@ -22,4 +22,5 @@ import android.hardware.radio.RadioManager;
 oneway interface ITunerCallback {
     void onError(int status);
     void onConfigurationChanged(in RadioManager.BandConfig config);
+    void onProgramInfoChanged(in RadioManager.ProgramInfo info);
 }

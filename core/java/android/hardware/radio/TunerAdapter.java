@@ -109,14 +109,30 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public int step(int direction, boolean skipSubChannel) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            mTuner.step(direction == RadioTuner.DIRECTION_DOWN, skipSubChannel);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Can't step", e);
+            return RadioManager.STATUS_INVALID_OPERATION;
+        } catch (RemoteException e) {
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
+        }
+        return RadioManager.STATUS_OK;
     }
 
     @Override
     public int scan(int direction, boolean skipSubChannel) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            mTuner.scan(direction == RadioTuner.DIRECTION_DOWN, skipSubChannel);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Can't scan", e);
+            return RadioManager.STATUS_INVALID_OPERATION;
+        } catch (RemoteException e) {
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
+        }
+        return RadioManager.STATUS_OK;
     }
 
     @Override
