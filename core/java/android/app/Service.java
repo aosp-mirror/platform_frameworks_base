@@ -671,22 +671,22 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
     
     /**
-     * Make this service run in the foreground, supplying the ongoing
+     * If your service is started (running through {@link Context#startService(Intent)}), then
+     * also make this service run in the foreground, supplying the ongoing
      * notification to be shown to the user while in this state.
-     * By default services are background, meaning that if the system needs to
-     * kill them to reclaim more memory (such as to display a large page in a
-     * web browser), they can be killed without too much harm.  You can set this
-     * flag if killing your service would be disruptive to the user, such as
+     * By default started services are background, meaning that their process won't be given
+     * foreground CPU scheduling (unless something else in that process is foreground) and,
+     * if the system needs to kill them to reclaim more memory (such as to display a large page in a
+     * web browser), they can be killed without too much harm.  You use
+     * {@link #startForeground} if killing your service would be disruptive to the user, such as
      * if your service is performing background music playback, so the user
      * would notice if their music stopped playing.
-     * 
-     * <p>If you need your application to run on platform versions prior to API
-     * level 5, you can use the following model to call the the older setForeground()
-     * or this modern method as appropriate:
-     * 
-     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
-     *   foreground_compatibility}
-     * 
+     *
+     * <p>Note that calling this method does <em>not</em> put the service in the started state
+     * itself, even though the name sounds like it.  You must always call
+     * {@link #startService(Intent)} first to tell the system it should keep the service running,
+     * and then use this method to tell it to keep it running harder.</p>
+     *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
@@ -716,7 +716,9 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     /**
      * Remove this service from foreground state, allowing it to be killed if
-     * more memory is needed.
+     * more memory is needed.  This does not stop the service from running (for that
+     * you use {@link #stopSelf()} or related methods), just takes it out of the
+     * foreground state.
      *
      * @param flags additional behavior options.
      * @see #startForeground(int, Notification)
