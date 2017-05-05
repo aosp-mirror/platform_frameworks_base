@@ -644,8 +644,10 @@
     <!-- Text shown when viewing channel settings for notifications related to a usb connection -->
     <string name="notification_channel_usb">USB connection</string>
 
-    <!-- Text shown when viewing channel settings for notifications related to running foreground
-        services [CHAR LIMIT=NONE] -->
+    <!-- This is the label for the notification channel settings that controls the behavior
+        of the notification about applications that are running in the background (that is,
+        perhaps confusingly, running foreground services but not the foreground UI on the screen).
+        [CHAR LIMIT=NONE] -->
     <string name="notification_channel_foreground_service">Apps running in background</string>
 
     <!-- Label for foreground service notification when one app is running. [CHAR LIMIT=NONE] -->
@@ -663,7 +665,10 @@
         data usage</string>
 
     <!-- Separator for foreground service notification content listing all apps when there
-        are multiple apps running [CHAR LIMIT=NONE] -->
+        are multiple apps running.  The left and right side may both already be compound
+        (constructed using this separator).  Should be kept as short as possible, this is
+        for summary text in the notification where there is not a lot of space.
+        [CHAR LIMIT=NONE] -->
     <string name="foreground_service_multiple_separator"><xliff:g id="left_side">%1$s</xliff:g>,
         <xliff:g id="right_side">%2$s</xliff:g></string>
 

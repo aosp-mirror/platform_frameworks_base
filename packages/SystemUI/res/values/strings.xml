@@ -2036,7 +2036,9 @@
     <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_title">Apps running in background</string>
 
-    <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
+    <!-- Descriptive text of an item in the "running foreground services" dialog, telling the
+        user what will happen when they tap on that item (which is an application that has
+        been identified for them as running). [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_msg">Tap for details on battery and data usage</string>
 
 </resources>
