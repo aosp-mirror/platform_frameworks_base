@@ -51,7 +51,6 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
-import com.android.server.DeviceIdleController;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
@@ -682,7 +681,7 @@ public final class BroadcastQueue {
                 // are already core system stuff so don't matter for this.
                 r.curApp = filter.receiverList.app;
                 filter.receiverList.app.curReceivers.add(r);
-                mService.updateOomAdjLocked(r.curApp);
+                mService.updateOomAdjLocked(r.curApp, true);
             }
         }
         try {

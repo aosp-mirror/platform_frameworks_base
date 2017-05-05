@@ -11293,7 +11293,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                 final int verifiedAdj = cpr.proc.verifiedAdj;
-                boolean success = updateOomAdjLocked(cpr.proc);
+                boolean success = updateOomAdjLocked(cpr.proc, true);
                 // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                 // if the process has been successfully adjusted.  So to reduce races with
                 // it, we will check whether the process still exists.  Note that this doesn't
@@ -11755,7 +11755,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         dst.proc = r;
                         dst.notifyAll();
                     }
-                    updateOomAdjLocked(r);
+                    updateOomAdjLocked(r, true);
                     maybeUpdateProviderUsageStatsLocked(r, src.info.packageName,
                             src.info.authority);
                 }
@@ -13480,7 +13480,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 if (changed) {
-                    updateOomAdjLocked(pr);
+                    updateOomAdjLocked(pr, true);
                 }
             }
         } finally {
@@ -18254,7 +18254,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mBackupAppName = app.packageName;
 
             // Try not to kill the process during backup
-            updateOomAdjLocked(proc);
+            updateOomAdjLocked(proc, true);
 
             // If the process is already attached, schedule the creation of the backup agent now.
             // If it is not yet live, this will be done when it attaches to the framework.
@@ -18351,7 +18351,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Not backing this app up any more; reset its OOM adjustment
                 final ProcessRecord proc = mBackupTarget.app;
-                updateOomAdjLocked(proc);
+                updateOomAdjLocked(proc, true);
                 proc.inFullBackup = false;
 
                 oldBackupUid = mBackupTarget != null ? mBackupTarget.appInfo.uid : -1;
@@ -22111,7 +22111,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         return act;
     }
 
-    final boolean updateOomAdjLocked(ProcessRecord app) {
+    /**
+     * Update OomAdj for a specific process.
+     * @param app The process to update
+     * @param oomAdjAll If it's ok to call updateOomAdjLocked() for all running apps
+     *                  if necessary, or skip.
+     * @return whether updateOomAdjLocked(app) was successful.
+     */
+    final boolean updateOomAdjLocked(ProcessRecord app, boolean oomAdjAll) {
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
         final boolean wasCached = app.cached;
@@ -22126,7 +22133,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? app.curRawAdj : ProcessList.UNKNOWN_ADJ;
         boolean success = updateOomAdjLocked(app, cachedAdj, TOP_APP, false,
                 SystemClock.uptimeMillis());
-        if (wasCached != app.cached || app.curRawAdj == ProcessList.UNKNOWN_ADJ) {
+        if (oomAdjAll
+                && (wasCached != app.cached || app.curRawAdj == ProcessList.UNKNOWN_ADJ)) {
             // Changed to/from cached state, so apps after it in the LRU
             // list may also be changed.
             updateOomAdjLocked();
@@ -23704,7 +23712,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 pr.hasOverlayUi = hasOverlayUi;
                 //Slog.i(TAG, "Setting hasOverlayUi=" + pr.hasOverlayUi + " for pid=" + pid);
-                updateOomAdjLocked(pr);
+                updateOomAdjLocked(pr, true);
             }
         }
 
