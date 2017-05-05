@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"మీరు <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకులను సంప్రదించండి."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>కి కూడా మీరు కనెక్ట్ చేయబడ్డారు."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> కోసం అన్‌లాక్ చేయబడింది"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"మీరు మాన్యువల్‌గా అన్‌లాక్ చేస్తే మినహా పరికరం లాక్ చేయబడి ఉంటుంది"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"నోటిఫికేషన్‌లను వేగంగా పొందండి"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"వీటిని మీరు అన్‌లాక్ చేయకముందే చూడండి"</string>
@@ -763,8 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> వరకు"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"ఉంచు"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"భర్తీ చేయి"</string>
-    <!-- no translation found for running_foreground_services_title (381024150898615683) -->
-    <skip />
-    <!-- no translation found for running_foreground_services_msg (6326247670075574355) -->
-    <skip />
+    <string name="running_foreground_services_title" msgid="381024150898615683">"నేపథ్యంలో అమలు అవుతున్న ఆప్‌లు"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"బ్యాటరీ మరియు డేటా వినియోగ వివరాల కోసం నొక్కండి"</string>
 </resources>
