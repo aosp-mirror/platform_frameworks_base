@@ -264,6 +264,10 @@ public final class AutoFillUI {
                 public void onDestroy() {
                     if (log.getType() == MetricsProto.MetricsEvent.TYPE_UNKNOWN) {
                         log.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+
+                        if (mCallback != null) {
+                            mCallback.cancelSave();
+                        }
                     }
                     mMetricsLogger.write(log);
                 }
