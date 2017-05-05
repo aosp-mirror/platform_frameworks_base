@@ -5084,24 +5084,26 @@ public final class ActivityThread {
         // caused by other sources, such as overlays. That means we want to be as conservative
         // about code changes as possible. Take the diff of the old ApplicationInfo and the new
         // to see if anything needs to change.
+        LoadedApk apk;
+        LoadedApk resApk;
+        // Update all affected loaded packages with new package information
         synchronized (mResourcesManager) {
-            // Update all affected loaded packages with new package information
             WeakReference<LoadedApk> ref = mPackages.get(ai.packageName);
-            LoadedApk apk = ref != null ? ref.get() : null;
-            if (apk != null) {
-                final ArrayList<String> oldPaths = new ArrayList<>();
-                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
-                apk.updateApplicationInfo(ai, oldPaths);
-            }
-
-            ref = mResourcePackages.get(ai.packageName);
             apk = ref != null ? ref.get() : null;
-            if (apk != null) {
-                final ArrayList<String> oldPaths = new ArrayList<>();
-                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
-                apk.updateApplicationInfo(ai, oldPaths);
-            }
-
+            ref = mResourcePackages.get(ai.packageName);
+            resApk = ref != null ? ref.get() : null;
+        }
+        if (apk != null) {
+            final ArrayList<String> oldPaths = new ArrayList<>();
+            LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
+            apk.updateApplicationInfo(ai, oldPaths);
+        }
+        if (resApk != null) {
+            final ArrayList<String> oldPaths = new ArrayList<>();
+            LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
+            resApk.updateApplicationInfo(ai, oldPaths);
+        }
+        synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
             mResourcesManager.applyNewResourceDirsLocked(ai.sourceDir, ai.resourceDirs);
         }
