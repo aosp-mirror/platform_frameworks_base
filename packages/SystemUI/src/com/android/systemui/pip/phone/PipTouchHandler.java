@@ -191,8 +191,8 @@ public class PipTouchHandler implements TunerService.Tunable {
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };
-        mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mSnapAlgorithm,
-                mFlingAnimationUtils);
+        mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mMenuController,
+                mSnapAlgorithm, mFlingAnimationUtils);
         mExpandedShortestEdgeSize = context.getResources().getDimensionPixelSize(
                 R.dimen.pip_expanded_shortest_edge_size);
 
