@@ -33,7 +33,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"Интернетке туташпай турат"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> тарабынан сакталды"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s аркылуу автоматтык түрдө туташты"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Тармак рейтингинин провайдери аркылуу автоматтык түрдө туташтырылды"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Тармактардын рейтингинин автору аркылуу автоматтык түрдө туташты"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s аркылуу жеткиликтүү"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s аркылуу жеткиликтүү"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Туташып турат, Интернет жок"</string>
@@ -316,7 +316,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Протаномалия (кызыл-жашыл)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Тританомалия (көк-сары)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Түсүн тууралоо"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бул сынамык мүмкүнчүлүк болгондуктан, иштин майнаптуулугуна таасир этиши мүмкүн."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бул сынамык мүмкүнчүлүк болгондуктан, түзмөктүн иштешине таасир этиши мүмкүн."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> менен алмаштырылган"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Батарея түгөнгөнгө чейин калган убакыт: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Батарея толгонго чейин калган убакыт: <xliff:g id="TIME">%1$s</xliff:g>"</string>
