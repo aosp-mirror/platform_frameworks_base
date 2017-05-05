@@ -6845,6 +6845,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
+            mStackSupervisor.mActivityMetricsLogger.notifyBindApplication(app);
             if (app.instr != null) {
                 thread.bindApplication(processName, appInfo, providers,
                         app.instr.mClass,
