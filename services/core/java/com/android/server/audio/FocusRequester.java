@@ -310,7 +310,6 @@ public class FocusRequester {
      */
     void handleFocusGain(int focusGain) {
         try {
-            final int oldLoss = mFocusLossReceived;
             mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
             mFocusController.notifyExtPolicyFocusGrant_syncAf(toAudioFocusInfo(),
                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
@@ -322,9 +321,8 @@ public class FocusRequester {
                 }
                 if (mFocusLossWasNotified) {
                     fd.dispatchAudioFocusChange(focusGain, mClientId);
-                } else if (oldLoss == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-                    mFocusController.unduckPlayers(this);
                 }
+                mFocusController.unduckPlayers(this);
             }
             mFocusLossWasNotified = false;
         } catch (android.os.RemoteException e) {
