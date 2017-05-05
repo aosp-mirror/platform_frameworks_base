@@ -25,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
+import android.util.LayoutDirection;
 
 import com.android.systemui.R;
 
@@ -187,7 +188,9 @@ public class MediaNotificationProcessor {
                         : R.color.notification_material_background_color;
                 backgroundColor = mContext.getColor(id);
             }
-            Bitmap colorized = mColorizer.colorize(drawable, backgroundColor);
+            Bitmap colorized = mColorizer.colorize(drawable, backgroundColor,
+                    mContext.getResources().getConfiguration().getLayoutDirection() ==
+                            LayoutDirection.RTL);
             builder.setLargeIcon(Icon.createWithBitmap(colorized));
         }
     }
