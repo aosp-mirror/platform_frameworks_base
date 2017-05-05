@@ -6717,7 +6717,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             info.activityInfo.packageName, info.activityInfo.splitName,
-                            info.activityInfo.applicationInfo.versionCode);
+                            info.activityInfo.applicationInfo.versionCode, null /*failureIntent*/);
                     // make sure this resolver is the default
                     installerInfo.isDefault = true;
                     installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -7390,7 +7390,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             info.serviceInfo.packageName, info.serviceInfo.splitName,
-                            info.serviceInfo.applicationInfo.versionCode);
+                            info.serviceInfo.applicationInfo.versionCode, null /*failureIntent*/);
                     // make sure this resolver is the default
                     installerInfo.isDefault = true;
                     installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -7511,7 +7511,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             info.providerInfo.packageName, info.providerInfo.splitName,
-                            info.providerInfo.applicationInfo.versionCode);
+                            info.providerInfo.applicationInfo.versionCode, null /*failureIntent*/);
                     // make sure this resolver is the default
                     installerInfo.isDefault = true;
                     installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
