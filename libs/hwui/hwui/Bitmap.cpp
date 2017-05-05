@@ -474,7 +474,6 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
-        ALOGW("Warning: attempt to read pixels from hardware bitmap, which is very slow operation");
         outBitmap->allocPixels(info());
         uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
         return;
