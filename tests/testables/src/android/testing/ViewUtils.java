@@ -21,8 +21,16 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+/**
+ * Utilities to make testing views easier.
+ */
 public class ViewUtils {
 
+    /**
+     * Causes the view (and its children) to have {@link View#onAttachedToWindow()} called.
+     *
+     * This is currently done by adding the view to a window.
+     */
     public static void attachView(View view) {
         // Make sure hardware acceleration isn't turned on.
         view.getContext().getApplicationInfo().flags &=
@@ -35,6 +43,11 @@ public class ViewUtils {
                 .getSystemService(WindowManager.class).addView(view, lp);
     }
 
+    /**
+     * Causes the view (and its children) to have {@link View#onDetachedFromWindow()} called.
+     *
+     * This is currently done by removing the view from a window.
+     */
     public static void detachView(View view) {
         InstrumentationRegistry.getContext()
                 .getSystemService(WindowManager.class).removeViewImmediate(view);
