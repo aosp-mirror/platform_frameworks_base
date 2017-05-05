@@ -20,6 +20,7 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.internal.os.RoSystemProperties;
+import com.android.org.conscrypt.Conscrypt;
 import com.android.org.conscrypt.OpenSSLContextImpl;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.SSLClientSessionCache;
@@ -212,7 +213,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory makeSocketFactory(
             KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
-            OpenSSLContextImpl sslContext = OpenSSLContextImpl.getPreferred();
+            OpenSSLContextImpl sslContext =  (OpenSSLContextImpl) Conscrypt.newPreferredSSLContextSpi();
             sslContext.engineInit(keyManagers, trustManagers, null);
             sslContext.engineGetClientSessionContext().setPersistentCache(mSessionCache);
             return sslContext.engineGetSocketFactory();
