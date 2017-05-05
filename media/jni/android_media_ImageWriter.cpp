@@ -499,30 +499,23 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
 
     sp<Surface> surface = ctx->getProducer();
     status_t res = OK;
-    if (!isFormatOpaque(imageFormat)) {
-        // TODO: need implement, see b/19962027
-        jniThrowRuntimeException(env,
-                "nativeAttachImage for non-opaque image is not implement yet!!!");
-        return -1;
-    }
-
-    if (!isFormatOpaque(ctx->getBufferFormat())) {
+    if (isFormatOpaque(imageFormat) != isFormatOpaque(ctx->getBufferFormat())) {
         jniThrowException(env, "java/lang/IllegalStateException",
-                "Trying to attach an opaque image into a non-opaque ImageWriter");
+                "Trying to attach an opaque image into a non-opaque ImageWriter, or vice versa");
         return -1;
     }
 
     // Image is guaranteed to be from ImageReader at this point, so it is safe to
     // cast to BufferItem pointer.
-    BufferItem* opaqueBuffer = reinterpret_cast<BufferItem*>(nativeBuffer);
-    if (opaqueBuffer == NULL) {
+    BufferItem* buffer = reinterpret_cast<BufferItem*>(nativeBuffer);
+    if (buffer == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Image is not initialized or already closed");
         return -1;
     }
 
     // Step 1. Attach Image
-    res = surface->attachBuffer(opaqueBuffer->mGraphicBuffer.get());
+    res = surface->attachBuffer(buffer->mGraphicBuffer.get());
     if (res != OK) {
         ALOGE("Attach image failed: %s (%d)", strerror(-res), res);
         switch (res) {
@@ -559,7 +552,7 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     }
 
     // Step 3. Queue Image.
-    res = anw->queueBuffer(anw.get(), opaqueBuffer->mGraphicBuffer.get(), /*fenceFd*/
+    res = anw->queueBuffer(anw.get(), buffer->mGraphicBuffer.get(), /*fenceFd*/
             -1);
     if (res != OK) {
         ALOGE("%s: Queue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
@@ -817,4 +810,3 @@ int register_android_media_ImageWriter(JNIEnv *env) {
 
     return (ret1 || ret2);
 }
-
