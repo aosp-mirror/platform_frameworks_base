@@ -232,7 +232,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     static final int STACK_VISIBLE = 1;
     // Stack is considered visible, but only becuase it has activity that is visible behind other
     // activities and there is a specific combination of stacks.
-    private static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
+    static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
 
     @VisibleForTesting
     /* The various modes for the method {@link #removeTask}. */
@@ -1652,7 +1652,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         if (StackId.isBackdropToTranslucentActivity(mStackId)
                 && hasVisibleBehindActivity() && StackId.isHomeOrRecentsStack(topStackId)
-                && !topStack.topActivity().fullscreen) {
+                && (topStack.topActivity() == null || !topStack.topActivity().fullscreen)) {
             // The fullscreen or assistant stack should be visible if it has a visible behind
             // activity behind the home or recents stack that is translucent.
             return STACK_VISIBLE_ACTIVITY_BEHIND;
