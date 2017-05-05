@@ -259,7 +259,7 @@ public class BuzzBeepBlinkTest {
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel, true);
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
         mService.addNotification(r);
         return r;
     }
@@ -769,7 +769,7 @@ public class BuzzBeepBlinkTest {
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel, true);
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
         mService.addNotification(r);
 
         mService.buzzBeepBlinkLocked(r);
