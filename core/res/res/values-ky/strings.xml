@@ -265,16 +265,11 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Эскертүүлөр"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Чекене соода дүкөнү үчүн демо режим"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB аркылуу туташуу"</string>
-    <!-- no translation found for notification_channel_foreground_service (6665375982962336520) -->
-    <skip />
-    <!-- no translation found for foreground_service_app_in_background (6826789589341671842) -->
-    <skip />
-    <!-- no translation found for foreground_service_apps_in_background (7150914856893450380) -->
-    <skip />
-    <!-- no translation found for foreground_service_tap_for_details (372046743534354644) -->
-    <skip />
-    <!-- no translation found for foreground_service_multiple_separator (4021901567939866542) -->
-    <skip />
+    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Фондо иштеп жаткан колдонмолор"</string>
+    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу фондо иштөөдө"</string>
+    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> колдонмо фондо иштөөдө"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Батареянын кубаты жана Интернеттин колдонулушу жөнүндө билүү үчүн таптап коюңуз"</string>
+    <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Коопсуз режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android тутуму"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Жеке профилге которулуу"</string>
@@ -283,7 +278,7 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"байланыштарыңызды көрүүгө"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Жайгашкан жер"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"түзмөктүн жайгашкан жерин аныктоого"</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнбарак"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Жылнаама"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
@@ -838,9 +833,9 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Пэриш"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Аймак"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Эмират"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"желе бүктөмөлүрүңүздү жана тарыхыңызды окуу"</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"кыстармаларыңыз менен издөө таржымалыңызды карап көрүңүз"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Колдонмого Серепчи ачкан URLдердин тарыхын жана Серепчинин бүктөмөлөрүн окууга уруксат берет. Эскертүү: бул уруксат үчүнчү тараптык интернет-серепчилерге, же интернетке кирүү мүмкүнчүлүгү бар колдонмолорго таасир этпеши мүмкүн."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"желе бүктөмөлөрүн жана тарыхын жазуу"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"кыстармалар жана издөө таржымалын өзгөртүү"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Колдонмого планшетиңизде сакталган Серепчинин тарыхын жана Серепчинин бүктөмөлөрүн өзгөртүү уруксатын берет. Бул колдонмого Серепчинин берилиштерин өчүрүү же өзгөртүү уруксатын берет. Эскертүү: бул уруксат үчүнчү тараптык интернет-серепчилерге, же интернетке кирүү мүмкүнчүлүгү бар колдонмолорго таасир этпеши мүмкүн."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Колдонмого Серепчиңиздин таржымалын же сыналгыңызда сакталган кыстармаларды өзгөртүү мүмкүнчүлүгүн берет. Ушуну менен, колдонмо Серепчи дайындарын тазалап же өзгөртө алат. Эскертүү: бул уруксат үчүнчү жактын серепчилери же башка желеде серептөө мүмкүнчүлүгү бар колдонмолор аркылуу иштетилбеши керек."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Колдонмого телефонуңузда сакталган Серепчинин тарыхын жана Серепчинин бүктөмөлөрүн өзгөртүү уруксатын берет. Бул колдонмого Серепчинин берилиштерин өчүрүү же өзгөртүү уруксатын берет. Эскертүү: бул уруксат үчүнчү тараптык интернет-серепчилерге, же интернетке кирүү мүмкүнчүлүгү бар колдонмолорго таасир этпеши мүмкүн."</string>
@@ -1128,7 +1123,7 @@
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Колдонмо"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Дайректи иштетүү. Бул Wi-Fi клиентти/хотспотту өчүрөт."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Дайрект иштетилбеди."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct иштетилген жок."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct иштөөдө"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Жөндөөлөрдү ачуу үчүн таптап коюңуз"</string>
     <string name="accept" msgid="1645267259272829559">"Кабыл алуу"</string>
@@ -1351,7 +1346,7 @@
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Айнуу"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Жок кылуу"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Даяр"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Тартип алмаштыруу"</string>
+    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Режимди өзгөртүү"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Кирүү"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Колдонмо тандоо"</string>
