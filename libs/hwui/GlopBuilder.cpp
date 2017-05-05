@@ -210,6 +210,7 @@ GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer) 
             alphaVertex ? kAlphaVertexStride : kVertexStride };
     mOutGlop->mesh.elementCount = indices
                 ? vertexBuffer.getIndexCount() : vertexBuffer.getVertexCount();
+    mOutGlop->mesh.vertexCount = vertexBuffer.getVertexCount(); // used for glDrawRangeElements()
     return *this;
 }
 
