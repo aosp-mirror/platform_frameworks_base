@@ -2531,6 +2531,10 @@
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>
 
+    <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
+     (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
+    <bool name="config_allowPriorityVibrationsInLowPowerMode">false</bool>
+
     <!-- Number of retries Cell Data should attempt for a given error code before
          restarting the modem.
          Error codes not listed will not lead to modem restarts.
