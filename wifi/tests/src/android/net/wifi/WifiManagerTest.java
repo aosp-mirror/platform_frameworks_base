@@ -22,6 +22,7 @@ import static android.net.wifi.WifiManager.HOTSPOT_STOPPED;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_GENERIC;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_INCOMPATIBLE_MODE;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_NO_CHANNEL;
+import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_TETHERING_DISALLOWED;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.REQUEST_REGISTERED;
 
 import static org.junit.Assert.assertEquals;
@@ -464,17 +465,32 @@ public class WifiManagerTest {
     }
 
     /**
-     * Verify the handler passed in to startLocalOnlyHotspot is correctly used for callbacks when a
-     * null WifiConfig is returned.
+     * Verify callback triggered from startLocalOnlyHotspot with an incompatible mode failure.
      */
     @Test
-    public void testLocalOnlyHotspotCallbackFullOnNullConfig() throws Exception {
+    public void testLocalOnlyHotspotCallbackFullOnIncompatibleMode() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(Messenger.class), any(IBinder.class)))
                 .thenReturn(ERROR_INCOMPATIBLE_MODE);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
+        assertFalse(callback.mOnStartedCalled);
+        assertFalse(callback.mOnStoppedCalled);
+        assertEquals(null, callback.mRes);
+    }
+
+    /**
+     * Verify callback triggered from startLocalOnlyHotspot with a tethering disallowed failure.
+     */
+    @Test
+    public void testLocalOnlyHotspotCallbackFullOnTetheringDisallowed() throws Exception {
+        TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
+        when(mWifiService.startLocalOnlyHotspot(any(Messenger.class), any(IBinder.class)))
+                .thenReturn(ERROR_TETHERING_DISALLOWED);
+        mWifiManager.startLocalOnlyHotspot(callback, mHandler);
+        mLooper.dispatchAll();
+        assertEquals(ERROR_TETHERING_DISALLOWED, callback.mFailureReason);
         assertFalse(callback.mOnStartedCalled);
         assertFalse(callback.mOnStoppedCalled);
         assertEquals(null, callback.mRes);
