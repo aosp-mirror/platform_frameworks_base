@@ -110,6 +110,7 @@ public:
         } vertices;
 
         int elementCount;
+        int vertexCount; // only used for meshes (for glDrawRangeElements)
         TextureVertex mappedVertices[4];
     } mesh;
 
