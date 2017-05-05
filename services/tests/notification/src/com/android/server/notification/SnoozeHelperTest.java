@@ -312,7 +312,7 @@ public class SnoozeHelperTest {
                 TEST_CHANNEL_ID, "name", NotificationManager.IMPORTANCE_LOW);
         return new NotificationRecord(getContext(), new StatusBarNotification(
                 pkg, pkg, id, tag, 0, 0, n, user, null,
-                System.currentTimeMillis()), notificationChannel, true);
+                System.currentTimeMillis()), notificationChannel);
     }
 
     private NotificationRecord getNotificationRecord(String pkg, int id, String tag,
