@@ -31,7 +31,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Mimo dosah"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Nedôjde k automatickému pripojeniu"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Žiadny prístup k internetu"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Uložil(a) <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Uložila aplikácia <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automaticky pripojené prostredníctvom %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automaticky pripojené prostredníctvom poskytovateľa hodnotenia siete"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Pripojené prostredníctvom %1$s"</string>
@@ -91,7 +91,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"OS Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Odstránené aplikácie"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Odstránené aplikácie a používatelia"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Zdieľané pripojenie cez USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Pripojenie cez USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prenosný prístupový bod"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Pripojenie cez Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Zdieľané pripojenie"</string>
