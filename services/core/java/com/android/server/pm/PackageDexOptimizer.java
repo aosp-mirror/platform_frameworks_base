@@ -56,7 +56,6 @@ import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
 import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getNonProfileGuidedCompilerFilter;
 
 import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
 import static dalvik.system.DexFile.getSafeModeCompilerFilter;
