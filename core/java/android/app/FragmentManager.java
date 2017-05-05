@@ -2497,7 +2497,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             mBackStack = new ArrayList<BackStackRecord>();
         }
         mBackStack.add(state);
-        reportBackStackChanged();
     }
 
     boolean popBackStackState(ArrayList<BackStackRecord> records, ArrayList<Boolean> isRecordPop,
