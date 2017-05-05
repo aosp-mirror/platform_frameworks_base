@@ -529,13 +529,6 @@ import java.util.List;
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  * </ul>
  * </p>
- * <p>
- * <b>Security note</b>
- * <p>
- * Since an event contains the text of its source privacy can be compromised by leaking
- * sensitive information such as passwords. To address this issue any event fired in response
- * to manipulation of a PASSWORD field does NOT CONTAIN the text of the password.
- * </p>
  *
  * @see android.view.accessibility.AccessibilityManager
  * @see android.accessibilityservice.AccessibilityService
