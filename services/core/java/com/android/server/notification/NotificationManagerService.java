@@ -344,6 +344,7 @@ public class NotificationManagerService extends SystemService {
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
+    private static final IBinder WHITELIST_TOKEN = new Binder();
     private RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
@@ -983,6 +984,7 @@ public class NotificationManagerService extends SystemService {
 
     public NotificationManagerService(Context context) {
         super(context);
+        Notification.processWhitelistToken = WHITELIST_TOKEN;
     }
 
     // TODO - replace these methods with a single VisibleForTesting constructor
@@ -3256,7 +3258,8 @@ public class NotificationManagerService extends SystemService {
                 for (int i = 0; i < intentCount; i++) {
                     PendingIntent pendingIntent = notification.allPendingIntents.valueAt(i);
                     if (pendingIntent != null) {
-                        am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(), duration);
+                        am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(),
+                                WHITELIST_TOKEN, duration);
                     }
                 }
             }
