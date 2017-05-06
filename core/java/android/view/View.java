@@ -7237,44 +7237,53 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         RectF position = mAttachInfo.mTmpTransformRect;
         position.set(0, 0, mRight - mLeft, mBottom - mTop);
+        mapRectFromViewToScreenCoords(position, clipToParent);
+        outRect.set(Math.round(position.left), Math.round(position.top),
+                Math.round(position.right), Math.round(position.bottom));
+    }
 
+    /**
+     * Map a rectangle from view-relative coordinates to screen-relative coordinates
+     *
+     * @param rect The rectangle to be mapped
+     * @param clipToParent Whether to clip child bounds to the parent ones.
+     * @hide
+     */
+    public void mapRectFromViewToScreenCoords(RectF rect, boolean clipToParent) {
         if (!hasIdentityMatrix()) {
-            getMatrix().mapRect(position);
+            getMatrix().mapRect(rect);
         }
 
-        position.offset(mLeft, mTop);
+        rect.offset(mLeft, mTop);
 
         ViewParent parent = mParent;
         while (parent instanceof View) {
             View parentView = (View) parent;
 
-            position.offset(-parentView.mScrollX, -parentView.mScrollY);
+            rect.offset(-parentView.mScrollX, -parentView.mScrollY);
 
             if (clipToParent) {
-                position.left = Math.max(position.left, 0);
-                position.top = Math.max(position.top, 0);
-                position.right = Math.min(position.right, parentView.getWidth());
-                position.bottom = Math.min(position.bottom, parentView.getHeight());
+                rect.left = Math.max(rect.left, 0);
+                rect.top = Math.max(rect.top, 0);
+                rect.right = Math.min(rect.right, parentView.getWidth());
+                rect.bottom = Math.min(rect.bottom, parentView.getHeight());
             }
 
             if (!parentView.hasIdentityMatrix()) {
-                parentView.getMatrix().mapRect(position);
+                parentView.getMatrix().mapRect(rect);
             }
 
-            position.offset(parentView.mLeft, parentView.mTop);
+            rect.offset(parentView.mLeft, parentView.mTop);
 
             parent = parentView.mParent;
         }
 
         if (parent instanceof ViewRootImpl) {
             ViewRootImpl viewRootImpl = (ViewRootImpl) parent;
-            position.offset(0, -viewRootImpl.mCurScrollY);
+            rect.offset(0, -viewRootImpl.mCurScrollY);
         }
 
-        position.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
-
-        outRect.set(Math.round(position.left), Math.round(position.top),
-                Math.round(position.right), Math.round(position.bottom));
+        rect.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
     }
 
     /**
