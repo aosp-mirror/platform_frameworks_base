@@ -322,11 +322,20 @@ public class FocusRequester {
                 if (mFocusLossWasNotified) {
                     fd.dispatchAudioFocusChange(focusGain, mClientId);
                 }
-                mFocusController.unduckPlayers(this);
             }
+            mFocusController.unduckPlayers(this);
             mFocusLossWasNotified = false;
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal gain of audio focus due to: ", e);
+        }
+    }
+
+    /**
+     * Called synchronized on MediaFocusControl.mAudioFocusLock
+     */
+    void handleFocusGainFromRequest(int focusRequestResult) {
+        if (focusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            mFocusController.unduckPlayers(this);
         }
     }
 

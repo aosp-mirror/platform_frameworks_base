@@ -752,6 +752,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
                 // push focus requester at the top of the audio focus stack
                 mFocusStack.push(nfr);
+                nfr.handleFocusGainFromRequest(AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
             }
             notifyExtPolicyFocusGrant_syncAf(nfr.toAudioFocusInfo(),
                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
