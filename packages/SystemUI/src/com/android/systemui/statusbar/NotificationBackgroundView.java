@@ -144,4 +144,8 @@ public class NotificationBackgroundView extends View {
             ripple.setColor(ColorStateList.valueOf(color));
         }
     }
+
+    public void setDrawableAlpha(int drawableAlpha) {
+        mBackground.setAlpha(drawableAlpha);
+    }
 }

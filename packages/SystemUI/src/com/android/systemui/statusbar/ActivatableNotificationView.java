@@ -23,6 +23,7 @@ import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -177,6 +178,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * Similar to mDimmed but is also true if it's not dimmable but should be
      */
     private boolean mNeedsDimming;
+    private int mDimmedAlpha;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -214,6 +216,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundDimmed = findViewById(R.id.backgroundDimmed);
         mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
         mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
+        mDimmedAlpha = Color.alpha(mContext.getColor(
+                R.color.notification_material_background_dimmed_color));
         updateBackground();
         updateBackgroundTint();
         updateOutlineAlpha();
@@ -492,10 +496,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      *                       used and the background color not at all.
      */
     public void setOverrideTintColor(int color, float overrideAmount) {
+        if (mDark) {
+            color = NO_COLOR;
+            overrideAmount = 0;
+        }
         mOverrideTint = color;
         mOverrideAmount = overrideAmount;
         int newColor = calculateBgColor();
         setBackgroundTintColor(newColor);
+        if (!isDimmable() && mNeedsDimming) {
+           mBackgroundNormal.setDrawableAlpha((int) NotificationUtils.interpolate(255,
+                   mDimmedAlpha,
+                   overrideAmount));
+        } else {
+            mBackgroundNormal.setDrawableAlpha(255);
+        }
     }
 
     protected void updateBackgroundTint() {

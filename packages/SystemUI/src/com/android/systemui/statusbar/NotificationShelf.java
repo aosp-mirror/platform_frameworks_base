@@ -200,7 +200,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         //  find the first view that doesn't overlap with the shelf
         int notificationIndex = 0;
         int notGoneIndex = 0;
-        int colorOfViewBeforeLast = 0;
+        int colorOfViewBeforeLast = NO_COLOR;
         boolean backgroundForceHidden = false;
         if (mHideBackground && !mShelfState.hasItemsInStableShelf) {
             backgroundForceHidden = true;
@@ -254,7 +254,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 colorTwoBefore = previousColor;
                 transitionAmount = inShelfAmount;
             }
-            if (isLastChild && colorOfViewBeforeLast != NO_COLOR) {
+            if (isLastChild) {
+                if (colorOfViewBeforeLast == NO_COLOR) {
+                    colorOfViewBeforeLast = ownColorUntinted;
+                }
                 row.setOverrideTintColor(colorOfViewBeforeLast, inShelfAmount);
             } else {
                 colorOfViewBeforeLast = ownColorUntinted;
@@ -308,8 +311,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float fullTransitionAmount;
         float iconTransitionAmount;
         float shelfStart = getTranslationY();
-        if (viewEnd >= shelfStart && (mAmbientState.isShadeExpanded()
-                || (!row.isPinned() && !row.isHeadsUpAnimatingAway()))) {
+        if (viewEnd >= shelfStart && (!mAmbientState.isUnlockHintRunning() || row.isInShelf())
+                && (mAmbientState.isShadeExpanded()
+                        || (!row.isPinned() && !row.isHeadsUpAnimatingAway()))) {
             if (viewStart < shelfStart) {
 
                 float fullAmount = (shelfStart - viewStart) / fullHeight;

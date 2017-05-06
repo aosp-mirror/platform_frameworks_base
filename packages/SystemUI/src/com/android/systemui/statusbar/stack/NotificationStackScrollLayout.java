@@ -4190,6 +4190,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAmbientState.setPanelFullWidth(isFullWidth);
     }
 
+    public void setUnlockHintRunning(boolean running) {
+        mAmbientState.setUnlockHintRunning(running);
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
