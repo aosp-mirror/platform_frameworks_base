@@ -16,14 +16,17 @@
 
 package android.os;
 
-import java.util.ArrayList;
+import java.util.Map;
 
 import android.util.Log;
 
-/** @hide */
+/**
+ * Java API for libvintf.
+ * @hide
+ */
 public class VintfObject {
 
-    private static final String LOG_TAG = "VintfObject";
+    /// ---------- OTA
 
     /**
      * Slurps all device information (both manifests and both matrices)
@@ -45,4 +48,26 @@ public class VintfObject {
      */
     public static native int verify(String[] packageInfo);
 
+    /// ---------- CTS Device Info
+
+    /**
+     * @return a list of HAL names and versions that is supported by this
+     * device as stated in device and framework manifests. For example,
+     * ["android.hidl.manager@1.0", "android.hardware.camera.device@1.0",
+     *  "android.hardware.camera.device@3.2"]. There are no duplicates.
+     */
+    public static native String[] getHalNamesAndVersions();
+
+    /**
+     * @return the BOARD_SEPOLICY_VERS build flag available in device manifest.
+     */
+    public static native String getSepolicyVersion();
+
+    /**
+     * @return a list of VNDK snapshots supported by the framework, as
+     * specified in framework manifest. For example,
+     * [("25.0.5", ["libjpeg.so", "libbase.so"]),
+     *  ("25.1.3", ["libjpeg.so", "libbase.so"])]
+     */
+    public static native Map<String, String[]> getVndkSnapshots();
 }
