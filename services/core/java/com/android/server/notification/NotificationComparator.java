@@ -48,8 +48,8 @@ public class NotificationComparator
     @Override
     public int compare(NotificationRecord left, NotificationRecord right) {
         // first all colorized notifications
-        boolean leftImportantColorized = isImportantOngoingColorized(left);
-        boolean rightImportantColorized = isImportantOngoingColorized(right);
+        boolean leftImportantColorized = isImportantColorized(left);
+        boolean rightImportantColorized = isImportantColorized(right);
 
         if (leftImportantColorized != rightImportantColorized) {
             return -1 * Boolean.compare(leftImportantColorized, rightImportantColorized);
@@ -110,10 +110,7 @@ public class NotificationComparator
         return -1 * Long.compare(left.getRankingTimeMs(), right.getRankingTimeMs());
     }
 
-    private boolean isImportantOngoingColorized(NotificationRecord record) {
-        if (!isOngoing(record)) {
-            return false;
-        }
+    private boolean isImportantColorized(NotificationRecord record) {
         if (record.getImportance() < NotificationManager.IMPORTANCE_LOW) {
             return false;
         }
