@@ -106,6 +106,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_UNLOCK_USER = 11;
     private static final int MSG_STOP_USER = 12;
     private static final int MSG_DISPATCH_UNLOCK_LOCKOUT = 13;
+    private static final int MSG_REFRESH_DEVICE_LOCKED_FOR_USER = 14;
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
@@ -125,8 +126,12 @@ public class TrustManagerService extends SystemService {
     @GuardedBy("mDeviceLockedForUser")
     private final SparseBooleanArray mDeviceLockedForUser = new SparseBooleanArray();
 
-    @GuardedBy("mDeviceLockedForUser")
+    @GuardedBy("mTrustUsuallyManagedForUser")
     private final SparseBooleanArray mTrustUsuallyManagedForUser = new SparseBooleanArray();
+
+    // set to true only if user can skip bouncer
+    @GuardedBy("mUsersUnlockedByFingerprint")
+    private SparseBooleanArray mUsersUnlockedByFingerprint = new SparseBooleanArray();
 
     private final StrongAuthTracker mStrongAuthTracker;
 
@@ -406,7 +411,6 @@ public class TrustManagerService extends SystemService {
                     + " must be USER_ALL or a specific user.", new Throwable("here"));
             userId = UserHandle.USER_ALL;
         }
-
         List<UserInfo> userInfos;
         if (userId == UserHandle.USER_ALL) {
             userInfos = mUserManager.getUsers(true /* excludeDying */);
@@ -429,13 +433,19 @@ public class TrustManagerService extends SystemService {
             boolean secure = mLockPatternUtils.isSecure(id);
             boolean trusted = aggregateIsTrusted(id);
             boolean showingKeyguard = true;
+            boolean fingerprintAuthenticated = false;
+
             if (mCurrentUser == id) {
+                synchronized(mUsersUnlockedByFingerprint) {
+                    fingerprintAuthenticated = mUsersUnlockedByFingerprint.get(id, false);
+                }
                 try {
                     showingKeyguard = wm.isKeyguardLocked();
                 } catch (RemoteException e) {
                 }
             }
-            boolean deviceLocked = secure && showingKeyguard && !trusted;
+            boolean deviceLocked = secure && showingKeyguard && !trusted &&
+                    !fingerprintAuthenticated;
             setDeviceLockedForUser(id, deviceLocked);
         }
     }
@@ -983,6 +993,26 @@ public class TrustManagerService extends SystemService {
                     "query trust state");
             return isTrustUsuallyManagedInternal(userId);
         }
+
+        @Override
+        public void unlockedByFingerprintForUser(int userId) {
+            enforceReportPermission();
+            synchronized(mUsersUnlockedByFingerprint) {
+                mUsersUnlockedByFingerprint.put(userId, true);
+            }
+            mHandler.obtainMessage(MSG_REFRESH_DEVICE_LOCKED_FOR_USER, userId,
+                    0 /* arg2 */).sendToTarget();
+        }
+
+        @Override
+        public void clearAllFingerprints() {
+            enforceReportPermission();
+            synchronized(mUsersUnlockedByFingerprint) {
+                mUsersUnlockedByFingerprint.clear();
+            }
+            mHandler.obtainMessage(MSG_REFRESH_DEVICE_LOCKED_FOR_USER, UserHandle.USER_ALL,
+                    0 /* arg2 */).sendToTarget();
+        }
     };
 
     private boolean isTrustUsuallyManagedInternal(int userId) {
@@ -1070,6 +1100,9 @@ public class TrustManagerService extends SystemService {
                         }
                     }
                     break;
+                case MSG_REFRESH_DEVICE_LOCKED_FOR_USER:
+                    refreshDeviceLockedForUser(msg.arg1);
+                    break;
             }
         }
     };
@@ -1128,6 +1161,9 @@ public class TrustManagerService extends SystemService {
                     }
                     synchronized (mTrustUsuallyManagedForUser) {
                         mTrustUsuallyManagedForUser.delete(userId);
+                    }
+                    synchronized (mUsersUnlockedByFingerprint) {
+                        mUsersUnlockedByFingerprint.delete(userId);
                     }
                     refreshAgentList(userId);
                     refreshDeviceLockedForUser(userId);
