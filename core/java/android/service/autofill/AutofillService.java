@@ -15,6 +15,7 @@
  */
 package android.service.autofill;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
@@ -156,6 +157,7 @@ public abstract class AutofillService extends Service {
      *
      * <strong>NOTE: </strong>if overridden, it must call {@code super.onCreate()}.
      */
+    @CallSuper
     @Override
     public void onCreate() {
         super.onCreate();
