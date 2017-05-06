@@ -78,7 +78,7 @@ public final class AutoFillUI {
         mHandler.post(() -> {
             if (mCallback != callback) {
                 if (mCallback != null) {
-                    hideAllUiThread(callback);
+                    hideAllUiThread(mCallback);
                 }
 
                 mCallback = callback;

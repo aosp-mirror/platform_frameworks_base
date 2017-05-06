@@ -25,6 +25,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 import android.annotation.CallSuper;
@@ -3144,19 +3145,6 @@ public class Activity extends ContextThemeWrapper
      * @see View#onWindowFocusChanged(boolean)
      */
     public void onWindowFocusChanged(boolean hasFocus) {
-    }
-
-    /**
-     * Called before {@link #onAttachedToWindow}.
-     *
-     * @hide
-     */
-    @CallSuper
-    public void onBeforeAttachedToWindow() {
-        if (mAutoFillResetNeeded) {
-            getAutofillManager().onAttachedToWindow(
-                    getWindow().getDecorView().getRootView().getWindowToken());
-        }
     }
 
     /**
@@ -7471,45 +7459,62 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
+    @NonNull public View[] findViewsByAccessibilityIdTraversal(@NonNull int[] viewIds) {
+        final View[] views = new View[viewIds.length];
+        final ArrayList<ViewRootImpl> roots =
+                WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
+
+        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+            final View rootView = roots.get(rootNum).getView();
+
+            if (rootView != null) {
+                for (int viewNum = 0; viewNum < viewIds.length; viewNum++) {
+                    if (views[viewNum] == null) {
+                        views[viewNum] = rootView.findViewByAccessibilityIdTraversal(
+                                viewIds[viewNum]);
+                    }
+                }
+            }
+        }
+
+        return views;
+    }
+
+    /** @hide */
     @Override
-    public boolean getViewVisibility(int viewId) {
-        Window window = getWindow();
-        if (window == null) {
-            Log.i(TAG, "no window");
-            return false;
-        }
+    @NonNull public boolean[] getViewVisibility(@NonNull int[] viewIds) {
+        final boolean[] isVisible = new boolean[viewIds.length];
+        final View views[] = findViewsByAccessibilityIdTraversal(viewIds);
 
-        View decorView = window.peekDecorView();
-        if (decorView == null) {
-            Log.i(TAG, "no decorView");
-            return false;
-        }
-
-        View view = decorView.findViewByAccessibilityIdTraversal(viewId);
-        if (view == null) {
-            Log.i(TAG, "cannot find view");
-            return false;
-        }
-
-        // Check if the view is visible by checking all parents
-        while (view != null) {
-            if (view == decorView) {
-                break;
+        for (int i = 0; i < viewIds.length; i++) {
+            View view = views[i];
+            if (view == null) {
+                isVisible[i] = false;
+                continue;
             }
 
-            if (view.getVisibility() != View.VISIBLE) {
-                Log.i(TAG, view + " is not visible");
-                return false;
-            }
+            isVisible[i] = true;
 
-            if (view.getParent() instanceof View) {
-                view = (View) view.getParent();
-            } else {
-                break;
+            // Check if the view is visible by checking all parents
+            while (true) {
+                if (view instanceof DecorView && view.getViewRootImpl() == view.getParent()) {
+                    break;
+                }
+
+                if (view.getVisibility() != View.VISIBLE) {
+                    isVisible[i] = false;
+                    break;
+                }
+
+                if (view.getParent() instanceof View) {
+                    view = (View) view.getParent();
+                } else {
+                    break;
+                }
             }
         }
 
-        return true;
+        return isVisible;
     }
 
     /** @hide */
