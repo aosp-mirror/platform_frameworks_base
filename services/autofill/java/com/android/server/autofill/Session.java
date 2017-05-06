@@ -177,6 +177,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private boolean mDestroyed;
 
+    /** Whether the session is currently saving */
+    @GuardedBy("mLock")
+    private boolean mIsSaving;
+
     /**
      * Receiver of assist data from the app's {@link Activity}.
      */
@@ -361,7 +365,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      *
      * @return The activity token
      */
-    IBinder getActivityTokenLocked() {
+    @NonNull IBinder getActivityTokenLocked() {
         return mActivityToken;
     }
 
@@ -474,6 +478,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void onSaveRequestSuccess(@NonNull String servicePackageName) {
         synchronized (mLock) {
+            mIsSaving = false;
+
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onSaveRequestSuccess() rejected - session: "
                         + id + " destroyed");
@@ -496,6 +502,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     public void onSaveRequestFailure(@Nullable CharSequence message,
             @NonNull String servicePackageName) {
         synchronized (mLock) {
+            mIsSaving = false;
+
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onSaveRequestFailure() rejected - session: "
                         + id + " destroyed");
@@ -596,6 +604,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void cancelSave() {
         synchronized (mLock) {
+            mIsSaving = false;
+
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#cancelSave() rejected - session: "
                         + id + " destroyed");
@@ -831,6 +841,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (atLeastOneChanged) {
                 mService.setSaveShown();
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName);
+
+                mIsSaving = true;
                 return false;
             }
         }
@@ -841,6 +853,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", atLeastOneChanged=" + atLeastOneChanged);
         }
         return true;
+    }
+
+    /**
+     * Returns whether the session is currently showing the save UI
+     */
+    boolean isSavingLocked() {
+        return mIsSaving;
     }
 
     /**
@@ -1349,6 +1368,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mCurrentViewId: "); pw.println(mCurrentViewId);
         pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
+        pw.print(prefix); pw.print("mIsSaving: "); pw.println(mIsSaving);
         final String prefix2 = prefix + "  ";
         for (Map.Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
             pw.print(prefix); pw.print("State for id "); pw.println(entry.getKey());
