@@ -7706,7 +7706,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAutofillable() {
-        return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill();
+        return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill()
+                && getAccessibilityViewId() > LAST_APP_ACCESSIBILITY_ID;
     }
 
     private void populateVirtualStructure(ViewStructure structure,
