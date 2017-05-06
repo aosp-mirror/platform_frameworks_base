@@ -103,7 +103,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         stateChangedLatch = new CountDownLatch(mSecurityController.hasWorkProfile() ? 2 : 1);
         mSecurityController.addCallback(this);
 
-        assertTrue(stateChangedLatch.await(1, TimeUnit.SECONDS));
+        assertTrue(stateChangedLatch.await(3, TimeUnit.SECONDS));
         assertFalse(mSecurityController.hasCACertInCurrentUser());
 
         // With a CA cert
@@ -116,7 +116,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         mSecurityController.new CACertLoader()
                            .execute(0);
 
-        assertTrue(stateChangedLatch.await(1, TimeUnit.SECONDS));
+        assertTrue(stateChangedLatch.await(3, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInCurrentUser());
 
         // Exception
@@ -130,7 +130,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         mSecurityController.new CACertLoader()
                            .execute(0);
 
-        assertFalse(stateChangedLatch.await(1, TimeUnit.SECONDS));
+        assertFalse(stateChangedLatch.await(3, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInCurrentUser());
         // The retry takes 30s
         //assertTrue(stateChangedLatch.await(31, TimeUnit.SECONDS));
