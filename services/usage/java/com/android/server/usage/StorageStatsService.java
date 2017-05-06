@@ -112,9 +112,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         mStorage.registerListener(new StorageEventListener() {
             @Override
             public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
-                if ((vol.type == VolumeInfo.TYPE_PRIVATE)
-                        && (newState == VolumeInfo.STATE_MOUNTED)) {
-                    invalidateMounts();
+                switch (vol.type) {
+                    case VolumeInfo.TYPE_PRIVATE:
+                    case VolumeInfo.TYPE_EMULATED:
+                        if (newState == VolumeInfo.STATE_MOUNTED) {
+                            invalidateMounts();
+                        }
                 }
             }
         });
@@ -178,9 +181,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         long cacheBytes = 0;
         final long token = Binder.clearCallingIdentity();
         try {
-            for (UserInfo user : mUser.getUsers()) {
-                final StorageStats stats = queryStatsForUser(volumeUuid, user.id, null);
-                cacheBytes += stats.cacheBytes;
+            if (isQuotaSupported(volumeUuid, callingPackage)) {
+                for (UserInfo user : mUser.getUsers()) {
+                    final StorageStats stats = queryStatsForUser(volumeUuid, user.id, null);
+                    cacheBytes += stats.cacheBytes;
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);

@@ -251,6 +251,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runUpdateApplicationInfo(pw);
                 case "no-home-screen":
                     return runNoHomeScreen(pw);
+                case "wait-for-broadcast-idle":
+                    return runWaitForBroadcastIdle(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2416,6 +2418,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
         pw.println(res.getBoolean(com.android.internal.R.bool.config_noHomeScreen));
+        return 0;
+    }
+
+    int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
+        mInternal.waitForBroadcastIdle(pw);
         return 0;
     }
 
