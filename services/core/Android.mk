@@ -18,7 +18,7 @@ LOCAL_SRC_FILES += \
 LOCAL_AIDL_INCLUDES += \
     system/netd/server/binder
 
-LOCAL_JAVA_LIBRARIES := services.net telephony-common
+LOCAL_JAVA_LIBRARIES := services.net
 LOCAL_STATIC_JAVA_LIBRARIES := tzdata_shared2 tzdata_update2
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 
