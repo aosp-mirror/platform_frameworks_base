@@ -6844,7 +6844,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAutofillable() && isAttachedToWindow()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (enter && hasWindowFocus() && isFocused()) {
+                if (enter && hasWindowFocus() && isFocused() && isVisibleToUser()) {
                     afm.notifyViewEntered(this);
                 } else if (!hasWindowFocus() || !isFocused()) {
                     afm.notifyViewExited(this);
