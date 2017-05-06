@@ -37,30 +37,46 @@ public final class ExternalStorageStats implements Parcelable {
     /**
      * Return the total bytes used by all files in the shared/external storage
      * hosted on this volume.
+     * <p>
+     * This value only includes data which is isolated for each user on a
+     * multiuser device. Any OBB data shared between users is not accounted in
+     * this value.
      */
     public @BytesLong long getTotalBytes() {
         return totalBytes;
     }
 
     /**
-     * Return the total bytes used by audio files in the shared/external storage
-     * hosted on this volume.
+     * Return the total bytes used by all audio files in the shared/external
+     * storage hosted on this volume.
+     * <p>
+     * This value only includes data which is isolated for each user on a
+     * multiuser device. This value does not include any app files which are all
+     * accounted under {@link #getAppBytes()}.
      */
     public @BytesLong long getAudioBytes() {
         return audioBytes;
     }
 
     /**
-     * Return the total bytes used by video files in the shared/external storage
-     * hosted on this volume.
+     * Return the total bytes used by all video files in the shared/external
+     * storage hosted on this volume.
+     * <p>
+     * This value only includes data which is isolated for each user on a
+     * multiuser device. This value does not include any app files which are all
+     * accounted under {@link #getAppBytes()}.
      */
     public @BytesLong long getVideoBytes() {
         return videoBytes;
     }
 
     /**
-     * Return the total bytes used by image files in the shared/external storage
-     * hosted on this volume.
+     * Return the total bytes used by all image files in the shared/external
+     * storage hosted on this volume.
+     * <p>
+     * This value only includes data which is isolated for each user on a
+     * multiuser device. This value does not include any app files which are all
+     * accounted under {@link #getAppBytes()}.
      */
     public @BytesLong long getImageBytes() {
         return imageBytes;
@@ -72,6 +88,9 @@ public final class ExternalStorageStats implements Parcelable {
      * <p>
      * This data is already accounted against individual apps as returned
      * through {@link StorageStats}.
+     * <p>
+     * This value only includes data which is isolated for each user on a
+     * multiuser device.
      */
     public @BytesLong long getAppBytes() {
         return appBytes;
