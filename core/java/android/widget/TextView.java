@@ -10136,7 +10136,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (lineCount <= 1) {
                 // Simple case: this is a single line.
                 final CharSequence text = getText();
-                structure.setText(text, getSelectionStart(), getSelectionEnd());
+                if (forAutofill) {
+                    structure.setText(text);
+                } else {
+                    structure.setText(text, getSelectionStart(), getSelectionEnd());
+                }
             } else {
                 // Complex case: multi-line, could be scrolled or within a scroll container
                 // so some lines are not visible.
@@ -10172,9 +10176,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (expandedBottomLine >= lineCount) {
                     expandedBottomLine = lineCount - 1;
                 }
+
                 // Convert lines into character offsets.
                 int expandedTopChar = layout.getLineStart(expandedTopLine);
                 int expandedBottomChar = layout.getLineEnd(expandedBottomLine);
+
                 // Take into account selection -- if there is a selection, we need to expand
                 // the text we are returning to include that selection.
                 final int selStart = getSelectionStart();
@@ -10187,48 +10193,57 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         expandedBottomChar = selEnd;
                     }
                 }
+
                 // Get the text and trim it to the range we are reporting.
                 CharSequence text = getText();
                 if (expandedTopChar > 0 || expandedBottomChar < text.length()) {
                     text = text.subSequence(expandedTopChar, expandedBottomChar);
                 }
-                structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
-                final int[] lineOffsets = new int[bottomLine - topLine + 1];
-                final int[] lineBaselines = new int[bottomLine - topLine + 1];
-                final int baselineOffset = getBaselineOffset();
-                for (int i = topLine; i <= bottomLine; i++) {
-                    lineOffsets[i - topLine] = layout.getLineStart(i);
-                    lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+
+                if (forAutofill) {
+                    structure.setText(text);
+                } else {
+                    structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
+
+                    final int[] lineOffsets = new int[bottomLine - topLine + 1];
+                    final int[] lineBaselines = new int[bottomLine - topLine + 1];
+                    final int baselineOffset = getBaselineOffset();
+                    for (int i = topLine; i <= bottomLine; i++) {
+                        lineOffsets[i - topLine] = layout.getLineStart(i);
+                        lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+                    }
+                    structure.setTextLines(lineOffsets, lineBaselines);
                 }
-                structure.setTextLines(lineOffsets, lineBaselines);
             }
 
-            // Extract style information that applies to the TextView as a whole.
-            int style = 0;
-            int typefaceStyle = getTypefaceStyle();
-            if ((typefaceStyle & Typeface.BOLD) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
-            }
-            if ((typefaceStyle & Typeface.ITALIC) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_ITALIC;
-            }
+            if (!forAutofill) {
+                // Extract style information that applies to the TextView as a whole.
+                int style = 0;
+                int typefaceStyle = getTypefaceStyle();
+                if ((typefaceStyle & Typeface.BOLD) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
+                }
+                if ((typefaceStyle & Typeface.ITALIC) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_ITALIC;
+                }
 
-            // Global styles can also be set via TextView.setPaintFlags().
-            int paintFlags = mTextPaint.getFlags();
-            if ((paintFlags & Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
-            }
-            if ((paintFlags & Paint.UNDERLINE_TEXT_FLAG) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_UNDERLINE;
-            }
-            if ((paintFlags & Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_STRIKE_THRU;
-            }
+                // Global styles can also be set via TextView.setPaintFlags().
+                int paintFlags = mTextPaint.getFlags();
+                if ((paintFlags & Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
+                }
+                if ((paintFlags & Paint.UNDERLINE_TEXT_FLAG) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_UNDERLINE;
+                }
+                if ((paintFlags & Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_STRIKE_THRU;
+                }
 
-            // TextView does not have its own text background color. A background is either part
-            // of the View (and can be any drawable) or a BackgroundColorSpan inside the text.
-            structure.setTextStyle(getTextSize(), getCurrentTextColor(),
-                    AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
+                // TextView does not have its own text background color. A background is either part
+                // of the View (and can be any drawable) or a BackgroundColorSpan inside the text.
+                structure.setTextStyle(getTextSize(), getCurrentTextColor(),
+                        AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
+            }
         }
         structure.setHint(getHint());
         structure.setInputType(getInputType());
