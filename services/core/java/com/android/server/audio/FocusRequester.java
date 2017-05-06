@@ -381,6 +381,8 @@ public class FocusRequester {
                         Log.v(TAG, "NOT dispatching " + focusChangeToString(mFocusLossReceived)
                             + " to " + mClientId + ", ducking implemented by framework");
                     }
+                    mFocusController.notifyExtPolicyFocusLoss_syncAf(
+                            toAudioFocusInfo(), false /* wasDispatched */);
                     return; // with mFocusLossWasNotified = false
                 }
 
