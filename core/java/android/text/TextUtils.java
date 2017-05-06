@@ -1520,6 +1520,18 @@ public class TextUtils {
     /**
      * Returns a CharSequence concatenating the specified CharSequences,
      * retaining their spans if any.
+     *
+     * If there are no parameters, an empty string will be returned.
+     *
+     * If the number of parameters is exactly one, that parameter is returned as output, even if it
+     * is null.
+     *
+     * If the number of parameters is at least two, any null CharSequence among the parameters is
+     * treated as if it was the string <code>"null"</code>.
+     *
+     * If there are paragraph spans in the source CharSequences that satisfy paragraph boundary
+     * requirements in the sources but would no longer satisfy them in the concatenated
+     * CharSequence, they may get extended in the resulting CharSequence or not retained.
      */
     public static CharSequence concat(CharSequence... text) {
         if (text.length == 0) {
@@ -1531,35 +1543,29 @@ public class TextUtils {
         }
 
         boolean spanned = false;
-        for (int i = 0; i < text.length; i++) {
-            if (text[i] instanceof Spanned) {
+        for (CharSequence piece : text) {
+            if (piece instanceof Spanned) {
                 spanned = true;
                 break;
             }
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < text.length; i++) {
-            sb.append(text[i]);
-        }
-
-        if (!spanned) {
+        if (spanned) {
+            final SpannableStringBuilder ssb = new SpannableStringBuilder();
+            for (CharSequence piece : text) {
+                // If a piece is null, we append the string "null" for compatibility with the
+                // behavior of StringBuilder and the behavior of the concat() method in earlier
+                // versions of Android.
+                ssb.append(piece == null ? "null" : piece);
+            }
+            return new SpannedString(ssb);
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            for (CharSequence piece : text) {
+                sb.append(piece);
+            }
             return sb.toString();
         }
-
-        SpannableString ss = new SpannableString(sb);
-        int off = 0;
-        for (int i = 0; i < text.length; i++) {
-            int len = text[i].length();
-
-            if (text[i] instanceof Spanned) {
-                copySpansFrom((Spanned) text[i], 0, len, Object.class, ss, off);
-            }
-
-            off += len;
-        }
-
-        return new SpannedString(ss);
     }
 
     /**
