@@ -21,17 +21,30 @@
 #include <functional>
 #include <jni.h>
 #include <memory>
+#include <type_traits>
 
 namespace android {
 
-typedef std::unique_ptr<_jobject, std::function<void(jobject)>> JavaRef;
+template <typename T>
+using JavaRef = std::unique_ptr<typename std::remove_pointer<T>::type, std::function<void(T)>>;
 
-JavaRef make_javaref(JNIEnv *env, jobject ref);
+template <typename T>
+JavaRef<T> make_javaref(JNIEnv *env, T ref) {
+    return JavaRef<T>(ref, [env](T ref) {
+        if (env && ref) {
+            env->DeleteLocalRef(ref);
+        }
+    });
+}
 
 class EnvWrapper {
 public:
     EnvWrapper(JNIEnv *env);
-    JavaRef operator() (jobject ref) const;
+
+    template <typename T>
+    JavaRef<T> operator() (T ref) const {
+        return make_javaref(mEnv, ref);
+    }
 
 private:
     JNIEnv *mEnv;

@@ -37,4 +37,25 @@ interface ITuner {
     void setMuted(boolean mute);
 
     boolean isMuted();
+
+    /**
+     * @throws IllegalStateException if called out of sequence
+     */
+    void step(boolean directionDown, boolean skipSubChannel);
+
+    /**
+     * @throws IllegalStateException if called out of sequence
+     */
+    void scan(boolean directionDown, boolean skipSubChannel);
+
+    /**
+     * @throws IllegalArgumentException if invalid arguments are passed
+     * @throws IllegalStateException if called out of sequence
+     */
+    void tune(int channel, int subChannel);
+
+    /**
+     * @throws IllegalStateException if called out of sequence
+     */
+    void cancel();
 }

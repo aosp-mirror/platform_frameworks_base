@@ -33,6 +33,8 @@ using hardware::hidl_vec;
 
 using V1_0::Band;
 using V1_0::Deemphasis;
+using V1_0::Direction;
+using V1_0::MetadataType;
 using V1_0::Result;
 using V1_0::Rds;
 
@@ -62,6 +64,20 @@ static struct {
         jfieldID upperLimit;
         jfieldID spacing;
     } BandDescriptor;
+
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+    } ProgramInfo;
+
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+        jmethodID putIntFromNative;
+        jmethodID putStringFromNative;
+        jmethodID putBitmapFromNative;
+        jmethodID putClockFromNative;
+    } RadioMetadata;
 } gjni;
 
 template <typename T>
@@ -137,7 +153,7 @@ static Deemphasis DeemphasisForRegion(Region region) {
     }
 }
 
-JavaRef BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
+JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
     ALOGV("BandConfigFromHal()");
     EnvWrapper wrap(env);
 
@@ -203,6 +219,77 @@ V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region) {
     return config;
 }
 
+Direction DirectionToHal(bool directionDown) {
+    return directionDown ? Direction::DOWN : Direction::UP;
+}
+
+static JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> metadata) {
+    ALOGV("MetadataFromHal()");
+    EnvWrapper wrap(env);
+
+    if (metadata.size() == 0) return nullptr;
+
+    auto jMetadata = wrap(env->NewObject(gjni.RadioMetadata.clazz, gjni.RadioMetadata.cstor));
+
+    for (auto& item : metadata) {
+        jint key = static_cast<jint>(item.key);
+        jint status = 0;
+        switch (item.type) {
+            case MetadataType::INT:
+                ALOGV("metadata INT %d", key);
+                status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putIntFromNative,
+                        key, item.intValue);
+                break;
+            case MetadataType::TEXT: {
+                ALOGV("metadata TEXT %d", key);
+                auto value = wrap(env->NewStringUTF(item.stringValue.c_str()));
+                status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putStringFromNative,
+                        key, value.get());
+                break;
+            }
+            case MetadataType::RAW: {
+                ALOGV("metadata RAW %d", key);
+                auto len = item.rawValue.size();
+                if (len == 0) break;
+                auto value = wrap(env->NewByteArray(len));
+                if (value == nullptr) {
+                    ALOGE("Failed to allocate byte array of len %zu", len);
+                    break;
+                }
+                env->SetByteArrayRegion(value.get(), 0, len,
+                        reinterpret_cast<const jbyte*>(item.rawValue.data()));
+                status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putBitmapFromNative,
+                        key, value.get());
+                break;
+            }
+            case MetadataType::CLOCK:
+                ALOGV("metadata CLOCK %d", key);
+                status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putClockFromNative,
+                        key, item.clockValue.utcSecondsSinceEpoch,
+                        item.clockValue.timezoneOffsetInMinutes);
+                break;
+            default:
+                ALOGW("invalid metadata type %d", item.type);
+        }
+        ALOGE_IF(status != 0, "Failed inserting metadata %d (of type %d)", key, item.type);
+    }
+
+    return jMetadata;
+}
+
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info11) {
+    ALOGV("ProgramInfoFromHal()");
+    EnvWrapper wrap(env);
+
+    auto& info10 = info11.base;
+    auto jMetadata = MetadataFromHal(env, info10.metadata);
+    auto jVendorExtension = wrap(env->NewStringUTF(info11.vendorExension.c_str()));
+
+    return wrap(env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor, info10.channel,
+            info10.subChannel, info10.tuned, info10.stereo, info10.digital, info10.signalStrength,
+            jMetadata.get(), info11.flags, jVendorExtension.get()));
+}
+
 
 } // namespace convert
 } // namespace radio
@@ -239,6 +326,23 @@ void register_android_server_radio_convert(JNIEnv *env) {
     gjni.BandDescriptor.lowerLimit = GetFieldIDOrDie(env, bandDescriptorClass, "mLowerLimit", "I");
     gjni.BandDescriptor.upperLimit = GetFieldIDOrDie(env, bandDescriptorClass, "mUpperLimit", "I");
     gjni.BandDescriptor.spacing = GetFieldIDOrDie(env, bandDescriptorClass, "mSpacing", "I");
+
+    auto programInfoClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$ProgramInfo");
+    gjni.ProgramInfo.clazz = MakeGlobalRefOrDie(env, programInfoClass);
+    gjni.ProgramInfo.cstor = GetMethodIDOrDie(env, programInfoClass, "<init>",
+            "(IIZZZILandroid/hardware/radio/RadioMetadata;ILjava/lang/String;)V");
+
+    auto radioMetadataClass = FindClassOrDie(env, "android/hardware/radio/RadioMetadata");
+    gjni.RadioMetadata.clazz = MakeGlobalRefOrDie(env, radioMetadataClass);
+    gjni.RadioMetadata.cstor = GetMethodIDOrDie(env, radioMetadataClass, "<init>", "()V");
+    gjni.RadioMetadata.putIntFromNative = GetMethodIDOrDie(env, radioMetadataClass,
+            "putIntFromNative", "(II)I");
+    gjni.RadioMetadata.putStringFromNative = GetMethodIDOrDie(env, radioMetadataClass,
+            "putStringFromNative", "(ILjava/lang/String;)I");
+    gjni.RadioMetadata.putBitmapFromNative = GetMethodIDOrDie(env, radioMetadataClass,
+            "putBitmapFromNative", "(I[B)I");
+    gjni.RadioMetadata.putClockFromNative = GetMethodIDOrDie(env, radioMetadataClass,
+            "putClockFromNative", "(IJI)I");
 }
 
 } // namespace android

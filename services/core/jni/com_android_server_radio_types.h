@@ -27,6 +27,11 @@ namespace radio {
  * frameworks/base/core/java/android/hardware/radio/RadioManager.java.
  */
 
+enum class HalRevision : jint {
+    V1_0,
+    V1_1,
+};
+
 // Keep in sync with STATUS_* constants from RadioManager.java.
 enum class Status : jint {
     OK = 0,

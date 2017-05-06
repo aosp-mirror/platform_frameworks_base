@@ -22,6 +22,7 @@
 #include "com_android_server_radio_Tuner.h"
 #include "com_android_server_radio_convert.h"
 
+#include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <core_jni_helpers.h>
 #include <utils/Log.h>
@@ -39,7 +40,6 @@ namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
 using V1_0::Class;
-using V1_0::IBroadcastRadio;
 using V1_0::Result;
 
 using V1_0::BandConfig;
@@ -57,7 +57,7 @@ static jclass gServiceClass;
 struct ServiceContext {
     ServiceContext() {}
 
-    sp<IBroadcastRadio> mModule;
+    sp<V1_0::IBroadcastRadio> mModule;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ServiceContext);
@@ -90,7 +90,7 @@ static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
     delete ctx;
 }
 
-static sp<IBroadcastRadio> getModule(jlong nativeContext) {
+static sp<V1_0::IBroadcastRadio> getModule(jlong nativeContext) {
     ALOGV("getModule()");
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
@@ -106,9 +106,10 @@ static sp<IBroadcastRadio> getModule(jlong nativeContext) {
         return nullptr;
     }
 
-    sp<IBroadcastRadio> module = nullptr;
+    sp<V1_0::IBroadcastRadio> module = nullptr;
     // TODO(b/36863239): not only AM/FM
-    factory->connectModule(Class::AM_FM, [&](Result retval, const sp<IBroadcastRadio>& result) {
+    factory->connectModule(Class::AM_FM, [&](Result retval,
+            const sp<V1_0::IBroadcastRadio>& result) {
         if (retval == Result::OK) {
             module = result;
         }
@@ -133,10 +134,19 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
         return nullptr;
     }
 
+    HalRevision halRev;
+    if (V1_1::IBroadcastRadio::castFrom(module).withDefault(nullptr) != nullptr) {
+        ALOGI("Opening tuner with broadcast radio HAL 1.1");
+        halRev = HalRevision::V1_1;
+    } else {
+        ALOGI("Opening tuner with broadcast radio HAL 1.0");
+        halRev = HalRevision::V1_0;
+    }
+
     Region region;
     BandConfig bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
 
-    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback, region, withAudio);
+    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback, halRev, region, withAudio);
     if (tuner == nullptr) {
         ALOGE("Unable to create new tuner object.");
         return nullptr;
@@ -184,7 +194,7 @@ void register_android_server_radio_RadioService(JNIEnv *env) {
     auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
     gTunerClass = MakeGlobalRefOrDie(env, tunerClass);
     gTunerCstor = GetMethodIDOrDie(env, tunerClass, "<init>",
-            "(Landroid/hardware/radio/ITunerCallback;IZ)V");
+            "(Landroid/hardware/radio/ITunerCallback;IIZ)V");
 
     auto serviceClass = FindClassOrDie(env, "com/android/server/radio/RadioService");
     gServiceClass = MakeGlobalRefOrDie(env, serviceClass);
