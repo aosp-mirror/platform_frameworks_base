@@ -213,7 +213,7 @@ public final class AutofillManagerService extends SystemService {
                             if (!doit) {
                                 return true;
                             }
-                            handleActiveAutofillServiceRemoved(getChangingUserId());
+                            removeCachedServiceLocked(getChangingUserId());
                         }
                     }
                 }
