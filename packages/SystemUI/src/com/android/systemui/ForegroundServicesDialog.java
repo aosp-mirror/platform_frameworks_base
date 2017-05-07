@@ -66,7 +66,7 @@ public final class ForegroundServicesDialog extends AlertActivity implements
     private DialogInterface.OnClickListener mAppClickListener =
             new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    String pkg = mPackages[which];
+                    String pkg = mAdapter.getItem(which).packageName;
                     Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     intent.setData(Uri.fromParts("package", pkg, null));
                     startActivity(intent);

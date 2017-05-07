@@ -77,12 +77,13 @@ static TunerContext& getNativeContext(JNIEnv *env, jobject obj) {
     return getNativeContext(env->GetLongField(obj, gjni.Tuner.nativeContext));
 }
 
-static jlong nativeInit(JNIEnv *env, jobject obj, jobject clientCallback) {
+static jlong nativeInit(JNIEnv *env, jobject obj, jobject clientCallback, jint halRev) {
     ALOGV("nativeInit()");
     AutoMutex _l(gContextMutex);
 
     auto ctx = new TunerContext();
-    ctx->mNativeCallback = new TunerCallback(env, obj, clientCallback);
+    ctx->mNativeCallback = new TunerCallback(env, obj,
+            clientCallback, static_cast<HalRevision>(halRev));
 
     static_assert(sizeof(jlong) >= sizeof(ctx), "jlong is smaller than a pointer");
     return reinterpret_cast<jlong>(ctx);
@@ -159,14 +160,47 @@ static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeCont
     return convert::BandConfigFromHal(env, halConfig, region).release();
 }
 
+static void nativeStep(JNIEnv *env, jobject obj, jlong nativeContext,
+        bool directionDown, bool skipSubChannel) {
+    ALOGV("nativeStep()");
+    auto halTuner = getHalTuner(nativeContext);
+
+    auto dir = convert::DirectionToHal(directionDown);
+    convert::ThrowIfFailed(env, halTuner->step(dir, skipSubChannel));
+}
+
+static void nativeScan(JNIEnv *env, jobject obj, jlong nativeContext,
+        bool directionDown, bool skipSubChannel) {
+    ALOGV("nativeScan()");
+    auto halTuner = getHalTuner(nativeContext);
+
+    auto dir = convert::DirectionToHal(directionDown);
+    convert::ThrowIfFailed(env, halTuner->scan(dir, skipSubChannel));
+}
+
+static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext,
+        jint channel, jint subChannel) {
+    // TODO(b/36863239): implement
+    jniThrowException(env, "java/lang/RuntimeException", "not implemented yet");
+}
+
+static void nativeCancel(JNIEnv *env, jobject obj, jlong nativeContext) {
+    // TODO(b/36863239): implement
+    jniThrowException(env, "java/lang/RuntimeException", "not implemented yet");
+}
+
 static const JNINativeMethod gTunerMethods[] = {
-    { "nativeInit", "(Landroid/hardware/radio/ITunerCallback;)J", (void*)nativeInit },
+    { "nativeInit", "(Landroid/hardware/radio/ITunerCallback;I)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
     { "nativeClose", "(J)V", (void*)nativeClose },
     { "nativeSetConfiguration", "(JLandroid/hardware/radio/RadioManager$BandConfig;)V",
             (void*)nativeSetConfiguration },
     { "nativeGetConfiguration", "(JI)Landroid/hardware/radio/RadioManager$BandConfig;",
             (void*)nativeGetConfiguration },
+    { "nativeStep", "(JZZ)V", (void*)nativeStep },
+    { "nativeScan", "(JZZ)V", (void*)nativeScan },
+    { "nativeTune", "(JII)V", (void*)nativeTune },
+    { "nativeCancel", "(J)V", (void*)nativeCancel },
 };
 
 } // namespace Tuner

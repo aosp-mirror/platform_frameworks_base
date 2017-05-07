@@ -18,6 +18,7 @@ package android.content.res;
 import com.android.internal.R;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -36,8 +37,6 @@ import java.util.List;
  */
 public class FontResourcesParser {
     private static final String TAG = "FontResourcesParser";
-    private static final int NORMAL_WEIGHT = 400;
-    private static final int ITALIC = 1;
 
     // A class represents single entry of font-family in xml file.
     public interface FamilyResourceEntry {}
@@ -78,10 +77,10 @@ public class FontResourcesParser {
     public static final class FontFileResourceEntry {
         private final @NonNull String mFileName;
         private int mWeight;
-        private boolean mItalic;
+        private int mItalic;
         private int mResourceId;
 
-        public FontFileResourceEntry(@NonNull String fileName, int weight, boolean italic) {
+        public FontFileResourceEntry(@NonNull String fileName, int weight, int italic) {
             mFileName = fileName;
             mWeight = weight;
             mItalic = italic;
@@ -95,7 +94,7 @@ public class FontResourcesParser {
             return mWeight;
         }
 
-        public boolean isItalic() {
+        public int getItalic() {
             return mItalic;
         }
     }
@@ -200,8 +199,10 @@ public class FontResourcesParser {
             throws XmlPullParserException, IOException {
         AttributeSet attrs = Xml.asAttributeSet(parser);
         TypedArray array = resources.obtainAttributes(attrs, R.styleable.FontFamilyFont);
-        int weight = array.getInt(R.styleable.FontFamilyFont_fontWeight, NORMAL_WEIGHT);
-        boolean isItalic = ITALIC == array.getInt(R.styleable.FontFamilyFont_fontStyle, 0);
+        int weight = array.getInt(R.styleable.FontFamilyFont_fontWeight,
+                Typeface.RESOLVE_BY_FONT_TABLE);
+        int italic = array.getInt(R.styleable.FontFamilyFont_fontStyle,
+                Typeface.RESOLVE_BY_FONT_TABLE);
         String filename = array.getString(R.styleable.FontFamilyFont_font);
         array.recycle();
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -210,7 +211,7 @@ public class FontResourcesParser {
         if (filename == null) {
             return null;
         }
-        return new FontFileResourceEntry(filename, weight, isItalic);
+        return new FontFileResourceEntry(filename, weight, italic);
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {

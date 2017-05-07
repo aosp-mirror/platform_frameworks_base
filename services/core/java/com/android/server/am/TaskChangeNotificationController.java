@@ -104,7 +104,7 @@ class TaskChangeNotificationController {
     };
 
     private final TaskStackConsumer mNotifyPinnedActivityRestartAttempt = (l, m) -> {
-        l.onPinnedActivityRestartAttempt();
+        l.onPinnedActivityRestartAttempt(m.arg1 != 0);
     };
 
     private final TaskStackConsumer mNotifyPinnedStackAnimationStarted = (l, m) -> {
@@ -300,10 +300,11 @@ class TaskChangeNotificationController {
      * running in the pinned stack and the activity was not actually started, but the task is
      * either brought to the front or a new Intent is delivered to it.
      */
-    void notifyPinnedActivityRestartAttempt() {
+    void notifyPinnedActivityRestartAttempt(boolean clearedTask) {
         mHandler.removeMessages(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
         final Message msg =
-                mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
+                mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG,
+                        clearedTask ? 1 : 0, 0);
         forAllLocalListeners(mNotifyPinnedActivityRestartAttempt, msg);
         msg.sendToTarget();
     }

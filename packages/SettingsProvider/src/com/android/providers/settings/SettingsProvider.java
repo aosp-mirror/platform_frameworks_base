@@ -1142,28 +1142,55 @@ public class SettingsProvider extends ContentProvider {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+
+        final SettingsState ssaidSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SSAID, owningUserId);
+
         if (instantSsaid != null) {
             // Use the stored value if it is still valid.
             if (ssaid != null && instantSsaid.equals(ssaid.getValue())) {
-                return ssaid;
+                return mascaradeSsaidSetting(ssaidSettings, ssaid);
             }
             // The value has changed, update the stored value.
-            final SettingsState ssaidSettings = mSettingsRegistry.getSettingsLocked(
-                    SETTINGS_TYPE_SSAID, owningUserId);
             final boolean success = ssaidSettings.insertSettingLocked(name, instantSsaid, null,
                     true, callingPkg.packageName);
             if (!success) {
                 throw new IllegalStateException("Failed to update instant app android id");
             }
-            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID, owningUserId, name);
+            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID,
+                    owningUserId, name);
+            return mascaradeSsaidSetting(ssaidSettings, setting);
         }
 
         // Lazy initialize ssaid if not yet present in ssaid table.
         if (ssaid == null || ssaid.isNull() || ssaid.getValue() == null) {
-            return mSettingsRegistry.generateSsaidLocked(callingPkg, owningUserId);
+            Setting setting = mSettingsRegistry.generateSsaidLocked(callingPkg, owningUserId);
+            return mascaradeSsaidSetting(ssaidSettings, setting);
         }
 
-        return ssaid;
+        return mascaradeSsaidSetting(ssaidSettings, ssaid);
+    }
+
+    private Setting mascaradeSsaidSetting(SettingsState settingsState, Setting ssaidSetting) {
+        // SSAID settings are located in a dedicated table for internal bookkeeping
+        // but for the world they reside in the secure table, so adjust the key here.
+        // We have a special name when looking it up but want the world to see it as
+        // "android_id".
+        if (ssaidSetting != null) {
+            return settingsState.new Setting(ssaidSetting) {
+                @Override
+                public int getKey() {
+                    final int userId = getUserIdFromKey(super.getKey());
+                    return makeKey(SETTINGS_TYPE_SECURE, userId);
+                }
+
+                @Override
+                public String getName() {
+                    return Settings.Secure.ANDROID_ID;
+                }
+            };
+        }
+        return null;
     }
 
     private boolean insertSecureSetting(String name, String value, String tag,
@@ -1173,7 +1200,6 @@ public class SettingsProvider extends ContentProvider {
                     + ", " + tag  + ", " + makeDefault + ", "  + requestingUserId
                     + ", " + forceNotify + ")");
         }
-
         return mutateSecureSetting(name, value, tag, makeDefault, requestingUserId,
                 MUTATION_OPERATION_INSERT, forceNotify, 0);
     }
@@ -1879,6 +1905,7 @@ public class SettingsProvider extends ContentProvider {
         Bundle result = new Bundle();
         result.putString(Settings.NameValueTable.VALUE,
                 !setting.isNull() ? setting.getValue() : null);
+
         mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getKey());
         return result;
     }

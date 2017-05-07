@@ -226,11 +226,7 @@ public class AlarmManager {
         @Override
         public void doAlarm(IAlarmCompleteListener alarmManager) {
             mCompletion = alarmManager;
-            mHandler.post(this);
-        }
 
-        @Override
-        public void run() {
             // Remove this listener from the wrapper cache first; the server side
             // already considers it gone
             synchronized (AlarmManager.class) {
@@ -239,6 +235,11 @@ public class AlarmManager {
                 }
             }
 
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
             // Now deliver it to the app
             try {
                 mListener.onAlarm();

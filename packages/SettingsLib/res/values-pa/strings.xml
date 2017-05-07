@@ -167,7 +167,7 @@
     <string name="mock_location_app" msgid="7966220972812881854">"ਮੌਕ ਸਥਾਨ ਐਪ ਚੁਣੋ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"ਕੋਈ ਵੀ ਮੌਕ ਸਥਾਨ ਐਪ ਸੈੱਟ ਨਹੀਂ ਕੀਤੀ ਗਈ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"ਮੌਕ ਸਥਾਨ ਐਪ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"ਨੈਟਵਰਕਿੰਗ"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"ਨੈੱਟਵਰਕਿੰਗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ਵਾਇਰਲੈਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ਵਰਬੋਸ ਲੌਗਿੰਗ ਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ਆਕਰਮਣਸ਼ੀਲ Wi‑Fi ਤੋਂ ਮੋਬਾਈਲ ਹੈਂਡਓਵਰ"</string>

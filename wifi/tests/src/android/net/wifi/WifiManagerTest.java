@@ -22,6 +22,7 @@ import static android.net.wifi.WifiManager.HOTSPOT_STOPPED;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_GENERIC;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_INCOMPATIBLE_MODE;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_NO_CHANNEL;
+import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_TETHERING_DISALLOWED;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.REQUEST_REGISTERED;
 
 import static org.junit.Assert.assertEquals;
@@ -335,14 +336,13 @@ public class WifiManagerTest {
      */
     @Test
     public void testCorrectLooperIsUsedForHandler() throws Exception {
-        // record thread from looper.getThread and check ids.
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(Messenger.class), any(IBinder.class)))
                 .thenReturn(ERROR_INCOMPATIBLE_MODE);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
-        assertEquals(mLooper.getLooper().getThread().getId(), callback.mCallingThreadId);
+        verify(mContext, never()).getMainLooper();
     }
 
     /**
@@ -361,6 +361,7 @@ public class WifiManagerTest {
         altLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
         assertEquals(altLooper.getLooper().getThread().getId(), callback.mCallingThreadId);
+        verify(mContext).getMainLooper();
     }
 
     /**
@@ -464,17 +465,32 @@ public class WifiManagerTest {
     }
 
     /**
-     * Verify the handler passed in to startLocalOnlyHotspot is correctly used for callbacks when a
-     * null WifiConfig is returned.
+     * Verify callback triggered from startLocalOnlyHotspot with an incompatible mode failure.
      */
     @Test
-    public void testLocalOnlyHotspotCallbackFullOnNullConfig() throws Exception {
+    public void testLocalOnlyHotspotCallbackFullOnIncompatibleMode() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(Messenger.class), any(IBinder.class)))
                 .thenReturn(ERROR_INCOMPATIBLE_MODE);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
+        assertFalse(callback.mOnStartedCalled);
+        assertFalse(callback.mOnStoppedCalled);
+        assertEquals(null, callback.mRes);
+    }
+
+    /**
+     * Verify callback triggered from startLocalOnlyHotspot with a tethering disallowed failure.
+     */
+    @Test
+    public void testLocalOnlyHotspotCallbackFullOnTetheringDisallowed() throws Exception {
+        TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
+        when(mWifiService.startLocalOnlyHotspot(any(Messenger.class), any(IBinder.class)))
+                .thenReturn(ERROR_TETHERING_DISALLOWED);
+        mWifiManager.startLocalOnlyHotspot(callback, mHandler);
+        mLooper.dispatchAll();
+        assertEquals(ERROR_TETHERING_DISALLOWED, callback.mFailureReason);
         assertFalse(callback.mOnStartedCalled);
         assertFalse(callback.mOnStoppedCalled);
         assertEquals(null, callback.mRes);
@@ -616,12 +632,11 @@ public class WifiManagerTest {
      */
     @Test
     public void testCorrectLooperIsUsedForObserverHandler() throws Exception {
-        // record thread from looper.getThread and check ids.
         TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
         mWifiManager.watchLocalOnlyHotspot(observer, mHandler);
         mLooper.dispatchAll();
         assertTrue(observer.mOnRegistered);
-        assertEquals(mLooper.getLooper().getThread().getId(), observer.mCallingThreadId);
+        verify(mContext, never()).getMainLooper();
     }
 
     /**
@@ -638,6 +653,7 @@ public class WifiManagerTest {
         altLooper.dispatchAll();
         assertTrue(observer.mOnRegistered);
         assertEquals(altLooper.getLooper().getThread().getId(), observer.mCallingThreadId);
+        verify(mContext).getMainLooper();
     }
 
     /**

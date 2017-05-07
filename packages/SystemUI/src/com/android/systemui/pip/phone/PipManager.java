@@ -107,12 +107,12 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt() {
+        public void onPinnedActivityRestartAttempt(boolean clearedTask) {
             if (!checkCurrentUserId(false /* debug */)) {
                 return;
             }
 
-            mTouchHandler.getMotionHelper().expandPip();
+            mTouchHandler.getMotionHelper().expandPip(clearedTask /* skipAnimation */);
         }
     };
 

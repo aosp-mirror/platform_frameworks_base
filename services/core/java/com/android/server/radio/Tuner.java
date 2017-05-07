@@ -32,11 +32,14 @@ class Tuner extends ITuner.Stub {
     private final long mNativeContext;
 
     private final Object mLock = new Object();
+    private boolean mIsMuted = false;
     private int mRegion;  // TODO(b/36863239): find better solution to manage regions
+    private final boolean mWithAudio;
 
-    Tuner(@NonNull ITunerCallback clientCallback, int region) {
+    Tuner(@NonNull ITunerCallback clientCallback, int halRev, int region, boolean withAudio) {
         mRegion = region;
-        mNativeContext = nativeInit(clientCallback);
+        mWithAudio = withAudio;
+        mNativeContext = nativeInit(clientCallback, halRev);
     }
 
     @Override
@@ -45,13 +48,18 @@ class Tuner extends ITuner.Stub {
         super.finalize();
     }
 
-    private native long nativeInit(@NonNull ITunerCallback clientCallback);
+    private native long nativeInit(@NonNull ITunerCallback clientCallback, int halRev);
     private native void nativeFinalize(long nativeContext);
     private native void nativeClose(long nativeContext);
 
     private native void nativeSetConfiguration(long nativeContext,
             @NonNull RadioManager.BandConfig config);
     private native RadioManager.BandConfig nativeGetConfiguration(long nativeContext, int region);
+
+    private native void nativeStep(long nativeContext, boolean directionDown, boolean skipSubChannel);
+    private native void nativeScan(long nativeContext, boolean directionDown, boolean skipSubChannel);
+    private native void nativeTune(long nativeContext, int channel, int subChannel);
+    private native void nativeCancel(long nativeContext);
 
     @Override
     public void close() {
@@ -85,5 +93,58 @@ class Tuner extends ITuner.Stub {
         }
         Slog.d(TAG, "getProgramInformation()");
         return RadioManager.STATUS_INVALID_OPERATION;
+    }
+
+    @Override
+    public void setMuted(boolean mute) {
+        if (!mWithAudio) {
+            throw new IllegalStateException("Can't operate on mute - no audio requested");
+        }
+        synchronized (mLock) {
+            if (mIsMuted == mute) return;
+            mIsMuted = mute;
+
+            // TODO(b/34348946): notifify audio policy manager of media activity on radio audio
+            // device. This task is pulled directly from previous implementation of native service.
+        }
+    }
+
+    @Override
+    public boolean isMuted() {
+        if (!mWithAudio) {
+            Slog.w(TAG, "Tuner did not request audio, pretending it was muted");
+            return true;
+        }
+        synchronized (mLock) {
+            return mIsMuted;
+        }
+    }
+
+    @Override
+    public void step(boolean directionDown, boolean skipSubChannel) {
+        synchronized (mLock) {
+            nativeStep(mNativeContext, directionDown, skipSubChannel);
+        }
+    }
+
+    @Override
+    public void scan(boolean directionDown, boolean skipSubChannel) {
+        synchronized (mLock) {
+            nativeScan(mNativeContext, directionDown, skipSubChannel);
+        }
+    }
+
+    @Override
+    public void tune(int channel, int subChannel) {
+        synchronized (mLock) {
+            nativeTune(mNativeContext, channel, subChannel);
+        }
+    }
+
+    @Override
+    public void cancel() {
+        synchronized (mLock) {
+            nativeCancel(mNativeContext);
+        }
     }
 }

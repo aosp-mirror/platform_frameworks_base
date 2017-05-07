@@ -18,6 +18,7 @@
 #define _ANDROID_SERVER_RADIO_TUNER_TUNERCALLBACK_H
 
 #include "NativeCallbackThread.h"
+#include "com_android_server_radio_types.h"
 
 #include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
 #include <jni.h>
@@ -34,11 +35,12 @@ class TunerCallback : public hardware::broadcastradio::V1_1::ITunerCallback {
     jobject mTuner;
     jobject mClientCallback;
     NativeCallbackThread mCallbackThread;
+    HalRevision mHalRev;
 
     DISALLOW_COPY_AND_ASSIGN(TunerCallback);
 
 public:
-    TunerCallback(JNIEnv *env, jobject tuner, jobject clientCallback);
+    TunerCallback(JNIEnv *env, jobject tuner, jobject clientCallback, HalRevision halRev);
     virtual ~TunerCallback();
 
     void detach();

@@ -19,17 +19,21 @@ package com.android.server.autofill;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.NO_SESSION;
 
+import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -46,6 +50,7 @@ import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -71,6 +76,9 @@ final class AutofillManagerServiceImpl {
 
     private static final String TAG = "AutofillManagerServiceImpl";
     private static final int MAX_SESSION_ID_CREATE_TRIES = 2048;
+
+    /** Minimum interval to prune abandoned sessions */
+    private static final int MAX_ABANDONED_SESSION_MILLIS = 30000;
 
     static final int MSG_SERVICE_SAVE = 1;
 
@@ -104,10 +112,10 @@ final class AutofillManagerServiceImpl {
             mHandlerCallback, true);
 
     /**
-     * Cache of pending {@link Session}s, keyed by {@code activityToken}.
+     * Cache of pending {@link Session}s, keyed by sessionId.
      *
      * <p>They're kept until the {@link AutofillService} finished handling a request, an error
-     * occurs, or the session times out.
+     * occurs, or the session is abandoned.
      */
     @GuardedBy("mLock")
     private final SparseArray<Session> mSessions = new SparseArray<>();
@@ -115,6 +123,9 @@ final class AutofillManagerServiceImpl {
     /** The last selection */
     @GuardedBy("mLock")
     private FillEventHistory mEventHistory;
+
+    /** When was {@link PruneTask} last executed? */
+    private long mLastPrune = 0;
 
     AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
             int userId, AutoFillUI ui, boolean disabled) {
@@ -260,6 +271,9 @@ final class AutofillManagerServiceImpl {
             return 0;
         }
 
+        // Occasionally clean up abandoned sessions
+        pruneAbandonedSessionsLocked();
+
         final Session newSession = createSessionByTokenLocked(activityToken, uid, windowToken,
                 appCallbackToken, hasCallback, flags, packageName);
         if (newSession == null) {
@@ -275,6 +289,20 @@ final class AutofillManagerServiceImpl {
         newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
 
         return newSession.id;
+    }
+
+    /**
+     * Remove abandoned sessions if needed.
+     */
+    private void pruneAbandonedSessionsLocked() {
+        long now = System.currentTimeMillis();
+        if (mLastPrune < now - MAX_ABANDONED_SESSION_MILLIS) {
+            mLastPrune = now;
+
+            if (mSessions.size() > 0) {
+                (new PruneTask()).execute();
+            }
+        }
     }
 
     void finishSessionLocked(int sessionId, int uid) {
@@ -513,6 +541,7 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Default component: ");
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
+        pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
         final int size = mSessions.size();
         if (size == 0) {
@@ -603,5 +632,63 @@ final class AutofillManagerServiceImpl {
         return "AutofillManagerServiceImpl: [userId=" + mUserId
                 + ", component=" + (mInfo != null
                 ? mInfo.getServiceInfo().getComponentName() : null) + "]";
+    }
+
+    /** Task used to prune abandoned session */
+    private class PruneTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... ignored) {
+            int numSessionsToRemove;
+            ArrayMap<IBinder, Integer> sessionsToRemove;
+
+            synchronized (mLock) {
+                numSessionsToRemove = mSessions.size();
+                sessionsToRemove = new ArrayMap<>(numSessionsToRemove);
+
+                for (int i = 0; i < numSessionsToRemove; i++) {
+                    Session session = mSessions.valueAt(i);
+
+                    sessionsToRemove.put(session.getActivityTokenLocked(), session.id);
+                }
+            }
+
+            IActivityManager am = ActivityManager.getService();
+
+            // Only remove sessions which's activities are not known to the activity manager anymore
+            for (int i = 0; i < numSessionsToRemove; i++) {
+                try {
+                    // The activity manager cannot resolve activities that have been removed
+                    if (am.getActivityClassForToken(sessionsToRemove.keyAt(i)) != null) {
+                        sessionsToRemove.removeAt(i);
+                        i--;
+                        numSessionsToRemove--;
+                    }
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Cannot figure out if activity is finished", e);
+                }
+            }
+
+            synchronized (mLock) {
+                for (int i = 0; i < numSessionsToRemove; i++) {
+                    Session sessionToRemove = mSessions.get(sessionsToRemove.valueAt(i));
+
+                    if (sessionToRemove != null) {
+                        if (sessionToRemove.isSavingLocked()) {
+                            if (sVerbose) {
+                                Slog.v(TAG, "Session " + sessionToRemove.id + " is saving");
+                            }
+                        } else {
+                            if (sDebug) {
+                                Slog.i(TAG, "Prune session " + sessionToRemove.id + " ("
+                                    + sessionToRemove.getActivityTokenLocked() + ")");
+                            }
+                            sessionToRemove.removeSelfLocked();
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }

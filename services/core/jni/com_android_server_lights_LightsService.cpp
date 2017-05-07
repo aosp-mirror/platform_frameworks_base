@@ -29,16 +29,46 @@
 
 namespace android {
 
-using ILight     = ::android::hardware::light::V2_0::ILight;
 using Brightness = ::android::hardware::light::V2_0::Brightness;
 using Flash      = ::android::hardware::light::V2_0::Flash;
-using Type       = ::android::hardware::light::V2_0::Type;
+using ILight     = ::android::hardware::light::V2_0::ILight;
 using LightState = ::android::hardware::light::V2_0::LightState;
 using Status     = ::android::hardware::light::V2_0::Status;
+using Type       = ::android::hardware::light::V2_0::Type;
 template<typename T>
 using Return     = ::android::hardware::Return<T>;
 
-static sp<ILight> gLight;
+class LightHal {
+private:
+    static sp<ILight> sLight;
+    static bool sLightInit;
+
+    LightHal() {}
+
+public:
+    static void disassociate() {
+        sLightInit = false;
+        sLight = nullptr;
+    }
+
+    static sp<ILight> associate() {
+        if ((sLight == nullptr && !sLightInit) ||
+                (sLight != nullptr && !sLight->ping().isOk())) {
+            // will return the hal if it exists the first time.
+            sLight = ILight::getService();
+            sLightInit = true;
+
+            if (sLight == nullptr) {
+                ALOGE("Unable to get ILight interface.");
+            }
+        }
+
+        return sLight;
+    }
+};
+
+sp<ILight> LightHal::sLight = nullptr;
+bool LightHal::sLightInit = false;
 
 static bool validate(jint light, jint flash, jint brightness) {
     bool valid = true;
@@ -103,7 +133,7 @@ static void processReturn(
         const LightState &state) {
     if (!ret.isOk()) {
         ALOGE("Failed to issue set light command.");
-        gLight = nullptr;
+        LightHal::disassociate();
         return;
     }
 
@@ -137,12 +167,9 @@ static void setLight_native(
         return;
     }
 
-    if (gLight == nullptr || !gLight->ping().isOk()) {
-        gLight = ILight::getService();
-    }
+    sp<ILight> hal = LightHal::associate();
 
-    if (gLight == nullptr) {
-        ALOGE("Unable to get ILight interface.");
+    if (hal == nullptr) {
         return;
     }
 
@@ -152,7 +179,7 @@ static void setLight_native(
 
     {
         ALOGD_IF_SLOW(50, "Excessive delay setting light");
-        Return<Status> ret = gLight->setLight(type, state);
+        Return<Status> ret = hal->setLight(type, state);
         processReturn(ret, type, state);
     }
 }

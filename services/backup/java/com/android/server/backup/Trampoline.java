@@ -357,7 +357,13 @@ public class Trampoline extends IBackupManager.Stub {
         if (svc != null) {
             svc.selectBackupTransportAsync(transport, listener);
         } else {
-            listener.onFailure(BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+            if (listener != null) {
+                try {
+                    listener.onFailure(BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+                } catch (RemoteException ex) {
+                    // ignore
+                }
+            }
         }
     }
 

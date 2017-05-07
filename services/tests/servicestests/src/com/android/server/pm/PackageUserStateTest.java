@@ -49,10 +49,6 @@ public class PackageUserStateTest {
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserState();
-        oldUserState.blockUninstall = true;
-        assertThat(testUserState.equals(oldUserState), is(false));
-
-        oldUserState = new PackageUserState();
         oldUserState.ceDataInode = 4000L;
         assertThat(testUserState.equals(oldUserState), is(false));
 

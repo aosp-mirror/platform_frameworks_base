@@ -102,7 +102,9 @@ final class TextClassifierImpl implements TextClassifier {
                         string, selectionStartIndex, selectionEndIndex);
                 final int start = startEnd[0];
                 final int end = startEnd[1];
-                if (start >= 0 && end <= string.length() && start <= end) {
+                if (start <= end
+                        && start >= 0 && end <= string.length()
+                        && start <= selectionStartIndex && end >= selectionEndIndex) {
                     final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
                     final SmartSelection.ClassificationResult[] results =
                             smartSelection.classifyText(
@@ -144,9 +146,6 @@ final class TextClassifierImpl implements TextClassifier {
                     final TextClassification classificationResult =
                             createClassificationResult(
                                     results, string.subSequence(startIndex, endIndex));
-                    // TODO: Added this log for debug only. Remove before release.
-                    Log.d(LOG_TAG, String.format(
-                            "Classification type: %s", classificationResult));
                     return classificationResult;
                 }
             }
@@ -377,11 +376,6 @@ final class TextClassifierImpl implements TextClassifier {
                 && Linkify.sUrlMatchFilter.acceptMatch(text, start, end)) {
             flag |= SmartSelection.HINT_FLAG_URL;
         }
-        // TODO: Added this log for debug only. Remove before release.
-        Log.d(LOG_TAG, String.format("Email hint: %b",
-                (flag & SmartSelection.HINT_FLAG_EMAIL) != 0));
-        Log.d(LOG_TAG, String.format("Url hint: %b",
-                (flag & SmartSelection.HINT_FLAG_URL) != 0));
         return flag;
     }
 

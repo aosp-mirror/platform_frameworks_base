@@ -42,6 +42,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * A test for broadcast radio API.
@@ -52,6 +53,7 @@ public class RadioTest {
     public final Context mContext = InstrumentationRegistry.getContext();
 
     private final int kConfigCallbacktimeoutNs = 10000;
+    private final int kTuneCallbacktimeoutNs = 30000;
 
     private RadioManager mRadioManager;
     private RadioTuner mRadioTuner;
@@ -89,9 +91,19 @@ public class RadioTest {
             mRadioTuner.close();
             mRadioTuner = null;
         }
+        verifyNoMoreInteractions(mCallback);
     }
 
     private void openTuner() {
+        openTuner(true);
+    }
+
+    private void resetCallback() {
+        verifyNoMoreInteractions(mCallback);
+        Mockito.reset(mCallback);
+    }
+
+    private void openTuner(boolean withAudio) {
         assertNull(mRadioTuner);
 
         // find FM band and build its config
@@ -109,17 +121,16 @@ public class RadioTest {
         mAmBandConfig = new RadioManager.AmBandConfig.Builder(mAmBandDescriptor).build();
         mFmBandConfig = new RadioManager.FmBandConfig.Builder(mFmBandDescriptor).build();
 
-        mRadioTuner = mRadioManager.openTuner(module.getId(), mFmBandConfig, true, mCallback, null);
+        mRadioTuner = mRadioManager.openTuner(module.getId(),
+                mFmBandConfig, withAudio, mCallback, null);
         assertNotNull(mRadioTuner);
         verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
-        verify(mCallback, never()).onError(anyInt());
-        Mockito.reset(mCallback);
+        resetCallback();
     }
 
     @Test
     public void testOpenTuner() {
         openTuner();
-        verify(mCallback, never()).onError(anyInt());
     }
 
     @Test
@@ -129,7 +140,6 @@ public class RadioTest {
         mRadioTuner = null;
         Thread.sleep(100);  // TODO(b/36122635): force reopen
         openTuner();
-        verify(mCallback, never()).onError(anyInt());
     }
 
     @Test
@@ -146,7 +156,6 @@ public class RadioTest {
         ret = mRadioTuner.getConfiguration(config);
         assertEquals(RadioManager.STATUS_OK, ret);
 
-        verify(mCallback, never()).onError(anyInt());
         assertEquals(mAmBandConfig, config[0]);
     }
 
@@ -175,7 +184,49 @@ public class RadioTest {
         ret = mRadioTuner.setConfiguration(mAmBandConfig);
         assertEquals(RadioManager.STATUS_OK, ret);
         verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
+    }
 
-        verify(mCallback, never()).onError(anyInt());
+    @Test
+    public void testMute() {
+        openTuner();
+
+        boolean isMuted = mRadioTuner.getMute();
+        assertFalse(isMuted);
+
+        int ret = mRadioTuner.setMute(true);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        isMuted = mRadioTuner.getMute();
+        assertTrue(isMuted);
+
+        ret = mRadioTuner.setMute(false);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        isMuted = mRadioTuner.getMute();
+        assertFalse(isMuted);
+    }
+
+    @Test
+    public void testMuteNoAudio() {
+        openTuner(false);
+
+        int ret = mRadioTuner.setMute(false);
+        assertEquals(RadioManager.STATUS_ERROR, ret);
+
+        boolean isMuted = mRadioTuner.getMute();
+        assertTrue(isMuted);
+    }
+
+    @Test
+    public void testStep() {
+        openTuner();
+
+        int ret = mRadioTuner.step(RadioTuner.DIRECTION_DOWN, true);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        verify(mCallback, timeout(kTuneCallbacktimeoutNs).times(1)).onProgramInfoChanged(any());
+
+        resetCallback();
+
+        ret = mRadioTuner.step(RadioTuner.DIRECTION_UP, false);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        verify(mCallback, timeout(kTuneCallbacktimeoutNs).times(1)).onProgramInfoChanged(any());
     }
 }

@@ -233,8 +233,7 @@ public class Typeface {
                 // TODO: Add ttc and variation font support. (b/37853920)
                 if (!fontFamily.addFontFromAssetManager(mgr, fontFile.getFileName(),
                         0 /* resourceCookie */, false /* isAsset */, 0 /* ttcIndex */,
-                        fontFile.getWeight(), fontFile.isItalic() ? STYLE_ITALIC : STYLE_NORMAL,
-                        null /* axes */)) {
+                        fontFile.getWeight(), fontFile.getItalic(), null /* axes */)) {
                     return null;
                 }
             }

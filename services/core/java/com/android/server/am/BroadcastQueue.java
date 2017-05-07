@@ -51,7 +51,6 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
-import com.android.server.DeviceIdleController;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
@@ -202,6 +201,11 @@ public final class BroadcastQueue {
         mQueueName = name;
         mTimeoutPeriod = timeoutPeriod;
         mDelayBehindServices = allowDelayBehindServices;
+    }
+
+    @Override
+    public String toString() {
+        return mQueueName;
     }
 
     public boolean isPendingBroadcastProcessLocked(int pid) {
@@ -682,7 +686,7 @@ public final class BroadcastQueue {
                 // are already core system stuff so don't matter for this.
                 r.curApp = filter.receiverList.app;
                 filter.receiverList.app.curReceivers.add(r);
-                mService.updateOomAdjLocked(r.curApp);
+                mService.updateOomAdjLocked(r.curApp, true);
             }
         }
         try {
@@ -1570,6 +1574,11 @@ public final class BroadcastQueue {
                 record.callerPackage == null ? "" : record.callerPackage,
                 record.callerApp == null ? "process unknown" : record.callerApp.toShortString(),
                 record.intent == null ? "" : record.intent.getAction());
+    }
+
+    final boolean isIdle() {
+        return mParallelBroadcasts.isEmpty() && mOrderedBroadcasts.isEmpty()
+                && (mPendingBroadcast == null);
     }
 
     final boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,

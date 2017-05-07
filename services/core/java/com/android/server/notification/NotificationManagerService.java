@@ -884,6 +884,8 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 mZenModeHelper.onUserRemoved(user);
+                mRankingHelper.onUserRemoved(user);
+                savePolicyFile();
             } else if (action.equals(Intent.ACTION_USER_UNLOCKED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 mConditionProviders.onUserUnlocked(user);
@@ -3198,10 +3200,8 @@ public class NotificationManagerService extends SystemService {
                     + ", incomingUserId=" + incomingUserId
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
-            // STOPSHIP TODO: should throw instead of logging or toasting.
-            // throw new IllegalArgumentException(noChannelStr);
             Log.e(TAG, noChannelStr);
-            doDebugOnlyToast("Developer warning for package \"" + pkg + "\"\n" +
+            doChannelWarningToast("Developer warning for package \"" + pkg + "\"\n" +
                     "Failed to post notification on channel \"" + channelId + "\"\n" +
                     "See log for more details");
             return;
@@ -3236,8 +3236,10 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
     }
 
-    private void doDebugOnlyToast(CharSequence toastText) {
-        if (Build.IS_DEBUGGABLE) {
+    private void doChannelWarningToast(CharSequence toastText) {
+        final boolean warningEnabled = Settings.System.getInt(getContext().getContentResolver(),
+                Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS, 0) != 0;
+        if (warningEnabled || Build.IS_DEBUGGABLE) {
             try {
                 Toast toast = Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG);
                 toast.show();
@@ -3933,7 +3935,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
         try {
-            mAm.setProcessForeground(mForegroundToken, pid, toastCount > 0);
+            mAm.setProcessImportant(mForegroundToken, pid, toastCount > 0, "toast");
         } catch (RemoteException e) {
             // Shouldn't happen.
         }

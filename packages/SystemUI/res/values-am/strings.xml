@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን ከሚከታተለው ከ<xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nለተጨማሪ መረጃ የእርስዎን አስተዳዳሪ ያነጋግሩ።"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nበተጨማሪ የእርስዎን የግል የአውታረ መረብ እንቅስቃሴ መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"ለ<xliff:g id="USER_NAME">%1$s</xliff:g> ተከፍቷል"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"እራስዎ እስኪከፍቱት ድረስ መሣሪያ እንደተቆለፈ ይቆያል"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ማሳወቂያዎችን ፈጥነው ያግኙ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ከመክፈትዎ በፊት ይመልከቷቸው"</string>
@@ -763,8 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"እስከ <xliff:g id="ID_1">%s</xliff:g> ድረስ"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"አቆይ"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ተካ"</string>
-    <!-- no translation found for running_foreground_services_title (381024150898615683) -->
-    <skip />
-    <!-- no translation found for running_foreground_services_msg (6326247670075574355) -->
-    <skip />
+    <string name="running_foreground_services_title" msgid="381024150898615683">"በጀርባ ውስጥ የሚያሄዱ መተግበሪያዎች"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"በባትሪ እና ውሂብ አጠቃቀም ላይ ዝርዝሮችን ለማግኘት መታ ያድርጉ"</string>
 </resources>

@@ -264,6 +264,10 @@ public final class AutoFillUI {
                 public void onDestroy() {
                     if (log.getType() == MetricsProto.MetricsEvent.TYPE_UNKNOWN) {
                         log.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
+
+                        if (mCallback != null) {
+                            mCallback.cancelSave();
+                        }
                     }
                     mMetricsLogger.write(log);
                 }
@@ -282,12 +286,17 @@ public final class AutoFillUI {
         pw.println("Autofill UI");
         final String prefix = "  ";
         final String prefix2 = "    ";
-        pw.print(prefix); pw.print("showsSaveUi: "); pw.println(mSaveUi != null);
         if (mFillUi != null) {
             pw.print(prefix); pw.println("showsFillUi: true");
             mFillUi.dump(pw, prefix2);
         } else {
             pw.print(prefix); pw.println("showsFillUi: false");
+        }
+        if (mSaveUi != null) {
+            pw.print(prefix); pw.println("showsSaveUi: true");
+            mSaveUi.dump(pw, prefix2);
+        } else {
+            pw.print(prefix); pw.println("showsSaveUi: false");
         }
     }
 

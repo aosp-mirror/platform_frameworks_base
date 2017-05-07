@@ -125,6 +125,7 @@ public abstract class InstantAppResolver {
                 final String packageName;
                 final String splitName;
                 final int versionCode;
+                final Intent failureIntent;
                 if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
                             InstantAppResolver.filterInstantAppIntent(
@@ -135,18 +136,22 @@ public abstract class InstantAppResolver {
                         packageName = instantAppIntentInfo.resolveInfo.getPackageName();
                         splitName = instantAppIntentInfo.splitName;
                         versionCode = instantAppIntentInfo.resolveInfo.getVersionCode();
+                        failureIntent = instantAppIntentInfo.failureIntent;
                     } else {
                         packageName = null;
                         splitName = null;
                         versionCode = -1;
+                        failureIntent = null;
                     }
                 } else {
                     packageName = null;
                     splitName = null;
                     versionCode = -1;
+                    failureIntent = null;
                 }
                 final Intent installerIntent = buildEphemeralInstallerIntent(
                         requestObj.origIntent,
+                        failureIntent,
                         requestObj.callingPackage,
                         requestObj.verificationBundle,
                         requestObj.resolvedType,
@@ -172,7 +177,9 @@ public abstract class InstantAppResolver {
     /**
      * Builds and returns an intent to launch the instant installer.
      */
-    public static Intent buildEphemeralInstallerIntent(@NonNull Intent origIntent,
+    public static Intent buildEphemeralInstallerIntent(
+            @NonNull Intent origIntent,
+            @NonNull Intent failureIntent,
             @NonNull String callingPackage,
             @Nullable Bundle verificationBundle,
             @NonNull String resolvedType,
@@ -200,22 +207,21 @@ public abstract class InstantAppResolver {
         // We have all of the data we need; just start the installer without a second phase
         if (!needsPhaseTwo) {
             // Intent that is launched if the package couldn't be installed for any reason.
-            final Intent failureIntent = new Intent(origIntent);
-            failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
-            failureIntent.setLaunchToken(token);
-            try {
-                final IIntentSender failureIntentTarget = ActivityManager.getService()
-                        .getIntentSender(
-                                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                                null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
-                                new Intent[] { failureIntent },
-                                new String[] { resolvedType },
-                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                                        | PendingIntent.FLAG_IMMUTABLE,
-                                null /*bOptions*/, userId);
-                intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE,
-                        new IntentSender(failureIntentTarget));
-            } catch (RemoteException ignore) { /* ignore; same process */ }
+            if (failureIntent != null) {
+                try {
+                    final IIntentSender failureIntentTarget = ActivityManager.getService()
+                            .getIntentSender(
+                                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                                    null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
+                                    new Intent[] { failureIntent },
+                                    new String[] { resolvedType },
+                                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                                            | PendingIntent.FLAG_IMMUTABLE,
+                                    null /*bOptions*/, userId);
+                    intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE,
+                            new IntentSender(failureIntentTarget));
+                } catch (RemoteException ignore) { /* ignore; same process */ }
+            }
 
             // Intent that is launched if the package was installed successfully.
             final Intent successIntent = new Intent(origIntent);
@@ -248,10 +254,13 @@ public abstract class InstantAppResolver {
 
     private static AuxiliaryResolveInfo filterInstantAppIntent(
             List<InstantAppResolveInfo> instantAppResolveInfoList,
-            Intent intent, String resolvedType, int userId, String packageName,
+            Intent origIntent, String resolvedType, int userId, String packageName,
             InstantAppDigest digest, String token) {
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
+        final Intent failureIntent = new Intent(origIntent);
+        failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
+        failureIntent.setLaunchToken(token);
         // Go in reverse order so we match the narrowest scope first.
         for (int i = shaPrefix.length - 1; i >= 0 ; --i) {
             for (InstantAppResolveInfo instantAppInfo : instantAppResolveInfoList) {
@@ -271,7 +280,8 @@ public abstract class InstantAppResolver {
                     }
                     return new AuxiliaryResolveInfo(instantAppInfo,
                             new IntentFilter(Intent.ACTION_VIEW) /*intentFilter*/,
-                            null /*splitName*/, token, true /*needsPhase2*/);
+                            null /*splitName*/, token, true /*needsPhase2*/,
+                            null /*failureIntent*/);
                 }
                 // We have a domain match; resolve the filters to see if anything matches.
                 final PackageManagerService.EphemeralIntentResolver instantAppResolver =
@@ -286,12 +296,12 @@ public abstract class InstantAppResolver {
                         final AuxiliaryResolveInfo intentInfo =
                                 new AuxiliaryResolveInfo(instantAppInfo,
                                         splitFilters.get(k), instantAppFilter.getSplitName(),
-                                        token, false /*needsPhase2*/);
+                                        token, false /*needsPhase2*/, failureIntent);
                         instantAppResolver.addFilter(intentInfo);
                     }
                 }
                 List<AuxiliaryResolveInfo> matchedResolveInfoList = instantAppResolver.queryIntent(
-                        intent, resolvedType, false /*defaultOnly*/, userId);
+                        origIntent, resolvedType, false /*defaultOnly*/, userId);
                 if (!matchedResolveInfoList.isEmpty()) {
                     if (DEBUG_EPHEMERAL) {
                         final AuxiliaryResolveInfo info = matchedResolveInfoList.get(0);

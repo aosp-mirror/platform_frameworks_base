@@ -31,13 +31,20 @@ import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@SmallTest
+@Presubmit
+@RunWith(AndroidJUnit4.class)
 public class BackupManagerMonitorUtilsTest {
     @Mock private IBackupManagerMonitor mMonitorMock;
 

@@ -39,8 +39,11 @@ oneway interface ITaskStackListener {
      * Called whenever IActivityManager.startActivity is called on an activity that is already
      * running in the pinned stack and the activity is not actually started, but the task is either
      * brought to the front or a new Intent is delivered to it.
+     *
+     * @param clearedTask whether or not the launch activity also cleared the task as a part of
+     * starting
      */
-    void onPinnedActivityRestartAttempt();
+    void onPinnedActivityRestartAttempt(boolean clearedTask);
 
     /**
      * Called whenever the pinned stack is starting animating a resize.

@@ -23,7 +23,6 @@ import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -96,6 +95,9 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_ADAPTIVE_BITMAP = 1 << 9;
 
     /** @hide */
+    public static final int FLAG_RETURNED_BY_SERVICE = 1 << 10;
+
+    /** @hide */
     @IntDef(flag = true,
             value = {
             FLAG_DYNAMIC,
@@ -108,6 +110,7 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_STRINGS_RESOLVED,
             FLAG_IMMUTABLE,
             FLAG_ADAPTIVE_BITMAP,
+            FLAG_RETURNED_BY_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -1343,6 +1346,16 @@ public final class ShortcutInfo implements Parcelable {
         return (mFlags & flags) == flags;
     }
 
+    /** @hide */
+    public boolean isReturnedByServer() {
+        return hasFlags(FLAG_RETURNED_BY_SERVICE);
+    }
+
+    /** @hide */
+    public void setReturnedByServer() {
+        addFlags(FLAG_RETURNED_BY_SERVICE);
+    }
+
     /** Return whether a shortcut is dynamic. */
     public boolean isDynamic() {
         return hasFlags(FLAG_DYNAMIC);
@@ -1450,7 +1463,7 @@ public final class ShortcutInfo implements Parcelable {
 
     /**
      * Return whether a shortcut's icon is adaptive bitmap following design guideline
-     * defined in {@link AdaptiveIconDrawable}.
+     * defined in {@link android.graphics.drawable.AdaptiveIconDrawable}.
      *
      * @hide internal/unit tests only
      */
@@ -1775,6 +1788,9 @@ public final class ShortcutInfo implements Parcelable {
         }
         if (hasStringResourcesResolved()) {
             sb.append("Sr");
+        }
+        if (isReturnedByServer()) {
+            sb.append("V");
         }
         sb.append("]");
 

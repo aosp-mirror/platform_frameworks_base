@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Umeunganishwa kwenye <xliff:g id="APPLICATION">%1$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Wasifu wako wa kazini unasimamiwa na <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Wasifu umeunganishwa kwenye <xliff:g id="APPLICATION">%2$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako wa kazini, ikiwa ni pamoja na barua pepe, programu na tovuti.\n\n Wasiliana na msimamizi wako kwa maelezo zaidi."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Wasifu wako wa kazini unasimamiwa na <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Wasifu umeunganishwa kwenye <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ambayo inaweza kufuatilia shughuli zako kwenye mtandao wa kazini, ikiwa ni pamoja na barua pepe, programu na tovuti.\n\n Umeunganishwa pia kwenye  <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ambayo inaweza kufuatilia shughuli zako kwenye mtandao wa binafsi."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Imefunguliwa kwa ajili ya <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Kifaa kitaendelea kuwa katika hali ya kufungwa hadi utakapokifungua mwenyewe"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Pata arifa kwa haraka"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zitazame kabla hujafungua"</string>
@@ -763,8 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Hadi <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Usibadilishe"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Badilisha"</string>
-    <!-- no translation found for running_foreground_services_title (381024150898615683) -->
-    <skip />
-    <!-- no translation found for running_foreground_services_msg (6326247670075574355) -->
-    <skip />
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Programu zinatumika chinichini"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Gonga ili upate maelezo kuhusu betri na matumizi ya data"</string>
 </resources>

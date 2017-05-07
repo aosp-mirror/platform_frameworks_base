@@ -49,10 +49,11 @@ static jclass gITunerCallbackClass;
 static struct {
     jmethodID onError;
     jmethodID onConfigurationChanged;
+    jmethodID onProgramInfoChanged;
 } gITunerCallbackMethods;
 
 // from frameworks/base/core/java/android/hardware/radio/RadioTuner.java
-enum class TunerError : int {
+enum class TunerError : jint {
     HARDWARE_FAILURE = 0,
     SERVER_DIED = 1,
     CANCELLED = 2,
@@ -60,8 +61,8 @@ enum class TunerError : int {
     CONFIG = 4,
 };
 
-TunerCallback::TunerCallback(JNIEnv *env, jobject tuner, jobject clientCallback)
-        : mCallbackThread(gvm) {
+TunerCallback::TunerCallback(JNIEnv *env, jobject tuner, jobject clientCallback, HalRevision halRev)
+        : mCallbackThread(gvm), mHalRev(halRev) {
     ALOGV("TunerCallback()");
     mTuner = env->NewGlobalRef(tuner);
     mClientCallback = env->NewGlobalRef(clientCallback);
@@ -111,12 +112,45 @@ Return<void> TunerCallback::configChange(Result result, const BandConfig& config
 }
 
 Return<void> TunerCallback::tuneComplete(Result result, const V1_0::ProgramInfo& info) {
-    ALOGE("Not implemented: tuneComplete");
+    ALOGV("tuneComplete(%d)", result);
+
+    if (mHalRev > HalRevision::V1_0) {
+        ALOGD("1.0 callback was ignored");
+        return Return<void>();
+    }
+
+    V1_1::ProgramInfo info_1_1 {
+        .base = info,
+    };
+    return tuneComplete_1_1(result, info_1_1);
+}
+
+Return<void> TunerCallback::tuneComplete_1_1(Result result, const V1_1::ProgramInfo& info) {
+    ALOGV("tuneComplete_1_1(%d)", result);
+
+    mCallbackThread.enqueue([result, info, this](JNIEnv *env) {
+        if (result == Result::OK) {
+            auto jInfo = convert::ProgramInfoFromHal(env, info);
+            if (jInfo == nullptr) return;
+            env->CallVoidMethod(mClientCallback, gITunerCallbackMethods.onProgramInfoChanged,
+                    jInfo.get());
+        } else {
+            TunerError cause = TunerError::CANCELLED;
+            if (result == Result::TIMEOUT) cause = TunerError::SCAN_TIMEOUT;
+            env->CallVoidMethod(mClientCallback, gITunerCallbackMethods.onError, cause);
+        }
+    });
+
     return Return<void>();
 }
 
 Return<void> TunerCallback::afSwitch(const V1_0::ProgramInfo& info) {
     ALOGE("Not implemented: afSwitch");
+    return Return<void>();
+}
+
+Return<void> TunerCallback::afSwitch_1_1(const V1_1::ProgramInfo& info) {
+    ALOGE("Not implemented: afSwitch_1_1");
     return Return<void>();
 }
 
@@ -138,16 +172,6 @@ Return<void> TunerCallback::emergencyAnnouncement(bool active) {
 Return<void> TunerCallback::newMetadata(uint32_t channel, uint32_t subChannel,
         const hidl_vec<MetaData>& metadata) {
     ALOGE("Not implemented: newMetadata");
-    return Return<void>();
-}
-
-Return<void> TunerCallback::tuneComplete_1_1(Result result, const V1_1::ProgramInfo& info) {
-    ALOGE("Not implemented: tuneComplete_1_1");
-    return Return<void>();
-}
-
-Return<void> TunerCallback::afSwitch_1_1(const V1_1::ProgramInfo& info) {
-    ALOGE("Not implemented: afSwitch_1_1afSwitch_1_1");
     return Return<void>();
 }
 
@@ -180,6 +204,8 @@ void register_android_server_radio_Tuner_TunerCallback(JavaVM *vm, JNIEnv *env) 
     gITunerCallbackMethods.onError = GetMethodIDOrDie(env, gITunerCallbackClass, "onError", "(I)V");
     gITunerCallbackMethods.onConfigurationChanged = GetMethodIDOrDie(env, gITunerCallbackClass,
             "onConfigurationChanged", "(Landroid/hardware/radio/RadioManager$BandConfig;)V");
+    gITunerCallbackMethods.onProgramInfoChanged = GetMethodIDOrDie(env, gITunerCallbackClass,
+            "onProgramInfoChanged", "(Landroid/hardware/radio/RadioManager$ProgramInfo;)V");
 }
 
 } // namespace android

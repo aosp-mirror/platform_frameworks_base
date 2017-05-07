@@ -4275,9 +4275,19 @@ public final class ActivityThread {
             View.mDebugViewAttributes = debugViewAttributes;
 
             // request all activities to relaunch for the changes to take place
-            for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false,
-                        false /* preserveWindow */);
+            requestRelaunchAllActivities();
+        }
+    }
+
+    private void requestRelaunchAllActivities() {
+        for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
+            final Activity activity = entry.getValue().activity;
+            if (!activity.mFinished) {
+                try {
+                    ActivityManager.getService().requestActivityRelaunch(entry.getKey());
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
@@ -5116,14 +5126,7 @@ public final class ActivityThread {
         newConfig.assetsSeq = (mConfiguration != null ? mConfiguration.assetsSeq : 0) + 1;
         handleConfigurationChanged(newConfig, null);
 
-        // Schedule all activities to reload
-        for (final Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-            final Activity activity = entry.getValue().activity;
-            if (!activity.mFinished) {
-                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false,
-                        false);
-            }
-        }
+        requestRelaunchAllActivities();
     }
 
     static void freeTextLayoutCachesIfNeeded(int configDiff) {

@@ -19,3 +19,71 @@ ndk_library {
     first_version: "9",
     unversioned_until: "current",
 }
+
+cc_defaults {
+    name: "libandroid_defaults",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+}
+
+cc_library_shared {
+    name: "libandroid",
+    defaults: ["libandroid_defaults"],
+
+    srcs: [
+        "asset_manager.cpp",
+        "choreographer.cpp",
+        "configuration.cpp",
+        "hardware_buffer_jni.cpp",
+        "input.cpp",
+        "looper.cpp",
+        "native_activity.cpp",
+        "native_window_jni.cpp",
+        "net.c",
+        "obb.cpp",
+        "sensor.cpp",
+        "sharedmem.cpp",
+        "storage_manager.cpp",
+        "trace.cpp",
+    ],
+
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libandroidfw",
+        "libinput",
+        "libutils",
+        "libbinder",
+        "libui",
+        "libgui",
+        "libsensor",
+        "libandroid_runtime",
+        "libnetd_client",
+    ],
+
+    static_libs: [
+        "libstorage",
+        "libarect",
+    ],
+
+    whole_static_libs: ["libnativewindow"],
+
+    export_static_lib_headers: ["libarect"],
+
+    include_dirs: ["bionic/libc/dns/include"],
+}
+
+// Network library.
+cc_library_shared {
+    name: "libandroid_net",
+    defaults: ["libandroid_defaults"],
+    srcs: ["net.c"],
+
+    shared_libs: ["libnetd_client"],
+
+    include_dirs: ["bionic/libc/dns/include"],
+}
