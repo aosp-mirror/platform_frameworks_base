@@ -812,15 +812,28 @@ public class ActivityManagerService extends IActivityManager.Stub
     final SparseArray<ProcessRecord> mPidsSelfLocked = new SparseArray<ProcessRecord>();
 
     /**
-     * All of the processes that have been forced to be foreground.  The key
+     * All of the processes that have been forced to be important.  The key
      * is the pid of the caller who requested it (we hold a death
      * link on it).
      */
-    abstract class ForegroundToken implements IBinder.DeathRecipient {
-        int pid;
-        IBinder token;
+    abstract class ImportanceToken implements IBinder.DeathRecipient {
+        final int pid;
+        final IBinder token;
+        final String reason;
+
+        ImportanceToken(int _pid, IBinder _token, String _reason) {
+            pid = _pid;
+            token = _token;
+            reason = _reason;
+        }
+
+        @Override
+        public String toString() {
+            return "ImportanceToken { " + Integer.toHexString(System.identityHashCode(this))
+                    + " " + reason + " " + pid + " " + token + " }";
+        }
     }
-    final SparseArray<ForegroundToken> mForegroundProcesses = new SparseArray<ForegroundToken>();
+    final SparseArray<ImportanceToken> mImportantProcesses = new SparseArray<ImportanceToken>();
 
     /**
      * List of records for processes that someone had tried to start before the
@@ -6499,6 +6512,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                         "No more processes in " + old.uidRecord);
                 enqueueUidChangeLocked(old.uidRecord, -1, UidRecord.CHANGE_GONE);
+                EventLogTags.writeAmUidStopped(uid);
                 mActiveUids.remove(uid);
                 noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
             }
@@ -6530,6 +6544,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             uidRec.updateHasInternetPermission();
             mActiveUids.put(proc.uid, uidRec);
+            EventLogTags.writeAmUidRunning(uidRec.uid);
             noteUidProcessState(uidRec.uid, uidRec.curProcState);
             enqueueUidChangeLocked(uidRec, -1, UidRecord.CHANGE_ACTIVE);
         }
@@ -6717,7 +6732,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.makeActive(thread, mProcessStats);
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
         app.curSchedGroup = app.setSchedGroup = ProcessList.SCHED_GROUP_DEFAULT;
-        app.forcingToForeground = null;
+        app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, false);
         app.hasShownUi = false;
         app.debugging = false;
@@ -7717,20 +7732,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void foregroundTokenDied(ForegroundToken token) {
+    void importanceTokenDied(ImportanceToken token) {
         synchronized (ActivityManagerService.this) {
             synchronized (mPidsSelfLocked) {
-                ForegroundToken cur
-                    = mForegroundProcesses.get(token.pid);
+                ImportanceToken cur
+                    = mImportantProcesses.get(token.pid);
                 if (cur != token) {
                     return;
                 }
-                mForegroundProcesses.remove(token.pid);
+                mImportantProcesses.remove(token.pid);
                 ProcessRecord pr = mPidsSelfLocked.get(token.pid);
                 if (pr == null) {
                     return;
                 }
-                pr.forcingToForeground = null;
+                pr.forcingToImportant = null;
                 updateProcessForegroundLocked(pr, false, false);
             }
             updateOomAdjLocked();
@@ -7738,9 +7753,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setProcessForeground(IBinder token, int pid, boolean isForeground) {
+    public void setProcessImportant(IBinder token, int pid, boolean isForeground, String reason) {
         enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
-                "setProcessForeground()");
+                "setProcessImportant()");
         synchronized(this) {
             boolean changed = false;
 
@@ -7750,28 +7765,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.w(TAG, "setProcessForeground called on unknown pid: " + pid);
                     return;
                 }
-                ForegroundToken oldToken = mForegroundProcesses.get(pid);
+                ImportanceToken oldToken = mImportantProcesses.get(pid);
                 if (oldToken != null) {
                     oldToken.token.unlinkToDeath(oldToken, 0);
-                    mForegroundProcesses.remove(pid);
+                    mImportantProcesses.remove(pid);
                     if (pr != null) {
-                        pr.forcingToForeground = null;
+                        pr.forcingToImportant = null;
                     }
                     changed = true;
                 }
                 if (isForeground && token != null) {
-                    ForegroundToken newToken = new ForegroundToken() {
+                    ImportanceToken newToken = new ImportanceToken(pid, token, reason) {
                         @Override
                         public void binderDied() {
-                            foregroundTokenDied(this);
+                            importanceTokenDied(this);
                         }
                     };
-                    newToken.pid = pid;
-                    newToken.token = token;
                     try {
                         token.linkToDeath(newToken, 0);
-                        mForegroundProcesses.put(pid, newToken);
-                        pr.forcingToForeground = token;
+                        mImportantProcesses.put(pid, newToken);
+                        pr.forcingToImportant = newToken;
                         changed = true;
                     } catch (RemoteException e) {
                         // If the process died while doing this, we will later
@@ -15490,12 +15503,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (mForegroundProcesses.size() > 0) {
+        if (mImportantProcesses.size() > 0) {
             synchronized (mPidsSelfLocked) {
                 boolean printed = false;
-                for (int i=0; i<mForegroundProcesses.size(); i++) {
+                for (int i = 0; i< mImportantProcesses.size(); i++) {
                     ProcessRecord r = mPidsSelfLocked.get(
-                            mForegroundProcesses.valueAt(i).pid);
+                            mImportantProcesses.valueAt(i).pid);
                     if (dumpPackage != null && (r == null
                             || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
@@ -15507,8 +15520,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         printed = true;
                         printedAnything = true;
                     }
-                    pw.print("    PID #"); pw.print(mForegroundProcesses.keyAt(i));
-                            pw.print(": "); pw.println(mForegroundProcesses.valueAt(i));
+                    pw.print("    PID #"); pw.print(mImportantProcesses.keyAt(i));
+                            pw.print(": "); pw.println(mImportantProcesses.valueAt(i));
                 }
             }
         }
@@ -17779,7 +17792,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.unlinkDeathRecipient();
         app.makeInactive(mProcessStats);
         app.waitingToKill = null;
-        app.forcingToForeground = null;
+        app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, false);
         app.foregroundActivities = false;
         app.hasShownUi = false;
@@ -20774,20 +20787,27 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.cached = false;
                 app.adjType = "fg-service";
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
-            } else if (app.forcingToForeground != null) {
-                // The user is aware of this app, so make it visible.
-                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
-                procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
-                app.cached = false;
-                app.adjType = "force-fg";
-                app.adjSource = app.forcingToForeground;
-                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             } else if (app.hasOverlayUi) {
                 // The process is display an overlay UI.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                 procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
                 app.cached = false;
                 app.adjType = "has-overlay-ui";
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            }
+        }
+
+        if (adj > ProcessList.PERCEPTIBLE_APP_ADJ
+                || procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+            if (app.forcingToImportant != null) {
+                // This is currently used for toasts...  they are not interactive, and
+                // we don't want them to cause the app to become fully foreground (and
+                // thus out of background check), so we yes the best background level we can.
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                procState = ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
+                app.cached = false;
+                app.adjType = "force-imp";
+                app.adjSource = app.forcingToImportant;
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             }
         }
@@ -22032,10 +22052,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + mConstants.SERVICE_USAGE_INTERACTION_TIME;
             }
         } else {
-            // If the app was being forced to the foreground, by say a Toast, then
-            // no need to treat it as an interaction
-            isInteraction = app.forcingToForeground == null
-                    && app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            isInteraction = app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             app.fgInteractionTime = 0;
         }
         if (isInteraction && (!app.reportedInteraction || (nowElapsed-app.interactionEventTime)
@@ -22573,6 +22590,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     if (uidRec.idle) {
                         uidChange = UidRecord.CHANGE_ACTIVE;
+                        EventLogTags.writeAmUidActive(uidRec.uid);
                         uidRec.idle = false;
                     }
                     uidRec.lastBackgroundTime = 0;
@@ -22651,6 +22669,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (UserHandle.getAppId(uidRec.uid) == appId) {
                             if (userId == UserHandle.USER_ALL ||
                                     userId == UserHandle.getUserId(uidRec.uid)) {
+                                EventLogTags.writeAmUidIdle(uidRec.uid);
                                 uidRec.idle = true;
                                 Slog.w(TAG, "Idling uid " + UserHandle.formatUid(uidRec.uid)
                                         + " from package " + packageName + " user " + userId);
@@ -22685,6 +22704,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final long bgTime = uidRec.lastBackgroundTime;
                 if (bgTime > 0 && !uidRec.idle) {
                     if (bgTime <= maxBgTime) {
+                        EventLogTags.writeAmUidIdle(uidRec.uid);
                         uidRec.idle = true;
                         doStopUidLocked(uidRec.uid, uidRec);
                     } else {
