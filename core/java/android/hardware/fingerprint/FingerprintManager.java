@@ -42,8 +42,8 @@ import javax.crypto.Cipher;
 import javax.crypto.Mac;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
-import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
+import static android.Manifest.permission.USE_FINGERPRINT;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
@@ -910,6 +910,7 @@ public class FingerprintManager {
             } else if (mAuthenticationCallback != null) {
                 mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
                         getErrorString(errMsgId, vendorCode));
+                mAuthenticationCallback = null;
             } else if (mRemovalCallback != null) {
                 mRemovalCallback.onRemovalError(mRemovalFingerprint, clientErrMsgId,
                         getErrorString(errMsgId, vendorCode));
@@ -930,12 +931,14 @@ public class FingerprintManager {
                 final AuthenticationResult result =
                         new AuthenticationResult(mCryptoObject, fp, userId);
                 mAuthenticationCallback.onAuthenticationSucceeded(result);
+                mAuthenticationCallback = null;
             }
         }
 
         private void sendAuthenticatedFailed() {
             if (mAuthenticationCallback != null) {
-               mAuthenticationCallback.onAuthenticationFailed();
+                mAuthenticationCallback.onAuthenticationFailed();
+                mAuthenticationCallback = null;
             }
         }
 
