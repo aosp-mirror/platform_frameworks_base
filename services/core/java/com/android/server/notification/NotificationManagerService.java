@@ -3935,7 +3935,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
         try {
-            mAm.setProcessForeground(mForegroundToken, pid, toastCount > 0);
+            mAm.setProcessImportant(mForegroundToken, pid, toastCount > 0, "toast");
         } catch (RemoteException e) {
             // Shouldn't happen.
         }
