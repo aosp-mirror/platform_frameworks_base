@@ -2494,7 +2494,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void startKeyguardExitOnNonAppWindows(boolean onWallpaper, boolean goingToShade) {
         final WindowManagerPolicy policy = mService.mPolicy;
         forAllWindows(w -> {
-            if (w.mAppToken == null && policy.canBeHiddenByKeyguardLw(w)) {
+            if (w.mAppToken == null && policy.canBeHiddenByKeyguardLw(w)
+                    && w.wouldBeVisibleIfPolicyIgnored() && !w.isVisible()) {
                 w.mWinAnimator.setAnimation(
                         policy.createHiddenByKeyguardExit(onWallpaper, goingToShade));
             }
