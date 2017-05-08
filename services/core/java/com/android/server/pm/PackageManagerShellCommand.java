@@ -147,6 +147,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHomeActivity();
                 case "get-privapp-permissions":
                     return runGetPrivappPermissions();
+                case "get-instantapp-resolver":
+                    return runGetInstantAppResolver();
                 case "has-feature":
                     return runHasFeature();
                 default:
@@ -1269,6 +1271,21 @@ class PackageManagerShellCommand extends ShellCommand {
         getOutPrintWriter().println(privAppPermissions == null
                 ? "{}" : privAppPermissions.toString());
         return 0;
+    }
+
+    private int runGetInstantAppResolver() {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            final ComponentName instantAppsResolver = mInterface.getInstantAppResolverComponent();
+            if (instantAppsResolver == null) {
+                return 1;
+            }
+            pw.println(instantAppsResolver.flattenToString());
+            return 0;
+        } catch (Exception e) {
+            pw.println(e.toString());
+            return 1;
+        }
     }
 
     private int runHasFeature() {

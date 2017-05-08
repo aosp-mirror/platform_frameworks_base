@@ -3180,6 +3180,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    @Override
+    public @Nullable ComponentName getInstantAppResolverComponent() {
+        synchronized (mPackages) {
+            final Pair<ComponentName, String> instantAppResolver = getInstantAppResolverLPr();
+            if (instantAppResolver == null) {
+                return null;
+            }
+            return instantAppResolver.first;
+        }
+    }
+
     private @Nullable Pair<ComponentName, String> getInstantAppResolverLPr() {
         final String[] packageArray =
                 mContext.getResources().getStringArray(R.array.config_ephemeralResolverPackage);
