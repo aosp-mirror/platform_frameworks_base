@@ -57,6 +57,7 @@ static struct {
 
 static jobject gPowerManagerServiceObj;
 sp<IPower> gPowerHal = nullptr;
+bool gPowerHalExists = true;
 std::mutex gPowerHalMutex;
 static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 
@@ -78,12 +79,13 @@ static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
 // Check validity of current handle to the power HAL service, and call getService() if necessary.
 // The caller must be holding gPowerHalMutex.
 bool getPowerHal() {
-    if (gPowerHal == nullptr) {
+    if (gPowerHalExists && gPowerHal == nullptr) {
         gPowerHal = IPower::getService();
         if (gPowerHal != nullptr) {
             ALOGI("Loaded power HAL service");
         } else {
             ALOGI("Couldn't load power HAL service");
+            gPowerHalExists = false;
         }
     }
     return gPowerHal != nullptr;
