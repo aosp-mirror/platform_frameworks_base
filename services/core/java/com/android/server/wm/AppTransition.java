@@ -54,6 +54,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -1808,27 +1809,25 @@ public class AppTransition implements Dump {
             final IAppTransitionAnimationSpecsFuture future
                     = mNextAppTransitionAnimationsSpecsFuture;
             mNextAppTransitionAnimationsSpecsFuture = null;
-            mDefaultExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    AppTransitionAnimationSpec[] specs = null;
-                    try {
-                        specs = future.get();
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failed to fetch app transition specs: " + e);
-                    }
-                    synchronized (mService.mWindowMap) {
-                        mNextAppTransitionAnimationsSpecsPending = false;
-                        overridePendingAppTransitionMultiThumb(specs,
-                                mNextAppTransitionFutureCallback, null /* finishedCallback */,
-                                mNextAppTransitionScaleUp);
-                        mNextAppTransitionFutureCallback = null;
-                        if (specs != null) {
-                            mService.prolongAnimationsFromSpecs(specs, mNextAppTransitionScaleUp);
-                        }
-                    }
-                    mService.requestTraversal();
+            mDefaultExecutor.execute(() -> {
+                AppTransitionAnimationSpec[] specs = null;
+                try {
+                    Binder.allowBlocking(future.asBinder());
+                    specs = future.get();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to fetch app transition specs: " + e);
                 }
+                synchronized (mService.mWindowMap) {
+                    mNextAppTransitionAnimationsSpecsPending = false;
+                    overridePendingAppTransitionMultiThumb(specs,
+                            mNextAppTransitionFutureCallback, null /* finishedCallback */,
+                            mNextAppTransitionScaleUp);
+                    mNextAppTransitionFutureCallback = null;
+                    if (specs != null) {
+                        mService.prolongAnimationsFromSpecs(specs, mNextAppTransitionScaleUp);
+                    }
+                }
+                mService.requestTraversal();
             });
         }
     }
