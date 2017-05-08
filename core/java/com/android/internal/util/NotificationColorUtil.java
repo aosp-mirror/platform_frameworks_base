@@ -286,6 +286,38 @@ public class NotificationColorUtil {
     }
 
     /**
+     * Finds a suitable alpha such that there's enough contrast.
+     *
+     * @param color the color to start searching from.
+     * @param backgroundColor the color to ensure contrast against.
+     * @param minRatio the minimum contrast ratio required.
+     * @return the same color as {@param color} with potentially modified alpha to meet contrast
+     */
+    public static int findAlphaToMeetContrast(int color, int backgroundColor, double minRatio) {
+        int fg = color;
+        int bg = backgroundColor;
+        if (ColorUtilsFromCompat.calculateContrast(fg, bg) >= minRatio) {
+            return color;
+        }
+        int startAlpha = Color.alpha(color);
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+
+        int low = startAlpha, high = 255;
+        for (int i = 0; i < 15 && high - low > 0; i++) {
+            final int alpha = (low + high) / 2;
+            fg = Color.argb(alpha, r, g, b);
+            if (ColorUtilsFromCompat.calculateContrast(fg, bg) > minRatio) {
+                high = alpha;
+            } else {
+                low = alpha;
+            }
+        }
+        return Color.argb(high, r, g, b);
+    }
+
+    /**
      * Finds a suitable color such that there's enough contrast.
      *
      * @param color the color to start searching from.
@@ -373,19 +405,19 @@ public class NotificationColorUtil {
      * color for the Notification's action and header text.
      *
      * @param notificationColor the color of the notification or {@link Notification#COLOR_DEFAULT}
+     * @param backgroundColor the background color to ensure the contrast against.
      * @return a color of the same hue with enough contrast against the backgrounds.
      */
-    public static int resolveContrastColor(Context context, int notificationColor) {
+    public static int resolveContrastColor(Context context, int notificationColor,
+            int backgroundColor) {
         final int resolvedColor = resolveColor(context, notificationColor);
 
         final int actionBg = context.getColor(
                 com.android.internal.R.color.notification_action_list);
-        final int notiBg = context.getColor(
-                com.android.internal.R.color.notification_material_background_color);
 
         int color = resolvedColor;
         color = NotificationColorUtil.ensureLargeTextContrast(color, actionBg);
-        color = NotificationColorUtil.ensureTextContrast(color, notiBg);
+        color = NotificationColorUtil.ensureTextContrast(color, backgroundColor);
 
         if (color != resolvedColor) {
             if (DEBUG){
@@ -394,7 +426,7 @@ public class NotificationColorUtil {
                                 + " and %s (over background) by changing #%s to %s",
                         context.getPackageName(),
                         NotificationColorUtil.contrastChange(resolvedColor, color, actionBg),
-                        NotificationColorUtil.contrastChange(resolvedColor, color, notiBg),
+                        NotificationColorUtil.contrastChange(resolvedColor, color, backgroundColor),
                         Integer.toHexString(resolvedColor), Integer.toHexString(color)));
             }
         }
@@ -499,6 +531,13 @@ public class NotificationColorUtil {
 
     public static double calculateContrast(int foregroundColor, int backgroundColor) {
         return ColorUtilsFromCompat.calculateContrast(foregroundColor, backgroundColor);
+    }
+
+    /**
+     * Composite two potentially translucent colors over each other and returns the result.
+     */
+    public static int compositeColors(int foreground, int background) {
+        return ColorUtilsFromCompat.compositeColors(foreground, background);
     }
 
     /**
