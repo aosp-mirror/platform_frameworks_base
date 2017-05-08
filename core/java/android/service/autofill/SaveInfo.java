@@ -174,6 +174,7 @@ public final class SaveInfo implements Parcelable {
                SAVE_DATA_TYPE_PASSWORD,
                SAVE_DATA_TYPE_ADDRESS,
                SAVE_DATA_TYPE_CREDIT_CARD,
+               SAVE_DATA_TYPE_USERNAME,
                SAVE_DATA_TYPE_EMAIL_ADDRESS})
     @Retention(RetentionPolicy.SOURCE)
     @interface SaveDataType{}
