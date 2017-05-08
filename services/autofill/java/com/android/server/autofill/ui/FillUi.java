@@ -265,8 +265,11 @@ final class FillUi {
         mContentWidth = 0;
         mContentHeight = 0;
 
-        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
-        final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.x,
+                MeasureSpec.AT_MOST);
+        final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
+                MeasureSpec.AT_MOST);
+
         final int itemCount = Math.min(mAdapter.getCount(), VISIBLE_OPTIONS_MAX_COUNT);
         for (int i = 0; i < itemCount; i++) {
             View view = mAdapter.getItem(i).getView();
