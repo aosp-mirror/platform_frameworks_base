@@ -567,22 +567,27 @@ public final class NightDisplayService extends SystemService
 
         private final TwilightManager mTwilightManager;
 
-        private Calendar mLastActivatedTime;
-
         TwilightAutoMode() {
             mTwilightManager = getLocalService(TwilightManager.class);
         }
 
         private void updateActivated(TwilightState state) {
-            boolean activate = state != null && state.isNight();
-            if (state != null && mLastActivatedTime != null) {
+            if (state == null) {
+                // If there isn't a valid TwilightState then just keep the current activated
+                // state.
+                return;
+            }
+
+            boolean activate = state.isNight();
+            final Calendar lastActivatedTime = getLastActivatedTime();
+            if (lastActivatedTime != null) {
                 final Calendar now = Calendar.getInstance();
                 final Calendar sunrise = state.sunrise();
                 final Calendar sunset = state.sunset();
 
                 // Maintain the existing activated state if within the current period.
-                if (mLastActivatedTime.before(now)
-                        && (mLastActivatedTime.after(sunrise) ^ mLastActivatedTime.after(sunset))) {
+                if (lastActivatedTime.before(now)
+                        && (lastActivatedTime.after(sunrise) ^ lastActivatedTime.after(sunset))) {
                     activate = mController.isActivated();
                 }
             }
@@ -595,7 +600,6 @@ public final class NightDisplayService extends SystemService
         @Override
         public void onStart() {
             mTwilightManager.registerListener(this, mHandler);
-            mLastActivatedTime = getLastActivatedTime();
 
             // Force an update to initialize state.
             updateActivated(mTwilightManager.getLastTwilightState());
@@ -604,14 +608,10 @@ public final class NightDisplayService extends SystemService
         @Override
         public void onStop() {
             mTwilightManager.unregisterListener(this);
-            mLastActivatedTime = null;
         }
 
         @Override
         public void onActivated(boolean activated) {
-            if (mIsActivated != null) {
-                mLastActivatedTime = getLastActivatedTime();
-            }
         }
 
         @Override
