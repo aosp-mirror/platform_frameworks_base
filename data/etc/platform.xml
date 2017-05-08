@@ -45,6 +45,7 @@
     <permission name="android.permission.BLUETOOTH_STACK" >
         <group gid="bluetooth" />
         <group gid="wakelock" />
+        <group gid="uhid" />
     </permission>
 
     <permission name="android.permission.NET_TUNNELING" >
