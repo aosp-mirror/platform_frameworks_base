@@ -1370,7 +1370,23 @@ class WindowStateAnimator {
             int posX = mTmpSize.left;
             int posY = mTmpSize.top;
             task.mStack.getDimBounds(mTmpStackBounds);
+
+            boolean allowStretching = false;
             task.mStack.getFinalAnimationSourceHintBounds(mTmpSourceBounds);
+            // If we don't have source bounds, we can attempt to use the content insets
+            // in the following scenario:
+            //    1. We have content insets.
+            //    2. We are not transitioning to full screen
+            // We have to be careful to check "lastAnimatingBoundsWasToFullscreen" rather than
+            // the mBoundsAnimating state, as we may have already left it and only be here
+            // because of the force-scale until resize state.
+            if (mTmpSourceBounds.isEmpty() && (mWin.mLastRelayoutContentInsets.width() > 0
+                    || mWin.mLastRelayoutContentInsets.height() > 0)
+                        && !task.mStack.lastAnimatingBoundsWasToFullscreen()) {
+                mTmpSourceBounds.set(task.mStack.mPreAnimationBounds);
+                mTmpSourceBounds.inset(mWin.mLastRelayoutContentInsets);
+                allowStretching = true;
+            }
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
                 // current stack bounds
@@ -1380,14 +1396,24 @@ class WindowStateAnimator {
                 // and source bounds
                 float finalWidth = mTmpAnimatingBounds.width();
                 float initialWidth = mTmpSourceBounds.width();
-                float t = (surfaceContentWidth - mTmpStackBounds.width())
+                float tw = (surfaceContentWidth - mTmpStackBounds.width())
                         / (surfaceContentWidth - mTmpAnimatingBounds.width());
-                mExtraHScale = (initialWidth + t * (finalWidth - initialWidth)) / initialWidth;
-                mExtraVScale = mExtraHScale;
+                float th = tw;
+                mExtraHScale = (initialWidth + tw * (finalWidth - initialWidth)) / initialWidth;
+                if (allowStretching) {
+                    float finalHeight = mTmpAnimatingBounds.height();
+                    float initialHeight = mTmpSourceBounds.height();
+                    th = (surfaceContentHeight - mTmpStackBounds.height())
+                        / (surfaceContentHeight - mTmpAnimatingBounds.height());
+                    mExtraVScale = (initialHeight + tw * (finalHeight - initialHeight))
+                            / initialHeight;
+                } else {
+                    mExtraVScale = mExtraHScale;
+                }
 
                 // Adjust the position to account for the inset bounds
-                posX -= (int) (t * mExtraHScale * mTmpSourceBounds.left);
-                posY -= (int) (t * mExtraVScale * mTmpSourceBounds.top);
+                posX -= (int) (tw * mExtraHScale * mTmpSourceBounds.left);
+                posY -= (int) (th * mExtraVScale * mTmpSourceBounds.top);
 
                 // Always clip to the stack bounds since the surface can be larger with the current
                 // scale
