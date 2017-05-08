@@ -35,6 +35,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
@@ -123,8 +124,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mLightBarController = lightBarController;
         mScrimBehindAlpha = context.getResources().getFloat(R.dimen.scrim_behind_alpha);
 
-        mColorExtractor = new ColorExtractor(context);
-        mColorExtractor.setListener(this);
+        mColorExtractor = Dependency.get(ColorExtractor.class);
+        mColorExtractor.addOnColorsChangedListener(this);
         mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK);
         mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM);
         mNeedsDrawableColorUpdate = true;
