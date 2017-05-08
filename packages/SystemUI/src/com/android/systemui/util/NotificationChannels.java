@@ -30,6 +30,7 @@ public class NotificationChannels extends SystemUI {
     public static String SCREENSHOTS = "SCN";
     public static String GENERAL     = "GEN";
     public static String STORAGE     = "DSK";
+    public static String TVPIP       = "TPP";
 
     @VisibleForTesting
     static void createAll(Context context) {
@@ -55,6 +56,15 @@ public class NotificationChannels extends SystemUI {
                                 ? NotificationManager.IMPORTANCE_DEFAULT
                                 : NotificationManager.IMPORTANCE_LOW)
                 ));
+        if (isTv(context)) {
+            // TV specific notification channel for TV PIP controls.
+            // Importance should be {@link NotificationManager#IMPORTANCE_MAX} to have the highest
+            // priority, so it can be shown in all times.
+            nm.createNotificationChannel(new NotificationChannel(
+                    TVPIP,
+                    context.getString(R.string.notification_channel_tv_pip),
+                    NotificationManager.IMPORTANCE_MAX));
+        }
     }
 
     @Override

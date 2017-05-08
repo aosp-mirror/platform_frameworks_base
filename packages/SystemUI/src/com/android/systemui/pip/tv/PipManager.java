@@ -61,7 +61,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
  */
 public class PipManager implements BasePipManager {
     private static final String TAG = "PipManager";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
     private static final String SETTINGS_PACKAGE_AND_CLASS_DELIMITER = "/";
 
     private static PipManager sPipManager;
@@ -122,6 +123,7 @@ public class PipManager implements BasePipManager {
     private ComponentName mPipComponentName;
     private MediaController mPipMediaController;
     private String[] mLastPackagesResourceGranted;
+    private PipNotification mPipNotification;
 
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
@@ -246,6 +248,8 @@ public class PipManager implements BasePipManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
+
+        mPipNotification = new PipNotification(context);
     }
 
     private void loadConfigurationsAndApply() {
@@ -267,6 +271,7 @@ public class PipManager implements BasePipManager {
      */
     public void onConfigurationChanged() {
         loadConfigurationsAndApply();
+        mPipNotification.onConfigurationChanged(mContext);
     }
 
     /**
@@ -345,7 +350,7 @@ public class PipManager implements BasePipManager {
      * @param state In Pip state also used to determine the new size for the Pip.
      */
     void resizePinnedStack(int state) {
-        if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state);
+        if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state, new Exception());
         boolean wasStateNoPip = (mState == STATE_NO_PIP);
         mResumeResizePinnedStackRunnable = state;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -511,8 +516,8 @@ public class PipManager implements BasePipManager {
 
     /**
      * Returns the PIPed activity's playback state.
-     * This returns one of {@link PLAYBACK_STATE_PLAYING}, {@link PLAYBACK_STATE_PAUSED},
-     * or {@link PLAYBACK_STATE_UNAVAILABLE}.
+     * This returns one of {@link #PLAYBACK_STATE_PLAYING}, {@link #PLAYBACK_STATE_PAUSED},
+     * or {@link #PLAYBACK_STATE_UNAVAILABLE}.
      */
     int getPlaybackState() {
         if (mPipMediaController == null || mPipMediaController.getPlaybackState() == null) {
