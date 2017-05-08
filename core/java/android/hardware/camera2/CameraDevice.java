@@ -107,7 +107,8 @@ public abstract class CameraDevice implements AutoCloseable {
     /**
      * Create a request suitable for zero shutter lag still capture. This means
      * means maximizing image quality without compromising preview frame rate.
-     * AE/AWB/AF should be on auto mode.
+     * AE/AWB/AF should be on auto mode. This is intended for application-operated ZSL. For
+     * device-operated ZSL, use {@link CaptureRequest#CONTROL_ENABLE_ZSL} if available.
      * This template is guaranteed to be supported on camera devices that support the
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING PRIVATE_REPROCESSING}
      * capability or the
@@ -115,6 +116,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * capability.
      *
      * @see #createCaptureRequest
+     * @see CaptureRequest#CONTROL_ENABLE_ZSL
      */
     public static final int TEMPLATE_ZERO_SHUTTER_LAG = 5;
 
