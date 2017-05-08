@@ -40,6 +40,7 @@ import android.view.View;
 import android.widget.TextViewMetrics;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
@@ -77,6 +78,8 @@ final class TextClassifierImpl implements TextClassifier {
 
     private final Context mContext;
 
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
+
     private final Object mSmartSelectionLock = new Object();
     @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
     private Map<Locale, String> mModelFilePaths;
@@ -105,7 +108,8 @@ final class TextClassifierImpl implements TextClassifier {
                 if (start <= end
                         && start >= 0 && end <= string.length()
                         && start <= selectionStartIndex && end >= selectionEndIndex) {
-                    final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
+                    final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end)
+                            .setLogSource(LOG_TAG);
                     final SmartSelection.ClassificationResult[] results =
                             smartSelection.classifyText(
                                     string, start, end,
@@ -171,6 +175,13 @@ final class TextClassifierImpl implements TextClassifier {
         }
         // Getting here means something went wrong, return a NO_OP result.
         return TextClassifier.NO_OP.getLinks(text, linkMask, defaultLocales);
+    }
+
+    @Override
+    public void logEvent(String source, String event) {
+        if (LOG_TAG.equals(source)) {
+            mMetricsLogger.count(event, 1);
+        }
     }
 
     private SmartSelection getSmartSelection(LocaleList localeList) throws FileNotFoundException {
