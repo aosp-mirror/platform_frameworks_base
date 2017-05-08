@@ -101,17 +101,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
-    public static final int USER_LOCKED_ALLOWED = 0x00000040;
-
-    /**
-     * @hide
-     */
     public static final int USER_LOCKED_SHOW_BADGE = 0x00000080;
-
-    /**
-     * @hide
-     */
-    public static final int USER_LOCKED_AUDIO_ATTRIBUTES = 0x00000100;
 
     /**
      * @hide
@@ -123,9 +113,7 @@ public final class NotificationChannel implements Parcelable {
             USER_LOCKED_LIGHTS,
             USER_LOCKED_VIBRATION,
             USER_LOCKED_SOUND,
-            USER_LOCKED_ALLOWED,
             USER_LOCKED_SHOW_BADGE,
-            USER_LOCKED_AUDIO_ATTRIBUTES
     };
 
     private static final int DEFAULT_LIGHT_COLOR = 0;
@@ -268,6 +256,13 @@ public final class NotificationChannel implements Parcelable {
      */
     public void lockFields(int field) {
         mUserLockedFields |= field;
+    }
+
+    /**
+     * @hide
+     */
+    public void unlockFields(int field) {
+        mUserLockedFields &= ~field;
     }
 
     /**
