@@ -212,6 +212,10 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_LOGOUT_USER = 1011;
 
+    // Notify the user that a TV PIP is running.
+    // Package: com.android.systemui
+    NOTE_TV_PIP = 1100;
+
     // Communicate to the user about remote bugreports.
     // Package: android
     NOTE_REMOTE_BUGREPORT = 678432343;
