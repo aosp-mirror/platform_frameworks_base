@@ -439,7 +439,7 @@ final class UserController {
                 }
             }
 
-            Slog.d(TAG, "Sending BOOT_COMPLETE user #" + userId);
+            Slog.i(TAG, "Sending BOOT_COMPLETE user #" + userId);
             // Do not report secondary users, runtime restarts or first boot/upgrade
             if (userId == UserHandle.USER_SYSTEM
                     && !mInjector.isRuntimeRestarted() && !mInjector.isFirstBootOrUpgrade()) {
@@ -451,7 +451,14 @@ final class UserController {
             bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
                     | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-            mInjector.broadcastIntentLocked(bootIntent, null, null, 0, null, null,
+            mInjector.broadcastIntentLocked(bootIntent, null, new IIntentReceiver.Stub() {
+                @Override
+                public void performReceive(Intent intent, int resultCode, String data,
+                        Bundle extras, boolean ordered, boolean sticky, int sendingUser)
+                        throws RemoteException {
+                    Slog.i(UserController.TAG, "Finished processing BOOT_COMPLETED for u" + userId);
+                }
+            }, 0, null, null,
                     new String[] { android.Manifest.permission.RECEIVE_BOOT_COMPLETED },
                     AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
         }
