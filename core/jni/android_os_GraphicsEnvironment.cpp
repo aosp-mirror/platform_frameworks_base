@@ -16,7 +16,7 @@
 
 #define LOG_TAG "GraphicsEnvironment"
 
-#include <ui/GraphicsEnv.h>
+#include <graphicsenv/GraphicsEnv.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "core_jni_helpers.h"
 
