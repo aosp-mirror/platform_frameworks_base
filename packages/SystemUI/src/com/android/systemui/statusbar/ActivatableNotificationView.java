@@ -891,7 +891,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * @return the calculated background color
      */
     private int calculateBgColor(boolean withTint, boolean withOverRide) {
-        if (mDark) {
+        if (withTint && mDark) {
             return getContext().getColor(R.color.notification_material_background_dark_color);
         }
         if (withOverRide && mOverrideTint != NO_COLOR) {

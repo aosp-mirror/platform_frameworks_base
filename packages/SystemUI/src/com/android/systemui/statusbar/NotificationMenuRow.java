@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.service.notification.StatusBarNotification;
 import android.view.LayoutInflater;
@@ -107,7 +108,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
-        mHandler = new Handler();
+        mHandler = new Handler(Looper.getMainLooper());
         mMenuItems = new ArrayList<>();
         mSnoozeItem = createSnoozeItem(context);
         mInfoItem = createInfoItem(context);
