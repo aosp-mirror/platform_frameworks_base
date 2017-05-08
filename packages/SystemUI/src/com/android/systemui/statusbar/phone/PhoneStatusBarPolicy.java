@@ -579,6 +579,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .setComponent(aiaComponent)
                     .setAction(Intent.ACTION_VIEW)
                     .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addCategory("unique:" + System.currentTimeMillis())
                     .putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName)
                     .putExtra(Intent.EXTRA_VERSION_CODE, appInfo.versionCode)
                     .putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, pendingIntent);
