@@ -157,6 +157,8 @@ public abstract class Vibrator {
         // This call needs to continue throwing ArrayIndexOutOfBoundsException but ignore all other
         // exceptions for compatibility purposes
         if (repeat < -1 || repeat >= pattern.length) {
+            Log.e(TAG, "vibrate called with repeat index out of bounds" +
+                    " (pattern.length=" + pattern.length + ", index=" + repeat + ")");
             throw new ArrayIndexOutOfBoundsException();
         }
 
