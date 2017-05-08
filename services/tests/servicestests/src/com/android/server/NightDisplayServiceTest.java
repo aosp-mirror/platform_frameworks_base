@@ -16,10 +16,12 @@
 
 package com.android.server;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
@@ -32,6 +34,7 @@ import com.android.internal.app.NightDisplayController.LocalTime;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.display.DisplayTransformManager;
 import com.android.server.display.NightDisplayService;
+import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 import org.junit.After;
@@ -41,6 +44,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.doReturn;
@@ -51,7 +58,7 @@ public class NightDisplayServiceTest {
     private Context mContext;
     private int mUserId;
 
-    private TwilightManager mTwilightManager;
+    private MockTwilightManager mTwilightManager;
 
     private NightDisplayController mNightDisplayController;
     private NightDisplayService mNightDisplayService;
@@ -73,7 +80,7 @@ public class NightDisplayServiceTest {
         final DisplayTransformManager dtm = Mockito.mock(DisplayTransformManager.class);
         LocalServices.addService(DisplayTransformManager.class, dtm);
 
-        mTwilightManager = Mockito.mock(TwilightManager.class);
+        mTwilightManager = new MockTwilightManager();
         LocalServices.addService(TwilightManager.class, mTwilightManager);
 
         mNightDisplayController = new NightDisplayController(mContext, mUserId);
@@ -526,23 +533,371 @@ public class NightDisplayServiceTest {
         assertActivated(true /* activated */);
     }
 
-    /**
-     * Convenience for making a {@link LocalTime} instance with an offset relative to now.
-     *
-     * @param offsetMinutes the offset relative to now (in minutes)
-     * @return the LocalTime instance
-     */
-    private LocalTime getLocalTimeRelativeToNow(int offsetMinutes) {
-        final Calendar c = Calendar.getInstance();
-        c.add(Calendar.MINUTE, offsetMinutes);
-        return new LocalTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOffAfterNight_turnsOff() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOffBeforeNight_turnsOff() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(false /* activated */, -180 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOffDuringNight_turnsOff() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOffInFuture_turnsOff() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOnAfterNight_turnsOn() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOnBeforeNight_turnsOff() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(true /* activated */, -180 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOnDuringNight_turnsOff() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedAfterNight_ifOnInFuture_turnsOff() {
+        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
+        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOffAfterNight_turnsOff() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(false /* activated */, 180 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOffBeforeNight_turnsOff() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOffDuringNight_turnsOff() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOffInPast_turnsOff() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOnAfterNight_turnsOff() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(true /* activated */, 180 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOnBeforeNight_turnsOff() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOnDuringNight_turnsOff() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedBeforeNight_ifOnInPast_turnsOn() {
+        setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
+        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOffAfterNight_turnsOn() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOffBeforeNight_turnsOn() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOffDuringNightInFuture_turnsOn() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOffDuringNightInPast_turnsOff() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(false /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(false /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOnAfterNight_turnsOn() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOnBeforeNight_turnsOn() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOnDuringNightInFuture_turnsOn() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
+    }
+
+    @Test
+    public void twilightSchedule_whenRebootedDuringNight_ifOnDuringNightInPast_turnsOn() {
+        setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
+        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+
+        final TwilightState state = mTwilightManager.getLastTwilightState();
+        mTwilightManager.setTwilightState(null);
+
+        startService();
+        assertActivated(true /* activated */);
+
+        mTwilightManager.setTwilightState(state);
+        assertActivated(true /* activated */);
     }
 
     /**
      * Configures Night display to use a custom schedule.
      *
      * @param startTimeOffset the offset relative to now to activate Night display (in minutes)
-     * @param endTimeOffset   the offset relative to now to deactivate Night display (in minutes)
+     * @param endTimeOffset the offset relative to now to deactivate Night display (in minutes)
      */
     private void setAutoModeCustom(int startTimeOffset, int endTimeOffset) {
         mNightDisplayController.setAutoMode(NightDisplayController.AUTO_MODE_CUSTOM);
@@ -553,34 +908,21 @@ public class NightDisplayServiceTest {
     /**
      * Configures Night display to use the twilight schedule.
      *
-     * @param sunsetOffset  the offset relative to now for sunset (in minutes)
+     * @param sunsetOffset the offset relative to now for sunset (in minutes)
      * @param sunriseOffset the offset relative to now for sunrise (in minutes)
      */
     private void setAutoModeTwilight(int sunsetOffset, int sunriseOffset) {
         mNightDisplayController.setAutoMode(NightDisplayController.AUTO_MODE_TWILIGHT);
-
-        final LocalTime sunset = getLocalTimeRelativeToNow(sunsetOffset);
-        final LocalTime sunrise = getLocalTimeRelativeToNow(sunriseOffset);
-
-        final Calendar now = Calendar.getInstance();
-        long sunsetMillis = sunset.getDateTimeBefore(now).getTimeInMillis();
-        long sunriseMillis = sunrise.getDateTimeBefore(now).getTimeInMillis();
-        if (sunsetMillis < sunriseMillis) {
-            sunsetMillis = sunset.getDateTimeAfter(now).getTimeInMillis();
-        } else {
-            sunriseMillis = sunrise.getDateTimeAfter(now).getTimeInMillis();
-        }
-
-        final TwilightState state = new TwilightState(sunriseMillis, sunsetMillis);
-        doReturn(state).when(mTwilightManager).getLastTwilightState();
+        mTwilightManager.setTwilightState(
+                getTwilightStateRelativeToNow(sunsetOffset, sunriseOffset));
     }
 
     /**
      * Configures the Night display activated state.
      *
-     * @param activated               {@code true} if Night display should be activated
+     * @param activated {@code true} if Night display should be activated
      * @param lastActivatedTimeOffset the offset relative to now to record that Night display was
-                                      activated (in minutes)
+     * activated (in minutes)
      */
     private void setActivated(boolean activated, int lastActivatedTimeOffset) {
         mNightDisplayController.setActivated(activated);
@@ -616,5 +958,94 @@ public class NightDisplayServiceTest {
         assertWithMessage("Invalid Night display activated state")
                 .that(mNightDisplayController.isActivated())
                 .isEqualTo(activated);
+    }
+
+    /**
+     * Convenience for making a {@link LocalTime} instance with an offset relative to now.
+     *
+     * @param offsetMinutes the offset relative to now (in minutes)
+     * @return the LocalTime instance
+     */
+    private static LocalTime getLocalTimeRelativeToNow(int offsetMinutes) {
+        final Calendar c = Calendar.getInstance();
+        c.add(Calendar.MINUTE, offsetMinutes);
+        return new LocalTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
+    }
+
+    /**
+     * Convenience for making a {@link TwilightState} instance with sunrise/sunset relative to now.
+     *
+     * @param sunsetOffset the offset relative to now for sunset (in minutes)
+     * @param sunriseOffset the offset relative to now for sunrise (in minutes)
+     * @return the TwilightState instance
+     */
+    private static TwilightState getTwilightStateRelativeToNow(int sunsetOffset,
+            int sunriseOffset) {
+        final LocalTime sunset = getLocalTimeRelativeToNow(sunsetOffset);
+        final LocalTime sunrise = getLocalTimeRelativeToNow(sunriseOffset);
+
+        final Calendar now = Calendar.getInstance();
+        long sunsetMillis = sunset.getDateTimeBefore(now).getTimeInMillis();
+        long sunriseMillis = sunrise.getDateTimeBefore(now).getTimeInMillis();
+        if (sunsetMillis < sunriseMillis) {
+            sunsetMillis = sunset.getDateTimeAfter(now).getTimeInMillis();
+        } else {
+            sunriseMillis = sunrise.getDateTimeAfter(now).getTimeInMillis();
+        }
+
+        return new TwilightState(sunriseMillis, sunsetMillis);
+    }
+
+    private static class MockTwilightManager implements TwilightManager {
+
+        private final Map<TwilightListener, Handler> mListeners = new HashMap<>();
+        private TwilightState mTwilightState;
+
+        /**
+         * Updates the TwilightState and notifies any registered listeners.
+         *
+         * @param state the new TwilightState to use
+         */
+        void setTwilightState(TwilightState state) {
+            synchronized (mListeners) {
+                mTwilightState = state;
+
+                final CountDownLatch latch = new CountDownLatch(mListeners.size());
+                for (Map.Entry<TwilightListener, Handler> entry : mListeners.entrySet()) {
+                    entry.getValue().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            entry.getKey().onTwilightStateChanged(state);
+                            latch.countDown();
+                        }
+                    });
+                }
+
+                try {
+                    latch.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        @Override
+        public void registerListener(@NonNull TwilightListener listener, @NonNull Handler handler) {
+            synchronized (mListeners) {
+                mListeners.put(listener, handler);
+            }
+        }
+
+        @Override
+        public void unregisterListener(@NonNull TwilightListener listener) {
+            synchronized (mListeners) {
+                mListeners.remove(listener);
+            }
+        }
+
+        @Override
+        public TwilightState getLastTwilightState() {
+            return mTwilightState;
+        }
     }
 }
