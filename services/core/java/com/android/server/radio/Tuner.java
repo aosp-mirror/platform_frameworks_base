@@ -61,6 +61,8 @@ class Tuner extends ITuner.Stub {
     private native void nativeTune(long nativeContext, int channel, int subChannel);
     private native void nativeCancel(long nativeContext);
 
+    private native RadioManager.ProgramInfo nativeGetProgramInformation(long nativeContext);
+
     @Override
     public void close() {
         synchronized (mLock) {
@@ -84,15 +86,6 @@ class Tuner extends ITuner.Stub {
         synchronized (mLock) {
             return nativeGetConfiguration(mNativeContext, mRegion);
         }
-    }
-
-    @Override
-    public int getProgramInformation(RadioManager.ProgramInfo[] infoOut) {
-        if (infoOut == null || infoOut.length != 1) {
-            throw new IllegalArgumentException("The argument must be an array of length 1");
-        }
-        Slog.d(TAG, "getProgramInformation()");
-        return RadioManager.STATUS_INVALID_OPERATION;
     }
 
     @Override
@@ -145,6 +138,13 @@ class Tuner extends ITuner.Stub {
     public void cancel() {
         synchronized (mLock) {
             nativeCancel(mNativeContext);
+        }
+    }
+
+    @Override
+    public RadioManager.ProgramInfo getProgramInformation() {
+        synchronized (mLock) {
+            return nativeGetProgramInformation(mNativeContext);
         }
     }
 }

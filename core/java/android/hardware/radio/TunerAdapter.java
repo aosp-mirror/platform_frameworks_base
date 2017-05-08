@@ -137,14 +137,33 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public int tune(int channel, int subChannel) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            mTuner.tune(channel, subChannel);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Can't tune", e);
+            return RadioManager.STATUS_INVALID_OPERATION;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Can't tune", e);
+            return RadioManager.STATUS_BAD_VALUE;
+        } catch (RemoteException e) {
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
+        }
+        return RadioManager.STATUS_OK;
     }
 
     @Override
     public int cancel() {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            mTuner.cancel();
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Can't cancel", e);
+            return RadioManager.STATUS_INVALID_OPERATION;
+        } catch (RemoteException e) {
+            Log.e(TAG, "service died", e);
+            return RadioManager.STATUS_DEAD_OBJECT;
+        }
+        return RadioManager.STATUS_OK;
     }
 
     @Override
@@ -153,7 +172,8 @@ class TunerAdapter extends RadioTuner {
             throw new IllegalArgumentException("The argument must be an array of length 1");
         }
         try {
-            return mTuner.getProgramInformation(info);
+            info[0] = mTuner.getProgramInformation();
+            return RadioManager.STATUS_OK;
         } catch (RemoteException e) {
             Log.e(TAG, "service died", e);
             return RadioManager.STATUS_DEAD_OBJECT;

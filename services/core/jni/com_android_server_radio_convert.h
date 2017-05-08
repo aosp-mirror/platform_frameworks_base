@@ -35,7 +35,7 @@ namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
 bool ThrowIfFailed(JNIEnv *env, const hardware::Return<V1_0::Result> &hidlResult);
-bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult);
+bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult, V1_0::Result halResult);
 
 JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
 V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
