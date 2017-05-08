@@ -2756,9 +2756,9 @@ public abstract class BatteryStats implements Parcelable {
             long elapsedRealtimeUs, String name, int which, String linePrefix) {
         long totalTimeMicros = 0;
         int count = 0;
-        long max = -1;
-        long current = -1;
-        long totalDuration = -1;
+        long max = 0;
+        long current = 0;
+        long totalDuration = 0;
         if (timer != null) {
             totalTimeMicros = timer.getTotalTimeLocked(elapsedRealtimeUs, which);
             count = timer.getCountLocked(which);
