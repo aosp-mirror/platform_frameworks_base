@@ -334,6 +334,7 @@ cc_test {
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/TextDropShadowCacheTests.cpp",
         "tests/unit/TextureCacheTests.cpp",
+	"tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
     ],
 }

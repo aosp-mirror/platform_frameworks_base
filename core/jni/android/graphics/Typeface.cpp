@@ -30,14 +30,14 @@ using namespace android;
 
 static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandle, jint style) {
     Typeface* family = reinterpret_cast<Typeface*>(familyHandle);
-    Typeface* face = Typeface::createFromTypeface(family, (SkTypeface::Style)style);
+    Typeface* face = Typeface::createRelative(family, (SkTypeface::Style)style);
     // TODO: the following logic shouldn't be necessary, the above should always succeed.
     // Try to find the closest matching font, using the standard heuristic
     if (NULL == face) {
-        face = Typeface::createFromTypeface(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
+        face = Typeface::createRelative(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
     }
     for (int i = 0; NULL == face && i < 4; i++) {
-        face = Typeface::createFromTypeface(family, (SkTypeface::Style)i);
+        face = Typeface::createRelative(family, (SkTypeface::Style)i);
     }
     return reinterpret_cast<jlong>(face);
 }
@@ -45,8 +45,7 @@ static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandl
 static jlong Typeface_createFromTypefaceWithExactStyle(JNIEnv* env, jobject, jlong nativeInstance,
         jint weight, jboolean italic) {
     Typeface* baseTypeface = reinterpret_cast<Typeface*>(nativeInstance);
-    return reinterpret_cast<jlong>(
-            Typeface::createFromTypefaceWithStyle(baseTypeface, weight, italic));
+    return reinterpret_cast<jlong>(Typeface::createAbsolute(baseTypeface, weight, italic));
 }
 
 static jlong Typeface_createFromTypefaceWithVariation(JNIEnv* env, jobject, jlong familyHandle,
@@ -68,7 +67,7 @@ static jlong Typeface_createFromTypefaceWithVariation(JNIEnv* env, jobject, jlon
 
 static jlong Typeface_createWeightAlias(JNIEnv* env, jobject, jlong familyHandle, jint weight) {
     Typeface* family = reinterpret_cast<Typeface*>(familyHandle);
-    Typeface* face = Typeface::createWeightAlias(family, weight);
+    Typeface* face = Typeface::createWithDifferentBaseWeight(family, weight);
     return reinterpret_cast<jlong>(face);
 }
 
@@ -82,9 +81,9 @@ static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
     return face->fSkiaStyle;
 }
 
-static jint Typeface_getBaseWeight(JNIEnv* env, jobject obj, jlong faceHandle) {
+static jint Typeface_getWeight(JNIEnv* env, jobject obj, jlong faceHandle) {
     Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
-    return face->fBaseWeight;
+    return face->fStyle.getWeight() * 100;
 }
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray,
@@ -134,7 +133,7 @@ static const JNINativeMethod gTypefaceMethods[] = {
     { "nativeCreateWeightAlias",  "(JI)J", (void*)Typeface_createWeightAlias },
     { "nativeUnref",              "(J)V",  (void*)Typeface_unref },
     { "nativeGetStyle",           "(J)I",  (void*)Typeface_getStyle },
-    { "nativeGetBaseWeight",      "(J)I",  (void*)Typeface_getBaseWeight },
+    { "nativeGetWeight",      "(J)I",  (void*)Typeface_getWeight },
     { "nativeCreateFromArray",    "([JII)J",
                                            (void*)Typeface_createFromArray },
     { "nativeSetDefault",         "(J)V",   (void*)Typeface_setDefault },
