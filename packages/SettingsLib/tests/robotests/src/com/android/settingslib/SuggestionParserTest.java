@@ -16,8 +16,6 @@
 
 package com.android.settingslib;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -36,19 +34,24 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.res.ResourceLoader;
 import org.robolectric.res.builder.DefaultPackageManager;
+import org.robolectric.res.builder.RobolectricPackageManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(SettingLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class SuggestionParserTest {
 
     private Context mContext;
+    private RobolectricPackageManager mPackageManager;
     private SuggestionParser mSuggestionParser;
     private SuggestionParser.SuggestionCategory mMultipleCategory;
     private SuggestionParser.SuggestionCategory mExclusiveCategory;
+    private SuggestionParser.SuggestionCategory mExpiredExclusiveCategory;
     private List<Tile> mSuggestionsBeforeDismiss;
     private List<Tile> mSuggestionsAfterDismiss;
     private SharedPreferences mPrefs;
@@ -59,6 +62,7 @@ public class SuggestionParserTest {
         RuntimeEnvironment.setRobolectricPackageManager(
                 new TestPackageManager(RuntimeEnvironment.getAppResourceLoader()));
         mContext = RuntimeEnvironment.application;
+        mPackageManager = RuntimeEnvironment.getRobolectricPackageManager();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         mSuggestion = new Tile();
         mSuggestion.intent = new Intent("action");
@@ -70,21 +74,36 @@ public class SuggestionParserTest {
         mExclusiveCategory = new SuggestionParser.SuggestionCategory();
         mExclusiveCategory.category = "category2";
         mExclusiveCategory.exclusive = true;
-        mSuggestionParser = new SuggestionParser(
-                mContext, mPrefs, Arrays.asList(mMultipleCategory, mExclusiveCategory), "0,0");
+        mExpiredExclusiveCategory = new SuggestionParser.SuggestionCategory();
+        mExpiredExclusiveCategory.category = "category3";
+        mExpiredExclusiveCategory.exclusive = true;
+        mExpiredExclusiveCategory.exclusiveExpireDaysInMillis = 0;
+
+        mSuggestionParser = new SuggestionParser(mContext, mPrefs,
+                Arrays.asList(mMultipleCategory, mExclusiveCategory, mExpiredExclusiveCategory),
+                "0,0");
 
         ResolveInfo info1 = TileUtilsTest.newInfo(true, "category1");
         info1.activityInfo.packageName = "pkg";
+        ResolveInfo infoDupe1 = TileUtilsTest.newInfo(true, "category1");
+        infoDupe1.activityInfo.packageName = "pkg";
+
         ResolveInfo info2 = TileUtilsTest.newInfo(true, "category1");
         info2.activityInfo.packageName = "pkg2";
         ResolveInfo info3 = TileUtilsTest.newInfo(true, "category2");
         info3.activityInfo.packageName = "pkg3";
+        ResolveInfo info4 = TileUtilsTest.newInfo(true, "category3");
+        info4.activityInfo.packageName = "pkg4";
 
         Intent intent1 = new Intent(Intent.ACTION_MAIN).addCategory("category1");
         Intent intent2 = new Intent(Intent.ACTION_MAIN).addCategory("category2");
-        RuntimeEnvironment.getRobolectricPackageManager().addResolveInfoForIntent(intent1, info1);
-        RuntimeEnvironment.getRobolectricPackageManager().addResolveInfoForIntent(intent1, info2);
-        RuntimeEnvironment.getRobolectricPackageManager().addResolveInfoForIntent(intent2, info3);
+        Intent intent3 = new Intent(Intent.ACTION_MAIN).addCategory("category3");
+
+        mPackageManager.addResolveInfoForIntent(intent1, info1);
+        mPackageManager.addResolveInfoForIntent(intent1, info2);
+        mPackageManager.addResolveInfoForIntent(intent1, infoDupe1);
+        mPackageManager.addResolveInfoForIntent(intent2, info3);
+        mPackageManager.addResolveInfoForIntent(intent3, info4);
     }
 
     @Test
@@ -115,16 +134,42 @@ public class SuggestionParserTest {
     }
 
     @Test
-    public void testGetSuggestion_exclusiveNotAvailable() {
-        RuntimeEnvironment.getRobolectricPackageManager().removeResolveInfosForIntent(
+    public void testGetSuggestion_exclusiveNotAvailable_onlyRegularCategoryAndNoDupe() {
+        mPackageManager.removeResolveInfosForIntent(
                 new Intent(Intent.ACTION_MAIN).addCategory("category2"),
                 "pkg3");
+        mPackageManager.removeResolveInfosForIntent(
+                new Intent(Intent.ACTION_MAIN).addCategory("category3"),
+                "pkg4");
 
         // If exclusive item is not available, the other categories should be shown
         final List<Tile> suggestions = mSuggestionParser.getSuggestions();
+
         assertThat(suggestions).hasSize(2);
         assertThat(suggestions.get(0).category).isEqualTo("category1");
+        assertThat(suggestions.get(0).intent.getComponent().getPackageName()).isEqualTo("pkg");
         assertThat(suggestions.get(1).category).isEqualTo("category1");
+        assertThat(suggestions.get(1).intent.getComponent().getPackageName()).isEqualTo("pkg2");
+    }
+
+    @Test
+    public void testGetSuggestion_exclusiveExpiredAvailable_shouldLoadWithRegularCategory() {
+        // First remove permanent exclusive
+        mPackageManager.removeResolveInfosForIntent(
+                new Intent(Intent.ACTION_MAIN).addCategory("category2"),
+                "pkg3");
+        // Set the other exclusive to be expired.
+        mPrefs.edit()
+                .putLong(mExpiredExclusiveCategory.category + "_setup_time",
+                        System.currentTimeMillis() - 1000)
+                .commit();
+
+        // If exclusive is expired, they should be shown together with the other categories
+        final List<Tile> suggestions = mSuggestionParser.getSuggestions();
+        assertThat(suggestions).hasSize(3);
+        assertThat(suggestions.get(0).category).isEqualTo("category1");
+        assertThat(suggestions.get(1).category).isEqualTo("category1");
+        assertThat(suggestions.get(2).category).isEqualTo("category3");
     }
 
     @Test
