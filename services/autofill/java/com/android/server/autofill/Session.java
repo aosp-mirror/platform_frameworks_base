@@ -419,7 +419,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         if (response == null) {
             if ((requestFlags & FLAG_MANUAL_REQUEST) != 0) {
-                getUiForShowing().showError(R.string.autofill_error_cannot_autofill);
+                getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
             }
             // Nothing to be done, but need to notify client.
             notifyUnavailableToClient();
@@ -469,7 +469,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
         mMetricsLogger.write(log);
 
-        getUiForShowing().showError(message);
+        getUiForShowing().showError(message, this);
         removeSelf();
     }
 
@@ -516,7 +516,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
         mMetricsLogger.write(log);
 
-        getUiForShowing().showError(message);
+        getUiForShowing().showError(message, this);
         removeSelf();
     }
 
@@ -706,7 +706,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         // refactor auth to support partitions; if it doesn't, we need to
                         // investigate it further (it can be reproduced by running
                         // LoginActivityTest.testFillResponseAuthServiceHasNoData())
-                        mUi.hideAll();
+                        mUi.hideAll(this);
                     }
                     processResponseLocked(response);
                 } else {
@@ -851,7 +851,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             if (atLeastOneChanged) {
                 mService.setSaveShown();
-                getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName);
+                getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName,
+                        this);
 
                 mIsSaving = true;
                 return false;
@@ -1062,9 +1063,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                     //..and the UI
                     if (value.isText()) {
-                        getUiForShowing().filterFillUi(value.getTextValue().toString());
+                        getUiForShowing().filterFillUi(value.getTextValue().toString(), this);
                     } else {
-                        getUiForShowing().filterFillUi(null);
+                        getUiForShowing().filterFillUi(null, this);
                     }
                 }
                 break;
@@ -1076,7 +1077,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 // Remove the UI if the ViewState has changed.
                 if (mCurrentViewId != viewState.id) {
-                    mUi.hideFillUi(mCurrentViewId != null ? mCurrentViewId : null);
+                    mUi.hideFillUi(this);
                     mCurrentViewId = viewState.id;
                 }
 
@@ -1086,7 +1087,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             case ACTION_VIEW_EXITED:
                 if (mCurrentViewId == viewState.id) {
                     if (sVerbose) Slog.d(TAG, "Exiting view " + id);
-                    mUi.hideFillUi(viewState.id);
+                    mUi.hideFillUi(this);
                     mCurrentViewId = null;
                 }
                 break;
@@ -1123,7 +1124,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             filterText = value.getTextValue().toString();
         }
 
-        getUiForShowing().showFillUi(filledId, response, filterText, mPackageName);
+        getUiForShowing().showFillUi(filledId, response, filterText, mPackageName, this);
     }
 
     boolean isDestroyed() {
@@ -1434,8 +1435,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         mRemoteFillService.destroy();
-        mUi.hideAll();
-        mUi.setCallback(null);
+        mUi.hideAll(this);
+        mUi.clearCallback(this);
         mDestroyed = true;
         mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_FINISHED, mPackageName);
     }

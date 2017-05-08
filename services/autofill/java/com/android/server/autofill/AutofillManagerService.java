@@ -118,7 +118,7 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                mUi.hideAll();
+                mUi.hideAll(null);
             }
         }
     };
