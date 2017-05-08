@@ -54,6 +54,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
@@ -1356,7 +1357,7 @@ public class ShortcutService extends IShortcutService.Stub {
             if (icon == null) {
                 return; // has no icon
             }
-
+            int maxIconDimension = mMaxIconDimension;
             Bitmap bitmap;
             try {
                 switch (icon.getType()) {
@@ -1368,9 +1369,12 @@ public class ShortcutService extends IShortcutService.Stub {
                         return;
                     }
                     case Icon.TYPE_BITMAP:
-                    case Icon.TYPE_ADAPTIVE_BITMAP: {
                         bitmap = icon.getBitmap(); // Don't recycle in this case.
                         break;
+                    case Icon.TYPE_ADAPTIVE_BITMAP: {
+                        bitmap = icon.getBitmap(); // Don't recycle in this case.
+                        maxIconDimension *= (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction());
+
                     }
                     default:
                         // This shouldn't happen because we've already validated the icon, but
@@ -1378,7 +1382,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         throw ShortcutInfo.getInvalidIconException();
                 }
                 mShortcutBitmapSaver.saveBitmapLocked(shortcut,
-                        mMaxIconDimension, mIconPersistFormat, mIconPersistQuality);
+                        maxIconDimension, mIconPersistFormat, mIconPersistQuality);
             } finally {
                 // Once saved, we won't use the original icon information, so null it out.
                 shortcut.clearIcon();
