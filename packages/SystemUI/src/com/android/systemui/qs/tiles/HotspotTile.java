@@ -39,14 +39,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     static final Intent TETHER_SETTINGS = new Intent().setComponent(new ComponentName(
              "com.android.settings", "com.android.settings.TetherSettings"));
 
-    private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_hotspot_enable_animation,
-                    R.drawable.ic_hotspot_disable);
     private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot_disable);
-    private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_hotspot_disable_animation,
-                    R.drawable.ic_hotspot_enable);
-    private final Icon mDisableNoAnimation = ResourceIcon.get(R.drawable.ic_hotspot_enable);
     private final Icon mUnavailable = ResourceIcon.get(R.drawable.ic_hotspot_unavailable);
 
     private final HotspotController mController;
@@ -116,6 +109,9 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
 
     @Override
     protected void handleUpdateState(AirplaneBooleanState state, Object arg) {
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
@@ -124,18 +120,12 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         } else {
             state.value = mController.isHotspotEnabled();
         }
-        state.icon = !state.value ? mDisable
-                : state.isTransient ? mEnabledStatic
-                : mEnable;
-        boolean wasAirplane = state.isAirplaneMode;
+        state.icon = mEnabledStatic;
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
         state.isTransient = mController.isHotspotTransient();
+        state.slash.isSlashed = !state.value && !state.isTransient;
         if (state.isTransient) {
             state.icon = ResourceIcon.get(R.drawable.ic_hotspot_transient_animation);
-        } else if (state.isAirplaneMode) {
-            state.icon = mUnavailable;
-        } else if (wasAirplane) {
-            state.icon = mDisableNoAnimation;
         }
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;

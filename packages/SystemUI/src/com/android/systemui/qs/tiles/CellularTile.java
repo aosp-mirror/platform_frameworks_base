@@ -127,13 +127,16 @@ public class CellularTile extends QSTileImpl<SignalState> {
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.value = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
-        state.icon = ResourceIcon.get(R.drawable.ic_data_unavailable);
         state.state = cb.airplaneModeEnabled || !cb.enabled ? Tile.STATE_UNAVAILABLE
                 : state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
+        state.slash.isSlashed = (state.state == Tile.STATE_INACTIVE);
         if (state.state == Tile.STATE_ACTIVE) {
             state.icon = ResourceIcon.get(R.drawable.ic_data_on);
         } else if (state.state == Tile.STATE_INACTIVE) {
-            state.icon = ResourceIcon.get(R.drawable.ic_data_off);
+            state.icon = ResourceIcon.get(R.drawable.ic_data_on);
         } else {
             state.icon = ResourceIcon.get(R.drawable.ic_data_unavailable);
         }
