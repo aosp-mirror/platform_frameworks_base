@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -97,6 +98,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
     }
 
     @Test
+    @Ignore("Flaky")
     public void testCaCertLoader() throws Exception {
         // Wait for one or two state changes from the CACertLoader(s) in the constructor of
         // mSecurityController
