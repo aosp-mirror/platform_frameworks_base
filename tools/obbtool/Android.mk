@@ -39,7 +39,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS := -Wall -Werror -Wno-mismatched-tags
 LOCAL_SRC_FILES := pbkdf2gen.cpp
 LOCAL_LDLIBS += -ldl
-LOCAL_STATIC_LIBRARIES := libcrypto_static
+LOCAL_STATIC_LIBRARIES := libcrypto
 
 include $(BUILD_HOST_EXECUTABLE)
 
