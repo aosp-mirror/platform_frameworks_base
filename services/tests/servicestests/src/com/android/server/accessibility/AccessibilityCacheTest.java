@@ -54,6 +54,7 @@ public class AccessibilityCacheTest {
     private static int OTHER_VIEW_ID = 0xCAB2;
     private static int PARENT_VIEW_ID = 0xFED4;
     private static int CHILD_VIEW_ID = 0xFEED;
+    private static int OTHER_CHILD_VIEW_ID = 0xACE2;
     private static int MOCK_CONNECTION_ID = 1;
 
     AccessibilityCache mAccessibilityCache;
@@ -479,6 +480,30 @@ public class AccessibilityCacheTest {
     public void nodeEventSaysHadContentDescriptionChange_getsRefreshed() {
         assertNodeIsRefreshedWithEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 AccessibilityEvent.CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION);
+    }
+
+    @Test
+    public void addNode_whenNodeBeingReplacedIsOwnGrandparent_doesntCrash() {
+        AccessibilityNodeInfo parentNodeInfo =
+                getNodeWithA11yAndWindowId(PARENT_VIEW_ID, WINDOW_ID_1);
+        parentNodeInfo.addChild(getMockViewWithA11yAndWindowIds(CHILD_VIEW_ID, WINDOW_ID_1));
+        parentNodeInfo.addChild(getMockViewWithA11yAndWindowIds(OTHER_CHILD_VIEW_ID, WINDOW_ID_1));
+        AccessibilityNodeInfo childNodeInfo =
+                getNodeWithA11yAndWindowId(CHILD_VIEW_ID, WINDOW_ID_1);
+        childNodeInfo.setParent(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
+        childNodeInfo.addChild(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
+
+        AccessibilityNodeInfo replacementParentNodeInfo =
+                getNodeWithA11yAndWindowId(PARENT_VIEW_ID, WINDOW_ID_1);
+        try {
+            mAccessibilityCache.add(parentNodeInfo);
+            mAccessibilityCache.add(childNodeInfo);
+            mAccessibilityCache.add(replacementParentNodeInfo);
+        } finally {
+            parentNodeInfo.recycle();
+            childNodeInfo.recycle();
+            replacementParentNodeInfo.recycle();
+        }
     }
 
     @Test
