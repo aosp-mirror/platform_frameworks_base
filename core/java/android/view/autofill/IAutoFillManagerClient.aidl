@@ -40,8 +40,7 @@ oneway interface IAutoFillManagerClient {
     /**
       * Autofills the activity with the contents of a dataset.
       */
-    void autofill(int sessionId, in IBinder windowToken, in List<AutofillId> ids,
-            in List<AutofillValue> values);
+    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values);
 
     /**
       * Authenticates a fill response or a data set.
@@ -58,18 +57,18 @@ oneway interface IAutoFillManagerClient {
     /**
      * Requests showing the fill UI.
      */
-    void requestShowFillUi(int sessionId, in IBinder windowToken, in AutofillId id, int width,
-            int height, in Rect anchorBounds, in IAutofillWindowPresenter presenter);
+    void requestShowFillUi(int sessionId, in AutofillId id, int width, int height,
+    in Rect anchorBounds, in IAutofillWindowPresenter presenter);
 
     /**
      * Requests hiding the fill UI.
      */
-    void requestHideFillUi(int sessionId, in IBinder windowToken, in AutofillId id);
+    void requestHideFillUi(int sessionId, in AutofillId id);
 
     /**
      * Notifies no fill UI will be shown.
      */
-    void notifyNoFillUi(int sessionId, in IBinder windowToken, in AutofillId id);
+    void notifyNoFillUi(int sessionId, in AutofillId id);
 
     /**
      * Starts the provided intent sender
