@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ટેક્સ્ટ ક્રિયાઓ"</string>
     <string name="email" msgid="4560673117055050403">"ઇમેઇલ"</string>
     <string name="dial" msgid="4204975095406423102">"ફોન"</string>
-    <string name="map" msgid="5441053548030107189">"નકશો"</string>
-    <string name="browse" msgid="6079864138582486027">"બ્રાઉઝ કરો"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"કેટલાક સિસ્ટમ કાર્યો કામ કરી શકશે નહીં"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"સિસ્ટમ માટે પર્યાપ્ત સ્ટોરેજ નથી. ખાતરી કરો કે તમારી પાસે 250MB ખાલી સ્થાન છે અને ફરીથી પ્રારંભ કરો."</string>
@@ -1178,10 +1180,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI માટે USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ઍક્સેસરીથી કનેક્ટ થયાં"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"વધુ વિકલ્પો માટે ટૅપ કરો."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (2256529893240208458) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (7811865061127547035) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"ઑડિયો ઍક્સેસરી સમર્થિત નથી"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"વધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ડીબગિંગ અક્ષમ કરવા માટે ટૅપ કરો."</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->

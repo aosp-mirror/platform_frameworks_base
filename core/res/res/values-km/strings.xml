@@ -268,7 +268,7 @@
     <string name="notification_channel_foreground_service" msgid="6665375982962336520">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
     <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
     <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"កម្មវិធី <xliff:g id="NUMBER">%1$d</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
-    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"ចុចដើម្បីទទួលបានព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ថ្ម និងទិន្នន័យ"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"របៀប​​​សុវត្ថិភាព"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ប្រព័ន្ធ​​ Android"</string>
@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"សកម្មភាព​អត្ថបទ"</string>
     <string name="email" msgid="4560673117055050403">"អ៊ីមែល"</string>
     <string name="dial" msgid="4204975095406423102">"ទូរសព្ទ"</string>
-    <string name="map" msgid="5441053548030107189">"ផែនទី"</string>
-    <string name="browse" msgid="6079864138582486027">"រុក​រក"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"អស់​ទំហំ​ផ្ទុក"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"មិន​មាន​ទំហំ​ផ្ទុក​​គ្រប់​គ្រាន់​សម្រាប់​ប្រព័ន្ធ​។ សូម​ប្រាកដ​ថា​អ្នក​មាន​ទំហំ​ទំនេរ​ 250MB ហើយ​ចាប់ផ្ដើម​ឡើង​វិញ។"</string>
@@ -1180,10 +1182,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB សម្រាប់ MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ប៉ះសម្រាប់ជម្រើសជាច្រើនទៀត"</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (2256529893240208458) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (7811865061127547035) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"មិនស្គាល់គ្រឿងបរិក្ខារសំឡេងទេ"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"ចុចដើម្បីទទួលព័ត៌មានបន្ថែម"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុសយូអេសប៊ី"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ជ្រើស​ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
