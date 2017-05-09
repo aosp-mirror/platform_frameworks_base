@@ -300,7 +300,7 @@ public final class BluetoothLeScanner {
                 // Scan stopped.
                 if (mScannerId == -1) return;
                 try {
-                    mBluetoothGatt.registerScanner(this);
+                    mBluetoothGatt.registerScanner(this, mWorkSource);
                     wait(REGISTRATION_CALLBACK_TIMEOUT_MILLIS);
                 } catch (InterruptedException | RemoteException e) {
                     Log.e(TAG, "application registeration exception", e);
@@ -364,7 +364,7 @@ public final class BluetoothLeScanner {
                         } else {
                             mScannerId = scannerId;
                             mBluetoothGatt.startScan(mScannerId, mSettings, mFilters,
-                                    mWorkSource, mResultStorages,
+                                    mResultStorages,
                                     ActivityThread.currentOpPackageName());
                         }
                     } catch (RemoteException e) {
