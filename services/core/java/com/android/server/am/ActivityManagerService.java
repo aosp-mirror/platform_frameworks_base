@@ -6945,7 +6945,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Check whether the next backup agent is in this process...
-        if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.uid) {
+        if (!badApp && mBackupTarget != null && mBackupTarget.app == app) {
             if (DEBUG_BACKUP) Slog.v(TAG_BACKUP,
                     "New app is backup target, launching agent for " + app);
             notifyPackageUse(mBackupTarget.appInfo.packageName,
