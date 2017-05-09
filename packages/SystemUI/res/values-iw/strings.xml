@@ -393,7 +393,7 @@
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"הסר"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"האם ברצונך להמשיך בפעילות באתר?"</string>
-    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"התחל מחדש"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ברצוני להתחיל מחדש"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"כן, המשך"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"משתמש אורח"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"הסר את המשתמש האורח כדי למחוק אפליקציות ונתונים"</string>
@@ -729,8 +729,8 @@
     <string name="pip_notification_message" msgid="4171698133469539591">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, הקש כדי לפתוח את ההגדרות ולכבות את התכונה."</string>
     <string name="pip_play" msgid="1417176722760265888">"הפעל"</string>
     <string name="pip_pause" msgid="8881063404466476571">"השהה"</string>
-    <string name="pip_skip_to_next" msgid="1948440006726306284">"דלג אל הבא"</string>
-    <string name="pip_skip_to_prev" msgid="1955311326688637914">"דלג אל הקודם"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"ברצוני לדלג אל הבא"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"ברצוני לדלג אל הקודם"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"הטלפון כבה עקב התחממות"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"הטלפון פועל כרגיל עכשיו"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"הטלפון שלך התחמם יותר מדי וכבה כדי להתקרר. הטלפון פועל כרגיל עכשיו.\n\nייתכן שהטלפון יתחמם יותר מדי אם:\n	• תשתמש באפליקציות עתירות משאבים (כגון משחקים, אפליקציות וידאו או אפליקציות ניווט)\n	• תוריד או תעלה קבצים גדולים\n	• תשתמש בטלפון בטמפרטורות גבוהות"</string>

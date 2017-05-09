@@ -298,7 +298,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi បានបើក"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ខាស"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ភ្ជាប់"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ត្រៀម​រួចរាល់​ដើម្បី​ចាត់​ថ្នាក់"</string>
@@ -700,7 +700,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"កម្មវិធីអាចនឹងមិនដំណើរការនៅលើអេក្រង់បំបែកទេ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"កម្មវិធីមិនគាំទ្រអេក្រង់បំបែកជាពីរទេ"</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"កម្មវិធីនេះ​ប្រហែល​ជាមិនដំណើរការ​នៅលើ​អេក្រង់បន្ទាប់បន្សំទេ។"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"កម្មវិធី​នេះមិន​អាច​ចាប់ផ្តើម​បានទេ ដោយសារ​អេក្រង់បន្ទាប់បន្សំមិនស្គាល់វា។"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"កម្មវិធី​នេះមិន​អាច​ចាប់ផ្តើម​នៅលើ​អេក្រង់បន្ទាប់បន្សំបានទេ។"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"បើកការកំណត់"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"បើកការកំណត់រហ័ស"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"បិទការកំណត់រហ័ស"</string>
@@ -762,5 +762,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"រក្សានៅ​ដដែល"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ជំនួស"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"ចុចដើម្បីទទួលបានព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ថ្ម និងទិន្នន័យ"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
 </resources>

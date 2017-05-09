@@ -30,7 +30,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Upišite PIN kôd za otključavanje"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Pogrešan PIN kôd."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Napunjeno"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Puni se"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"Punjenje"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Brzo punjenje"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Sporo punjenje"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Priključite punjač."</string>

@@ -762,5 +762,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Қалсын"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ауыстыру"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Фонда жұмыс істеп тұрған қолданбалар"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батарея мен деректер трафигі туралы мәліметтер алу үшін түртіңіз"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
 </resources>

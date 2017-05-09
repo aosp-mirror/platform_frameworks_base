@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Dữ liệu di động"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dữ liệu di động đang bật"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Dữ liệu di động đang tắt"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Truy cập Internet qua Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Chia sẻ kết nối Internet qua Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Chế độ trên máy bay."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN đang bật."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Không có thẻ SIM nào."</string>
@@ -764,5 +764,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Giữ"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Thay thế"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Ứng dụng đang chạy trong nền"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Nhấn để biết chi tiết về pin và mức sử dụng dữ liệu"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
 </resources>

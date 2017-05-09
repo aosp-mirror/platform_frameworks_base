@@ -699,8 +699,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> नोटिफ़िकेशन: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"हो सकता है कि ऐप्लिकेशन विभाजित स्क्रीन के साथ काम ना करे."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ऐप विभाजित स्‍क्रीन का समर्थन नहीं करता है."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"हो सकता है कि ऐप्लिकेशन दूसरे प्रदर्शन पर काम नहीं करे."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"दूसरे प्रदर्शन पर यह ऐप्लिकेशन लॉन्च नहीं हो सकता."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"त्वरित सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"त्वरित सेटिंग बंद करें."</string>
@@ -761,6 +761,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> तक"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"रखें"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"बदलें"</string>
-    <string name="running_foreground_services_title" msgid="381024150898615683">"ऐप्लिकेशन बैकग्राउंड में चल रहे हैं"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"बैटरी और डेटा उपयोग के विवरण पाने के लिए टैप करें"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"बैकग्राउंड में चल रहे ऐप्लिकेशन"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"बैटरी और डेटा उपयोग के विवरण देखने के लिए टैप करें"</string>
 </resources>

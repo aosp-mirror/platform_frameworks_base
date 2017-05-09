@@ -702,7 +702,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Application incompatible avec l\'écran partagé."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"L\'application ne peut être lancée sur des écrans secondaires."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"L\'application ne peut pas être lancée sur des écrans secondaires."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Ouvrir les paramètres."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ouvrir la fenêtre de configuration rapide."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Fermer la fenêtre de configuration rapide."</string>

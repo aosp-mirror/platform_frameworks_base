@@ -346,7 +346,7 @@
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ചാർജായി"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ചാർജ്ജുചെയ്യുന്നു"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"പൂർണ്ണമായും ചാർജ്ജാകുന്നതിന്, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"ഫുൾ ചാർജാകാൻ, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"നെറ്റ്‌വർക്ക്\nനിരീക്ഷിക്കപ്പെടാം"</string>
     <string name="description_target_search" msgid="3091587249776033139">"തിരയൽ"</string>
@@ -700,7 +700,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"സ്പ്ലിറ്റ്-സ്ക്രീനിനൊപ്പം ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"സ്പ്ലിറ്റ്-സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നത് ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നതിനെ ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ക്രമീകരണം തുറക്കുക."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ദ്രുത ക്രമീകരണം തുറക്കുക."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ദ്രുത ക്രമീകരണം അടയ്ക്കുക."</string>
