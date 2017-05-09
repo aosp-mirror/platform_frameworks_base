@@ -563,7 +563,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mPanicPressOnBackBehavior;
     int mShortPressOnSleepBehavior;
     int mShortPressWindowBehavior;
-    boolean mAwake;
+    volatile boolean mAwake;
     boolean mScreenOnEarly;
     boolean mScreenOnFully;
     ScreenOnListener mScreenOnListener;
@@ -6811,6 +6811,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             return mScreenOnEarly;
         }
+    }
+
+    @Override
+    public boolean isInteractive() {
+        return mAwake;
     }
 
     /** {@inheritDoc} */
