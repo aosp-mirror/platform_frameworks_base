@@ -35,6 +35,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
 import java.lang.IllegalArgumentException;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 /**
@@ -114,10 +115,8 @@ public abstract class PlayerBase {
             mHasAppOpsPlayAudio = false;
         }
         try {
-            if (mIPlayer == null) {
-                throw new IllegalStateException("Cannot register a player with a null mIPlayer");
-            }
-            newPiid = getService().trackPlayer(new PlayerIdCard(mImplType, mAttributes, mIPlayer));
+            newPiid = getService().trackPlayer(
+                    new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this)));
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, player will not be tracked", e);
         }
@@ -407,46 +406,74 @@ public abstract class PlayerBase {
 
     //=====================================================================
     /**
-     * Implementation of IPlayer for all subclasses of PlayerBase
+     * Wrapper around an implementation of IPlayer for all subclasses of PlayerBase
+     * that doesn't keep a strong reference on PlayerBase
      */
-    private IPlayer mIPlayer = new IPlayer.Stub() {
+    private static class IPlayerWrapper extends IPlayer.Stub {
+        private final WeakReference<PlayerBase> mWeakPB;
+
+        public IPlayerWrapper(PlayerBase pb) {
+            mWeakPB = new WeakReference<PlayerBase>(pb);
+        }
+
         @Override
         public void start() {
-            playerStart();
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerStart();
+            }
         }
 
         @Override
         public void pause() {
-            playerPause();
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerPause();
+            }
         }
 
         @Override
         public void stop() {
-            playerStop();
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerStop();
+            }
         }
 
         @Override
         public void setVolume(float vol) {
-            baseSetVolume(vol, vol);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.baseSetVolume(vol, vol);
+            }
         }
 
         @Override
         public void setPan(float pan) {
-            baseSetPan(pan);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.baseSetPan(pan);
+            }
         }
 
         @Override
         public void setStartDelayMs(int delayMs) {
-            baseSetStartDelayMs(delayMs);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.baseSetStartDelayMs(delayMs);
+            }
         }
 
         @Override
         public void applyVolumeShaper(
                 @NonNull VolumeShaper.Configuration configuration,
                 @NonNull VolumeShaper.Operation operation) {
-            /* void */ playerApplyVolumeShaper(configuration, operation);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerApplyVolumeShaper(configuration, operation);
+            }
         }
-    };
+    }
 
     //=====================================================================
     /**
