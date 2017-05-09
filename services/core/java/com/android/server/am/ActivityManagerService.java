@@ -2908,7 +2908,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             // The activity manager only throws security exceptions, so let's
             // log all others.
             if (!(e instanceof SecurityException)) {
-                Slog.wtf(TAG, "Activity Manager Crash", e);
+                Slog.wtf(TAG, "Activity Manager Crash."
+                        + " UID:" + Binder.getCallingUid()
+                        + " PID:" + Binder.getCallingPid()
+                        + " TRANS:" + code, e);
             }
             throw e;
         }
