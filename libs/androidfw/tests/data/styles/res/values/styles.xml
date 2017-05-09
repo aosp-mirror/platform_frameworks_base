@@ -33,6 +33,12 @@
     <public type="attr" name="attr_indirect" id="0x7f010005" />
     <attr name="attr_indirect" />
 
+    <public type="attr" name="attr_six" id="0x7f010006" />
+    <attr name="attr_six" />
+
+    <public type="attr" name="attr_empty" id="0x7f010007" />
+    <attr name="attr_empty" />
+
     <public type="string" name="string_one" id="0x7f030000" />
     <string name="string_one">Hi</string>
 
@@ -48,11 +54,9 @@
         <item name="attr_two">"string"</item>
         <item name="attr_three">?attr/attr_indirect</item>
         <item name="attr_five">@string/string_one</item>
+        <item name="attr_empty">@empty</item>
     </style>
-    
-    <public type="attr" name="attr_six" id="0x7f010006" />
-    <attr name="attr_six" />
-    
+
     <public type="style" name="StyleThree" id="0x7f020002" />
     <style name="StyleThree">
         <item name="attr_six">6</item>
