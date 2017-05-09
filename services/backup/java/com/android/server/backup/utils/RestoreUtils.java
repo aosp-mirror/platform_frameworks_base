@@ -16,6 +16,9 @@
 
 package com.android.server.backup.utils;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -25,7 +28,6 @@ import android.os.Process;
 import android.util.Slog;
 
 import com.android.server.backup.FileMetadata;
-import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.restore.RestoreDeleteObserver;
 import com.android.server.backup.restore.RestoreInstallObserver;
 import com.android.server.backup.restore.RestorePolicy;
@@ -66,9 +68,8 @@ public class RestoreUtils {
             File dataDir) {
         boolean okay = true;
 
-        if (RefactoredBackupManagerService.DEBUG) {
-            Slog.d(RefactoredBackupManagerService.TAG,
-                    "Installing from backup: " + info.packageName);
+        if (DEBUG) {
+            Slog.d(TAG, "Installing from backup: " + info.packageName);
         }
 
         // The file content is an .apk file.  Copy it out to a staging location and
@@ -112,10 +113,9 @@ public class RestoreUtils {
                 // Okay, the install succeeded.  Make sure it was the right app.
                 boolean uninstall = false;
                 if (!installObserver.getPackageName().equals(info.packageName)) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "Restore stream claimed to include apk for "
-                                    + info.packageName + " but apk was really "
-                                    + installObserver.getPackageName());
+                    Slog.w(TAG, "Restore stream claimed to include apk for "
+                            + info.packageName + " but apk was really "
+                            + installObserver.getPackageName());
                     // delete the package we just put in place; it might be fraudulent
                     okay = false;
                     uninstall = true;
@@ -126,10 +126,9 @@ public class RestoreUtils {
                                 PackageManager.GET_SIGNATURES);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
                                 == 0) {
-                            Slog.w(RefactoredBackupManagerService.TAG,
-                                    "Restore stream contains apk of package "
-                                            + info.packageName
-                                            + " but it disallows backup/restore");
+                            Slog.w(TAG, "Restore stream contains apk of package "
+                                    + info.packageName
+                                    + " but it disallows backup/restore");
                             okay = false;
                         } else {
                             // So far so good -- do the signatures match the manifest?
@@ -139,23 +138,20 @@ public class RestoreUtils {
                                 // don't restore any of the file data.
                                 if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
                                         && (pkg.applicationInfo.backupAgentName == null)) {
-                                    Slog.w(RefactoredBackupManagerService.TAG,
-                                            "Installed app " + info.packageName
-                                                    + " has restricted uid and no agent");
+                                    Slog.w(TAG, "Installed app " + info.packageName
+                                            + " has restricted uid and no agent");
                                     okay = false;
                                 }
                             } else {
-                                Slog.w(RefactoredBackupManagerService.TAG,
-                                        "Installed app " + info.packageName
-                                                + " signatures do not match restore manifest");
+                                Slog.w(TAG, "Installed app " + info.packageName
+                                        + " signatures do not match restore manifest");
                                 okay = false;
                                 uninstall = true;
                             }
                         }
                     } catch (PackageManager.NameNotFoundException e) {
-                        Slog.w(RefactoredBackupManagerService.TAG,
-                                "Install of package " + info.packageName
-                                        + " succeeded but now not found");
+                        Slog.w(TAG, "Install of package " + info.packageName
+                                + " succeeded but now not found");
                         okay = false;
                     }
                 }
@@ -171,8 +167,7 @@ public class RestoreUtils {
                 }
             }
         } catch (IOException e) {
-            Slog.e(RefactoredBackupManagerService.TAG,
-                    "Unable to transcribe restored apk for install");
+            Slog.e(TAG, "Unable to transcribe restored apk for install");
             okay = false;
         } finally {
             apkFile.delete();

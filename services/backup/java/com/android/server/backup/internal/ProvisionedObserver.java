@@ -16,6 +16,9 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.util.Slog;
@@ -38,8 +41,8 @@ public class ProvisionedObserver extends ContentObserver {
         final boolean isProvisioned = backupManagerService.deviceIsProvisioned();
         // latch: never unprovision
         backupManagerService.setProvisioned(wasProvisioned || isProvisioned);
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.d(RefactoredBackupManagerService.TAG, "Provisioning change: was=" + wasProvisioned
+        if (MORE_DEBUG) {
+            Slog.d(TAG, "Provisioning change: was=" + wasProvisioned
                     + " is=" + isProvisioned + " now=" + backupManagerService.isProvisioned());
         }
 
@@ -47,9 +50,8 @@ public class ProvisionedObserver extends ContentObserver {
             if (backupManagerService.isProvisioned() && !wasProvisioned
                     && backupManagerService.isEnabled()) {
                 // we're now good to go, so start the backup alarms
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.d(RefactoredBackupManagerService.TAG,
-                            "Now provisioned, so starting backups");
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "Now provisioned, so starting backups");
                 }
                 KeyValueBackupJob.schedule(backupManagerService.getContext());
                 backupManagerService.scheduleNextFullBackupJob(0);

@@ -16,11 +16,11 @@
 
 package com.android.server.backup.utils;
 
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.app.backup.IFullBackupRestoreObserver;
 import android.os.RemoteException;
 import android.util.Slog;
-
-import com.android.server.backup.RefactoredBackupManagerService;
 
 /**
  * Utility methods to communicate with FullBackupRestoreObserver.
@@ -38,8 +38,7 @@ public class FullBackupRestoreObserverUtils {
             try {
                 observer.onStartRestore();
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG,
-                        "full restore observer went away: startRestore");
+                Slog.w(TAG, "full restore observer went away: startRestore");
                 observer = null;
             }
         }
@@ -61,8 +60,7 @@ public class FullBackupRestoreObserverUtils {
                 // TODO: use a more user-friendly name string
                 observer.onRestorePackage(name);
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG,
-                        "full restore observer went away: restorePackage");
+                Slog.w(TAG, "full restore observer went away: restorePackage");
                 observer = null;
             }
         }
@@ -81,8 +79,7 @@ public class FullBackupRestoreObserverUtils {
             try {
                 observer.onEndRestore();
             } catch (RemoteException e) {
-                Slog.w(RefactoredBackupManagerService.TAG,
-                        "full restore observer went away: endRestore");
+                Slog.w(TAG, "full restore observer went away: endRestore");
                 observer = null;
             }
         }

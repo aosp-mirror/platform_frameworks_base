@@ -16,6 +16,8 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.app.backup.BackupAgent;
 import android.util.Slog;
 
@@ -80,7 +82,7 @@ public class FileMetadata {
         b.append(" :: ");
         b.append(path);
 
-        Slog.i(RefactoredBackupManagerService.TAG, b.toString());
+        Slog.i(TAG, b.toString());
     }
 
 }

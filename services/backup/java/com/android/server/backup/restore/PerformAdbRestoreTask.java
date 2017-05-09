@@ -170,8 +170,7 @@ public class PerformAdbRestoreTask implements Runnable {
 
         // Are we able to restore shared-storage data?
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            mPackagePolicies.put(SHARED_BACKUP_AGENT_PACKAGE,
-                    RestorePolicy.ACCEPT);
+            mPackagePolicies.put(SHARED_BACKUP_AGENT_PACKAGE, RestorePolicy.ACCEPT);
         }
 
         FileInputStream rawInStream = null;
@@ -412,8 +411,7 @@ public class PerformAdbRestoreTask implements Runnable {
 
                 // decrypt the master key blob
                 result = attemptMasterKeyDecryption(decryptPassword, PBKDF_CURRENT,
-                        userSalt, ckSalt,
-                        rounds, userIvHex, masterKeyBlobHex, rawInStream, false);
+                        userSalt, ckSalt, rounds, userIvHex, masterKeyBlobHex, rawInStream, false);
                 if (result == null && pbkdf2Fallback) {
                     result = attemptMasterKeyDecryption(
                             decryptPassword, PBKDF_FALLBACK, userSalt, ckSalt,
@@ -644,11 +642,8 @@ public class PerformAdbRestoreTask implements Runnable {
                         boolean agentSuccess = true;
                         long toCopy = info.size;
                         try {
-                            mBackupManagerService
-                                    .prepareOperationTimeout(token,
-                                            TIMEOUT_RESTORE_INTERVAL,
-                                            null,
-                                            OP_TYPE_RESTORE_WAIT);
+                            mBackupManagerService.prepareOperationTimeout(
+                                    token, TIMEOUT_RESTORE_INTERVAL, null, OP_TYPE_RESTORE_WAIT);
 
                             if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
                                 if (DEBUG) {
@@ -825,11 +820,8 @@ public class PerformAdbRestoreTask implements Runnable {
                     final int token = mBackupManagerService.generateRandomIntegerToken();
                     final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch(
                             mBackupManagerService, token);
-                    mBackupManagerService
-                            .prepareOperationTimeout(token,
-                                    TIMEOUT_FULL_BACKUP_INTERVAL,
-                                    latch,
-                                    OP_TYPE_RESTORE_WAIT);
+                    mBackupManagerService.prepareOperationTimeout(
+                            token, TIMEOUT_FULL_BACKUP_INTERVAL, latch, OP_TYPE_RESTORE_WAIT);
                     if (mTargetApp.processName.equals("system")) {
                         if (MORE_DEBUG) {
                             Slog.d(TAG, "system agent - restoreFinished on thread");
