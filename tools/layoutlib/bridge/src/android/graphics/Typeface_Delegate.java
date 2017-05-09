@@ -253,7 +253,7 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeGetBaseWeight(long native_instance) {
+    /*package*/ static int nativeGetWeight(long native_instance) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
             return 0;
