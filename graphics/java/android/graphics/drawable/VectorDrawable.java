@@ -483,10 +483,10 @@ public class VectorDrawable extends Drawable {
         final int sourceDensity = mVectorState.mDensity;
         final int targetDensity = mTargetDensity;
         if (targetDensity != sourceDensity) {
-            mDpiScaledWidth = Drawable.scaleFromDensity(
-                    (int) mVectorState.mBaseWidth, sourceDensity, targetDensity, true);
-            mDpiScaledHeight = Drawable.scaleFromDensity(
-                    (int) mVectorState.mBaseHeight,sourceDensity, targetDensity, true);
+            mDpiScaledWidth = Drawable.scaleFromDensity(mVectorState.mBaseWidth, sourceDensity,
+                    targetDensity, true);
+            mDpiScaledHeight = Drawable.scaleFromDensity(mVectorState.mBaseHeight,sourceDensity,
+                    targetDensity, true);
             final int left = Drawable.scaleFromDensity(
                     opticalInsets.left, sourceDensity, targetDensity, false);
             final int right = Drawable.scaleFromDensity(
@@ -497,8 +497,8 @@ public class VectorDrawable extends Drawable {
                     opticalInsets.bottom, sourceDensity, targetDensity, false);
             mDpiScaledInsets = Insets.of(left, top, right, bottom);
         } else {
-            mDpiScaledWidth = (int) mVectorState.mBaseWidth;
-            mDpiScaledHeight = (int) mVectorState.mBaseHeight;
+            mDpiScaledWidth = mVectorState.mBaseWidth;
+            mDpiScaledHeight = mVectorState.mBaseHeight;
             mDpiScaledInsets = opticalInsets;
         }
 
@@ -675,9 +675,9 @@ public class VectorDrawable extends Drawable {
                     "<vector> tag requires viewportHeight > 0");
         }
 
-        state.mBaseWidth = a.getDimension(
+        state.mBaseWidth = a.getDimensionPixelSize(
                 R.styleable.VectorDrawable_width, state.mBaseWidth);
-        state.mBaseHeight = a.getDimension(
+        state.mBaseHeight = a.getDimensionPixelSize(
                 R.styleable.VectorDrawable_height, state.mBaseHeight);
 
         if (state.mBaseWidth <= 0) {
@@ -819,8 +819,8 @@ public class VectorDrawable extends Drawable {
         Mode mTintMode = DEFAULT_TINT_MODE;
         boolean mAutoMirrored;
 
-        float mBaseWidth = 0;
-        float mBaseHeight = 0;
+        int mBaseWidth = 0;
+        int mBaseHeight = 0;
         float mViewportWidth = 0;
         float mViewportHeight = 0;
         Insets mOpticalInsets = Insets.NONE;
@@ -1004,8 +1004,9 @@ public class VectorDrawable extends Drawable {
         }
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
-            mBaseWidth = Drawable.scaleFromDensity(mBaseWidth, sourceDensity, targetDensity);
-            mBaseHeight = Drawable.scaleFromDensity(mBaseHeight, sourceDensity, targetDensity);
+            mBaseWidth = Drawable.scaleFromDensity(mBaseWidth, sourceDensity, targetDensity, true);
+            mBaseHeight = Drawable.scaleFromDensity(mBaseHeight, sourceDensity, targetDensity,
+                    true);
 
             final int insetLeft = Drawable.scaleFromDensity(
                     mOpticalInsets.left, sourceDensity, targetDensity, false);
