@@ -66,8 +66,7 @@ public class WindowTestUtils {
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     public static Task createTaskInStack(WindowManagerService service, TaskStack stack,
             int userId) {
-        final Task newTask = new Task(WindowTestUtils.sNextTaskId++, stack, userId, service, null,
-                EMPTY, 0, false,
+        final Task newTask = new Task(sNextTaskId++, stack, userId, service, null, EMPTY, 0, false,
                 false, new ActivityManager.TaskDescription(), null);
         stack.addTask(newTask, POSITION_TOP);
         return newTask;
@@ -92,7 +91,7 @@ public class WindowTestUtils {
     public static class TestAppWindowToken extends AppWindowToken {
 
         TestAppWindowToken(DisplayContent dc) {
-            super(dc.mService, null, false, dc, true /* fillsParent */,
+            super(dc.mService, new IApplicationToken.Stub() {}, false, dc, true /* fillsParent */,
                     null /* overrideConfig */, null /* bounds */);
         }
 
