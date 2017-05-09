@@ -78,6 +78,9 @@
     <!-- The color of the material notification background when low priority -->
     <color name="notification_material_background_low_priority_color">#fff5f5f5</color>
 
+    <!-- The color of the dividing line between grouped notifications. -->
+    <color name="notification_divider_color">#FF616161</color>
+
     <!-- The background color of the notification shade -->
     <color name="notification_shade_background_color">#ffeeeeee</color>
 
