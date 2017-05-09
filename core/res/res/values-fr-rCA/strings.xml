@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="byteShort" msgid="8340973892742019101">"o"</string>
     <string name="kilobyteShort" msgid="7542884022844556968">"ko"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"Mo"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"Go"</string>
@@ -268,7 +268,7 @@
     <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Applications qui fonctionnent en arrière-plan"</string>
     <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> fonctionne en arrière-plan"</string>
     <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> applications fonctionnent en arrière-plan"</string>
-    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Touchez ici pour afficher des détails sur l\'usage de la pile et des données"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Actions sur le texte"</string>
     <string name="email" msgid="4560673117055050403">"Courriel"</string>
     <string name="dial" msgid="4204975095406423102">"Téléphone"</string>
-    <string name="map" msgid="5441053548030107189">"Carte"</string>
-    <string name="browse" msgid="6079864138582486027">"Parcourir"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Espace de stockage bientôt saturé"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Il est possible que certaines fonctionnalités du système ne soient pas opérationnelles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Espace de stockage insuffisant pour le système. Assurez-vous de disposer de 250 Mo d\'espace libre, puis redémarrez."</string>

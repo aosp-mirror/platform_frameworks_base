@@ -1064,8 +1064,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
     <string name="email" msgid="4560673117055050403">"بريد إلكتروني"</string>
     <string name="dial" msgid="4204975095406423102">"الهاتف"</string>
-    <string name="map" msgid="5441053548030107189">"خريطة"</string>
-    <string name="browse" msgid="6079864138582486027">"تصفح"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>

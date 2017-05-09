@@ -82,7 +82,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Drierigtingbel"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Verwerping van ongewenste, irriterende oproepe"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Oproepnommer-lewering"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Moenie steur nie"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Moenie Steur Nie"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Beller-ID se verstek is beperk. Volgende oproep: beperk"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Beller-ID se verstek is beperk. Volgende oproep: nie beperk nie"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Beller-ID se verstek is nie beperk nie. Volgende oproep: beperk"</string>
@@ -553,8 +553,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Dit laat die houer toe om aan die top-koppelvlak van \'n diensverskaffer-boodskapdiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"verbind aan diensverskafferdienste"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Laat die houer toe om aan diensverskafferdienste te verbind. Behoort nooit vir normale programme nodig te wees nie."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"verkry toegang tot Moenie steur nie"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Laat die program toe om Moenie steur nie-opstelling te lees en skryf."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"verkry toegang tot Moenie Steur Nie"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Laat die program toe om Moenie Steur Nie-opstelling te lees en skryf."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitor pogings om skerm te ontsluit"</string>
@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksaksies"</string>
     <string name="email" msgid="4560673117055050403">"E-pos"</string>
     <string name="dial" msgid="4204975095406423102">"Foon"</string>
-    <string name="map" msgid="5441053548030107189">"Kaart"</string>
-    <string name="browse" msgid="6079864138582486027">"Blaai"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Bergingspasie word min"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sommige stelselfunksies werk moontlik nie"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nie genoeg berging vir die stelsel nie. Maak seker jy het 250 MB spasie beskikbaar en herbegin."</string>
@@ -1651,11 +1653,11 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Totdat jy Moenie steur nie afskakel"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat jy Moenie steur nie afskakel"</string>
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Totdat jy Moenie Steur Nie afskakel"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat jy Moenie Steur Nie afskakel"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Vou in"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Moenie steur nie"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Moenie Steur Nie"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Staantyd"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Weeksaand"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Naweek"</string>

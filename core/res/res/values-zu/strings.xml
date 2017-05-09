@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Izenzo zombhalo"</string>
     <string name="email" msgid="4560673117055050403">"I-imeyili"</string>
     <string name="dial" msgid="4204975095406423102">"Ifoni"</string>
-    <string name="map" msgid="5441053548030107189">"Imephu"</string>
-    <string name="browse" msgid="6079864138582486027">"Dlulisa amehlo"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Isikhala sokulondoloza siyaphela"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Eminye imisebenzi yohlelo ingahle ingasebenzi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Akusona isitoreji esanele sesistimu. Qiniseka ukuthi unesikhala esikhululekile esingu-250MB uphinde uqalise kabusha."</string>

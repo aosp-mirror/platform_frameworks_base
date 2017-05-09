@@ -272,7 +272,7 @@
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Prodejní ukázka"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Připojení USB"</string>
     <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikace běžící na pozadí"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> běží na pozadí"</string>
+    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> běží na pozadí"</string>
     <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Aplikace (<xliff:g id="NUMBER">%1$d</xliff:g>) běží na pozadí"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Klepnutím zobrazíte podrobnosti o využití baterie a dat"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
@@ -1024,8 +1024,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operace s textem"</string>
     <string name="email" msgid="4560673117055050403">"Poslat e-mail"</string>
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="browse" msgid="6079864138582486027">"Procházet"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"V úložišti je málo místa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Některé systémové funkce nemusí fungovat"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Pro systém není dostatek místa v úložišti. Uvolněte alespoň 250 MB místa a restartujte zařízení."</string>

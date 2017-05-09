@@ -28,9 +28,9 @@
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> días"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> hrs"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> hrs"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> h"</string>
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
@@ -268,7 +268,7 @@
     <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplicacións que se executan en segundo plano"</string>
     <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Estase executando en segundo plano a aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Estanse executando en segundo plano <xliff:g id="NUMBER">%1$d</xliff:g> aplicacións"</string>
-    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Toca para obter información sobre a batería e o uso de datos"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Toca para obter información sobre o uso de datos e a batería"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accións de texto"</string>
     <string name="email" msgid="4560673117055050403">"Correo electrónico"</string>
     <string name="dial" msgid="4204975095406423102">"Teléfono"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="browse" msgid="6079864138582486027">"Examinar"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Estase esgotando o espazo de almacenamento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"É posible que algunhas funcións do sistema non funcionen"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Non hai almacenamento suficiente para o sistema. Asegúrate de ter un espazo libre de 250 MB e reinicia o dispositivo."</string>
@@ -1026,8 +1028,8 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Escoller unha acción"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Selecciona unha aplicación para o dispositivo USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Ningunha aplicación pode realizar esta acción."</string>
-    <string name="aerr_application" msgid="250320989337856518">"Detívose <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="aerr_process" msgid="6201597323218674729">"Detívose <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> deixou de funcionar"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"O proceso <xliff:g id="PROCESS">%1$s</xliff:g>  deixou de funcionar"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> segue deténdose"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> segue deténdose"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Abrir aplicación de novo"</string>
@@ -1189,7 +1191,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ANULAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Manteno na pantalla mentres o teclado físico estea activo"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Móstrase na pantalla mentres o teclado físico estea activo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configura o teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca para seleccionar o idioma e o deseño"</string>
