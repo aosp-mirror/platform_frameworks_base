@@ -82,7 +82,7 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်ဆက်သွယ်မရပါ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်တွဲချိတ်ရန် ပယ်ချခံရသည်"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi  မရှိ"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi  ပိတ်ထားသည်"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi  ချိတ်ဆက်ထားမှု မရှိပါ"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi  ၁ ဘားရှိ"</string>
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi  ၂ ဘား"</string>
@@ -91,9 +91,9 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android စနစ်"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ဖယ်ရှားထားသော အက်ပ်များ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ဖယ်ရှားထားသော အပလီကေးရှင်းနှင့် သုံးစွဲသူများ"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USBမှတဆင့်ချိတ်ဆက်ခြင်း"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB သုံး၍ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ရွေ့လျားနိုင်သောဟော့စပေါ့"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ဘလူးတုသ်တဆင့်ပြန်ချိတ်ဆက်"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ဘလူးတုသ်သုံးချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"တဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"တဆင့်ချိတ်ဆက်ခြင်း၊ ဟော့စပေါ့"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>

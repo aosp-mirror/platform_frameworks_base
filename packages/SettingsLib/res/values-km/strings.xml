@@ -91,7 +91,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"ប្រព័ន្ធ​ប្រតិបត្តិការ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"កម្មវិធី​ដែល​បាន​លុប"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"បាន​លុប​កម្មវិធី និង​អ្នកប្រើ"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"ការ​ភ្ជាប់​យូអេសប៊ី"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"ការ​ភ្ជាប់តាម USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ហតស្ពត​ចល័ត"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ការ​ភ្ជាប់ប៊្លូធូស"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ការ​ភ្ជាប់"</string>

@@ -31,7 +31,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ընդգրկույթից դուրս է"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Չի միանա ավտոմատ"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Ինտերնետ կապ չկա"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Պահել է հետևյալ օգտատերը՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Պահել է՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Ավտոմատ կերպով միացել է ցանցի վարկանիշի ծառայության մատակարարի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Կապակցված է %1$s-ի միջոցով"</string>
@@ -216,7 +216,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"Տեղային տերմինալ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Միացնել տերմինալային հավելվածը, որն առաջարկում է մուտք տեղային խեցի"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ստուգում"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Կարգավորել HDCP ստուգման վարքագիծը"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP-ի ստուգման կարգը"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Վրիպազերծում"</string>
     <string name="debug_app" msgid="8349591734751384446">"Ընտրել վրիպազերծման հավելվածը"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Վրիպազերծման ծրագիրը կարգավորված չէ"</string>
@@ -294,7 +294,7 @@
     <item msgid="8280754435979370728">"Բնական գույներ"</item>
     <item msgid="5363960654009010371">"Թվային բովանդակության համար հարմարեցված գույներ"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"Միացրած հավելվածներ"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Անգործուն հավելվածներ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Ակտիվ չէ: Հպեք՝ փոխելու համար:"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ակտիվ է: Հպեք՝ փոխելու համար:"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Աշխատեցվող ծառայություններ"</string>
