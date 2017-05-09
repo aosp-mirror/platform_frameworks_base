@@ -80,19 +80,23 @@ final class EphemeralResolverConnection implements DeathRecipient {
     }
 
     public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(int hashPrefix[],
-            String token) {
+            String token) throws ConnectionException {
         throwIfCalledOnMainThread();
         IInstantAppResolver target = null;
         try {
-            target = getRemoteInstanceLazy(token);
-            return mGetEphemeralResolveInfoCaller
-                    .getEphemeralResolveInfoList(target, hashPrefix, token);
-        } catch (RemoteException e) {
-        } catch (InterruptedException | TimeoutException e) {
-            if (target == null) {
-                Slog.w(TAG, "[" + token + "] Timeout! Phase1 binding to instant app resolver");
-            } else {
-                Slog.w(TAG, "[" + token + "] Timeout! Phase1 resolving instant app");
+            try {
+                target = getRemoteInstanceLazy(token);
+            } catch (TimeoutException e) {
+                throw new ConnectionException(ConnectionException.FAILURE_BIND);
+            } catch (InterruptedException e) {
+                throw new ConnectionException(ConnectionException.FAILURE_INTERRUPTED);
+            }
+            try {
+                return mGetEphemeralResolveInfoCaller
+                        .getEphemeralResolveInfoList(target, hashPrefix, token);
+            } catch (TimeoutException e) {
+                throw new ConnectionException(ConnectionException.FAILURE_BIND);
+            } catch (RemoteException ignore) {
             }
         } finally {
             synchronized (mLock) {
@@ -104,7 +108,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
     public final void getInstantAppIntentFilterList(int hashPrefix[], String token,
             String hostName, PhaseTwoCallback callback, Handler callbackHandler,
-            final long startTime) {
+            final long startTime) throws ConnectionException {
         final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
@@ -122,14 +126,16 @@ final class EphemeralResolverConnection implements DeathRecipient {
         try {
             getRemoteInstanceLazy(token)
                     .getInstantAppIntentFilterList(hashPrefix, token, hostName, remoteCallback);
-        } catch (RemoteException e) {
-        } catch (InterruptedException | TimeoutException e) {
-            Slog.w(TAG, "[" + token + "] Timeout! Phase2 binding to instant app resolver");
+        } catch (TimeoutException e) {
+            throw new ConnectionException(ConnectionException.FAILURE_BIND);
+        } catch (InterruptedException e) {
+            throw new ConnectionException(ConnectionException.FAILURE_INTERRUPTED);
+        } catch (RemoteException ignore) {
         }
     }
 
     private IInstantAppResolver getRemoteInstanceLazy(String token)
-            throws TimeoutException, InterruptedException {
+            throws ConnectionException, TimeoutException, InterruptedException {
         synchronized (mLock) {
             if (mRemoteInstance != null) {
                 return mRemoteInstance;
@@ -139,7 +145,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
         }
     }
 
-    private void waitForBind(String token) throws TimeoutException, InterruptedException {
+    private void waitForBindLocked(String token) throws TimeoutException, InterruptedException {
         final long startMillis = SystemClock.uptimeMillis();
         while (mIsBinding) {
             if (mRemoteInstance != null) {
@@ -154,12 +160,13 @@ final class EphemeralResolverConnection implements DeathRecipient {
         }
     }
 
-    private void bindLocked(String token) throws TimeoutException, InterruptedException {
+    private void bindLocked(String token)
+            throws ConnectionException, TimeoutException, InterruptedException {
         if (DEBUG_EPHEMERAL && mIsBinding && mRemoteInstance == null) {
             Slog.i(TAG, "[" + token + "] Previous bind timed out; waiting for connection");
         }
         try {
-            waitForBind(token);
+            waitForBindLocked(token);
         } catch (TimeoutException e) {
             if (DEBUG_EPHEMERAL) {
                 Slog.i(TAG, "[" + token + "] Previous connection never established; rebinding");
@@ -179,9 +186,10 @@ final class EphemeralResolverConnection implements DeathRecipient {
             wasBound = mContext
                     .bindServiceAsUser(mIntent, mServiceConnection, flags, UserHandle.SYSTEM);
             if (wasBound) {
-                waitForBind(token);
+                waitForBindLocked(token);
             } else {
                 Slog.w(TAG, "[" + token + "] Failed to bind to: " + mIntent);
+                throw new ConnectionException(ConnectionException.FAILURE_BIND);
             }
         } finally {
             mIsBinding = wasBound && mRemoteInstance == null;
@@ -220,6 +228,17 @@ final class EphemeralResolverConnection implements DeathRecipient {
     public abstract static class PhaseTwoCallback {
         abstract void onPhaseTwoResolved(
                 List<InstantAppResolveInfo> instantAppResolveInfoList, long startTime);
+    }
+
+    public static class ConnectionException extends Exception {
+        public static final int FAILURE_BIND = 1;
+        public static final int FAILURE_CALL = 2;
+        public static final int FAILURE_INTERRUPTED = 3;
+
+        public final int failure;
+        public ConnectionException(int _failure) {
+            failure = _failure;
+        }
     }
 
     private final class MyServiceConnection implements ServiceConnection {
