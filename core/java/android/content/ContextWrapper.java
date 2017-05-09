@@ -952,4 +952,12 @@ public class ContextWrapper extends Context {
     public Handler getMainThreadHandler() {
         return mBase.getMainThreadHandler();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getNextAccessibilityId() {
+        return mBase.getNextAccessibilityId();
+    }
 }

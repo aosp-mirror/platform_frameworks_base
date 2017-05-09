@@ -20,9 +20,7 @@ import android.annotation.NonNull;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
-import android.util.DebugUtils;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -66,10 +64,6 @@ public final class Helper {
         final StringBuilder builder = new StringBuilder();
         append(builder, bundle);
         return builder.toString();
-    }
-
-    static String getUpdateActionAsString(int action) {
-        return DebugUtils.flagsToString(AutofillManager.class, "ACTION_", action);
     }
 
     static ViewNode findViewNodeById(@NonNull AssistStructure structure, @NonNull AutofillId id) {

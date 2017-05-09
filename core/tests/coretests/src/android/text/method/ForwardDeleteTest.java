@@ -16,10 +16,13 @@
 
 package android.text.method;
 
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.InputType;
+import android.util.KeyUtils;
 import android.view.KeyEvent;
+import android.widget.EditText;
 import android.widget.TextView.BufferType;
 
 import org.junit.Before;
@@ -34,12 +37,19 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ForwardDeleteTest extends KeyListenerTestCase {
+public class ForwardDeleteTest {
+    private EditText mTextView;
+
     private static final BaseKeyListener mKeyListener = new BaseKeyListener() {
         public int getInputType() {
             return InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
         }
     };
+
+    @Before
+    public void setup() {
+        mTextView = new EditText(InstrumentationRegistry.getInstrumentation().getContext());
+    }
 
     // Sync the state to the TextView and call onKeyDown with KEYCODE_FORWARD_DEL key event.
     // Then update the state to the result of TextView.
@@ -48,7 +58,8 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
         mTextView.setKeyListener(mKeyListener);
         mTextView.setSelection(state.mSelectionStart, state.mSelectionEnd);
 
-        final KeyEvent keyEvent = getKey(KeyEvent.KEYCODE_FORWARD_DEL, modifiers);
+        final KeyEvent keyEvent = KeyUtils.generateKeyEvent(
+            KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.ACTION_DOWN, modifiers);
         mTextView.onKeyDown(keyEvent.getKeyCode(), keyEvent);
 
         state.mText = mTextView.getText();

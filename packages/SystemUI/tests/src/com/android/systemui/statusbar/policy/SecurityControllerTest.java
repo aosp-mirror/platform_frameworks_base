@@ -43,6 +43,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,12 +55,12 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
     private final DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
     private final IKeyChainService.Stub mKeyChainService = mock(IKeyChainService.Stub.class);
     private SecurityControllerImpl mSecurityController;
-    private CountDownLatch stateChangedLatch;
+    private CountDownLatch mStateChangedLatch;
 
     // implementing SecurityControllerCallback
     @Override
     public void onStateChanged() {
-        stateChangedLatch.countDown();
+        mStateChangedLatch.countDown();
     }
 
     @Before
@@ -79,6 +80,16 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
                 .thenReturn(mKeyChainService);
 
         mSecurityController = new SecurityControllerImpl(mContext);
+
+        // Wait for one or two state changes from the CACertLoader(s) in the constructor of
+        // mSecurityController
+        mStateChangedLatch = new CountDownLatch(mSecurityController.hasWorkProfile() ? 2 : 1);
+        mSecurityController.addCallback(this);
+    }
+
+    @After
+    public void tearDown() {
+        mSecurityController.removeCallback(this);
     }
 
     @Test
@@ -98,17 +109,12 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
 
     @Test
     public void testCaCertLoader() throws Exception {
-        // Wait for one or two state changes from the CACertLoader(s) in the constructor of
-        // mSecurityController
-        stateChangedLatch = new CountDownLatch(mSecurityController.hasWorkProfile() ? 2 : 1);
-        mSecurityController.addCallback(this);
-
-        assertTrue(stateChangedLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(mStateChangedLatch.await(3, TimeUnit.SECONDS));
         assertFalse(mSecurityController.hasCACertInCurrentUser());
 
         // With a CA cert
 
-        stateChangedLatch = new CountDownLatch(1);
+        mStateChangedLatch = new CountDownLatch(1);
 
         when(mKeyChainService.getUserCaAliases())
                 .thenReturn(new StringParceledListSlice(Arrays.asList("One CA Alias")));
@@ -116,12 +122,12 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         mSecurityController.new CACertLoader()
                            .execute(0);
 
-        assertTrue(stateChangedLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(mStateChangedLatch.await(3, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInCurrentUser());
 
         // Exception
 
-        stateChangedLatch = new CountDownLatch(1);
+        mStateChangedLatch = new CountDownLatch(1);
 
         when(mKeyChainService.getUserCaAliases())
                 .thenThrow(new AssertionError("Test AssertionError"))
@@ -130,12 +136,10 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         mSecurityController.new CACertLoader()
                            .execute(0);
 
-        assertFalse(stateChangedLatch.await(3, TimeUnit.SECONDS));
+        assertFalse(mStateChangedLatch.await(3, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInCurrentUser());
         // The retry takes 30s
-        //assertTrue(stateChangedLatch.await(31, TimeUnit.SECONDS));
+        //assertTrue(mStateChangedLatch.await(31, TimeUnit.SECONDS));
         //assertFalse(mSecurityController.hasCACertInCurrentUser());
-
-        mSecurityController.removeCallback(this);
     }
 }

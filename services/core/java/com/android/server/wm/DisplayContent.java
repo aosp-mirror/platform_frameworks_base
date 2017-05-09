@@ -759,16 +759,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return token.asAppWindowToken();
     }
 
-    void addWindowToken(IBinder binder, WindowToken token) {
+    private void addWindowToken(IBinder binder, WindowToken token) {
         final DisplayContent dc = mService.mRoot.getWindowTokenDisplay(token);
         if (dc != null) {
             // We currently don't support adding a window token to the display if the display
             // already has the binder mapped to another token. If there is a use case for supporting
             // this moving forward we will either need to merge the WindowTokens some how or have
             // the binder map to a list of window tokens.
-            throw new IllegalArgumentException("Can't map token=" + token + " to display=" + this
-                    + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
+            throw new IllegalArgumentException("Can't map token=" + token + " to display="
+                    + getName() + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
         }
+        if (binder == null) {
+            throw new IllegalArgumentException("Can't map token=" + token + " to display="
+                    + getName() + " binder is null");
+        }
+        if (token == null) {
+            throw new IllegalArgumentException("Can't map null token to display="
+                    + getName() + " binder=" + binder);
+        }
+
         mTokenMap.put(binder, token);
 
         if (token.asAppWindowToken() == null) {
@@ -1503,16 +1512,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mImeWindowsContainers.forAllWindows(callback, traverseTopToBottom);
     }
 
-    /**
-     * Returns the orientation that this display should be in factoring in its children containers.
-     *
-     * @param includeAppContainers True if then app containers (stacks, tasks, ...) should be
-     *                             factored in when determining the orientation. If false only
-     *                             non-app/system containers will be used to determine the returned
-     *                             orientation.
-     * @return The orientation the display should be in.
-     */
-    int getOrientation(boolean includeAppContainers) {
+    @Override
+    int getOrientation() {
         final WindowManagerPolicy policy = mService.mPolicy;
 
         if (mService.mDisplayFrozen) {
@@ -1541,14 +1542,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        // Top system windows are not requesting an orientation. Get orientation from app containers
-        // if allowed. Otherwise, return the last orientation.
-        return includeAppContainers ? mTaskStackContainers.getOrientation() : mLastOrientation;
-    }
-
-    @Override
-    int getOrientation() {
-        return getOrientation(true /* includeAppContainers */);
+        // Top system windows are not requesting an orientation. Start searching from apps.
+        return mTaskStackContainers.getOrientation();
     }
 
     void updateDisplayInfo() {

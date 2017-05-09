@@ -362,7 +362,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 NotificationColorUtil.getInstance(mContext));
         int color = StatusBarIconView.NO_COLOR;
         if (colorize) {
-            color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded());
+            color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded(),
+                    getBackgroundColorWithoutTint());
         }
         expandedIcon.setStaticDrawableColor(color);
     }
@@ -875,7 +876,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private void updateNotificationColor() {
         mNotificationColor = NotificationColorUtil.resolveContrastColor(mContext,
-                getStatusBarNotification().getNotification().color);
+                getStatusBarNotification().getNotification().color,
+                getBackgroundColorWithoutTint());
     }
 
     public HybridNotificationView getSingleLineView() {

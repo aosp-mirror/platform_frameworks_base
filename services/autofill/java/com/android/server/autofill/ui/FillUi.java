@@ -16,6 +16,7 @@
 package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -265,8 +266,11 @@ final class FillUi {
         mContentWidth = 0;
         mContentHeight = 0;
 
-        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
-        final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.x,
+                MeasureSpec.AT_MOST);
+        final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
+                MeasureSpec.AT_MOST);
+
         final int itemCount = Math.min(mAdapter.getCount(), VISIBLE_OPTIONS_MAX_COUNT);
         for (int i = 0; i < itemCount; i++) {
             View view = mAdapter.getItem(i).getView();
@@ -334,6 +338,11 @@ final class FillUi {
         @Override
         public void show(WindowManager.LayoutParams p, Rect transitionEpicenter,
                 boolean fitsSystemWindows, int layoutDirection) {
+            if (sVerbose) {
+                Slog.v(TAG, "AutofillWindowPresenter.show(): fit=" + fitsSystemWindows
+                        + ", epicenter="+ transitionEpicenter + ", dir=" + layoutDirection
+                        + ", params=" + p);
+            }
             UiThread.getHandler().post(() -> mWindow.show(p));
         }
 

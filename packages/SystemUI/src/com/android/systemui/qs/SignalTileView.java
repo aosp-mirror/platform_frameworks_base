@@ -27,6 +27,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
+import com.android.systemui.qs.tileimpl.SlashImageView;
 
 /** View that represents a custom quick settings tile for displaying signal info (wifi/cell). **/
 public class SignalTileView extends QSIconViewImpl {
@@ -61,7 +62,7 @@ public class SignalTileView extends QSIconViewImpl {
     @Override
     protected View createIcon() {
         mIconFrame = new FrameLayout(mContext);
-        mSignal = new ImageView(mContext);
+        mSignal = new SlashImageView(mContext);
         mIconFrame.addView(mSignal);
         return mIconFrame;
     }

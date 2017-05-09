@@ -415,6 +415,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void onFingerprintAuthenticated(int userId) {
         Trace.beginSection("KeyGuardUpdateMonitor#onFingerPrintAuthenticated");
         mUserFingerprintAuthenticated.put(userId, true);
+        // Update/refresh trust state only if user can skip bouncer
+        if (getUserCanSkipBouncer(userId)) {
+            mTrustManager.unlockedByFingerprintForUser(userId);
+        }
         // Don't send cancel if authentication succeeds
         mFingerprintCancelSignal = null;
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1649,6 +1653,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public void clearFingerprintRecognized() {
         mUserFingerprintAuthenticated.clear();
+        mTrustManager.clearAllFingerprints();
     }
 
     public boolean isSimPinVoiceSecure() {

@@ -41,9 +41,6 @@
 
 namespace android {
 
-// Must be same with Java constant in Typeface.Builder. See Typeface.java
-constexpr jint RESOLVE_BY_FONT_TABLE = -1;
-
 struct NativeFamilyBuilder {
     NativeFamilyBuilder(uint32_t langId, int variant)
         : langId(langId), variant(variant), allowUnsupportedFont(false) {}

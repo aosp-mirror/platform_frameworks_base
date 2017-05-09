@@ -767,7 +767,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mDockedStackMinimized = minimized;
         } else if (mDockedStackMinimized != minimized) {
             mIsInMinimizeInteraction = true;
-            if (minimized) {
+            if (minimized && (mCurrentAnimator == null || !mCurrentAnimator.isRunning())) {
                 mDividerPositionBeforeMinimized = getCurrentPosition();
             }
             mMinimizedSnapAlgorithm = null;

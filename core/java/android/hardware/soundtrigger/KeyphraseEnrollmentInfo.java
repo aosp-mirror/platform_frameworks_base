@@ -341,7 +341,8 @@ public class KeyphraseEnrollmentInfo {
               }
           }
         }
-        Slog.w(TAG, "No Enrollment application supports the given keyphrase/locale");
+        Slog.w(TAG, "No enrollment application supports the given keyphrase/locale: '"
+                + keyphrase + "'/" + locale);
         return null;
     }
 

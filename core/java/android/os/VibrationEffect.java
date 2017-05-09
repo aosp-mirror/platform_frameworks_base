@@ -189,10 +189,11 @@ public abstract class VibrationEffect implements Parcelable {
             if (mAmplitude < -1 || mAmplitude == 0 || mAmplitude > 255) {
                 throw new IllegalArgumentException(
                         "amplitude must either be DEFAULT_AMPLITUDE, " +
-                        "or between 1 and 255 inclusive");
+                        "or between 1 and 255 inclusive (amplitude=" + mAmplitude + ")");
             }
             if (mTiming <= 0) {
-                throw new IllegalArgumentException("timing must be positive");
+                throw new IllegalArgumentException(
+                        "timing must be positive (timing=" + mTiming + ")");
             }
         }
 
@@ -274,24 +275,31 @@ public abstract class VibrationEffect implements Parcelable {
         public void validate() {
             if (mTimings.length != mAmplitudes.length) {
                 throw new IllegalArgumentException(
-                        "timing and amplitude arrays must be of equal length");
+                        "timing and amplitude arrays must be of equal length" +
+                        " (timings.length=" + mTimings.length +
+                        ", amplitudes.length=" + mAmplitudes.length + ")");
             }
             if (!hasNonZeroEntry(mTimings)) {
-                throw new IllegalArgumentException("at least one timing must be non-zero");
+                throw new IllegalArgumentException("at least one timing must be non-zero" +
+                        " (timings=" + Arrays.toString(mTimings) + ")");
             }
             for (long timing : mTimings) {
                 if (timing < 0) {
-                    throw new IllegalArgumentException("timings must all be >= 0");
+                    throw new IllegalArgumentException("timings must all be >= 0" +
+                            " (timings=" + Arrays.toString(mTimings) + ")");
                 }
             }
             for (int amplitude : mAmplitudes) {
                 if (amplitude < -1 || amplitude > 255) {
                     throw new IllegalArgumentException(
-                            "amplitudes must all be DEFAULT_AMPLITUDE or between 0 and 255");
+                            "amplitudes must all be DEFAULT_AMPLITUDE or between 0 and 255" +
+                            " (amplitudes=" + Arrays.toString(mAmplitudes) + ")");
                 }
             }
             if (mRepeat < -1 || mRepeat >= mTimings.length) {
-                throw new IllegalArgumentException("repeat index must be >= -1");
+                throw new IllegalArgumentException(
+                        "repeat index must be within the bounds of the timings array" +
+                        " (timings.length=" + mTimings.length + ", index=" + mRepeat +")");
             }
         }
 
@@ -375,7 +383,8 @@ public abstract class VibrationEffect implements Parcelable {
         @Override
         public void validate() {
             if (mEffectId != EFFECT_CLICK) {
-                throw new IllegalArgumentException("Unknown prebaked effect type");
+                throw new IllegalArgumentException(
+                        "Unknown prebaked effect type (value=" + mEffectId + ")");
             }
         }
 

@@ -6,8 +6,6 @@ import android.content.ComponentName;
 import android.os.RemoteException;
 import android.service.vr.IVrManager;
 
-import java.io.FileDescriptor;
-
 /**
  * Used to control aspects of a devices Virtual Reality (VR) capabilities.
  * <p>
@@ -59,34 +57,6 @@ public class VrManager {
             Vr2dDisplayProperties vr2dDisplayProp) {
         try {
             mService.setVr2dDisplayProperties(vr2dDisplayProp);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Initiate connection for system controller data.
-     *
-     * @param fd Controller data file descriptor.
-     *
-     * {@hide}
-     */
-    public void connectController(FileDescriptor fd) {
-        try {
-            mService.connectController(fd);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Sever connection for system controller data.
-     *
-     * {@hide}
-     */
-    public void disconnectController() {
-        try {
-            mService.disconnectController();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
