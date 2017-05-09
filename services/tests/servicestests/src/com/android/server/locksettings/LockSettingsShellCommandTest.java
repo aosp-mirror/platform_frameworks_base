@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server;
+package com.android.server.locksettings;
 
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
@@ -59,7 +59,7 @@ import java.io.FileDescriptor;
 /**
  * Test class for {@link LockSettingsShellCommand}.
  *
- * runtest frameworks-services -c com.android.server.LockSettingsShellCommandTest
+ * runtest frameworks-services -c com.android.server.locksettings.LockSettingsShellCommandTest
  */
 @SmallTest
 @Presubmit

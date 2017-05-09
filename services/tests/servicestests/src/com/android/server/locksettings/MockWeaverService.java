@@ -1,4 +1,4 @@
-package com.android.server;
+package com.android.server.locksettings;
 
 import android.hardware.weaver.V1_0.IWeaver;
 import android.hardware.weaver.V1_0.WeaverConfig;

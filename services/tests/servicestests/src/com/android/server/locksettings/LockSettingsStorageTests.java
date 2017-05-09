@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server;
+package com.android.server.locksettings;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -31,7 +31,7 @@ import android.os.UserManager;
 import android.test.AndroidTestCase;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.server.LockSettingsStorage.CredentialHash;
+import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * runtest frameworks-services -c com.android.server.LockSettingsStorageTests
+ * runtest frameworks-services -c com.android.server.locksettings.LockSettingsStorageTests
  */
 public class LockSettingsStorageTests extends AndroidTestCase {
     private final byte[] PASSWORD_0 = "thepassword0".getBytes();

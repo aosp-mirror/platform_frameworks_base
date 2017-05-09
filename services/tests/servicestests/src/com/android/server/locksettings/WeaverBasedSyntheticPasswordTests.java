@@ -1,4 +1,4 @@
-package com.android.server;
+package com.android.server.locksettings;
 
 public class WeaverBasedSyntheticPasswordTests extends SyntheticPasswordTests {
 

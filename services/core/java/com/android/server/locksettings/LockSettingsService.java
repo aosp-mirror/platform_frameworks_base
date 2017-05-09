@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.locksettings;
 
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.READ_CONTACTS;
@@ -84,9 +84,10 @@ import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
-import com.android.server.LockSettingsStorage.CredentialHash;
-import com.android.server.SyntheticPasswordManager.AuthenticationResult;
-import com.android.server.SyntheticPasswordManager.AuthenticationToken;
+import com.android.server.SystemService;
+import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
+import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
+import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
 
 import libcore.util.HexEncoding;
 

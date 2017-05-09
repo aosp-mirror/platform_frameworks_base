@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server;
+package com.android.server.locksettings;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
