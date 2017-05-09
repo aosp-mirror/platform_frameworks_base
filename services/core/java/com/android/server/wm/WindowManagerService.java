@@ -1239,7 +1239,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                     }
                 }
-                token = new WindowToken(this, attrs.token, type, false, displayContent,
+                final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
+                token = new WindowToken(this, binder, type, false, displayContent,
                         session.mCanAddInternalSystemWindow);
             } else if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
                 atoken = token.asAppWindowToken();
@@ -1310,7 +1311,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, null, type, false, displayContent,
+                token = new WindowToken(this, client.asBinder(), type, false, displayContent,
                         session.mCanAddInternalSystemWindow);
             }
 

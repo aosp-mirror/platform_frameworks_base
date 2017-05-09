@@ -759,16 +759,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return token.asAppWindowToken();
     }
 
-    void addWindowToken(IBinder binder, WindowToken token) {
+    private void addWindowToken(IBinder binder, WindowToken token) {
         final DisplayContent dc = mService.mRoot.getWindowTokenDisplay(token);
         if (dc != null) {
             // We currently don't support adding a window token to the display if the display
             // already has the binder mapped to another token. If there is a use case for supporting
             // this moving forward we will either need to merge the WindowTokens some how or have
             // the binder map to a list of window tokens.
-            throw new IllegalArgumentException("Can't map token=" + token + " to display=" + this
-                    + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
+            throw new IllegalArgumentException("Can't map token=" + token + " to display="
+                    + getName() + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
         }
+        if (binder == null) {
+            throw new IllegalArgumentException("Can't map token=" + token + " to display="
+                    + getName() + " binder is null");
+        }
+        if (token == null) {
+            throw new IllegalArgumentException("Can't map null token to display="
+                    + getName() + " binder=" + binder);
+        }
+
         mTokenMap.put(binder, token);
 
         if (token.asAppWindowToken() == null) {
