@@ -4102,13 +4102,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             setBarState(StatusBarState.KEYGUARD);
         }
         updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
-        if (!mDeviceInteractive) {
-
-            // If the screen is off already, we need to disable touch events because these might
-            // collapse the panel after we expanded it, and thus we would end up with a blank
-            // Keyguard.
-            mNotificationPanel.setTouchDisabled(true);
-        }
         updatePanelExpansionForKeyguard();
         mLeaveOpenOnKeyguardHide = false;
         if (mDraggedDownRow != null) {
@@ -4915,6 +4908,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStackScroller.setAnimationsEnabled(false);
         mVisualStabilityManager.setScreenOn(false);
         updateVisibleToUser();
+
+        // We need to disable touch events because these might
+        // collapse the panel after we expanded it, and thus we would end up with a blank
+        // Keyguard.
+        mNotificationPanel.setTouchDisabled(true);
+        mStatusBarWindow.cancelCurrentTouch();
         if (mLaunchCameraOnFinishedGoingToSleep) {
             mLaunchCameraOnFinishedGoingToSleep = false;
 

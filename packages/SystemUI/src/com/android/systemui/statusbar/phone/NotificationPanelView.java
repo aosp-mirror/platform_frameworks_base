@@ -2477,6 +2477,14 @@ public class NotificationPanelView extends PanelView implements
         }
     };
 
+    @Override
+    public void setTouchDisabled(boolean disabled) {
+        super.setTouchDisabled(disabled);
+        if (disabled && mAffordanceHelper.isSwipingInProgress() && !mIsLaunchTransitionRunning) {
+            mAffordanceHelper.resetImmediately();
+        }
+    }
+
     public void setDark(boolean dark) {
         mDark = dark;
         mKeyguardStatusView.setDark(dark);
