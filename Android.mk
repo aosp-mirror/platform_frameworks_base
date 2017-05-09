@@ -332,7 +332,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/chooser/IChooserTargetResult.aidl \
 	core/java/android/service/resolver/IResolverRankerService.aidl \
 	core/java/android/service/resolver/IResolverRankerResult.aidl \
-	core/java/android/text/ITextClassificationService.aidl \
 	core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl\
 	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
