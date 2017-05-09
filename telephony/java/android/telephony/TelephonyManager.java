@@ -5778,35 +5778,75 @@ public class TelephonyManager {
     }
 
     /**
-     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     * Requested state of SIM
      *
-     * @param powerUp True if powering up the SIM, otherwise powering down
+     * CARD_POWER_DOWN
+     * Powers down the SIM. SIM must be up prior.
+     *
+     * CARD_POWER_UP
+     * Powers up the SIM normally. SIM must be down prior.
+     *
+     * CARD_POWER_UP_PASS_THROUGH
+     * Powers up the SIM in PASS_THROUGH mode. SIM must be down prior.
+     * When SIM is powered up in PASS_THOUGH mode, the modem does not send
+     * any command to it (for example SELECT of MF, or TERMINAL CAPABILITY),
+     * and the SIM card is controlled completely by Telephony sending APDUs
+     * directly. The SIM card state will be RIL_CARDSTATE_PRESENT and the
+     * number of card apps will be 0.
+     * No new error code is generated. Emergency calls are supported in the
+     * same way as if the SIM card is absent.
+     * The PASS_THROUGH mode is valid only for the specific card session where it
+     * is activated, and normal behavior occurs at the next SIM initialization,
+     * unless PASS_THROUGH mode is requested again. Hence, the last power-up mode
+     * is NOT persistent across boots. On reboot, SIM will power up normally.
+     */
+    /** @hide */
+    public static final int CARD_POWER_DOWN = 0;
+    /** @hide */
+    public static final int CARD_POWER_UP = 1;
+    /** @hide */
+    public static final int CARD_POWER_UP_PASS_THROUGH = 2;
+
+    /**
+     * Set SIM card power state.
+     *
+     * @param state  State of SIM (power down, power up, pass through)
+     * @see #CARD_POWER_DOWN
+     * @see #CARD_POWER_UP
+     * @see #CARD_POWER_UP_PASS_THROUGH
+     * Callers should monitor for {@link TelephonyIntents#ACTION_SIM_STATE_CHANGED}
+     * broadcasts to determine success or failure and timeout if needed.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * @hide
      **/
-    public void setSimPowerState(boolean powerUp) {
-        setSimPowerStateForSlot(getSlotIndex(), powerUp);
+    public void setSimPowerState(int state) {
+        setSimPowerStateForSlot(getSlotIndex(), state);
     }
 
     /**
-     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     * Set SIM card power state.
      *
      * @param slotIndex SIM slot id
-     * @param powerUp True if powering up the SIM, otherwise powering down
+     * @param state  State of SIM (power down, power up, pass through)
+     * @see #CARD_POWER_DOWN
+     * @see #CARD_POWER_UP
+     * @see #CARD_POWER_UP_PASS_THROUGH
+     * Callers should monitor for {@link TelephonyIntents#ACTION_SIM_STATE_CHANGED}
+     * broadcasts to determine success or failure and timeout if needed.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * @hide
      **/
-    public void setSimPowerStateForSlot(int slotIndex, boolean powerUp) {
+    public void setSimPowerStateForSlot(int slotIndex, int state) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.setSimPowerStateForSlot(slotIndex, powerUp);
+                telephony.setSimPowerStateForSlot(slotIndex, state);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setSimPowerStateForSlot", e);
