@@ -119,7 +119,7 @@ RENDERTHREAD_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
     layerPaint.setAlpha(128);
     OffscreenBuffer* buffer = nullptr; // no providing a buffer, should hit rect fallback case
     LayerOp op(Rect(10, 10), Matrix4::identity(), nullptr, &layerPaint, &buffer);
-    testUnmergedGlopDispatch(renderThread, &op, [&renderThread] (const Glop& glop) {
+    testUnmergedGlopDispatch(renderThread, &op, [] (const Glop& glop) {
         ADD_FAILURE() << "Nothing should happen";
     }, 0);
 }
