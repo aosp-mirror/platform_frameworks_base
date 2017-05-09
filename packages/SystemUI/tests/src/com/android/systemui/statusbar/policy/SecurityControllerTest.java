@@ -45,6 +45,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -108,6 +109,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
     }
 
     @Test
+    @Ignore("Flaky")
     public void testCaCertLoader() throws Exception {
         assertTrue(mStateChangedLatch.await(3, TimeUnit.SECONDS));
         assertFalse(mSecurityController.hasCACertInCurrentUser());
