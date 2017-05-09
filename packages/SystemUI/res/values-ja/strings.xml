@@ -701,8 +701,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> の通知: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"アプリは分割画面では動作しないことがあります。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"アプリで分割画面がサポートされていません。"</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"アプリは 2 次画面では動作しないことがあります。"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"アプリは 2 次画面での起動に対応していません"</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"アプリはセカンダリ ディスプレイでは動作しないことがあります。"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"アプリはセカンダリ ディスプレイでの起動に対応していません。"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"設定を開きます。"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"クイック設定を開きます。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"クイック設定を閉じます。"</string>
@@ -764,5 +764,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"設定を維持"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"設定を変更"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"バックグラウンドで実行中のアプリ"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"タップで電池やデータの使用量の詳細を確認"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"タップして電池やデータの使用量を確認"</string>
 </resources>

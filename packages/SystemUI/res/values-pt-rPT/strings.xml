@@ -387,7 +387,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Pretende remover o convidado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Todas as aplicações e dados desta sessão serão eliminados."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Remover"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"Bem-vindo(a) de volta, caro(a) convidado(a)!"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"Bem-vindo de volta, caro(a) convidado(a)!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Pretende continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sim, continuar"</string>

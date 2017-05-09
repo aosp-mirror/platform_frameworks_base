@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ਆਟੋ-ਰੋਟੇਟ ਸਕ੍ਰੀਨ"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ਸਕ੍ਰੀਨ ਆਪਣੇ-ਆਪ ਘੁੰਮਾਓ"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ਆਟੋ"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"ਸੂਚਨਾਵਾਂ"</string>
@@ -58,8 +58,8 @@
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ਕੋਈ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਇਸ USB ਐਕਸੈਸਰੀ ਨਾਲ ਕੰਮ ਨਹੀਂ ਕਰਦੇ। <xliff:g id="URL">%1$s</xliff:g> ਤੇ ਇਸ ਐਕਸੈਸਰੀ ਬਾਰੇ ਹੋਰ ਜਾਣੋ"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ਐਕਸੈਸਰੀ"</string>
     <string name="label_view" msgid="6304565553218192990">"ਦੇਖੋ"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"ਇਸ USB ਡੀਵਾਈਸ ਲਈ ਬਾਇ ਡਿਫੌਲਟ ਵਰਤੋ"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"ਇਸ USB ਐਕਸਸੈਰੀ ਲਈ ਬਾਇ ਡਿਫੌਲਟ ਵਰਤੋ"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"ਇਸ USB ਡੀਵਾਈਸ ਲਈ ਬਾਇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਵਰਤੋ"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"ਇਸ USB ਐਕਸਸੈਰੀ ਲਈ ਬਾਇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਵਰਤੋ"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ਕੰਪਿਊਟਰ ਦਾ RSA ਕੁੰਜੀ ਫਿੰਗਰਪ੍ਰਿੰਟ ਹੈ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ਹਮੇਸ਼ਾਂ ਇਸ ਕੰਪਿਊਟਰ ਤੋਂ ਆਗਿਆ ਦਿਓ"</string>
@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ਮੋਬਾਈਲ ਡੈਟਾ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ਮੋਬਾਈਲ ਡੈਟਾ ਚਾਲੂ ਹੈ"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"ਮੋਬਾਈਲ ਡੈਟਾ ਬੰਦ ਹੈ"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ਟੀਥਰਿੰਗ।"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ਟੈਦਰਿੰਗ।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ਏਅਰਪਲੇਨ ਮੋਡ।"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ਚਾਲੂ ਹੈ।"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ਕੋਈ SIM ਕਾਰਡ ਨਹੀਂ।"</string>
@@ -269,11 +269,11 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ਕੇਵਲ ਤਰਜੀਹੀ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"ਕੇਵਲ ਅਲਾਰਮ"</string>
-    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"ਕੁਲ ਚੁੱਪੀ"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"ਸੰਪੂਰਨ ਖਾਮੋਸ਼ੀ"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> ਡਿਵਾਈਸਾਂ)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth ਬੰਦ"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ਕੋਈ ਪੇਅਰ ਕੀਤੀਆਂ ਡਿਵਾਈਸਾਂ ਉਪਲਬਧ ਨਹੀਂ"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ਕੋਈ ਜੋੜਾਬੱਧ ਕੀਤੀਆਂ ਡੀਵਾਈਸਾਂ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ਚਮਕ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ਆਟੋ-ਰੋਟੇਟ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ਸਕ੍ਰੀਨ ਨੂੰ ਆਪਣੇ ਆਪ ਘੁੰਮਾਓ"</string>
@@ -291,14 +291,14 @@
     <string name="quick_settings_time_label" msgid="4635969182239736408">"ਸਮਾਂ"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ਮੈਂ"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ਵਰਤੋਂਕਾਰ"</string>
-    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ਨਵਾਂ ਉਪਭੋਗਤਾ"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ਕੋਈ ਨੈੱਟਵਰਕ ਨਹੀਂ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ਬੰਦ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ਚਾਲੂ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ਕੋਈ Wi-Fi ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਨਹੀਂ"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ਪ੍ਰਸਾਰਿਤ ਕਰੋ"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ਕਾਸਟ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ਕਾਸਟਿੰਗ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ਬਿਨਾਂ ਨਾਮ ਦਿੱਤੀ ਡੀਵਾਈਸ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ਜੋੜਨ ਲਈ ਤਿਆਰ"</string>
@@ -334,7 +334,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ਖੋਜੋ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਚਾਲੂ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਸੁਰੱਖਿਅਤ-ਮੋਡ ਵਿੱਚ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ।"</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ਸਭ ਸਾਫ਼ ਕਰੋ"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਇੱਥੇ ਘਸੀਟੋ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ਹੌਰੀਜ਼ੌਂਟਲ ਸਪਲਿਟ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ਵਰਟੀਕਲ ਸਪਲਿਟ"</string>
@@ -352,9 +352,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"ਖੋਜੋ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਲਈ ਉੱਪਰ ਸਲਾਈਡ ਕਰੋ।"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਤੱਕ ਖੱਬੇ ਪਾਸੇ ਸਲਾਈਡ ਕਰੋ।"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"ਤੁਹਾਨੂੰ ਤੁਹਾਡੇ ਦੁਆਰਾ ਨਿਰਦਿਸ਼ਟ ਅਲਾਰਮ, ਰਿਮਾਈਂਡਰ, ਇਵੈਂਟਸ, ਅਤੇ ਕਾਲਰਸ ਤੋਂ ਇਲਾਵਾ, ਧੁਨੀ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਤੋਂ ਪਰੇਸ਼ਾਨ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"ਤੁਹਾਡੇ ਦੁਆਰਾ ਤੈਅ ਕੀਤੇ ਅਲਾਰਮਾਂ, ਯਾਦ-ਦਹਾਨੀਆਂ, ਵਰਤਾਰਿਆਂ, ਅਤੇ ਕਾਲ ਕਰਨ ਵਾਲਿਆਂ ਨੂੰ ਛੱਡਕੇ, ਤੁਹਾਨੂੰ ਧੁਨੀਆਂ ਅਤੇ ਥਰਥਰਾਹਟਾਂ ਵੱਲੋਂ ਪਰੇਸ਼ਾਨ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓਜ਼, ਅਤੇ ਗੇਮਸ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਫ਼ੋਨ ਕਾਲ ਕਰਨ ਦੇ ਯੋਗ ਹੋਵੋਗੇ।"</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓ, ਅਤੇ ਗੇਮਾਂ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਥਰਥਰਾਹਟ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਫ਼ੋਨ ਕਾਲ ਕਰਨ ਦੇ ਯੋਗ ਹੋਵੋਂਗੇ।"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓਜ਼, ਅਤੇ ਗੇਮਸ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ।"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ਹੇਠਾਂ ਘੱਟ ਲਾਜ਼ਮੀ ਸੂਚਨਾਵਾਂ"</string>
@@ -366,7 +366,7 @@
     <string name="voice_hint" msgid="8939888732119726665">"ਵੌਇਸ ਅਸਿਸਟ ਲਈ ਆਈਕਨ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ਕੈਮਰੇ ਲਈ ਆਈਕਨ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"ਕੁੱਲ ਸਾਈਲੈਂਟ। ਇਹ ਸਕ੍ਰੀਨ ਰੀਡਰਾਂ ਨੂੰ ਵੀ ਸਾਈਲੈਂਸ ਕਰ ਦੇਵੇਗਾ।"</string>
-    <string name="interruption_level_none" msgid="6000083681244492992">"ਕੁਲ ਚੁੱਪੀ"</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"ਸੰਪੂਰਨ ਖਾਮੋਸ਼ੀ"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ਕੇਵਲ ਤਰਜੀਹੀ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"ਕੇਵਲ ਅਲਾਰਮ"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"ਕੁਲ \n ਚੁੱਪੀ"</string>
@@ -380,7 +380,7 @@
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ਪ੍ਰੋਫਾਈਲ ਦਿਖਾਓ"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <string name="user_new_user_name" msgid="426540612051178753">"ਨਵਾਂ ਉਪਭੋਗਤਾ"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ਮਹਿਮਾਨ"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"ਮਹਿਮਾਨ ਜੋੜੋ"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"ਮਹਿਮਾਨ ਹਟਾਓ"</string>
@@ -407,7 +407,7 @@
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ਬੈਟਰੀ ਸੇਵਰ ਬੰਦ ਕਰੋ"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ਉਹ ਸਭ ਕੁਝ ਕੈਪਚਰ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰ ਦੇਵੇਗਾ, ਜੋ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਤੇ ਡਿਸਪਲੇ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"ਸਭ ਸਾਫ਼ ਕਰੋ"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ਹੁਣ ਚਾਲੂ ਕਰੋ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ਪ੍ਰੋਫਾਈਲ ਦਾ ਨਿਰੀਖਣ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ"</string>
@@ -610,7 +610,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"ਪਿੱਛੇ"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ਵਾਪਸ ਇਨਪੁੱਟ ਵਿਧੀ \'ਤੇ ਬਦਲੋ"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ਇਨਪੁੱਟ ਵਿਧੀ ਬਦਲੋ"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"ਐਪਲੀਕੇਸ਼ਨਾਂ"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"ਸਹਾਇਕ"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"ਬ੍ਰਾਊਜ਼ਰ"</string>
@@ -761,6 +761,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> ਤੱਕ"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"ਰੱਖੋ"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ਬਦਲੋ"</string>
-    <string name="running_foreground_services_title" msgid="381024150898615683">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ ਵਾਲੀਆਂ ਐਪਾਂ"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀਆਂ ਐਪਾਂ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ਬੈਟਰੀ ਅਤੇ ਡੈਟਾ ਉਪਯੋਗ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
 </resources>

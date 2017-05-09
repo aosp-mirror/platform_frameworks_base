@@ -766,5 +766,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Zadrži"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zameni"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacije pokrenute u pozadini"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite da biste pregledali detalje o bateriji i potrošnji podataka"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite za detalje o bateriji i potrošnji podataka"</string>
 </resources>

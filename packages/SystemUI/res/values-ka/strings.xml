@@ -700,7 +700,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"აპმა შეიძლება არ იმუშაოს გაყოფილი ეკრანის რეჟიმში."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ეკრანის გაყოფა არ არის მხარდაჭერილი აპის მიერ."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"აპმა შეიძლება არ იმუშაოს მეორეულ ეკრანზე."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"მეორეულ ეკრანზე გაშვება მხარდაუჭერელია აპის მიერ."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"აპს არ გააჩნია მეორეული ეკრანის მხარდაჭერა."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"პარამეტრების გახსნა."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"სწრაფი პარამეტრების გახსნა."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"სწრაფი პარამეტრების დახურვა."</string>

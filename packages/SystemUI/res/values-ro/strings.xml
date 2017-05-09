@@ -638,7 +638,7 @@
     <string name="data_saver" msgid="5037565123367048522">"Economizor de date"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Economizorul de date este activat"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Economizorul de date este dezactivat"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"Activați"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Activat"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Dezactivați"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Bară de navigare"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Aspect"</string>
@@ -705,8 +705,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificare <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Este posibil ca aplicația să nu funcționeze cu ecranul împărțit."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplicația nu acceptă ecranul împărțit."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Este posibil ca aplicația să nu funcționeze pe un afișaj secundar."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Aplicația nu acceptă lansare pe afișaje secundare."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Este posibil ca aplicația să nu funcționeze pe un ecran secundar."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Aplicația nu acceptă lansare pe ecrane secundare."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Deschideți setările."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Deschideți setările rapide."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Închideți setările rapide."</string>
