@@ -45,6 +45,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
@@ -145,11 +146,7 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
         mBackgroundScrim = new GradientDrawable(context);
         mBackgroundScrim.setCallback(this);
         mBackgroundScrim.setAlpha((int) (mScrimAlpha * 255));
-        mColorExtractor = new ColorExtractor(context);
-        mColorExtractor.setListener(this);
-        // We don't want to interpolate colors because we're defining the initial state.
-        // Gradient should be set/ready when you open "Recents".
-        mBackgroundScrim.setColors(mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM), false);
+        mColorExtractor = Dependency.get(ColorExtractor.class);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
@@ -827,5 +824,16 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
             mBackgroundScrim.setColors(colors);
         }
+    }
+
+    public void onStart() {
+        mColorExtractor.addOnColorsChangedListener(this);
+        // We don't want to interpolate colors because we're defining the initial state.
+        // Gradient should be set/ready when you open "Recents".
+        mBackgroundScrim.setColors(mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM), false);
+    }
+
+    public void onStop() {
+        mColorExtractor.removeOnColorsChangedListener(this);
     }
 }

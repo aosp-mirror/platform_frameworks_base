@@ -374,6 +374,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
         MetricsLogger.visible(this, MetricsEvent.OVERVIEW_ACTIVITY);
 
+        // Make sure we have the right gradient and we're listening for update events
+        mRecentsView.onStart();
         // Notify of the next draw
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
 
@@ -533,6 +535,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
         Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(false);
+
+        // We don't need to update the gradient when we're not visible
+        mRecentsView.onStop();
 
         if (!isChangingConfigurations()) {
             // Workaround for b/22542869, if the RecentsActivity is started again, but without going

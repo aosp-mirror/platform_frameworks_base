@@ -84,6 +84,8 @@ import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
+import com.google.android.colorextraction.ColorExtractor;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -263,6 +265,8 @@ public class Dependency extends SystemUI {
 
         mProviders.put(AccessibilityManagerWrapper.class,
                 () -> new AccessibilityManagerWrapper(mContext));
+
+        mProviders.put(ColorExtractor.class, () -> new ColorExtractor(mContext));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
