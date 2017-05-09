@@ -31,7 +31,8 @@ public interface ExtractionType {
      *
      * @param inWallpaperColors where to read from
      * @param outGradientColors object that should receive the colors
+     * @return true if successful
      */
-    void extractInto(WallpaperColors inWallpaperColors,
+    boolean extractInto(WallpaperColors inWallpaperColors,
             ColorExtractor.GradientColors outGradientColors);
 }
