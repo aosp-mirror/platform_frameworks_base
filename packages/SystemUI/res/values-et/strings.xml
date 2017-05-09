@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobiilne andmeside"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobiilne andmeside on sees"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobiilne andmeside on väljas"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothi jagamine."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Jagamine Bluetoothiga."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lennurežiim."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN on sees."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM-kaarti pole."</string>

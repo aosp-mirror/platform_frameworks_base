@@ -202,7 +202,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飛行模式已開啟。"</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"開啟「請勿騷擾」，僅限優先。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"開啟「請勿騷擾」，完全靜音。"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"開啟「請勿騷擾」，僅限鬧鐘。"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"開啟「請勿騷擾」，只限鬧鐘。"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"請勿騷擾。"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"「請勿騷擾」關閉"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"已關閉「請勿騷擾」。"</string>
@@ -223,7 +223,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"增加時間。"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"減少時間。"</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"閃光燈已關閉。"</string>
-    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"無法使用手電筒。"</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"無法使用閃光燈。"</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"閃光燈已開啟。"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"閃光燈已關閉。"</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"閃光燈已開啟。"</string>
@@ -270,7 +270,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"以太網"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"請勿騷擾"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"僅限優先"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"僅限鬧鐘"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"只限鬧鐘"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"完全靜音"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"藍牙"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"藍牙 (<xliff:g id="NUMBER">%d</xliff:g> 部裝置)"</string>
@@ -308,7 +308,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"反轉顏色"</string>
-    <string name="quick_settings_color_space_label" msgid="853443689745584770">"色彩校準模式"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"色彩校正模式"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"更多設定"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"完成"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"已連線"</string>
@@ -316,7 +316,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網絡共享"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"熱點"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"手電筒"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"閃光燈"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"流動數據"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"數據用量"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩餘資料"</string>
@@ -370,7 +370,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"完全靜音。這亦將使螢幕閱讀器靜音。"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"完全靜音"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"僅限優先"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"僅限鬧鐘"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"只限鬧鐘"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"完全\n靜音"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"僅限\n優先"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"僅限\n鬧鐘"</string>
@@ -571,12 +571,12 @@
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"通知控制項"</string>
-    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知重響選項"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知延後選項"</string>
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 分鐘"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 分鐘"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 小時"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"復原"</string>
-    <string name="snoozed_for_time" msgid="2390718332980204462">"已隔 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>重響"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"已延後 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池用量"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電時無法使用「省電模式」"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"省電模式"</string>
@@ -703,7 +703,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"應用程式可能無法在分割畫面中運作。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"應用程式不支援分割畫面。"</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"應用程式可能無法在次要顯示屏上運作。"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"應用程式不支援在次要顯示屏上啟動。"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"應用程式無法在次要顯示屏上啟動。"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"開啟設定。"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"開啟快速設定。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"關閉快速設定。"</string>

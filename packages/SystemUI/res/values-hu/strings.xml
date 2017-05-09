@@ -701,7 +701,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Az alkalmazás nem támogatja a másodlagos kijelzőn történő indítást."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Az alkalmazást nem lehet másodlagos kijelzőn elindítani."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Beállítások megnyitása."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Gyorsbeállítások megnyitása."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Gyorsbeállítások bezárása"</string>
@@ -763,5 +763,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Megtartás"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Csere"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"A háttérben még futnak alkalmazások"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Az akkumulátor töltöttségének és az adathasználat részleteinek megtekintéséhez koppintson"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Koppintson az akkumulátor- és adathasználat részleteinek megtekintéséhez"</string>
 </resources>

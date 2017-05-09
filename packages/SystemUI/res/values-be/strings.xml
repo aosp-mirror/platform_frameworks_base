@@ -232,7 +232,7 @@
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Інверсія колеру адключаецца."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Інверсія колеру ўключаецца."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Мабільны хот-спот выключаецца."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мабільны хот-спот ўключаецца."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мабільная кропка доступу ўключаная."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Трансляцыя экрана спынена."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Рэжым працы выкл."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Рэжым працы ўкл."</string>
@@ -318,7 +318,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Падлучана"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Падлучэнне..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Мадэм"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Хот-спот"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Кропка доступу"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Апавяшчэнні"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Ліхтарык"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мабільная перадача даных"</string>
@@ -527,7 +527,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Хуткія налады, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Хот-спот"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Кропка доступу"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Працоўны профіль"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Цікава для некаторых, але не для ўсіх"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Наладка сістэмнага інтэрфейсу карыстальніка дае вам дадатковыя спосабы наладжвання і дапасоўвання карыстальніцкага інтэрфейсу Android. Гэтыя эксперыментальныя функцыі могуць змяніцца, перастаць працаваць або знікнуць у будучых версіях. Карыстайцеся з асцярожнасцю."</string>
@@ -710,8 +710,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Апавяшчэнне <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Праграма можа не працаваць у рэжыме дзялення экрана."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Праграма не падтрымлівае функцыю дзялення экрана."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Праграма можа не працаваць на дадатковых дысплэях."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Праграма не падтрымлівае запуск на дадатковых дысплэях."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Праграма можа не працаваць на дадатковых экранах."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Праграма не падтрымлівае запуск на дадатковых экранах."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Адкрыць налады."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Адкрыць хуткія налады."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Закрыць хуткія налады."</string>
@@ -773,5 +773,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Пакінуць"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замяніць"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Праграмы, якія працуюць у фонавым рэжыме"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Дакраніцеся, каб атрымаць падрабязныя звесткі пра выкарыстанне трафіка і акумулятара"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
 </resources>

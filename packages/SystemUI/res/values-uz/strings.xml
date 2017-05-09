@@ -703,7 +703,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Ilova ekranni ikkiga bo‘lish rejimini qo‘llab-quvvatlamaydi."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Bu ilova ekranni bo‘lish xususiyatini qo‘llab-quvvatlamaydi."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Bu ilova qo‘shimcha ekranda ishlamasligi mumkin."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Bu ilova qo‘shimcha ekranlarda ishlamaydi."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Bu ilova qo‘shimcha ekranlarda ishga tushmaydi."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Sozlamalarni ochish."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Tezkor sozlamalarni ochish."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tezkor sozlamalarni yopish."</string>
@@ -765,5 +765,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Saqlab qolish"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Almashtirish"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Fonda ishlayotgan ilovalar"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya va trafik sarfiga oid tafsilotlarni olish uchun ustiga bosing"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya va trafik sarfi tafsilotlari uchun ustiga bosing"</string>
 </resources>

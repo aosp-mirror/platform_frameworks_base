@@ -700,7 +700,7 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"ການແຈ້ງເຕືອນ <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ແອັບອາດໃຊ້ບໍ່ໄດ້ກັບການແບ່ງໜ້າຈໍ."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ແອັບບໍ່ຮອງຮັບໜ້າຈໍແບບແຍກກັນ."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ແອັບອາດຮອງຮັບການເປີດໃນໜ້າຈໍທີສອງ."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ແອັບອາດບໍ່ສາມາດໃຊ້ໄດ້ໃນໜ້າຈໍທີສອງ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"ແອັບບໍ່ຮອງຮັບການເປີດໃນໜ້າຈໍທີສອງ."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ເປີດການຕັ້ງຄ່າ."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ເປີດການຕັ້ງຄ່າດ່ວນ."</string>
