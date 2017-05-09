@@ -346,7 +346,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         float clampedAmount = iconTransitionAmount > 0.5f ? 1.0f : 0.0f;
         if (clampedAmount == fullTransitionAmount) {
-            iconState.useFullTransitionAmount = scrollingFast || expandingAnimated
+            iconState.noAnimations = scrollingFast || expandingAnimated;
+            iconState.useFullTransitionAmount = iconState.noAnimations
                 || (!ICON_ANMATIONS_WHILE_SCROLLING && fullTransitionAmount == 0.0f && scrolling);
             iconState.useLinearTransitionAmount = !ICON_ANMATIONS_WHILE_SCROLLING
                     && fullTransitionAmount == 0.0f && !mAmbientState.isExpansionChanging();
@@ -357,6 +358,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 && !ViewState.isAnimatingY(icon))) {
             iconState.cancelAnimations(icon);
             iconState.useFullTransitionAmount = true;
+            iconState.noAnimations = true;
         }
         float transitionAmount;
         if (isLastChild || !USE_ANIMATIONS_WHEN_OPENING || iconState.useFullTransitionAmount
