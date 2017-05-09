@@ -46,7 +46,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
@@ -2462,6 +2461,14 @@ public class NotificationPanelView extends PanelView implements
             }
         }
     };
+
+    @Override
+    public void setTouchDisabled(boolean disabled) {
+        super.setTouchDisabled(disabled);
+        if (disabled && mAffordanceHelper.isSwipingInProgress() && !mIsLaunchTransitionRunning) {
+            mAffordanceHelper.resetImmediately();
+        }
+    }
 
     public void setDark(boolean dark) {
         mDark = dark;
