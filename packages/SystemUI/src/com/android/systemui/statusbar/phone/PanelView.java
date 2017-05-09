@@ -221,8 +221,11 @@ public abstract class PanelView extends FrameLayout {
 
     public void setTouchDisabled(boolean disabled) {
         mTouchDisabled = disabled;
-        if (mTouchDisabled && mTracking) {
-            onTrackingStopped(true /* expanded */);
+        if (mTouchDisabled) {
+            cancelHeightAnimator();
+            if (mTracking) {
+                onTrackingStopped(true /* expanded */);
+            }
         }
     }
 
