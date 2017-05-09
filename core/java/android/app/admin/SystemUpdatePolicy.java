@@ -71,11 +71,12 @@ public class SystemUpdatePolicy implements Parcelable {
     public static final int TYPE_INSTALL_WINDOWED = 2;
 
     /**
-     * Incoming system updates (except for security updates) will be blocked for 30 days, after
-     * which the policy will no longer be effective and the system will revert back to its normal
-     * behavior as if no policy were set.
-     * <b>Note:</b> security updates (e.g. monthly security patches) will <i>not</i> be affected by
-     * this policy.
+     * Incoming system updates (except for security updates) will be blocked for a maximum of 30
+     * days, after which the policy will no longer be effective and the system will revert back to
+     * its normal behavior as if no policy were set.
+     *
+     * <p><b>Note:</b> security updates (e.g. monthly security patches) may <i>not</i> be affected
+     * by this policy, depending on the policy set by the device manufacturer and carrier.
      *
      * <p>After this policy expires, resetting it to any policy other than
      * {@link #TYPE_INSTALL_AUTOMATIC} will produce no effect, as the 30-day maximum delay has
