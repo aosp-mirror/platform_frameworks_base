@@ -700,8 +700,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> эскертмеси: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Колдонмодо экран бөлүнбөшү мүмкүн."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Колдонмодо экран бөлүнбөйт."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Колдонмо көмөкчү дисплейде иштебей калышы мүмкүн."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Колдонмо көмөкчү дисплейлерде иштетилбейт."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Колдонмо кошумча экранда иштебей коюшу мүмкүн."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Колдонмону кошумча экрандарда иштетүүгө болбойт."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ыкчам жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Ыкчам жөндөөлөрдү жабуу."</string>
@@ -763,5 +763,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Ушундай калтыруу"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Алмаштыруу"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Фондо иштеп жаткан колдонмолор"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батареянын кубаты жана Интернеттин колдонулушу жөнүндө билүү үчүн таптап коюңуз"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батареянын кубаты жана трафиктин көлөмү жөнүндө билүү үчүн таптап коюңуз"</string>
 </resources>

@@ -50,7 +50,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाहरू"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लुटुथ टेथर भयो"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट विधिहरू सेटअप गर्नुहोस्"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"फिजिकल किबोर्ड"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"वास्तविक किबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"<xliff:g id="APPLICATION">%1$s</xliff:g> USB उपकरणलाई पहुँच दिनको लागि अनुप्रयोगलाई अनुमति दिने हो?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"<xliff:g id="APPLICATION">%1$s</xliff:g> USB पाटपुर्जालाई पहुँच दिनको लागि अनुप्रयोगलाई अनुमति दिने हो?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"यो USB उपकरण जोडिएको बेला <xliff:g id="ACTIVITY">%1$s</xliff:g> खोल्ने हो?"</string>
@@ -631,7 +631,7 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफोनहरू जडान गरियो"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हेडसेट जडान गरियो"</string>
     <string name="data_saver" msgid="5037565123367048522">"डेटा सेभर"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा सेभर अन छ"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा सेभर सक्रिय छ"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा सेभर बन्द छ"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"सक्रिय गर्नुहोस्"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"निष्क्रिय"</string>
@@ -701,7 +701,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"अनुप्रयोगले विभाजित-स्क्रिनमा काम नगर्न सक्छ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अनुप्रयोगले विभाजित-स्क्रिनलाई समर्थन गर्दैन।"</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"यो अनुप्रयोगले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लोकार्पण गर्ने गतिविधिलाई समर्थन गर्दैन।"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"द्रुत सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"द्रुत सेटिङहरूलाई बन्द गर्नुहोस्।"</string>
@@ -763,5 +763,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"राख्नुहोस्"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"प्रतिस्थापन गर्नुहोस्"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"पृष्ठभूमिमा चल्ने अनुप्रयोगहरू"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"ब्याट्री र डेटा प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
 </resources>

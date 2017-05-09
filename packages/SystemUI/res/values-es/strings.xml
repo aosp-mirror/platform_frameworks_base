@@ -248,7 +248,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Reanudar"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sin conexión a Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Con conexión Wi-Fi"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando señal GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ubicación definida por GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de ubicación activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Borrar todas las notificaciones"</string>
@@ -703,7 +703,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Es posible que la aplicación no funcione con la pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"La aplicación no admite la pantalla dividida."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Es posible que la aplicación no funcione en una pantalla secundaria."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"La aplicación no se puede iniciar en pantallas secundarias."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"La aplicación no se puede abrir en pantallas secundarias."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Abrir ajustes."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir ajustes rápidos."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Cerrar ajustes rápidos."</string>
@@ -765,5 +765,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Conservar"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Reemplazar"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicaciones que se están ejecutando en segundo plano"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Toca para ver información detallada sobre el uso de datos y la batería"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
 </resources>

@@ -530,7 +530,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Баяр хүргэе! Системийн UI Tохируулагчийг тохиргоонд нэмлээ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Тохиргооноос устгах"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Системийн UI Тохируулагчийг тохиргооноос устгаж, үүнтэй холбоотой бүх тохиргоог ашиглахаа болих уу?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"Апп-ыг таны төхөөрөмжид суулгаагүй байна"</string>
+    <string name="activity_not_found" msgid="348423244327799974">"Аппыг таны төхөөрөмжид суулгаагүй байна"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Цагийн секундыг харуулах"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Статус талбарт цагийн секундыг харуулах. Энэ нь тэжээлийн цэнэгт нөлөөлж болно."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Түргэн тохиргоог дахин засварлах"</string>
@@ -763,5 +763,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Хадгалах"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Солих"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Цаана ажиллаж буй апп"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батерей, дата ашиглалтын талаар дэлгэрэнгүй мэдээллийг харахын тулд товшино уу"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
 </resources>
