@@ -402,4 +402,22 @@ TEST_F(ManifestFixerTest, UsesFeatureMustHaveNameOrGlEsVersion) {
   EXPECT_EQ(nullptr, Verify(input));
 }
 
+TEST_F(ManifestFixerTest, IgnoreNamespacedElements) {
+  std::string input = R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android">
+        <special:tag whoo="true" xmlns:special="http://google.com" />
+      </manifest>)EOF";
+  EXPECT_NE(nullptr, Verify(input));
+}
+
+TEST_F(ManifestFixerTest, DoNotIgnoreNonNamespacedElements) {
+  std::string input = R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android">
+        <tag whoo="true" />
+      </manifest>)EOF";
+  EXPECT_EQ(nullptr, Verify(input));
+}
+
 }  // namespace aapt
