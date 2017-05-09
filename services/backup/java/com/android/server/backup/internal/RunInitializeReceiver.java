@@ -16,6 +16,9 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.RUN_INITIALIZE_ACTION;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_INITIALIZE;
 
 import android.content.BroadcastReceiver;
@@ -35,10 +38,10 @@ public class RunInitializeReceiver extends BroadcastReceiver {
     }
 
     public void onReceive(Context context, Intent intent) {
-        if (RefactoredBackupManagerService.RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
+        if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
             synchronized (backupManagerService.getQueueLock()) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.v(RefactoredBackupManagerService.TAG, "Running a device init");
+                if (DEBUG) {
+                    Slog.v(TAG, "Running a device init");
                 }
 
                 // Acquire the wakelock and pass it to the init thread.  it will

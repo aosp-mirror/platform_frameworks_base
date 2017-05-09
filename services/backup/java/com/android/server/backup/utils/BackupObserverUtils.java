@@ -16,12 +16,13 @@
 
 package com.android.server.backup.utils;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.app.backup.BackupProgress;
 import android.app.backup.IBackupObserver;
 import android.os.RemoteException;
 import android.util.Slog;
-
-import com.android.server.backup.RefactoredBackupManagerService;
 
 /**
  * Utility methods to communicate with BackupObserver.
@@ -37,9 +38,8 @@ public class BackupObserverUtils {
             try {
                 observer.onUpdate(packageName, progress);
             } catch (RemoteException e) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "Backup observer went away: onUpdate");
+                if (DEBUG) {
+                    Slog.w(TAG, "Backup observer went away: onUpdate");
                 }
             }
         }
@@ -55,9 +55,8 @@ public class BackupObserverUtils {
             try {
                 observer.onResult(packageName, status);
             } catch (RemoteException e) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "Backup observer went away: onResult");
+                if (DEBUG) {
+                    Slog.w(TAG, "Backup observer went away: onResult");
                 }
             }
         }
@@ -72,9 +71,8 @@ public class BackupObserverUtils {
             try {
                 observer.backupFinished(status);
             } catch (RemoteException e) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "Backup observer went away: backupFinished");
+                if (DEBUG) {
+                    Slog.w(TAG, "Backup observer went away: backupFinished");
                 }
             }
         }

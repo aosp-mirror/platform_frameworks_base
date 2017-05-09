@@ -16,6 +16,8 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.content.pm.PackageInfo;
 import android.util.Slog;
 
@@ -49,16 +51,14 @@ public class PerformClearTask implements Runnable {
             // TODO - need to handle failures
             mTransport.clearBackupData(mPackage);
         } catch (Exception e) {
-            Slog.e(RefactoredBackupManagerService.TAG,
-                    "Transport threw clearing data for " + mPackage + ": " + e.getMessage());
+            Slog.e(TAG, "Transport threw clearing data for " + mPackage + ": " + e.getMessage());
         } finally {
             try {
                 // TODO - need to handle failures
                 mTransport.finishBackup();
             } catch (Exception e) {
                 // Nothing we can do here, alas
-                Slog.e(RefactoredBackupManagerService.TAG,
-                        "Unable to mark clear operation finished: " + e.getMessage());
+                Slog.e(TAG, "Unable to mark clear operation finished: " + e.getMessage());
             }
 
             // Last but not least, release the cpu

@@ -16,6 +16,14 @@
 
 package com.android.server.backup.fullbackup;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_PENDING;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+
 import android.app.IBackupAgent;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
@@ -121,7 +129,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         mBackupRunnerOpToken = backupManagerService.generateRandomIntegerToken();
 
         if (backupManagerService.isBackupOperationInProgress()) {
-            if (RefactoredBackupManagerService.DEBUG) {
+            if (DEBUG) {
                 Slog.d(TAG, "Skipping full backup. A backup is already in progress.");
             }
             mCancelAll = true;
@@ -140,7 +148,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     // that run as system-domain uids but do not define their own backup agents,
                     // as well as any explicit mention of the 'special' shared-storage agent
                     // package (we handle that one at the end).
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    if (MORE_DEBUG) {
                         Slog.d(TAG, "Ignoring ineligible package " + pkg);
                     }
                     mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -154,7 +162,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 } else if (!AppBackupUtils.appGetsFullBackup(info)) {
                     // Cull any packages that are found in the queue but now aren't supposed
                     // to get full-data backup operations.
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    if (MORE_DEBUG) {
                         Slog.d(TAG, "Ignoring full-data backup of key/value participant "
                                 + pkg);
                     }
@@ -170,7 +178,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     // Cull any packages in the 'stopped' state: they've either just been
                     // installed or have explicitly been force-stopped by the user.  In both
                     // cases we do not want to launch them for backup.
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    if (MORE_DEBUG) {
                         Slog.d(TAG, "Ignoring stopped package " + pkg);
                     }
                     mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -197,9 +205,9 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private void registerTask() {
         synchronized (backupManagerService.getCurrentOpLock()) {
             Slog.d(TAG, "backupmanager pftbt token=" + Integer.toHexString(mCurrentOpToken));
-            backupManagerService.getCurrentOperations().put(mCurrentOpToken, new Operation(
-                    RefactoredBackupManagerService.OP_PENDING, this,
-                    RefactoredBackupManagerService.OP_TYPE_BACKUP));
+            backupManagerService.getCurrentOperations().put(
+                    mCurrentOpToken,
+                    new Operation(OP_PENDING, this, OP_TYPE_BACKUP));
         }
     }
 
@@ -262,7 +270,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         try {
             if (!backupManagerService.isEnabled() || !backupManagerService.isProvisioned()) {
                 // Backups are globally disabled, so don't proceed.
-                if (RefactoredBackupManagerService.DEBUG) {
+                if (DEBUG) {
                     Slog.i(TAG, "full backup requested but enabled=" + backupManagerService
                             .isEnabled()
                             + " provisioned=" + backupManagerService.isProvisioned()
@@ -300,7 +308,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             for (int i = 0; i < N; i++) {
                 PackageInfo currentPackage = mPackages.get(i);
                 String packageName = currentPackage.packageName;
-                if (RefactoredBackupManagerService.DEBUG) {
+                if (DEBUG) {
                     Slog.i(TAG, "Initiating full-data transport backup of " + packageName
                             + " token: " + mCurrentOpToken);
                 }
@@ -356,7 +364,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     final long preflightResult = mBackupRunner.getPreflightResultBlocking();
                     // Preflight result is negative if some error happened on preflight.
                     if (preflightResult < 0) {
-                        if (RefactoredBackupManagerService.MORE_DEBUG) {
+                        if (MORE_DEBUG) {
                             Slog.d(TAG, "Backup error after preflight of package "
                                     + packageName + ": " + preflightResult
                                     + ", not running backup.");
@@ -373,7 +381,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                         int nRead = 0;
                         do {
                             nRead = in.read(buffer);
-                            if (RefactoredBackupManagerService.MORE_DEBUG) {
+                            if (MORE_DEBUG) {
                                 Slog.v(TAG, "in.read(buffer) from app: " + nRead);
                             }
                             if (nRead > 0) {
@@ -443,12 +451,12 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                             backupPackageStatus = backupRunnerResult;
                         }
                     } else {
-                        if (RefactoredBackupManagerService.MORE_DEBUG) {
+                        if (MORE_DEBUG) {
                             Slog.i(TAG, "Transport-level failure; cancelling agent work");
                         }
                     }
 
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    if (MORE_DEBUG) {
                         Slog.i(TAG, "Done delivering backup data: result="
                                 + backupPackageStatus);
                     }
@@ -461,7 +469,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     // Also ask the transport how long it wants us to wait before
                     // moving on to the next package, if any.
                     backoff = mTransport.requestFullBackupTime();
-                    if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
+                    if (DEBUG_SCHEDULING) {
                         Slog.i(TAG, "Transport suggested backoff=" + backoff);
                     }
 
@@ -477,7 +485,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     BackupObserverUtils
                             .sendBackupOnPackageResult(mBackupObserver, packageName,
                                     BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
-                    if (RefactoredBackupManagerService.DEBUG) {
+                    if (DEBUG) {
                         Slog.i(TAG, "Transport rejected backup of " + packageName
                                 + ", skipping");
                     }
@@ -488,7 +496,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     BackupObserverUtils
                             .sendBackupOnPackageResult(mBackupObserver, packageName,
                                     BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
-                    if (RefactoredBackupManagerService.DEBUG) {
+                    if (DEBUG) {
                         Slog.i(TAG, "Transport quota exceeded for package: " + packageName);
                         EventLog.writeEvent(EventLogTags.FULL_BACKUP_QUOTA_EXCEEDED,
                                 packageName);
@@ -556,7 +564,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 backupRunStatus = BackupManager.ERROR_BACKUP_CANCELLED;
             }
 
-            if (RefactoredBackupManagerService.DEBUG) {
+            if (DEBUG) {
                 Slog.i(TAG, "Full backup completed with status: " + backupRunStatus);
             }
             BackupObserverUtils.sendBackupFinished(mBackupObserver, backupRunStatus);
@@ -582,7 +590,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 backupManagerService.scheduleNextFullBackupJob(backoff);
             }
 
-            Slog.i(RefactoredBackupManagerService.TAG, "Full data backup pass finished.");
+            Slog.i(TAG, "Full data backup pass finished.");
             backupManagerService.getWakelock().release();
         }
     }
@@ -630,12 +638,10 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         public int preflightFullBackup(PackageInfo pkg, IBackupAgent agent) {
             int result;
             try {
-                backupManagerService
-                        .prepareOperationTimeout(mCurrentOpToken,
-                                RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                                this, RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
+                backupManagerService.prepareOperationTimeout(
+                        mCurrentOpToken, TIMEOUT_FULL_BACKUP_INTERVAL, this, OP_TYPE_BACKUP_WAIT);
                 backupManagerService.addBackupTrace("preflighting");
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                if (MORE_DEBUG) {
                     Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
                 }
                 agent.doMeasureFullBackup(mQuota, mCurrentOpToken,
@@ -646,21 +652,20 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 // timeout had been produced.  In case of a real backstop timeout, mResult
                 // will still contain the value it was constructed with, AGENT_ERROR, which
                 // intentionaly falls into the "just report failure" code.
-                mLatch.await(RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                        TimeUnit.MILLISECONDS);
+                mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
 
                 long totalSize = mResult.get();
                 // If preflight timed out, mResult will contain error code as int.
                 if (totalSize < 0) {
                     return (int) totalSize;
                 }
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                if (MORE_DEBUG) {
                     Slog.v(TAG, "Got preflight response; size=" + totalSize);
                 }
 
                 result = mTransport.checkFullBackupSize(totalSize);
                 if (result == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    if (MORE_DEBUG) {
                         Slog.d(TAG, "Package hit quota limit on preflight " +
                                 pkg.packageName + ": " + totalSize + " of " + mQuota);
                     }
@@ -681,7 +686,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         @Override
         public void operationComplete(long result) {
             // got the callback, and our preflightFullBackup() method is waiting for the result
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
+            if (MORE_DEBUG) {
                 Slog.i(TAG, "Preflight op complete, result=" + result);
             }
             mResult.set(result);
@@ -691,7 +696,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
         @Override
         public void handleCancel(boolean cancelAll) {
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
+            if (MORE_DEBUG) {
                 Slog.i(TAG, "Preflight cancelled; failing");
             }
             mResult.set(BackupTransport.AGENT_ERROR);
@@ -702,8 +707,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         @Override
         public long getExpectedSizeOrErrorCode() {
             try {
-                mLatch.await(RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                        TimeUnit.MILLISECONDS);
+                mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                 return mResult.get();
             } catch (InterruptedException e) {
                 return BackupTransport.NO_MORE_DATA;
@@ -742,9 +746,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
         void registerTask() {
             synchronized (backupManagerService.getCurrentOpLock()) {
-                backupManagerService.getCurrentOperations().put(mCurrentOpToken, new Operation(
-                        RefactoredBackupManagerService.OP_PENDING, this,
-                        RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT));
+                backupManagerService.getCurrentOperations().put(
+                        mCurrentOpToken, new Operation(OP_PENDING, this, OP_TYPE_BACKUP_WAIT));
             }
         }
 
@@ -794,8 +797,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         // otherwise return negative error code.
         long getPreflightResultBlocking() {
             try {
-                mPreflightLatch.await(RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                        TimeUnit.MILLISECONDS);
+                mPreflightLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                 if (mIsCancelled) {
                     return BackupManager.ERROR_BACKUP_CANCELLED;
                 }
@@ -811,8 +813,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
         int getBackupResultBlocking() {
             try {
-                mBackupLatch.await(RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                        TimeUnit.MILLISECONDS);
+                mBackupLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                 if (mIsCancelled) {
                     return BackupManager.ERROR_BACKUP_CANCELLED;
                 }
@@ -833,7 +834,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
         @Override
         public void handleCancel(boolean cancelAll) {
-            if (RefactoredBackupManagerService.DEBUG) {
+            if (DEBUG) {
                 Slog.w(TAG, "Full backup cancel of " + mTarget.packageName);
             }
 

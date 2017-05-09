@@ -16,9 +16,9 @@
 
 package com.android.server.backup.utils;
 
-import android.util.Slog;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
-import com.android.server.backup.RefactoredBackupManagerService;
+import android.util.Slog;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -127,9 +127,9 @@ public class PasswordUtils {
                     ks = new PBEKeySpec(pwArray, salt, rounds, PBKDF2_KEY_SIZE);
             return keyFactory.generateSecret(ks);
         } catch (InvalidKeySpecException e) {
-            Slog.e(RefactoredBackupManagerService.TAG, "Invalid key spec for PBKDF2!");
+            Slog.e(TAG, "Invalid key spec for PBKDF2!");
         } catch (NoSuchAlgorithmException e) {
-            Slog.e(RefactoredBackupManagerService.TAG, "PBKDF2 unavailable!");
+            Slog.e(TAG, "PBKDF2 unavailable!");
         }
         return null;
     }

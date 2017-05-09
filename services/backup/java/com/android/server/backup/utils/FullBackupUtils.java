@@ -16,14 +16,14 @@
 
 package com.android.server.backup.utils;
 
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION;
+
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.StringBuilderPrinter;
-
-import com.android.server.backup.RefactoredBackupManagerService;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -88,7 +88,7 @@ public class FullBackupUtils {
         StringBuilder builder = new StringBuilder(4096);
         StringBuilderPrinter printer = new StringBuilderPrinter(builder);
 
-        printer.println(Integer.toString(RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION));
+        printer.println(Integer.toString(BACKUP_MANIFEST_VERSION));
         printer.println(pkg.packageName);
         printer.println(Integer.toString(pkg.versionCode));
         printer.println(Integer.toString(Build.VERSION.SDK_INT));

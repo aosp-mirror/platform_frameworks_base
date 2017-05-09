@@ -16,6 +16,11 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL;
+
 import android.app.AlarmManager;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
@@ -93,8 +98,7 @@ public class BackupHandler extends Handler {
                 IBackupTransport transport =
                         backupManagerService.getTransportManager().getCurrentTransportBinder();
                 if (transport == null) {
-                    Slog.v(RefactoredBackupManagerService.TAG,
-                            "Backup requested but no transport available");
+                    Slog.v(TAG, "Backup requested but no transport available");
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.setBackupRunning(false);
                     }
@@ -113,8 +117,8 @@ public class BackupHandler extends Handler {
                         for (BackupRequest b : backupManagerService.getPendingBackups().values()) {
                             queue.add(b);
                         }
-                        if (RefactoredBackupManagerService.DEBUG) {
-                            Slog.v(RefactoredBackupManagerService.TAG, "clearing pending backups");
+                        if (DEBUG) {
+                            Slog.v(TAG, "clearing pending backups");
                         }
                         backupManagerService.getPendingBackups().clear();
 
@@ -143,14 +147,12 @@ public class BackupHandler extends Handler {
                     } catch (Exception e) {
                         // unable to ask the transport its dir name -- transient failure, since
                         // the above check succeeded.  Try again next time.
-                        Slog.e(RefactoredBackupManagerService.TAG,
-                                "Transport became unavailable attempting backup"
-                                        + " or error initializing backup task", e);
+                        Slog.e(TAG, "Transport became unavailable attempting backup"
+                                + " or error initializing backup task", e);
                         staged = false;
                     }
                 } else {
-                    Slog.v(RefactoredBackupManagerService.TAG,
-                            "Backup requested but nothing pending");
+                    Slog.v(TAG, "Backup requested but nothing pending");
                     staged = false;
                 }
 
@@ -167,14 +169,12 @@ public class BackupHandler extends Handler {
             case MSG_BACKUP_RESTORE_STEP: {
                 try {
                     BackupRestoreTask task = (BackupRestoreTask) msg.obj;
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
-                        Slog.v(RefactoredBackupManagerService.TAG,
-                                "Got next step for " + task + ", executing");
+                    if (MORE_DEBUG) {
+                        Slog.v(TAG, "Got next step for " + task + ", executing");
                     }
                     task.execute();
                 } catch (ClassCastException e) {
-                    Slog.e(RefactoredBackupManagerService.TAG,
-                            "Invalid backup task in flight, obj=" + msg.obj);
+                    Slog.e(TAG, "Invalid backup task in flight, obj=" + msg.obj);
                 }
                 break;
             }
@@ -185,8 +185,7 @@ public class BackupHandler extends Handler {
                             (Pair<BackupRestoreTask, Long>) msg.obj;
                     taskWithResult.first.operationComplete(taskWithResult.second);
                 } catch (ClassCastException e) {
-                    Slog.e(RefactoredBackupManagerService.TAG,
-                            "Invalid completion in flight, obj=" + msg.obj);
+                    Slog.e(TAG, "Invalid completion in flight, obj=" + msg.obj);
                 }
                 break;
             }
@@ -213,8 +212,7 @@ public class BackupHandler extends Handler {
 
             case MSG_RUN_RESTORE: {
                 RestoreParams params = (RestoreParams) msg.obj;
-                Slog.d(RefactoredBackupManagerService.TAG,
-                        "MSG_RUN_RESTORE observer=" + params.observer);
+                Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
 
                 PerformUnifiedRestoreTask task = new PerformUnifiedRestoreTask(backupManagerService,
                         params.transport,
@@ -223,16 +221,15 @@ public class BackupHandler extends Handler {
 
                 synchronized (backupManagerService.getPendingRestores()) {
                     if (backupManagerService.isRestoreInProgress()) {
-                        if (RefactoredBackupManagerService.DEBUG) {
-                            Slog.d(RefactoredBackupManagerService.TAG,
-                                    "Restore in progress, queueing.");
+                        if (DEBUG) {
+                            Slog.d(TAG, "Restore in progress, queueing.");
                         }
                         backupManagerService.getPendingRestores().add(task);
                         // This task will be picked up and executed when the the currently running
                         // restore task finishes.
                     } else {
-                        if (RefactoredBackupManagerService.DEBUG) {
-                            Slog.d(RefactoredBackupManagerService.TAG, "Starting restore.");
+                        if (DEBUG) {
+                            Slog.d(TAG, "Starting restore.");
                         }
                         backupManagerService.setRestoreInProgress(true);
                         Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
@@ -305,26 +302,21 @@ public class BackupHandler extends Handler {
                         EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     }
                 } catch (Exception e) {
-                    Slog.e(RefactoredBackupManagerService.TAG,
-                            "Error from transport getting set list: " + e.getMessage());
+                    Slog.e(TAG, "Error from transport getting set list: " + e.getMessage());
                 } finally {
                     if (params.observer != null) {
                         try {
                             params.observer.restoreSetsAvailable(sets);
                         } catch (RemoteException re) {
-                            Slog.e(RefactoredBackupManagerService.TAG,
-                                    "Unable to report listing to observer");
+                            Slog.e(TAG, "Unable to report listing to observer");
                         } catch (Exception e) {
-                            Slog.e(RefactoredBackupManagerService.TAG,
-                                    "Restore observer threw: " + e.getMessage());
+                            Slog.e(TAG, "Restore observer threw: " + e.getMessage());
                         }
                     }
 
                     // Done: reset the session timeout clock
                     removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
-                    sendEmptyMessageDelayed(
-                            MSG_RESTORE_SESSION_TIMEOUT,
-                            RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL);
+                    sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
 
                     backupManagerService.getWakelock().release();
                 }
@@ -333,8 +325,7 @@ public class BackupHandler extends Handler {
 
             case MSG_BACKUP_OPERATION_TIMEOUT:
             case MSG_RESTORE_OPERATION_TIMEOUT: {
-                Slog.d(RefactoredBackupManagerService.TAG,
-                        "Timeout message received for token=" + Integer.toHexString(msg.arg1));
+                Slog.d(TAG, "Timeout message received for token=" + Integer.toHexString(msg.arg1));
                 backupManagerService.handleCancel(msg.arg1, false);
                 break;
             }
@@ -346,8 +337,7 @@ public class BackupHandler extends Handler {
                         // can't be in the middle of an actual restore operation because
                         // the timeout is suspended while a restore is in progress.  Clean
                         // up now.
-                        Slog.w(RefactoredBackupManagerService.TAG,
-                                "Restore session timed out; aborting");
+                        Slog.w(TAG, "Restore session timed out; aborting");
                         backupManagerService.getActiveRestoreSession().markTimedOut();
                         post(backupManagerService.getActiveRestoreSession().new EndRestoreRunnable(
                                 backupManagerService,
@@ -362,8 +352,7 @@ public class BackupHandler extends Handler {
                     AdbParams params = backupManagerService.getAdbBackupRestoreConfirmations().get(
                             msg.arg1);
                     if (params != null) {
-                        Slog.i(RefactoredBackupManagerService.TAG,
-                                "Full backup/restore timed out waiting for user confirmation");
+                        Slog.i(TAG, "Full backup/restore timed out waiting for user confirmation");
 
                         // Release the waiter; timeout == completion
                         backupManagerService.signalAdbBackupRestoreCompletion(params);
@@ -380,8 +369,7 @@ public class BackupHandler extends Handler {
                             }
                         }
                     } else {
-                        Slog.d(RefactoredBackupManagerService.TAG,
-                                "couldn't find params for token " + msg.arg1);
+                        Slog.d(TAG, "couldn't find params for token " + msg.arg1);
                     }
                 }
                 break;
@@ -395,9 +383,8 @@ public class BackupHandler extends Handler {
 
             case MSG_REQUEST_BACKUP: {
                 BackupParams params = (BackupParams) msg.obj;
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.d(RefactoredBackupManagerService.TAG,
-                            "MSG_REQUEST_BACKUP observer=" + params.observer);
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "MSG_REQUEST_BACKUP observer=" + params.observer);
                 }
                 ArrayList<BackupRequest> kvQueue = new ArrayList<>();
                 for (String packageName : params.kvPackages) {
@@ -418,9 +405,8 @@ public class BackupHandler extends Handler {
 
             case MSG_SCHEDULE_BACKUP_PACKAGE: {
                 String pkgName = (String) msg.obj;
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.d(RefactoredBackupManagerService.TAG,
-                            "MSG_SCHEDULE_BACKUP_PACKAGE " + pkgName);
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "MSG_SCHEDULE_BACKUP_PACKAGE " + pkgName);
                 }
                 backupManagerService.dataChangedImpl(pkgName);
                 break;

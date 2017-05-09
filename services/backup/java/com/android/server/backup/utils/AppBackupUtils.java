@@ -16,13 +16,15 @@
 
 package com.android.server.backup.utils;
 
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Process;
 import android.util.Slog;
-
-import com.android.server.backup.RefactoredBackupManagerService;
 
 /**
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
@@ -52,7 +54,7 @@ public class AppBackupUtils {
         }
 
         // 3. it is the special shared-storage backup package used for 'adb backup'
-        if (app.packageName.equals(RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE)) {
+        if (app.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
             return false;
         }
 
@@ -103,9 +105,8 @@ public class AppBackupUtils {
         // partition will be signed with the device's platform certificate, so on
         // different phones the same system app will have different signatures.)
         if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.v(RefactoredBackupManagerService.TAG,
-                        "System app " + target.packageName + " - skipping sig check");
+            if (MORE_DEBUG) {
+                Slog.v(TAG, "System app " + target.packageName + " - skipping sig check");
             }
             return true;
         }
@@ -113,9 +114,8 @@ public class AppBackupUtils {
         // Allow unsigned apps, but not signed on one device and unsigned on the other
         // TODO(b/37977154): is this the right policy?
         Signature[] deviceSigs = target.signatures;
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.v(RefactoredBackupManagerService.TAG, "signaturesMatch(): stored=" + storedSigs
-                    + " device=" + deviceSigs);
+        if (MORE_DEBUG) {
+            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device=" + deviceSigs);
         }
         if ((storedSigs == null || storedSigs.length == 0)
                 && (deviceSigs == null || deviceSigs.length == 0)) {

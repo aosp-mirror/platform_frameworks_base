@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_GET_RESTORE_SETS;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
@@ -115,7 +117,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                 android.Manifest.permission.BACKUP,
                 "performRestore");
 
-        if (RefactoredBackupManagerService.DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, "restoreAll token=" + Long.toHexString(token)
                     + " observer=" + observer);
         }
@@ -157,7 +159,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
                     long oldId = Binder.clearCallingIdentity();
                     backupManagerService.getWakelock().acquire();
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    if (MORE_DEBUG) {
                         Slog.d(TAG, "restoreAll() kicking off");
                     }
                     Message msg = backupManagerService.getBackupHandler().obtainMessage(
@@ -182,7 +184,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                 android.Manifest.permission.BACKUP,
                 "performRestore");
 
-        if (RefactoredBackupManagerService.DEBUG) {
+        if (DEBUG) {
             StringBuilder b = new StringBuilder(128);
             b.append("restoreSome token=");
             b.append(Long.toHexString(token));
@@ -250,7 +252,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
                     long oldId = Binder.clearCallingIdentity();
                     backupManagerService.getWakelock().acquire();
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
+                    if (MORE_DEBUG) {
                         Slog.d(TAG, "restoreSome() of " + packages.length + " packages");
                     }
                     Message msg = backupManagerService.getBackupHandler().obtainMessage(
@@ -270,7 +272,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
     public synchronized int restorePackage(String packageName, IRestoreObserver observer,
             IBackupManagerMonitor monitor) {
-        if (RefactoredBackupManagerService.DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "restorePackage pkg=" + packageName + " obs=" + observer
                     + "monitor=" + monitor);
         }
@@ -318,7 +320,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // Check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
             long token = backupManagerService.getAvailableRestoreToken(packageName);
-            if (RefactoredBackupManagerService.DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "restorePackage pkg=" + packageName
                         + " token=" + Long.toHexString(token));
             }
@@ -327,7 +329,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // the app has never been backed up from this device -- there's nothing
             // to do but return failure.
             if (token == 0) {
-                if (RefactoredBackupManagerService.DEBUG) {
+                if (DEBUG) {
                     Slog.w(TAG, "No data available for this package; not restoring");
                 }
                 return -1;
@@ -338,8 +340,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                 dirName = mRestoreTransport.transportDirName();
             } catch (Exception e) {
                 // Transport went AWOL; fail.
-                Slog.e(TAG,
-                        "Unable to get transport dir for restorePackage: " + e.getMessage());
+                Slog.e(TAG, "Unable to get transport dir for restorePackage: " + e.getMessage());
                 return -1;
             }
 
@@ -348,7 +349,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
             // Ready to go:  enqueue the restore request and claim success
             backupManagerService.getWakelock().acquire();
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
+            if (MORE_DEBUG) {
                 Slog.d(TAG, "restorePackage() : " + packageName);
             }
             Message msg = backupManagerService.getBackupHandler().obtainMessage(MSG_RUN_RESTORE);
@@ -387,7 +388,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     }
 
     public synchronized void endRestoreSession() {
-        if (RefactoredBackupManagerService.DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, "endRestoreSession");
         }
 

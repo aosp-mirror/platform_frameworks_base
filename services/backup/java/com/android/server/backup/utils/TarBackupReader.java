@@ -34,8 +34,13 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
 
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION;
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
 import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
 import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
 import android.app.backup.BackupAgent;
@@ -51,7 +56,6 @@ import android.os.Process;
 import android.util.Slog;
 
 import com.android.server.backup.FileMetadata;
-import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.restore.RestorePolicy;
 
 import java.io.ByteArrayInputStream;
@@ -178,7 +182,7 @@ public class TarBackupReader {
                         info.path, 0, FullBackup.SHARED_PREFIX.length())) {
                     // File in shared storage.  !!! TODO: implement this.
                     info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
-                    info.packageName = RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+                    info.packageName = SHARED_BACKUP_AGENT_PACKAGE;
                     info.domain = FullBackup.SHARED_STORAGE_TOKEN;
                     if (DEBUG) {
                         Slog.i(TAG, "File in shared storage: " + info.path);
@@ -200,9 +204,8 @@ public class TarBackupReader {
 
                     // if it's a manifest or metadata payload we're done, otherwise parse
                     // out the domain into which the file will be restored
-                    if (!info.path.equals(RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME)
-                            && !info.path.equals(
-                            RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
+                    if (!info.path.equals(BACKUP_MANIFEST_FILENAME) &&
+                            !info.path.equals(BACKUP_METADATA_FILENAME)) {
                         slash = info.path.indexOf('/');
                         if (slash < 0) {
                             throw new IOException("Illegal semantic path in non-manifest "
@@ -292,7 +295,7 @@ public class TarBackupReader {
         try {
             offset = extractLine(buffer, offset, str);
             int version = Integer.parseInt(str[0]);
-            if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
+            if (version == BACKUP_MANIFEST_VERSION) {
                 offset = extractLine(buffer, offset, str);
                 String manifestPackage = str[0];
                 // TODO: handle <original-package>
@@ -568,7 +571,7 @@ public class TarBackupReader {
         String[] str = new String[1];
         int offset = extractLine(buffer, 0, str);
         int version = Integer.parseInt(str[0]);
-        if (version == RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION) {
+        if (version == BACKUP_MANIFEST_VERSION) {
             offset = extractLine(buffer, offset, str);
             final String pkg = str[0];
             if (info.packageName.equals(pkg)) {
@@ -585,7 +588,7 @@ public class TarBackupReader {
                                 + " too big; corrupt? size=" + info.size);
                     }
                     switch (token) {
-                        case RefactoredBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN: {
+                        case BACKUP_WIDGET_METADATA_TOKEN: {
                             if (MORE_DEBUG) {
                                 Slog.i(TAG, "Got widget metadata for " + info.packageName);
                             }
@@ -682,9 +685,7 @@ public class TarBackupReader {
             throws IOException {
         // We should never see a pax extended header larger than this
         if (info.size > 32 * 1024) {
-            Slog.w(TAG,
-                    "Suspiciously large pax header size " + info.size
-                            + " - aborting");
+            Slog.w(TAG, "Suspiciously large pax header size " + info.size + " - aborting");
             throw new IOException("Sanity failure: pax header size " + info.size);
         }
 
