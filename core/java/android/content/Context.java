@@ -2892,6 +2892,7 @@ public abstract class Context {
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
             TEXT_SERVICES_MANAGER_SERVICE,
+            TEXT_CLASSIFICATION_SERVICE,
             APPWIDGET_SERVICE,
             //@hide: VOICE_INTERACTION_MANAGER_SERVICE,
             //@hide: BACKUP_SERVICE,
