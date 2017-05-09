@@ -29,6 +29,8 @@ import android.util.Range;
 
 import com.google.android.colorextraction.ColorExtractor.GradientColors;
 
+import java.util.List;
+
 /**
  * Implementation of tonal color extraction
  */
@@ -40,9 +42,6 @@ public class Tonal implements ExtractionType {
     private static final float FIT_WEIGHT_S = 1.0f;
     private static final float FIT_WEIGHT_L = 10.0f;
 
-    // When extracting the main color, only consider colors
-    // present in at least MIN_COLOR_OCCURRENCE of the image
-    private static final float MIN_COLOR_OCCURRENCE = 0.1f;
     private static final boolean DEBUG = true;
 
     // Temporary variable to avoid allocations
@@ -61,7 +60,10 @@ public class Tonal implements ExtractionType {
             @NonNull GradientColors outColorsNormal, @NonNull GradientColors outColorsDark,
             @NonNull GradientColors outColorsExtraDark) {
 
-        if (inWallpaperColors.getColors().size() == 0) {
+        final List<Color> mainColors = inWallpaperColors.getMainColors();
+        final int mainColorsSize = mainColors.size();
+
+        if (mainColorsSize == 0) {
             return false;
         }
         // Tonal is not really a sort, it takes a color from the extracted
@@ -69,30 +71,18 @@ public class Tonal implements ExtractionType {
         // palettes. The best fit is tweaked to be closer to the source color
         // and replaces the original palette
 
-        // First find the most representative color in the image
-        populationSort(inWallpaperColors);
-        // Calculate total
-        int total = 0;
-        for (Pair<Color, Integer> weightedColor : inWallpaperColors.getColors()) {
-            total += weightedColor.second;
-        }
-
-        // Get bright colors that occur often enough in this image
-        Pair<Color, Integer> bestColor = null;
-        float[] hsl = new float[3];
-        for (Pair<Color, Integer> weightedColor : inWallpaperColors.getColors()) {
-            float colorOccurrence = weightedColor.second / (float) total;
-            if (colorOccurrence < MIN_COLOR_OCCURRENCE) {
-                break;
-            }
-
-            int colorValue = weightedColor.first.toArgb();
+        // Get the most preeminent, non-blacklisted color.
+        Color bestColor = null;
+        final float[] hsl = new float[3];
+        for (int i = 0; i < mainColorsSize; i++) {
+            final Color color = mainColors.get(i);
+            final int colorValue = color.toArgb();
             ColorUtils.RGBToHSL(Color.red(colorValue), Color.green(colorValue),
                     Color.blue(colorValue), hsl);
 
             // Stop when we find a color that meets our criteria
             if (!isBlacklisted(hsl)) {
-                bestColor = weightedColor;
+                bestColor = color;
                 break;
             }
         }
@@ -102,7 +92,7 @@ public class Tonal implements ExtractionType {
             return false;
         }
 
-        int colorValue = bestColor.first.toArgb();
+        int colorValue = bestColor.toArgb();
         ColorUtils.RGBToHSL(Color.red(colorValue), Color.green(colorValue), Color.blue(colorValue),
                 hsl);
 
@@ -212,10 +202,6 @@ public class Tonal implements ExtractionType {
         return false;
     }
 
-    private static void populationSort(@NonNull WallpaperColors wallpaperColors) {
-        wallpaperColors.getColors().sort((a, b) -> b.second - a.second);
-    }
-
     /**
      * Offsets all colors by a delta, clamping values that go beyond what's
      * supported on the color space.
@@ -269,7 +255,9 @@ public class Tonal implements ExtractionType {
         TonalPalette best = null;
         float error = Float.POSITIVE_INFINITY;
 
-        for (TonalPalette candidate : TONAL_PALETTES) {
+        for (int i = 0; i < TONAL_PALETTES.length; i++) {
+            final TonalPalette candidate = TONAL_PALETTES[i];
+
             if (h >= candidate.minHue && h <= candidate.maxHue) {
                 best = candidate;
                 break;
