@@ -118,7 +118,7 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                mUi.hideAll();
+                mUi.hideAll(null);
             }
         }
     };
@@ -470,9 +470,9 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
-        public int startSession(IBinder activityToken, IBinder windowToken, IBinder appCallback,
-                AutofillId autofillId, Rect bounds, AutofillValue value, int userId,
-                boolean hasCallback, int flags, String packageName) {
+        public int startSession(IBinder activityToken, IBinder appCallback, AutofillId autofillId,
+                Rect bounds, AutofillValue value, int userId, boolean hasCallback, int flags,
+                String packageName) {
 
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
             appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
@@ -489,8 +489,8 @@ public final class AutofillManagerService extends SystemService {
 
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                return service.startSessionLocked(activityToken, getCallingUid(), windowToken,
-                        appCallback, autofillId, bounds, value, hasCallback, flags, packageName);
+                return service.startSessionLocked(activityToken, getCallingUid(), appCallback,
+                        autofillId, bounds, value, hasCallback, flags, packageName);
             }
         }
 
@@ -525,19 +525,6 @@ public final class AutofillManagerService extends SystemService {
             }
 
             return false;
-        }
-
-        @Override
-        public void setWindow(int sessionId, IBinder windowToken) throws RemoteException {
-            windowToken = Preconditions.checkNotNull(windowToken, "windowToken");
-
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = mServicesCache.get(
-                        UserHandle.getCallingUserId());
-                if (service != null) {
-                    service.setWindow(sessionId, getCallingUid(), windowToken);
-                }
-            }
         }
 
         @Override

@@ -263,7 +263,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    int startSessionLocked(@NonNull IBinder activityToken, int uid, @Nullable IBinder windowToken,
+    int startSessionLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
             int flags, @NonNull String packageName) {
@@ -274,8 +274,8 @@ final class AutofillManagerServiceImpl {
         // Occasionally clean up abandoned sessions
         pruneAbandonedSessionsLocked();
 
-        final Session newSession = createSessionByTokenLocked(activityToken, uid, windowToken,
-                appCallbackToken, hasCallback, flags, packageName);
+        final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
+                hasCallback, flags, packageName);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -359,8 +359,8 @@ final class AutofillManagerServiceImpl {
     }
 
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
-            @Nullable IBinder windowToken, @NonNull IBinder appCallbackToken, boolean hasCallback,
-            int flags, @NonNull String packageName) {
+            @NonNull IBinder appCallbackToken, boolean hasCallback, int flags,
+            @NonNull String packageName) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -375,7 +375,7 @@ final class AutofillManagerServiceImpl {
         } while (sessionId == NO_SESSION || mSessions.indexOfKey(sessionId) >= 0);
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
-                sessionId, uid, activityToken, windowToken, appCallbackToken, hasCallback,
+                sessionId, uid, activityToken, appCallbackToken, hasCallback,
                 mInfo.getServiceInfo().getComponentName(), packageName);
         mSessions.put(newSession.id, newSession);
 
@@ -398,24 +398,6 @@ final class AutofillManagerServiceImpl {
             return false;
         } else {
             session.switchActivity(activityToken, appCallback);
-            return true;
-        }
-    }
-
-    /**
-     * Set the window the UI should get attached to
-     *
-     * @param sessionId The id of the session to restore
-     * @param uid UID of the process that tries to restore the session
-     * @param windowToken The window the activity is now in
-     */
-    boolean setWindow(int sessionId, int uid, @NonNull IBinder windowToken) {
-        final Session session = mSessions.get(sessionId);
-
-        if (session == null || uid != session.uid) {
-            return false;
-        } else {
-            session.switchWindow(windowToken);
             return true;
         }
     }
