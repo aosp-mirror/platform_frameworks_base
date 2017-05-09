@@ -35,7 +35,6 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -50,6 +49,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.server.NativeDaemonConnector.Command;
 
 /**
  * Network Service Discovery Service handles remote service discovery operation requests by
@@ -162,7 +162,7 @@ public class NsdService extends INsdManager.Stub {
                         }
                         //Last client
                         if (mClients.size() == 0) {
-                            mDaemon.stop();
+                            stopMDnsDaemon();
                         }
                         break;
                     case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION:
@@ -222,14 +222,14 @@ public class NsdService extends INsdManager.Stub {
             public void enter() {
                 sendNsdStateChangeBroadcast(true);
                 if (mClients.size() > 0) {
-                    mDaemon.start();
+                    startMDnsDaemon();
                 }
             }
 
             @Override
             public void exit() {
                 if (mClients.size() > 0) {
-                    mDaemon.stop();
+                    stopMDnsDaemon();
                 }
             }
 
@@ -248,8 +248,8 @@ public class NsdService extends INsdManager.Stub {
             }
 
             private void removeRequestMap(int clientId, int globalId, ClientInfo clientInfo) {
-                clientInfo.mClientIds.delete(clientId);
-                clientInfo.mClientRequests.delete(clientId);
+                clientInfo.mClientIds.remove(clientId);
+                clientInfo.mClientRequests.remove(clientId);
                 mIdToClientInfoMap.remove(globalId);
             }
 
@@ -263,7 +263,7 @@ public class NsdService extends INsdManager.Stub {
                         //First client
                         if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL &&
                                 mClients.size() == 0) {
-                            mDaemon.start();
+                            startMDnsDaemon();
                         }
                         return NOT_HANDLED;
                     case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
@@ -302,7 +302,7 @@ public class NsdService extends INsdManager.Stub {
                         clientInfo = mClients.get(msg.replyTo);
 
                         try {
-                            id = clientInfo.mClientIds.get(msg.arg2);
+                            id = clientInfo.mClientIds.get(msg.arg2).intValue();
                         } catch (NullPointerException e) {
                             replyToMessage(msg, NsdManager.STOP_DISCOVERY_FAILED,
                                     NsdManager.FAILURE_INTERNAL_ERROR);
@@ -340,7 +340,7 @@ public class NsdService extends INsdManager.Stub {
                         if (DBG) Slog.d(TAG, "unregister service");
                         clientInfo = mClients.get(msg.replyTo);
                         try {
-                            id = clientInfo.mClientIds.get(msg.arg2);
+                            id = clientInfo.mClientIds.get(msg.arg2).intValue();
                         } catch (NullPointerException e) {
                             replyToMessage(msg, NsdManager.UNREGISTER_SERVICE_FAILED,
                                     NsdManager.FAILURE_INTERNAL_ERROR);
@@ -713,13 +713,26 @@ public class NsdService extends INsdManager.Stub {
             return true;
         }
 
-        public void start() {
-            execute("start-service");
+        public boolean execute(Command cmd) {
+            if (DBG) {
+                Slog.d(TAG, cmd.toString());
+            }
+            try {
+                mNativeConnector.execute(cmd);
+            } catch (NativeDaemonConnectorException e) {
+                Slog.e(TAG, "Failed to execute " + cmd, e);
+                return false;
+            }
+            return true;
         }
+    }
 
-        public void stop() {
-            execute("stop-service");
-        }
+    private boolean startMDnsDaemon() {
+        return mDaemon.execute("start-service");
+    }
+
+    private boolean stopMDnsDaemon() {
+        return mDaemon.execute("stop-service");
     }
 
     private boolean registerService(int regId, NsdServiceInfo service) {
@@ -731,7 +744,8 @@ public class NsdService extends INsdManager.Stub {
         int port = service.getPort();
         byte[] textRecord = service.getTxtRecord();
         String record = Base64.encodeToString(textRecord, Base64.DEFAULT).replace("\n", "");
-        return mDaemon.execute("register", regId, name, type, port, record);
+        Command cmd = new Command("mdnssd", "register", regId, name, type, port, record);
+        return mDaemon.execute(cmd);
     }
 
     private boolean unregisterService(int regId) {
@@ -824,10 +838,10 @@ public class NsdService extends INsdManager.Stub {
         private NsdServiceInfo mResolvedService;
 
         /* A map from client id to unique id sent to mDns */
-        private final SparseIntArray mClientIds = new SparseIntArray();
+        private final SparseArray<Integer> mClientIds = new SparseArray<>();
 
         /* A map from client id to the type of the request we had received */
-        private final SparseIntArray mClientRequests = new SparseIntArray();
+        private final SparseArray<Integer> mClientRequests = new SparseArray<>();
 
         private ClientInfo(AsyncChannel c, Messenger m) {
             mChannel = c;
@@ -854,7 +868,6 @@ public class NsdService extends INsdManager.Stub {
         // and send cancellations to the daemon.
         private void expungeAllRequests() {
             int globalId, clientId, i;
-            // TODO: to keep handler responsive, do not clean all requests for that client at once.
             for (i = 0; i < mClientIds.size(); i++) {
                 clientId = mClientIds.keyAt(i);
                 globalId = mClientIds.valueAt(i);
@@ -882,11 +895,15 @@ public class NsdService extends INsdManager.Stub {
         // mClientIds is a sparse array of listener id -> mDnsClient id.  For a given mDnsClient id,
         // return the corresponding listener id.  mDnsClient id is also called a global id.
         private int getClientId(final int globalId) {
-            int idx = mClientIds.indexOfValue(globalId);
-            if (idx < 0) {
-                return idx;
+            // This doesn't use mClientIds.indexOfValue because indexOfValue uses == (not .equals)
+            // while also coercing the int primitives to Integer objects.
+            for (int i = 0, nSize = mClientIds.size(); i < nSize; i++) {
+                int mDnsId = mClientIds.valueAt(i);
+                if (globalId == mDnsId) {
+                    return mClientIds.keyAt(i);
+                }
             }
-            return mClientIds.keyAt(idx);
+            return -1;
         }
     }
 
