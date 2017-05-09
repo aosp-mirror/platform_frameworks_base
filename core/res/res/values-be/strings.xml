@@ -274,7 +274,7 @@
     <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Праграмы, якія працуюць у фонавым рэжыме"</string>
     <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> працуе ў фонавым рэжыме"</string>
     <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Праграмы (<xliff:g id="NUMBER">%1$d</xliff:g>) працуюць у фонавым рэжыме"</string>
-    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Дакраніцеся, каб атрымаць падрабязныя звесткі пра выкарыстанне трафіка і акумулятара"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Бяспечны рэжым"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Сістэма Android"</string>
@@ -1023,9 +1023,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Метад уводу"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дзеянні з тэкстам"</string>
     <string name="email" msgid="4560673117055050403">"Электронная пошта"</string>
-    <string name="dial" msgid="4204975095406423102">"Патэлефанаваць"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
-    <string name="browse" msgid="6079864138582486027">"Праглядзець"</string>
+    <string name="dial" msgid="4204975095406423102">"Тэлефон"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Месца для захавання на зыходзе"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некаторыя сістэмныя функцыі могуць не працаваць"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Не хапае сховішча для сістэмы. Пераканайцеся, што ў вас ёсць 250 МБ свабоднага месца, і перазапусціце."</string>
@@ -1066,7 +1068,7 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Выберыце дзеянне"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Выберыце прыкладанне для USB-прылады"</string>
     <string name="noApplications" msgid="2991814273936504689">"Няма прыкладанняў, якія могуць выконваць гэты працэс."</string>
-    <string name="aerr_application" msgid="250320989337856518">"Праграма <xliff:g id="APPLICATION">%1$s</xliff:g> спынілася"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g>: збой у рабоце"</string>
     <string name="aerr_process" msgid="6201597323218674729">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> спыніўся"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> шматразова спыняе працу"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> шматразова спыняе працу"</string>

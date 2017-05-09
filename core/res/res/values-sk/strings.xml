@@ -1024,8 +1024,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operácie s textom"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
     <string name="dial" msgid="4204975095406423102">"Telefón"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="browse" msgid="6079864138582486027">"Prehliadať"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>
@@ -1066,7 +1068,7 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Zvoľte akciu"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Zvoľte aplikáciu pre zariadenie USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Túto akciu nemôžu vykonávať žiadne aplikácie."</string>
-    <string name="aerr_application" msgid="250320989337856518">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> sa zastavila"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> sa zastavila"</string>
     <string name="aerr_process" msgid="6201597323218674729">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> sa zastavil"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sa opakovane zastavuje"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sa opakovane zastavuje"</string>

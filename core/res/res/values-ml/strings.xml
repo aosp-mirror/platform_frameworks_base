@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ടെക്‌സ്‌റ്റ് പ്രവർത്തനങ്ങൾ"</string>
     <string name="email" msgid="4560673117055050403">"ഇമെയിൽ"</string>
     <string name="dial" msgid="4204975095406423102">"ഫോണ്‍"</string>
-    <string name="map" msgid="5441053548030107189">"മാപ്പ്"</string>
-    <string name="browse" msgid="6079864138582486027">"ബ്രൗസുചെയ്യുക"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
@@ -1178,10 +1180,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI-യ്‌ക്കായുള്ള USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ഒരു USB ആക്‌സസ്സറി കണക്റ്റുചെയ്‌തു"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (2256529893240208458) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (7811865061127547035) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"ഓഡിയോ ആക്‌സസറി പ്രവർത്തിക്കുകയില്ല"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"കൂടുതൽ വിവരങ്ങൾക്ക് ടാപ്പുചെയ്യുക"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ഡീബഗ്ഗിംഗ് പ്രവർത്തനരഹിതമാക്കാൻ ടാപ്പുചെയ്യുക."</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
