@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textåtgärder"</string>
     <string name="email" msgid="4560673117055050403">"Skicka e-post"</string>
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
-    <string name="map" msgid="5441053548030107189">"Karta"</string>
-    <string name="browse" msgid="6079864138582486027">"Bläddra"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lagringsutrymmet börjar ta slut"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Det finns inte tillräckligt med utrymme för systemet. Kontrollera att du har ett lagringsutrymme på minst 250 MB och starta om."</string>

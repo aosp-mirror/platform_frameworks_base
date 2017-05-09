@@ -1004,8 +1004,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acțiuni pentru text"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
-    <string name="map" msgid="5441053548030107189">"Hartă"</string>
-    <string name="browse" msgid="6079864138582486027">"Răsfoiți"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spațiul de stocare aproape ocupat"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Este posibil ca unele funcții de sistem să nu funcționeze"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Spațiu de stocare insuficient pentru sistem. Asigurați-vă că aveți 250 MB de spațiu liber și reporniți."</string>
