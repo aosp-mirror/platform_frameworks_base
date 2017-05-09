@@ -754,6 +754,15 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testOnlyHasDefaultChannel() throws Exception {
+        assertTrue(mHelper.onlyHasDefaultChannel(PKG, UID));
+        assertFalse(mHelper.onlyHasDefaultChannel(UPDATED_PKG, UID2));
+
+        mHelper.createNotificationChannel(PKG, UID, getChannel(), true);
+        assertFalse(mHelper.onlyHasDefaultChannel(PKG, UID));
+    }
+
+    @Test
     public void testCreateChannel_defaultChannelId() throws Exception {
         try {
             mHelper.createNotificationChannel(PKG, UID, new NotificationChannel(
