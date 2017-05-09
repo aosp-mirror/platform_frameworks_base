@@ -678,6 +678,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     mIsCreating = false;
                     if (mSurfaceControl != null && !mSurfaceCreated) {
                         mSurfaceControl.destroy();
+                        mSurface.release();
                         mSurfaceControl = null;
                     }
                 }
