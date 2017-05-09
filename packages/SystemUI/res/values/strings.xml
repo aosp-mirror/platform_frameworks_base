@@ -1442,7 +1442,7 @@
     <string name="notification_header_default_channel">Notifications</string>
 
     <!-- Notification Inline Controls: Shown when a channel's notifications are currently blocked -->
-    <string name="notification_channel_disabled">You won\'t get these notifications anymore.</string>
+    <string name="notification_channel_disabled">You won\'t get these notifications anymore</string>
 
     <!-- Notification: Control panel: Label that shows how many channels are included in this bundle
         of notifications.  Replaces the channel name and only appears when there is more than one channel. -->
