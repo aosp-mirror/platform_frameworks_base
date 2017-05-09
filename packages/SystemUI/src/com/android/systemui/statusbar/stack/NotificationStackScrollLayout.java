@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationGuts;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationSnooze;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.FakeShadowView;
@@ -234,6 +235,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private NotificationMenuRowPlugin mCurrMenuRow;
     private View mTranslatingParentView;
     private View mMenuExposedView;
+    boolean mCheckForLeavebehind;
 
     /**
      * Should in this touch motion only be scrolling allowed? It's true when the scroller was
@@ -1310,6 +1312,22 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && !mDisallowDismissInThisMotion) {
             horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
         }
+
+        // Check if we need to clear any snooze leavebehinds
+        NotificationGuts guts = mStatusBar.getExposedGuts();
+        if (guts != null && !isTouchInView(ev, guts)
+                && guts.getGutsContent() instanceof NotificationSnooze) {
+            NotificationSnooze ns = (NotificationSnooze) guts.getGutsContent();
+            if ((ns.isExpanded() && isCancelOrUp)
+                    || (!horizontalSwipeWantsIt && scrollerWantsIt)) {
+                // If the leavebehind is expanded we clear it on the next up event, otherwise we
+                // clear it on the next non-horizontal swipe or expand event.
+                checkSnoozeLeavebehind();
+            }
+        }
+        if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
+            mCheckForLeavebehind = true;
+        }
         return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || super.onTouchEvent(ev);
     }
 
@@ -1429,6 +1447,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                         // existing overScroll, we have to scroll the view
                         customOverScrollBy((int) scrollAmount, mOwnScrollY,
                                 range, getHeight() / 2);
+                        // If we're scrolling, leavebehinds should be dismissed
+                        checkSnoozeLeavebehind();
                     }
                 }
                 break;
@@ -2458,6 +2478,18 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && !mDisallowDismissInThisMotion) {
             swipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
         }
+        // Check if we need to clear any snooze leavebehinds
+        boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
+        NotificationGuts guts = mStatusBar.getExposedGuts();
+        if (!isTouchInView(ev, guts) && isUp && !swipeWantsIt && !expandWantsIt
+                && !scrollWantsIt) {
+            mCheckForLeavebehind = false;
+            mStatusBar.closeAndSaveGuts(true /* removeLeavebehind */, false /* force */,
+                    false /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
+        }
+        if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
+            mCheckForLeavebehind = true;
+        }
         return swipeWantsIt || scrollWantsIt || expandWantsIt || super.onInterceptTouchEvent(ev);
     }
 
@@ -3287,13 +3319,27 @@ public class NotificationStackScrollLayout extends ViewGroup
         return Math.max(mMaxLayoutHeight - mContentHeight, 0);
     }
 
+    public void checkSnoozeLeavebehind() {
+        if (mCheckForLeavebehind) {
+            mStatusBar.closeAndSaveGuts(true /* removeLeavebehind */, false /* force */,
+                    false /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
+            mCheckForLeavebehind = false;
+        }
+    }
+
+    public void resetCheckSnoozeLeavebehind() {
+        mCheckForLeavebehind = true;
+    }
+
     public void onExpansionStarted() {
         mIsExpansionChanging = true;
         mAmbientState.setExpansionChanging(true);
+        checkSnoozeLeavebehind();
     }
 
     public void onExpansionStopped() {
         mIsExpansionChanging = false;
+        resetCheckSnoozeLeavebehind();
         mAmbientState.setExpansionChanging(false);
         if (!mIsExpanded) {
             setOwnScrollY(0);
@@ -4292,6 +4338,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // of the panel early.
                 handleChildDismissed(view);
             }
+            mStatusBar.closeAndSaveGuts(true /* removeLeavebehind */, false /* force */,
+                    false /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
             handleMenuCoveredOrDismissed();
         }
 
@@ -4374,29 +4422,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         public void closeControlsIfOutsideTouch(MotionEvent ev) {
             NotificationGuts guts = mStatusBar.getExposedGuts();
             View view = null;
-            int height = 0;
-            if (guts != null) {
-                // Checking guts
+            if (guts != null && !guts.getGutsContent().isLeavebehind()) {
+                // Only close visible guts if they're not a leavebehind.
                 view = guts;
-                height = guts.getActualHeight();
             } else if (mCurrMenuRow != null && mCurrMenuRow.isMenuVisible()
                     && mTranslatingParentView != null) {
                 // Checking menu
                 view = mTranslatingParentView;
-                height = ((ExpandableView) mTranslatingParentView).getActualHeight();
             }
-            if (view != null) {
-                final int rx = (int) ev.getRawX();
-                final int ry = (int) ev.getRawY();
-
-                view.getLocationOnScreen(mTempInt2);
-                final int x = mTempInt2[0];
-                final int y = mTempInt2[1];
-                Rect rect = new Rect(x, y, x + view.getWidth(), y + height);
-                if (!rect.contains(rx, ry)) {
-                    // Touch was outside visible guts / meny notification, close what's visible
-                    mStatusBar.dismissPopups(-1, -1, true /* resetMenu */, true /* animate */);
-                }
+            if (view != null && !isTouchInView(ev, view)) {
+                // Touch was outside visible guts / menu notification, close what's visible
+                mStatusBar.closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
+                        true /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
+                resetExposedMenuView(true /* animate */, true /* force */);
             }
         }
 
@@ -4418,6 +4456,23 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             mMenuExposedView = null;
         }
+    }
+
+    private boolean isTouchInView(MotionEvent ev, View view) {
+        if (view == null) {
+            return false;
+        }
+        final int height = (view instanceof ExpandableView)
+                ? ((ExpandableView) view).getActualHeight()
+                : view.getHeight();
+        final int rx = (int) ev.getRawX();
+        final int ry = (int) ev.getRawY();
+        view.getLocationOnScreen(mTempInt2);
+        final int x = mTempInt2[0];
+        final int y = mTempInt2[1];
+        Rect rect = new Rect(x, y, x + view.getWidth(), y + height);
+        boolean ret = rect.contains(rx, ry);
+        return ret;
     }
 
     private void updateContinuousShadowDrawing() {

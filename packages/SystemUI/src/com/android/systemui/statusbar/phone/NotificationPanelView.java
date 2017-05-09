@@ -523,7 +523,8 @@ public class NotificationPanelView extends PanelView implements
             mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
         }
         closeQs();
-        mStatusBar.dismissPopups();
+        mStatusBar.closeAndSaveGuts(true /* leavebehind */, true /* force */,
+                true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
         mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
                 true /* cancelAnimators */);
         mNotificationStackScroller.resetScrollPosition();
@@ -1014,6 +1015,7 @@ public class NotificationPanelView extends PanelView implements
         float height = mQsExpansionHeight - overscrollAmount;
         setQsExpansion(height);
         requestPanelHeightUpdate();
+        mNotificationStackScroller.checkSnoozeLeavebehind();
     }
 
     private void setQsExpanded(boolean expanded) {
@@ -1380,6 +1382,7 @@ public class NotificationPanelView extends PanelView implements
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                mNotificationStackScroller.resetCheckSnoozeLeavebehind();
                 mQsExpansionAnimator = null;
                 if (onFinishRunnable != null) {
                     onFinishRunnable.run();
