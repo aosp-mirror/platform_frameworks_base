@@ -21,6 +21,7 @@
     android:id="@+id/header"
     android:layout_width="match_parent"
     android:layout_height="48dp"
+    android:elevation="4dp"
     android:baselineAligned="false"
     android:clickable="false"
     android:clipChildren="false"
