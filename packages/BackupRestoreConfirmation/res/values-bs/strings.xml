@@ -19,7 +19,7 @@
     <string name="backup_confirm_title" msgid="827563724209303345">"Napraviti potpunu rezervnu kopiju"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Izvrši potpuno obnavljanje"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"Zatraženo je pravljenje potpune rezervne kopije svih podataka na povezani računar. Da li želite da dozvolite to?\n\nPrekinite radnju ukoliko to niste sami zatražili."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"Napravi rezervnu kopiju mojih podataka"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Napravi sigurnosnu kopiju mojih podataka"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Nemoj napraviti rezervnu kopiju"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Sa povezanog računara je upućen zahtjev za potpuno obnavljanje svih podataka. Želite li to dozvoliti?\n\nUkoliko niste uputili zahtjev za obnavljanje, prekinite radnju. Ovim će zamijeniti svi podaci koji su trenutno na uređaju!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Obnovi moje podatke"</string>
