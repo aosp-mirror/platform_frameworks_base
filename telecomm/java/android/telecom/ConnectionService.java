@@ -1770,10 +1770,28 @@ public abstract class ConnectionService extends Service {
      */
     public final void addExistingConnection(PhoneAccountHandle phoneAccountHandle,
             Connection connection) {
+        addExistingConnection(phoneAccountHandle, connection, null /* conference */);
+    }
+
+    /**
+     * Adds a connection created by the {@link ConnectionService} and informs telecom of the new
+     * connection.
+     *
+     * @param phoneAccountHandle The phone account handle for the connection.
+     * @param connection The connection to add.
+     * @param conference The parent conference of the new connection.
+     * @hide
+     */
+    public final void addExistingConnection(PhoneAccountHandle phoneAccountHandle,
+            Connection connection, Conference conference) {
 
         String id = addExistingConnectionInternal(phoneAccountHandle, connection);
         if (id != null) {
             List<String> emptyList = new ArrayList<>(0);
+            String conferenceId = null;
+            if (conference != null) {
+                conferenceId = mIdByConference.get(conference);
+            }
 
             ParcelableConnection parcelableConnection = new ParcelableConnection(
                     phoneAccountHandle,
@@ -1794,7 +1812,8 @@ public abstract class ConnectionService extends Service {
                     connection.getStatusHints(),
                     connection.getDisconnectCause(),
                     emptyList,
-                    connection.getExtras());
+                    connection.getExtras(),
+                    conferenceId);
             mAdapter.addExistingConnection(id, parcelableConnection);
         }
     }
