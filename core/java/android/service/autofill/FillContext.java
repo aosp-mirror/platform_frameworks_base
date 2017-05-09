@@ -19,11 +19,19 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
+import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
+import android.util.SparseIntArray;
+import android.view.autofill.AutofillId;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * This class represents a context for each fill request made via {@link
@@ -42,6 +50,13 @@ import android.os.Parcelable;
 public final class FillContext implements Parcelable {
     private final int mRequestId;
     private final @NonNull AssistStructure mStructure;
+
+    /**
+     * Lookup table AutofillId->ViewNode to speed up {@link #findViewNodesByAutofillIds}
+     * This is purely a cache and can be deleted at any time
+     */
+    @Nullable private ArrayMap<AutofillId, AssistStructure.ViewNode> mViewNodeLookupTable;
+
 
     /** @hide */
     public FillContext(int requestId, @NonNull AssistStructure structure) {
@@ -88,6 +103,79 @@ public final class FillContext implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mRequestId);
         parcel.writeParcelable(mStructure, flags);
+    }
+
+    /**
+     * Finds {@link ViewNode}s that have the requested ids.
+     *
+     * @param ids The ids of the node to find
+     *
+     * @return The nodes indexed in the same way as the ids
+     *
+     * @hide
+     */
+    @NonNull public ViewNode[] findViewNodesByAutofillIds(@NonNull AutofillId[] ids) {
+        final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
+        final ViewNode[] foundNodes = new AssistStructure.ViewNode[ids.length];
+
+        // Indexes of foundNodes that are not found yet
+        final SparseIntArray missingNodeIndexes = new SparseIntArray(ids.length);
+
+        for (int i = 0; i < ids.length; i++) {
+            if (mViewNodeLookupTable != null) {
+                int lookupTableIndex = mViewNodeLookupTable.indexOfKey(ids[i]);
+
+                if (lookupTableIndex >= 0) {
+                    foundNodes[i] = mViewNodeLookupTable.valueAt(lookupTableIndex);
+                } else {
+                    missingNodeIndexes.put(i, /* ignored */ 0);
+                }
+            } else {
+                missingNodeIndexes.put(i, /* ignored */ 0);
+            }
+        }
+
+        final int numWindowNodes = mStructure.getWindowNodeCount();
+        for (int i = 0; i < numWindowNodes; i++) {
+            nodesToProcess.add(mStructure.getWindowNodeAt(i).getRootViewNode());
+        }
+
+        while (missingNodeIndexes.size() > 0 && !nodesToProcess.isEmpty()) {
+            final ViewNode node = nodesToProcess.removeFirst();
+
+            for (int i = 0; i < missingNodeIndexes.size(); i++) {
+                final int index = missingNodeIndexes.keyAt(i);
+                final AutofillId id = ids[index];
+
+                if (id.equals(node.getAutofillId())) {
+                    foundNodes[index] = node;
+
+                    if (mViewNodeLookupTable == null) {
+                        mViewNodeLookupTable = new ArrayMap<>(ids.length);
+                    }
+
+                    mViewNodeLookupTable.put(id, node);
+
+                    missingNodeIndexes.removeAt(i);
+                    break;
+                }
+            }
+
+            for (int i = 0; i < node.getChildCount(); i++) {
+                nodesToProcess.addLast(node.getChildAt(i));
+            }
+        }
+
+        // Remember which ids could not be resolved to not search for them again the next time
+        for (int i = 0; i < missingNodeIndexes.size(); i++) {
+            if (mViewNodeLookupTable == null) {
+                mViewNodeLookupTable = new ArrayMap<>(missingNodeIndexes.size());
+            }
+
+            mViewNodeLookupTable.put(ids[missingNodeIndexes.keyAt(i)], null);
+        }
+
+        return foundNodes;
     }
 
     public static final Parcelable.Creator<FillContext> CREATOR =
