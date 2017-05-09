@@ -2174,9 +2174,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void removeOrphanedStartingWindow(boolean behindFullscreenActivity) {
-        if (state == INITIALIZING
-                && mStartingWindowState == STARTING_WINDOW_SHOWN
-                && behindFullscreenActivity) {
+        if (mStartingWindowState == STARTING_WINDOW_SHOWN && behindFullscreenActivity) {
             if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY, "Found orphaned starting window " + this);
             mStartingWindowState = STARTING_WINDOW_REMOVED;
             mWindowContainerController.removeStartingWindow();
