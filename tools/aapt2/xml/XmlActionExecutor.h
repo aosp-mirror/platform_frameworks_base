@@ -31,17 +31,12 @@ namespace aapt {
 namespace xml {
 
 enum class XmlActionExecutorPolicy {
-  /**
-   * Actions on run if elements are matched, errors occur only when actions
-   * return false.
-   */
+  // Actions are run if elements are matched, errors occur only when actions return false.
   kNone,
 
-  /**
-   * The actions defined must match and run. If an element is found that does
-   * not match
-   * an action, an error occurs.
-   */
+  // The actions defined must match and run. If an element is found that does
+  // not match an action, an error occurs.
+  // Note: namespaced elements are always ignored.
   kWhitelist,
 };
 
@@ -52,14 +47,12 @@ enum class XmlActionExecutorPolicy {
  */
 class XmlNodeAction {
  public:
-  using ActionFuncWithDiag =
-      std::function<bool(Element*, SourcePathDiagnostics*)>;
+  using ActionFuncWithDiag = std::function<bool(Element*, SourcePathDiagnostics*)>;
   using ActionFunc = std::function<bool(Element*)>;
 
   /**
    * Find or create a child XmlNodeAction that will be performed for the child
-   * element
-   * with the name `name`.
+   * element with the name `name`.
    */
   XmlNodeAction& operator[](const std::string& name) { return map_[name]; }
 
@@ -72,8 +65,7 @@ class XmlNodeAction {
  private:
   friend class XmlActionExecutor;
 
-  bool Execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag,
-               Element* el) const;
+  bool Execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag, Element* el) const;
 
   std::map<std::string, XmlNodeAction> map_;
   std::vector<ActionFuncWithDiag> actions_;
@@ -98,8 +90,7 @@ class XmlActionExecutor {
    * Execute the defined actions for this XmlResource.
    * Returns true if all actions return true, otherwise returns false.
    */
-  bool Execute(XmlActionExecutorPolicy policy, IDiagnostics* diag,
-               XmlResource* doc) const;
+  bool Execute(XmlActionExecutorPolicy policy, IDiagnostics* diag, XmlResource* doc) const;
 
  private:
   std::map<std::string, XmlNodeAction> map_;
