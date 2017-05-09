@@ -16,6 +16,20 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_VERSION;
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT;
+import static com.android.server.backup.RefactoredBackupManagerService.PBKDF_CURRENT;
+import static com.android.server.backup.RefactoredBackupManagerService.PBKDF_FALLBACK;
+import static com.android.server.backup.RefactoredBackupManagerService.SETTINGS_PACKAGE;
+import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 
 import android.app.ApplicationThreadConstants;
@@ -32,6 +46,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.PackageManagerBackupAgent;
@@ -43,7 +58,6 @@ import com.android.server.backup.utils.PasswordUtils;
 import com.android.server.backup.utils.RestoreUtils;
 import com.android.server.backup.utils.TarBackupReader;
 
-import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,38 +82,44 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class PerformAdbRestoreTask implements Runnable {
 
-    private RefactoredBackupManagerService backupManagerService;
-    ParcelFileDescriptor mInputFile;
-    String mCurrentPassword;
-    String mDecryptPassword;
-    IFullBackupRestoreObserver mObserver;
-    AtomicBoolean mLatchObject;
-    IBackupAgent mAgent;
-    PackageManagerBackupAgent mPackageManagerBackupAgent;
-    String mAgentPackage;
-    ApplicationInfo mTargetApp;
-    FullBackupObbConnection mObbConnection = null;
-    ParcelFileDescriptor[] mPipes = null;
-    byte[] mWidgetData = null;
+    private final RefactoredBackupManagerService mBackupManagerService;
+    private final ParcelFileDescriptor mInputFile;
+    private final String mCurrentPassword;
+    private final String mDecryptPassword;
+    private final AtomicBoolean mLatchObject;
+    private final PackageManagerBackupAgent mPackageManagerBackupAgent;
+    private final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
+    private final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
 
-    long mBytes;
+    private IFullBackupRestoreObserver mObserver;
+    private IBackupAgent mAgent;
+    private String mAgentPackage;
+    private ApplicationInfo mTargetApp;
+    private FullBackupObbConnection mObbConnection = null;
+    private ParcelFileDescriptor[] mPipes = null;
+    private byte[] mWidgetData = null;
+
+    private long mBytes;
 
     // Runner that can be placed on a separate thread to do in-process invocation
     // of the "restore finished" API asynchronously.  Used by adb restore.
-    class RestoreFinishedRunnable implements Runnable {
+    private static class RestoreFinishedRunnable implements Runnable {
 
-        final IBackupAgent mAgent;
-        final int mToken;
+        private final IBackupAgent mAgent;
+        private final int mToken;
+        private final RefactoredBackupManagerService mBackupManagerService;
 
-        RestoreFinishedRunnable(IBackupAgent agent, int token) {
+        RestoreFinishedRunnable(IBackupAgent agent, int token,
+                RefactoredBackupManagerService backupManagerService) {
             mAgent = agent;
             mToken = token;
+            mBackupManagerService = backupManagerService;
         }
 
         @Override
         public void run() {
             try {
-                mAgent.doRestoreFinished(mToken, backupManagerService.getBackupManagerBinder());
+                mAgent.doRestoreFinished(mToken, mBackupManagerService.getBackupManagerBinder());
             } catch (RemoteException e) {
                 // never happens; this is used only for local binder calls
             }
@@ -107,23 +127,23 @@ public class PerformAdbRestoreTask implements Runnable {
     }
 
     // possible handling states for a given package in the restore dataset
-    final HashMap<String, RestorePolicy> mPackagePolicies
+    private final HashMap<String, RestorePolicy> mPackagePolicies
             = new HashMap<>();
 
     // installer package names for each encountered app, derived from the manifests
-    final HashMap<String, String> mPackageInstallers = new HashMap<>();
+    private final HashMap<String, String> mPackageInstallers = new HashMap<>();
 
     // Signatures for a given package found in its manifest file
-    final HashMap<String, Signature[]> mManifestSignatures
+    private final HashMap<String, Signature[]> mManifestSignatures
             = new HashMap<>();
 
     // Packages we've already wiped data on when restoring their first file
-    final HashSet<String> mClearedPackages = new HashSet<>();
+    private final HashSet<String> mClearedPackages = new HashSet<>();
 
     public PerformAdbRestoreTask(RefactoredBackupManagerService backupManagerService,
             ParcelFileDescriptor fd, String curPassword, String decryptPassword,
             IFullBackupRestoreObserver observer, AtomicBoolean latch) {
-        this.backupManagerService = backupManagerService;
+        this.mBackupManagerService = backupManagerService;
         mInputFile = fd;
         mCurrentPassword = curPassword;
         mDecryptPassword = decryptPassword;
@@ -139,115 +159,66 @@ public class PerformAdbRestoreTask implements Runnable {
         // Which packages we've already wiped data on.  We prepopulate this
         // with a whitelist of packages known to be unclearable.
         mClearedPackages.add("android");
-        mClearedPackages.add(RefactoredBackupManagerService.SETTINGS_PACKAGE);
+        mClearedPackages.add(SETTINGS_PACKAGE);
     }
 
     @Override
     public void run() {
-        Slog.i(RefactoredBackupManagerService.TAG, "--- Performing full-dataset restore ---");
+        Slog.i(TAG, "--- Performing full-dataset restore ---");
         mObbConnection.establish();
         mObserver = FullBackupRestoreObserverUtils.sendStartRestore(mObserver);
 
         // Are we able to restore shared-storage data?
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            mPackagePolicies.put(RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE,
+            mPackagePolicies.put(SHARED_BACKUP_AGENT_PACKAGE,
                     RestorePolicy.ACCEPT);
         }
 
         FileInputStream rawInStream = null;
-        DataInputStream rawDataIn = null;
         try {
-            if (!backupManagerService.backupPasswordMatches(mCurrentPassword)) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "Backup password mismatch; aborting");
+            if (!mBackupManagerService.backupPasswordMatches(mCurrentPassword)) {
+                if (DEBUG) {
+                    Slog.w(TAG, "Backup password mismatch; aborting");
                 }
                 return;
             }
 
             mBytes = 0;
-            byte[] buffer = new byte[32 * 1024];
+
             rawInStream = new FileInputStream(mInputFile.getFileDescriptor());
-            rawDataIn = new DataInputStream(rawInStream);
 
-            // First, parse out the unencrypted/uncompressed header
-            boolean compressed = false;
-            InputStream preCompressStream = rawInStream;
-            final InputStream in;
-
-            boolean okay = false;
-            final int headerLen = RefactoredBackupManagerService.BACKUP_FILE_HEADER_MAGIC.length();
-            byte[] streamHeader = new byte[headerLen];
-            rawDataIn.readFully(streamHeader);
-            byte[] magicBytes = RefactoredBackupManagerService.BACKUP_FILE_HEADER_MAGIC.getBytes(
-                    "UTF-8");
-            if (Arrays.equals(magicBytes, streamHeader)) {
-                // okay, header looks good.  now parse out the rest of the fields.
-                String s = readHeaderLine(rawInStream);
-                final int archiveVersion = Integer.parseInt(s);
-                if (archiveVersion <= RefactoredBackupManagerService.BACKUP_FILE_VERSION) {
-                    // okay, it's a version we recognize.  if it's version 1, we may need
-                    // to try two different PBKDF2 regimes to compare checksums.
-                    final boolean pbkdf2Fallback = (archiveVersion == 1);
-
-                    s = readHeaderLine(rawInStream);
-                    compressed = (Integer.parseInt(s) != 0);
-                    s = readHeaderLine(rawInStream);
-                    if (s.equals("none")) {
-                        // no more header to parse; we're good to go
-                        okay = true;
-                    } else if (mDecryptPassword != null && mDecryptPassword.length() > 0) {
-                        preCompressStream = decodeAesHeaderAndInitialize(s, pbkdf2Fallback,
-                                rawInStream);
-                        if (preCompressStream != null) {
-                            okay = true;
-                        }
-                    } else {
-                        Slog.w(RefactoredBackupManagerService.TAG,
-                                "Archive is encrypted but no password given");
-                    }
-                } else {
-                    Slog.w(RefactoredBackupManagerService.TAG, "Wrong header version: " + s);
-                }
-            } else {
-                Slog.w(RefactoredBackupManagerService.TAG, "Didn't read the right header magic");
-            }
-
-            if (!okay) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Invalid restore data; aborting.");
+            InputStream tarInputStream = parseBackupFileHeaderAndReturnTarStream(rawInStream,
+                    mDecryptPassword);
+            if (tarInputStream == null) {
+                // There was an error reading the backup file, which is already handled and logged.
+                // Just abort.
                 return;
             }
 
-            // okay, use the right stream layer based on compression
-            in = (compressed) ? new InflaterInputStream(preCompressStream) : preCompressStream;
-
+            byte[] buffer = new byte[32 * 1024];
             boolean didRestore;
             do {
-                didRestore = restoreOneFile(in, false /* mustKillAgent */, buffer,
+                didRestore = restoreOneFile(tarInputStream, false /* mustKillAgent */, buffer,
                         null /* onlyPackage */, true /* allowApks */,
-                        backupManagerService.generateRandomIntegerToken(), null /* monitor */);
+                        mBackupManagerService.generateRandomIntegerToken(), null /* monitor */);
             } while (didRestore);
 
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.v(RefactoredBackupManagerService.TAG,
-                        "Done consuming input tarfile, total bytes=" + mBytes);
+            if (MORE_DEBUG) {
+                Slog.v(TAG, "Done consuming input tarfile, total bytes=" + mBytes);
             }
         } catch (IOException e) {
-            Slog.e(RefactoredBackupManagerService.TAG, "Unable to read restore input");
+            Slog.e(TAG, "Unable to read restore input");
         } finally {
             tearDownPipes();
             tearDownAgent(mTargetApp, true);
 
             try {
-                if (rawDataIn != null) {
-                    rawDataIn.close();
-                }
                 if (rawInStream != null) {
                     rawInStream.close();
                 }
                 mInputFile.close();
             } catch (IOException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Close of restore data pipe threw", e);
+                Slog.w(TAG, "Close of restore data pipe threw", e);
                 /* nothing we can do about this */
             }
             synchronized (mLatchObject) {
@@ -256,12 +227,79 @@ public class PerformAdbRestoreTask implements Runnable {
             }
             mObbConnection.tearDown();
             mObserver = FullBackupRestoreObserverUtils.sendEndRestore(mObserver);
-            Slog.d(RefactoredBackupManagerService.TAG, "Full restore pass complete.");
-            backupManagerService.getWakelock().release();
+            Slog.d(TAG, "Full restore pass complete.");
+            mBackupManagerService.getWakelock().release();
         }
     }
 
-    String readHeaderLine(InputStream in) throws IOException {
+    private static void readFullyOrThrow(InputStream in, byte[] buffer) throws IOException {
+        int offset = 0;
+        while (offset < buffer.length) {
+            int bytesRead = in.read(buffer, offset, buffer.length - offset);
+            if (bytesRead <= 0) {
+                throw new IOException("Couldn't fully read data");
+            }
+            offset += bytesRead;
+        }
+    }
+
+    @VisibleForTesting
+    public static InputStream parseBackupFileHeaderAndReturnTarStream(
+            InputStream rawInputStream,
+            String decryptPassword)
+            throws IOException {
+        // First, parse out the unencrypted/uncompressed header
+        boolean compressed = false;
+        InputStream preCompressStream = rawInputStream;
+
+        boolean okay = false;
+        final int headerLen = BACKUP_FILE_HEADER_MAGIC.length();
+        byte[] streamHeader = new byte[headerLen];
+        readFullyOrThrow(rawInputStream, streamHeader);
+        byte[] magicBytes = BACKUP_FILE_HEADER_MAGIC.getBytes(
+                "UTF-8");
+        if (Arrays.equals(magicBytes, streamHeader)) {
+            // okay, header looks good.  now parse out the rest of the fields.
+            String s = readHeaderLine(rawInputStream);
+            final int archiveVersion = Integer.parseInt(s);
+            if (archiveVersion <= BACKUP_FILE_VERSION) {
+                // okay, it's a version we recognize.  if it's version 1, we may need
+                // to try two different PBKDF2 regimes to compare checksums.
+                final boolean pbkdf2Fallback = (archiveVersion == 1);
+
+                s = readHeaderLine(rawInputStream);
+                compressed = (Integer.parseInt(s) != 0);
+                s = readHeaderLine(rawInputStream);
+                if (s.equals("none")) {
+                    // no more header to parse; we're good to go
+                    okay = true;
+                } else if (decryptPassword != null && decryptPassword.length() > 0) {
+                    preCompressStream = decodeAesHeaderAndInitialize(
+                            decryptPassword, s, pbkdf2Fallback,
+                            rawInputStream);
+                    if (preCompressStream != null) {
+                        okay = true;
+                    }
+                } else {
+                    Slog.w(TAG, "Archive is encrypted but no password given");
+                }
+            } else {
+                Slog.w(TAG, "Wrong header version: " + s);
+            }
+        } else {
+            Slog.w(TAG, "Didn't read the right header magic");
+        }
+
+        if (!okay) {
+            Slog.w(TAG, "Invalid restore data; aborting.");
+            return null;
+        }
+
+        // okay, use the right stream layer based on compression
+        return compressed ? new InflaterInputStream(preCompressStream) : preCompressStream;
+    }
+
+    private static String readHeaderLine(InputStream in) throws IOException {
         int c;
         StringBuilder buffer = new StringBuilder(80);
         while ((c = in.read()) >= 0) {
@@ -273,7 +311,8 @@ public class PerformAdbRestoreTask implements Runnable {
         return buffer.toString();
     }
 
-    InputStream attemptMasterKeyDecryption(String algorithm, byte[] userSalt, byte[] ckSalt,
+    private static InputStream attemptMasterKeyDecryption(String decryptPassword, String algorithm,
+            byte[] userSalt, byte[] ckSalt,
             int rounds, String userIvHex, String masterKeyBlobHex, InputStream rawInStream,
             boolean doLog) {
         InputStream result = null;
@@ -281,7 +320,7 @@ public class PerformAdbRestoreTask implements Runnable {
         try {
             Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
             SecretKey userKey = PasswordUtils
-                    .buildPasswordKey(algorithm, mDecryptPassword, userSalt,
+                    .buildPasswordKey(algorithm, decryptPassword, userSalt,
                             rounds);
             byte[] IV = PasswordUtils.hexToByteArray(userIvHex);
             IvParameterSpec ivSpec = new IvParameterSpec(IV);
@@ -317,11 +356,11 @@ public class PerformAdbRestoreTask implements Runnable {
                 // Only if all of the above worked properly will 'result' be assigned
                 result = new CipherInputStream(rawInStream, c);
             } else if (doLog) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Incorrect password");
+                Slog.w(TAG, "Incorrect password");
             }
         } catch (InvalidAlgorithmParameterException e) {
             if (doLog) {
-                Slog.e(RefactoredBackupManagerService.TAG, "Needed parameter spec unavailable!", e);
+                Slog.e(TAG, "Needed parameter spec unavailable!", e);
             }
         } catch (BadPaddingException e) {
             // This case frequently occurs when the wrong password is used to decrypt
@@ -329,31 +368,32 @@ public class PerformAdbRestoreTask implements Runnable {
             // used in the checksum failure log in order to avoid providing additional
             // information to an attacker.
             if (doLog) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Incorrect password");
+                Slog.w(TAG, "Incorrect password");
             }
         } catch (IllegalBlockSizeException e) {
             if (doLog) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Invalid block size in master key");
+                Slog.w(TAG, "Invalid block size in master key");
             }
         } catch (NoSuchAlgorithmException e) {
             if (doLog) {
-                Slog.e(RefactoredBackupManagerService.TAG,
-                        "Needed decryption algorithm unavailable!");
+                Slog.e(TAG, "Needed decryption algorithm unavailable!");
             }
         } catch (NoSuchPaddingException e) {
             if (doLog) {
-                Slog.e(RefactoredBackupManagerService.TAG, "Needed padding mechanism unavailable!");
+                Slog.e(TAG, "Needed padding mechanism unavailable!");
             }
         } catch (InvalidKeyException e) {
             if (doLog) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Illegal password; aborting");
+                Slog.w(TAG, "Illegal password; aborting");
             }
         }
 
         return result;
     }
 
-    InputStream decodeAesHeaderAndInitialize(String encryptionName, boolean pbkdf2Fallback,
+    private static InputStream decodeAesHeaderAndInitialize(String decryptPassword,
+            String encryptionName,
+            boolean pbkdf2Fallback,
             InputStream rawInStream) {
         InputStream result = null;
         try {
@@ -371,22 +411,21 @@ public class PerformAdbRestoreTask implements Runnable {
                 String masterKeyBlobHex = readHeaderLine(rawInStream); // 9
 
                 // decrypt the master key blob
-                result = attemptMasterKeyDecryption(RefactoredBackupManagerService.PBKDF_CURRENT,
+                result = attemptMasterKeyDecryption(decryptPassword, PBKDF_CURRENT,
                         userSalt, ckSalt,
                         rounds, userIvHex, masterKeyBlobHex, rawInStream, false);
                 if (result == null && pbkdf2Fallback) {
                     result = attemptMasterKeyDecryption(
-                            RefactoredBackupManagerService.PBKDF_FALLBACK, userSalt, ckSalt,
+                            decryptPassword, PBKDF_FALLBACK, userSalt, ckSalt,
                             rounds, userIvHex, masterKeyBlobHex, rawInStream, true);
                 }
             } else {
-                Slog.w(RefactoredBackupManagerService.TAG,
-                        "Unsupported encryption method: " + encryptionName);
+                Slog.w(TAG, "Unsupported encryption method: " + encryptionName);
             }
         } catch (NumberFormatException e) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Can't parse restore data header");
+            Slog.w(TAG, "Can't parse restore data header");
         } catch (IOException e) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Can't read input header");
+            Slog.w(TAG, "Can't read input header");
         }
 
         return result;
@@ -406,7 +445,7 @@ public class PerformAdbRestoreTask implements Runnable {
         try {
             info = tarBackupReader.readTarHeaders();
             if (info != null) {
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                if (MORE_DEBUG) {
                     info.dump();
                 }
 
@@ -421,9 +460,8 @@ public class PerformAdbRestoreTask implements Runnable {
                     // Clean up the previous agent relationship if necessary,
                     // and let the observer know we're considering a new app.
                     if (mAgent != null) {
-                        if (RefactoredBackupManagerService.DEBUG) {
-                            Slog.d(RefactoredBackupManagerService.TAG,
-                                    "Saw new package; finalizing old one");
+                        if (DEBUG) {
+                            Slog.d(TAG, "Saw new package; finalizing old one");
                         }
                         // Now we're really done
                         tearDownPipes();
@@ -433,19 +471,21 @@ public class PerformAdbRestoreTask implements Runnable {
                     }
                 }
 
-                if (info.path.equals(RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME)) {
-                    RestorePolicy appManifest = tarBackupReader.readAppManifest(
-                            backupManagerService.getPackageManager(), allowApks,
-                            mManifestSignatures, info);
-                    mPackagePolicies.put(pkg, appManifest);
+                if (info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                    Signature[] signatures = tarBackupReader.readAppManifestAndReturnSignatures(
+                            info);
+                    RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
+                            mBackupManagerService.getPackageManager(), allowApks,
+                            info, signatures);
+                    mManifestSignatures.put(info.packageName, signatures);
+                    mPackagePolicies.put(pkg, restorePolicy);
                     mPackageInstallers.put(pkg, info.installerPackageName);
                     // We've read only the manifest content itself at this point,
                     // so consume the footer before looping around to the next
                     // input file
                     tarBackupReader.skipTarPadding(info.size);
                     mObserver = FullBackupRestoreObserverUtils.sendOnRestorePackage(mObserver, pkg);
-                } else if (info.path.equals(
-                        RefactoredBackupManagerService.BACKUP_METADATA_FILENAME)) {
+                } else if (info.path.equals(BACKUP_METADATA_FILENAME)) {
                     // Metadata blobs!
                     tarBackupReader.readMetadata(info);
 
@@ -472,18 +512,17 @@ public class PerformAdbRestoreTask implements Runnable {
                             // If we're in accept-if-apk state, then the first file we
                             // see MUST be the apk.
                             if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.d(RefactoredBackupManagerService.TAG,
-                                            "APK file; installing");
+                                if (DEBUG) {
+                                    Slog.d(TAG, "APK file; installing");
                                 }
                                 // Try to install the app.
                                 String installerName = mPackageInstallers.get(pkg);
                                 boolean isSuccessfullyInstalled = RestoreUtils.installApk(
-                                        instream, backupManagerService.getPackageManager(),
+                                        instream, mBackupManagerService.getPackageManager(),
                                         mInstallObserver, mDeleteObserver, mManifestSignatures,
                                         mPackagePolicies, info, installerName,
-                                        bytesReadListener, backupManagerService.getDataDir()
-                                                              );
+                                        bytesReadListener, mBackupManagerService.getDataDir()
+                                                                                         );
                                 // good to go; promote to ACCEPT
                                 mPackagePolicies.put(pkg, isSuccessfullyInstalled
                                         ? RestorePolicy.ACCEPT
@@ -503,9 +542,8 @@ public class PerformAdbRestoreTask implements Runnable {
 
                         case ACCEPT:
                             if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.d(RefactoredBackupManagerService.TAG,
-                                            "apk present but ACCEPT");
+                                if (DEBUG) {
+                                    Slog.d(TAG, "apk present but ACCEPT");
                                 }
                                 // we can take the data without the apk, so we
                                 // *want* to do so.  skip the apk by declaring this
@@ -519,8 +557,7 @@ public class PerformAdbRestoreTask implements Runnable {
                             // Something has gone dreadfully wrong when determining
                             // the restore policy from the manifest.  Ignore the
                             // rest of this package's data.
-                            Slog.e(RefactoredBackupManagerService.TAG,
-                                    "Invalid policy from manifest");
+                            Slog.e(TAG, "Invalid policy from manifest");
                             okay = false;
                             mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
                             break;
@@ -533,19 +570,17 @@ public class PerformAdbRestoreTask implements Runnable {
 
                     // If the policy is satisfied, go ahead and set up to pipe the
                     // data to the agent.
-                    if (RefactoredBackupManagerService.DEBUG && okay && mAgent != null) {
-                        Slog.i(RefactoredBackupManagerService.TAG,
-                                "Reusing existing agent instance");
+                    if (DEBUG && okay && mAgent != null) {
+                        Slog.i(TAG, "Reusing existing agent instance");
                     }
                     if (okay && mAgent == null) {
-                        if (RefactoredBackupManagerService.DEBUG) {
-                            Slog.d(RefactoredBackupManagerService.TAG,
-                                    "Need to launch agent for " + pkg);
+                        if (DEBUG) {
+                            Slog.d(TAG, "Need to launch agent for " + pkg);
                         }
 
                         try {
                             mTargetApp =
-                                    backupManagerService.getPackageManager().getApplicationInfo(
+                                    mBackupManagerService.getPackageManager().getApplicationInfo(
                                             pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
@@ -555,29 +590,28 @@ public class PerformAdbRestoreTask implements Runnable {
                                 // responsible for coherently managing a full
                                 // restore.
                                 if (mTargetApp.backupAgentName == null) {
-                                    if (RefactoredBackupManagerService.DEBUG) {
-                                        Slog.d(RefactoredBackupManagerService.TAG,
+                                    if (DEBUG) {
+                                        Slog.d(TAG,
                                                 "Clearing app data preparatory to full restore");
                                     }
-                                    backupManagerService.clearApplicationDataSynchronous(pkg);
+                                    mBackupManagerService.clearApplicationDataSynchronous(pkg);
                                 } else {
-                                    if (RefactoredBackupManagerService.DEBUG) {
-                                        Slog.d(RefactoredBackupManagerService.TAG, "backup agent ("
+                                    if (DEBUG) {
+                                        Slog.d(TAG, "backup agent ("
                                                 + mTargetApp.backupAgentName + ") => no clear");
                                     }
                                 }
                                 mClearedPackages.add(pkg);
                             } else {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.d(RefactoredBackupManagerService.TAG,
-                                            "We've initialized this app already; no clear "
-                                                    + "required");
+                                if (DEBUG) {
+                                    Slog.d(TAG, "We've initialized this app already; no clear "
+                                            + "required");
                                 }
                             }
 
                             // All set; now set up the IPC and launch the agent
                             setUpPipes();
-                            mAgent = backupManagerService.bindToAgentSynchronous(mTargetApp,
+                            mAgent = mBackupManagerService.bindToAgentSynchronous(mTargetApp,
                                     ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
                             mAgentPackage = pkg;
                         } catch (IOException e) {
@@ -587,9 +621,7 @@ public class PerformAdbRestoreTask implements Runnable {
                         }
 
                         if (mAgent == null) {
-                            Slog.e(
-                                    RefactoredBackupManagerService.TAG,
-                                    "Unable to create agent for " + pkg);
+                            Slog.e(TAG, "Unable to create agent for " + pkg);
                             okay = false;
                             tearDownPipes();
                             mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
@@ -599,7 +631,7 @@ public class PerformAdbRestoreTask implements Runnable {
                     // Sanity check: make sure we never give data to the wrong app.  This
                     // should never happen but a little paranoia here won't go amiss.
                     if (okay && !pkg.equals(mAgentPackage)) {
-                        Slog.e(RefactoredBackupManagerService.TAG, "Restoring data for " + pkg
+                        Slog.e(TAG, "Restoring data for " + pkg
                                 + " but agent is for " + mAgentPackage);
                         okay = false;
                     }
@@ -612,67 +644,60 @@ public class PerformAdbRestoreTask implements Runnable {
                         boolean agentSuccess = true;
                         long toCopy = info.size;
                         try {
-                            backupManagerService
+                            mBackupManagerService
                                     .prepareOperationTimeout(token,
-                                            RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL,
+                                            TIMEOUT_RESTORE_INTERVAL,
                                             null,
-                                            RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT);
+                                            OP_TYPE_RESTORE_WAIT);
 
                             if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.d(RefactoredBackupManagerService.TAG,
-                                            "Restoring OBB file for " + pkg
-                                                    + " : " + info.path);
+                                if (DEBUG) {
+                                    Slog.d(TAG, "Restoring OBB file for " + pkg
+                                            + " : " + info.path);
                                 }
                                 mObbConnection.restoreObbFile(pkg, mPipes[0],
                                         info.size, info.type, info.path, info.mode,
                                         info.mtime, token,
-                                        backupManagerService.getBackupManagerBinder());
+                                        mBackupManagerService.getBackupManagerBinder());
                             } else if (FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)) {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.d(RefactoredBackupManagerService.TAG,
-                                            "Restoring key-value file for " + pkg
-                                                    + " : " + info.path);
+                                if (DEBUG) {
+                                    Slog.d(TAG, "Restoring key-value file for " + pkg
+                                            + " : " + info.path);
                                 }
                                 KeyValueAdbRestoreEngine restoreEngine =
                                         new KeyValueAdbRestoreEngine(
-                                                backupManagerService,
-                                                backupManagerService.getDataDir(), info, mPipes[0],
+                                                mBackupManagerService,
+                                                mBackupManagerService.getDataDir(), info, mPipes[0],
                                                 mAgent, token);
                                 new Thread(restoreEngine, "restore-key-value-runner").start();
                             } else {
-                                if (RefactoredBackupManagerService.DEBUG) {
-                                    Slog.d(RefactoredBackupManagerService.TAG,
-                                            "Invoking agent to restore file "
-                                                    + info.path);
+                                if (DEBUG) {
+                                    Slog.d(TAG, "Invoking agent to restore file " + info.path);
                                 }
                                 // fire up the app's agent listening on the socket.  If
                                 // the agent is running in the system process we can't
                                 // just invoke it asynchronously, so we provide a thread
                                 // for it here.
                                 if (mTargetApp.processName.equals("system")) {
-                                    Slog.d(RefactoredBackupManagerService.TAG,
-                                            "system process agent - spinning a thread");
+                                    Slog.d(TAG, "system process agent - spinning a thread");
                                     RestoreFileRunnable runner = new RestoreFileRunnable(
-                                            backupManagerService, mAgent, info, mPipes[0], token);
+                                            mBackupManagerService, mAgent, info, mPipes[0], token);
                                     new Thread(runner, "restore-sys-runner").start();
                                 } else {
                                     mAgent.doRestoreFile(mPipes[0], info.size, info.type,
                                             info.domain, info.path, info.mode, info.mtime,
-                                            token, backupManagerService.getBackupManagerBinder());
+                                            token, mBackupManagerService.getBackupManagerBinder());
                                 }
                             }
                         } catch (IOException e) {
                             // couldn't dup the socket for a process-local restore
-                            Slog.d(RefactoredBackupManagerService.TAG,
-                                    "Couldn't establish restore");
+                            Slog.d(TAG, "Couldn't establish restore");
                             agentSuccess = false;
                             okay = false;
                         } catch (RemoteException e) {
                             // whoops, remote entity went away.  We'll eat the content
                             // ourselves, then, and not copy it over.
-                            Slog.e(RefactoredBackupManagerService.TAG,
-                                    "Agent crashed during full restore");
+                            Slog.e(TAG, "Agent crashed during full restore");
                             agentSuccess = false;
                             okay = false;
                         }
@@ -700,8 +725,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                     try {
                                         pipe.write(buffer, 0, nRead);
                                     } catch (IOException e) {
-                                        Slog.e(RefactoredBackupManagerService.TAG,
-                                                "Failed to write to restore pipe", e);
+                                        Slog.e(TAG, "Failed to write to restore pipe", e);
                                         pipeOkay = false;
                                     }
                                 }
@@ -713,17 +737,16 @@ public class PerformAdbRestoreTask implements Runnable {
 
                             // and now that we've sent it all, wait for the remote
                             // side to acknowledge receipt
-                            agentSuccess = backupManagerService.waitUntilOperationComplete(token);
+                            agentSuccess = mBackupManagerService.waitUntilOperationComplete(token);
                         }
 
                         // okay, if the remote end failed at any point, deal with
                         // it by ignoring the rest of the restore on it
                         if (!agentSuccess) {
-                            if (RefactoredBackupManagerService.DEBUG) {
-                                Slog.d(RefactoredBackupManagerService.TAG,
-                                        "Agent failure restoring " + pkg + "; now ignoring");
+                            if (DEBUG) {
+                                Slog.d(TAG, "Agent failure restoring " + pkg + "; now ignoring");
                             }
-                            backupManagerService.getBackupHandler().removeMessages(
+                            mBackupManagerService.getBackupHandler().removeMessages(
                                     MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
                             tearDownAgent(mTargetApp, false);
@@ -735,8 +758,8 @@ public class PerformAdbRestoreTask implements Runnable {
                     // ignored package: skip to the next tar stream entry by
                     // reading and discarding this file.
                     if (!okay) {
-                        if (RefactoredBackupManagerService.DEBUG) {
-                            Slog.d(RefactoredBackupManagerService.TAG, "[discarding file content]");
+                        if (DEBUG) {
+                            Slog.d(TAG, "[discarding file content]");
                         }
                         long bytesToConsume = (info.size + 511) & ~511;
                         while (bytesToConsume > 0) {
@@ -755,9 +778,8 @@ public class PerformAdbRestoreTask implements Runnable {
                 }
             }
         } catch (IOException e) {
-            if (RefactoredBackupManagerService.DEBUG) {
-                Slog.w(RefactoredBackupManagerService.TAG, "io exception on restore socket read",
-                        e);
+            if (DEBUG) {
+                Slog.w(TAG, "io exception on restore socket read", e);
             }
             // treat as EOF
             info = null;
@@ -768,8 +790,8 @@ public class PerformAdbRestoreTask implements Runnable {
 
     private static boolean isCanonicalFilePath(String path) {
         if (path.contains("..") || path.contains("//")) {
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Dropping invalid path " + path);
+            if (MORE_DEBUG) {
+                Slog.w(TAG, "Dropping invalid path " + path);
             }
             return false;
         }
@@ -777,11 +799,11 @@ public class PerformAdbRestoreTask implements Runnable {
         return true;
     }
 
-    void setUpPipes() throws IOException {
+    private void setUpPipes() throws IOException {
         mPipes = ParcelFileDescriptor.createPipe();
     }
 
-    void tearDownPipes() {
+    private void tearDownPipes() {
         if (mPipes != null) {
             try {
                 mPipes[0].close();
@@ -789,49 +811,46 @@ public class PerformAdbRestoreTask implements Runnable {
                 mPipes[1].close();
                 mPipes[1] = null;
             } catch (IOException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "Couldn't close agent pipes", e);
+                Slog.w(TAG, "Couldn't close agent pipes", e);
             }
             mPipes = null;
         }
     }
 
-    void tearDownAgent(ApplicationInfo app, boolean doRestoreFinished) {
+    private void tearDownAgent(ApplicationInfo app, boolean doRestoreFinished) {
         if (mAgent != null) {
             try {
                 // In the adb restore case, we do restore-finished here
                 if (doRestoreFinished) {
-                    final int token = backupManagerService.generateRandomIntegerToken();
+                    final int token = mBackupManagerService.generateRandomIntegerToken();
                     final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch(
-                            backupManagerService, token);
-                    backupManagerService
+                            mBackupManagerService, token);
+                    mBackupManagerService
                             .prepareOperationTimeout(token,
-                                    RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
+                                    TIMEOUT_FULL_BACKUP_INTERVAL,
                                     latch,
-                                    RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT);
+                                    OP_TYPE_RESTORE_WAIT);
                     if (mTargetApp.processName.equals("system")) {
-                        if (RefactoredBackupManagerService.MORE_DEBUG) {
-                            Slog.d(RefactoredBackupManagerService.TAG,
-                                    "system agent - restoreFinished on thread");
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "system agent - restoreFinished on thread");
                         }
-                        Runnable runner = new RestoreFinishedRunnable(mAgent, token);
+                        Runnable runner = new RestoreFinishedRunnable(mAgent, token,
+                                mBackupManagerService);
                         new Thread(runner, "restore-sys-finished-runner").start();
                     } else {
                         mAgent.doRestoreFinished(token,
-                                backupManagerService.getBackupManagerBinder());
+                                mBackupManagerService.getBackupManagerBinder());
                     }
 
                     latch.await();
                 }
 
-                backupManagerService.tearDownAgentAndKill(app);
+                mBackupManagerService.tearDownAgentAndKill(app);
             } catch (RemoteException e) {
-                Slog.d(RefactoredBackupManagerService.TAG, "Lost app trying to shut down");
+                Slog.d(TAG, "Lost app trying to shut down");
             }
             mAgent = null;
         }
     }
-
-    final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
-    final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
 
 }

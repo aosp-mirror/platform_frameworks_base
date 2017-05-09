@@ -34,6 +34,8 @@ public class FileMetadata {
     public long mode;                      // e.g. 0666 (actually int)
     public long mtime;                     // last mod time, UTC time_t (actually int)
     public long size;                      // bytes of content
+    public int version;                    // App version.
+    public boolean hasApk;                 // Whether backup file contains apk.
 
     @Override
     public String toString() {
