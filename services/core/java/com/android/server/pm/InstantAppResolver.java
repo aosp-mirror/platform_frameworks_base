@@ -22,6 +22,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_RESOLUTION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_RESOLUTION_STATUS;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -50,20 +51,37 @@ import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.pm.EphemeralResolverConnection.ConnectionException;
 import com.android.server.pm.EphemeralResolverConnection.PhaseTwoCallback;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 /** @hide */
 public abstract class InstantAppResolver {
     private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
     private static final String TAG = "PackageManager";
 
-    private static int RESOLUTION_SUCCESS = 0;
-    private static int RESOLUTION_FAILURE = 1;
+    private static final int RESOLUTION_SUCCESS = 0;
+    private static final int RESOLUTION_FAILURE = 1;
+    /** Binding to the external service timed out */
+    private static final int RESOLUTION_BIND_TIMEOUT = 2;
+    /** The call to retrieve an instant application response timed out */
+    private static final int RESOLUTION_CALL_TIMEOUT = 3;
+
+    @IntDef(flag = true, prefix = { "RESOLUTION_" }, value = {
+            RESOLUTION_SUCCESS,
+            RESOLUTION_FAILURE,
+            RESOLUTION_BIND_TIMEOUT,
+            RESOLUTION_CALL_TIMEOUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResolutionStatus {}
 
     private static MetricsLogger sMetricsLogger;
     private static MetricsLogger getLogger() {
@@ -78,29 +96,43 @@ public abstract class InstantAppResolver {
         final long startTime = System.currentTimeMillis();
         final String token = UUID.randomUUID().toString();
         if (DEBUG_EPHEMERAL) {
-            Log.d(TAG, "[" + token + "] Resolving phase 1");
+            Log.d(TAG, "[" + token + "] Phase1; resolving");
         }
         final Intent intent = requestObj.origIntent;
         final InstantAppDigest digest =
                 new InstantAppDigest(intent.getData().getHost(), 5 /*maxDigests*/);
         final int[] shaPrefix = digest.getDigestPrefix();
-        final List<InstantAppResolveInfo> instantAppResolveInfoList =
-                connection.getInstantAppResolveInfoList(shaPrefix, token);
-
-        if (instantAppResolveInfoList == null || instantAppResolveInfoList.size() == 0) {
-            // No hash prefix match; there are no instant apps for this domain.
-            if (DEBUG_EPHEMERAL) {
-                Log.d(TAG, "[" + token + "] No results returned");
+        AuxiliaryResolveInfo resolveInfo = null;
+        @ResolutionStatus int resolutionStatus = RESOLUTION_SUCCESS;
+        try {
+            final List<InstantAppResolveInfo> instantAppResolveInfoList =
+                    connection.getInstantAppResolveInfoList(shaPrefix, token);
+            if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
+                resolveInfo = InstantAppResolver.filterInstantAppIntent(
+                        instantAppResolveInfoList, intent, requestObj.resolvedType,
+                        requestObj.userId, intent.getPackage(), digest, token);
             }
-            return null;
+        } catch (ConnectionException e) {
+            if (e.failure == ConnectionException.FAILURE_BIND) {
+                resolutionStatus = RESOLUTION_BIND_TIMEOUT;
+            } else if (e.failure == ConnectionException.FAILURE_CALL) {
+                resolutionStatus = RESOLUTION_CALL_TIMEOUT;
+            } else {
+                resolutionStatus = RESOLUTION_FAILURE;
+            }
         }
-        final AuxiliaryResolveInfo resolveInfo = InstantAppResolver.filterInstantAppIntent(
-                instantAppResolveInfoList, intent, requestObj.resolvedType, requestObj.userId,
-                intent.getPackage(), digest, token);
         logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
-                RESOLUTION_SUCCESS);
+                resolutionStatus);
         if (DEBUG_EPHEMERAL && resolveInfo == null) {
-            Log.d(TAG, "[" + token + "] No results matched");
+            if (resolutionStatus == RESOLUTION_BIND_TIMEOUT) {
+                Log.d(TAG, "[" + token + "] Phase1; bind timed out");
+            } else if (resolutionStatus == RESOLUTION_CALL_TIMEOUT) {
+                Log.d(TAG, "[" + token + "] Phase1; call timed out");
+            } else if (resolutionStatus != RESOLUTION_SUCCESS) {
+                Log.d(TAG, "[" + token + "] Phase1; service connection error");
+            } else {
+                Log.d(TAG, "[" + token + "] Phase1; No results matched");
+            }
         }
         return resolveInfo;
     }
@@ -111,7 +143,7 @@ public abstract class InstantAppResolver {
         final long startTime = System.currentTimeMillis();
         final String token = requestObj.responseObj.token;
         if (DEBUG_EPHEMERAL) {
-            Log.d(TAG, "[" + token + "] Resolving phase 2");
+            Log.d(TAG, "[" + token + "] Phase2; resolving");
         }
         final Intent intent = requestObj.origIntent;
         final String hostName = intent.getData().getHost();
@@ -170,8 +202,24 @@ public abstract class InstantAppResolver {
                 context.startActivity(installerIntent);
             }
         };
-        connection.getInstantAppIntentFilterList(
-                shaPrefix, token, hostName, callback, callbackHandler, startTime);
+        try {
+            connection.getInstantAppIntentFilterList(
+                    shaPrefix, token, hostName, callback, callbackHandler, startTime);
+        } catch (ConnectionException e) {
+            @ResolutionStatus int resolutionStatus = RESOLUTION_FAILURE;
+            if (e.failure == ConnectionException.FAILURE_BIND) {
+                resolutionStatus = RESOLUTION_BIND_TIMEOUT;
+            }
+            logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO, startTime, token,
+                    resolutionStatus);
+            if (DEBUG_EPHEMERAL) {
+                if (resolutionStatus == RESOLUTION_BIND_TIMEOUT) {
+                    Log.d(TAG, "[" + token + "] Phase2; bind timed out");
+                } else {
+                    Log.d(TAG, "[" + token + "] Phase2; service connection error");
+                }
+            }
+        }
     }
 
     /**
@@ -322,7 +370,8 @@ public abstract class InstantAppResolver {
         return null;
     }
 
-    private static void logMetrics(int action, long startTime, String token, int status) {
+    private static void logMetrics(int action, long startTime, String token,
+            @ResolutionStatus int status) {
         final LogMaker logMaker = new LogMaker(action)
                 .setType(MetricsProto.MetricsEvent.TYPE_ACTION)
                 .addTaggedData(FIELD_INSTANT_APP_RESOLUTION_DELAY_MS,
