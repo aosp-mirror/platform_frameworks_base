@@ -1585,7 +1585,6 @@ public class KeyguardViewMediator extends SystemUI {
             updateInputRestricted();
         }
 
-        mDismissCallbackRegistry.notifyDismissSucceeded();
         handleHide();
         Trace.endSection();
     }
@@ -1798,6 +1797,7 @@ public class KeyguardViewMediator extends SystemUI {
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
             adjustStatusBarLocked();
+            mDismissCallbackRegistry.notifyDismissSucceeded();
             sendUserPresentBroadcast();
         }
         Trace.endSection();
