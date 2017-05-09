@@ -21,6 +21,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +72,11 @@ public class PipDismissViewController {
             mDismissView = inflater.inflate(R.layout.pip_dismiss_view, null);
             mDismissView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             mDismissView.forceHasOverlappingRendering(false);
+
+            // Set the gradient background
+            Drawable gradient = mContext.getResources().getDrawable(R.drawable.pip_dismiss_scrim);
+            gradient.setAlpha((int) (255 * 0.85f));
+            mDismissView.setBackground(gradient);
 
             // Adjust bottom margins of the text
             View text = mDismissView.findViewById(R.id.pip_dismiss_text);
