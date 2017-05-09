@@ -855,7 +855,7 @@ public class UsbDeviceManager {
                         if (!mConnected) {
                             // restore defaults when USB is disconnected
                             Slog.i(TAG, "Disconnect, setting usb functions to null");
-                            setEnabledFunctions(null, false, false);
+                            setEnabledFunctions(null, true, false);
                         }
                         updateUsbFunctions();
                     } else {
