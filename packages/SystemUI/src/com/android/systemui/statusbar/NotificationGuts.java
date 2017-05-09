@@ -95,14 +95,25 @@ public class NotificationGuts extends FrameLayout {
 
         /**
          * Called when the guts view have been told to close, typically after an outside
-         * interaction. Returning {@code true} here will prevent the guts view to close.
+         * interaction.
+         *
+         * @param save whether the state should be saved.
+         * @param force whether the guts view should be forced closed regardless of state.
+         * @return if closing the view has been handled.
          */
-        public boolean handleCloseControls(boolean save);
+        public boolean handleCloseControls(boolean save, boolean force);
 
         /**
          * @return whether the notification associated with these guts is set to be removed.
          */
         public boolean willBeRemoved();
+
+        /**
+         * @return whether these guts are a leavebehind (e.g. {@link NotificationSnooze}).
+         */
+        public default boolean isLeavebehind() {
+            return false;
+        }
     }
 
     public interface OnGutsClosedListener {
@@ -125,7 +136,7 @@ public class NotificationGuts extends FrameLayout {
             @Override
             public void run() {
                 if (mNeedsFalsingProtection && mExposed) {
-                    closeControls(-1 /* x */, -1 /* y */, false /* save */);
+                    closeControls(-1 /* x */, -1 /* y */, false /* save */, false /* force */);
                 }
             }
         };
@@ -142,6 +153,10 @@ public class NotificationGuts extends FrameLayout {
         mGutsContent = content;
         removeAllViews();
         addView(mGutsContent.getContentView());
+    }
+
+    public GutsContent getGutsContent() {
+        return mGutsContent;
     }
 
     public void resetFalsingCheck() {
@@ -197,19 +212,30 @@ public class NotificationGuts extends FrameLayout {
         }
     }
 
-    public void closeControls(int x, int y, boolean save) {
+    public void closeControls(boolean leavebehinds, boolean controls, int x, int y, boolean force) {
+        if (mGutsContent != null) {
+            if (mGutsContent.isLeavebehind() && leavebehinds) {
+                closeControls(x, y, true /* save */, force);
+            } else if (!mGutsContent.isLeavebehind() && controls) {
+                closeControls(x, y, true /* save */, force);
+            }
+        }
+    }
+
+    public void closeControls(int x, int y, boolean save, boolean force) {
         if (getWindowToken() == null) {
             if (mClosedListener != null) {
                 mClosedListener.onGutsClosed(this);
             }
             return;
         }
-        if (mGutsContent == null || !mGutsContent.handleCloseControls(save)) {
+
+        if (mGutsContent == null || !mGutsContent.handleCloseControls(save, force)) {
             animateClose(x, y);
-        }
-        setExposed(false, mNeedsFalsingProtection);
-        if (mClosedListener != null) {
-            mClosedListener.onGutsClosed(this);
+            setExposed(false, mNeedsFalsingProtection);
+            if (mClosedListener != null) {
+                mClosedListener.onGutsClosed(this);
+            }
         }
     }
 
