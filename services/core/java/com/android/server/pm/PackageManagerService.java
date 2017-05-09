@@ -1741,13 +1741,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
                         int ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 
-                        if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
+                        final UserHandle user = args.getUser();
+                        if (getDefaultVerificationResponse(user)
+                                == PackageManager.VERIFICATION_ALLOW) {
                             Slog.i(TAG, "Continuing with installation of " + originUri);
                             state.setVerifierResponse(Binder.getCallingUid(),
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
                             broadcastPackageVerified(verificationId, originUri,
-                                    PackageManager.VERIFICATION_ALLOW,
-                                    state.getInstallArgs().getUser());
+                                    PackageManager.VERIFICATION_ALLOW, user);
                             try {
                                 ret = args.copyApk(mContainerService, true);
                             } catch (RemoteException e) {
@@ -1755,8 +1756,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         } else {
                             broadcastPackageVerified(verificationId, originUri,
-                                    PackageManager.VERIFICATION_REJECT,
-                                    state.getInstallArgs().getUser());
+                                    PackageManager.VERIFICATION_REJECT, user);
                         }
 
                         Trace.asyncTraceEnd(
@@ -14208,7 +14208,10 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @return default verification response code
      */
-    private int getDefaultVerificationResponse() {
+    private int getDefaultVerificationResponse(UserHandle user) {
+        if (sUserManager.hasUserRestriction(UserManager.ENSURE_VERIFY_APPS, user.getIdentifier())) {
+            return PackageManager.VERIFICATION_REJECT;
+        }
         return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                 android.provider.Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
                 DEFAULT_VERIFICATION_RESPONSE);
