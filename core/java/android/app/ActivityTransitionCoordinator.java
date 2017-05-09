@@ -570,8 +570,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             // Find the location in the view's parent
             ViewGroup parent = (ViewGroup) view.getParent();
             Matrix matrix = new Matrix();
-            parent.transformMatrixToLocal(matrix);
-            matrix.postTranslate(parent.getScrollX(), parent.getScrollY());
+            if (parent != null) {
+                parent.transformMatrixToLocal(matrix);
+                matrix.postTranslate(parent.getScrollX(), parent.getScrollY());
+            }
             mSharedElementParentMatrices.add(matrix);
         }
     }
@@ -861,15 +863,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             Matrix tempMatrix = new Matrix();
             for (int i = 0; i < numSharedElements; i++) {
                 View view = mSharedElements.get(i);
-                tempMatrix.reset();
-                mSharedElementParentMatrices.get(i).invert(tempMatrix);
-                GhostView.addGhost(view, decor, tempMatrix);
-                ViewGroup parent = (ViewGroup) view.getParent();
-                if (moveWithParent && !isInTransitionGroup(parent, decor)) {
-                    GhostViewListeners listener = new GhostViewListeners(view, parent, decor);
-                    parent.getViewTreeObserver().addOnPreDrawListener(listener);
-                    parent.addOnAttachStateChangeListener(listener);
-                    mGhostViewListeners.add(listener);
+                if (view.isAttachedToWindow()) {
+                    tempMatrix.reset();
+                    mSharedElementParentMatrices.get(i).invert(tempMatrix);
+                    GhostView.addGhost(view, decor, tempMatrix);
+                    ViewGroup parent = (ViewGroup) view.getParent();
+                    if (moveWithParent && !isInTransitionGroup(parent, decor)) {
+                        GhostViewListeners listener = new GhostViewListeners(view, parent, decor);
+                        parent.getViewTreeObserver().addOnPreDrawListener(listener);
+                        parent.addOnAttachStateChangeListener(listener);
+                        mGhostViewListeners.add(listener);
+                    }
                 }
             }
         }
@@ -1065,7 +1069,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         @Override
         public boolean onPreDraw() {
             GhostView ghostView = GhostView.getGhost(mView);
-            if (ghostView == null) {
+            if (ghostView == null || !mView.isAttachedToWindow()) {
                 removeListener();
             } else {
                 GhostView.calculateMatrix(mView, mDecor, mMatrix);
