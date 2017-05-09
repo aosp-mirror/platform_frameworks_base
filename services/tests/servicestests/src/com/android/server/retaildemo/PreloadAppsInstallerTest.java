@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -32,6 +33,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -40,20 +42,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.ArrayList;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PreloadAppsInstallerTest {
     private static final int TEST_DEMO_USER = 111;
 
-    private @Mock Context mContext;
+    private Context mContext;
     private @Mock IPackageManager mIpm;
     private MockContentResolver mContentResolver;
     private File mPreloadsAppsDirectory;
@@ -66,6 +68,7 @@ public class PreloadAppsInstallerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
@@ -89,7 +92,9 @@ public class PreloadAppsInstallerTest {
 
     @After
     public void tearDown() {
-        FileUtils.deleteContentsAndDir(mPreloadsAppsDirectory);
+        if (mPreloadsAppsDirectory != null) {
+            FileUtils.deleteContentsAndDir(mPreloadsAppsDirectory);
+        }
     }
 
     @Test
