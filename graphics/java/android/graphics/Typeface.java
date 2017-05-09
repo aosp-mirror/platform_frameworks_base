@@ -123,7 +123,7 @@ public class Typeface {
     public static final int BOLD_ITALIC = 3;
 
     private int mStyle = 0;
-    private int mBaseWeight = 0;
+    private int mWeight = 0;
 
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
@@ -544,7 +544,7 @@ public class Typeface {
                 return base;
             }
 
-            final int weight = (mWeight == RESOLVE_BY_FONT_TABLE) ? base.mBaseWeight : mWeight;
+            final int weight = (mWeight == RESOLVE_BY_FONT_TABLE) ? base.mWeight : mWeight;
             final boolean italic =
                     (mItalic == RESOLVE_BY_FONT_TABLE) ? (base.mStyle & ITALIC) != 0 : mItalic == 1;
             final int key = weight << 1 | (italic ? 1 : 0);
@@ -882,7 +882,7 @@ public class Typeface {
 
         native_instance = ni;
         mStyle = nativeGetStyle(ni);
-        mBaseWeight = nativeGetBaseWeight(ni);
+        mWeight = nativeGetWeight(ni);
     }
 
     private static FontFamily makeFamilyFromParsed(FontConfig.Family family,
@@ -1068,7 +1068,7 @@ public class Typeface {
     private static native long nativeCreateWeightAlias(long native_instance, int weight);
     private static native void nativeUnref(long native_instance);
     private static native int  nativeGetStyle(long native_instance);
-    private static native int  nativeGetBaseWeight(long native_instance);
+    private static native int  nativeGetWeight(long native_instance);
     private static native long nativeCreateFromArray(long[] familyArray, int weight, int italic);
     private static native void nativeSetDefault(long native_instance);
     private static native int[] nativeGetSupportedAxes(long native_instance);
