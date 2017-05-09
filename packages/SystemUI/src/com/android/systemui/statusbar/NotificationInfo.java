@@ -393,7 +393,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     @Override
-    public boolean handleCloseControls(boolean save) {
+    public boolean handleCloseControls(boolean save, boolean force) {
         if (save && hasImportanceChanged()) {
             if (mCheckSaveListener != null) {
                 mCheckSaveListener.checkSave(() -> { saveImportance(); });
