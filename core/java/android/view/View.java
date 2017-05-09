@@ -7304,7 +7304,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * fills in all data that can be inferred from the view itself.
      */
     public void onProvideStructure(ViewStructure structure) {
-        onProvideStructureForAssistOrAutofill(structure, false);
+        onProvideStructureForAssistOrAutofill(structure, false, 0);
     }
 
     /**
@@ -7318,6 +7318,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>It must set fields such {@link ViewStructure#setText(CharSequence)},
      * {@link ViewStructure#setAutofillOptions(CharSequence[])},
      * or {@link ViewStructure#setWebDomain(String)}.
+     *   <li> The {@code left} and {@code top} values set in
+     * {@link ViewStructure#setDimens(int, int, int, int, int, int)} need to be relative to the next
+     * {@link ViewGroup#isImportantForAutofill() included} parent in the structure.
      * </ul>
      *
      * @param structure Fill in with structured view data. The default implementation
@@ -7326,12 +7329,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      */
-    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
-        onProvideStructureForAssistOrAutofill(structure, true);
+    public void onProvideAutofillStructure(ViewStructure structure, @AutofillFlags int flags) {
+        onProvideStructureForAssistOrAutofill(structure, true, flags);
     }
 
     private void onProvideStructureForAssistOrAutofill(ViewStructure structure,
-            boolean forAutofill) {
+            boolean forAutofill, @AutofillFlags int flags) {
         final int id = mID;
         if (id != NO_ID && !isViewIdGenerated(id)) {
             String pkg, type, entry;
@@ -7359,7 +7362,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
+        int ignoredParentLeft = 0;
+        int ignoredParentTop = 0;
+        if (forAutofill && (flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
+            View parentGroup = null;
+
+            ViewParent viewParent = getParent();
+            if (viewParent instanceof View) {
+                parentGroup = (View) viewParent;
+            }
+
+            while (parentGroup != null && !parentGroup.isImportantForAutofill()) {
+                ignoredParentLeft += parentGroup.mLeft;
+                ignoredParentTop += parentGroup.mTop;
+
+                viewParent = parentGroup.getParent();
+                if (viewParent instanceof View) {
+                    parentGroup = (View) viewParent;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        structure.setDimens(ignoredParentLeft + mLeft, ignoredParentTop + mTop, mScrollX, mScrollY,
+                mRight - mLeft, mBottom - mTop);
         if (!forAutofill) {
             if (!hasIdentityMatrix()) {
                 structure.setTransformation(getMatrix());
@@ -7445,10 +7472,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Call {@link AutofillManager#cancel()} ()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be cancelled.
+     * <li> The {@code left} and {@code top} values set in
+     * {@link ViewStructure#setDimens(int, int, int, int, int, int)} need to be relative to the next
+     * {@link ViewGroup#isImportantForAutofill() included} parent in the structure.
      * </ol>
      *
      * @param structure Fill in with structured view data.
-     * @param flags optional flags (currently {@code 0}).
+     * @param flags optional flags.
+     *
+     * @see #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      */
     public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
     }
@@ -7772,7 +7804,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #onProvideVirtualStructure}.
      */
     public void dispatchProvideStructure(ViewStructure structure) {
-        dispatchProvideStructureForAssistOrAutofill(structure, false);
+        dispatchProvideStructureForAssistOrAutofill(structure, false, 0);
     }
 
     /**
@@ -7805,16 +7837,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void dispatchProvideAutofillStructure(@NonNull ViewStructure structure,
             @AutofillFlags int flags) {
-        dispatchProvideStructureForAssistOrAutofill(structure, true);
+        dispatchProvideStructureForAssistOrAutofill(structure, true, flags);
     }
 
     private void dispatchProvideStructureForAssistOrAutofill(ViewStructure structure,
-            boolean forAutofill) {
+            boolean forAutofill, @AutofillFlags int flags) {
         if (forAutofill) {
             structure.setAutofillId(getAutofillId());
-            // NOTE: flags are not currently supported, hence 0
-            onProvideAutofillStructure(structure, 0);
-            onProvideAutofillVirtualStructure(structure, 0);
+            onProvideAutofillStructure(structure, flags);
+            onProvideAutofillVirtualStructure(structure, flags);
         } else if (!isAssistBlocked()) {
             onProvideStructure(structure);
             onProvideVirtualStructure(structure);
