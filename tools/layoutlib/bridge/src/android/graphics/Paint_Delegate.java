@@ -596,10 +596,10 @@ public class Paint_Delegate {
             java.awt.FontMetrics javaMetrics = delegate.mFonts.get(0).mMetrics;
             if (fmi != null) {
                 // Android expects negative ascent so we invert the value from Java.
-                fmi.top = - javaMetrics.getMaxAscent();
+                fmi.top = (int)(- javaMetrics.getMaxAscent() * 1.15);
                 fmi.ascent = - javaMetrics.getAscent();
                 fmi.descent = javaMetrics.getDescent();
-                fmi.bottom = javaMetrics.getMaxDescent();
+                fmi.bottom = (int)(javaMetrics.getMaxDescent() * 1.15);
                 fmi.leading = javaMetrics.getLeading();
             }
 
