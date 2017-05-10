@@ -4219,7 +4219,6 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean allowMatchInstant =
                     (includeInstantApps
                             && Intent.ACTION_VIEW.equals(intent.getAction())
-                            && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
                             && hasWebURI(intent))
                     || isSpecialProcess
                     || mContext.checkCallingOrSelfPermission(

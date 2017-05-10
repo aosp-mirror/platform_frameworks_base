@@ -637,7 +637,6 @@ class ActivityStarter {
         if (componentSpecified
                 && intent.getData() != null
                 && Intent.ACTION_VIEW.equals(intent.getAction())
-                && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
                 && mService.getPackageManagerInternalLocked()
                         .isInstantAppInstallerComponent(intent.getComponent())) {
             // intercept intents targeted directly to the ephemeral installer the
