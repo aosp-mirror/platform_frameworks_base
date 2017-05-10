@@ -28,6 +28,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -36,10 +37,13 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 
@@ -49,6 +53,8 @@ import libcore.util.Objects;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 final class FillUi {
     private static final String TAG = "FillUi";
@@ -81,9 +87,11 @@ final class FillUi {
 
     private final @NonNull ListView mListView;
 
-    private final @Nullable ArrayAdapter<ViewItem> mAdapter;
+    private final @Nullable ItemsAdapter mAdapter;
 
     private @Nullable String mFilterText;
+
+    private @Nullable AnnounceFilterResult mAnnounceFilterResult;
 
     private int mContentWidth;
     private int mContentHeight;
@@ -157,7 +165,9 @@ final class FillUi {
                     }
                     final AutofillValue value = dataset.getFieldValues().get(index);
                     String valueText = null;
-                    if (value.isText()) {
+                    // If the dataset needs auth - don't add its text to allow guessing
+                    // its content based on how filtering behaves.
+                    if (value != null && value.isText() && dataset.getAuthentication() == null) {
                         valueText = value.getTextValue().toString().toLowerCase();
                     }
 
@@ -165,12 +175,7 @@ final class FillUi {
                 }
             }
 
-            mAdapter = new ArrayAdapter<ViewItem>(context, 0, items) {
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    return getItem(position).getView();
-                }
-            };
+            mAdapter = new ItemsAdapter(items);
 
             mListView = decor.findViewById(R.id.autofill_dataset_list);
             mListView.setAdapter(mAdapter);
@@ -270,8 +275,7 @@ final class FillUi {
                 MeasureSpec.AT_MOST);
         final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
                 MeasureSpec.AT_MOST);
-
-        final int itemCount = Math.min(mAdapter.getCount(), VISIBLE_OPTIONS_MAX_COUNT);
+        final int itemCount = mAdapter.getCount();
         for (int i = 0; i < itemCount; i++) {
             View view = mAdapter.getItem(i).getView();
             view.measure(widthMeasureSpec, heightMeasureSpec);
@@ -281,11 +285,14 @@ final class FillUi {
                 mContentWidth = newContentWidth;
                 changed = true;
             }
-            final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
-            final int newContentHeight = mContentHeight + clampedMeasuredHeight;
-            if (newContentHeight != mContentHeight) {
-                mContentHeight = newContentHeight;
-                changed = true;
+            // Update the width to fit only the first items up to max count
+            if (i < VISIBLE_OPTIONS_MAX_COUNT) {
+                final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
+                final int newContentHeight = mContentHeight + clampedMeasuredHeight;
+                if (newContentHeight != mContentHeight) {
+                    mContentHeight = newContentHeight;
+                    changed = true;
+                }
             }
         }
         return changed;
@@ -325,6 +332,10 @@ final class FillUi {
 
         public Dataset getDataset() {
             return mDataset;
+        }
+
+        public String getValue() {
+            return mValue;
         }
 
         @Override
@@ -433,6 +444,118 @@ final class FillUi {
                 final int[] coordinates = mWindow.mContentView.getLocationOnScreen();
                 pw.print(coordinates[0]); pw.print("x"); pw.println(coordinates[1]);
             }
+        }
+    }
+
+    private void announceSearchResultIfNeeded() {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            if (mAnnounceFilterResult == null) {
+                mAnnounceFilterResult = new AnnounceFilterResult();
+            }
+            mAnnounceFilterResult.post();
+        }
+    }
+
+    private final class ItemsAdapter extends BaseAdapter implements Filterable {
+        private @NonNull final List<ViewItem> mAllItems;
+
+        private @NonNull final List<ViewItem> mFilteredItems = new ArrayList<>();
+
+        ItemsAdapter(@NonNull List<ViewItem> items) {
+            mAllItems = Collections.unmodifiableList(new ArrayList<>(items));
+            mFilteredItems.addAll(items);
+        }
+
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    // No locking needed as mAllItems is final an immutable
+                    final FilterResults results = new FilterResults();
+                    if (TextUtils.isEmpty(constraint)) {
+                        results.values = mAllItems;
+                        results.count = mAllItems.size();
+                        return results;
+                    }
+                    final List<ViewItem> filteredItems = new ArrayList<>();
+                    final String constraintLowerCase = constraint.toString().toLowerCase();
+                    final int itemCount = mAllItems.size();
+                    for (int i = 0; i < itemCount; i++) {
+                        final ViewItem item = mAllItems.get(i);
+                        final String value = item.getValue();
+                        // No value, i.e. null, matches any filter
+                        if (value == null
+                                || value.toLowerCase().contains(constraintLowerCase)) {
+                            filteredItems.add(item);
+                        }
+                    }
+                    results.values = filteredItems;
+                    results.count = filteredItems.size();
+                    return results;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    final boolean resultCountChanged;
+                    final int oldItemCount = mFilteredItems.size();
+                    mFilteredItems.clear();
+                    @SuppressWarnings("unchecked")
+                    final List<ViewItem> items = (List<ViewItem>) results.values;
+                    mFilteredItems.addAll(items);
+                    resultCountChanged = (oldItemCount != mFilteredItems.size());
+                    if (resultCountChanged) {
+                        announceSearchResultIfNeeded();
+                    }
+                    notifyDataSetChanged();
+                }
+            };
+        }
+
+        @Override
+        public int getCount() {
+            return mFilteredItems.size();
+        }
+
+        @Override
+        public ViewItem getItem(int position) {
+            return mFilteredItems.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getItem(position).getView();
+        }
+    }
+
+    private final class AnnounceFilterResult implements Runnable {
+        private static final int SEARCH_RESULT_ANNOUNCEMENT_DELAY = 1000; // 1 sec
+
+        public void post() {
+            remove();
+            mListView.postDelayed(this, SEARCH_RESULT_ANNOUNCEMENT_DELAY);
+        }
+
+        public void remove() {
+            mListView.removeCallbacks(this);
+        }
+
+        @Override
+        public void run() {
+            final int count = mListView.getAdapter().getCount();
+            final String text;
+            if (count <= 0) {
+                text = mContext.getString(R.string.autofill_picker_no_suggestions);
+            } else {
+                text = mContext.getResources().getQuantityString(
+                        R.plurals.autofill_picker_some_suggestions, count, count);
+            }
+            mListView.announceForAccessibility(text);
         }
     }
 }
