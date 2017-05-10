@@ -767,6 +767,28 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
+     * Force SCO audio to be opened regardless any other restrictions
+     *
+     * @param forced Whether or not SCO audio connection should be forced:
+     *                 True to force SCO audio
+     *                 False to use SCO audio in normal manner
+     * @hide
+     */
+    public void setForceScoAudio(boolean forced) {
+        if (VDBG) log("setForceScoAudio " + String.valueOf(forced));
+        if (mService != null && isEnabled()) {
+            try {
+                mService.setForceScoAudio(forced);
+            } catch (RemoteException e) {
+              Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+    }
+
+    /**
      * Check if Bluetooth SCO audio is connected.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
