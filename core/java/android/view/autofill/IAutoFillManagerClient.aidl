@@ -45,7 +45,8 @@ oneway interface IAutoFillManagerClient {
     /**
       * Authenticates a fill response or a data set.
       */
-    void authenticate(int sessionId, in IntentSender intent, in Intent fillInIntent);
+    void authenticate(int sessionId, int authenticationId, in IntentSender intent,
+            in Intent fillInIntent);
 
     /**
       * Sets the views to track. If saveOnAllViewsInvisible is set and all these view are invisible

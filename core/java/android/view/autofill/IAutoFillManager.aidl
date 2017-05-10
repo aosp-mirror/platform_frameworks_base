@@ -41,7 +41,7 @@ interface IAutoFillManager {
             in AutofillValue value, int action, int flags, int userId);
     void finishSession(int sessionId, int userId);
     void cancelSession(int sessionId, int userId);
-    void setAuthenticationResult(in Bundle data, int sessionId, int userId);
+    void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId, int userId);
     void setHasCallback(int sessionId, int userId, boolean hasIt);
     void disableOwnedAutofillServices(int userId);
     boolean isServiceSupported(int userId);
