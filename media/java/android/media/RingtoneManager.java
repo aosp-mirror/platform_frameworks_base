@@ -943,7 +943,8 @@ public class RingtoneManager {
 
         // Sanity-check: are we actually being asked to install an audio file?
         final String mimeType = mContext.getContentResolver().getType(fileUri);
-        if(mimeType == null || !mimeType.startsWith("audio/")) {
+        if(mimeType == null ||
+                !(mimeType.startsWith("audio/") || mimeType.equals("application/ogg"))) {
             throw new IllegalArgumentException("Ringtone file must have MIME type \"audio/*\"."
                     + " Given file has MIME type \"" + mimeType + "\"");
         }
