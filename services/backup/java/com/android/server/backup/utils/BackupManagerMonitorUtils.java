@@ -18,14 +18,15 @@ package com.android.server.backup.utils;
 
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
-
-import com.android.server.backup.RefactoredBackupManagerService;
 
 /**
  * Utility methods to communicate with BackupManagerMonitor.
@@ -62,8 +63,8 @@ public class BackupManagerMonitorUtils {
                 monitor.onEvent(bundle);
                 return monitor;
             } catch (RemoteException e) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG, "backup manager monitor went away");
+                if (DEBUG) {
+                    Slog.w(TAG, "backup manager monitor went away");
                 }
             }
         }

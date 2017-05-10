@@ -454,10 +454,12 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
-        public void setAuthenticationResult(Bundle data, int sessionId, int userId) {
+        public void setAuthenticationResult(Bundle data, int sessionId, int authenticationId,
+                int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                service.setAuthenticationResultLocked(data, sessionId, getCallingUid());
+                service.setAuthenticationResultLocked(data, sessionId, authenticationId,
+                        getCallingUid());
             }
         }
 

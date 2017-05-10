@@ -2272,6 +2272,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: This is a device dedicated to showing UI
      * on a vehicle headunit. A headunit here is defined to be inside a
      * vehicle that may or may not be moving. A headunit uses either a

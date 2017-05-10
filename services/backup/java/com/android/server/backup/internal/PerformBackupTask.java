@@ -16,6 +16,15 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG_BACKUP_TRACE;
+import static com.android.server.backup.RefactoredBackupManagerService.KEY_WIDGET_STATE;
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_PENDING;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_BACKUP_INTERVAL;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 
@@ -51,7 +60,6 @@ import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.RefactoredBackupManagerService;
-import com.android.server.backup.RefactoredBackupManagerService.BackupState;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
@@ -155,7 +163,7 @@ public class PerformBackupTask implements BackupRestoreTask {
 
         synchronized (backupManagerService.getCurrentOpLock()) {
             if (backupManagerService.isBackupOperationInProgress()) {
-                if (RefactoredBackupManagerService.DEBUG) {
+                if (DEBUG) {
                     Slog.d(TAG, "Skipping backup since one is already in progress.");
                 }
                 mCancelAll = true;
@@ -186,9 +194,8 @@ public class PerformBackupTask implements BackupRestoreTask {
      */
     private void registerTask() {
         synchronized (backupManagerService.getCurrentOpLock()) {
-            backupManagerService.getCurrentOperations().put(mCurrentOpToken, new Operation(
-                    RefactoredBackupManagerService.OP_PENDING, this,
-                    RefactoredBackupManagerService.OP_TYPE_BACKUP));
+            backupManagerService.getCurrentOperations().put(
+                    mCurrentOpToken, new Operation(OP_PENDING, this, OP_TYPE_BACKUP));
         }
     }
 
@@ -229,7 +236,7 @@ public class PerformBackupTask implements BackupRestoreTask {
     // We're starting a backup pass.  Initialize the transport and send
     // the PM metadata blob if we haven't already.
     void beginBackup() {
-        if (RefactoredBackupManagerService.DEBUG_BACKUP_TRACE) {
+        if (DEBUG_BACKUP_TRACE) {
             backupManagerService.clearBackupTrace();
             StringBuilder b = new StringBuilder(256);
             b.append("beginBackup: [");
@@ -267,9 +274,9 @@ public class PerformBackupTask implements BackupRestoreTask {
         // we performed a backup.  Drop it from the working queue now that
         // we're committed to evaluating it for backup regardless.
         for (int i = 0; i < mQueue.size(); i++) {
-            if (RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL.equals(
+            if (PACKAGE_MANAGER_SENTINEL.equals(
                     mQueue.get(i).packageName)) {
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                if (MORE_DEBUG) {
                     Slog.i(TAG, "Metadata in queue; eliding");
                 }
                 mQueue.remove(i);
@@ -278,12 +285,11 @@ public class PerformBackupTask implements BackupRestoreTask {
             }
         }
 
-        if (RefactoredBackupManagerService.DEBUG) {
-            Slog.v(TAG,
-                    "Beginning backup of " + mQueue.size() + " targets");
+        if (DEBUG) {
+            Slog.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
         }
 
-        File pmState = new File(mStateDir, RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL);
+        File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
         try {
             final String transportName = mTransport.transportDirName();
             EventLog.writeEvent(EventLogTags.BACKUP_START, transportName);
@@ -317,7 +323,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
                             backupManagerService.getPackageManager());
                     mStatus = invokeAgentForBackup(
-                            RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL,
+                            PACKAGE_MANAGER_SENTINEL,
                             IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
                     backupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
 
@@ -365,7 +371,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         // Sanity check that we have work to do.  If not, skip to the end where
         // we reestablish the wakelock invariants etc.
         if (mQueue.isEmpty()) {
-            if (RefactoredBackupManagerService.MORE_DEBUG) Slog.i(TAG, "queue now empty");
+            if (MORE_DEBUG) Slog.i(TAG, "queue now empty");
             executeNextState(BackupState.FINAL);
             return;
         }
@@ -471,10 +477,9 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // An agent-level failure means we reenqueue this one agent for
                 // a later retry, but otherwise proceed normally.
                 if (mStatus == BackupTransport.AGENT_ERROR) {
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
-                        Slog.i(TAG,
-                                "Agent failure for " + request.packageName
-                                        + " - restaging");
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "Agent failure for " + request.packageName
+                                + " - restaging");
                     }
                     backupManagerService.dataChangedImpl(request.packageName);
                     mStatus = BackupTransport.TRANSPORT_OK;
@@ -544,9 +549,8 @@ public class PerformBackupTask implements BackupRestoreTask {
             backupManagerService.setBackupRunning(false);
             if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
                 // Make sure we back up everything and perform the one-time init
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.d(TAG,
-                            "Server requires init; rerunning");
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "Server requires init; rerunning");
                 }
                 backupManagerService.addBackupTrace("init required; rerunning");
                 try {
@@ -555,7 +559,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     if (name != null) {
                         backupManagerService.getPendingInits().add(name);
                     } else {
-                        if (RefactoredBackupManagerService.DEBUG) {
+                        if (DEBUG) {
                             Slog.w(TAG, "Couldn't find name of transport " + mTransport
                                     + " for init");
                         }
@@ -603,15 +607,14 @@ public class PerformBackupTask implements BackupRestoreTask {
                     break;
             }
         }
-        Slog.i(RefactoredBackupManagerService.TAG, "K/V backup pass finished.");
+        Slog.i(TAG, "K/V backup pass finished.");
         // Only once we're entirely finished do we release the wakelock for k/v backup.
         backupManagerService.getWakelock().release();
     }
 
     // Remove the PM metadata state. This will generate an init on the next pass.
     void clearMetadata() {
-        final File pmState = new File(mStateDir,
-                RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL);
+        final File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
         if (pmState.exists()) pmState.delete();
     }
 
@@ -619,9 +622,8 @@ public class PerformBackupTask implements BackupRestoreTask {
     // handler in case it doesn't get back to us.
     int invokeAgentForBackup(String packageName, IBackupAgent agent,
             IBackupTransport transport) {
-        if (RefactoredBackupManagerService.DEBUG) {
-            Slog.d(TAG,
-                    "invokeAgentForBackup on " + packageName);
+        if (DEBUG) {
+            Slog.d(TAG, "invokeAgentForBackup on " + packageName);
         }
         backupManagerService.addBackupTrace("invoking " + packageName);
 
@@ -629,7 +631,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         mSavedStateName = new File(mStateDir, packageName);
         mBackupDataName = new File(backupManagerService.getDataDir(), packageName + ".data");
         mNewStateName = new File(mStateDir, packageName + ".new");
-        if (RefactoredBackupManagerService.MORE_DEBUG) Slog.d(TAG, "data file: " + mBackupDataName);
+        if (MORE_DEBUG) Slog.d(TAG, "data file: " + mBackupDataName);
 
         mSavedState = null;
         mBackupData = null;
@@ -641,7 +643,7 @@ public class PerformBackupTask implements BackupRestoreTask {
             // Look up the package info & signatures.  This is first so that if it
             // throws an exception, there's no file setup yet that would need to
             // be unraveled.
-            if (packageName.equals(RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL)) {
+            if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
                 // The metadata 'package' is synthetic; construct one and make
                 // sure our global state is pointed at it
                 mCurrentPackage = new PackageInfo();
@@ -675,10 +677,8 @@ public class PerformBackupTask implements BackupRestoreTask {
 
             // Initiate the target's backup pass
             backupManagerService.addBackupTrace("setting timeout");
-            backupManagerService
-                    .prepareOperationTimeout(mEphemeralOpToken,
-                            RefactoredBackupManagerService.TIMEOUT_BACKUP_INTERVAL, this,
-                            RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
+            backupManagerService.prepareOperationTimeout(
+                    mEphemeralOpToken, TIMEOUT_BACKUP_INTERVAL, this, OP_TYPE_BACKUP_WAIT);
             backupManagerService.addBackupTrace("calling agent doBackup()");
 
             agent.doBackup(mSavedState, mBackupData, mNewState, quota, mEphemeralOpToken,
@@ -740,7 +740,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         final File widgetFile = new File(mStateDir, pkgName + "_widget");
         final boolean priorStateExists = widgetFile.exists();
 
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
+        if (MORE_DEBUG) {
             if (priorStateExists || widgetState != null) {
                 Slog.i(TAG, "Checking widget update: state=" + (widgetState != null)
                         + " prior=" + priorStateExists);
@@ -783,12 +783,11 @@ public class PerformBackupTask implements BackupRestoreTask {
                 stateOut.writeUTF(newChecksum);
             }
 
-            out.writeEntityHeader(RefactoredBackupManagerService.KEY_WIDGET_STATE,
-                    widgetState.length);
+            out.writeEntityHeader(KEY_WIDGET_STATE, widgetState.length);
             out.writeEntityData(widgetState, widgetState.length);
         } else {
             // Widget state for this app has been removed; commit a deletion
-            out.writeEntityHeader(RefactoredBackupManagerService.KEY_WIDGET_STATE, -1);
+            out.writeEntityHeader(KEY_WIDGET_STATE, -1);
             widgetFile.delete();
         }
     }
@@ -811,7 +810,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // initiated the appropriate next operation.
                 final String pkg = (mCurrentPackage != null)
                         ? mCurrentPackage.packageName : "[none]";
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                if (MORE_DEBUG) {
                     Slog.i(TAG, "Callback after agent teardown: " + pkg);
                 }
                 backupManagerService.addBackupTrace("late opComplete; curPkg = " + pkg);
@@ -882,10 +881,9 @@ public class PerformBackupTask implements BackupRestoreTask {
             }
 
             // Spin the data off to the transport and proceed with the next stage.
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.v(TAG,
-                        "operationComplete(): sending data to transport for "
-                                + pkgName);
+            if (MORE_DEBUG) {
+                Slog.v(TAG, "operationComplete(): sending data to transport for "
+                        + pkgName);
             }
             backupManagerService.getBackupHandler().removeMessages(MSG_BACKUP_OPERATION_TIMEOUT);
             clearAgentState();
@@ -919,9 +917,8 @@ public class PerformBackupTask implements BackupRestoreTask {
                         backupManagerService.addBackupTrace("transport rejected package");
                     }
                 } else {
-                    if (RefactoredBackupManagerService.MORE_DEBUG) {
-                        Slog.i(TAG,
-                                "no backup data written; not calling transport");
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "no backup data written; not calling transport");
                     }
                     backupManagerService.addBackupTrace("no data to send");
                     mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -979,7 +976,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // otherwise we're done.
                 nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
             } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                if (MORE_DEBUG) {
                     Slog.d(TAG, "Package " + mCurrentPackage.packageName +
                             " hit quota limit on k/v backup");
                 }
@@ -1012,7 +1009,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         synchronized (mCancelLock) {
             if (mFinished) {
                 // We have already cancelled this operation.
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
+                if (MORE_DEBUG) {
                     Slog.d(TAG, "Ignoring stale cancel. cancelAll=" + cancelAll);
                 }
                 return;
@@ -1047,9 +1044,8 @@ public class PerformBackupTask implements BackupRestoreTask {
     }
 
     void revertAndEndBackup() {
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.i(TAG,
-                    "Reverting backup queue - restaging everything");
+        if (MORE_DEBUG) {
+            Slog.i(TAG, "Reverting backup queue - restaging everything");
         }
         backupManagerService.addBackupTrace("transport error; reverting");
 
@@ -1109,7 +1105,7 @@ public class PerformBackupTask implements BackupRestoreTask {
     }
 
     void executeNextState(BackupState nextState) {
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
+        if (MORE_DEBUG) {
             Slog.i(TAG, " => executing next step on "
                     + this + " nextState=" + nextState);
         }

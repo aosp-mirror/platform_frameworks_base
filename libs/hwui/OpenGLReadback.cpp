@@ -27,6 +27,7 @@
 #include <GLES2/gl2.h>
 #include <ui/Fence.h>
 #include <ui/GraphicBuffer.h>
+#include <gui/Surface.h>
 
 namespace android {
 namespace uirenderer {

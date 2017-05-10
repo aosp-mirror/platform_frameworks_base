@@ -235,7 +235,7 @@
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Աշխատանքային ռեժիմն անջատվեց:"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Աշխատանքային ռեժիմը միացվեց:"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Տվյալների խնայումն անջատվեց:"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Տվյալների խնայումը միացվեց:"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Թրաֆիկի տնտեսումը միացվեց:"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ցուցադրել պայծառությունը"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Լիցքավորում"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2Գ-3Գ տվյալների օգտագործումը դադարեցված է"</string>
@@ -630,8 +630,8 @@
     <string name="headset" msgid="4534219457597457353">"Ականջակալ"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Ականջակալը կապակցված է"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Ականջակալը կապակցված է"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Թրաֆիկի խնայում"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Տվյալների խնայումը միացված է"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Թրաֆիկի տնտեսում"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Թրաֆիկի տնտեսումը միացված է"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Տվյալների խնայումն անջատված է"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Միացնել"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Անջատել"</string>
@@ -700,8 +700,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> ծանուցում՝ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Հավելվածը չի կարող աշխատել տրոհված էկրանի ռեժիմում:"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Հավելվածը չի աջակցում էկրանի տրոհումը:"</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Հավելվածը չի կարող աշխատել երկրորդական էկրանի վրա։"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Հավելվածը չի աջակցում երկրորդական էկրանների վրա գործարկումը։"</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Հավելվածը կարող է չաշխատել լրացուցիչ էկրանի վրա"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Հավելվածը չի աջակցում գործարկումը լրացուցիչ էկրանների վրա"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Բացել կարգավորումները:"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Բացել արագ կարգավորումները:"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Փակել արագ կարգավորումները:"</string>
@@ -734,7 +734,7 @@
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Աջ դյուրանցում"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ձախ դյուրանցումը նաև ապակողպում է"</string>
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Աջ դյուրանցումը նաև ապակողպում է"</string>
-    <string name="lockscreen_none" msgid="4783896034844841821">"Ոչ մի"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Չկա"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"Գործարկել <xliff:g id="APP">%1$s</xliff:g> հավելվածը"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Այլ հավելվածներ"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Օղակ"</string>
@@ -762,6 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Մինչև <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Պահել"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Փոխարինել"</string>
-    <string name="running_foreground_services_title" msgid="381024150898615683">"Հետին ֆոնին գործարկվող հավելվածներ"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Հպել՝ մարտկոցի և տվյալների օգտագործման մասին մանրամասներ ստանալու համար"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Ֆոնային ռեժիմում աշխատող հավելվածներ"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Հպեք՝ մարտկոցի և թրաֆիկի մանրամասները տեսնելու համար"</string>
 </resources>

@@ -2078,12 +2078,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // ----- Back up a set of applications via a worker thread -----
 
-    public enum BackupState {
-        INITIAL,
-        RUNNING_QUEUE,
-        FINAL
-    }
-
     public boolean isBackupOperationInProgress() {
         synchronized (mCurrentOpLock) {
             for (int i = 0; i < mCurrentOperations.size(); i++) {

@@ -106,7 +106,6 @@ import com.android.server.soundtrigger.SoundTriggerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
-import com.android.server.text.TextClassificationService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.tv.TvRemoteService;
@@ -177,7 +176,7 @@ public final class SystemServer {
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
-            "com.android.server.LockSettingsService$Lifecycle";
+            "com.android.server.locksettings.LockSettingsService$Lifecycle";
     private static final String STORAGE_MANAGER_SERVICE_CLASS =
             "com.android.server.StorageManagerService$Lifecycle";
     private static final String STORAGE_STATS_SERVICE_CLASS =
@@ -1050,12 +1049,6 @@ public final class SystemServer {
             if (!disableNonCoreServices && !disableTextServices) {
                 traceBeginAndSlog("StartTextServicesManager");
                 mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
-                traceEnd();
-            }
-
-            if (!disableNonCoreServices) {
-                traceBeginAndSlog("StartTextClassificationService");
-                mSystemServiceManager.startService(TextClassificationService.Lifecycle.class);
                 traceEnd();
             }
 

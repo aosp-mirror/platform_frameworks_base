@@ -268,7 +268,7 @@
     <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikacionet që ekzekutohen në sfond"</string>
     <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> po ekzekutohet në sfond"</string>
     <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikacione po ekzekutohen në sfond"</string>
-    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Trokit për detaje për baterinë dhe përdorimin e të dhënave"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Trokit për detaje mbi baterinë dhe përdorimin e të dhënave"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modaliteti i sigurisë"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistemi \"android\""</string>
@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Veprimet e tekstit"</string>
     <string name="email" msgid="4560673117055050403">"Dërgo mail"</string>
     <string name="dial" msgid="4204975095406423102">"Telefoni"</string>
-    <string name="map" msgid="5441053548030107189">"Harta"</string>
-    <string name="browse" msgid="6079864138582486027">"Shfleto"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Hapësira ruajtëse po mbaron"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Disa funksione të sistemit mund të mos punojnë"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që të kesh 250 MB hapësirë të lirë dhe pastaj të rifillosh."</string>
@@ -1178,10 +1180,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB për MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"U lidh me një ndihmës USB-je"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Trokit për më shumë opsione."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (2256529893240208458) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (7811865061127547035) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Aksesori i audios nuk mbështetet"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Trokit për më shumë informacion"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Trokit për të çaktivizuar korrigjimin e gabimeve të USB-së."</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->

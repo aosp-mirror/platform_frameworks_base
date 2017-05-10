@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Accu is bijna leeg"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Accubesparing is ingeschakeld."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Opladen via USB niet ondersteund.\nGebruik alleen de bijgeleverde oplader."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Opladen via USB wordt niet ondersteund."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Gebruik alleen de bijgeleverde oplader."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Instellingen"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Accubesparing inschakelen?"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Batterijbesparing inschakelen?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Inschakelen"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Accubesparing inschakelen"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Batterijbesparing inschakelen"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Instellingen"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Scherm automatisch draaien"</string>
@@ -402,9 +402,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Gebruiker verwijderen?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Alle apps en gegevens van deze gebruiker worden verwijderd."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Verwijderen"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Accubesparing is ingeschakeld"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterijbesparing is ingeschakeld"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Vermindert de prestaties en achtergrondgegevens"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Accubesparing uitschakelen"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Batterijbesparing uitschakelen"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> gaat alles vastleggen dat wordt weergegeven op je scherm."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Niet opnieuw weergeven"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alles wissen"</string>
@@ -576,7 +576,7 @@
     <string name="snooze_undo" msgid="6074877317002985129">"ONGEDAAN MAKEN"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Snoozefunctie <xliff:g id="TIME_AMOUNT">%1$s</xliff:g> actief"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Accubesparing niet beschikbaar tijdens opladen"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterijbesparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vermindert de prestaties en achtergrondgegevens"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Knop <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -701,7 +701,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"App werkt mogelijk niet met gesplitst scherm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"App biedt geen ondersteuning voor gesplitst scherm."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"App werkt mogelijk niet op een secundair display."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"App biedt geen ondersteuning voor lancering op secundaire displays."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"App kan niet op secundaire displays worden gestart."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Instellingen openen."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Snelle instellingen openen."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Snelle instellingen sluiten."</string>
@@ -763,5 +763,5 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Behouden"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Vervangen"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps uitgevoerd op achtergrond"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tik voor informatie over batterij- en datagebruik"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tik voor batterij- en datagebruik"</string>
 </resources>

@@ -984,8 +984,10 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaaðgerðir"</string>
     <string name="email" msgid="4560673117055050403">"Tölvupóstur"</string>
     <string name="dial" msgid="4204975095406423102">"Sími"</string>
-    <string name="map" msgid="5441053548030107189">"Kort"</string>
-    <string name="browse" msgid="6079864138582486027">"Vafri"</string>
+    <!-- no translation found for map (6068210738233985748) -->
+    <skip />
+    <!-- no translation found for browse (6993590095938149861) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Geymslurýmið er senn á þrotum"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sumir kerfiseiginleikar kunna að vera óvirkir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Ekki nægt geymslurými fyrir kerfið. Gakktu úr skugga um að 250 MB séu laus og endurræstu."</string>

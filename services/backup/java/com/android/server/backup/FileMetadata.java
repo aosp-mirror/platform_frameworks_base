@@ -16,6 +16,8 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.app.backup.BackupAgent;
 import android.util.Slog;
 
@@ -34,6 +36,8 @@ public class FileMetadata {
     public long mode;                      // e.g. 0666 (actually int)
     public long mtime;                     // last mod time, UTC time_t (actually int)
     public long size;                      // bytes of content
+    public int version;                    // App version.
+    public boolean hasApk;                 // Whether backup file contains apk.
 
     @Override
     public String toString() {
@@ -78,7 +82,7 @@ public class FileMetadata {
         b.append(" :: ");
         b.append(path);
 
-        Slog.i(RefactoredBackupManagerService.TAG, b.toString());
+        Slog.i(TAG, b.toString());
     }
 
 }

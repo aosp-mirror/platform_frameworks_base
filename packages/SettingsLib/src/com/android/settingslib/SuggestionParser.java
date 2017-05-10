@@ -32,20 +32,25 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Xml;
 import android.view.InflateException;
+
 import com.android.settingslib.drawer.Tile;
 import com.android.settingslib.drawer.TileUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class SuggestionParser {
 
@@ -104,8 +109,8 @@ public class SuggestionParser {
     private final String mSmartDismissControl;
 
 
-    public SuggestionParser(
-        Context context, SharedPreferences sharedPrefs, int orderXml, String smartDismissControl) {
+    public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml,
+            String smartDismissControl) {
         this(
                 context,
                 sharedPrefs,
@@ -114,7 +119,7 @@ public class SuggestionParser {
     }
 
     public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml) {
-       this(context, sharedPrefs, orderXml, DEFAULT_SMART_DISMISS_CONTROL);
+        this(context, sharedPrefs, orderXml, DEFAULT_SMART_DISMISS_CONTROL);
     }
 
     @VisibleForTesting
@@ -138,19 +143,25 @@ public class SuggestionParser {
         final int N = mSuggestionList.size();
         for (int i = 0; i < N; i++) {
             final SuggestionCategory category = mSuggestionList.get(i);
-            if (category.exclusive) {
+            if (category.exclusive && !isExclusiveCategoryExpired(category)) {
                 // If suggestions from an exclusive category are present, parsing is stopped
                 // and only suggestions from that category are displayed. Note that subsequent
                 // exclusive categories are also ignored.
-                List<Tile> exclusiveSuggestions = new ArrayList<>();
-                readSuggestions(category, exclusiveSuggestions, isSmartSuggestionEnabled);
+                final List<Tile> exclusiveSuggestions = new ArrayList<>();
+
+                // Read suggestion and force isSmartSuggestion to be false so the rule defined
+                // from each suggestion itself is used.
+                readSuggestions(category, exclusiveSuggestions, false /* isSmartSuggestion */);
                 if (!exclusiveSuggestions.isEmpty()) {
                     return exclusiveSuggestions;
                 }
             } else {
+                // Either the category is not exclusive, or the exclusiveness expired so we should
+                // treat it as a normal category.
                 readSuggestions(category, suggestions, isSmartSuggestionEnabled);
             }
         }
+        dedupeSuggestions(suggestions);
         return suggestions;
     }
 
@@ -177,7 +188,7 @@ public class SuggestionParser {
 
     @VisibleForTesting
     public void filterSuggestions(
-        List<Tile> suggestions, int countBefore, boolean isSmartSuggestionEnabled) {
+            List<Tile> suggestions, int countBefore, boolean isSmartSuggestionEnabled) {
         for (int i = countBefore; i < suggestions.size(); i++) {
             if (!isAvailable(suggestions.get(i)) ||
                     !isSupported(suggestions.get(i)) ||
@@ -190,9 +201,25 @@ public class SuggestionParser {
         }
     }
 
+    /**
+     * Filter suggestions list so they are all unique.
+     */
+    private void dedupeSuggestions(List<Tile> suggestions) {
+        final Set<String> intents = new ArraySet<>();
+        for (int i = suggestions.size() - 1; i >= 0; i--) {
+            final Tile suggestion = suggestions.get(i);
+            final String intentUri = suggestion.intent.toUri(Intent.URI_INTENT_SCHEME);
+            if (intents.contains(intentUri)) {
+                suggestions.remove(i);
+            } else {
+                intents.add(intentUri);
+            }
+        }
+    }
+
     @VisibleForTesting
     void readSuggestions(
-        SuggestionCategory category, List<Tile> suggestions, boolean isSmartSuggestionEnabled) {
+            SuggestionCategory category, List<Tile> suggestions, boolean isSmartSuggestionEnabled) {
         int countBefore = suggestions.size();
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(category.category);
@@ -304,7 +331,7 @@ public class SuggestionParser {
         final boolean isConnectionRequired =
                 suggestion.metaData.getBoolean(META_DATA_IS_CONNECTION_REQUIRED);
         if (!isConnectionRequired) {
-          return true;
+            return true;
         }
         ConnectivityManager cm =
                 (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -324,6 +351,25 @@ public class SuggestionParser {
     public void markCategoryDone(String category) {
         String name = Settings.Secure.COMPLETED_CATEGORY_PREFIX + category;
         Settings.Secure.putInt(mContext.getContentResolver(), name, 1);
+    }
+
+    /**
+     * Whether or not the category's exclusiveness has expired.
+     */
+    private boolean isExclusiveCategoryExpired(SuggestionCategory category) {
+        final String keySetupTime = category.category + SETUP_TIME;
+        final long currentTime = System.currentTimeMillis();
+        if (!mSharedPrefs.contains(keySetupTime)) {
+            mSharedPrefs.edit()
+                    .putLong(keySetupTime, currentTime)
+                    .commit();
+        }
+        if (category.exclusiveExpireDaysInMillis < 0) {
+            // negative means never expires
+            return false;
+        }
+        final long setupTime = mSharedPrefs.getLong(keySetupTime, 0);
+        return currentTime - setupTime > category.exclusiveExpireDaysInMillis;
     }
 
     private boolean isDismissed(Tile suggestion, boolean isSmartSuggestionEnabled) {
@@ -384,6 +430,7 @@ public class SuggestionParser {
         public String pkg;
         public boolean multiple;
         public boolean exclusive;
+        public long exclusiveExpireDaysInMillis;
     }
 
     private static class SuggestionOrderInflater {
@@ -394,6 +441,7 @@ public class SuggestionParser {
         private static final String ATTR_PACKAGE = "package";
         private static final String ATTR_MULTIPLE = "multiple";
         private static final String ATTR_EXCLUSIVE = "exclusive";
+        private static final String ATTR_EXCLUSIVE_EXPIRE_DAYS = "exclusiveExpireDays";
 
         private final Context mContext;
 
@@ -471,6 +519,12 @@ public class SuggestionParser {
                 String exclusive = attrs.getAttributeValue(null, ATTR_EXCLUSIVE);
                 category.exclusive =
                         !TextUtils.isEmpty(exclusive) && Boolean.parseBoolean(exclusive);
+                String expireDaysAttr = attrs.getAttributeValue(null,
+                        ATTR_EXCLUSIVE_EXPIRE_DAYS);
+                long expireDays = !TextUtils.isEmpty(expireDaysAttr)
+                        ? Integer.parseInt(expireDaysAttr)
+                        : -1;
+                category.exclusiveExpireDaysInMillis = DateUtils.DAY_IN_MILLIS * expireDays;
                 return category;
             } else {
                 throw new IllegalArgumentException("Unknown item " + name);

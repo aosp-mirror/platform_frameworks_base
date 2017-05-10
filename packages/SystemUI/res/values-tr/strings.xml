@@ -762,6 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Bitiş: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Koru"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Değiştir"</string>
-    <string name="running_foreground_services_title" msgid="381024150898615683">"Uygulamalar arka planda çalışıyor"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Arka planda çalışan uygulamalar"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Pil ve veri kullanımı ile ilgili ayrıntılar için dokunun"</string>
 </resources>

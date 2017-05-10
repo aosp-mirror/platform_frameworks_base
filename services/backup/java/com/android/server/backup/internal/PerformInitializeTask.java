@@ -16,6 +16,8 @@
 
 package com.android.server.backup.internal;
 
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+
 import android.app.AlarmManager;
 import android.app.backup.BackupTransport;
 import android.os.SystemClock;
@@ -47,14 +49,11 @@ public class PerformInitializeTask implements Runnable {
                         backupManagerService.getTransportManager().getTransportBinder(
                                 transportName);
                 if (transport == null) {
-                    Slog.e(
-                            RefactoredBackupManagerService.TAG,
-                            "Requested init for " + transportName + " but not found");
+                    Slog.e(TAG, "Requested init for " + transportName + " but not found");
                     continue;
                 }
 
-                Slog.i(RefactoredBackupManagerService.TAG,
-                        "Initializing (wiping) backup transport storage: " + transportName);
+                Slog.i(TAG, "Initializing (wiping) backup transport storage: " + transportName);
                 EventLog.writeEvent(EventLogTags.BACKUP_START, transport.transportDirName());
                 long startRealtime = SystemClock.elapsedRealtime();
                 int status = transport.initializeDevice();
@@ -65,7 +64,7 @@ public class PerformInitializeTask implements Runnable {
 
                 // Okay, the wipe really happened.  Clean up our local bookkeeping.
                 if (status == BackupTransport.TRANSPORT_OK) {
-                    Slog.i(RefactoredBackupManagerService.TAG, "Device init successful");
+                    Slog.i(TAG, "Device init successful");
                     int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
                     EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                     backupManagerService
@@ -78,23 +77,21 @@ public class PerformInitializeTask implements Runnable {
                 } else {
                     // If this didn't work, requeue this one and try again
                     // after a suitable interval
-                    Slog.e(RefactoredBackupManagerService.TAG,
-                            "Transport error in initializeDevice()");
+                    Slog.e(TAG, "Transport error in initializeDevice()");
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.recordInitPendingLocked(true, transportName);
                     }
                     // do this via another alarm to make sure of the wakelock states
                     long delay = transport.requestBackupTime();
-                    Slog.w(RefactoredBackupManagerService.TAG,
-                            "Init failed on " + transportName + " resched in " + delay);
+                    Slog.w(TAG, "Init failed on " + transportName + " resched in " + delay);
                     backupManagerService.getAlarmManager().set(AlarmManager.RTC_WAKEUP,
                             System.currentTimeMillis() + delay,
                             backupManagerService.getRunInitIntent());
                 }
             }
         } catch (Exception e) {
-            Slog.e(RefactoredBackupManagerService.TAG, "Unexpected error performing init", e);
+            Slog.e(TAG, "Unexpected error performing init", e);
         } finally {
             // Done; release the wakelock
             backupManagerService.getWakelock().release();

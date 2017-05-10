@@ -1777,7 +1777,6 @@
   <java-symbol type="bool" name="config_supportLongPressPowerWhenNonInteractive" />
   <java-symbol type="bool" name="config_wifi_background_scan_support" />
   <java-symbol type="bool" name="config_wifi_dual_band_support" />
-  <java-symbol type="bool" name="config_wifi_hotspot2_enabled" />
   <java-symbol type="bool" name="config_wifi_fast_bss_transition_enabled" />
   <java-symbol type="bool" name="config_wimaxEnabled" />
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
@@ -2908,6 +2907,8 @@
   <java-symbol type="id" name="autofill_save_yes" />
   <java-symbol type="id" name="autofill_save_close" />
   <java-symbol type="string" name="autofill_error_cannot_autofill" />
+  <java-symbol type="string" name="autofill_picker_no_suggestions" />
+  <java-symbol type="plurals" name="autofill_picker_some_suggestions" />
   <java-symbol type="string" name="autofill" />
   <java-symbol type="string" name="autofill_picker_accessibility_title " />
   <java-symbol type="string" name="autofill_save_accessibility_title " />

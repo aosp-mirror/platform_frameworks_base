@@ -236,7 +236,8 @@ public final class FillResponse implements Parcelable {
          *
          * <p>When a user triggers autofill, the system launches the provided intent
          * whose extras will have the {@link AutofillManager#EXTRA_ASSIST_STRUCTURE screen
-         * content}. Once you complete your authentication flow you should set the activity
+         * content} and your {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE
+         * client state}. Once you complete your authentication flow you should set the activity
          * result to {@link android.app.Activity#RESULT_OK} and provide the fully populated
          * {@link FillResponse response} by setting it to the {@link
          * AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra.

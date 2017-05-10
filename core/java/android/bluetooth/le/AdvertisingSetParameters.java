@@ -34,7 +34,7 @@ public final class AdvertisingSetParameters implements Parcelable {
     * Advertise on low frequency, around every 1000ms. This is the default and
     * preferred advertising mode as it consumes the least power.
     */
-    public static final int INTERVAL_LOW = 1600;
+    public static final int INTERVAL_HIGH = 1600;
 
     /**
      * Advertise on medium frequency, around every 250ms. This is balanced
@@ -47,7 +47,7 @@ public final class AdvertisingSetParameters implements Parcelable {
      * has the highest power consumption and should not be used for continuous
      * background advertising.
      */
-    public static final int INTERVAL_HIGH = 160;
+    public static final int INTERVAL_LOW = 160;
 
     /**
      * Minimum value for advertising interval.

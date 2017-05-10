@@ -1491,6 +1491,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // This is the first time we failed -- restart process and
             // retry.
+            r.launchFailed = true;
             app.activities.remove(r);
             throw e;
         }

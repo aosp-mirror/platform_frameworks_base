@@ -117,6 +117,48 @@ public final class AutofillManager {
     /** @hide */ public static final int FLAG_ADD_CLIENT_DEBUG = 0x2;
     /** @hide */ public static final int FLAG_ADD_CLIENT_VERBOSE = 0x4;
 
+    /** Which bits in an authentication id are used for the dataset id */
+    private static final int AUTHENTICATION_ID_DATASET_ID_MASK = 0xFFFF;
+    /** How many bits in an authentication id are used for the dataset id */
+    private static final int AUTHENTICATION_ID_DATASET_ID_SHIFT = 16;
+    /** @hide The index for an undefined data set */
+    public static final int AUTHENTICATION_ID_DATASET_ID_UNDEFINED = 0xFFFF;
+
+    /**
+     * Makes an authentication id from a request id and a dataset id.
+     *
+     * @param requestId The request id.
+     * @param datasetId The dataset id.
+     * @return The authentication id.
+     * @hide
+     */
+    public static int makeAuthenticationId(int requestId, int datasetId) {
+        return (requestId << AUTHENTICATION_ID_DATASET_ID_SHIFT)
+                | (datasetId & AUTHENTICATION_ID_DATASET_ID_MASK);
+    }
+
+    /**
+     * Gets the request id from an authentication id.
+     *
+     * @param authRequestId The authentication id.
+     * @return The request id.
+     * @hide
+     */
+    public static int getRequestIdFromAuthenticationId(int authRequestId) {
+        return (authRequestId >> AUTHENTICATION_ID_DATASET_ID_SHIFT);
+    }
+
+    /**
+     * Gets the dataset id from an authentication id.
+     *
+     * @param authRequestId The authentication id.
+     * @return The dataset id.
+     * @hide
+     */
+    public static int getDatasetIdFromAuthenticationId(int authRequestId) {
+        return (authRequestId & AUTHENTICATION_ID_DATASET_ID_MASK);
+    }
+
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     /**
@@ -156,10 +198,12 @@ public final class AutofillManager {
         /**
          * Asks the client to start an authentication flow.
          *
+         * @param authenticationId A unique id of the authentication operation.
          * @param intent The authentication intent.
          * @param fillInIntent The authentication fill-in intent.
          */
-        void autofillCallbackAuthenticate(IntentSender intent, Intent fillInIntent);
+        void autofillCallbackAuthenticate(int authenticationId, IntentSender intent,
+                Intent fillInIntent);
 
         /**
          * Tells the client this manager has state to be reset.
@@ -675,7 +719,7 @@ public final class AutofillManager {
     }
 
     /** @hide */
-    public void onAuthenticationResult(Intent data) {
+    public void onAuthenticationResult(int authenticationId, Intent data) {
         if (!hasAutofillFeature()) {
             return;
         }
@@ -694,7 +738,8 @@ public final class AutofillManager {
             final Bundle responseData = new Bundle();
             responseData.putParcelable(EXTRA_AUTHENTICATION_RESULT, result);
             try {
-                mService.setAuthenticationResult(responseData, mSessionId, mContext.getUserId());
+                mService.setAuthenticationResult(responseData, mSessionId, authenticationId,
+                        mContext.getUserId());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error delivering authentication result", e);
             }
@@ -870,12 +915,13 @@ public final class AutofillManager {
         }
     }
 
-    private void authenticate(int sessionId, IntentSender intent, Intent fillInIntent) {
+    private void authenticate(int sessionId, int authenticationId, IntentSender intent,
+            Intent fillInIntent) {
         synchronized (mLock) {
             if (sessionId == mSessionId) {
                 AutofillClient client = getClientLocked();
                 if (client != null) {
-                    client.autofillCallbackAuthenticate(intent, fillInIntent);
+                    client.autofillCallbackAuthenticate(authenticationId, intent, fillInIntent);
                 }
             }
         }
@@ -1393,11 +1439,12 @@ public final class AutofillManager {
         }
 
         @Override
-        public void authenticate(int sessionId, IntentSender intent, Intent fillInIntent) {
+        public void authenticate(int sessionId, int authenticationId, IntentSender intent,
+                Intent fillInIntent) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.mContext.getMainThreadHandler().post(
-                        () -> afm.authenticate(sessionId, intent, fillInIntent));
+                        () -> afm.authenticate(sessionId, authenticationId, intent, fillInIntent));
             }
         }
 

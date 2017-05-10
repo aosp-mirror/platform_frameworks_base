@@ -71,6 +71,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 class UsbProfileGroupSettingsManager {
     private static final String TAG = UsbProfileGroupSettingsManager.class.getSimpleName();
@@ -139,7 +140,7 @@ class UsbProfileGroupSettingsManager {
             } else {
                 UserPackage other = (UserPackage)obj;
 
-                return user.equals(user) && packageName.equals(other.packageName);
+                return user.equals(other.user) && packageName.equals(other.packageName);
             }
         }
 
@@ -319,21 +320,32 @@ class UsbProfileGroupSettingsManager {
             return false;
         }
 
-        public boolean matches(DeviceFilter f) {
-            if (mVendorId != -1 && f.mVendorId != mVendorId) return false;
-            if (mProductId != -1 && f.mProductId != mProductId) return false;
-            if (f.mManufacturerName != null && mManufacturerName == null) return false;
-            if (f.mProductName != null && mProductName == null) return false;
-            if (f.mSerialNumber != null && mSerialNumber == null) return false;
-            if (mManufacturerName != null && f.mManufacturerName != null &&
-                !mManufacturerName.equals(f.mManufacturerName)) return false;
-            if (mProductName != null && f.mProductName != null &&
-                !mProductName.equals(f.mProductName)) return false;
-            if (mSerialNumber != null && f.mSerialNumber != null &&
-                !mSerialNumber.equals(f.mSerialNumber)) return false;
+        /**
+         * If the device described by {@code device} covered by this filter?
+         *
+         * @param device The device
+         *
+         * @return {@code true} iff this filter covers the {@code device}
+         */
+        public boolean contains(DeviceFilter device) {
+            // -1 and null means "match anything"
+
+            if (mVendorId != -1 && device.mVendorId != mVendorId) return false;
+            if (mProductId != -1 && device.mProductId != mProductId) return false;
+            if (mManufacturerName != null && !Objects.equals(mManufacturerName,
+                    device.mManufacturerName)) {
+                return false;
+            }
+            if (mProductName != null && !Objects.equals(mProductName, device.mProductName)) {
+                return false;
+            }
+            if (mSerialNumber != null
+                    && !Objects.equals(mSerialNumber, device.mSerialNumber)) {
+                return false;
+            }
 
             // check device class/subclass/protocol
-            return matches(f.mClass, f.mSubclass, f.mProtocol);
+            return matches(device.mClass, device.mSubclass, device.mProtocol);
         }
 
         @Override
@@ -493,10 +505,19 @@ class UsbProfileGroupSettingsManager {
             return true;
         }
 
-        public boolean matches(AccessoryFilter f) {
-            if (mManufacturer != null && !f.mManufacturer.equals(mManufacturer)) return false;
-            if (mModel != null && !f.mModel.equals(mModel)) return false;
-            if (mVersion != null && !f.mVersion.equals(mVersion)) return false;
+        /**
+         * Is the accessories described {@code accessory} covered by this filter?
+         *
+         * @param accessory A filter describing the accessory
+         *
+         * @return {@code true} iff this the filter covers the accessory
+         */
+        public boolean contains(AccessoryFilter accessory) {
+            if (mManufacturer != null && !Objects.equals(accessory.mManufacturer, mManufacturer)) {
+                return false;
+            }
+            if (mModel != null && !Objects.equals(accessory.mModel, mModel)) return false;
+            if (mVersion != null && !Objects.equals(accessory.mVersion, mVersion)) return false;
             return true;
         }
 
@@ -539,16 +560,21 @@ class UsbProfileGroupSettingsManager {
     private class MyPackageMonitor extends PackageMonitor {
         @Override
         public void onPackageAdded(String packageName, int uid) {
-            handlePackageUpdate(packageName);
-        }
+            if (!mUserManager.isSameProfileGroup(mParentUser.getIdentifier(),
+                    UserHandle.getUserId(uid))) {
+                return;
+            }
 
-        @Override
-        public void onPackageUpdateFinished(String packageName, int uid) {
-            handlePackageUpdate(packageName);
+            handlePackageAdded(new UserPackage(packageName, UserHandle.getUserHandleForUid(uid)));
         }
 
         @Override
         public void onPackageRemoved(String packageName, int uid) {
+            if (!mUserManager.isSameProfileGroup(mParentUser.getIdentifier(),
+                    UserHandle.getUserId(uid))) {
+                return;
+            }
+
             clearDefaults(packageName, UserHandle.getUserHandleForUid(uid));
         }
     }
@@ -595,7 +621,7 @@ class UsbProfileGroupSettingsManager {
             readSettingsLocked();
         }
 
-        mPackageMonitor.register(context, null, true);
+        mPackageMonitor.register(context, null, UserHandle.ALL, true);
         mMtpNotificationManager = new MtpNotificationManager(
                 parentUserContext,
                 new MtpNotificationManager.OnOpenInAppListener() {
@@ -989,9 +1015,12 @@ class UsbProfileGroupSettingsManager {
 
         ApplicationInfo appInfo;
         try {
-            appInfo = mPackageManager.getApplicationInfo(component.getPackageName(), 0);
+            // Fixed handlers are always for parent user
+            appInfo = mPackageManager.getApplicationInfoAsUser(component.getPackageName(), 0,
+                    mParentUser.getIdentifier());
         } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Default USB handling package not found: " + component.getPackageName());
+            Slog.e(TAG, "Default USB handling package (" + component.getPackageName()
+                    + ") not found  for user " + mParentUser);
             return;
         }
 
@@ -1175,10 +1204,10 @@ class UsbProfileGroupSettingsManager {
         if (userPackage != null) {
             // look for default activity
             for (final ResolveInfo info : matches) {
-                if (info.activityInfo != null
-                        && userPackage.packageName.equals(info.activityInfo.packageName)
-                        && userPackage.user.getIdentifier()
-                                == UserHandle.getUserId(info.activityInfo.applicationInfo.uid)) {
+                if (info.activityInfo != null && userPackage.equals(
+                        new UserPackage(info.activityInfo.packageName,
+                                UserHandle.getUserHandleForUid(
+                                        info.activityInfo.applicationInfo.uid)))) {
                     return info.activityInfo;
                 }
             }
@@ -1202,35 +1231,53 @@ class UsbProfileGroupSettingsManager {
         return null;
     }
 
-    private boolean clearCompatibleMatchesLocked(String packageName, DeviceFilter filter) {
-        boolean changed = false;
-        for (DeviceFilter test : mDevicePreferenceMap.keySet()) {
-            if (filter.matches(test)) {
-                UserPackage currentMatch = mDevicePreferenceMap.get(test);
-                if (!currentMatch.packageName.equals(packageName)) {
-                    mDevicePreferenceMap.remove(test);
-                    changed = true;
+    private boolean clearCompatibleMatchesLocked(@NonNull UserPackage userPackage,
+            @NonNull DeviceFilter filter) {
+        ArrayList<DeviceFilter> keysToRemove = new ArrayList<>();
+
+        // The keys in mDevicePreferenceMap are filters that match devices very narrowly
+        for (DeviceFilter device : mDevicePreferenceMap.keySet()) {
+            if (filter.contains(device)) {
+                UserPackage currentMatch = mDevicePreferenceMap.get(device);
+                if (!currentMatch.equals(userPackage)) {
+                    keysToRemove.add(device);
                 }
             }
         }
-        return changed;
+
+        if (!keysToRemove.isEmpty()) {
+            for (DeviceFilter keyToRemove : keysToRemove) {
+                mDevicePreferenceMap.remove(keyToRemove);
+            }
+        }
+
+        return !keysToRemove.isEmpty();
     }
 
-    private boolean clearCompatibleMatchesLocked(String packageName, AccessoryFilter filter) {
-        boolean changed = false;
-        for (AccessoryFilter test : mAccessoryPreferenceMap.keySet()) {
-            if (filter.matches(test)) {
-                UserPackage currentMatch = mAccessoryPreferenceMap.get(test);
-                if (!currentMatch.packageName.equals(packageName)) {
-                    mAccessoryPreferenceMap.remove(test);
-                    changed = true;
+    private boolean clearCompatibleMatchesLocked(@NonNull UserPackage userPackage,
+            @NonNull AccessoryFilter filter) {
+        ArrayList<AccessoryFilter> keysToRemove = new ArrayList<>();
+
+        // The keys in mAccessoryPreferenceMap are filters that match accessories very narrowly
+        for (AccessoryFilter accessory : mAccessoryPreferenceMap.keySet()) {
+            if (filter.contains(accessory)) {
+                UserPackage currentMatch = mAccessoryPreferenceMap.get(accessory);
+                if (!currentMatch.equals(userPackage)) {
+                    keysToRemove.add(accessory);
                 }
             }
         }
-        return changed;
+
+        if (!keysToRemove.isEmpty()) {
+            for (AccessoryFilter keyToRemove : keysToRemove) {
+                mAccessoryPreferenceMap.remove(keyToRemove);
+            }
+        }
+
+        return !keysToRemove.isEmpty();
     }
 
-    private boolean handlePackageUpdateLocked(String packageName, ActivityInfo aInfo,
+    private boolean handlePackageAddedLocked(UserPackage userPackage, ActivityInfo aInfo,
             String metaDataName) {
         XmlResourceParser parser = null;
         boolean changed = false;
@@ -1244,13 +1291,13 @@ class UsbProfileGroupSettingsManager {
                 String tagName = parser.getName();
                 if ("usb-device".equals(tagName)) {
                     DeviceFilter filter = DeviceFilter.read(parser);
-                    if (clearCompatibleMatchesLocked(packageName, filter)) {
+                    if (clearCompatibleMatchesLocked(userPackage, filter)) {
                         changed = true;
                     }
                 }
                 else if ("usb-accessory".equals(tagName)) {
                     AccessoryFilter filter = AccessoryFilter.read(parser);
-                    if (clearCompatibleMatchesLocked(packageName, filter)) {
+                    if (clearCompatibleMatchesLocked(userPackage, filter)) {
                         changed = true;
                     }
                 }
@@ -1265,17 +1312,18 @@ class UsbProfileGroupSettingsManager {
     }
 
     // Check to see if the package supports any USB devices or accessories.
-    // If so, clear any non-matching preferences for matching devices/accessories.
-    private void handlePackageUpdate(String packageName) {
+    // If so, clear any preferences for matching devices/accessories.
+    private void handlePackageAdded(@NonNull UserPackage userPackage) {
         synchronized (mLock) {
             PackageInfo info;
             boolean changed = false;
 
             try {
-                info = mPackageManager.getPackageInfo(packageName,
-                        PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
+                info = mPackageManager.getPackageInfoAsUser(userPackage.packageName,
+                        PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA,
+                        userPackage.user.getIdentifier());
             } catch (NameNotFoundException e) {
-                Slog.e(TAG, "handlePackageUpdate could not find package " + packageName, e);
+                Slog.e(TAG, "handlePackageUpdate could not find package " + userPackage, e);
                 return;
             }
 
@@ -1283,11 +1331,12 @@ class UsbProfileGroupSettingsManager {
             if (activities == null) return;
             for (int i = 0; i < activities.length; i++) {
                 // check for meta-data, both for devices and accessories
-                if (handlePackageUpdateLocked(packageName, activities[i],
+                if (handlePackageAddedLocked(userPackage, activities[i],
                         UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
                     changed = true;
                 }
-                if (handlePackageUpdateLocked(packageName, activities[i],
+
+                if (handlePackageAddedLocked(userPackage, activities[i],
                         UsbManager.ACTION_USB_ACCESSORY_ATTACHED)) {
                     changed = true;
                 }
@@ -1318,16 +1367,18 @@ class UsbProfileGroupSettingsManager {
      * @param user The user the package belongs to
      */
     void setDevicePackage(@NonNull UsbDevice device, @Nullable String packageName,
-            @Nullable UserHandle user) {
+            @NonNull UserHandle user) {
         DeviceFilter filter = new DeviceFilter(device);
         boolean changed = false;
         synchronized (mLock) {
             if (packageName == null) {
                 changed = (mDevicePreferenceMap.remove(filter) != null);
             } else {
-                changed = !packageName.equals(mDevicePreferenceMap.get(filter));
+                UserPackage userPackage = new UserPackage(packageName, user);
+
+                changed = !userPackage.equals(mDevicePreferenceMap.get(filter));
                 if (changed) {
-                    mDevicePreferenceMap.put(filter, new UserPackage(packageName, user));
+                    mDevicePreferenceMap.put(filter, userPackage);
                 }
             }
             if (changed) {
@@ -1344,16 +1395,18 @@ class UsbProfileGroupSettingsManager {
      * @param user The user the package belongs to
      */
     void setAccessoryPackage(@NonNull UsbAccessory accessory, @Nullable String packageName,
-            @Nullable UserHandle user) {
+            @NonNull UserHandle user) {
         AccessoryFilter filter = new AccessoryFilter(accessory);
         boolean changed = false;
         synchronized (mLock) {
             if (packageName == null) {
                 changed = (mAccessoryPreferenceMap.remove(filter) != null);
             } else {
-                changed = !packageName.equals(mAccessoryPreferenceMap.get(filter));
+                UserPackage userPackage = new UserPackage(packageName, user);
+
+                changed = !userPackage.equals(mAccessoryPreferenceMap.get(filter));
                 if (changed) {
-                    mAccessoryPreferenceMap.put(filter, new UserPackage(packageName, user));
+                    mAccessoryPreferenceMap.put(filter, userPackage);
                 }
             }
             if (changed) {

@@ -76,7 +76,7 @@ public class NotificationComparatorTest {
     private NotificationRecord mRecordUrgent;
     private NotificationRecord mRecordCheater;
     private NotificationRecord mRecordCheaterColorized;
-
+    private NotificationRecord mNoMediaSessionMedia;
 
     @Before
     public void setUp() {
@@ -124,7 +124,6 @@ public class NotificationComparatorTest {
         Notification n3 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MediaStyle()
                         .setMediaSession(new MediaSession.Token(null)))
-                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
@@ -192,6 +191,16 @@ public class NotificationComparatorTest {
                 pkg2, 1, "cheater", uid2, uid2, n11, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mRecordCheaterColorized.setUserImportance(NotificationManager.IMPORTANCE_LOW);
+
+        Notification n12 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setColorized(true)
+                .setStyle(new Notification.MediaStyle())
+                .build();
+        mNoMediaSessionMedia = new NotificationRecord(mContext, new StatusBarNotification(
+                pkg2, pkg2, 1, "cheater", uid2, uid2, n12, new UserHandle(userId),
+                "", 9258), getDefaultChannel());
+        mNoMediaSessionMedia.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
     }
 
     @Test
@@ -205,6 +214,7 @@ public class NotificationComparatorTest {
         expected.add(mRecordContact);
         expected.add(mRecordEmail);
         expected.add(mRecordUrgent);
+        expected.add(mNoMediaSessionMedia);
         expected.add(mRecordCheater);
         expected.add(mRecordCheaterColorized);
         expected.add(mRecordMinCall);
