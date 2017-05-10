@@ -45,14 +45,14 @@ public final class FgThread extends ServiceThread {
     }
 
     public static FgThread get() {
-        synchronized (UiThread.class) {
+        synchronized (FgThread.class) {
             ensureThreadLocked();
             return sInstance;
         }
     }
 
     public static Handler getHandler() {
-        synchronized (UiThread.class) {
+        synchronized (FgThread.class) {
             ensureThreadLocked();
             return sHandler;
         }
