@@ -906,6 +906,20 @@ public class UserManager {
     }
 
     /**
+     * Returns whether user name has been set.
+     * <p>This method can be used to check that the value returned by {@link #getUserName()} was
+     * set by the user and is not a placeholder string provided by the system.
+     * @hide
+     */
+    public boolean isUserNameSet() {
+        try {
+            return mService.isUserNameSet(getUserHandle());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Used to determine whether the user making this call is subject to
      * teleportations.
      *
