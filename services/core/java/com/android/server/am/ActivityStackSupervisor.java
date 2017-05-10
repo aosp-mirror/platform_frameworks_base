@@ -4979,10 +4979,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         VirtualActivityDisplay(int width, int height, int density) {
             DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null,
-                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null,
+            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null /* projection */,
+                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null /* surface */,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null, null);
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null /* callback */,
+                    null /* handler */, null /* uniqueId */);
 
             init(mVirtualDisplay.getDisplay());
 
