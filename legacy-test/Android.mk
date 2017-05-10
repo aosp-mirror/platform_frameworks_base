@@ -19,7 +19,7 @@ LOCAL_PATH:= $(call my-dir)
 # Build the legacy-test library
 # =============================
 # This contains the junit.framework and android.test classes that were in
-# Android API level 25.
+# Android API level 25 excluding those from android.test.runner.
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
@@ -31,10 +31,13 @@ include $(BUILD_JAVA_LIBRARY)
 
 # Build the legacy-android-test library
 # =============================
-# This contains the android.test classes that were in Android API level 25.
+# This contains the android.test classes that were in Android API level 25,
+# including those from android.test.runner.
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src/android)
+LOCAL_SRC_FILES := \
+    $(call all-java-files-under, src/android) \
+    $(call all-java-files-under, ../test-runner/src/android)
 LOCAL_MODULE := legacy-android-test
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core-oj core-libart framework junit
