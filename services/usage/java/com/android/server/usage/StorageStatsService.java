@@ -31,6 +31,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageStats;
 import android.content.pm.UserInfo;
 import android.net.TrafficStats;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -467,6 +468,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                     if (bytesDelta > mMinimumThresholdBytes) {
                         mPreviousBytes = mStats.getAvailableBytes();
                         recalculateQuotas(getInitializedStrategy());
+                        notifySignificantDelta();
                     }
                     sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_IN_MILLIS);
                     break;
@@ -517,5 +519,14 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     static boolean isCacheQuotaCalculationsEnabled(ContentResolver resolver) {
         return Settings.Global.getInt(
                 resolver, Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION, 1) != 0;
+    }
+
+    /**
+     * Hacky way of notifying that disk space has changed significantly; we do
+     * this to cause "available space" values to be requeried.
+     */
+    void notifySignificantDelta() {
+        mContext.getContentResolver().notifyChange(
+                Uri.parse("content://com.android.externalstorage.documents/"), null, false);
     }
 }
