@@ -1062,6 +1062,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-showAnnotation android.annotation.SystemApi \
 		-api $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
 		-removedApi $(INTERNAL_PLATFORM_SYSTEM_REMOVED_API_FILE) \
+		-exactApi $(INTERNAL_PLATFORM_SYSTEM_EXACT_API_FILE) \
 		-nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
@@ -1098,6 +1099,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
                -showAnnotation android.annotation.TestApi \
                -api $(INTERNAL_PLATFORM_TEST_API_FILE) \
                -removedApi $(INTERNAL_PLATFORM_TEST_REMOVED_API_FILE) \
+               -exactApi $(INTERNAL_PLATFORM_TEST_EXACT_API_FILE) \
                -nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
@@ -1251,8 +1253,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
 include $(BUILD_DROIDDOC)
 
 # ==== docs for the web (on the androiddevdocs app engine server) =======================
-# TODO: Fix the System API docs build.
-ifneq ($(filter online-system-api-sdk-docs,$(MAKECMDGOALS)),)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
@@ -1283,11 +1283,10 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-samplesdir $(samples_dir)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
-# Don't build by default
+
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
-endif  # online-system-api-sdk-docs in make command line.
 
 # ==== docs for the web (on the devsite app engine server) =======================
 include $(CLEAR_VARS)
