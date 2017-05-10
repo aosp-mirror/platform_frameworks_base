@@ -16,8 +16,6 @@
 
 package android.test;
 
-import com.google.android.collect.Sets;
-
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.ContentProvider;
@@ -30,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -48,8 +47,8 @@ public class RenamingDelegatingContext extends ContextWrapper {
     private File mCacheDir;
     private final Object mSync = new Object();
 
-    private Set<String> mDatabaseNames = Sets.newHashSet();
-    private Set<String> mFileNames = Sets.newHashSet();
+    private Set<String> mDatabaseNames = new HashSet<>();
+    private Set<String> mFileNames = new HashSet<>();
 
     public static <T extends ContentProvider> T providerWithRenamedContext(
             Class<T> contentProvider, Context c, String filePrefix)
