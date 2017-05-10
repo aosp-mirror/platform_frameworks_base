@@ -219,11 +219,7 @@ class MediaSessionStack {
     private MediaSessionRecord findMediaButtonSession(int uid) {
         MediaSessionRecord mediaButtonSession = null;
         for (MediaSessionRecord session : mSessions) {
-            // Since the media buttons come with the headset/speaker, users will expect changes in
-            // the headset/speaker when they press media buttons. So only consider local playback
-            // for the media button session.
-            if (uid == session.getUid()
-                    && session.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
+            if (uid == session.getUid()) {
                 if (session.isPlaybackActive() ==
                         mAudioPlaybackMonitor.isPlaybackActive(session.getUid())) {
                     // If there's a media session whose PlaybackState matches
