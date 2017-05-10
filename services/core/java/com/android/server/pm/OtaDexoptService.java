@@ -316,6 +316,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
                 if (arg == null) {
                     builder.append('!');
+                    return;
                 }
 
                 String txt = String.valueOf(arg);
