@@ -53,6 +53,7 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -69,6 +70,8 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+
+import static android.os.Build.VERSION_CODES.O;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -1245,7 +1248,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation(int candidate) {
-        if (!fillsParent()) {
+        // We do not allow non-fullscreen apps to influence orientation at and beyond O. While we do
+        // throw an exception in {@link Activity#onCreate} and
+        // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
+        // other calculations aren't affected.
+        if (!fillsParent() && mTargetSdk >= O) {
             // Can't specify orientation if app doesn't fill parent.
             return SCREEN_ORIENTATION_UNSET;
         }
