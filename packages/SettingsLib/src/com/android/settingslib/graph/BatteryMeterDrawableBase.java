@@ -88,12 +88,6 @@ public class BatteryMeterDrawableBase extends Drawable {
     private final Path mClipPath = new Path();
     private final Path mTextPath = new Path();
 
-    private int mDarkModeBackgroundColor;
-    private int mDarkModeFillColor;
-
-    private int mLightModeBackgroundColor;
-    private int mLightModeFillColor;
-
     public BatteryMeterDrawableBase(Context context, int frameColor) {
         mContext = context;
         final Resources res = context.getResources();
@@ -155,15 +149,6 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         mPlusPaint = new Paint(mBoltPaint);
         mPlusPoints = loadPoints(res, R.array.batterymeter_plus_points);
-
-        mDarkModeBackgroundColor =
-                Utils.getDefaultColor(mContext, R.color.dark_mode_icon_color_dual_tone_background);
-        mDarkModeFillColor =
-                Utils.getDefaultColor(mContext, R.color.dark_mode_icon_color_dual_tone_fill);
-        mLightModeBackgroundColor =
-                Utils.getDefaultColor(mContext, R.color.light_mode_icon_color_dual_tone_background);
-        mLightModeFillColor =
-                Utils.getDefaultColor(mContext, R.color.light_mode_icon_color_dual_tone_fill);
 
         mIntrinsicWidth = context.getResources().getDimensionPixelSize(R.dimen.battery_width);
         mIntrinsicHeight = context.getResources().getDimensionPixelSize(R.dimen.battery_height);
@@ -259,36 +244,12 @@ public class BatteryMeterDrawableBase extends Drawable {
         return color;
     }
 
-    public void setDarkIntensity(float darkIntensity) {
-        if (darkIntensity == mOldDarkIntensity) {
-            return;
-        }
-        int backgroundColor = getBackgroundColor(darkIntensity);
-        int fillColor = getFillColor(darkIntensity);
-        setColors(fillColor, backgroundColor);
-        mOldDarkIntensity = darkIntensity;
-    }
-
     public void setColors(int fillColor, int backgroundColor) {
         mIconTint = fillColor;
         mFramePaint.setColor(backgroundColor);
         mBoltPaint.setColor(fillColor);
         mChargeColor = fillColor;
         invalidateSelf();
-    }
-
-    private int getBackgroundColor(float darkIntensity) {
-        return getColorForDarkIntensity(
-                darkIntensity, mLightModeBackgroundColor, mDarkModeBackgroundColor);
-    }
-
-    private int getFillColor(float darkIntensity) {
-        return getColorForDarkIntensity(
-                darkIntensity, mLightModeFillColor, mDarkModeFillColor);
-    }
-
-    private int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
-        return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
     }
 
     @Override
