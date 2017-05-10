@@ -18,20 +18,14 @@ package com.android.systemui.statusbar.notification;
 
 import android.app.Notification;
 import android.content.Context;
-import android.text.BidiFormatter;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
-import android.text.style.TextAppearanceSpan;
+import android.content.res.Resources;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-
-import java.util.List;
 
 /**
  * A class managing hybrid groups that include {@link HybridNotificationView} and the notification
@@ -40,16 +34,37 @@ import java.util.List;
 public class HybridGroupManager {
 
     private final Context mContext;
-    private ViewGroup mParent;
+    private final NotificationDozeHelper mDozer;
+    private final ViewGroup mParent;
+
+    private final float mOverflowNumberSizeDark;
+    private final int mOverflowNumberPaddingDark;
+    private final float mOverflowNumberSize;
+    private final int mOverflowNumberPadding;
+
     private int mOverflowNumberColor;
+    private int mOverflowNumberColorDark;
+    private float mDarkAmount = 0f;
 
     public HybridGroupManager(Context ctx, ViewGroup parent) {
         mContext = ctx;
         mParent = parent;
+        mDozer = new NotificationDozeHelper();
+
+        Resources res = mContext.getResources();
+        mOverflowNumberSize = res.getDimensionPixelSize(
+                R.dimen.group_overflow_number_size);
+        mOverflowNumberSizeDark = res.getDimensionPixelSize(
+                R.dimen.group_overflow_number_size_dark);
+        mOverflowNumberPadding = res.getDimensionPixelSize(
+                R.dimen.group_overflow_number_padding);
+        mOverflowNumberPaddingDark = mOverflowNumberPadding + res.getDimensionPixelSize(
+                R.dimen.group_overflow_number_extra_padding_dark);
     }
 
-    private HybridNotificationView inflateHybridView() {
-        LayoutInflater inflater = mContext.getSystemService(LayoutInflater.class);
+    private HybridNotificationView inflateHybridViewWithStyle(int style) {
+        LayoutInflater inflater = new ContextThemeWrapper(mContext, style)
+                .getSystemService(LayoutInflater.class);
         HybridNotificationView hybrid = (HybridNotificationView) inflater.inflate(
                 R.layout.hybrid_notification, mParent, false);
         mParent.addView(hybrid);
@@ -66,11 +81,13 @@ public class HybridGroupManager {
     }
 
     private void updateOverFlowNumberColor(TextView numberView) {
-        numberView.setTextColor(mOverflowNumberColor);
+        numberView.setTextColor(NotificationUtils.interpolateColors(
+                mOverflowNumberColor, mOverflowNumberColorDark, mDarkAmount));
     }
 
-    public void setOverflowNumberColor(TextView numberView, int overflowNumberColor) {
-        mOverflowNumberColor = overflowNumberColor;
+    public void setOverflowNumberColor(TextView numberView, int colorRegular, int colorDark) {
+        mOverflowNumberColor = colorRegular;
+        mOverflowNumberColorDark = colorDark;
         if (numberView != null) {
             updateOverFlowNumberColor(numberView);
         }
@@ -78,8 +95,20 @@ public class HybridGroupManager {
 
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
             Notification notification) {
+        return bindFromNotificationWithStyle(reusableView, notification,
+                R.style.HybridNotification);
+    }
+
+    public HybridNotificationView bindAmbientFromNotification(HybridNotificationView reusableView,
+            Notification notification) {
+        return bindFromNotificationWithStyle(reusableView, notification,
+                R.style.HybridNotification_Ambient);
+    }
+
+    private HybridNotificationView bindFromNotificationWithStyle(
+            HybridNotificationView reusableView, Notification notification, int style) {
         if (reusableView == null) {
-            reusableView = inflateHybridView();
+            reusableView = inflateHybridViewWithStyle(style);
         }
         CharSequence titleText = resolveTitle(notification);
         CharSequence contentText = resolveText(notification);
@@ -117,5 +146,17 @@ public class HybridGroupManager {
 
         reusableView.setContentDescription(contentDescription);
         return reusableView;
+    }
+
+    public void setOverflowNumberDark(TextView view, boolean dark, boolean fade, long delay) {
+        mDozer.setIntensityDark((f)->{
+            mDarkAmount = f;
+            updateOverFlowNumberColor(view);
+        }, dark, fade, delay);
+        view.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                dark ? mOverflowNumberSizeDark : mOverflowNumberSize);
+        int paddingEnd = dark ? mOverflowNumberPaddingDark : mOverflowNumberPadding;
+        view.setPaddingRelative(view.getPaddingStart(), view.getPaddingTop(), paddingEnd,
+                view.getPaddingBottom());
     }
 }
