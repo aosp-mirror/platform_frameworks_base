@@ -87,6 +87,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             GarbageMonitor.Service.class,
             LatencyTester.class,
             GlobalActionsComponent.class,
+            RoundedCorners.class,
     };
 
     /**
