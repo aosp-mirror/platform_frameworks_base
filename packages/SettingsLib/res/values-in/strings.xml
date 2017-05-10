@@ -114,8 +114,8 @@
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Menyetel suara spesifik bahasa untuk teks lisan"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Dengarkan contoh"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Putar demonstrasi singkat dari sintesis suara"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"Pasang data suara"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"Pasang data suara yang dibutuhkan untuk sintesis suara"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Instal data suara"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instal data suara yang dibutuhkan untuk sintesis suara"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Mesin sintesis suara ini mungkin dapat mengumpulkan semua teks yang akan diucapkan, termasuk di antaranya data pribadi seperti sandi dan nomor kartu kredit. Berasal dari <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> aplikasi. Gunakan metode masukan ini?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Bahasa ini perlu sambungan jaringan yang bekerja untuk keluaran text-to-speech."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Ini adalah contoh sintesis suara"</string>

@@ -114,8 +114,8 @@
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Postavlja glas za dati jezik za izgovoreni tekst"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Poslušajte primjer"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Reproduciraj kratku demonstraciju sintetiziranja govora"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"Instaliraj glasovne podatke"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalirajte glasovne podatke potrebne za sintetiziranje govora"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Instaliranje glasovnih podataka"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instaliranje glasovnih podataka potrebnih za sintetiziranje govora"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ovaj program za sintetiziranje govora u mogućnosti je da prikuplja sav tekst koji se izgovara, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Program omogućava aplikacija <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Da li želite koristiti ovaj program za sintetiziranje govora?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Ovaj jezik zahtijeva aktivnu mrežnu vezu za pretvaranje teksta u govor."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Ovo je primjer sinteze govora"</string>
@@ -319,7 +319,7 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ova funkcija je eksperimentalna i može uticati na performanse."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Zamjenjuje <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Preostalo je otprilike još <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Do potpune napunjenosti preostalo je <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Još <xliff:g id="TIME">%1$s</xliff:g> do potpune napunjenosti"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Imate još <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - imate još <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - imate još <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -327,7 +327,7 @@
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> do potpune napunjenosti"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Nepoznato"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Puni se"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Punjenje"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"punjenje"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Ne puni se"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ne puni se"</string>

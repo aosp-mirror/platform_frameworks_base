@@ -82,12 +82,12 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ভুল পিন বা পাস কী দেওয়ার কারণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে যুক্ত করা যায়নি।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে যোগাযোগ করতে পারবেন না।"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"যুক্ত করা <xliff:g id="DEVICE_NAME">%1$s</xliff:g> প্রত্যাখ্যান করেছে।"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi বন্ধ৷"</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi এর সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
-    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi এ একটি দণ্ড৷"</string>
-    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi এ দুইটি দণ্ড৷"</string>
-    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi এ তিনটি দণ্ড৷"</string>
-    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wifi এ সম্পূর্ণ সিগন্যাল৷"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"ওয়াই ফাই বন্ধ৷"</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"ওয়াই ফাই এর সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"ওয়াই ফাই এ একটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ওয়াই ফাই এ দুইটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"ওয়াই ফাই এ তিনটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"ওয়াই ফাই এ সম্পূর্ণ সিগন্যাল৷"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"সরানো অ্যাপ্লিকেশানগুলি"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"সরানো অ্যাপ্লিকেশানগুলি এবং ব্যবহারকারীগণ"</string>
@@ -171,7 +171,7 @@
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ওয়াই-ফাই থেকে মোবাইলে তৎপর হস্তান্তর"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা ওয়াই ফাই রোম স্ক্যানকে অনুমতি দিন"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ইন-ব্যান্ড রিং করা সক্ষম করুন"</string>
