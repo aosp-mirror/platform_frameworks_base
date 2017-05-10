@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 import android.view.FocusFinder;
@@ -147,6 +148,8 @@ import java.util.function.Predicate;
  */
 @RemoteView
 public class ListView extends AbsListView {
+    static final String TAG = "ListView";
+
     /**
      * Used to indicate a no preference for a position type.
      */
@@ -335,6 +338,12 @@ public class ListView extends AbsListView {
      * @param isSelectable whether the item is selectable
      */
     public void addHeaderView(View v, Object data, boolean isSelectable) {
+        if (v.getParent() != null && v.getParent() != this) {
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "The specified child already has a parent. "
+                           + "You must call removeView() on the child's parent first.");
+            }
+        }
         final FixedViewInfo info = new FixedViewInfo();
         info.view = v;
         info.data = data;
@@ -429,6 +438,13 @@ public class ListView extends AbsListView {
      * @param isSelectable true if the footer view can be selected
      */
     public void addFooterView(View v, Object data, boolean isSelectable) {
+        if (v.getParent() != null && v.getParent() != this) {
+            if (Log.isLoggable(TAG, Log.WARN)) {
+                Log.w(TAG, "The specified child already has a parent. "
+                           + "You must call removeView() on the child's parent first.");
+            }
+        }
+
         final FixedViewInfo info = new FixedViewInfo();
         info.view = v;
         info.data = data;
