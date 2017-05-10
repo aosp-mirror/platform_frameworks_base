@@ -62,6 +62,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private int mAppUid;
     private List<NotificationChannel> mNotificationChannels;
     private NotificationChannel mSingleNotificationChannel;
+    private boolean mIsSingleDefaultChannel;
     private StatusBarNotification mSbn;
     private int mStartingUserImportance;
 
@@ -113,17 +114,23 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mSbn = sbn;
         mPm = pm;
         mAppSettingsClickListener = onAppSettingsClick;
-        boolean isSingleDefaultChannel = false;
         mStartingUserImportance = startingUserImportance;
+        int numTotalChannels = 1;
+        numTotalChannels = iNotificationManager.getNumNotificationChannelsForPackage(
+                pkg, mAppUid, false /* includeDeleted */);
         if (mNotificationChannels.isEmpty()) {
             throw new IllegalArgumentException("bindNotification requires at least one channel");
         } else  {
             if (mNotificationChannels.size() == 1) {
                 mSingleNotificationChannel = mNotificationChannels.get(0);
-                isSingleDefaultChannel = mSingleNotificationChannel.getId()
-                        .equals(NotificationChannel.DEFAULT_CHANNEL_ID);
+                // Special behavior for the Default channel if no other channels have been defined.
+                mIsSingleDefaultChannel =
+                        (mSingleNotificationChannel.getId()
+                                .equals(NotificationChannel.DEFAULT_CHANNEL_ID) &&
+                        numTotalChannels <= 1);
             } else {
                 mSingleNotificationChannel = null;
+                mIsSingleDefaultChannel = false;
             }
         }
 
@@ -148,19 +155,16 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
         ((ImageView) findViewById(R.id.pkgicon)).setImageDrawable(pkgicon);
 
-        int numChannels = 1;
-        numChannels = iNotificationManager.getNumNotificationChannelsForPackage(
-                pkg, mAppUid, false /* includeDeleted */);
-
         String channelsDescText;
         mNumChannelsView = findViewById(R.id.num_channels_desc);
-        if (isSingleDefaultChannel) {
+        if (mIsSingleDefaultChannel) {
             channelsDescText = mContext.getString(R.string.notification_default_channel_desc);
         } else {
             switch (mNotificationChannels.size()) {
                 case 1:
                     channelsDescText = String.format(mContext.getResources().getQuantityString(
-                            R.plurals.notification_num_channels_desc, numChannels), numChannels);
+                            R.plurals.notification_num_channels_desc, numTotalChannels),
+                            numTotalChannels);
                     break;
                 case 2:
                     channelsDescText = mContext.getString(
@@ -185,7 +189,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             // Multiple channels don't use a channel name for the title.
             channelNameText = mContext.getString(R.string.notification_num_channels,
                     mNotificationChannels.size());
-        } else if (isSingleDefaultChannel) {
+        } else if (mIsSingleDefaultChannel) {
             // If this is the default channel, don't use our channel-specific text.
             channelNameText = mContext.getString(R.string.notification_header_default_channel);
         } else {
@@ -241,7 +245,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                     (View view) -> {
                         onSettingsClick.onClick(view, mSingleNotificationChannel, appUidF);
                     });
-            if (numChannels > 1) {
+            if (numTotalChannels > 1) {
                 settingsButton.setText(R.string.notification_all_categories);
             } else {
                 settingsButton.setText(R.string.notification_more_settings);
@@ -327,14 +331,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private void updateSecondaryText() {
         final boolean disabled = mSingleNotificationChannel != null &&
                 getSelectedImportance() == IMPORTANCE_NONE;
-        final boolean isDefaultChannel = mSingleNotificationChannel != null &&
-                mSingleNotificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID);
         if (disabled) {
             mChannelDisabledView.setVisibility(View.VISIBLE);
             mNumChannelsView.setVisibility(View.GONE);
         } else {
             mChannelDisabledView.setVisibility(View.GONE);
-            mNumChannelsView.setVisibility(isDefaultChannel ? View.INVISIBLE : View.VISIBLE);
+            mNumChannelsView.setVisibility(mIsSingleDefaultChannel ? View.INVISIBLE : View.VISIBLE);
         }
     }
 

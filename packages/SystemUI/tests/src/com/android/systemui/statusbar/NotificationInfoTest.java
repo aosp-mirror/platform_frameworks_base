@@ -210,6 +210,30 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBindNotification_DefaultChannelDoesNotUseChannelName() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mDefaultNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null, null,
+                null, null);
+        final TextView textView = (TextView) mNotificationInfo.findViewById(R.id.channel_name);
+        assertEquals(mContext.getString(R.string.notification_header_default_channel),
+                textView.getText());
+    }
+
+    @Test
+    public void testBindNotification_DefaultChannelUsesNameWhenMoreThanOneChannelExists()
+            throws Exception {
+        when(mMockINotificationManager.getNumNotificationChannelsForPackage(
+                eq(TEST_PACKAGE_NAME), anyInt(), anyBoolean())).thenReturn(2);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mDefaultNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null, null,
+                null, null);
+        final TextView textView = (TextView) mNotificationInfo.findViewById(R.id.channel_name);
+        assertEquals(mDefaultNotificationChannel.getName(), textView.getText());
+    }
+
+    @Test
     public void testBindNotification_SetsOnClickListenerForSettings() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
@@ -322,6 +346,21 @@ public class NotificationInfoTest extends SysuiTestCase {
         final TextView numChannelsView =
                 (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
         assertEquals(View.INVISIBLE, numChannelsView.getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_NumChannelsTextDisplaysWhenMoreThanOneChannelExists()
+            throws Exception {
+        when(mMockINotificationManager.getNumNotificationChannelsForPackage(
+                eq(TEST_PACKAGE_NAME), anyInt(), anyBoolean())).thenReturn(2);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mDefaultNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null,
+                null, null, null);
+        final TextView numChannelsView =
+                (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
+        assertEquals(numChannelsView.getVisibility(), View.VISIBLE);
+        assertEquals(getNumChannelsDescString(2), numChannelsView.getText());
     }
 
     @Test
