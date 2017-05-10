@@ -17,6 +17,7 @@
 package com.android.externalstorage;
 
 import android.annotation.Nullable;
+import android.app.usage.StorageStatsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.UriPermission;
@@ -49,10 +50,12 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class ExternalStorageProvider extends FileSystemProvider {
     private static final String TAG = "ExternalStorage";
@@ -79,6 +82,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
     private static class RootInfo {
         public String rootId;
         public String volumeId;
+        public UUID storageUuid;
         public int flags;
         public String title;
         public String docId;
@@ -124,6 +128,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
             final String rootId;
             final String title;
+            final UUID storageUuid;
             if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
                 // We currently only support a single emulated volume mounted at
                 // a time, and it's always considered the primary
@@ -142,17 +147,20 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     title = !TextUtils.isEmpty(deviceName)
                             ? deviceName
                             : getContext().getString(R.string.root_internal_storage);
+                    storageUuid = StorageManager.UUID_DEFAULT;
                 } else {
                     // This should cover all other storage devices, like an SD card
                     // or USB OTG drive plugged in. Using getBestVolumeDescription()
                     // will give us a nice string like "Samsung SD card" or "SanDisk USB drive"
                     final VolumeInfo privateVol = mStorageManager.findPrivateForEmulated(volume);
                     title = mStorageManager.getBestVolumeDescription(privateVol);
+                    storageUuid = StorageManager.convert(privateVol.fsUuid);
                 }
             } else if (volume.getType() == VolumeInfo.TYPE_PUBLIC
                     && volume.getMountUserId() == userId) {
                 rootId = volume.getFsUuid();
                 title = mStorageManager.getBestVolumeDescription(volume);
+                storageUuid = null;
             } else {
                 // Unsupported volume; ignore
                 continue;
@@ -172,6 +180,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
             root.rootId = rootId;
             root.volumeId = volume.id;
+            root.storageUuid = storageUuid;
             root.flags = Root.FLAG_LOCAL_ONLY
                     | Root.FLAG_SUPPORTS_SEARCH
                     | Root.FLAG_SUPPORTS_IS_CHILD;
@@ -385,8 +394,22 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 row.add(Root.COLUMN_FLAGS, root.flags);
                 row.add(Root.COLUMN_TITLE, root.title);
                 row.add(Root.COLUMN_DOCUMENT_ID, root.docId);
-                row.add(Root.COLUMN_AVAILABLE_BYTES,
-                        root.reportAvailableBytes ? root.path.getUsableSpace() : -1);
+
+                long availableBytes = -1;
+                if (root.reportAvailableBytes) {
+                    if (root.storageUuid != null) {
+                        try {
+                            availableBytes = getContext()
+                                    .getSystemService(StorageStatsManager.class)
+                                    .getFreeBytes(root.storageUuid);
+                        } catch (IOException e) {
+                            Log.w(TAG, e);
+                        }
+                    } else {
+                        availableBytes = root.path.getUsableSpace();
+                    }
+                }
+                row.add(Root.COLUMN_AVAILABLE_BYTES, availableBytes);
             }
         }
         return result;
