@@ -340,7 +340,12 @@ public final class DisplayManager {
     private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {
         Display display = mDisplays.get(displayId);
         if (display == null) {
-            display = mGlobal.getCompatibleDisplay(displayId, mContext.getResources());
+            // TODO: We cannot currently provide any override configurations for metrics on displays
+            // other than the display the context is associated with.
+            final Context context = mContext.getDisplay().getDisplayId() == displayId
+                    ? mContext : mContext.getApplicationContext();
+
+            display = mGlobal.getCompatibleDisplay(displayId, context.getResources());
             if (display != null) {
                 mDisplays.put(displayId, display);
             }
