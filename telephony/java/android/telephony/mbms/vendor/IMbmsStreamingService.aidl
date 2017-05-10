@@ -54,7 +54,7 @@ interface IMbmsStreamingService
      * - Streaming status will be sent via the included listener, including an initial
      *   URL-change and State-change pair.
      */
-    StreamingService startStreaming(String appName, int subId, String serviceId,
+    int startStreaming(String appName, int subId, String serviceId,
             IStreamingServiceCallback listener);
 
     /**
