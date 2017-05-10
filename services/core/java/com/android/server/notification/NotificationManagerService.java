@@ -3269,12 +3269,8 @@ public class NotificationManagerService extends SystemService {
         final boolean warningEnabled = Settings.System.getInt(getContext().getContentResolver(),
                 Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS, 0) != 0;
         if (warningEnabled || Build.IS_DEBUGGABLE) {
-            try {
-                Toast toast = Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG);
-                toast.show();
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Unable to toast with text: " + toastText, e);
-            }
+            Toast toast = Toast.makeText(getContext(), mHandler.getLooper(), toastText, Toast.LENGTH_LONG);
+            toast.show();
         }
     }
 
