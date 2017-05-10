@@ -2998,13 +2998,9 @@
 
   <!-- ETWS primary messages -->
   <java-symbol type="string" name="etws_primary_default_message_earthquake" />
-
   <java-symbol type="string" name="etws_primary_default_message_tsunami" />
-
   <java-symbol type="string" name="etws_primary_default_message_earthquake_and_tsunami" />
-
   <java-symbol type="string" name="etws_primary_default_message_test" />
-
   <java-symbol type="string" name="etws_primary_default_message_others" />
 
   <java-symbol type="bool" name="config_quickSettingsSupported" />
@@ -3032,4 +3028,6 @@
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
 
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
+
+  <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
 </resources>
