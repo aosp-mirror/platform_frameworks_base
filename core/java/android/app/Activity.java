@@ -7431,7 +7431,7 @@ public class Activity extends ContextThemeWrapper
         final int offsetX = (anchorBounds != null)
                 ? anchorBounds.left - actualAnchorBounds.left : 0;
         int offsetY = (anchorBounds != null)
-                ? anchorBounds.bottom - actualAnchorBounds.bottom : 0;
+                ?  anchorBounds.top - actualAnchorBounds.top : 0;
 
         final boolean wasShowing;
 
