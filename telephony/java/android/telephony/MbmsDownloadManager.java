@@ -23,7 +23,7 @@ import android.telephony.mbms.DownloadCallback;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.DownloadStatus;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
-import android.telephony.mbms.MbmsInitializationException;
+import android.telephony.mbms.MbmsException;
 import android.telephony.mbms.vendor.IMbmsDownloadService;
 import android.util.Log;
 
@@ -172,7 +172,7 @@ public class MbmsDownloadManager {
      */
     public static MbmsDownloadManager createManager(Context context,
             IMbmsDownloadManagerCallback listener, String downloadAppName)
-            throws MbmsInitializationException{
+            throws MbmsException {
         MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, downloadAppName,
                 SubscriptionManager.getDefaultSubscriptionId());
         mdm.bindAndInitialize();
@@ -190,19 +190,19 @@ public class MbmsDownloadManager {
 
     public static MbmsDownloadManager createManager(Context context,
             IMbmsDownloadManagerCallback listener, String downloadAppName, int subId)
-            throws MbmsInitializationException {
+            throws MbmsException {
         MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, downloadAppName,
                 subId);
         mdm.bindAndInitialize();
         return mdm;
     }
 
-    private void bindAndInitialize() throws MbmsInitializationException {
+    private void bindAndInitialize() throws MbmsException {
         // TODO: bind
         try {
             mService.initialize(mDownloadAppName, mSubId, mCallback);
         } catch (RemoteException e) {
-            throw new MbmsInitializationException(0); // TODO: proper error code
+            throw new MbmsException(0); // TODO: proper error code
         }
     }
 
