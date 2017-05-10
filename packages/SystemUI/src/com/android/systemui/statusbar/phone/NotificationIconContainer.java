@@ -466,6 +466,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean useLinearTransitionAmount;
         public boolean translateContent;
         public int iconColor = StatusBarIconView.NO_COLOR;
+        public boolean noAnimations;
 
         @Override
         public void applyToView(View view) {
@@ -473,7 +474,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 StatusBarIconView icon = (StatusBarIconView) view;
                 boolean animate = false;
                 AnimationProperties animationProperties = null;
-                boolean animationsAllowed = mAnimationsEnabled && !mDisallowNextAnimation;
+                boolean animationsAllowed = mAnimationsEnabled && !mDisallowNextAnimation
+                        && !noAnimations;
                 if (animationsAllowed) {
                     if (justAdded) {
                         super.applyToView(icon);
