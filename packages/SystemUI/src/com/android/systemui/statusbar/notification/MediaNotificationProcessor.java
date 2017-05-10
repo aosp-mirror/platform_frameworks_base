@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 import android.util.LayoutDirection;
@@ -57,9 +58,15 @@ public class MediaNotificationProcessor {
     private boolean mIsLowPriority;
 
     public MediaNotificationProcessor(Context context, Context packageContext) {
+        this(context, packageContext, new ImageGradientColorizer());
+    }
+
+    @VisibleForTesting
+    MediaNotificationProcessor(Context context, Context packageContext,
+            ImageGradientColorizer colorizer) {
         mContext = context;
         mPackageContext = packageContext;
-        mColorizer = new ImageGradientColorizer();
+        mColorizer = colorizer;
     }
 
     /**
@@ -74,6 +81,9 @@ public class MediaNotificationProcessor {
         Bitmap bitmap = null;
         Drawable drawable = null;
         if (largeIcon != null) {
+            // We're transforming the builder, let's make sure all baked in RemoteViews are
+            // rebuilt!
+            builder.setRebuildStyledRemoteViews(true);
             drawable = largeIcon.loadDrawable(mPackageContext);
             int backgroundColor = 0;
             if (notification.isColorizedMedia()) {
