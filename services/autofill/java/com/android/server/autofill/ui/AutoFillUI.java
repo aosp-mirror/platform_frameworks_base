@@ -30,6 +30,7 @@ import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.Toast;
 
@@ -60,8 +61,9 @@ public final class AutoFillUI {
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     public interface AutoFillUiCallback {
-        void authenticate(int requestId, @NonNull IntentSender intent, @Nullable Bundle extras);
-        void fill(int requestId, @NonNull Dataset dataset);
+        void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
+                @Nullable Bundle extras);
+        void fill(int requestId, int datasetIndex, @NonNull Dataset dataset);
         void save();
         void cancelSave();
         void requestShowFillUi(AutofillId id, int width, int height,
@@ -176,6 +178,7 @@ public final class AutoFillUI {
                     hideFillUiUiThread(callback);
                     if (mCallback != null) {
                         mCallback.authenticate(response.getRequestId(),
+                                AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
                                 response.getAuthentication(), response.getClientState());
                     }
                 }
@@ -185,7 +188,8 @@ public final class AutoFillUI {
                     log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
                     hideFillUiUiThread(callback);
                     if (mCallback != null) {
-                        mCallback.fill(response.getRequestId(), dataset);
+                        final int datasetIndex = response.getDatasets().indexOf(dataset);
+                        mCallback.fill(response.getRequestId(), datasetIndex, dataset);
                     }
                 }
 

@@ -241,13 +241,13 @@ final class AutofillManagerServiceImpl {
         return isEnabled();
     }
 
-    void setAuthenticationResultLocked(Bundle data, int sessionId, int uid) {
+    void setAuthenticationResultLocked(Bundle data, int sessionId, int authenticationId, int uid) {
         if (!isEnabled()) {
             return;
         }
         final Session session = mSessions.get(sessionId);
         if (session != null && uid == session.uid) {
-            session.setAuthenticationResultLocked(data);
+            session.setAuthenticationResultLocked(data, authenticationId);
         }
     }
 
