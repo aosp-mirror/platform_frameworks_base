@@ -1357,6 +1357,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (mKeyguardController.isKeyguardLocked()) {
             r.notifyUnknownVisibilityLaunched();
         }
+        final int applicationInfoUid =
+                (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
+        if ((r.userId != app.userId) || (r.appInfo.uid != applicationInfoUid)) {
+            Slog.wtf(TAG,
+                    "User ID for activity changing for " + r
+                            + " appInfo.uid=" + r.appInfo.uid
+                            + " info.ai.uid=" + applicationInfoUid
+                            + " old=" + r.app + " new=" + app);
+        }
 
         r.app = app;
         app.waitingToKill = null;
