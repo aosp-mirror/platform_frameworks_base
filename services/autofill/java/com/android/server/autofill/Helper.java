@@ -26,15 +26,22 @@ public final class Helper {
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
-     * {@code cmd autofill debug [on|off]}.
+     * {@code cmd autofill set log_level debug}.
      */
     public static boolean sDebug = false;
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
-     * {@code cmd autofill verbose [on|off]}.
+     * {@code cmd autofill set log_level verbose}.
      */
     public static boolean sVerbose = false;
+
+    /**
+     * Maximum number of partitions that can be allowed in a session.
+     *
+     * <p>Can be modified using {@code cmd autofill set max_partitions}.
+     */
+    static int sPartitionMaxCount = 10;
 
     private Helper() {
         throw new UnsupportedOperationException("contains static members only");
