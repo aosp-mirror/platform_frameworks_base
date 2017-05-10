@@ -28,7 +28,11 @@ import com.android.ims.internal.IImsFeatureStatusCallback;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Base class for all IMS features that are supported by the framework.
@@ -88,7 +92,8 @@ public abstract class ImsFeature {
     public static final int STATE_READY = 2;
 
     private List<INotifyFeatureRemoved> mRemovedListeners = new ArrayList<>();
-    private IImsFeatureStatusCallback mStatusCallback;
+    private final Set<IImsFeatureStatusCallback> mStatusCallbacks = Collections.newSetFromMap(
+            new WeakHashMap<IImsFeatureStatusCallback, Boolean>());
     private @ImsState int mState = STATE_NOT_AVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
     private Context mContext;
@@ -136,11 +141,29 @@ public abstract class ImsFeature {
         }
     }
 
-    // Not final for testing.
-    public void setImsFeatureStatusCallback(IImsFeatureStatusCallback c) {
-        mStatusCallback = c;
-        // If we have just connected, send queued status.
-        notifyFeatureState(mState);
+    public void addImsFeatureStatusCallback(IImsFeatureStatusCallback c) {
+        if (c == null) {
+            return;
+        }
+        try {
+            // If we have just connected, send queued status.
+            c.notifyImsFeatureStatus(mState);
+            // Add the callback if the callback completes successfully without a RemoteException.
+            synchronized (mStatusCallbacks) {
+                mStatusCallbacks.add(c);
+            }
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Couldn't notify feature state: " + e.getMessage());
+        }
+    }
+
+    public void removeImsFeatureStatusCallback(IImsFeatureStatusCallback c) {
+        if (c == null) {
+            return;
+        }
+        synchronized (mStatusCallbacks) {
+            mStatusCallbacks.remove(c);
+        }
     }
 
     /**
@@ -148,13 +171,18 @@ public abstract class ImsFeature {
      * @param state
      */
     private void notifyFeatureState(@ImsState int state) {
-        if (mStatusCallback != null) {
-            try {
-                Log.i(LOG_TAG, "notifying ImsFeatureState=" + state);
-                mStatusCallback.notifyImsFeatureStatus(state);
-            } catch (RemoteException e) {
-                mStatusCallback = null;
-                Log.w(LOG_TAG, "Couldn't notify feature state: " + e.getMessage());
+        synchronized (mStatusCallbacks) {
+            for (Iterator<IImsFeatureStatusCallback> iter = mStatusCallbacks.iterator();
+                 iter.hasNext(); ) {
+                IImsFeatureStatusCallback callback = iter.next();
+                try {
+                    Log.i(LOG_TAG, "notifying ImsFeatureState=" + state);
+                    callback.notifyImsFeatureStatus(state);
+                } catch (RemoteException e) {
+                    // remove if the callback is no longer alive.
+                    iter.remove();
+                    Log.w(LOG_TAG, "Couldn't notify feature state: " + e.getMessage());
+                }
             }
         }
         sendImsServiceIntent(state);
