@@ -37,7 +37,7 @@ import android.os.Message;
 interface IImsServiceController {
     // ImsService Control
     void createImsFeature(int slotId, int feature, IImsFeatureStatusCallback c);
-    void removeImsFeature(int slotId, int feature);
+    void removeImsFeature(int slotId, int feature, IImsFeatureStatusCallback c);
     // MMTel Feature
     int startSession(int slotId, int featureType, in PendingIntent incomingCallIntent,
             in IImsRegistrationListener listener);
