@@ -123,12 +123,13 @@ final class UserController {
     private final Injector mInjector;
     private final Handler mHandler;
 
-    // Holds the current foreground user's id
+    // Holds the current foreground user's id. Use mLock when updating
     @GuardedBy("mLock")
-    private int mCurrentUserId = UserHandle.USER_SYSTEM;
-    // Holds the target user's id during a user switch
+    private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
+    // Holds the target user's id during a user switch. The value of mCurrentUserId will be updated
+    // once target user goes into the foreground. Use mLock when updating
     @GuardedBy("mLock")
-    private int mTargetUserId = UserHandle.USER_NULL;
+    private volatile int mTargetUserId = UserHandle.USER_NULL;
 
     /**
      * Which users have been started, so are allowed to run code.
@@ -1504,6 +1505,11 @@ final class UserController {
                     + " requires " + INTERACT_ACROSS_USERS;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
+        }
+
+        // Optimization - if there is no pending user switch, return current id
+        if (mTargetUserId == UserHandle.USER_NULL) {
+            return getUserInfo(mCurrentUserId);
         }
         synchronized (mLock) {
             return getCurrentUserLocked();
