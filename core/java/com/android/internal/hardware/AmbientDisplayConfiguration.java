@@ -80,8 +80,8 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean alwaysOnAvailable() {
-        // TODO: introduce config_dozeAlwaysOnAvailable. For now just debuggable builds.
-        return Build.IS_DEBUGGABLE && ambientDisplayAvailable();
+        // Does not work properly yet.
+        return false;
     }
 
     public String ambientDisplayComponent() {
