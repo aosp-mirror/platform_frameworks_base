@@ -7261,7 +7261,7 @@ public class Activity extends ContextThemeWrapper
             }
         } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
             Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
-            getAutofillManager().onAuthenticationResult(resultData);
+            getAutofillManager().onAuthenticationResult(requestCode, resultData);
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {
@@ -7406,10 +7406,11 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    final public void autofillCallbackAuthenticate(IntentSender intent, Intent fillInIntent) {
+    final public void autofillCallbackAuthenticate(int authenticationId, IntentSender intent,
+            Intent fillInIntent) {
         try {
             startIntentSenderForResultInner(intent, AUTO_FILL_AUTH_WHO_PREFIX,
-                    0, fillInIntent, 0, 0, null);
+                    authenticationId, fillInIntent, 0, 0, null);
         } catch (IntentSender.SendIntentException e) {
             Log.e(TAG, "authenticate() failed for intent:" + intent, e);
         }

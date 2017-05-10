@@ -112,7 +112,7 @@ final class ViewState {
         return mAutofilledValue;
     }
 
-    void setAutofilledValue(AutofillValue value) {
+    void setAutofilledValue(@Nullable AutofillValue value) {
         mAutofilledValue = value;
     }
 
@@ -180,15 +180,9 @@ final class ViewState {
         }
         // First try the current response associated with this View.
         if (mResponse != null) {
-            if (mResponse.getDatasets() != null) {
+            if (mResponse.getDatasets() != null || mResponse.getAuthentication() != null) {
                 mListener.onFillReady(mResponse, this.id, mCurrentValue);
             }
-            return;
-        }
-        // Then checks if the session has a response waiting authentication; if so, uses it instead.
-        final FillResponse responseWaitingAuth = mSession.getResponseWaitingAuth();
-        if (responseWaitingAuth != null) {
-            mListener.onFillReady(responseWaitingAuth, this.id, mCurrentValue);
         }
     }
 
