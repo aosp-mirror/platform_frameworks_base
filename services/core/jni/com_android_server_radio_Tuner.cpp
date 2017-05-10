@@ -39,7 +39,6 @@ namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
 using V1_0::BandConfig;
-using V1_0::ITuner;
 using V1_0::MetaData;
 using V1_0::Result;
 using V1_1::ITunerCallback;
@@ -57,7 +56,9 @@ static struct {
 struct TunerContext {
     TunerContext() {}
 
-    sp<ITuner> mHalTuner;
+    HalRevision mHalRev;
+    sp<V1_0::ITuner> mHalTuner;
+    sp<V1_1::ITuner> mHalTuner11;
     sp<TunerCallback> mNativeCallback;
 
 private:
@@ -82,8 +83,8 @@ static jlong nativeInit(JNIEnv *env, jobject obj, jobject clientCallback, jint h
     AutoMutex _l(gContextMutex);
 
     auto ctx = new TunerContext();
-    ctx->mNativeCallback = new TunerCallback(env, obj,
-            clientCallback, static_cast<HalRevision>(halRev));
+    ctx->mHalRev = static_cast<HalRevision>(halRev);
+    ctx->mNativeCallback = new TunerCallback(env, obj, clientCallback, ctx->mHalRev);
 
     static_assert(sizeof(jlong) >= sizeof(ctx), "jlong is smaller than a pointer");
     return reinterpret_cast<jlong>(ctx);
@@ -97,18 +98,29 @@ static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
     delete ctx;
 }
 
-void setHalTuner(JNIEnv *env, jobject obj, sp<ITuner> halTuner) {
+void setHalTuner(JNIEnv *env, jobject obj, sp<V1_0::ITuner> halTuner) {
     ALOGV("setHalTuner(%p)", halTuner.get());
     ALOGE_IF(halTuner == nullptr, "HAL tuner is a nullptr");
 
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(env, obj);
+
     ctx.mHalTuner = halTuner;
+    ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
+    ALOGW_IF(ctx.mHalRev >= HalRevision::V1_1 && ctx.mHalTuner11 == nullptr,
+            "Provided tuner does not implement 1.1 HAL");
 }
 
-sp<ITuner> getHalTuner(jlong nativeContext) {
+sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
     AutoMutex _l(gContextMutex);
     auto tuner = getNativeContext(nativeContext).mHalTuner;
+    LOG_ALWAYS_FATAL_IF(tuner == nullptr, "HAL tuner not set");
+    return tuner;
+}
+
+sp<V1_1::ITuner> getHalTuner11(jlong nativeContext) {
+    AutoMutex _l(gContextMutex);
+    auto tuner = getNativeContext(nativeContext).mHalTuner11;
     LOG_ALWAYS_FATAL_IF(tuner == nullptr, "HAL tuner not set");
     return tuner;
 }
@@ -128,6 +140,7 @@ static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
     auto& ctx = getNativeContext(nativeContext);
     ALOGI("Closing tuner %p", ctx.mHalTuner.get());
     ctx.mNativeCallback->detach();
+    ctx.mHalTuner11 = nullptr;
     ctx.mHalTuner = nullptr;
     ctx.mNativeCallback = nullptr;
 }
@@ -153,7 +166,7 @@ static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeCont
         halResult = result;
         halConfig = config;
     });
-    if (convert::ThrowIfFailed(env, hidlResult)) {
+    if (convert::ThrowIfFailed(env, hidlResult, halResult)) {
         return nullptr;
     }
 
@@ -180,13 +193,44 @@ static void nativeScan(JNIEnv *env, jobject obj, jlong nativeContext,
 
 static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext,
         jint channel, jint subChannel) {
-    // TODO(b/36863239): implement
-    jniThrowException(env, "java/lang/RuntimeException", "not implemented yet");
+    ALOGV("nativeTune(%d, %d)", channel, subChannel);
+    auto halTuner = getHalTuner(nativeContext);
+
+    convert::ThrowIfFailed(env, halTuner->tune(channel, subChannel));
 }
 
 static void nativeCancel(JNIEnv *env, jobject obj, jlong nativeContext) {
-    // TODO(b/36863239): implement
-    jniThrowException(env, "java/lang/RuntimeException", "not implemented yet");
+    ALOGV("nativeCancel()");
+    auto halTuner = getHalTuner(nativeContext);
+
+    convert::ThrowIfFailed(env, halTuner->cancel());
+}
+
+static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativeContext) {
+    ALOGV("nativeGetProgramInformation()");
+    auto halTuner10 = getHalTuner(nativeContext);
+    auto halTuner11 = getHalTuner11(nativeContext);
+
+    V1_1::ProgramInfo halInfo;
+    Result halResult;
+    Return<void> hidlResult;
+    if (halTuner11 != nullptr) {
+        hidlResult = halTuner11->getProgramInformation_1_1([&](Result result,
+                const V1_1::ProgramInfo& info) {
+            halResult = result;
+            halInfo = info;
+        });
+    } else {
+        hidlResult = halTuner10->getProgramInformation([&](Result result,
+                const V1_0::ProgramInfo& info) {
+            halResult = result;
+            halInfo.base = info;
+        });
+    }
+
+    if (convert::ThrowIfFailed(env, hidlResult, halResult)) return nullptr;
+
+    return convert::ProgramInfoFromHal(env, halInfo).release();
 }
 
 static const JNINativeMethod gTunerMethods[] = {
@@ -201,6 +245,8 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeScan", "(JZZ)V", (void*)nativeScan },
     { "nativeTune", "(JII)V", (void*)nativeTune },
     { "nativeCancel", "(J)V", (void*)nativeCancel },
+    { "nativeGetProgramInformation", "(J)Landroid/hardware/radio/RadioManager$ProgramInfo;",
+            (void*)nativeGetProgramInformation },
 };
 
 } // namespace Tuner

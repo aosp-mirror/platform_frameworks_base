@@ -81,7 +81,7 @@ static struct {
 } gjni;
 
 template <typename T>
-bool ThrowIfFailedCommon(JNIEnv *env, const hardware::Return<T> &hidlResult) {
+static bool ThrowIfFailedHidl(JNIEnv *env, const Return<T> &hidlResult) {
     if (hidlResult.isOk()) return false;
 
     jniThrowExceptionFmt(env, "java/lang/RuntimeException",
@@ -89,15 +89,8 @@ bool ThrowIfFailedCommon(JNIEnv *env, const hardware::Return<T> &hidlResult) {
     return true;
 }
 
-bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult) {
-    return ThrowIfFailedCommon(env, hidlResult);
-}
-
-bool ThrowIfFailed(JNIEnv *env, const hardware::Return<V1_0::Result> &hidlResult) {
-    if (ThrowIfFailedCommon(env, hidlResult)) return true;
-
-    Result result = hidlResult;
-    switch (result) {
+static bool ThrowIfFailed(JNIEnv *env, const Result halResult) {
+    switch (halResult) {
         case Result::OK:
             return false;
         case Result::NOT_INITIALIZED:
@@ -116,9 +109,18 @@ bool ThrowIfFailed(JNIEnv *env, const hardware::Return<V1_0::Result> &hidlResult
             return true;
         default:
             jniThrowExceptionFmt(env, "java/lang/RuntimeException",
-                    "Unknown failure, result: %d", result);
+                    "Unknown failure, result: %d", halResult);
             return true;
     }
+}
+
+bool ThrowIfFailed(JNIEnv *env, const Return<void> &hidlResult, Result halResult) {
+    return ThrowIfFailedHidl(env, hidlResult) || ThrowIfFailed(env, halResult);
+}
+
+bool ThrowIfFailed(JNIEnv *env, const Return<Result> &hidlResult) {
+    return ThrowIfFailedHidl(env, hidlResult)
+            || ThrowIfFailed(env, static_cast<Result>(hidlResult));
 }
 
 static Rds RdsForRegion(bool rds, Region region) {

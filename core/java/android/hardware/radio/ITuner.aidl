@@ -29,8 +29,6 @@ interface ITuner {
 
     RadioManager.BandConfig getConfiguration();
 
-    int getProgramInformation(out RadioManager.ProgramInfo[] infoOut);
-
     /**
      * @throws IllegalStateException if tuner was opened without audio
      */
@@ -58,4 +56,6 @@ interface ITuner {
      * @throws IllegalStateException if called out of sequence
      */
     void cancel();
+
+    RadioManager.ProgramInfo getProgramInformation();
 }
