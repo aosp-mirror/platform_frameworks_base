@@ -114,6 +114,7 @@ struct CompileOptions {
   std::string output_path;
   Maybe<std::string> res_dir;
   bool pseudolocalize = false;
+  bool no_png_crunch = false;
   bool legacy_mode = false;
   bool verbose = false;
 };
@@ -663,6 +664,7 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
                           "Generate resources for pseudo-locales "
                           "(en-XA and ar-XB)",
                           &options.pseudolocalize)
+          .OptionalSwitch("--no-crunch", "Disables PNG processing", &options.no_png_crunch)
           .OptionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
                           &options.legacy_mode)
           .OptionalSwitch("-v", "Enables verbose logging", &verbose);
@@ -738,7 +740,8 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
             if (!CompileXml(&context, options, path_data, archive_writer.get(), output_filename)) {
               error = true;
             }
-          } else if (path_data.extension == "png" || path_data.extension == "9.png") {
+          } else if (!options.no_png_crunch &&
+                     (path_data.extension == "png" || path_data.extension == "9.png")) {
             if (!CompilePng(&context, options, path_data, archive_writer.get(), output_filename)) {
               error = true;
             }
