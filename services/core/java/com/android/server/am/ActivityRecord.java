@@ -131,6 +131,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -892,15 +893,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         Entry ent = AttributeCache.instance().get(packageName,
                 realTheme, com.android.internal.R.styleable.Window, userId);
-        final boolean translucent = ent != null && (ent.array.getBoolean(
-                com.android.internal.R.styleable.Window_windowIsTranslucent, false)
-                || (!ent.array.hasValue(
-                        com.android.internal.R.styleable.Window_windowIsTranslucent)
-                        && ent.array.getBoolean(
-                                com.android.internal.R.styleable.Window_windowSwipeToDismiss,
-                                        false)));
-        fullscreen = ent != null && !ent.array.getBoolean(
-                com.android.internal.R.styleable.Window_windowIsFloating, false) && !translucent;
+        fullscreen = ent != null && !ActivityInfo.isTranslucentOrFloating(ent.array);
         noDisplay = ent != null && ent.array.getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
 
@@ -2186,6 +2179,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void setRequestedOrientation(int requestedOrientation) {
+        if (ActivityInfo.isFixedOrientation(requestedOrientation) && !fullscreen
+                && appInfo.targetSdkVersion >= O) {
+            throw new IllegalStateException("Only fullscreen activities can request orientation");
+        }
+
         final int displayId = getDisplayId();
         final Configuration displayConfig =
                 mStackSupervisor.getDisplayOverrideConfiguration(displayId);

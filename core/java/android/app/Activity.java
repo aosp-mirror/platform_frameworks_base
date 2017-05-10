@@ -131,6 +131,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.os.Build.VERSION_CODES.O;
 import static java.lang.Character.MIN_VALUE;
 
 /**
@@ -974,6 +975,18 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
+
+        if (getApplicationInfo().targetSdkVersion >= O && mActivityInfo.isFixedOrientation()) {
+            final TypedArray ta = obtainStyledAttributes(com.android.internal.R.styleable.Window);
+            final boolean isTranslucentOrFloating = ActivityInfo.isTranslucentOrFloating(ta);
+            ta.recycle();
+
+            if (isTranslucentOrFloating) {
+                throw new IllegalStateException(
+                        "Only fullscreen opaque activities can request orientation");
+            }
+        }
+
         if (mLastNonConfigurationInstances != null) {
             mFragments.restoreLoaderNonConfig(mLastNonConfigurationInstances.loaders);
         }
