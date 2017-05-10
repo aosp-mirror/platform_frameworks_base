@@ -158,8 +158,8 @@ public class AccountManagerService
         }
 
         @Override
-        public void onCleanupUser(int userHandle) {
-            mService.onCleanupUser(userHandle);
+        public void onStopUser(int userHandle) {
+            mService.onStopUser(userHandle);
         }
     }
 
@@ -1360,8 +1360,8 @@ public class AccountManagerService
     }
 
 
-    private void onCleanupUser(int userId) {
-        Log.i(TAG, "onCleanupUser " + userId);
+    private void onStopUser(int userId) {
+        Log.i(TAG, "onStopUser " + userId);
         UserAccounts accounts;
         synchronized (mUsers) {
             accounts = mUsers.get(userId);
