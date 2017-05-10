@@ -462,6 +462,15 @@ public class WifiManager {
     public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
 
     /**
+     * Interface IP mode unspecified.
+     *
+     * @see updateInterfaceIpState(String, int)
+     *
+     * @hide
+     */
+    public static final int IFACE_IP_MODE_UNSPECIFIED = -1;
+
+    /**
      * Interface IP mode for configuration error.
      *
      * @see updateInterfaceIpState(String, int)
