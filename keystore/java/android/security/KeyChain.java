@@ -599,9 +599,9 @@ public final class KeyChain {
         private final Context context;
         private final ServiceConnection serviceConnection;
         private final IKeyChainService service;
-        private KeyChainConnection(Context context,
-                                   ServiceConnection serviceConnection,
-                                   IKeyChainService service) {
+        protected KeyChainConnection(Context context,
+                                     ServiceConnection serviceConnection,
+                                     IKeyChainService service) {
             this.context = context;
             this.serviceConnection = serviceConnection;
             this.service = service;
