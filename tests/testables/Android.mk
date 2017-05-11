@@ -31,3 +31,5 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
