@@ -1368,6 +1368,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
         super.setDark(dark, fade, delay);
+        if (!mIsHeadsUp) {
+            // Only fade the showing view of the pulsing notification.
+            fade = false;
+        }
         final NotificationContentView showing = getShowingLayout();
         if (showing != null) {
             showing.setDark(dark, fade, delay);

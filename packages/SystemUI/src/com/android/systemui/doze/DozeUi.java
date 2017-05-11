@@ -95,6 +95,19 @@ public class DozeUi implements DozeMachine.Part {
                 unscheduleTimeTick();
                 break;
         }
+        mHost.setAnimateWakeup(shouldAnimateWakeup(newState));
+    }
+
+    private boolean shouldAnimateWakeup(DozeMachine.State state) {
+        switch (state) {
+            case DOZE_AOD:
+            case DOZE_REQUEST_PULSE:
+            case DOZE_PULSING:
+            case DOZE_PULSE_DONE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private void scheduleTimeTick() {
