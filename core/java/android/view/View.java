@@ -2858,6 +2858,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_SCROLL_INDICATOR_END = 0x2000;
 
+    /**
+     * Flag indicating that when layout is completed we should notify
+     * that the view was entered for autofill purposes. To minimize
+     * showing autofill for views not visible to the user we evaluate
+     * user visibility which cannot be done until the view is laid out.
+     */
+    static final int PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT = 0x4000;
+
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
 
     static final int SCROLL_INDICATORS_NONE = 0x0000;
@@ -6844,8 +6852,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAutofillable() && isAttachedToWindow()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (enter && hasWindowFocus() && isFocused() && isVisibleToUser()) {
-                    afm.notifyViewEntered(this);
+                if (enter && hasWindowFocus() && isFocused()) {
+                    // We have not been laid out yet, hence cannot evaluate
+                    // whether this view is visible to the user, we will do
+                    // the evaluation once layout is complete.
+                    if (!isLaidOut()) {
+                        mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
+                    } else if (isVisibleToUser()) {
+                        afm.notifyViewEntered(this);
+                    }
                 } else if (!hasWindowFocus() || !isFocused()) {
                     afm.notifyViewExited(this);
                 }
@@ -19304,6 +19319,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
         mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
+
+        if ((mPrivateFlags3 & PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT) != 0) {
+            mPrivateFlags3 &= ~PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
+            notifyEnterOrExitForAutoFillIfNeeded(true);
+        }
     }
 
     /**
