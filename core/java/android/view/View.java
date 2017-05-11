@@ -4462,6 +4462,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
 
             Canvas.sCompatibilityRestore = targetSdkVersion < Build.VERSION_CODES.M;
+            Canvas.sCompatibilitySetBitmap = targetSdkVersion < Build.VERSION_CODES.O;
 
             // In M and newer, our widgets can pass a "hint" value in the size
             // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
