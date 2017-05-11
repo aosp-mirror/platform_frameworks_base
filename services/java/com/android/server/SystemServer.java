@@ -189,6 +189,8 @@ public final class SystemServer {
             "com.google.android.clockwork.connectivity.WearConnectivityService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
             "com.google.android.clockwork.display.WearDisplayService";
+    private static final String WEAR_LEFTY_SERVICE_CLASS =
+            "com.google.android.clockwork.lefty.WearLeftyService";
     private static final String WEAR_TIME_SERVICE_CLASS =
             "com.google.android.clockwork.time.WearTimeService";
     private static final String ACCOUNT_SERVICE_CLASS =
@@ -703,6 +705,7 @@ public final class SystemServer {
                 false);
         // TODO(b/36863239): Remove when transitioned from native service.
         boolean enableRadioService = SystemProperties.getBoolean("config.enable_java_radio", false);
+        boolean enableLeftyService = SystemProperties.getBoolean("config.enable_lefty", false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
@@ -1498,6 +1501,12 @@ public final class SystemServer {
                 mSystemServiceManager.startService(WEAR_DISPLAY_SERVICE_CLASS);
                 mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
                 traceEnd();
+
+                if (enableLeftyService) {
+                    traceBeginAndSlog("StartWearLeftyService");
+                    mSystemServiceManager.startService(WEAR_LEFTY_SERVICE_CLASS);
+                    traceEnd();
+                }
             }
         }
 
