@@ -16,11 +16,7 @@
 
 package com.android.server.autofill;
 
-import android.annotation.NonNull;
-import android.app.assist.AssistStructure;
-import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
-import android.view.autofill.AutofillId;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -64,38 +60,5 @@ public final class Helper {
         final StringBuilder builder = new StringBuilder();
         append(builder, bundle);
         return builder.toString();
-    }
-
-    static ViewNode findViewNodeById(@NonNull AssistStructure structure, @NonNull AutofillId id) {
-        final int size = structure.getWindowNodeCount();
-        for (int i = 0; i < size; i++) {
-            final AssistStructure.WindowNode window = structure.getWindowNodeAt(i);
-            final ViewNode root = window.getRootViewNode();
-            if (id.equals(root.getAutofillId())) {
-                return root;
-            }
-            final ViewNode child = findViewNodeById(root, id);
-            if (child != null) {
-                return child;
-            }
-        }
-        return null;
-    }
-
-    static ViewNode findViewNodeById(@NonNull ViewNode parent, @NonNull AutofillId id) {
-        final int childrenSize = parent.getChildCount();
-        if (childrenSize > 0) {
-            for (int i = 0; i < childrenSize; i++) {
-                final ViewNode child = parent.getChildAt(i);
-                if (id.equals(child.getAutofillId())) {
-                    return child;
-                }
-                final ViewNode grandChild = findViewNodeById(child, id);
-                if (grandChild != null && id.equals(grandChild.getAutofillId())) {
-                    return grandChild;
-                }
-            }
-        }
-        return null;
     }
 }
