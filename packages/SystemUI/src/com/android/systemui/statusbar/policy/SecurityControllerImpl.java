@@ -90,6 +90,10 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private ArrayMap<Integer, Boolean> mHasCACerts = new ArrayMap<Integer, Boolean>();
 
     public SecurityControllerImpl(Context context) {
+        this(context, null);
+    }
+
+    public SecurityControllerImpl(Context context, SecurityControllerCallback callback) {
         super(context);
         mContext = context;
         mDevicePolicyManager = (DevicePolicyManager)
@@ -101,6 +105,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager)
                 context.getSystemService(Context.USER_SERVICE);
+
+        addCallback(callback);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
