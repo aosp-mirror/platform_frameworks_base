@@ -330,7 +330,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             } else {
                 snapBack(animView, velocity);
             }
-        } else if ((swipedEnoughToShowMenu() && (!gestureFastEnough || showMenuForSlowOnGoing))
+        } else if (!mSwipeHelper.isFalseGesture(ev)
+                && (swipedEnoughToShowMenu() && (!gestureFastEnough || showMenuForSlowOnGoing))
                 || (gestureTowardsMenu && !mSwipeHelper.isDismissGesture(ev))) {
             // Menu has not been snapped to previously and this is menu revealing gesture
             showMenu(animView, menuSnapTarget, velocity);
