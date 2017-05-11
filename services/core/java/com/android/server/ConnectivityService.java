@@ -91,6 +91,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -3951,7 +3952,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (mUidToNetworkRequestCount) {
                 int networkRequests = mUidToNetworkRequestCount.get(mUid, 0) + 1;
                 if (networkRequests >= MAX_NETWORK_REQUESTS_PER_UID) {
-                    throw new IllegalArgumentException("Too many NetworkRequests filed");
+                    throw new ServiceSpecificException(
+                            ConnectivityManager.Errors.TOO_MANY_REQUESTS);
                 }
                 mUidToNetworkRequestCount.put(mUid, networkRequests);
             }

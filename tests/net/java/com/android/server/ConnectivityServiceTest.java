@@ -44,6 +44,7 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
+import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.IpPrefix;
@@ -3055,7 +3056,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 networkCallbacks.add(networkCallback);
             }
             fail("Registering " + MAX_REQUESTS + " NetworkRequests did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (NetworkCallback networkCallback : networkCallbacks) {
             mCm.unregisterNetworkCallback(networkCallback);
         }
@@ -3068,7 +3069,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 networkCallbacks.add(networkCallback);
             }
             fail("Registering " + MAX_REQUESTS + " NetworkCallbacks did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (NetworkCallback networkCallback : networkCallbacks) {
             mCm.unregisterNetworkCallback(networkCallback);
         }
@@ -3084,7 +3085,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             }
             fail("Registering " + MAX_REQUESTS +
                     " PendingIntent NetworkRequests did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (PendingIntent pendingIntent : pendingIntents) {
             mCm.unregisterNetworkCallback(pendingIntent);
         }
@@ -3099,7 +3100,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             }
             fail("Registering " + MAX_REQUESTS +
                     " PendingIntent NetworkCallbacks did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (PendingIntent pendingIntent : pendingIntents) {
             mCm.unregisterNetworkCallback(pendingIntent);
         }
