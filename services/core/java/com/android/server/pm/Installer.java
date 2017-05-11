@@ -42,22 +42,20 @@ public class Installer extends SystemService {
      * **************************************************************************/
     /** Application should be visible to everyone */
     public static final int DEXOPT_PUBLIC         = 1 << 1;
-    /** Application wants to run in VM safe mode */
-    public static final int DEXOPT_SAFEMODE       = 1 << 2;
     /** Application wants to allow debugging of its code */
-    public static final int DEXOPT_DEBUGGABLE     = 1 << 3;
+    public static final int DEXOPT_DEBUGGABLE     = 1 << 2;
     /** The system boot has finished */
-    public static final int DEXOPT_BOOTCOMPLETE   = 1 << 4;
+    public static final int DEXOPT_BOOTCOMPLETE   = 1 << 3;
     /** Hint that the dexopt type is profile-guided. */
-    public static final int DEXOPT_PROFILE_GUIDED = 1 << 5;
+    public static final int DEXOPT_PROFILE_GUIDED = 1 << 4;
     /** The compilation is for a secondary dex file. */
-    public static final int DEXOPT_SECONDARY_DEX  = 1 << 6;
+    public static final int DEXOPT_SECONDARY_DEX  = 1 << 5;
     /** Ignore the result of dexoptNeeded and force compilation. */
-    public static final int DEXOPT_FORCE          = 1 << 7;
+    public static final int DEXOPT_FORCE          = 1 << 6;
     /** Indicates that the dex file passed to dexopt in on CE storage. */
-    public static final int DEXOPT_STORAGE_CE     = 1 << 8;
+    public static final int DEXOPT_STORAGE_CE     = 1 << 7;
     /** Indicates that the dex file passed to dexopt in on DE storage. */
-    public static final int DEXOPT_STORAGE_DE     = 1 << 9;
+    public static final int DEXOPT_STORAGE_DE     = 1 << 8;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
