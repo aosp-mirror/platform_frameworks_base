@@ -27,11 +27,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.ICancellationSignal;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillRequest;
@@ -43,6 +45,7 @@ import android.service.autofill.SaveRequest;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.HandlerCaller;
 import com.android.server.FgThread;
 
@@ -62,6 +65,9 @@ final class RemoteFillService implements DeathRecipient {
 
     // How long after the last interaction with the service we would unbind
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
+
+    // How long after we make a remote request to a fill service we timeout
+    private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
 
     private final Context mContext;
 
@@ -413,11 +419,17 @@ final class RemoteFillService implements DeathRecipient {
 
     private static final class PendingFillRequest extends PendingRequest {
         private final Object mLock = new Object();
+
         private final WeakReference<RemoteFillService> mWeakService;
         private final FillRequest mRequest;
         private final IFillCallback mCallback;
         private ICancellationSignal mCancellation;
+
+        @GuardedBy("mLock")
         private boolean mCancelled;
+
+        @GuardedBy("mLock")
+        private boolean mCompleted;
 
         public PendingFillRequest(FillRequest request, RemoteFillService service) {
             mRequest = request;
@@ -443,8 +455,15 @@ final class RemoteFillService implements DeathRecipient {
 
                 @Override
                 public void onSuccess(FillResponse response) {
+                    synchronized (mLock) {
+                        if (mCompleted) {
+                            return;
+                        }
+                        mCompleted = true;
+                    }
                     RemoteFillService remoteService = mWeakService.get();
                     if (remoteService != null) {
+                        service.mHandler.getHandler().removeCallbacks(PendingFillRequest.this);
                         remoteService.dispatchOnFillRequestSuccess(PendingFillRequest.this,
                                 getCallingUid(), request.getFlags(), response);
                     }
@@ -452,13 +471,29 @@ final class RemoteFillService implements DeathRecipient {
 
                 @Override
                 public void onFailure(CharSequence message) {
+                    synchronized (mLock) {
+                        if (mCompleted) {
+                            return;
+                        }
+                        mCompleted = true;
+                    }
                     RemoteFillService remoteService = mWeakService.get();
                     if (remoteService != null) {
+                        service.mHandler.getHandler().removeCallbacks(PendingFillRequest.this);
                         remoteService.dispatchOnFillRequestFailure(
                                 PendingFillRequest.this, message);
                     }
                 }
             };
+            service.mHandler.getHandler().postAtTime(() -> {
+                cancel();
+                try {
+                    mCallback.onFailure(null);
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
+            }, PendingFillRequest.this,
+                    SystemClock.uptimeMillis() + TIMEOUT_REMOTE_REQUEST_MILLIS);
         }
 
         @Override
@@ -496,9 +531,14 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     private static final class PendingSaveRequest extends PendingRequest {
+        private final Object mLock = new Object();
+
         private final WeakReference<RemoteFillService> mWeakService;
         private final SaveRequest mRequest;
         private final ISaveCallback mCallback;
+
+        @GuardedBy("mLock")
+        private boolean mCompleted;
 
         public PendingSaveRequest(@NonNull SaveRequest request,
                 @NonNull RemoteFillService service) {
@@ -507,8 +547,16 @@ final class RemoteFillService implements DeathRecipient {
             mCallback = new ISaveCallback.Stub() {
                 @Override
                 public void onSuccess() {
+                    synchronized (mLock) {
+                        if (mCompleted) {
+                            return;
+                        }
+                        mCompleted = true;
+                    }
+                    cancel();
                     RemoteFillService service = mWeakService.get();
                     if (service != null) {
+                        service.mHandler.getHandler().removeCallbacks(PendingSaveRequest.this);
                         service.dispatchOnSaveRequestSuccess(
                                 PendingSaveRequest.this);
                     }
@@ -516,13 +564,29 @@ final class RemoteFillService implements DeathRecipient {
 
                 @Override
                 public void onFailure(CharSequence message) {
+                    synchronized (mLock) {
+                        if (mCompleted) {
+                            return;
+                        }
+                        mCompleted = true;
+                    }
                     RemoteFillService service = mWeakService.get();
                     if (service != null) {
+                        service.mHandler.getHandler().removeCallbacks(PendingSaveRequest.this);
                         service.dispatchOnSaveRequestFailure(
                                 PendingSaveRequest.this, message);
                     }
                 }
             };
+            service.mHandler.getHandler().postAtTime(() -> {
+                cancel();
+                try {
+                    mCallback.onFailure(null);
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
+            }, PendingSaveRequest.this,
+                    SystemClock.uptimeMillis() + TIMEOUT_REMOTE_REQUEST_MILLIS);
         }
 
         @Override
