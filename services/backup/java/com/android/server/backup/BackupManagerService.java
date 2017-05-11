@@ -1399,23 +1399,22 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
         // Remember our ancestral dataset
         mTokenFile = new File(mBaseStateDir, "ancestral");
-        try {
-            RandomAccessFile tf = new RandomAccessFile(mTokenFile, "r");
-            int version = tf.readInt();
+        try (DataInputStream tokenStream = new DataInputStream(new BufferedInputStream(
+                new FileInputStream(mTokenFile)))) {
+            int version = tokenStream.readInt();
             if (version == CURRENT_ANCESTRAL_RECORD_VERSION) {
-                mAncestralToken = tf.readLong();
-                mCurrentToken = tf.readLong();
+                mAncestralToken = tokenStream.readLong();
+                mCurrentToken = tokenStream.readLong();
 
-                int numPackages = tf.readInt();
+                int numPackages = tokenStream.readInt();
                 if (numPackages >= 0) {
-                    mAncestralPackages = new HashSet<String>();
+                    mAncestralPackages = new HashSet<>();
                     for (int i = 0; i < numPackages; i++) {
-                        String pkgName = tf.readUTF();
+                        String pkgName = tokenStream.readUTF();
                         mAncestralPackages.add(pkgName);
                     }
                 }
             }
-            tf.close();
         } catch (FileNotFoundException fnf) {
             // Probably innocuous
             Slog.v(TAG, "No ancestral data");
@@ -1439,12 +1438,13 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         // If there are previous contents, parse them out then start a new
         // file to continue the recordkeeping.
         if (mEverStored.exists()) {
-            RandomAccessFile temp = null;
-            RandomAccessFile in = null;
+            DataOutputStream temp = null;
+            DataInputStream in = null;
 
             try {
-                temp = new RandomAccessFile(tempProcessedFile, "rws");
-                in = new RandomAccessFile(mEverStored, "r");
+                temp = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(
+                        tempProcessedFile)));
+                in = new DataInputStream(new BufferedInputStream(new FileInputStream(mEverStored)));
 
                 // Loop until we hit EOF
                 while (true) {
