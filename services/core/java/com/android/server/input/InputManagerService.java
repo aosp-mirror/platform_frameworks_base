@@ -190,11 +190,13 @@ public class InputManagerService extends IInputManager.Stub
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
     private static native void nativeStart(long ptr);
-    private static native void nativeSetDisplayViewport(long ptr, boolean external,
+    private static native void nativeSetVirtualDisplayViewports(long ptr,
+            DisplayViewport[] viewports);
+    private static native void nativeSetDisplayViewport(long ptr, int viewportType,
             int displayId, int rotation,
             int logicalLeft, int logicalTop, int logicalRight, int logicalBottom,
             int physicalLeft, int physicalTop, int physicalRight, int physicalBottom,
-            int deviceWidth, int deviceHeight);
+            int deviceWidth, int deviceHeight, String uniqueId);
 
     private static native int nativeGetScanCodeState(long ptr,
             int deviceId, int sourceMask, int scanCode);
@@ -291,6 +293,11 @@ public class InputManagerService extends IInputManager.Stub
 
     /** Switch code: Camera lens cover. When set the lens is covered. */
     public static final int SW_CAMERA_LENS_COVER = 0x09;
+
+    // Viewport constants defined in InputReader.h.
+    public static final int VIEWPORT_DEFAULT = 1;
+    public static final int VIEWPORT_EXTERNAL = 2;
+    public static final int VIEWPORT_VIRTUAL = 3;
 
     public static final int SW_LID_BIT = 1 << SW_LID;
     public static final int SW_TABLET_MODE_BIT = 1 << SW_TABLET_MODE;
@@ -409,26 +416,30 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void setDisplayViewportsInternal(DisplayViewport defaultViewport,
-            DisplayViewport externalTouchViewport) {
+            DisplayViewport externalTouchViewport,
+            List<DisplayViewport> virtualTouchViewports) {
         if (defaultViewport.valid) {
-            setDisplayViewport(false, defaultViewport);
+            setDisplayViewport(VIEWPORT_DEFAULT, defaultViewport);
         }
 
         if (externalTouchViewport.valid) {
-            setDisplayViewport(true, externalTouchViewport);
+            setDisplayViewport(VIEWPORT_EXTERNAL, externalTouchViewport);
         } else if (defaultViewport.valid) {
-            setDisplayViewport(true, defaultViewport);
+            setDisplayViewport(VIEWPORT_EXTERNAL, defaultViewport);
         }
+
+        nativeSetVirtualDisplayViewports(mPtr,
+                virtualTouchViewports.toArray(new DisplayViewport[0]));
     }
 
-    private void setDisplayViewport(boolean external, DisplayViewport viewport) {
-        nativeSetDisplayViewport(mPtr, external,
+    private void setDisplayViewport(int viewportType, DisplayViewport viewport) {
+        nativeSetDisplayViewport(mPtr, viewportType,
                 viewport.displayId, viewport.orientation,
                 viewport.logicalFrame.left, viewport.logicalFrame.top,
                 viewport.logicalFrame.right, viewport.logicalFrame.bottom,
                 viewport.physicalFrame.left, viewport.physicalFrame.top,
                 viewport.physicalFrame.right, viewport.physicalFrame.bottom,
-                viewport.deviceWidth, viewport.deviceHeight);
+                viewport.deviceWidth, viewport.deviceHeight, viewport.uniqueId);
     }
 
     /**
@@ -2325,9 +2336,11 @@ public class InputManagerService extends IInputManager.Stub
 
     private final class LocalService extends InputManagerInternal {
         @Override
-        public void setDisplayViewports(
-                DisplayViewport defaultViewport, DisplayViewport externalTouchViewport) {
-            setDisplayViewportsInternal(defaultViewport, externalTouchViewport);
+        public void setDisplayViewports(DisplayViewport defaultViewport,
+                DisplayViewport externalTouchViewport,
+                List<DisplayViewport> virtualTouchViewports) {
+            setDisplayViewportsInternal(defaultViewport, externalTouchViewport,
+                    virtualTouchViewports);
         }
 
         @Override
