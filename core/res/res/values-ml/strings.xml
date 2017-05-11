@@ -1688,7 +1688,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"പലവക"</string>
+    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
+    <skip />
     <string name="importance_from_user" msgid="7318955817386549931">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ഉൾപ്പെട്ടിട്ടുള്ള ആളുകളെ കണക്കിലെടുക്കുമ്പോള്‍ ഇത് പ്രധാനപ്പെട്ടതാണ്‌."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് ഉപയോഗിച്ച് പുതിയൊരു ഉപയോക്താവിനെ സൃഷ്ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്ന ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -1747,6 +1748,9 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"സ്വയമേവ പൂരിപ്പിക്കാനായി സംരക്ഷിക്കുക"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ഉള്ളടക്കങ്ങൾ സ്വയമേവ പൂരിപ്പിക്കാൻ കഴിയില്ല"</string>
+    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
+    <skip />
+    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> എന്നതിനെ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> എന്നിവ&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
