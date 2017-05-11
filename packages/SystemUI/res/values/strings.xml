@@ -1505,19 +1505,26 @@
     <!-- Notification: Menu row: Content description for the snooze icon. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_snooze_description">notification snooze options</string>
 
-    <!-- Notification: Menu row: Snooze options: 15 minute option. [CHAR LIMIT=50]-->
-    <string name="snooze_option_15_min">15 minutes</string>
-    <!-- Notification: Menu row: Snooze options: 30 minute option. [CHAR LIMIT=50]-->
-    <string name="snooze_option_30_min">30 minutes</string>
-    <!-- Notification: Menu row: Snooze options: 1 hour option. [CHAR LIMIT=50]-->
-    <string name="snooze_option_1_hour">1 hour</string>
-    <!-- Notification: Menu row: Snooze options: 1 hour option. [CHAR LIMIT=50]-->
-    <string name="snooze_option_2_hour">2 hours</string>
-    <!-- Notification: Menu row: Snooze undo button label. [CHAR LIMIT=50]-->
+    <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">UNDO</string>
 
-    <!-- Notification: Menu row: Snooze: message indicating how long the notification was snoozed for. [CHAR LIMIT=100]-->
+    <!-- Notification: Snooze panel: message indicating how long the notification was snoozed for. [CHAR LIMIT=100]-->
     <string name="snoozed_for_time">Snoozed for <xliff:g id="time_amount" example="15 minutes">%1$s</xliff:g></string>
+
+    <!-- Notification:Snooze panel: Snooze options for hours -->
+    <plurals name="snoozeHourOptions">
+        <item quantity="one">%d hour</item>
+        <item quantity="two">%d hours</item>
+        <item quantity="few">%d hours</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+
+   <!--  Notification: Snooze panel: Snooze options for minutes -->
+   <plurals name="snoozeMinuteOptions">
+        <item quantity="one">%d minute</item>
+        <item quantity="few">%d minutes</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
 
     <!-- Title of the battery settings detail panel [CHAR LIMIT=20] -->
     <string name="battery_panel_title">Battery usage</string>
