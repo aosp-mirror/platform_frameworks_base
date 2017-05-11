@@ -1,5 +1,13 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.15
+### `aapt2 compile ...`
+- Add `--no-crunch` option to avoid processing PNGs during the compile phase. Note that this
+  shouldn't be used as a performance optimization, as once the PNG is processed, its result is
+  cached for incremental linking. This should only be used if the developer has specially
+  pre-processed the PNG and wants it byte-for-byte identical to the input.
+  NOTE: 9-patches will not be processed correctly with this flag set.
+
 ## Version 2.14
 ### `aapt2 link ...`
 - If an app is building with a minSdkVersion < 26 and a --package-id XX where XX > 7F, aapt2
