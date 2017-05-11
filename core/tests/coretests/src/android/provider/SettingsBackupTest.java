@@ -37,8 +37,6 @@ import org.junit.runner.RunWith;
 
 /** Tests that ensure appropriate settings are backed up. */
 @RunWith(AndroidJUnit4.class)
-// TODO(b/37684646): Can re-enable pre-submit once test is fixed.
-//@Presubmit
 @SmallTest
 public class SettingsBackupTest {
 
@@ -167,6 +165,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.DEVICE_NAME,
+                    Settings.Global.DEVICE_POLICY_CONSTANTS,
                     Settings.Global.DEVICE_PROVISIONED,
                     Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
                     Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
@@ -379,6 +378,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                     Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
                     Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
+                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
                     Settings.Global.WIFI_WATCHDOG_ON,
                     Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     Settings.Global.WINDOW_ANIMATION_SCALE,
