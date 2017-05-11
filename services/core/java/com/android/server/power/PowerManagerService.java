@@ -4607,6 +4607,9 @@ public final class PowerManagerService extends SystemService
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read last_reboot_reason file", e);
         }
+        if (line == null) {
+            return PowerManager.SHUTDOWN_REASON_UNKNOWN;
+        }
         switch (line) {
             case REASON_SHUTDOWN:
                 return PowerManager.SHUTDOWN_REASON_SHUTDOWN;
