@@ -103,7 +103,8 @@ public class TypedArray {
     }
 
     /**
-     * Return the number of indices in the array that actually have data.
+     * Returns the number of indices in the array that actually have data. Attributes with a value
+     * of @empty are included, as this is an explicit indicator.
      *
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
@@ -116,7 +117,8 @@ public class TypedArray {
     }
 
     /**
-     * Returns an index in the array that has data.
+     * Returns an index in the array that has data. Attributes with a value of @empty are included,
+     * as this is an explicit indicator.
      *
      * @param at The index you would like to returned, ranging from 0 to
      *           {@link #getIndexCount()}.
@@ -1017,7 +1019,7 @@ public class TypedArray {
      * @param outValue TypedValue object in which to place the attribute's
      *                 data.
      *
-     * @return {@code true} if the value was retrieved, false otherwise.
+     * @return {@code true} if the value was retrieved and not @empty, {@code false} otherwise.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public boolean getValue(@StyleableRes int index, TypedValue outValue) {
