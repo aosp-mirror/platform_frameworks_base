@@ -767,17 +767,22 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mDockedStackMinimized = minimized;
         } else if (mDockedStackMinimized != minimized) {
             mIsInMinimizeInteraction = true;
-            if (minimized && (mCurrentAnimator == null || !mCurrentAnimator.isRunning())) {
+            if (minimized && (mCurrentAnimator == null || !mCurrentAnimator.isRunning())
+                    && (mDividerPositionBeforeMinimized <= 0 || !mAdjustedForIme)) {
                 mDividerPositionBeforeMinimized = getCurrentPosition();
             }
             mMinimizedSnapAlgorithm = null;
             mDockedStackMinimized = minimized;
             initializeSnapAlgorithm();
-            stopDragging(getCurrentPosition(), minimized ?
-                            mMinimizedSnapAlgorithm.getMiddleTarget() :
-                            mSnapAlgorithm.calculateNonDismissingSnapTarget(
+            stopDragging(minimized
+                            ? mDividerPositionBeforeMinimized
+                            : getCurrentPosition(),
+                    minimized
+                            ? mMinimizedSnapAlgorithm.getMiddleTarget()
+                            : mSnapAlgorithm.calculateNonDismissingSnapTarget(
                                     mDividerPositionBeforeMinimized),
                     animDuration, Interpolators.FAST_OUT_SLOW_IN, 0);
+            setAdjustedForIme(false, animDuration);
         }
         if (!minimized) {
             mBackground.animate().withEndAction(mResetBackgroundRunnable);
@@ -820,6 +825,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .setDuration(animDuration)
                 .start();
         mAdjustedForIme = adjustedForIme;
+        if (mHomeStackResizable && adjustedForIme) {
+            mDividerPositionBeforeMinimized = getCurrentPosition();
+        }
     }
 
     private void resetBackground() {
