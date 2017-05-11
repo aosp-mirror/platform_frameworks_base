@@ -2273,7 +2273,6 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint.
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
