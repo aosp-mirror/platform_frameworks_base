@@ -4419,7 +4419,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStackScroller.setDark(mDozing, animate, mWakeUpTouchLocation);
         mScrimController.setDozing(mDozing);
         mKeyguardIndicationController.setDozing(mDozing);
-        mNotificationPanel.setDark(mDozing);
+        mNotificationPanel.setDark(mDozing, animate);
         updateQsExpansionEnabled();
 
         // Immediately abort the dozing from the doze scrim controller in case of wake-and-unlock
