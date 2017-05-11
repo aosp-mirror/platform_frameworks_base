@@ -743,6 +743,12 @@ public interface WindowManager extends ViewManager {
         public static final int LAST_SYSTEM_WINDOW      = 2999;
 
         /**
+         * @hide
+         * Used internally when there is no suitable type available.
+         */
+        public static final int INVALID_WINDOW_TYPE = -1;
+
+        /**
          * Return true if the window type is an alert window.
          *
          * @param type The window type.
