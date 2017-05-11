@@ -57,6 +57,11 @@
     <!-- The amount to scale each of the status bar icons by. A value of 1 means no scaling. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
 
+    <dimen name="group_overflow_number_size">@*android:dimen/notification_text_size</dimen>
+    <dimen name="group_overflow_number_size_dark">16sp</dimen>
+    <dimen name="group_overflow_number_padding">@*android:dimen/notification_content_margin_end</dimen>
+    <dimen name="group_overflow_number_extra_padding_dark">@*android:dimen/notification_extra_margin_ambient</dimen>
+
     <!-- max height of a notification such that the content can still fade out when closing -->
     <dimen name="max_notification_fadeout_height">100dp</dimen>
 

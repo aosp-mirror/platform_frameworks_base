@@ -4257,15 +4257,17 @@ public class Notification implements Parcelable
          * Construct a RemoteViews for the final notification header only. This will not be
          * colorized.
          *
+         * @param ambient if true, generate the header for the ambient display layout.
          * @hide
          */
-        public RemoteViews makeNotificationHeader() {
+        public RemoteViews makeNotificationHeader(boolean ambient) {
             Boolean colorized = (Boolean) mN.extras.get(EXTRA_COLORIZED);
             mN.extras.putBoolean(EXTRA_COLORIZED, false);
             RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    R.layout.notification_template_header);
+                    ambient ? R.layout.notification_template_ambient_header
+                            : R.layout.notification_template_header);
             resetNotificationHeader(header);
-            bindNotificationHeader(header, false /* ambient */);
+            bindNotificationHeader(header, ambient);
             if (colorized != null) {
                 mN.extras.putBoolean(EXTRA_COLORIZED, colorized);
             } else {
@@ -4407,7 +4409,7 @@ public class Notification implements Parcelable
                 }
             }
 
-            RemoteViews header = makeNotificationHeader();
+            RemoteViews header = makeNotificationHeader(false /* ambient */);
             header.setBoolean(R.id.notification_header, "setAcceptAllTouches", true);
             if (summary != null) {
                 mN.extras.putCharSequence(EXTRA_SUB_TEXT, summary);

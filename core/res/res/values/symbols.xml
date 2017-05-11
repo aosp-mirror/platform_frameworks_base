@@ -2952,6 +2952,8 @@
   <java-symbol type="string" name="time_picker_text_input_mode_description"/>
   <java-symbol type="string" name="time_picker_radial_mode_description"/>
 
+  <java-symbol type="layout" name="notification_template_ambient_header" />
+
   <!-- resolver activity -->
   <java-symbol type="drawable" name="resolver_icon_placeholder" />
 
