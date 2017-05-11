@@ -17,6 +17,8 @@
 package android.widget;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -26,6 +28,7 @@ import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -62,7 +65,7 @@ import java.lang.annotation.RetentionPolicy;
  * <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Toast Notifications</a> developer
  * guide.</p>
  * </div>
- */ 
+ */
 public class Toast {
     static final String TAG = "Toast";
     static final boolean localLOGV = false;
@@ -99,8 +102,16 @@ public class Toast {
      *                 or {@link android.app.Activity} object.
      */
     public Toast(Context context) {
+        this(context, null);
+    }
+
+    /**
+     * Constructs an empty Toast object.  If looper is null, Looper.myLooper() is used.
+     * @hide
+     */
+    public Toast(@NonNull Context context, @Nullable Looper looper) {
         mContext = context;
-        mTN = new TN(context.getPackageName());
+        mTN = new TN(context.getPackageName(), looper);
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
         mTN.mGravity = context.getResources().getInteger(
@@ -170,7 +181,7 @@ public class Toast {
     public int getDuration() {
         return mDuration;
     }
-    
+
     /**
      * Set the margins of the view.
      *
@@ -226,7 +237,7 @@ public class Toast {
     public int getXOffset() {
         return mTN.mX;
     }
-    
+
     /**
      * Return the Y offset in pixels to apply to the gravity's location.
      */
@@ -241,7 +252,7 @@ public class Toast {
     public WindowManager.LayoutParams getWindowParams() {
         return mTN.mParams;
     }
-    
+
     /**
      * Make a standard toast that just contains a text view.
      *
@@ -253,14 +264,24 @@ public class Toast {
      *
      */
     public static Toast makeText(Context context, CharSequence text, @Duration int duration) {
-        Toast result = new Toast(context);
+        return makeText(context, null, text, duration);
+    }
+
+    /**
+     * Make a standard toast to display using the specified looper.
+     * If looper is null, Looper.myLooper() is used.
+     * @hide
+     */
+    public static Toast makeText(@NonNull Context context, @Nullable Looper looper,
+            @NonNull CharSequence text, @Duration int duration) {
+        Toast result = new Toast(context, looper);
 
         LayoutInflater inflate = (LayoutInflater)
                 context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflate.inflate(com.android.internal.R.layout.transient_notification, null);
         TextView tv = (TextView)v.findViewById(com.android.internal.R.id.message);
         tv.setText(text);
-        
+
         result.mNextView = v;
         result.mDuration = duration;
 
@@ -290,7 +311,7 @@ public class Toast {
     public void setText(@StringRes int resId) {
         setText(mContext.getText(resId));
     }
-    
+
     /**
      * Update the text in a Toast that was previously created using one of the makeText() methods.
      * @param s The new text for the Toast.
@@ -327,34 +348,7 @@ public class Toast {
         private static final int SHOW = 0;
         private static final int HIDE = 1;
         private static final int CANCEL = 2;
-        final Handler mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case SHOW: {
-                        IBinder token = (IBinder) msg.obj;
-                        handleShow(token);
-                        break;
-                    }
-                    case HIDE: {
-                        handleHide();
-                        // Don't do this in handleHide() because it is also invoked by handleShow()
-                        mNextView = null;
-                        break;
-                    }
-                    case CANCEL: {
-                        handleHide();
-                        // Don't do this in handleHide() because it is also invoked by handleShow()
-                        mNextView = null;
-                        try {
-                            getService().cancelToast(mPackageName, TN.this);
-                        } catch (RemoteException e) {
-                        }
-                        break;
-                    }
-                }
-            }
-        };
+        final Handler mHandler;
 
         int mGravity;
         int mX, mY;
@@ -373,7 +367,7 @@ public class Toast {
         static final long SHORT_DURATION_TIMEOUT = 4000;
         static final long LONG_DURATION_TIMEOUT = 7000;
 
-        TN(String packageName) {
+        TN(String packageName, @Nullable Looper looper) {
             // XXX This should be changed to use a Dialog, with a Theme.Toast
             // defined that sets up the layout params appropriately.
             final WindowManager.LayoutParams params = mParams;
@@ -388,6 +382,45 @@ public class Toast {
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 
             mPackageName = packageName;
+
+            if (looper == null) {
+                // Use Looper.myLooper() if looper is not specified.
+                looper = Looper.myLooper();
+                if (looper == null) {
+                    throw new RuntimeException(
+                            "Can't toast on a thread that has not called Looper.prepare()");
+                }
+            }
+            mHandler = new Handler(looper, null) {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case SHOW: {
+                            IBinder token = (IBinder) msg.obj;
+                            handleShow(token);
+                            break;
+                        }
+                        case HIDE: {
+                            handleHide();
+                            // Don't do this in handleHide() because it is also invoked by
+                            // handleShow()
+                            mNextView = null;
+                            break;
+                        }
+                        case CANCEL: {
+                            handleHide();
+                            // Don't do this in handleHide() because it is also invoked by
+                            // handleShow()
+                            mNextView = null;
+                            try {
+                                getService().cancelToast(mPackageName, TN.this);
+                            } catch (RemoteException e) {
+                            }
+                            break;
+                        }
+                    }
+                }
+            };
         }
 
         /**
@@ -469,7 +502,7 @@ public class Toast {
             event.setPackageName(mView.getContext().getPackageName());
             mView.dispatchPopulateAccessibilityEvent(event);
             accessibilityManager.sendAccessibilityEvent(event);
-        }        
+        }
 
         public void handleHide() {
             if (localLOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
