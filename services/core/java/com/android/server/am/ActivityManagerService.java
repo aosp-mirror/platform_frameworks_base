@@ -4598,7 +4598,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAppSwitchesAllowedTime = 0;
             }
         }
-        int ret = pir.sendInner(0, fillInIntent, resolvedType, null, null,
+        int ret = pir.sendInner(0, fillInIntent, resolvedType, null, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions, null);
         return ret;
     }
@@ -7504,11 +7504,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int sendIntentSender(IIntentSender target, int code, Intent intent, String resolvedType,
+    public int sendIntentSender(IIntentSender target, IBinder whitelistToken, int code,
+            Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         if (target instanceof PendingIntentRecord) {
             return ((PendingIntentRecord)target).sendWithResult(code, intent, resolvedType,
-                    finishedReceiver, requiredPermission, options);
+                    whitelistToken, finishedReceiver, requiredPermission, options);
         } else {
             if (intent == null) {
                 // Weird case: someone has given us their own custom IIntentSender, and now
@@ -7520,7 +7521,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent = new Intent(Intent.ACTION_MAIN);
             }
             try {
-                target.send(code, intent, resolvedType, null, requiredPermission, options);
+                target.send(code, intent, resolvedType, whitelistToken, null,
+                        requiredPermission, options);
             } catch (RemoteException e) {
             }
             // Platform code can rely on getting a result back when the send is done, but if
@@ -7817,9 +7819,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     // be guarded by permission checking.
     int getUidState(int uid) {
         synchronized (this) {
-            UidRecord uidRec = mActiveUids.get(uid);
-            return uidRec == null ? ActivityManager.PROCESS_STATE_NONEXISTENT : uidRec.curProcState;
+            return getUidStateLocked(uid);
         }
+    }
+
+    int getUidStateLocked(int uid) {
+        UidRecord uidRec = mActiveUids.get(uid);
+        return uidRec == null ? ActivityManager.PROCESS_STATE_NONEXISTENT : uidRec.curProcState;
     }
 
     @Override
@@ -23643,12 +23649,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void setPendingIntentWhitelistDuration(IIntentSender target, long duration) {
+        public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
+                long duration) {
             if (!(target instanceof PendingIntentRecord)) {
                 Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
                 return;
             }
-            ((PendingIntentRecord) target).setWhitelistDurationLocked(duration);
+            ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
         }
 
         @Override
