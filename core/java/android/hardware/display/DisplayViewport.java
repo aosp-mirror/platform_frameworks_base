@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import android.graphics.Rect;
+import android.text.TextUtils;
 
 /**
  * Describes how the pixels of physical display device reflects the content of
@@ -52,6 +53,9 @@ public final class DisplayViewport {
     public int deviceWidth;
     public int deviceHeight;
 
+    // The ID used to uniquely identify this display.
+    public String uniqueId;
+
     public void copyFrom(DisplayViewport viewport) {
         valid = viewport.valid;
         displayId = viewport.displayId;
@@ -60,6 +64,49 @@ public final class DisplayViewport {
         physicalFrame.set(viewport.physicalFrame);
         deviceWidth = viewport.deviceWidth;
         deviceHeight = viewport.deviceHeight;
+        uniqueId = viewport.uniqueId;
+    }
+
+    public DisplayViewport makeCopy() {
+        DisplayViewport dv = new DisplayViewport();
+        dv.copyFrom(this);
+        return dv;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof DisplayViewport)) {
+            return false;
+        }
+
+        DisplayViewport other = (DisplayViewport) o;
+        return valid == other.valid &&
+              displayId == other.displayId &&
+              orientation == other.orientation &&
+              logicalFrame.equals(other.logicalFrame) &&
+              physicalFrame.equals(other.physicalFrame) &&
+              deviceWidth == other.deviceWidth &&
+              deviceHeight == other.deviceHeight &&
+              TextUtils.equals(uniqueId, other.uniqueId);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result += prime * result + (valid ? 1 : 0);
+      result += prime * result + displayId;
+      result += prime * result + orientation;
+      result += prime * result + logicalFrame.hashCode();
+      result += prime * result + physicalFrame.hashCode();
+      result += prime * result + deviceWidth;
+      result += prime * result + deviceHeight;
+      result += prime * result + uniqueId.hashCode();
+      return result;
     }
 
     // For debugging purposes.
@@ -67,6 +114,7 @@ public final class DisplayViewport {
     public String toString() {
         return "DisplayViewport{valid=" + valid
                 + ", displayId=" + displayId
+                + ", uniqueId='" + uniqueId + "'"
                 + ", orientation=" + orientation
                 + ", logicalFrame=" + logicalFrame
                 + ", physicalFrame=" + physicalFrame

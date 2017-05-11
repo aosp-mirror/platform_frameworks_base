@@ -40,6 +40,8 @@ class Vr2dDisplay {
     private int mVirtualDisplayWidth;
     private int mVirtualDisplayDpi;
     private final static int STOP_VIRTUAL_DISPLAY_DELAY_MILLIS = 2000;
+    private final static String UNIQUE_DISPLAY_ID = "277f1a09-b88d-4d1e-8716-796f114d080b";
+    private final static String DISPLAY_NAME = "VR 2D Display";
 
     private final static String DEBUG_ACTION_SET_MODE =
             "com.android.server.vr.Vr2dDisplay.SET_MODE";
@@ -268,9 +270,11 @@ class Vr2dDisplay {
                 return;
             }
 
-            mVirtualDisplay = mDisplayManager.createVirtualDisplay("VR 2D Display",
-                    mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi,
-                    null /* Surface */, 0 /* flags */);
+            int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
+            mVirtualDisplay = mDisplayManager.createVirtualDisplay(null /* projection */,
+                    DISPLAY_NAME, mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi,
+                    null /* surface */, flags, null /* callback */, null /* handler */,
+                    UNIQUE_DISPLAY_ID);
 
             if (mVirtualDisplay != null) {
                 mActivityManagerInternal.setVr2dDisplayId(
