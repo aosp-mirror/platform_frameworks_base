@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
     <string name="email" msgid="4560673117055050403">"மின்னஞ்சல்"</string>
     <string name="dial" msgid="4204975095406423102">"ஃபோன்"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"வரைபடம்"</string>
+    <string name="browse" msgid="6993590095938149861">"உலாவி"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
@@ -1688,7 +1686,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டன</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டது</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"மற்றவை"</string>
+    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
+    <skip />
     <string name="importance_from_user" msgid="7318955817386549931">"இந்த அறிவிப்புகளின் முக்கியத்துவத்தை அமைத்துள்ளீர்கள்."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ஈடுபட்டுள்ளவர்களின் காரணமாக, இது முக்கியமானது."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g>ஐ அனுமதிக்கவா?"</string>
@@ -1747,6 +1746,9 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"தன்னிரப்பி விருப்பங்கள்"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"தன்னிரப்பியில் சேமி"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"உள்ளடக்கத்தைத் தானாக நிரப்ப முடியவில்லை"</string>
+    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
+    <skip />
+    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; இல் சேமிக்கவா?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>ஐ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; இல் சேமிக்கவா?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> மற்றும் <xliff:g id="TYPE_1">%2$s</xliff:g>ஐ &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; இல் சேமிக்கவா?"</string>

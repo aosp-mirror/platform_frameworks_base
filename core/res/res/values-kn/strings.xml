@@ -1688,7 +1688,8 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"ಇತರೆ"</string>
+    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
+    <skip />
     <string name="importance_from_user" msgid="7318955817386549931">"ನೀವು ಈ ಅಧಿಸೂಚನೆಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಿರುವಿರಿ."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ಜನರು ತೊಡಗಿಕೊಂಡಿರುವ ಕಾರಣ ಇದು ಅತ್ಯಂತ ಪ್ರಮುಖವಾಗಿದೆ."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ಮೂಲಕ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ ?"</string>
@@ -1747,6 +1748,9 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ಸ್ವಯಂತುಂಬುವಿಕೆ ಆಯ್ಕೆಗಳು"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"ಸ್ವಯಂ ಭರ್ತಿಗಾಗಿ ಉಳಿಸಿ"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"ವಿಷಯಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಭರ್ತಿಯಾಗಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
+    <skip />
+    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;ನಲ್ಲಿ ಉಳಿಸುವುದೇ?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ಅನ್ನು &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;ನಲ್ಲಿ ಉಳಿಸುವುದೇ?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> ಹಾಗೂ <xliff:g id="TYPE_1">%2$s</xliff:g> ಅನ್ನು &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;ನಲ್ಲಿ ಉಳಿಸುವುದೇ?"</string>

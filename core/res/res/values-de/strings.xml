@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
     <string name="email" msgid="4560673117055050403">"E-Mail"</string>
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"Karten"</string>
+    <string name="browse" msgid="6993590095938149861">"Browser"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Einige Systemfunktionen funktionieren möglicherweise nicht."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Der Speicherplatz reicht nicht für das System aus. Stelle sicher, dass 250 MB freier Speicherplatz vorhanden sind, und starte das Gerät dann neu."</string>
@@ -1687,7 +1685,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ausgewählt</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ausgewählt</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"Verschiedenes"</string>
+    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
+    <skip />
     <string name="importance_from_user" msgid="7318955817386549931">"Du hast die Wichtigkeit dieser Benachrichtigungen festgelegt."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Diese Benachrichtigung ist aufgrund der beteiligten Personen wichtig."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Möchtest du zulassen, dass <xliff:g id="APP">%1$s</xliff:g> einen neuen Nutzer mit <xliff:g id="ACCOUNT">%2$s</xliff:g> erstellt?"</string>
@@ -1746,6 +1745,9 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"AutoFill-Optionen"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Für AutoFill speichern"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Inhalte können nicht automatisch ausgefüllt werden"</string>
+    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
+    <skip />
+    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
     <string name="autofill_save_title" msgid="3345527308992082601">"In &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; speichern?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; speichern?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> und <xliff:g id="TYPE_1">%2$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; speichern?"</string>
