@@ -132,7 +132,7 @@ interface IBatteryStats {
     void noteBleScanStarted(in WorkSource ws);
     void noteBleScanStopped(in WorkSource ws);
     void noteResetBleScan();
-    void noteBleScanResult(in WorkSource ws);
+    void noteBleScanResults(in WorkSource ws, int numNewResults);
 
     HealthStatsParceler takeUidSnapshot(int uid);
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);

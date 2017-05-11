@@ -29,15 +29,15 @@ public class BatteryStatsNoteTest extends TestCase{
     private static final int UID = 10500;
     private static final WorkSource WS = new WorkSource(UID);
 
-    /** Test that BatteryStatsImpl.Uid.noteBluetoothScanResultLocked. */
+    /** Test that BatteryStatsImpl.Uid.noteBluetoothScanResultsLocked. */
     @SmallTest
     public void testNoteBluetoothScanResultLocked() throws Exception {
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClocks());
         bi.updateTimeBasesLocked(true, true, 0, 0);
 
-        bi.noteBluetoothScanResultFromSourceLocked(WS);
-        bi.noteBluetoothScanResultFromSourceLocked(WS);
-        assertEquals(2,
+        bi.noteBluetoothScanResultsFromSourceLocked(WS, 1);
+        bi.noteBluetoothScanResultsFromSourceLocked(WS, 100);
+        assertEquals(101,
                 bi.getUidStats().get(UID).getBluetoothScanResultCounter()
                         .getCountLocked(STATS_SINCE_CHARGED));
     }
