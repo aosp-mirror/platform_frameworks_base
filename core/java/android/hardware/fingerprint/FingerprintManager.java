@@ -938,7 +938,6 @@ public class FingerprintManager {
         private void sendAuthenticatedFailed() {
             if (mAuthenticationCallback != null) {
                 mAuthenticationCallback.onAuthenticationFailed();
-                mAuthenticationCallback = null;
             }
         }
 
