@@ -9222,6 +9222,23 @@ public final class Settings {
         public static final String SHORTCUT_MANAGER_CONSTANTS = "shortcut_manager_constants";
 
         /**
+         * DevicePolicyManager specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * <pre>
+         * das_died_service_reconnect_backoff_sec       (long)
+         * das_died_service_reconnect_backoff_increase  (float)
+         * das_died_service_reconnect_max_backoff_sec   (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * see also com.android.server.devicepolicy.DevicePolicyConstants
+         */
+        public static final String DEVICE_POLICY_CONSTANTS = "device_policy_constants";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
