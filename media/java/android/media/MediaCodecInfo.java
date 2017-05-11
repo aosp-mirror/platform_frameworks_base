@@ -1067,7 +1067,7 @@ public final class MediaCodecInfo {
         private void applyLevelLimits() {
             int[] sampleRates = null;
             Range<Integer> sampleRateRange = null, bitRates = null;
-            int maxChannels = 0;
+            int maxChannels = MAX_INPUT_CHANNEL_COUNT;
             String mime = mParent.getMimeType();
 
             if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
@@ -1160,6 +1160,8 @@ public final class MediaCodecInfo {
             if (info.containsKey("max-channel-count")) {
                 maxInputChannels = Utils.parseIntSafely(
                         info.getString("max-channel-count"), maxInputChannels);
+            } else if ((mParent.mError & ERROR_UNSUPPORTED) != 0) {
+                maxInputChannels = 0;
             }
             if (info.containsKey("bitrate-range")) {
                 bitRates = bitRates.intersect(
