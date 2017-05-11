@@ -90,6 +90,10 @@ public class LocalBluetoothAdapter {
         return mAdapter.disable();
     }
 
+    public String getAddress() {
+        return mAdapter.getAddress();
+    }
+
     void getProfileProxy(Context context,
             BluetoothProfile.ServiceListener listener, int profile) {
         mAdapter.getProfileProxy(context, listener, profile);

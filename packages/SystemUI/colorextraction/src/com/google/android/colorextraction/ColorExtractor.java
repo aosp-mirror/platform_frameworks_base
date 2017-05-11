@@ -95,12 +95,25 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         if (inWallpaperColors == null) {
             return;
         }
-        mExtractionType.extractInto(inWallpaperColors, outGradientColors);
+        boolean success = mExtractionType.extractInto(inWallpaperColors, outGradientColors);
+        if (success) {
+            // Updating dark text support. We're going to verify if the mean luminosity
+            // is greater then a threshold.
+            float hsl[] = new float[3];
+            float meanLuminosity = 0;
+            ColorUtils.colorToHSL(outGradientColors.getMainColor(), hsl);
+            meanLuminosity += hsl[2];
+            ColorUtils.colorToHSL(outGradientColors.getSecondaryColor(), hsl);
+            meanLuminosity += hsl[2];
+            meanLuminosity /= 2;
+            outGradientColors.setSupportsDarkText(meanLuminosity >= DARK_TEXT_LUMINOSITY);
+        }
     }
 
     private void applyFallback(GradientColors outGradientColors) {
         outGradientColors.setMainColor(mMainFallbackColor);
         outGradientColors.setSecondaryColor(mSecondaryFallbackColor);
+        outGradientColors.setSupportsDarkText(false);
     }
 
     public void destroy() {

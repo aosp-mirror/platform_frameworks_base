@@ -8337,6 +8337,17 @@ public final class Settings {
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
         /**
+         * Value to specify if Wi-Fi Wakeup is available.
+         *
+         * Wi-Fi Wakeup will only operate if it's available
+         * and {@link #WIFI_WAKEUP_ENABLED} is true.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String WIFI_WAKEUP_AVAILABLE = "wifi_wakeup_available";
+
+        /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
@@ -9244,6 +9255,23 @@ public final class Settings {
         public static final String SHORTCUT_MANAGER_CONSTANTS = "shortcut_manager_constants";
 
         /**
+         * DevicePolicyManager specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * <pre>
+         * das_died_service_reconnect_backoff_sec       (long)
+         * das_died_service_reconnect_backoff_increase  (float)
+         * das_died_service_reconnect_max_backoff_sec   (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * see also com.android.server.devicepolicy.DevicePolicyConstants
+         */
+        public static final String DEVICE_POLICY_CONSTANTS = "device_policy_constants";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
@@ -9949,7 +9977,8 @@ public final class Settings {
             CALL_AUTO_RETRY,
             DOCK_AUDIO_MEDIA_ENABLED,
             ENCODED_SURROUND_OUTPUT,
-            LOW_POWER_MODE_TRIGGER_LEVEL
+            LOW_POWER_MODE_TRIGGER_LEVEL,
+            BLUETOOTH_ON
         };
 
         private static final ContentProviderHolder sProviderHolder =

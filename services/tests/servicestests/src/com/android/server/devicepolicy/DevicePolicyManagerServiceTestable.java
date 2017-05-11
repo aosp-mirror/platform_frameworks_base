@@ -369,6 +369,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        String settingsGlobalGetString(String name) {
+            return context.settings.settingsGlobalGetString(name);
+        }
+
+        @Override
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
             context.settings.securityLogSetLoggingEnabledProperty(enabled);
         }

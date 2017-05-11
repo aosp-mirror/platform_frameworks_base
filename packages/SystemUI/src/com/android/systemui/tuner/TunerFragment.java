@@ -19,9 +19,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v14.preference.PreferenceFragment;
+import android.support.v7.preference.Preference;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -43,6 +45,11 @@ public class TunerFragment extends PreferenceFragment {
     public static final String SETTING_SEEN_TUNER_WARNING = "seen_tuner_warning";
 
     private static final String WARNING_TAG = "tuner_warning";
+    private static final String[] DEBUG_ONLY = new String[] {
+            "nav_bar",
+            "lockscreen",
+            "picture_in_picture",
+    };
 
     private static final int MENU_REMOVE = Menu.FIRST + 1;
 
@@ -67,6 +74,12 @@ public class TunerFragment extends PreferenceFragment {
         }
         if (!alwaysOnAvailable()) {
             getPreferenceScreen().removePreference(findPreference(KEY_DOZE));
+        }
+        if (!Build.IS_DEBUGGABLE) {
+            for (int i = 0; i < DEBUG_ONLY.length; i++) {
+                Preference preference = findPreference(DEBUG_ONLY[i]);
+                if (preference != null) getPreferenceScreen().removePreference(preference);
+            }
         }
 
         if (Settings.Secure.getInt(getContext().getContentResolver(), SETTING_SEEN_TUNER_WARNING,

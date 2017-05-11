@@ -35,6 +35,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
 import java.lang.IllegalArgumentException;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 /**
@@ -45,11 +46,11 @@ import java.util.Objects;
  */
 public abstract class PlayerBase {
 
-    private final static String TAG = "PlayerBase";
-    private final static boolean DEBUG = false;
+    private static final String TAG = "PlayerBase";
+    private static final boolean DEBUG = false;
     private static IAudioService sService; //lazy initialization, use getService()
     /** Debug app ops */
-    protected static final boolean DEBUG_APP_OPS = Log.isLoggable(TAG + ".AO", Log.DEBUG);
+    private static final boolean DEBUG_APP_OPS = false;
 
     // parameters of the player that affect AppOps
     protected AudioAttributes mAttributes;
@@ -94,19 +95,9 @@ public abstract class PlayerBase {
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
         // initialize mHasAppOpsPlayAudio
-        synchronized (mLock) {
-            updateAppOpsPlayAudio_sync();
-        }
+        updateAppOpsPlayAudio();
         // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
-        mAppOpsCallback = new IAppOpsCallback.Stub() {
-            public void opChanged(int op, int uid, String packageName) {
-                synchronized (mLock) {
-                    if (op == AppOpsManager.OP_PLAY_AUDIO) {
-                        updateAppOpsPlayAudio_sync();
-                    }
-                }
-            }
-        };
+        mAppOpsCallback = new IAppOpsCallbackWrapper(this);
         try {
             mAppOps.startWatchingMode(AppOpsManager.OP_PLAY_AUDIO,
                     ActivityThread.currentPackageName(), mAppOpsCallback);
@@ -114,10 +105,8 @@ public abstract class PlayerBase {
             mHasAppOpsPlayAudio = false;
         }
         try {
-            if (mIPlayer == null) {
-                throw new IllegalStateException("Cannot register a player with a null mIPlayer");
-            }
-            newPiid = getService().trackPlayer(new PlayerIdCard(mImplType, mAttributes, mIPlayer));
+            newPiid = getService().trackPlayer(
+                    new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this)));
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, player will not be tracked", e);
         }
@@ -256,6 +245,12 @@ public abstract class PlayerBase {
             }
         } catch (Exception e) {
             // nothing to do here, the object is supposed to be released anyway
+        }
+    }
+
+    private void updateAppOpsPlayAudio() {
+        synchronized (mLock) {
+            updateAppOpsPlayAudio_sync();
         }
     }
 
@@ -406,47 +401,95 @@ public abstract class PlayerBase {
     abstract void playerStop();
 
     //=====================================================================
+    private static class IAppOpsCallbackWrapper extends IAppOpsCallback.Stub {
+        private final WeakReference<PlayerBase> mWeakPB;
+
+        public IAppOpsCallbackWrapper(PlayerBase pb) {
+            mWeakPB = new WeakReference<PlayerBase>(pb);
+        }
+
+        @Override
+        public void opChanged(int op, int uid, String packageName) {
+            if (op == AppOpsManager.OP_PLAY_AUDIO) {
+                if (DEBUG_APP_OPS) { Log.v(TAG, "opChanged: op=PLAY_AUDIO pack=" + packageName); }
+                final PlayerBase pb = mWeakPB.get();
+                if (pb != null) {
+                    pb.updateAppOpsPlayAudio();
+                }
+            }
+        }
+    }
+
+    //=====================================================================
     /**
-     * Implementation of IPlayer for all subclasses of PlayerBase
+     * Wrapper around an implementation of IPlayer for all subclasses of PlayerBase
+     * that doesn't keep a strong reference on PlayerBase
      */
-    private IPlayer mIPlayer = new IPlayer.Stub() {
+    private static class IPlayerWrapper extends IPlayer.Stub {
+        private final WeakReference<PlayerBase> mWeakPB;
+
+        public IPlayerWrapper(PlayerBase pb) {
+            mWeakPB = new WeakReference<PlayerBase>(pb);
+        }
+
         @Override
         public void start() {
-            playerStart();
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerStart();
+            }
         }
 
         @Override
         public void pause() {
-            playerPause();
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerPause();
+            }
         }
 
         @Override
         public void stop() {
-            playerStop();
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerStop();
+            }
         }
 
         @Override
         public void setVolume(float vol) {
-            baseSetVolume(vol, vol);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.baseSetVolume(vol, vol);
+            }
         }
 
         @Override
         public void setPan(float pan) {
-            baseSetPan(pan);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.baseSetPan(pan);
+            }
         }
 
         @Override
         public void setStartDelayMs(int delayMs) {
-            baseSetStartDelayMs(delayMs);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.baseSetStartDelayMs(delayMs);
+            }
         }
 
         @Override
         public void applyVolumeShaper(
                 @NonNull VolumeShaper.Configuration configuration,
                 @NonNull VolumeShaper.Operation operation) {
-            /* void */ playerApplyVolumeShaper(configuration, operation);
+            final PlayerBase pb = mWeakPB.get();
+            if (pb != null) {
+                pb.playerApplyVolumeShaper(configuration, operation);
+            }
         }
-    };
+    }
 
     //=====================================================================
     /**
@@ -455,8 +498,8 @@ public abstract class PlayerBase {
     public static class PlayerIdCard implements Parcelable {
         public final int mPlayerType;
 
-        public final static int AUDIO_ATTRIBUTES_NONE = 0;
-        public final static int AUDIO_ATTRIBUTES_DEFINED = 1;
+        public static final int AUDIO_ATTRIBUTES_NONE = 0;
+        public static final int AUDIO_ATTRIBUTES_DEFINED = 1;
         public final AudioAttributes mAttributes;
         public final IPlayer mIPlayer;
 

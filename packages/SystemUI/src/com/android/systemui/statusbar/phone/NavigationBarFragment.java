@@ -94,7 +94,7 @@ import java.util.Locale;
  */
 public class NavigationBarFragment extends Fragment implements Callbacks {
 
-    private static final String TAG = "NavigationBar";
+    public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
     private static final String EXTRA_DISABLE_STATE = "disabled_state";
 

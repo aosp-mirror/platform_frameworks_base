@@ -240,7 +240,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     private int getColorForLevel(int percent) {
         // If we are in power save mode, always use the normal color.
         if (mPowerSaveEnabled) {
-            return mColors[mColors.length - 1];
+            return mIconTint;
         }
         int thresh, color = 0;
         for (int i = 0; i < mColors.length; i += 2) {

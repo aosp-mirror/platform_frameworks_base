@@ -91,6 +91,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String REASON_SYSTEM_BOOT = "system boot";
     private static final String REASON_UNEXPECTED = "unexpected crash";
     private static final String REASON_USER_SWITCH = "user switch";
+    private static final String REASON_RESTORE_USER_SETTING = "restore user setting";
 
     private static final int TIMEOUT_BIND_MS = 3000; //Maximum msec to wait for a bind
     //Maximum msec to wait for service restart
@@ -119,6 +120,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_USER_UNLOCKED = 301;
     private static final int MESSAGE_ADD_PROXY_DELAYED = 400;
     private static final int MESSAGE_BIND_PROFILE_SERVICE = 401;
+    private static final int MESSAGE_RESTORE_USER_SETTING = 500;
+
+    private static final int RESTORE_SETTING_TO_ON = 1;
+    private static final int RESTORE_SETTING_TO_OFF = 0;
 
     private static final int MAX_ERROR_RESTART_RETRIES = 6;
 
@@ -318,6 +323,26 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 } else {
                     if (DBG) Slog.e(TAG, "No Bluetooth Adapter address parameter found");
                 }
+            } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
+                final String name = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
+                if (Settings.Global.BLUETOOTH_ON.equals(name)) {
+                    // The Bluetooth On state may be changed during system restore.
+                    final String prevValue = intent.getStringExtra(
+                            Intent.EXTRA_SETTING_PREVIOUS_VALUE);
+                    final String newValue = intent.getStringExtra(
+                            Intent.EXTRA_SETTING_NEW_VALUE);
+
+                    if (DBG) Slog.d(TAG, "ACTION_SETTING_RESTORED with BLUETOOTH_ON, prevValue=" +
+                                    prevValue + ", newValue=" + newValue);
+
+                    if ((newValue != null) && (prevValue != null) && !prevValue.equals(newValue)) {
+                        Message msg = mHandler.obtainMessage(MESSAGE_RESTORE_USER_SETTING,
+                                                             newValue.equals("0") ?
+                                                             RESTORE_SETTING_TO_OFF :
+                                                             RESTORE_SETTING_TO_ON, 0);
+                        mHandler.sendMessage(msg);
+                    }
+                }
             }
         }
     };
@@ -350,12 +375,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         registerForBleScanModeChange();
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_BLUETOOTH_ADDRESS_CHANGED);
+        filter.addAction(Intent.ACTION_SETTING_RESTORED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiver(mReceiver, filter);
-        filter = new IntentFilter(BluetoothAdapter.ACTION_BLUETOOTH_ADDRESS_CHANGED);
-        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        mContext.registerReceiver(mReceiver, filter);
+
         loadStoredNameAndAddress();
         if (isBluetoothPersistedStateOn()) {
             if (DBG) Slog.d(TAG, "Startup: Bluetooth persisted state is ON.");
@@ -1418,6 +1445,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     } else {
                         mEnable = false;
                         handleDisable();
+                    }
+                    break;
+
+                case MESSAGE_RESTORE_USER_SETTING:
+                    try {
+                        if ((msg.arg1 == RESTORE_SETTING_TO_OFF) && mEnable) {
+                            if (DBG) Slog.d(TAG, "Restore Bluetooth state to disabled");
+                            disable(REASON_RESTORE_USER_SETTING, true);
+                        } else if ((msg.arg1 == RESTORE_SETTING_TO_ON) && !mEnable) {
+                            if (DBG) Slog.d(TAG, "Restore Bluetooth state to enabled");
+                            enable(REASON_RESTORE_USER_SETTING);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG,"Unable to change Bluetooth On setting", e);
                     }
                     break;
 

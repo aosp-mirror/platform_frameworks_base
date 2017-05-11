@@ -36,6 +36,8 @@ public interface DozeHost {
     void abortPulsing();
     void extendPulse();
 
+    void setAnimateWakeup(boolean animateWakeup);
+
     interface Callback {
         default void onNotificationHeadsUp() {}
         default void onPowerSaveChanged(boolean active) {}

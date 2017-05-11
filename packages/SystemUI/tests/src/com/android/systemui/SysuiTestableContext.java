@@ -31,6 +31,11 @@ public class SysuiTestableContext extends TestableContext implements SysUiServic
         super(base, check);
     }
 
+    public ArrayMap<Class<?>, Object> getComponents() {
+        if (mComponents == null) mComponents = new ArrayMap<>();
+        return mComponents;
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T getComponent(Class<T> interfaceType) {
         return (T) (mComponents != null ? mComponents.get(interfaceType) : null);

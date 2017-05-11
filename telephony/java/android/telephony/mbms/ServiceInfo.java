@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class ServiceInfo implements Parcelable {
     // arbitrary limit on the number of locale -> name pairs we support
-    final static int MAP_LIMIT = 50;
+    final static int MAP_LIMIT = 1000;
     /**
      * User displayable names listed by language.  Unmodifiable.
      */

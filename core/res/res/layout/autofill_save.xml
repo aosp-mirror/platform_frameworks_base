@@ -59,7 +59,8 @@
                     android:layout_marginLeft="16dp"
                     android:src="@android:drawable/ic_close"
                     android:alpha="0.54"
-                    android:background="?android:attr/selectableItemBackgroundBorderless">
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@android:string/close_button_text">
                 </ImageView>
 
             </LinearLayout>

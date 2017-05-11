@@ -429,7 +429,8 @@ def verify_parcelable(clazz):
         if len(creator) == 0 or len(write) == 0 or len(describe) == 0:
             error(clazz, None, "FW3", "Parcelable requires CREATOR, writeToParcel, and describeContents; missing one")
 
-        if " final class " not in clazz.raw:
+        if ((" final class " not in clazz.raw) and
+            (" final deprecated class " not in clazz.raw)):
             error(clazz, None, "FW8", "Parcelable classes must be final")
 
 

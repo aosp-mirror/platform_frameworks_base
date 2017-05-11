@@ -37,78 +37,79 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
 
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end">
 
-    <com.android.systemui.statusbar.phone.MultiUserSwitch
-        android:id="@+id/multi_user_switch"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/ripple_drawable"
-        android:focusable="true">
-
-        <ImageView
-            android:id="@+id/multi_user_avatar"
-            android:layout_width="@dimen/multi_user_avatar_expanded_size"
-            android:layout_height="@dimen/multi_user_avatar_expanded_size"
-            android:layout_gravity="center"
-            android:scaleType="centerInside"/>
-    </com.android.systemui.statusbar.phone.MultiUserSwitch>
-
-    <com.android.systemui.statusbar.AlphaOptimizedImageView
-        android:id="@android:id/edit"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:clickable="true"
-        android:clipToPadding="false"
-        android:contentDescription="@string/accessibility_quick_settings_edit"
-        android:focusable="true"
-        android:padding="16dp"
-        android:src="@drawable/ic_mode_edit"
-        android:tint="?android:attr/colorForeground"/>
-
-    <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
-        android:id="@+id/settings_button_container"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:clipChildren="false"
-        android:clipToPadding="false">
-
-        <com.android.systemui.statusbar.phone.SettingsButton
-            android:id="@+id/settings_button"
-            style="@android:style/Widget.Material.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <com.android.systemui.statusbar.phone.MultiUserSwitch
+            android:id="@+id/multi_user_switch"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
             android:background="@drawable/ripple_drawable"
-            android:contentDescription="@string/accessibility_quick_settings_settings"
-            android:src="@drawable/ic_settings_16dp"
-            android:tint="?android:attr/colorForeground"/>
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/multi_user_avatar"
+                android:layout_width="@dimen/multi_user_avatar_expanded_size"
+                android:layout_height="@dimen/multi_user_avatar_expanded_size"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"/>
+        </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
         <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:id="@+id/tuner_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="36dp"
-            android:paddingEnd="4dp"
-            android:src="@drawable/tuner"
-            android:tint="?android:attr/textColorTertiary"
-            android:visibility="invisible"/>
+            android:id="@android:id/edit"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:clipToPadding="false"
+            android:contentDescription="@string/accessibility_quick_settings_edit"
+            android:focusable="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_mode_edit"
+            android:tint="?android:attr/colorForeground"/>
 
-    </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
+        <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+            android:id="@+id/settings_button_container"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-    <com.android.systemui.statusbar.phone.ExpandableIndicator
-        android:id="@+id/expand_indicator"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:clipToPadding="false"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/accessibility_quick_settings_expand"
-        android:padding="14dp" />
+            <com.android.systemui.statusbar.phone.SettingsButton
+                android:id="@+id/settings_button"
+                style="@android:style/Widget.Material.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/ripple_drawable"
+                android:contentDescription="@string/accessibility_quick_settings_settings"
+                android:src="@drawable/ic_settings_16dp"
+                android:tint="?android:attr/colorForeground"/>
+
+            <com.android.systemui.statusbar.AlphaOptimizedImageView
+                android:id="@+id/tuner_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="36dp"
+                android:paddingEnd="4dp"
+                android:src="@drawable/tuner"
+                android:tint="?android:attr/textColorTertiary"
+                android:visibility="invisible"/>
+
+        </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
+
+        <com.android.systemui.statusbar.phone.ExpandableIndicator
+            android:id="@+id/expand_indicator"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:clipToPadding="false"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/accessibility_quick_settings_expand"
+            android:padding="14dp" />
+    </LinearLayout>
 
 </com.android.systemui.qs.QSFooter>

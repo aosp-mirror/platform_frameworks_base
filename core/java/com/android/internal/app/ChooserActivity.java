@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -1136,8 +1138,10 @@ public class ChooserActivity extends ResolverActivity {
          * Set to true to reveal all service targets at once.
          */
         public void setShowServiceTargets(boolean show) {
-            mShowServiceTargets = show;
-            notifyDataSetChanged();
+            if (show != mShowServiceTargets) {
+                mShowServiceTargets = show;
+                notifyDataSetChanged();
+            }
         }
 
         private void insertServiceTarget(ChooserTargetInfo chooserTargetInfo) {
@@ -1201,7 +1205,18 @@ public class ChooserActivity extends ResolverActivity {
                 return;
             }
 
-            mAnimator = ObjectAnimator.ofFloat(this, PROPERTY, from, to).setDuration(DURATION);
+            mAnimator = ObjectAnimator.ofFloat(this, PROPERTY, from, to)
+                .setDuration(DURATION);
+            mAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mAdapter.onAnimationStart();
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAdapter.onAnimationEnd();
+                }
+            });
         }
 
         public RowScale setInterpolator(Interpolator interpolator) {
@@ -1234,6 +1249,7 @@ public class ChooserActivity extends ResolverActivity {
         private final int mColumnCount = 4;
         private RowScale[] mServiceTargetScale;
         private final Interpolator mInterpolator;
+        private int mAnimationCount = 0;
 
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
@@ -1300,6 +1316,21 @@ public class ChooserActivity extends ResolverActivity {
                 return mServiceTargetScale[rowPosition - start].get();
             }
             return 1.f;
+        }
+
+        public void onAnimationStart() {
+            final boolean lock = mAnimationCount == 0;
+            mAnimationCount++;
+            if (lock) {
+                mResolverDrawerLayout.setDismissLocked(true);
+            }
+        }
+
+        public void onAnimationEnd() {
+            mAnimationCount--;
+            if (mAnimationCount == 0) {
+                mResolverDrawerLayout.setDismissLocked(false);
+            }
         }
 
         @Override

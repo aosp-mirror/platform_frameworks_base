@@ -173,8 +173,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
         token.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         token.setFillsParent(false);
-        // Can not specify orientation if app doesn't fill parent.
-        assertEquals(SCREEN_ORIENTATION_UNSET, token.getOrientation());
+        // Can specify orientation if app doesn't fill parent. Allowed for SDK <= 25.
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, token.getOrientation());
 
         token.setFillsParent(true);
         token.hidden = true;

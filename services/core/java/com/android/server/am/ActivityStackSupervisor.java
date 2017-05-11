@@ -1357,6 +1357,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (mKeyguardController.isKeyguardLocked()) {
             r.notifyUnknownVisibilityLaunched();
         }
+        final int applicationInfoUid =
+                (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
+        if ((r.userId != app.userId) || (r.appInfo.uid != applicationInfoUid)) {
+            Slog.wtf(TAG,
+                    "User ID for activity changing for " + r
+                            + " appInfo.uid=" + r.appInfo.uid
+                            + " info.ai.uid=" + applicationInfoUid
+                            + " old=" + r.app + " new=" + app);
+        }
 
         r.app = app;
         app.waitingToKill = null;
@@ -4967,10 +4976,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         VirtualActivityDisplay(int width, int height, int density) {
             DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null,
-                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null,
+            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null /* projection */,
+                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null /* surface */,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null, null);
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null /* callback */,
+                    null /* handler */, null /* uniqueId */);
 
             init(mVirtualDisplay.getDisplay());
 

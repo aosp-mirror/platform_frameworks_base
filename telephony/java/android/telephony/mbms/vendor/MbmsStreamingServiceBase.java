@@ -43,9 +43,9 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     }
 
     @Override
-    public StreamingService startStreaming(String appName, int subId,
+    public int startStreaming(String appName, int subId,
             String serviceId, IStreamingServiceCallback listener) throws RemoteException {
-        return null;
+        return 0;
     }
 
     @Override

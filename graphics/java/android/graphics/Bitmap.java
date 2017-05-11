@@ -1869,9 +1869,9 @@ public final class Bitmap implements Parcelable {
     public boolean sameAs(Bitmap other) {
         checkRecycled("Can't call sameAs on a recycled bitmap!");
         noteHardwareBitmapSlowCall();
-        other.noteHardwareBitmapSlowCall();
         if (this == other) return true;
         if (other == null) return false;
+        other.noteHardwareBitmapSlowCall();
         if (other.isRecycled()) {
             throw new IllegalArgumentException("Can't compare to a recycled bitmap!");
         }

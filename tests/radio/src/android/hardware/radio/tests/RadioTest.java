@@ -28,8 +28,10 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -38,6 +40,8 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -52,8 +56,9 @@ public class RadioTest {
 
     public final Context mContext = InstrumentationRegistry.getContext();
 
-    private final int kConfigCallbacktimeoutNs = 10000;
-    private final int kTuneCallbacktimeoutNs = 30000;
+    private final int kConfigCallbackTimeoutMs = 10000;
+    private final int kCancelTimeoutMs = 1000;
+    private final int kTuneCallbackTimeoutMs = 30000;
 
     private RadioManager mRadioManager;
     private RadioTuner mRadioTuner;
@@ -124,8 +129,14 @@ public class RadioTest {
         mRadioTuner = mRadioManager.openTuner(module.getId(),
                 mFmBandConfig, withAudio, mCallback, null);
         assertNotNull(mRadioTuner);
-        verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
+        verify(mCallback, timeout(kConfigCallbackTimeoutMs)).onConfigurationChanged(any());
         resetCallback();
+    }
+
+    private void checkAntenna() {
+        // TODO(b/36863239): enable check when isAntennaConnected is implemented
+        //boolean isConnected = mRadioTuner.isAntennaConnected();
+        //assertTrue(isConnected);
     }
 
     @Test
@@ -149,7 +160,7 @@ public class RadioTest {
         // set
         int ret = mRadioTuner.setConfiguration(mAmBandConfig);
         assertEquals(RadioManager.STATUS_OK, ret);
-        verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
+        verify(mCallback, timeout(kConfigCallbackTimeoutMs)).onConfigurationChanged(any());
 
         // get
         RadioManager.BandConfig[] config = new RadioManager.BandConfig[1];
@@ -183,7 +194,7 @@ public class RadioTest {
         // setting good config should recover
         ret = mRadioTuner.setConfiguration(mAmBandConfig);
         assertEquals(RadioManager.STATUS_OK, ret);
-        verify(mCallback, timeout(kConfigCallbacktimeoutNs).times(1)).onConfigurationChanged(any());
+        verify(mCallback, timeout(kConfigCallbackTimeoutMs)).onConfigurationChanged(any());
     }
 
     @Test
@@ -218,15 +229,79 @@ public class RadioTest {
     @Test
     public void testStep() {
         openTuner();
+        checkAntenna();
 
         int ret = mRadioTuner.step(RadioTuner.DIRECTION_DOWN, true);
         assertEquals(RadioManager.STATUS_OK, ret);
-        verify(mCallback, timeout(kTuneCallbacktimeoutNs).times(1)).onProgramInfoChanged(any());
+        verify(mCallback, timeout(kTuneCallbackTimeoutMs)).onProgramInfoChanged(any());
 
         resetCallback();
 
         ret = mRadioTuner.step(RadioTuner.DIRECTION_UP, false);
         assertEquals(RadioManager.STATUS_OK, ret);
-        verify(mCallback, timeout(kTuneCallbacktimeoutNs).times(1)).onProgramInfoChanged(any());
+        verify(mCallback, timeout(kTuneCallbackTimeoutMs)).onProgramInfoChanged(any());
+    }
+
+    @Test
+    public void testTuneAndGetPI() {
+        openTuner();
+        checkAntenna();
+
+        int channel = mFmBandConfig.getLowerLimit() + mFmBandConfig.getSpacing();
+
+        // test tune
+        int ret = mRadioTuner.tune(channel, 0);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        ArgumentCaptor<RadioManager.ProgramInfo> infoc =
+                ArgumentCaptor.forClass(RadioManager.ProgramInfo.class);
+        verify(mCallback, timeout(kTuneCallbackTimeoutMs))
+                .onProgramInfoChanged(infoc.capture());
+        assertEquals(channel, infoc.getValue().getChannel());
+
+        // test getProgramInformation
+        RadioManager.ProgramInfo[] info = new RadioManager.ProgramInfo[1];
+        ret = mRadioTuner.getProgramInformation(info);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        assertNotNull(info[0]);
+        assertEquals(channel, info[0].getChannel());
+    }
+
+    @Test
+    public void testDummyCancel() {
+        openTuner();
+
+        int ret = mRadioTuner.cancel();
+        assertEquals(RadioManager.STATUS_OK, ret);
+    }
+
+    @Test
+    public void testLateCancel() {
+        openTuner();
+        checkAntenna();
+
+        int ret = mRadioTuner.step(RadioTuner.DIRECTION_DOWN, false);
+        assertEquals(RadioManager.STATUS_OK, ret);
+        verify(mCallback, timeout(kTuneCallbackTimeoutMs)).onProgramInfoChanged(any());
+
+        int cancelRet = mRadioTuner.cancel();
+        assertEquals(RadioManager.STATUS_OK, cancelRet);
+    }
+
+    @Test
+    public void testScanAndCancel() {
+        openTuner();
+        checkAntenna();
+
+        /* There is a possible race condition between scan and cancel commands - the scan may finish
+         * before cancel command is issued. Thus we accept both outcomes in this test.
+         */
+        int scanRet = mRadioTuner.scan(RadioTuner.DIRECTION_DOWN, true);
+        int cancelRet = mRadioTuner.cancel();
+
+        assertEquals(RadioManager.STATUS_OK, scanRet);
+        assertEquals(RadioManager.STATUS_OK, cancelRet);
+
+        verify(mCallback, after(kCancelTimeoutMs).atMost(1)).onError(RadioTuner.ERROR_CANCELLED);
+        verify(mCallback, atMost(1)).onProgramInfoChanged(any());
     }
 }

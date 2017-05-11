@@ -54,11 +54,13 @@ import java.io.PrintWriter;
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
  */
-public class PipTouchHandler implements TunerService.Tunable {
+public class PipTouchHandler {
     private static final String TAG = "PipTouchHandler";
 
-    private static final String TUNER_KEY_MINIMIZE = "pip_minimize";
-    private static final String TUNER_KEY_FLING_DISMISS = "pip_fling_dismiss";
+    // Allow the PIP to be dragged to the edge of the screen to be minimized.
+    private static final boolean ENABLE_MINIMIZE = false;
+    // Allow the PIP to be flung from anywhere on the screen to the bottom to be dismissed.
+    private static final boolean ENABLE_FLING_DISMISS = false;
 
     // These values are used for metrics and should never change
     private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
@@ -112,11 +114,6 @@ public class PipTouchHandler implements TunerService.Tunable {
                     updateDismissFraction();
                 }
             };
-
-    // Allow the PIP to be dragged to the edge of the screen to be minimized.
-    private boolean mEnableMinimize = false;
-    // Allow the PIP to be flung from anywhere on the screen to the bottom to be dismissed.
-    private boolean mEnableFlingToDismiss = false;
 
     // Behaviour states
     private int mMenuState;
@@ -196,10 +193,6 @@ public class PipTouchHandler implements TunerService.Tunable {
         mExpandedShortestEdgeSize = context.getResources().getDimensionPixelSize(
                 R.dimen.pip_expanded_shortest_edge_size);
 
-        // Register any tuner settings changes
-        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_MINIMIZE);
-        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_FLING_DISMISS);
-
         // Register the listener for input consumer touch events
         inputConsumerController.setTouchListener(this::handleTouchEvent);
         inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
@@ -237,18 +230,6 @@ public class PipTouchHandler implements TunerService.Tunable {
             mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),
                     mMovementBounds, true /* allowMenuTimeout */);
             mShowPipMenuOnAnimationEnd = false;
-        }
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        switch (key) {
-            case TUNER_KEY_MINIMIZE:
-                mEnableMinimize = newValue == null ? false : Integer.parseInt(newValue) != 0;
-                break;
-            case TUNER_KEY_FLING_DISMISS:
-                mEnableFlingToDismiss = newValue == null ? false : Integer.parseInt(newValue) != 0;
-                break;
         }
     }
 
@@ -451,7 +432,7 @@ public class PipTouchHandler implements TunerService.Tunable {
      * Sets the minimized state.
      */
     void setMinimizedStateInternal(boolean isMinimized) {
-        if (!mEnableMinimize) {
+        if (!ENABLE_MINIMIZE) {
             return;
         }
         setMinimizedState(isMinimized, false /* fromController */);
@@ -461,7 +442,7 @@ public class PipTouchHandler implements TunerService.Tunable {
      * Sets the minimized state.
      */
     void setMinimizedState(boolean isMinimized, boolean fromController) {
-        if (!mEnableMinimize) {
+        if (!ENABLE_MINIMIZE) {
             return;
         }
         if (mIsMinimized != isMinimized) {
@@ -597,7 +578,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 final PointF lastDelta = touchState.getLastTouchDelta();
                 float left = mTmpBounds.left + lastDelta.x;
                 float top = mTmpBounds.top + lastDelta.y;
-                if (!touchState.allowDraggingOffscreen() || !mEnableMinimize) {
+                if (!touchState.allowDraggingOffscreen() || !ENABLE_MINIMIZE) {
                     left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
                 }
                 if (ENABLE_DISMISS_DRAG_TO_EDGE) {
@@ -645,7 +626,7 @@ public class PipTouchHandler implements TunerService.Tunable {
             final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
             final float velocity = PointF.length(vel.x, vel.y);
             final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
-            final boolean isUpWithinDimiss = mEnableFlingToDismiss
+            final boolean isUpWithinDimiss = ENABLE_FLING_DISMISS
                     && touchState.getLastTouchPosition().y >= mMovementBounds.bottom
                     && mMotionHelper.isGestureToDismissArea(mMotionHelper.getBounds(), vel.x,
                             vel.y, isFling);
@@ -666,7 +647,7 @@ public class PipTouchHandler implements TunerService.Tunable {
             if (touchState.isDragging()) {
                 final boolean isFlingToEdge = isFling && isHorizontal && mMovementWithinMinimize
                         && (mStartedOnLeft ? vel.x < 0 : vel.x > 0);
-                if (mEnableMinimize &&
+                if (ENABLE_MINIMIZE &&
                         !mIsMinimized && (mMotionHelper.shouldMinimizePip() || isFlingToEdge)) {
                     // Pip should be minimized
                     setMinimizedStateInternal(true);
@@ -758,7 +739,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
         pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + ENABLE_DISMISS_DRAG_TO_EDGE);
-        pw.println(innerPrefix + "mEnableMinimize=" + mEnableMinimize);
+        pw.println(innerPrefix + "mEnableMinimize=" + ENABLE_MINIMIZE);
         mSnapAlgorithm.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);
         mMotionHelper.dump(pw, innerPrefix);

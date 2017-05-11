@@ -131,6 +131,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.os.Build.VERSION_CODES.O;
 import static java.lang.Character.MIN_VALUE;
 
 /**
@@ -974,6 +975,18 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
+
+        if (getApplicationInfo().targetSdkVersion >= O && mActivityInfo.isFixedOrientation()) {
+            final TypedArray ta = obtainStyledAttributes(com.android.internal.R.styleable.Window);
+            final boolean isTranslucentOrFloating = ActivityInfo.isTranslucentOrFloating(ta);
+            ta.recycle();
+
+            if (isTranslucentOrFloating) {
+                throw new IllegalStateException(
+                        "Only fullscreen opaque activities can request orientation");
+            }
+        }
+
         if (mLastNonConfigurationInstances != null) {
             mFragments.restoreLoaderNonConfig(mLastNonConfigurationInstances.loaders);
         }
@@ -7426,14 +7439,6 @@ public class Activity extends ContextThemeWrapper
     @Override
     final public boolean autofillCallbackRequestShowFillUi(@NonNull View anchor, int width,
             int height, @Nullable Rect anchorBounds, IAutofillWindowPresenter presenter) {
-        final Rect actualAnchorBounds = new Rect();
-        anchor.getBoundsOnScreen(actualAnchorBounds);
-
-        final int offsetX = (anchorBounds != null)
-                ? anchorBounds.left - actualAnchorBounds.left : 0;
-        int offsetY = (anchorBounds != null)
-                ? anchorBounds.bottom - actualAnchorBounds.bottom : 0;
-
         final boolean wasShowing;
 
         if (mAutofillPopupWindow == null) {
@@ -7442,8 +7447,7 @@ public class Activity extends ContextThemeWrapper
         } else {
             wasShowing = mAutofillPopupWindow.isShowing();
         }
-        mAutofillPopupWindow.update(anchor, offsetX, offsetY, width, height, anchorBounds,
-                actualAnchorBounds);
+        mAutofillPopupWindow.update(anchor, 0, 0, width, height, anchorBounds);
 
         return !wasShowing && mAutofillPopupWindow.isShowing();
     }

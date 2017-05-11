@@ -19,11 +19,13 @@ package android.view.autofill;
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.transition.Transition;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.PopupWindow;
@@ -84,18 +86,93 @@ public class AutofillPopupWindow extends PopupWindow {
      * The effective {@code update} method that should be called by its clients.
      */
     public void update(View anchor, int offsetX, int offsetY, int width, int height,
-            Rect anchorBounds, Rect actualAnchorBounds) {
+            Rect virtualBounds) {
+        // If we are showing the popup for a virtual view we use a fake view which
+        // delegates to the anchor but present itself with the same bounds as the
+        // virtual view. This ensures that the location logic in popup works
+        // symmetrically when the dropdown is below and above the anchor.
+        final View actualAnchor;
+        if (virtualBounds != null) {
+            actualAnchor = new View(anchor.getContext()) {
+                @Override
+                public void getLocationOnScreen(int[] location) {
+                    location[0] = virtualBounds.left;
+                    location[1] = virtualBounds.top;
+                }
+
+                @Override
+                public int getAccessibilityViewId() {
+                    return anchor.getAccessibilityViewId();
+                }
+
+                @Override
+                public ViewTreeObserver getViewTreeObserver() {
+                    return anchor.getViewTreeObserver();
+                }
+
+                @Override
+                public IBinder getApplicationWindowToken() {
+                    return anchor.getApplicationWindowToken();
+                }
+
+                @Override
+                public View getRootView() {
+                    return anchor.getRootView();
+                }
+
+                @Override
+                public int getLayoutDirection() {
+                    return anchor.getLayoutDirection();
+                }
+
+                @Override
+                public void getWindowDisplayFrame(Rect outRect) {
+                    anchor.getWindowDisplayFrame(outRect);
+                }
+
+                @Override
+                public void addOnAttachStateChangeListener(
+                        OnAttachStateChangeListener listener) {
+                    anchor.addOnAttachStateChangeListener(listener);
+                }
+
+                @Override
+                public void removeOnAttachStateChangeListener(
+                        OnAttachStateChangeListener listener) {
+                    anchor.removeOnAttachStateChangeListener(listener);
+                }
+
+                @Override
+                public boolean isAttachedToWindow() {
+                    return anchor.isAttachedToWindow();
+                }
+
+                @Override
+                public boolean requestRectangleOnScreen(Rect rectangle, boolean immediate) {
+                    return anchor.requestRectangleOnScreen(rectangle, immediate);
+                }
+
+                @Override
+                public IBinder getWindowToken() {
+                    return anchor.getWindowToken();
+                }
+            };
+
+            actualAnchor.setLeftTopRightBottom(
+                    virtualBounds.left, virtualBounds.top,
+                    virtualBounds.right, virtualBounds.bottom);
+            actualAnchor.setScrollX(anchor.getScrollX());
+            actualAnchor.setScrollY(anchor.getScrollY());
+        } else {
+            actualAnchor = anchor;
+        }
+
         if (!isShowing()) {
             setWidth(width);
             setHeight(height);
-            showAsDropDown(anchor, offsetX, offsetY);
+            showAsDropDown(actualAnchor, offsetX, offsetY);
         } else {
-            update(anchor, offsetX, offsetY, width, height);
-        }
-
-        if (anchorBounds != null && mWindowLayoutParams.y > anchorBounds.bottom) {
-            offsetY = anchorBounds.bottom - actualAnchorBounds.bottom;
-            update(anchor, offsetX, offsetY, width, height);
+            update(actualAnchor, offsetX, offsetY, width, height);
         }
     }
 
