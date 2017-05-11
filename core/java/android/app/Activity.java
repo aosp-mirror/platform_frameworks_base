@@ -7439,14 +7439,6 @@ public class Activity extends ContextThemeWrapper
     @Override
     final public boolean autofillCallbackRequestShowFillUi(@NonNull View anchor, int width,
             int height, @Nullable Rect anchorBounds, IAutofillWindowPresenter presenter) {
-        final Rect actualAnchorBounds = new Rect();
-        anchor.getBoundsOnScreen(actualAnchorBounds);
-
-        final int offsetX = (anchorBounds != null)
-                ? anchorBounds.left - actualAnchorBounds.left : 0;
-        int offsetY = (anchorBounds != null)
-                ?  anchorBounds.top - actualAnchorBounds.top : 0;
-
         final boolean wasShowing;
 
         if (mAutofillPopupWindow == null) {
@@ -7455,8 +7447,7 @@ public class Activity extends ContextThemeWrapper
         } else {
             wasShowing = mAutofillPopupWindow.isShowing();
         }
-        mAutofillPopupWindow.update(anchor, offsetX, offsetY, width, height, anchorBounds,
-                actualAnchorBounds);
+        mAutofillPopupWindow.update(anchor, 0, 0, width, height, anchorBounds);
 
         return !wasShowing && mAutofillPopupWindow.isShowing();
     }
