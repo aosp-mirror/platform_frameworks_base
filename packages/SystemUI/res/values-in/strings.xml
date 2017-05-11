@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Telusuri"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Geser ke atas untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Geser ke kiri untuk <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Anda tidak akan diganggu oleh suara dan getaran, kecuali dari alarm, pengingat, acara, dan penelepon tertentu."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Anda tidak akan terganggu oleh suara dan getaran, kecuali dari alarm, pengingat, acara, dan penelepon yang Anda tentukan. Anda akan tetap mendengar apa pun yang telah dipilih untuk diputar, termasuk musik, video, dan game."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Anda tidak akan terganggu oleh suara dan getaran, kecuali dari alarm. Anda akan tetap mendengar apa pun yang telah dipilih untuk diputar, termasuk musik, video, dan game."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Sesuaikan"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"SEMUA suara dan getaran, termasuk dari alarm, musik, video, dan game akan diblokir. Anda tetap dapat melakukan panggilan telepon."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"SEMUA suara dan getaran, termasuk dari alarm, musik, video, dan game akan diblokir."</string>
@@ -472,7 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Tidak"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Siapkan"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Akhiri sekarang"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Nonaktifkan sekarang"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Luaskan"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ciutkan"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Layar dipasangi pin"</string>
@@ -643,7 +644,7 @@
     <item msgid="1545641631806817203">"Papan klip"</item>
     <item msgid="5742013440802239414">"Kode tombol"</item>
     <item msgid="8802889973626281575">"Pengalih keyboard"</item>
-    <item msgid="8175437057325747277">"Tidak Ada"</item>
+    <item msgid="8175437057325747277">"Tidak ada"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Biasa"</item>
@@ -733,7 +734,7 @@
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Pintasan kanan"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Pintasan kiri juga membuka kunci"</string>
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Pintasan kanan juga membuka kunci"</string>
-    <string name="lockscreen_none" msgid="4783896034844841821">"Tidak Ada"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Tidak ada"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"Luncurkan <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Aplikasi lainnya"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Lingkaran"</string>
