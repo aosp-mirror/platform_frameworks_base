@@ -8315,6 +8315,17 @@ public final class Settings {
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
         /**
+         * Value to specify if Wi-Fi Wakeup is available.
+         *
+         * Wi-Fi Wakeup will only operate if it's available
+         * and {@link #WIFI_WAKEUP_ENABLED} is true.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String WIFI_WAKEUP_AVAILABLE = "wifi_wakeup_available";
+
+        /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
