@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"ရှာဖွေရန်"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> အတွက် အပေါ်ကို ပွတ်ဆွဲပါ"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> အတွက် ဖယ်ဘက်ကို ပွတ်ဆွဲပါ"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"နှိုးစက်များ၊ အသိပေးချက်များ၊ ဖြစ်ရပ်များ နှင့် သင်သတ်မှတ်ထားသည့် ခေါ်ဆိုသူများမှ လွဲ၍ အသံများနှင့် တုန်ခါမှုများသည် သင့်အား နှောင့်ယှက်မည် မဟုတ်ပါ။"</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"နှိုးစက်သံ၊ သတိပေးချက်အသံများ၊ ပွဲစဉ်သတိပေးသံများနှင့် သင်ခွင့်ပြုထားသူများထံမှ ဖုန်းခေါ်မှုများမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"နှိုးစက်သံမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"စိတ်ကြိုက် ပြုလုပ်ရန်"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ဤအရာမှ နှိုးစက်၊ ဂီတ၊ ဗွီဒီယိုများနှင့် ဂိမ်းများ အပါအဝင်၊ အသံအားလုံးနှင့် တုန်ခါမှုများအား တားဆီးပေးသည်။ ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်နိုင်ဆဲဖြစ်မည်။"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"နှိုးစက်၊ ဂီတ၊ ဗွီဒီယိုများနှင့် ဂိမ်းများ အပါအဝင်၊ အသံအားလုံးနှင့် တုန်ခါမှုများအား ဤအရာမှ တားဆီးပေး၏။"</string>
@@ -472,7 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"မလိုအပ်ပါ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"သတ်မှတ်ရန်"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>။ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"ယခု အဆုံးသတ်ရန်"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"ပိတ်ရန်"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"တိုးချဲ့ရန်"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ခေါက်သိမ်းရန်..."</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
