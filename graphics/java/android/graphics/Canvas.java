@@ -49,6 +49,8 @@ import javax.microedition.khronos.opengles.GL;
 public class Canvas extends BaseCanvas {
     /** @hide */
     public static boolean sCompatibilityRestore = false;
+    /** @hide */
+    public static boolean sCompatibilitySetBitmap = false;
 
     /** @hide */
     public long getNativeCanvasWrapper() {
@@ -172,6 +174,11 @@ public class Canvas extends BaseCanvas {
             throw new RuntimeException("Can't set a bitmap device on a HW accelerated canvas");
         }
 
+        Matrix preservedMatrix = null;
+        if (bitmap != null && sCompatibilitySetBitmap) {
+            preservedMatrix = getMatrix();
+        }
+
         if (bitmap == null) {
             nSetBitmap(mNativeCanvasWrapper, null);
             mDensity = Bitmap.DENSITY_NONE;
@@ -183,6 +190,10 @@ public class Canvas extends BaseCanvas {
 
             nSetBitmap(mNativeCanvasWrapper, bitmap);
             mDensity = bitmap.mDensity;
+        }
+
+        if (preservedMatrix != null) {
+            setMatrix(preservedMatrix);
         }
 
         mBitmap = bitmap;
