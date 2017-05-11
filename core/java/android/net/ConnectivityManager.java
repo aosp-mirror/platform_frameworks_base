@@ -40,6 +40,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
@@ -2695,6 +2696,28 @@ public class ConnectivityManager {
         }
     }
 
+    /**
+     * Constant error codes used by ConnectivityService to communicate about failures and errors
+     * across a Binder boundary.
+     * @hide
+     */
+    public interface Errors {
+        static int TOO_MANY_REQUESTS = 1;
+    }
+
+    /** @hide */
+    public static class TooManyRequestsException extends RuntimeException {}
+
+    private static RuntimeException convertServiceException(ServiceSpecificException e) {
+        switch (e.errorCode) {
+            case Errors.TOO_MANY_REQUESTS:
+                return new TooManyRequestsException();
+            default:
+                Log.w(TAG, "Unknown service error code " + e.errorCode);
+                return new RuntimeException(e);
+        }
+    }
+
     private static final int BASE = Protocol.BASE_CONNECTIVITY_MANAGER;
     /** @hide */
     public static final int CALLBACK_PRECHECK            = BASE + 1;
@@ -2886,6 +2909,8 @@ public class ConnectivityManager {
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw convertServiceException(e);
         }
         return request;
     }
@@ -3127,6 +3152,8 @@ public class ConnectivityManager {
             mService.pendingRequestForNetwork(request.networkCapabilities, operation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw convertServiceException(e);
         }
     }
 
@@ -3226,6 +3253,8 @@ public class ConnectivityManager {
             mService.pendingListenForNetwork(request.networkCapabilities, operation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw convertServiceException(e);
         }
     }
 
