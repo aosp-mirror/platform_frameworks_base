@@ -198,7 +198,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private ShortcutInfo deleteShortcutInner(@NonNull String id) {
         final ShortcutInfo shortcut = mShortcuts.remove(id);
         if (shortcut != null) {
-            mShortcutUser.mService.removeIcon(getPackageUserId(), shortcut);
+            mShortcutUser.mService.removeIconLocked(shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
                     | ShortcutInfo.FLAG_MANIFEST);
         }
@@ -211,7 +211,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         deleteShortcutInner(newShortcut.getId());
 
         // Extract Icon and update the icon res ID and the bitmap path.
-        s.saveIconAndFixUpShortcut(getPackageUserId(), newShortcut);
+        s.saveIconAndFixUpShortcutLocked(newShortcut);
         s.fixUpShortcutResourceNamesAndValues(newShortcut);
         mShortcuts.put(newShortcut.getId(), newShortcut);
     }
@@ -1263,12 +1263,20 @@ class ShortcutPackage extends ShortcutPackageItem {
         out.endTag(null, TAG_ROOT);
     }
 
-    private static void saveShortcut(XmlSerializer out, ShortcutInfo si, boolean forBackup)
+    private void saveShortcut(XmlSerializer out, ShortcutInfo si, boolean forBackup)
             throws IOException, XmlPullParserException {
+
+        final ShortcutService s = mShortcutUser.mService;
+
         if (forBackup) {
             if (!(si.isPinned() && si.isEnabled())) {
                 return; // We only backup pinned shortcuts that are enabled.
             }
+        }
+        // Note: at this point no shortcuts should have bitmaps pending save, but if they do,
+        // just remove the bitmap.
+        if (si.isIconPendingSave()) {
+            s.removeIconLocked(si);
         }
         out.startTag(null, TAG_SHORTCUT);
         ShortcutService.writeAttr(out, ATTR_ID, si.getId());
@@ -1293,6 +1301,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeAttr(out, ATTR_FLAGS,
                     si.getFlags() &
                             ~(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES
+                            | ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE
                             | ShortcutInfo.FLAG_DYNAMIC));
         } else {
             // When writing for backup, ranks shouldn't be saved, since shortcuts won't be restored

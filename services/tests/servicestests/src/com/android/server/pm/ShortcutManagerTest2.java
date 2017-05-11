@@ -2026,12 +2026,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                     makeShortcutWithIcon("bmp32x32", bmp32x32),
                     makeShortcutWithIcon("bmp64x64", bmp64x64))));
         });
+
         // We can't predict the compressed bitmap sizes, so get the real sizes here.
         final long bitmapTotal =
-                new File(getPackageShortcut(CALLING_PACKAGE_2, "bmp32x32", USER_0)
-                        .getBitmapPath()).length() +
-                new File(getPackageShortcut(CALLING_PACKAGE_2, "bmp64x64", USER_0)
-                        .getBitmapPath()).length();
+                new File(getBitmapAbsPath(USER_0, CALLING_PACKAGE_2, "bmp32x32")).length() +
+                new File(getBitmapAbsPath(USER_0, CALLING_PACKAGE_2, "bmp64x64")).length();
 
         // Read the expected output and inject the bitmap size.
         final String expected = readTestAsset("shortcut/dumpsys_expected.txt")

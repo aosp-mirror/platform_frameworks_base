@@ -306,6 +306,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private final ActivityManagerInternal mActivityManagerInternal;
 
     private final ShortcutRequestPinProcessor mShortcutRequestPinProcessor;
+    private final ShortcutBitmapSaver mShortcutBitmapSaver;
 
     @GuardedBy("mLock")
     final SparseIntArray mUidState = new SparseIntArray();
@@ -426,6 +427,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 LocalServices.getService(ActivityManagerInternal.class));
 
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
+        mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
 
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
@@ -926,6 +928,9 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG) {
             Slog.d(TAG, "Saving to " + path);
         }
+
+        mShortcutBitmapSaver.waitForAllSavesLocked();
+
         path.getParentFile().mkdirs();
         final AtomicFile file = new AtomicFile(path);
         FileOutputStream os = null;
@@ -1213,13 +1218,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     // === Caller validation ===
 
-    void removeIcon(@UserIdInt int userId, ShortcutInfo shortcut) {
-        // Do not remove the actual bitmap file yet, because if the device crashes before saving
-        // he XML we'd lose the icon.  We just remove all dangling files after saving the XML.
-        shortcut.setIconResourceId(0);
-        shortcut.setIconResName(null);
-        shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE |
-            ShortcutInfo.FLAG_ADAPTIVE_BITMAP | ShortcutInfo.FLAG_HAS_ICON_RES);
+    void removeIconLocked(ShortcutInfo shortcut) {
+        mShortcutBitmapSaver.removeIcon(shortcut);
     }
 
     public void cleanupBitmapsForPackage(@UserIdInt int userId, String packageName) {
@@ -1232,6 +1232,13 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    /**
+     * Remove dangling bitmap files for a user.
+     *
+     * Note this method must be called with the lock held after calling
+     * {@link ShortcutBitmapSaver#waitForAllSavesLocked()} to make sure there's no pending bitmap
+     * saves are going on.
+     */
     private void cleanupDanglingBitmapDirectoriesLocked(@UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "cleanupDanglingBitmaps: userId=" + userId);
@@ -1265,6 +1272,13 @@ public class ShortcutService extends IShortcutService.Stub {
         logDurationStat(Stats.CLEANUP_DANGLING_BITMAPS, start);
     }
 
+    /**
+     * Remove dangling bitmap files for a package.
+     *
+     * Note this method must be called with the lock held after calling
+     * {@link ShortcutBitmapSaver#waitForAllSavesLocked()} to make sure there's no pending bitmap
+     * saves are going on.
+     */
     private void cleanupDanglingBitmapFilesLocked(@UserIdInt int userId, @NonNull ShortcutUser user,
             @NonNull String packageName, @NonNull File path) {
         final ArraySet<String> usedFiles =
@@ -1303,7 +1317,6 @@ public class ShortcutService extends IShortcutService.Stub {
      *
      * The filename will be based on the ID, except certain characters will be escaped.
      */
-    @VisibleForTesting
     FileOutputStreamWithPath openIconFileForWrite(@UserIdInt int userId, ShortcutInfo shortcut)
             throws IOException {
         final File packagePath = new File(getUserBitmapFilePath(userId),
@@ -1329,7 +1342,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    void saveIconAndFixUpShortcut(@UserIdInt int userId, ShortcutInfo shortcut) {
+    void saveIconAndFixUpShortcutLocked(ShortcutInfo shortcut) {
         if (shortcut.hasIconFile() || shortcut.hasIconResource()) {
             return;
         }
@@ -1337,7 +1350,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final long token = injectClearCallingIdentity();
         try {
             // Clear icon info on the shortcut.
-            removeIcon(userId, shortcut);
+            removeIconLocked(shortcut);
 
             final Icon icon = shortcut.getIcon();
             if (icon == null) {
@@ -1364,41 +1377,8 @@ public class ShortcutService extends IShortcutService.Stub {
                         // just in case.
                         throw ShortcutInfo.getInvalidIconException();
                 }
-                if (bitmap == null) {
-                    Slog.e(TAG, "Null bitmap detected");
-                    return;
-                }
-                // Shrink and write to the file.
-                File path = null;
-                try {
-                    final FileOutputStreamWithPath out = openIconFileForWrite(userId, shortcut);
-                    try {
-                        path = out.getFile();
-
-                        Bitmap shrunk = shrinkBitmap(bitmap, mMaxIconDimension);
-                        try {
-                            shrunk.compress(mIconPersistFormat, mIconPersistQuality, out);
-                        } finally {
-                            if (bitmap != shrunk) {
-                                shrunk.recycle();
-                            }
-                        }
-
-                        shortcut.setBitmapPath(out.getFile().getAbsolutePath());
-                        shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_FILE);
-                        if (icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
-                            shortcut.addFlags(ShortcutInfo.FLAG_ADAPTIVE_BITMAP);
-                        }
-                    } finally {
-                        IoUtils.closeQuietly(out);
-                    }
-                } catch (IOException | RuntimeException e) {
-                    // STOPSHIP Change wtf to e
-                    Slog.wtf(ShortcutService.TAG, "Unable to write bitmap to file", e);
-                    if (path != null && path.exists()) {
-                        path.delete();
-                    }
-                }
+                mShortcutBitmapSaver.saveBitmapLocked(shortcut,
+                        mMaxIconDimension, mIconPersistFormat, mIconPersistQuality);
             } finally {
                 // Once saved, we won't use the original icon information, so null it out.
                 shortcut.clearIcon();
@@ -1418,7 +1398,6 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    @VisibleForTesting
     static Bitmap shrinkBitmap(Bitmap in, int maxSize) {
         // Original width/height.
         final int ow = in.getWidth();
@@ -1787,7 +1766,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 final boolean replacingIcon = (source.getIcon() != null);
                 if (replacingIcon) {
-                    removeIcon(userId, target);
+                    removeIconLocked(target);
                 }
 
                 // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
@@ -1795,7 +1774,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 target.setTimestamp(injectCurrentTimeMillis());
 
                 if (replacingIcon) {
-                    saveIconAndFixUpShortcut(userId, target);
+                    saveIconAndFixUpShortcutLocked(target);
                 }
 
                 // When we're updating any resource related fields, re-extract the res names and
@@ -2613,16 +2592,17 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
                     return null;
                 }
+                final String path = mShortcutBitmapSaver.getBitmapPathMayWaitLocked(shortcutInfo);
+                if (path == null) {
+                    Slog.w(TAG, "null bitmap detected in getShortcutIconFd()");
+                    return null;
+                }
                 try {
-                    if (shortcutInfo.getBitmapPath() == null) {
-                        Slog.w(TAG, "null bitmap detected in getShortcutIconFd()");
-                        return null;
-                    }
                     return ParcelFileDescriptor.open(
-                            new File(shortcutInfo.getBitmapPath()),
+                            new File(path),
                             ParcelFileDescriptor.MODE_READ_ONLY);
                 } catch (FileNotFoundException e) {
-                    Slog.e(TAG, "Icon file not found: " + shortcutInfo.getBitmapPath());
+                    Slog.e(TAG, "Icon file not found: " + path);
                     return null;
                 }
             }
@@ -3384,6 +3364,9 @@ public class ShortcutService extends IShortcutService.Stub {
             scheduleSaveUser(userId);
             saveDirtyInfo();
 
+            // Note, in case of backup, we don't have to wait on bitmap saving, because we don't
+            // back up bitmaps anyway.
+
             // Then create the backup payload.
             final ByteArrayOutputStream os = new ByteArrayOutputStream(32 * 1024);
             try {
@@ -3515,6 +3498,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 pw.print("  Last failure stack trace: ");
                 pw.println(Log.getStackTraceString(mLastWtfStacktrace));
             }
+
+            pw.println();
+            mShortcutBitmapSaver.dumpLocked(pw, "  ");
 
             for (int i = 0; i < mUsers.size(); i++) {
                 pw.println();
@@ -3827,6 +3813,11 @@ public class ShortcutService extends IShortcutService.Stub {
         return SystemClock.elapsedRealtime();
     }
 
+    @VisibleForTesting
+    long injectUptimeMillis() {
+        return SystemClock.uptimeMillis();
+    }
+
     // Injection point.
     @VisibleForTesting
     int injectBinderCallingUid() {
@@ -3995,6 +3986,13 @@ public class ShortcutService extends IShortcutService.Stub {
     private void verifyStatesInner() {
         synchronized (mLock) {
             forEachLoadedUserLocked(u -> u.forAllPackageItems(ShortcutPackageItem::verifyStates));
+        }
+    }
+
+    @VisibleForTesting
+    void waitForBitmapSavesForTest() {
+        synchronized (mLock) {
+            mShortcutBitmapSaver.waitForAllSavesLocked();
         }
     }
 }
