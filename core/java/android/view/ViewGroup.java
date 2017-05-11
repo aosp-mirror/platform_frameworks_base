@@ -57,6 +57,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
+
 import com.android.internal.R;
 
 import java.util.ArrayList;
@@ -832,8 +833,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void focusableViewAvailable(View v) {
         if (mParent != null
                 // shortcut: don't report a new focusable view if we block our descendants from
-                // getting focus
+                // getting focus or if we're not visible
                 && (getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS)
+                && ((mViewFlags & VISIBILITY_MASK) == VISIBLE)
                 && (isFocusableInTouchMode() || !shouldBlockFocusForTouchscreen())
                 // shortcut: don't report a new focusable view if we already are focused
                 // (and we don't prefer our descendants)
@@ -1158,18 +1160,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Determine whether we have a focused descendant.
         final int descendantFocusability = getDescendantFocusability();
         if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
-            final int count = mChildrenCount;
-            final View[] children = mChildren;
+            return hasFocusableChild(dispatchExplicit);
+        }
 
-            for (int i = 0; i < count; i++) {
-                final View child = children[i];
+        return false;
+    }
 
-                // In case the subclass has overridden has[Explicit]Focusable, dispatch
-                // to the expected one for each child even though we share logic here.
-                if ((dispatchExplicit && child.hasExplicitFocusable())
-                        || (!dispatchExplicit && child.hasFocusable())) {
-                    return true;
-                }
+    boolean hasFocusableChild(boolean dispatchExplicit) {
+        // Determine whether we have a focusable descendant.
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+
+        for (int i = 0; i < count; i++) {
+            final View child = children[i];
+
+            // In case the subclass has overridden has[Explicit]Focusable, dispatch
+            // to the expected one for each child even though we share logic here.
+            if ((dispatchExplicit && child.hasExplicitFocusable())
+                    || (!dispatchExplicit && child.hasFocusable())) {
+                return true;
             }
         }
 
@@ -3229,7 +3238,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // will refer to a view not-in a cluster.
             return restoreFocusInCluster(View.FOCUS_DOWN);
         }
-        if (isKeyboardNavigationCluster()) {
+        if (isKeyboardNavigationCluster() || (mViewFlags & VISIBILITY_MASK) != VISIBLE) {
             return false;
         }
         int descendentFocusability = getDescendantFocusability();
@@ -3247,7 +3256,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 return true;
             }
         }
-        if (descendentFocusability == FOCUS_AFTER_DESCENDANTS) {
+        if (descendentFocusability == FOCUS_AFTER_DESCENDANTS && !hasFocusableChild(false)) {
             return super.requestFocus(FOCUS_DOWN, null);
         }
         return false;
@@ -4913,7 +4922,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.mParent = this;
         }
 
-        if (child.hasFocus()) {
+        final boolean childHasFocus = child.hasFocus();
+        if (childHasFocus) {
             requestChildFocus(child, child.findFocus());
         }
 
@@ -4926,6 +4936,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 needGlobalAttributesUpdate(true);
             }
             ai.mKeepScreenOn = lastKeepOn;
+            if (!childHasFocus && child.hasFocusable()) {
+                focusableViewAvailable(child);
+            }
         }
 
         if (child.isLayoutDirectionInherited()) {
