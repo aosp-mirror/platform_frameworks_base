@@ -141,6 +141,7 @@ import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
@@ -364,6 +365,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final UserManagerInternal mUserManagerInternal;
     final TelephonyManager mTelephonyManager;
     private final LockPatternUtils mLockPatternUtils;
+    private final DevicePolicyConstants mConstants;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
 
     /**
@@ -1447,7 +1449,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void handlePackagesChanged(@Nullable String packageName, int userHandle) {
         boolean removedAdmin = false;
-        if (VERBOSE_LOG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
+        if (VERBOSE_LOG) {
+            Slog.d(LOG_TAG, "Handling package changes package " + packageName
+                    + " for user " + userHandle);
+        }
         DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
             for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
@@ -1760,6 +1765,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return Settings.Global.getInt(mContext.getContentResolver(), name, def);
         }
 
+        String settingsGlobalGetString(String name) {
+            return Settings.Global.getString(mContext.getContentResolver(), name);
+        }
+
         void settingsGlobalPutInt(String name, int value) {
             Settings.Global.putInt(mContext.getContentResolver(), name, value);
         }
@@ -1801,6 +1810,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mInjector = injector;
         mContext = Preconditions.checkNotNull(injector.mContext);
         mHandler = new Handler(Preconditions.checkNotNull(injector.getMyLooper()));
+        mConstants = DevicePolicyConstants.loadFromString(
+                mInjector.settingsGlobalGetString(Global.DEVICE_POLICY_CONSTANTS));
+
         mOwners = Preconditions.checkNotNull(injector.newOwners());
 
         mUserManager = Preconditions.checkNotNull(injector.getUserManager());
@@ -1823,7 +1835,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Needed when mHasFeature == false, because it controls the certificate warning text.
         mCertificateMonitor = new CertificateMonitor(this, mInjector, mBackgroundHandler);
 
-        mDeviceAdminServiceController = new DeviceAdminServiceController(this);
+        mDeviceAdminServiceController = new DeviceAdminServiceController(this, mConstants);
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -7354,6 +7366,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (this) {
             pw.println("Current Device Policy Manager state:");
+
             mOwners.dump("  ", pw);
             mDeviceAdminServiceController.dump("  ", pw);
             int userCount = mUserData.size();
@@ -7380,7 +7393,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.print("    mPasswordOwner="); pw.println(policy.mPasswordOwner);
             }
             pw.println();
-            pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
+            mConstants.dump("  ", pw);
+            pw.println();
+            pw.println("  Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
         }
     }
 
