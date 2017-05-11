@@ -436,8 +436,8 @@ public final class GnssMeasurement implements Parcelable {
      *     E1BC code lock       : [ 0   4ms ]  : STATE_GAL_E1BC_CODE_LOCK is set
      *     E1C 2nd code lock    : [ 0 100ms ]  : STATE_GAL_E1C_2ND_CODE_LOCK is set
      *     E1B page             : [ 0    2s ]  : STATE_GAL_E1B_PAGE_SYNC is set
-     *     Time of week decoded : [ 0 1week ]  : STATE_GAL_TOW_DECODED is set
-     *     Time of week known   : [ 0 1week ]  : STATE_GAL_TOW_KNOWN set</pre>
+     *     Time of week decoded : [ 0 1week ]  : STATE_TOW_DECODED is set
+     *     Time of week known   : [ 0 1week ]  : STATE_TOW_KNOWN set</pre>
      *
      * Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
      * been determined from other sources. If TOW decoded is set then TOW Known must also be set.
