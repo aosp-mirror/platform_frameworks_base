@@ -3794,17 +3794,11 @@ public class NotificationManagerService extends SystemService {
             updateLightsLocked();
         }
         if (buzz || beep || blink) {
-            if (((record.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0)) {
-                if (DBG) Slog.v(TAG, "Suppressed SystemUI from triggering screen on");
-            } else {
-                MetricsLogger.action(record.getLogMaker()
-                        .setCategory(MetricsEvent.NOTIFICATION_ALERT)
-                        .setType(MetricsEvent.TYPE_OPEN)
-                        .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
-                EventLogTags.writeNotificationAlert(key,
-                        buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
-            }
+            MetricsLogger.action(record.getLogMaker()
+                    .setCategory(MetricsEvent.NOTIFICATION_ALERT)
+                    .setType(MetricsEvent.TYPE_OPEN)
+                    .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
+            EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
         }
     }
 
@@ -4072,6 +4066,8 @@ public class NotificationManagerService extends SystemService {
                     | (mZenModeHelper.shouldSuppressWhenScreenOn()
                     ? SUPPRESSED_EFFECT_SCREEN_ON : 0);
             record.setSuppressedVisualEffects(suppressed);
+        } else {
+            record.setSuppressedVisualEffects(0);
         }
     }
 
