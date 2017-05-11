@@ -13607,6 +13607,12 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         final boolean isSystem = isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
         sendPackageAddedForNewUsers(packageName, isSystem, pkgSetting.appId, userId);
+
+        // Send a session commit broadcast
+        final PackageInstaller.SessionInfo info = new PackageInstaller.SessionInfo();
+        info.installReason = pkgSetting.getInstallReason(userId);
+        info.appPackageName = packageName;
+        sendSessionCommitBroadcast(info, userId);
     }
 
     public void sendPackageAddedForNewUsers(String packageName, boolean isSystem, int appId, int... userIds) {
@@ -20122,11 +20128,27 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         return getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getCallingUserId());
     }
 
+    public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
+        UserManagerService ums = UserManagerService.getInstance();
+        if (ums != null) {
+            final UserInfo parent = ums.getProfileParent(userId);
+            final int launcherUid = (parent != null) ? parent.id : userId;
+            final ComponentName launcherComponent = getDefaultHomeActivity(launcherUid);
+            if (launcherComponent != null) {
+                Intent launcherIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
+                        .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
+                        .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+                        .setPackage(launcherComponent.getPackageName());
+                mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUid));
+            }
+        }
+    }
+
     /**
      * Report the 'Home' activity which is currently set as "always use this one". If non is set
      * then reports the most likely home activity or null if there are more than one.
      */
-    public ComponentName getDefaultHomeActivity(int userId) {
+    private ComponentName getDefaultHomeActivity(int userId) {
         List<ResolveInfo> allHomeCandidates = new ArrayList<>();
         ComponentName cn = getHomeActivitiesAsUser(allHomeCandidates, userId);
         if (cn != null) {
