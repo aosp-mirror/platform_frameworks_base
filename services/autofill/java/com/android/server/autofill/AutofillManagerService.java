@@ -144,6 +144,9 @@ public final class AutofillManagerService extends SystemService {
             final int userId = users.get(i).id;
             final boolean disabled = umi.getUserRestriction(userId, UserManager.DISALLOW_AUTOFILL);
             if (disabled) {
+                if (disabled) {
+                    Slog.i(TAG, "Disabling Autofill for user " + userId);
+                }
                 mDisabledUsers.put(userId, disabled);
             }
         }
@@ -155,11 +158,12 @@ public final class AutofillManagerService extends SystemService {
                 if (disabledBefore == disabledNow) {
                     // Nothing changed, do nothing.
                     if (sDebug) {
-                        Slog.d(TAG, "Restriction not changed for user " + userId + ": "
+                        Slog.d(TAG, "Autofill restriction did not change for user " + userId + ": "
                                 + bundleToString(newRestrictions));
                         return;
                     }
                 }
+                Slog.i(TAG, "Updating Autofill for user " + userId + ": disabled=" + disabledNow);
                 mDisabledUsers.put(userId, disabledNow);
                 updateCachedServiceLocked(userId, disabledNow);
             }
@@ -606,7 +610,7 @@ public final class AutofillManagerService extends SystemService {
                             pw.println("Usage: dumpsys autofill [--ui-only|--no-history]");
                             return;
                         default:
-                            throw new IllegalArgumentException("Invalid dump arg: " + arg);
+                            Slog.w(TAG, "Ignoring invalid dump arg: " + arg);
                     }
                 }
             }
