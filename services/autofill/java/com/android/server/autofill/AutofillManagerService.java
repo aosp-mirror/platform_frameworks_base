@@ -172,7 +172,6 @@ public final class AutofillManagerService extends SystemService {
         startTrackingPackageChanges();
     }
 
-
     private void startTrackingPackageChanges() {
         PackageMonitor monitor = new PackageMonitor() {
             @Override
@@ -559,15 +558,36 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
-        public void updateSession(int sessionId, AutofillId id, Rect bounds,
+        public void updateSession(int sessionId, AutofillId autoFillId, Rect bounds,
                 AutofillValue value, int action, int flags, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    service.updateSessionLocked(sessionId, getCallingUid(), id, bounds, value,
-                            action, flags);
+                    service.updateSessionLocked(sessionId, getCallingUid(), autoFillId, bounds,
+                            value, action, flags);
                 }
             }
+        }
+
+        @Override
+        public int updateOrRestartSession(IBinder activityToken, IBinder appCallback,
+                AutofillId autoFillId, Rect bounds, AutofillValue value, int userId,
+                boolean hasCallback, int flags, String packageName, int sessionId, int action) {
+            boolean restart = false;
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    restart = service.updateSessionLocked(sessionId, getCallingUid(), autoFillId,
+                            bounds, value, action, flags);
+                }
+            }
+            if (restart) {
+                return startSession(activityToken, appCallback, autoFillId, bounds, value, userId,
+                        hasCallback, flags, packageName);
+            }
+
+            // Nothing changed...
+            return sessionId;
         }
 
         @Override

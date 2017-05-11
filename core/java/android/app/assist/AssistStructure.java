@@ -862,10 +862,10 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mAutofillType);
                 out.writeStringArray(mAutofillHints);
                 final AutofillValue sanitizedValue;
-                if (mAutofillOverlay != null && mAutofillOverlay.value != null) {
-                    sanitizedValue = mAutofillOverlay.value;
-                } else if (writeSensitive) {
+                if (writeSensitive) {
                     sanitizedValue = mAutofillValue;
+                } else if (mAutofillOverlay != null && mAutofillOverlay.value != null) {
+                    sanitizedValue = mAutofillOverlay.value;
                 } else {
                     sanitizedValue = null;
                 }
