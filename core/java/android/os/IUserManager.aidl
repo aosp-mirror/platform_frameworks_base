@@ -93,4 +93,5 @@ interface IUserManager {
     int getManagedProfileBadge(int userId);
     boolean isUserUnlocked(int userId);
     boolean isUserRunning(int userId);
+    boolean isUserNameSet(int userHandle);
 }
