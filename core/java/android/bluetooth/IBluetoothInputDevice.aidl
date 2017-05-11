@@ -56,4 +56,12 @@ interface IBluetoothInputDevice {
     * @hide
     */
     boolean sendData(in BluetoothDevice device, String report);
+    /**
+    * @hide
+    */
+    boolean getIdleTime(in BluetoothDevice device);
+    /**
+    * @hide
+    */
+    boolean setIdleTime(in BluetoothDevice device, byte idleTime);
 }
