@@ -71,6 +71,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private float mMaxShelfEnd;
     private int mRelativeOffset;
     private boolean mInteractive;
+    private float mOpenedAmount;
+    private boolean mNoAnimationsInThisFrame;
     private boolean mAnimationsEnabled = true;
     private boolean mShowNotificationShelf;
 
@@ -377,7 +379,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         } else {
             // We take the clamped position instead
             transitionAmount = clampedAmount;
-            iconState.needsCannedAnimation = iconState.clampedAppearAmount != clampedAmount;
+            iconState.needsCannedAnimation = iconState.clampedAppearAmount != clampedAmount
+                    && !mNoAnimationsInThisFrame;
         }
         iconState.iconAppearAmount = !USE_ANIMATIONS_WHEN_OPENING
                     || iconState.useFullTransitionAmount
@@ -515,6 +518,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     private void setOpenedAmount(float openedAmount) {
+        mNoAnimationsInThisFrame = openedAmount == 1.0f && mOpenedAmount == 0.0f;
+        mOpenedAmount = openedAmount;
         if (!mAmbientState.isPanelFullWidth()) {
             // We don't do a transformation at all, lets just assume we are fully opened
             openedAmount = 1.0f;
