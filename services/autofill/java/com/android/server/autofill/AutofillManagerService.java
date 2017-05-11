@@ -20,6 +20,7 @@ import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.bundleToString;
 
@@ -397,6 +398,21 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
+    // Called by Shell command.
+    public int getMaxPartitions() {
+        synchronized (mLock) {
+            return sPartitionMaxCount;
+        }
+    }
+
+    // Called by Shell command.
+    public void setMaxPartitions(int max) {
+        Slog.i(TAG, "setMaxPartitions(): " + max);
+        synchronized (mLock) {
+            sPartitionMaxCount = max;
+        }
+    }
+
     private void setDebugLocked(boolean debug) {
         com.android.server.autofill.Helper.sDebug = debug;
         android.view.autofill.Helper.sDebug = debug;
@@ -628,6 +644,7 @@ public final class AutofillManagerService extends SystemService {
                     pw.print("Debug mode: "); pw.println(oldDebug);
                     pw.print("Verbose mode: "); pw.println(sVerbose);
                     pw.print("Disabled users: "); pw.println(mDisabledUsers);
+                    pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
                     final int size = mServicesCache.size();
                     pw.print("Cached services: ");
                     if (size == 0) {
