@@ -976,7 +976,7 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
 
-        if (getApplicationInfo().targetSdkVersion >= O && mActivityInfo.isFixedOrientation()) {
+        if (getApplicationInfo().targetSdkVersion > O && mActivityInfo.isFixedOrientation()) {
             final TypedArray ta = obtainStyledAttributes(com.android.internal.R.styleable.Window);
             final boolean isTranslucentOrFloating = ActivityInfo.isTranslucentOrFloating(ta);
             ta.recycle();
