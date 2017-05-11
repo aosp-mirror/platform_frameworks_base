@@ -3614,7 +3614,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (matchFactoryOnly) {
                 final PackageSetting ps = mSettings.getDisabledSystemPkgLPr(packageName);
                 if (ps != null) {
-                    if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId)) {
+                    if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
                         return null;
                     }
                     return generatePackageInfo(ps, flags, userId);
@@ -3629,14 +3629,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 Log.v(TAG, "getPackageInfo " + packageName + ": " + p);
             if (p != null) {
                 if (filterSharedLibPackageLPr((PackageSetting) p.mExtras,
-                        Binder.getCallingUid(), userId)) {
+                        Binder.getCallingUid(), userId, flags)) {
                     return null;
                 }
                 return generatePackageInfo((PackageSetting)p.mExtras, flags, userId);
             }
             if (!matchFactoryOnly && (flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
-                if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId)) {
+                if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
                     return null;
                 }
                 return generatePackageInfo(ps, flags, userId);
@@ -3645,13 +3645,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
-
-    private boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId) {
-        // System/shell/root get to see all static libs
-        final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
-                || appId == Process.ROOT_UID) {
-            return false;
+    private boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId,
+            int flags) {
+        // Callers can access only the libs they depend on, otherwise they need to explicitly
+        // ask for the shared libraries given the caller is allowed to access all static libs.
+        if ((flags & PackageManager.MATCH_STATIC_SHARED_LIBRARIES) != 0) {
+            // System/shell/root get to see all static libs
+            final int appId = UserHandle.getAppId(uid);
+            if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
+                    || appId == Process.ROOT_UID) {
+                return false;
+            }
         }
 
         // No package means no static lib as it is always on internal storage
@@ -3846,7 +3850,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!sUserManager.exists(userId)) return null;
         PackageSetting ps = mSettings.mPackages.get(packageName);
         if (ps != null) {
-            if (filterSharedLibPackageLPr(ps, uid, userId)) {
+            if (filterSharedLibPackageLPr(ps, uid, userId, flags)) {
                 return null;
             }
             if (ps.pkg == null) {
@@ -3887,7 +3891,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (p != null) {
                 PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps == null) return null;
-                if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId)) {
+                if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
                     return null;
                 }
                 // Note: isEnabledLP() does not apply here - always return info
@@ -4349,7 +4353,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     final long identity = Binder.clearCallingIdentity();
                     try {
-                        // TODO: We will change version code to long, so in the new API it is long
                         PackageInfo packageInfo = getPackageInfoVersioned(
                                 libInfo.getDeclaringPackage(), flags, userId);
                         if (packageInfo == null) {
@@ -4492,7 +4495,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     PackageSetting ps = mSettings.getPackageLPr(libEntry.apk);
                     if (ps != null && !filterSharedLibPackageLPr(ps, Binder.getCallingUid(),
-                            UserHandle.getUserId(Binder.getCallingUid()))) {
+                            UserHandle.getUserId(Binder.getCallingUid()),
+                            PackageManager.MATCH_STATIC_SHARED_LIBRARIES)) {
                         if (libs == null) {
                             libs = new ArraySet<>();
                         }
@@ -7547,7 +7551,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (listUninstalled) {
                 list = new ArrayList<>(mSettings.mPackages.size());
                 for (PackageSetting ps : mSettings.mPackages.values()) {
-                    if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId)) {
+                    if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
                         continue;
                     }
                     final PackageInfo pi = generatePackageInfo(ps, flags, userId);
@@ -7559,7 +7563,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 list = new ArrayList<>(mPackages.size());
                 for (PackageParser.Package p : mPackages.values()) {
                     if (filterSharedLibPackageLPr((PackageSetting) p.mExtras,
-                            Binder.getCallingUid(), userId)) {
+                            Binder.getCallingUid(), userId, flags)) {
                         continue;
                     }
                     final PackageInfo pi = generatePackageInfo((PackageSetting)
@@ -7664,7 +7668,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         effectiveFlags |= PackageManager.MATCH_ANY_USER;
                     }
                     if (ps.pkg != null) {
-                        if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId)) {
+                        if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
                             continue;
                         }
                         ai = PackageParser.generateApplicationInfo(ps.pkg, effectiveFlags,
@@ -7688,7 +7692,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (PackageParser.Package p : mPackages.values()) {
                     if (p.mExtras != null) {
                         PackageSetting ps = (PackageSetting) p.mExtras;
-                        if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId)) {
+                        if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
                             continue;
                         }
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
