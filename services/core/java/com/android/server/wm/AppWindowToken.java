@@ -1248,11 +1248,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation(int candidate) {
-        // We do not allow non-fullscreen apps to influence orientation at and beyond O. While we do
+        // We do not allow non-fullscreen apps to influence orientation beyond O. While we do
         // throw an exception in {@link Activity#onCreate} and
         // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
         // other calculations aren't affected.
-        if (!fillsParent() && mTargetSdk >= O) {
+        if (!fillsParent() && mTargetSdk > O) {
             // Can't specify orientation if app doesn't fill parent.
             return SCREEN_ORIENTATION_UNSET;
         }

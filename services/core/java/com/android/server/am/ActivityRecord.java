@@ -2180,7 +2180,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setRequestedOrientation(int requestedOrientation) {
         if (ActivityInfo.isFixedOrientation(requestedOrientation) && !fullscreen
-                && appInfo.targetSdkVersion >= O) {
+                && appInfo.targetSdkVersion > O) {
             throw new IllegalStateException("Only fullscreen activities can request orientation");
         }
 
