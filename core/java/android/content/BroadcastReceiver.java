@@ -330,9 +330,31 @@ public abstract class BroadcastReceiver {
      * This can be called by an application in {@link #onReceive} to allow
      * it to keep the broadcast active after returning from that function.
      * This does <em>not</em> change the expectation of being relatively
-     * responsive to the broadcast (finishing it within 10s), but does allow
+     * responsive to the broadcast, but does allow
      * the implementation to move work related to it over to another thread
      * to avoid glitching the main UI thread due to disk IO.
+     *
+     * <p>As a general rule, broadcast receivers are allowed to run for up to 10 seconds
+     * before they system will consider them non-responsive and ANR the app.  Since these usually
+     * execute on the app's main thread, they are already bound by the ~5 second time limit
+     * of various operations that can happen there (not to mention just avoiding UI jank), so
+     * the receive limit is generally not of concern.  However, once you use {@goAsync}, though
+     * able to be off the main thread, the broadcast execution limit still applies, and that
+     * includes the time spent between calling this method and ultimately
+     * {@link PendingResult#finish() PendingResult.finish()}.</p>
+     *
+     * <p>If you are taking advantage of this method to have more time to execute, it is useful
+     * to know that the available time can be longer in certain situations.  In particular, if
+     * the broadcast you are receiving is not a foreground broadcast (that is, the sender has not
+     * used {@link Intent#FLAG_RECEIVER_FOREGROUND}), then more time is allowed for the receivers
+     * to run, allowing them to execute for 30 seconds or even a bit more.  This is something that
+     * receivers should rarely take advantage of (long work should be punted to another system
+     * facility such as {@link android.app.job.JobScheduler}, {@link android.app.Service}, or
+     * see especially {@link android.support.v4.app.JobIntentService}), but can be useful in
+     * certain rare cases where it is necessary to do some work as soon as the broadcast is
+     * delivered.  Keep in mind that the work you do here will block further broadcasts until
+     * it completes, so taking advantage of this at all excessively can be counter-productive
+     * and cause later events to be received more slowly.</p>
      *
      * @return Returns a {@link PendingResult} representing the result of
      * the active broadcast.  The BroadcastRecord itself is no longer active;
