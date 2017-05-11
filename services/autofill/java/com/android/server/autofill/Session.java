@@ -384,6 +384,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         if (response == null) {
+            if (sVerbose) Slog.v(TAG, "canceling session " + id + " when server returned null");
             if ((requestFlags & FLAG_MANUAL_REQUEST) != 0) {
                 getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
             }
@@ -906,7 +907,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // If it's not, then check if it it should start a partition.
         if (shouldStartNewPartitionLocked(id)) {
-            if (sDebug) Slog.d(TAG, "Starting partition for view id " + id);
+            if (sDebug) {
+                Slog.d(TAG, "Starting partition for view id " + id + ": "
+                        + viewState.getStateAsString());
+            }
             viewState.setState(ViewState.STATE_STARTED_PARTITION);
             requestNewFillResponseLocked(flags);
         }
@@ -1344,15 +1348,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     void dumpLocked(String prefix, PrintWriter pw) {
+        final String prefix2 = prefix + "  ";
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
-        pw.print(prefix); pw.print("mResponses: "); pw.println(mResponses);
+        pw.print(prefix); pw.print("mResponses: "); pw.println(mResponses.size());
+        for (int i = 0; i < mResponses.size(); i++) {
+            pw.print(prefix2); pw.print('#'); pw.print(i); pw.print(' ');
+                pw.println(mResponses.valueAt(i));
+        }
         pw.print(prefix); pw.print("mCurrentViewId: "); pw.println(mCurrentViewId);
         pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
         pw.print(prefix); pw.print("mIsSaving: "); pw.println(mIsSaving);
-        final String prefix2 = prefix + "  ";
         for (Map.Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
             pw.print(prefix); pw.print("State for id "); pw.println(entry.getKey());
             entry.getValue().dump(prefix2, pw);
