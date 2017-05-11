@@ -1120,7 +1120,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void notifyUnavailableToClient() {
         synchronized (mLock) {
-            if (!mHasCallback) return;
+            if (!mHasCallback || mCurrentViewId == null) return;
             try {
                 mClient.notifyNoFillUi(id, mCurrentViewId);
             } catch (RemoteException e) {
