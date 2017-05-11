@@ -42,8 +42,10 @@ import android.media.PlayerBase;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -833,6 +835,22 @@ public class Notification implements Parcelable
      * @hide
      */
     public ArraySet<PendingIntent> allPendingIntents;
+
+    /**
+     * Token identifying the notification that is applying doze/bgcheck whitelisting to the
+     * pending intents inside of it, so only those will get the behavior.
+     *
+     * @hide
+     */
+    static public IBinder whitelistToken;
+
+    /**
+     * Must be set by a process to start associating tokens with Notification objects
+     * coming in to it.  This is set by NotificationManagerService.
+     *
+     * @hide
+     */
+    static public IBinder processWhitelistToken;
 
     /**
      * {@link #extras} key: this is the title of the notification,
@@ -1823,6 +1841,13 @@ public class Notification implements Parcelable
     {
         int version = parcel.readInt();
 
+        whitelistToken = parcel.readStrongBinder();
+        if (whitelistToken == null) {
+            whitelistToken = processWhitelistToken;
+        }
+        // Propagate this token to all pending intents that are unmarshalled from the parcel.
+        parcel.setClassCookie(PendingIntent.class, whitelistToken);
+
         when = parcel.readLong();
         creationTime = parcel.readLong();
         if (parcel.readInt() != 0) {
@@ -1929,6 +1954,7 @@ public class Notification implements Parcelable
      * @hide
      */
     public void cloneInto(Notification that, boolean heavy) {
+        that.whitelistToken = this.whitelistToken;
         that.when = this.when;
         that.creationTime = this.creationTime;
         that.mSmallIcon = this.mSmallIcon;
@@ -2158,6 +2184,7 @@ public class Notification implements Parcelable
     private void writeToParcelImpl(Parcel parcel, int flags) {
         parcel.writeInt(1);
 
+        parcel.writeStrongBinder(whitelistToken);
         parcel.writeLong(when);
         parcel.writeLong(creationTime);
         if (mSmallIcon == null && icon != 0) {

@@ -4719,7 +4719,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             checkEmbeddedAllowedInner(userId, pendingIntent.key.requestIntent,
                     pendingIntent.key.requestResolvedType);
 
-            return pendingIntent.sendInner(0, null, null, null, null, null, null, 0,
+            return pendingIntent.sendInner(0, null, null, null, null, null, null, null, 0,
                     FORCE_NEW_TASK_FLAGS, FORCE_NEW_TASK_FLAGS, null, this);
         }
 
