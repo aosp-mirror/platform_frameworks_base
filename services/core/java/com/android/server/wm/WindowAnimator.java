@@ -255,12 +255,19 @@ public class WindowAnimator {
             mWindowPlacerLocked.requestTraversal();
         }
 
-        if (mAnimating && !wasAnimating && Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
-            Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+        if (mAnimating && !wasAnimating) {
+
+            // Usually app transitions but quite a load onto the system already (with all the things
+            // happening in app), so pause task snapshot persisting to not increase the load.
+            mService.mTaskSnapshotController.setPersisterPaused(true);
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+            }
         }
 
         if (!mAnimating && wasAnimating) {
             mWindowPlacerLocked.requestTraversal();
+            mService.mTaskSnapshotController.setPersisterPaused(false);
             if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
                 Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }

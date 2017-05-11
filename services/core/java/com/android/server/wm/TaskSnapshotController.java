@@ -275,6 +275,15 @@ class TaskSnapshotController {
         mPersister.removeObsoleteFiles(persistentTaskIds, runningUserIds);
     }
 
+    /**
+     * Temporarily pauses/unpauses persisting of task snapshots.
+     *
+     * @param paused Whether task snapshot persisting should be paused.
+     */
+    void setPersisterPaused(boolean paused) {
+        mPersister.setPaused(paused);
+    }
+
     void dump(PrintWriter pw, String prefix) {
         mCache.dump(pw, prefix);
     }

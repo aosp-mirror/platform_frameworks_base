@@ -13387,8 +13387,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setRenderThread(int tid) {
         synchronized (this) {
             ProcessRecord proc;
+            int pid = Binder.getCallingPid();
+            if (pid == Process.myPid()) {
+                demoteSystemServerRenderThread(tid);
+                return;
+            }
             synchronized (mPidsSelfLocked) {
-                int pid = Binder.getCallingPid();
                 proc = mPidsSelfLocked.get(pid);
                 if (proc != null && proc.renderThreadTid == 0 && tid > 0) {
                     // ensure the tid belongs to the process
@@ -13419,6 +13423,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+    }
+
+    /**
+     * We only use RenderThread in system_server to store task snapshots to the disk, which should
+     * happen in the background. Thus, demote render thread from system_server to a lower priority.
+     *
+     * @param tid the tid of the RenderThread
+     */
+    private void demoteSystemServerRenderThread(int tid) {
+        setThreadPriority(tid, Process.THREAD_PRIORITY_BACKGROUND);
     }
 
     @Override
