@@ -4414,7 +4414,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void updateDozingState() {
         Trace.beginSection("StatusBar#updateDozingState");
-        boolean animate = !mDozing && mDozeScrimController.isPulsing();
+        boolean animate = !mDozing && mDozeServiceHost.shouldAnimateWakeup();
         mNotificationPanel.setDozing(mDozing, animate);
         mStackScroller.setDark(mDozing, animate, mWakeUpTouchLocation);
         mScrimController.setDozing(mDozing);
@@ -5076,6 +5076,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final class DozeServiceHost implements DozeHost {
         private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
+        private boolean mAnimateWakeup;
 
         @Override
         public String toString() {
@@ -5184,6 +5185,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             mDozeScrimController.extendPulse();
         }
 
+        @Override
+        public void setAnimateWakeup(boolean animateWakeup) {
+            mAnimateWakeup = animateWakeup;
+        }
+
+        private boolean shouldAnimateWakeup() {
+            return mAnimateWakeup;
+        }
     }
 
     // Begin Extra BaseStatusBar methods.

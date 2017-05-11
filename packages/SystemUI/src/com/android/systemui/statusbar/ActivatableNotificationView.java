@@ -50,7 +50,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
     private static final int ACTIVATE_ANIMATION_LENGTH = 220;
-    private static final int DARK_ANIMATION_LENGTH = 170;
+    private static final long DARK_ANIMATION_LENGTH = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
 
     /**
      * The amount of width, which is kept in the end when performing a disappear animation (also
@@ -418,7 +418,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         mDark = dark;
         updateBackground();
-        updateBackgroundTint(fade);
+        updateBackgroundTint(false);
         if (!dark && fade && !shouldHideBackground()) {
             fadeInFromDark(delay);
         }
@@ -555,23 +555,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         final View background = mDimmed ? mBackgroundDimmed : mBackgroundNormal;
         background.setAlpha(0f);
         mBackgroundVisibilityUpdater.onAnimationUpdate(null);
-        background.setPivotX(mBackgroundDimmed.getWidth() / 2f);
-        background.setPivotY(getActualHeight() / 2f);
-        background.setScaleX(DARK_EXIT_SCALE_START);
-        background.setScaleY(DARK_EXIT_SCALE_START);
         background.animate()
                 .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
                 .setDuration(DARK_ANIMATION_LENGTH)
                 .setStartDelay(delay)
-                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
+                .setInterpolator(Interpolators.ALPHA_IN)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationCancel(Animator animation) {
                         // Jump state if we are cancelled
-                        background.setScaleX(1f);
-                        background.setScaleY(1f);
                         background.setAlpha(1f);
                     }
                 })

@@ -24,8 +24,9 @@ import android.app.PendingIntent;
  */
 class DozeHostFake implements DozeHost {
     Callback callback;
-    private boolean pulseAborted;
-    private boolean pulseExtended;
+    boolean pulseAborted;
+    boolean pulseExtended;
+    boolean animateWakeup;
 
     @Override
     public void addCallback(@NonNull Callback callback) {
@@ -80,5 +81,10 @@ class DozeHostFake implements DozeHost {
     @Override
     public void extendPulse() {
         pulseExtended = true;
+    }
+
+    @Override
+    public void setAnimateWakeup(boolean animateWakeup) {
+        this.animateWakeup = animateWakeup;
     }
 }

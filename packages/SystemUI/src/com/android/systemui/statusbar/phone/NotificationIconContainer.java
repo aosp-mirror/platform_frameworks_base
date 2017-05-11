@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.statusbar.stack.ViewState;
 
 import java.util.HashMap;
@@ -87,6 +88,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return mAnimationFilter;
         }
     }.setDuration(200).setDelay(50);
+
+    private static final AnimationProperties UNDARK_PROPERTIES = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter()
+                .animateX();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
     public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
 
     private boolean mShowAllIcons = true;
@@ -404,11 +415,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     public void setDark(boolean dark, boolean fade, long delay) {
         mDark = dark;
-        mDisallowNextAnimation = true;
+        mDisallowNextAnimation |= !fade;
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             if (view instanceof StatusBarIconView) {
                 ((StatusBarIconView) view).setDark(dark, fade, delay);
+                if (!dark && fade) {
+                    getIconState((StatusBarIconView) view).justUndarkened = true;
+                }
             }
         }
     }
@@ -465,6 +479,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean useFullTransitionAmount;
         public boolean useLinearTransitionAmount;
         public boolean translateContent;
+        public boolean justUndarkened;
         public int iconColor = StatusBarIconView.NO_COLOR;
         public boolean noAnimations;
 
@@ -474,7 +489,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 StatusBarIconView icon = (StatusBarIconView) view;
                 boolean animate = false;
                 AnimationProperties animationProperties = null;
-                boolean animationsAllowed = mAnimationsEnabled && !mDisallowNextAnimation
+                boolean animationsAllowed = (mAnimationsEnabled || justUndarkened)
+                        && !mDisallowNextAnimation
                         && !noAnimations;
                 if (animationsAllowed) {
                     if (justAdded) {
@@ -486,6 +502,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                             animationProperties = ADD_ICON_PROPERTIES;
                             animate = true;
                         }
+                    } else if (justUndarkened) {
+                        animationProperties = UNDARK_PROPERTIES;
+                        animate = true;
                     } else if (visibleState != icon.getVisibleState()) {
                         animationProperties = DOT_ANIMATION_PROPERTIES;
                         animate = true;
@@ -536,6 +555,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             }
             justAdded = false;
             needsCannedAnimation = false;
+            justUndarkened = false;
         }
 
         @Override
