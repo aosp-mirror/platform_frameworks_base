@@ -54,6 +54,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
@@ -3124,7 +3125,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void generateDarkEvent() {
         if (mDarkNeedsAnimation) {
-            AnimationEvent ev = new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DARK);
+            AnimationEvent ev = new AnimationEvent(null,
+                    AnimationEvent.ANIMATION_TYPE_DARK,
+                    new AnimationFilter()
+                            .animateDark()
+                            .animateY(mShelf));
             ev.darkAnimationOriginIndex = mDarkAnimationOriginIndex;
             mAnimationEvents.add(ev);
             startBackgroundFadeIn();
@@ -3708,18 +3713,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void startBackgroundFadeIn() {
         ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, BACKGROUND_FADE, 0f, 1f);
-        int maxLength;
-        if (mDarkAnimationOriginIndex == AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE
-                || mDarkAnimationOriginIndex == AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_BELOW) {
-            maxLength = getNotGoneChildCount() - 1;
-        } else {
-            maxLength = Math.max(mDarkAnimationOriginIndex,
-                    getNotGoneChildCount() - mDarkAnimationOriginIndex - 1);
-        }
-        maxLength = Math.max(0, maxLength);
-        long delay = maxLength * StackStateAnimator.ANIMATION_DELAY_PER_ELEMENT_DARK;
-        fadeAnimator.setStartDelay(delay);
-        fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
         fadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
         fadeAnimator.start();
     }
@@ -4571,9 +4565,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateZ(),
 
                 // ANIMATION_TYPE_DARK
-                new AnimationFilter()
-                        .animateDark()
-                        .hasDelays(),
+                null, // Unused
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
                 new AnimationFilter()
@@ -4682,7 +4674,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
                 // ANIMATION_TYPE_DARK
-                StackStateAnimator.ANIMATION_DURATION_STANDARD,
+                StackStateAnimator.ANIMATION_DURATION_WAKEUP,
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
                 StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE,
@@ -4748,12 +4740,20 @@ public class NotificationStackScrollLayout extends ViewGroup
             this(view, type, LENGTHS[type]);
         }
 
+        AnimationEvent(View view, int type, AnimationFilter filter) {
+            this(view, type, LENGTHS[type], filter);
+        }
+
         AnimationEvent(View view, int type, long length) {
+            this(view, type, length, FILTERS[type]);
+        }
+
+        AnimationEvent(View view, int type, long length, AnimationFilter filter) {
             eventStartTime = AnimationUtils.currentAnimationTimeMillis();
             changingView = view;
             animationType = type;
-            filter = FILTERS[type];
             this.length = length;
+            this.filter = filter;
         }
 
         /**

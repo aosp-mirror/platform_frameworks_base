@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.app.Notification;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -28,6 +29,7 @@ import android.view.animation.Interpolator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -223,7 +225,7 @@ public class ViewState {
         }
     }
 
-    protected boolean isAnimating(View view) {
+    public boolean isAnimating(View view) {
         if (isAnimating(view, TAG_ANIMATOR_TRANSLATION_X)) {
             return true;
         }
@@ -540,7 +542,7 @@ public class ViewState {
         }
         ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_Y);
         AnimationFilter filter = properties.getAnimationFilter();
-        if (!filter.animateY) {
+        if (!filter.shouldAnimateY(child)) {
             // just a local update was performed
             if (previousAnimator != null) {
                 // we need to increase all animation keyframes of the previous animator by the
