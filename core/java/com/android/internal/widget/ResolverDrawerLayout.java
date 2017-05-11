@@ -96,6 +96,8 @@ public class ResolverDrawerLayout extends ViewGroup {
     private OnDismissedListener mOnDismissedListener;
     private RunOnDismissedListener mRunOnDismissedListener;
 
+    private boolean mDismissLocked;
+
     private float mInitialTouchX;
     private float mInitialTouchY;
     private float mLastTouchY;
@@ -187,6 +189,10 @@ public class ResolverDrawerLayout extends ViewGroup {
         invalidate();
     }
 
+    public void setDismissLocked(boolean locked) {
+        mDismissLocked = locked;
+    }
+
     private boolean isMoving() {
         return mIsDragging || !mScroller.isFinished();
     }
@@ -227,6 +233,10 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     public void setOnDismissedListener(OnDismissedListener listener) {
         mOnDismissedListener = listener;
+    }
+
+    private boolean isDismissable() {
+        return mOnDismissedListener != null && !mDismissLocked;
     }
 
     @Override
@@ -296,7 +306,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mInitialTouchY = mLastTouchY = y;
                 mActivePointerId = ev.getPointerId(0);
                 final boolean hitView = findChildUnder(mInitialTouchX, mInitialTouchY) != null;
-                handled = mOnDismissedListener != null || mCollapsibleHeight > 0;
+                handled = isDismissable() || mCollapsibleHeight > 0;
                 mIsDragging = hitView && handled;
                 abortAnimation();
             }
@@ -348,7 +358,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mIsDragging = false;
                 if (!wasDragging && findChildUnder(mInitialTouchX, mInitialTouchY) == null &&
                         findChildUnder(ev.getX(), ev.getY()) == null) {
-                    if (mOnDismissedListener != null) {
+                    if (isDismissable()) {
                         dispatchOnDismissed();
                         resetTouch();
                         return true;
@@ -362,7 +372,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mVelocityTracker.computeCurrentVelocity(1000);
                 final float yvel = mVelocityTracker.getYVelocity(mActivePointerId);
                 if (Math.abs(yvel) > mMinFlingVelocity) {
-                    if (mOnDismissedListener != null
+                    if (isDismissable()
                             && yvel > 0 && mCollapseOffset > mCollapsibleHeight) {
                         smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, yvel);
                         mDismissOnScrollerFinished = true;
@@ -656,7 +666,7 @@ public class ResolverDrawerLayout extends ViewGroup {
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
         if (!consumed && Math.abs(velocityY) > mMinFlingVelocity) {
-            if (mOnDismissedListener != null
+            if (isDismissable()
                     && velocityY < 0 && mCollapseOffset > mCollapsibleHeight) {
                 smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, velocityY);
                 mDismissOnScrollerFinished = true;
