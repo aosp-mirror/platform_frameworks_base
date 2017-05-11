@@ -17266,15 +17266,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * item in a list view.
      *
      * @return Returns a Parcelable object containing the view's current dynamic
-     *         state, or null if there is nothing interesting to save. The
-     *         default implementation returns null.
+     *         state, or null if there is nothing interesting to save.
      * @see #onRestoreInstanceState(android.os.Parcelable)
      * @see #saveHierarchyState(android.util.SparseArray)
      * @see #dispatchSaveInstanceState(android.util.SparseArray)
      * @see #setSaveEnabled(boolean)
      */
     @CallSuper
-    protected Parcelable onSaveInstanceState() {
+    @Nullable protected Parcelable onSaveInstanceState() {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
         if (mStartActivityRequestWho != null || isAutofilled()
                 || mAccessibilityViewId > LAST_APP_ACCESSIBILITY_ID) {
