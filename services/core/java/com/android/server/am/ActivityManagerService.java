@@ -1472,6 +1472,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
     boolean mForceResizableActivities;
+    /**
+     * Flag that indicates if multi-window is enabled.
+     *
+     * For any particular form of multi-window to be enabled, generic multi-window must be enabled
+     * in {@link com.android.internal.R.bool.config_supportsMultiWindow} config or
+     * {@link Settings.Global#DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES} development option set.
+     * At least one of the forms of multi-window must be enabled in order for this flag to be
+     * initialized to 'true'.
+     *
+     * @see #mSupportsSplitScreenMultiWindow
+     * @see #mSupportsFreeformWindowManagement
+     * @see #mSupportsPictureInPicture
+     * @see #mSupportsMultiDisplay
+     */
     boolean mSupportsMultiWindow;
     boolean mSupportsSplitScreenMultiWindow;
     boolean mSupportsFreeformWindowManagement;
@@ -13932,16 +13946,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAlwaysFinishActivities = alwaysFinishActivities;
             mSupportsLeanbackOnly = supportsLeanbackOnly;
             mForceResizableActivities = forceResizable;
-            if (supportsMultiWindow || forceResizable) {
+            final boolean multiWindowFormEnabled = freeformWindowManagement
+                    || supportsSplitScreenMultiWindow
+                    || supportsPictureInPicture
+                    || supportsMultiDisplay;
+            if ((supportsMultiWindow || forceResizable) && multiWindowFormEnabled) {
                 mSupportsMultiWindow = true;
-                mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
+                mSupportsFreeformWindowManagement = freeformWindowManagement;
+                mSupportsSplitScreenMultiWindow = supportsSplitScreenMultiWindow;
+                mSupportsPictureInPicture = supportsPictureInPicture;
+                mSupportsMultiDisplay = supportsMultiDisplay;
             } else {
                 mSupportsMultiWindow = false;
                 mSupportsFreeformWindowManagement = false;
+                mSupportsSplitScreenMultiWindow = false;
+                mSupportsPictureInPicture = false;
+                mSupportsMultiDisplay = false;
             }
-            mSupportsSplitScreenMultiWindow = supportsSplitScreenMultiWindow;
-            mSupportsPictureInPicture = supportsPictureInPicture;
-            mSupportsMultiDisplay = supportsMultiDisplay;
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
             mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
             // This happens before any activities are started, so we can change global configuration
