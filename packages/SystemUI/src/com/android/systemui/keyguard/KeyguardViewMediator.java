@@ -675,9 +675,14 @@ public class KeyguardViewMediator extends SystemUI {
         mLockPatternUtils = new LockPatternUtils(mContext);
         KeyguardUpdateMonitor.setCurrentUser(ActivityManager.getCurrentUser());
 
-        // Assume keyguard is showing (unless it's disabled) until we know for sure...
-        setShowingLocked(!shouldWaitForProvisioning() && !mLockPatternUtils.isLockScreenDisabled(
-                KeyguardUpdateMonitor.getCurrentUser()), true /* forceCallbacks */);
+        // Assume keyguard is showing (unless it's disabled) until we know for sure, unless Keyguard
+        // is disabled.
+        if (mContext.getResources().getBoolean(
+                com.android.keyguard.R.bool.config_enableKeyguardService)) {
+            setShowingLocked(!shouldWaitForProvisioning()
+                    && !mLockPatternUtils.isLockScreenDisabled(
+                            KeyguardUpdateMonitor.getCurrentUser()), true /* forceCallbacks */);
+        }
 
         mStatusBarKeyguardViewManager =
                 SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(mContext,
