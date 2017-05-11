@@ -1217,7 +1217,7 @@ public final class LoadedApk {
         RuntimeException mUnregisterLocation;
         boolean mForgotten;
 
-        final class Args extends BroadcastReceiver.PendingResult implements Runnable {
+        final class Args extends BroadcastReceiver.PendingResult {
             private Intent mCurIntent;
             private final boolean mOrdered;
             private boolean mDispatched;
@@ -1231,66 +1231,68 @@ public final class LoadedApk {
                 mCurIntent = intent;
                 mOrdered = ordered;
             }
-            
-            public void run() {
-                final BroadcastReceiver receiver = mReceiver;
-                final boolean ordered = mOrdered;
-                
-                if (ActivityThread.DEBUG_BROADCAST) {
-                    int seq = mCurIntent.getIntExtra("seq", -1);
-                    Slog.i(ActivityThread.TAG, "Dispatching broadcast " + mCurIntent.getAction()
-                            + " seq=" + seq + " to " + mReceiver);
-                    Slog.i(ActivityThread.TAG, "  mRegistered=" + mRegistered
-                            + " mOrderedHint=" + ordered);
-                }
-                
-                final IActivityManager mgr = ActivityManager.getService();
-                final Intent intent = mCurIntent;
-                if (intent == null) {
-                    Log.wtf(TAG, "Null intent being dispatched, mDispatched=" + mDispatched
-                            + ": run() previously called at "
-                            + Log.getStackTraceString(mPreviousRunStacktrace));
-                }
 
-                mCurIntent = null;
-                mDispatched = true;
-                mPreviousRunStacktrace = new Throwable("Previous stacktrace");
-                if (receiver == null || intent == null || mForgotten) {
-                    if (mRegistered && ordered) {
-                        if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                                "Finishing null broadcast to " + mReceiver);
-                        sendFinished(mgr);
-                    }
-                    return;
-                }
+            public final Runnable getRunnable() {
+                return () -> {
+                    final BroadcastReceiver receiver = mReceiver;
+                    final boolean ordered = mOrdered;
 
-                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
-                try {
-                    ClassLoader cl =  mReceiver.getClass().getClassLoader();
-                    intent.setExtrasClassLoader(cl);
-                    intent.prepareToEnterProcess();
-                    setExtrasClassLoader(cl);
-                    receiver.setPendingResult(this);
-                    receiver.onReceive(mContext, intent);
-                } catch (Exception e) {
-                    if (mRegistered && ordered) {
-                        if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                                "Finishing failed broadcast to " + mReceiver);
-                        sendFinished(mgr);
+                    if (ActivityThread.DEBUG_BROADCAST) {
+                        int seq = mCurIntent.getIntExtra("seq", -1);
+                        Slog.i(ActivityThread.TAG, "Dispatching broadcast " + mCurIntent.getAction()
+                                + " seq=" + seq + " to " + mReceiver);
+                        Slog.i(ActivityThread.TAG, "  mRegistered=" + mRegistered
+                                + " mOrderedHint=" + ordered);
                     }
-                    if (mInstrumentation == null ||
-                            !mInstrumentation.onException(mReceiver, e)) {
-                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                        throw new RuntimeException(
-                            "Error receiving broadcast " + intent
-                            + " in " + mReceiver, e);
+
+                    final IActivityManager mgr = ActivityManager.getService();
+                    final Intent intent = mCurIntent;
+                    if (intent == null) {
+                        Log.wtf(TAG, "Null intent being dispatched, mDispatched=" + mDispatched
+                                + ": run() previously called at "
+                                + Log.getStackTraceString(mPreviousRunStacktrace));
                     }
-                }
-                
-                if (receiver.getPendingResult() != null) {
-                    finish();
-                }
-                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+                    mCurIntent = null;
+                    mDispatched = true;
+                    mPreviousRunStacktrace = new Throwable("Previous stacktrace");
+                    if (receiver == null || intent == null || mForgotten) {
+                        if (mRegistered && ordered) {
+                            if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                                    "Finishing null broadcast to " + mReceiver);
+                            sendFinished(mgr);
+                        }
+                        return;
+                    }
+
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
+                    try {
+                        ClassLoader cl = mReceiver.getClass().getClassLoader();
+                        intent.setExtrasClassLoader(cl);
+                        intent.prepareToEnterProcess();
+                        setExtrasClassLoader(cl);
+                        receiver.setPendingResult(this);
+                        receiver.onReceive(mContext, intent);
+                    } catch (Exception e) {
+                        if (mRegistered && ordered) {
+                            if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                                    "Finishing failed broadcast to " + mReceiver);
+                            sendFinished(mgr);
+                        }
+                        if (mInstrumentation == null ||
+                                !mInstrumentation.onException(mReceiver, e)) {
+                            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                            throw new RuntimeException(
+                                    "Error receiving broadcast " + intent
+                                            + " in " + mReceiver, e);
+                        }
+                    }
+
+                    if (receiver.getPendingResult() != null) {
+                        finish();
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                };
             }
         }
 
@@ -1359,7 +1361,7 @@ public final class LoadedApk {
                             + " seq=" + seq + " to " + mReceiver);
                 }
             }
-            if (intent == null || !mActivityThread.post(args)) {
+            if (intent == null || !mActivityThread.post(args.getRunnable())) {
                 if (mRegistered && ordered) {
                     IActivityManager mgr = ActivityManager.getService();
                     if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
