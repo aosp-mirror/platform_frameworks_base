@@ -1493,11 +1493,12 @@ public final class ActiveServices {
                     mAm.updateOomAdjLocked(r.binding.service.app, false);
                 }
             }
+
+            mAm.updateOomAdjLocked();
+
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
-
-        mAm.updateOomAdjLocked();
 
         return true;
     }
