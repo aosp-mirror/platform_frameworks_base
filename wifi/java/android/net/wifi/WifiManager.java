@@ -160,6 +160,8 @@ public class WifiManager {
      *
      * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
      * components will be launched.
+     *
+     * @hide
      */
     public static final String ACTION_PASSPOINT_ICON = "android.net.wifi.action.PASSPOINT_ICON";
     /**
@@ -167,6 +169,8 @@ public class WifiManager {
      * String representation.
      *
      * Retrieve with {@link android.content.Intent#getLongExtra(String, long)}.
+     *
+     * @hide
      */
     public static final String EXTRA_BSSID_LONG = "android.net.wifi.extra.BSSID_LONG";
     /**
@@ -174,12 +178,16 @@ public class WifiManager {
      *
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)} and cast into
      * {@link android.graphics.drawable.Icon}.
+     *
+     * @hide
      */
     public static final String EXTRA_ICON = "android.net.wifi.extra.ICON";
     /**
      * Name of a file.
      *
      * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     *
+     * @hide
      */
     public static final String EXTRA_FILENAME = "android.net.wifi.extra.FILENAME";
 
@@ -195,6 +203,7 @@ public class WifiManager {
      * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
      * components will be launched.
      *
+     * @hide
      */
     public static final String ACTION_PASSPOINT_OSU_PROVIDERS_LIST =
             "android.net.wifi.action.PASSPOINT_OSU_PROVIDERS_LIST";
@@ -202,6 +211,8 @@ public class WifiManager {
      * Raw binary data of an ANQP (Access Network Query Protocol) element.
      *
      * Retrieve with {@link android.content.Intent#getByteArrayExtra(String)}.
+     *
+     * @hide
      */
     public static final String EXTRA_ANQP_ELEMENT_DATA =
             "android.net.wifi.extra.ANQP_ELEMENT_DATA";
@@ -220,6 +231,7 @@ public class WifiManager {
      * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
      * components will be launched.
      *
+     * @hide
      */
     public static final String ACTION_PASSPOINT_DEAUTH_IMMINENT =
             "android.net.wifi.action.PASSPOINT_DEAUTH_IMMINENT";
@@ -228,18 +240,24 @@ public class WifiManager {
      * {@code true} for ESS.
      *
      * Retrieve with {@link android.content.Intent#getBooleanExtra(String, boolean)}.
+     *
+     * @hide
      */
     public static final String EXTRA_ESS = "android.net.wifi.extra.ESS";
     /**
      * Delay in seconds.
      *
      * Retrieve with {@link android.content.Intent#getIntExtra(String, int)}.
+     *
+     * @hide
      */
     public static final String EXTRA_DELAY = "android.net.wifi.extra.DELAY";
     /**
      * String representation of an URL.
      *
      * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     *
+     * @hide
      */
     public static final String EXTRA_URL = "android.net.wifi.extra.URL";
 
@@ -254,8 +272,10 @@ public class WifiManager {
      *
      * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
      *
-     ** <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
+     * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
      * components will be launched.
+     *
+     * @hide
      */
     public static final String ACTION_PASSPOINT_SUBSCRIPTION_REMEDIATION =
             "android.net.wifi.action.PASSPOINT_SUBSCRIPTION_REMEDIATION";
@@ -265,6 +285,8 @@ public class WifiManager {
      * 1 - SOAP XML SPP
      *
      * Retrieve with {@link android.content.Intent#getIntExtra(String, int)}.
+     *
+     * @hide
      */
     public static final String EXTRA_SUBSCRIPTION_REMEDIATION_METHOD =
             "android.net.wifi.extra.SUBSCRIPTION_REMEDIATION_METHOD";
@@ -1107,6 +1129,8 @@ public class WifiManager {
      *
      * @param bssid The BSSID of the AP
      * @param fileName Name of the icon file (remote file) to query from the AP
+     *
+     * @hide
      */
     public void queryPasspointIcon(long bssid, String fileName) {
         try {
