@@ -356,7 +356,7 @@ final class ProcessList {
                 procState = "PERU";
                 break;
             case ActivityManager.PROCESS_STATE_TOP:
-                procState = "TOP";
+                procState = "TOP ";
                 break;
             case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
                 procState = "BFGS";
