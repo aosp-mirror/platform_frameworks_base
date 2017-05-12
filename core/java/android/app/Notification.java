@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static com.android.internal.util.NotificationColorUtil.satisfiesTextContrast;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -42,7 +44,6 @@ import android.media.PlayerBase;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -72,6 +73,7 @@ import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.util.Preconditions;
@@ -2670,6 +2672,19 @@ public class Notification implements Parcelable
         private static final boolean USE_ONLY_TITLE_IN_LOW_PRIORITY_SUMMARY =
                 SystemProperties.getBoolean("notifications.only_title", true);
 
+        /**
+         * The lightness difference that has to be added to the primary text color to obtain the
+         * secondary text color when the background is light.
+         */
+        private static final int LIGHTNESS_TEXT_DIFFERENCE_LIGHT = 20;
+
+        /**
+         * The lightness difference that has to be added to the primary text color to obtain the
+         * secondary text color when the background is dark.
+         * A bit less then the above value, since it looks better on dark backgrounds.
+         */
+        private static final int LIGHTNESS_TEXT_DIFFERENCE_DARK = -10;
+
         private Context mContext;
         private Notification mN;
         private Bundle mUserExtras = new Bundle();
@@ -3836,9 +3851,24 @@ public class Notification implements Parcelable
             contentView.setTextColor(id, mPrimaryTextColor);
         }
 
-        private int getPrimaryTextColor() {
+        /**
+         * @return the primary text color
+         * @hide
+         */
+        @VisibleForTesting
+        public int getPrimaryTextColor() {
             ensureColors();
             return mPrimaryTextColor;
+        }
+
+        /**
+         * @return the secondary text color
+         * @hide
+         */
+        @VisibleForTesting
+        public int getSecondaryTextColor() {
+            ensureColors();
+            return mSecondaryTextColor;
         }
 
         private int getActionBarColor() {
@@ -3880,16 +3910,21 @@ public class Notification implements Parcelable
                     double textLum = NotificationColorUtil.calculateLuminance(mForegroundColor);
                     double contrast = NotificationColorUtil.calculateContrast(mForegroundColor,
                             backgroundColor);
-                    boolean textDark = backLum > textLum;
+                    // We only respect the given colors if worst case Black or White still has
+                    // contrast
+                    boolean backgroundLight = backLum > textLum
+                                    && satisfiesTextContrast(backgroundColor, Color.BLACK)
+                            || backLum <= textLum
+                                    && !satisfiesTextContrast(backgroundColor, Color.WHITE);
                     if (contrast < 4.5f) {
-                        if (textDark) {
+                        if (backgroundLight) {
                             mSecondaryTextColor = NotificationColorUtil.findContrastColor(
                                     mForegroundColor,
                                     backgroundColor,
                                     true /* findFG */,
                                     4.5f);
                             mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
-                                    mSecondaryTextColor, -20);
+                                    mSecondaryTextColor, -LIGHTNESS_TEXT_DIFFERENCE_LIGHT);
                         } else {
                             mSecondaryTextColor =
                                     NotificationColorUtil.findContrastColorAgainstDark(
@@ -3898,16 +3933,17 @@ public class Notification implements Parcelable
                                     true /* findFG */,
                                     4.5f);
                             mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
-                                    mSecondaryTextColor, 10);
+                                    mSecondaryTextColor, -LIGHTNESS_TEXT_DIFFERENCE_DARK);
                         }
                     } else {
                         mPrimaryTextColor = mForegroundColor;
                         mSecondaryTextColor = NotificationColorUtil.changeColorLightness(
-                                mPrimaryTextColor, textDark ? 10 : -20);
+                                mPrimaryTextColor, backgroundLight ? LIGHTNESS_TEXT_DIFFERENCE_LIGHT
+                                        : LIGHTNESS_TEXT_DIFFERENCE_DARK);
                         if (NotificationColorUtil.calculateContrast(mSecondaryTextColor,
                                 backgroundColor) < 4.5f) {
                             // oh well the secondary is not good enough
-                            if (textDark) {
+                            if (backgroundLight) {
                                 mSecondaryTextColor = NotificationColorUtil.findContrastColor(
                                         mSecondaryTextColor,
                                         backgroundColor,
@@ -3922,7 +3958,9 @@ public class Notification implements Parcelable
                                         4.5f);
                             }
                             mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
-                                    mSecondaryTextColor, textDark ? -20 : 10);
+                                    mSecondaryTextColor, backgroundLight
+                                            ? -LIGHTNESS_TEXT_DIFFERENCE_LIGHT
+                                            : -LIGHTNESS_TEXT_DIFFERENCE_DARK);
                         }
                     }
                 }
