@@ -1310,6 +1310,10 @@ class WindowStateAnimator {
     }
 
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
+        if (mSurfaceController == null) {
+            return;
+        }
+
         final WindowState w = mWin;
         final LayoutParams attrs = mWin.getAttrs();
         final Task task = w.getTask();

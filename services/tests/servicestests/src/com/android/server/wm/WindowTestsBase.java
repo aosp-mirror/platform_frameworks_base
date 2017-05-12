@@ -120,18 +120,21 @@ class WindowTestsBase {
     @After
     public void tearDown() throws Exception {
         final LinkedList<WindowState> nonCommonWindows = new LinkedList();
-        sWm.mRoot.forAllWindows(w -> {
-            if (!mCommonWindows.contains(w)) {
-                nonCommonWindows.addLast(w);
+
+        synchronized (sWm.mWindowMap) {
+            sWm.mRoot.forAllWindows(w -> {
+                if (!mCommonWindows.contains(w)) {
+                    nonCommonWindows.addLast(w);
+                }
+            }, true /* traverseTopToBottom */);
+
+            while (!nonCommonWindows.isEmpty()) {
+                nonCommonWindows.pollLast().removeImmediately();
             }
-        }, true /* traverseTopToBottom */);
 
-        while (!nonCommonWindows.isEmpty()) {
-            nonCommonWindows.pollLast().removeImmediately();
+            mDisplayContent.removeImmediately();
+            sWm.mInputMethodTarget = null;
         }
-
-        mDisplayContent.removeImmediately();
-        sWm.mInputMethodTarget = null;
     }
 
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
