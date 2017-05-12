@@ -114,6 +114,7 @@ public class ServiceInfo implements Parcelable {
         sessionEndTime = (java.util.Date) in.readSerializable();
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         Set<Locale> keySet = names.keySet();
         dest.writeInt(keySet.size());
@@ -128,7 +129,33 @@ public class ServiceInfo implements Parcelable {
         dest.writeSerializable(sessionEndTime);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
+
+    public Map<Locale, String> getNames() {
+        return names;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public Date getSessionStartTime() {
+        return sessionStartTime;
+    }
+
+    public Date getSessionEndTime() {
+        return sessionEndTime;
+    }
+
 }
