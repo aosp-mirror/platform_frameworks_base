@@ -382,6 +382,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final boolean DEBUG_PACKAGE_SCANNING = false;
     private static final boolean DEBUG_VERIFY = false;
     private static final boolean DEBUG_FILTERS = false;
+    private static final boolean DEBUG_PERMISSIONS = false;
+    private static final boolean DEBUG_SHARED_LIBRARIES = false;
 
     // Debug output for dexopting. This is shared between PackageManagerService, OtaDexoptService
     // and PackageDexOptimizer. All these classes have their own flag to allow switching a single
@@ -2783,10 +2785,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         // skip setup wizard; allow it to keep the high priority filter
                         continue;
                     }
-                    Slog.w(TAG, "Protected action; cap priority to 0;"
-                            + " package: " + filter.activity.info.packageName
-                            + " activity: " + filter.activity.className
-                            + " origPrio: " + filter.getPriority());
+                    if (DEBUG_FILTERS) {
+                        Slog.i(TAG, "Protected action; cap priority to 0;"
+                                + " package: " + filter.activity.info.packageName
+                                + " activity: " + filter.activity.className
+                                + " origPrio: " + filter.getPriority());
+                    }
                     filter.setPriority(0);
                 }
             }
@@ -9298,8 +9302,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                             "Package " + packageName + " requires unavailable shared library "
                                     + libName + "; failing!");
-                } else {
-                    Slog.w(TAG, "Package " + packageName
+                } else if (DEBUG_SHARED_LIBRARIES) {
+                    Slog.i(TAG, "Package " + packageName
                             + " desires unavailable shared library "
                             + libName + "; ignoring!");
                 }
@@ -10662,13 +10666,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Now that permission groups have a special meaning, we ignore permission
                 // groups for legacy apps to prevent unexpected behavior. In particular,
-                // permissions for one app being granted to someone just becase they happen
+                // permissions for one app being granted to someone just because they happen
                 // to be in a group defined by another app (before this had no implications).
                 if (pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
                     p.group = mPermissionGroups.get(p.info.group);
                     // Warn for a permission in an unknown group.
-                    if (p.info.group != null && p.group == null) {
-                        Slog.w(TAG, "Permission " + p.info.name + " from package "
+                    if (DEBUG_PERMISSIONS && p.info.group != null && p.group == null) {
+                        Slog.i(TAG, "Permission " + p.info.name + " from package "
                                 + p.info.packageName + " in an unknown group " + p.info.group);
                     }
                 }
@@ -11021,12 +11025,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (ps.pkg != null && ps.pkg.applicationInfo != null &&
                             !TextUtils.equals(adjustedAbi, ps.pkg.applicationInfo.primaryCpuAbi)) {
                         ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
-                        Slog.i(TAG, "Adjusting ABI for " + ps.name + " to " + adjustedAbi
-                                + " (requirer="
-                                + (requirer != null ? requirer.pkg : "null")
-                                + ", scannedPackage="
-                                + (scannedPackage != null ? scannedPackage : "null")
-                                + ")");
+                        if (DEBUG_ABI_SELECTION) {
+                            Slog.i(TAG, "Adjusting ABI for " + ps.name + " to " + adjustedAbi
+                                    + " (requirer="
+                                    + (requirer != null ? requirer.pkg : "null")
+                                    + ", scannedPackage="
+                                    + (scannedPackage != null ? scannedPackage : "null")
+                                    + ")");
+                        }
                         try {
                             mInstaller.rmdex(ps.codePathString,
                                     getDexCodeInstructionSet(getPreferredInstructionSet()));
@@ -11747,8 +11753,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (bp == null || bp.packageSetting == null) {
                 if (packageOfInterest == null || packageOfInterest.equals(pkg.packageName)) {
-                    Slog.w(TAG, "Unknown permission " + name
-                            + " in package " + pkg.packageName);
+                    if (DEBUG_PERMISSIONS) {
+                        Slog.i(TAG, "Unknown permission " + name
+                                + " in package " + pkg.packageName);
+                    }
                 }
                 continue;
             }
@@ -11756,14 +11764,18 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Limit ephemeral apps to ephemeral allowed permissions.
             if (pkg.applicationInfo.isInstantApp() && !bp.isInstant()) {
-                Log.i(TAG, "Denying non-ephemeral permission " + bp.name + " for package "
-                        + pkg.packageName);
+                if (DEBUG_PERMISSIONS) {
+                    Log.i(TAG, "Denying non-ephemeral permission " + bp.name + " for package "
+                            + pkg.packageName);
+                }
                 continue;
             }
 
             if (bp.isRuntimeOnly() && !appSupportsRuntimePermissions) {
-                Log.i(TAG, "Denying runtime-only permission " + bp.name + " for package "
-                        + pkg.packageName);
+                if (DEBUG_PERMISSIONS) {
+                    Log.i(TAG, "Denying runtime-only permission " + bp.name + " for package "
+                            + pkg.packageName);
+                }
                 continue;
             }
 
@@ -11821,8 +11833,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 } break;
             }
 
-            if (DEBUG_INSTALL) {
-                Log.i(TAG, "Package " + pkg.packageName + " granting " + perm);
+            if (DEBUG_PERMISSIONS) {
+                Slog.i(TAG, "Granting permission " + perm + " to package " + pkg.packageName);
             }
 
             if (grant != GRANT_DENIED) {
@@ -11968,9 +11980,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     default: {
                         if (packageOfInterest == null
                                 || packageOfInterest.equals(pkg.packageName)) {
-                            Slog.w(TAG, "Not granting permission " + perm
-                                    + " to package " + pkg.packageName
-                                    + " because it was previously installed without");
+                            if (DEBUG_PERMISSIONS) {
+                                Slog.i(TAG, "Not granting permission " + perm
+                                        + " to package " + pkg.packageName
+                                        + " because it was previously installed without");
+                            }
                         }
                     } break;
                 }
@@ -11989,8 +12003,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) == 0) {
                     // Don't print warning for app op permissions, since it is fine for them
                     // not to be granted, there is a UI for the user to decide.
-                    if (packageOfInterest == null || packageOfInterest.equals(pkg.packageName)) {
-                        Slog.w(TAG, "Not granting permission " + perm
+                    if (DEBUG_PERMISSIONS
+                            && (packageOfInterest == null
+                                    || packageOfInterest.equals(pkg.packageName))) {
+                        Slog.i(TAG, "Not granting permission " + perm
                                 + " to package " + pkg.packageName
                                 + " (protectionLevel=" + bp.protectionLevel
                                 + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
@@ -12359,10 +12375,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     ((applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0);
             if (!privilegedApp) {
                 // non-privileged applications can never define a priority >0
-                Slog.w(TAG, "Non-privileged app; cap priority to 0;"
-                        + " package: " + applicationInfo.packageName
-                        + " activity: " + intent.activity.className
-                        + " origPrio: " + intent.getPriority());
+                if (DEBUG_FILTERS) {
+                    Slog.i(TAG, "Non-privileged app; cap priority to 0;"
+                            + " package: " + applicationInfo.packageName
+                            + " activity: " + intent.activity.className
+                            + " origPrio: " + intent.getPriority());
+                }
                 intent.setPriority(0);
                 return;
             }
@@ -12402,10 +12420,12 @@ public class PackageManagerService extends IPackageManager.Stub
                             // setup wizard gets whatever it wants
                             return;
                         }
-                        Slog.w(TAG, "Protected action; cap priority to 0;"
-                                + " package: " + intent.activity.info.packageName
-                                + " activity: " + intent.activity.className
-                                + " origPrio: " + intent.getPriority());
+                        if (DEBUG_FILTERS) {
+                            Slog.i(TAG, "Protected action; cap priority to 0;"
+                                    + " package: " + intent.activity.info.packageName
+                                    + " activity: " + intent.activity.className
+                                    + " origPrio: " + intent.getPriority());
+                        }
                         intent.setPriority(0);
                         return;
                     }
