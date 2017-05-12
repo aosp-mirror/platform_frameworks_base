@@ -5960,15 +5960,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             result &= ~ACTION_PASS_TO_USER;
                             break;
                         }
-                        if (telecomManager.isInCall()
-                                && (result & ACTION_PASS_TO_USER) == 0) {
-                            // If we are in call but we decided not to pass the key to
-                            // the application, just pass it to the session service.
-                            MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
-                                    event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
-                            break;
-                        }
                     }
+                    int audioMode = AudioManager.MODE_NORMAL;
+                    try {
+                        audioMode = getAudioService().getMode();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error getting AudioService in interceptKeyBeforeQueueing.", e);
+                    }
+                    boolean isInCall = (telecomManager != null && telecomManager.isInCall()) ||
+                            audioMode == AudioManager.MODE_IN_COMMUNICATION;
+                    if (isInCall && (result & ACTION_PASS_TO_USER) == 0) {
+                        // If we are in call but we decided not to pass the key to
+                        // the application, just pass it to the session service.
+                        MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
+                                event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
+                        break;
+                    }
+
                 }
                 if (mUseTvRouting || mHandleVolumeKeysInWM) {
                     // Defer special key handlings to
@@ -6313,7 +6321,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 try {
                     getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,
                             AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName, TAG);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Error dispatching volume up in dispatchTvAudioEvent.", e);
                 }
                 break;
@@ -6321,7 +6329,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 try {
                     getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,
                             AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName, TAG);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Error dispatching volume down in dispatchTvAudioEvent.", e);
                 }
                 break;
@@ -6332,7 +6340,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 AudioManager.ADJUST_TOGGLE_MUTE,
                                 AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName, TAG);
                     }
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Error dispatching mute in dispatchTvAudioEvent.", e);
                 }
                 break;
