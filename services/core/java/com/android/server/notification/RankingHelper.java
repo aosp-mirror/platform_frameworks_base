@@ -312,7 +312,8 @@ public class RankingHelper implements RankingConfig {
 
     private void createDefaultChannelIfNeeded(Record r) throws NameNotFoundException {
         if (r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
-            // Already exists
+            r.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID).setName(
+                    mContext.getString(R.string.default_notification_channel_label));
             return;
         }
 
@@ -776,6 +777,21 @@ public class RankingHelper implements RankingConfig {
             }
         }
         return new ParceledListSlice<>(channels);
+    }
+
+    /**
+     * True for pre-O apps that only have the default channel, or pre O apps that have no
+     * channels yet. This method will create the default channel for pre-O apps that don't have it.
+     * Should never be true for O+ targeting apps, but that's enforced on boot/when an app
+     * upgrades.
+     */
+    public boolean onlyHasDefaultChannel(String pkg, int uid) {
+        Record r = getOrCreateRecord(pkg, uid);
+        if (r.channels.size() == 1
+                && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+            return true;
+        }
+        return false;
     }
 
     public int getDeletedChannelCount(String pkg, int uid) {
