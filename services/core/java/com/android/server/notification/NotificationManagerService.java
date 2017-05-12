@@ -1827,6 +1827,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean onlyHasDefaultChannel(String pkg, int uid) {
+            enforceSystemOrSystemUI("onlyHasDefaultChannel");
+            return mRankingHelper.onlyHasDefaultChannel(pkg, uid);
+        }
+
+        @Override
         public int getDeletedChannelCount(String pkg, int uid) {
             enforceSystemOrSystemUI("getDeletedChannelCount");
             return mRankingHelper.getDeletedChannelCount(pkg, uid);
