@@ -400,6 +400,7 @@ final class SelectionActionModeHelper {
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             mTextClassifier = Preconditions.checkNotNull(textClassifier);
             mText = Preconditions.checkNotNull(text).toString();
+            mLastClassificationText = null; // invalidate.
             Preconditions.checkArgument(selectionEnd > selectionStart);
             mSelectionStart = selectionStart;
             mSelectionEnd = selectionEnd;
