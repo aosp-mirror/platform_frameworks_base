@@ -16,10 +16,10 @@
 
 package com.android.server.appwidget;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -35,10 +35,8 @@ import android.content.ComponentName;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutServiceInternal;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
@@ -113,19 +111,18 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         ComponentName provider = new ComponentName(mTestContext, DummyAppWidget.class);
         // Set up users.
         when(mMockShortcutService.requestPinAppWidget(anyString(),
-                any(AppWidgetProviderInfo.class), any(Bundle.class), any(IntentSender.class), anyInt()))
+                any(AppWidgetProviderInfo.class), eq(null), eq(null), anyInt()))
                 .thenReturn(true);
         assertTrue(mManager.requestPinAppWidget(provider, null, null));
 
         final ArgumentCaptor<AppWidgetProviderInfo> providerCaptor =
                 ArgumentCaptor.forClass(AppWidgetProviderInfo.class);
         verify(mMockShortcutService, times(1)).requestPinAppWidget(anyString(),
-                providerCaptor.capture(), any(null), eq(null), anyInt());
+                providerCaptor.capture(), eq(null), eq(null), anyInt());
         assertEquals(provider, providerCaptor.getValue().provider);
     }
 
     public void testIsRequestPinAppWidgetSupported() {
-        ComponentName provider = new ComponentName(mTestContext, DummyAppWidget.class);
         // Set up users.
         when(mMockShortcutService.isRequestPinItemSupported(anyInt(), anyInt()))
                 .thenReturn(true, false);
