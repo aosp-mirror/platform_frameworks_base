@@ -9157,6 +9157,23 @@ public final class Settings {
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
 
         /**
+         * Battery anomaly detection specific settings
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "anomaly_detection_enabled=true,wakelock_threshold=2000"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * anomaly_detection_enabled       (boolean)
+         * wakelock_enabled                (boolean)
+         * wakelock_threshold              (long)
+         * </pre>
+         * @hide
+         */
+        public static final String ANOMALY_DETECTION_CONSTANTS = "anomaly_detection_constants";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
