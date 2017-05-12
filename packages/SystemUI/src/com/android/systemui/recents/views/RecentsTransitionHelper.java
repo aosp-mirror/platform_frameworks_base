@@ -101,57 +101,49 @@ public class RecentsTransitionHelper {
      */
     public void launchTaskFromRecents(final TaskStack stack, @Nullable final Task task,
             final TaskStackView stackView, final TaskView taskView,
-            final boolean screenPinningRequested, final Rect bounds, final int destinationStack) {
-        final ActivityOptions opts = ActivityOptions.makeBasic();
-        if (bounds != null) {
-            opts.setLaunchBounds(bounds.isEmpty() ? null : bounds);
-        }
+            final boolean screenPinningRequested, final int destinationStack) {
 
         final ActivityOptions.OnAnimationStartedListener animStartedListener;
-        final IAppTransitionAnimationSpecsFuture transitionFuture;
+        final AppTransitionAnimationSpecsFuture transitionFuture;
         if (taskView != null) {
-            transitionFuture = getAppTransitionFuture(new AnimationSpecComposer() {
-                @Override
-                public List<AppTransitionAnimationSpec> composeSpecs() {
-                    return composeAnimationSpecs(task, stackView, destinationStack);
-                }
-            });
-            animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
-                @Override
-                public void onAnimationStarted() {
-                    // If we are launching into another task, cancel the previous task's
-                    // window transition
-                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
-                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
-                    stackView.cancelAllTaskViewAnimations();
 
-                    if (screenPinningRequested) {
-                        // Request screen pinning after the animation runs
-                        mStartScreenPinningRunnable.taskId = task.key.id;
-                        mHandler.postDelayed(mStartScreenPinningRunnable, 350);
-                    }
+            // Fetch window rect here already in order not to be blocked on lock contention in WM
+            // when the future calls it.
+            final Rect windowRect = Recents.getSystemServices().getWindowRect();
+            transitionFuture = getAppTransitionFuture(
+                    () -> composeAnimationSpecs(task, stackView, destinationStack, windowRect));
+            animStartedListener = () -> {
+                // If we are launching into another task, cancel the previous task's
+                // window transition
+                EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
+                EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                stackView.cancelAllTaskViewAnimations();
+
+                if (screenPinningRequested) {
+                    // Request screen pinning after the animation runs
+                    mStartScreenPinningRunnable.taskId = task.key.id;
+                    mHandler.postDelayed(mStartScreenPinningRunnable, 350);
                 }
             };
         } else {
             // This is only the case if the task is not on screen (scrolled offscreen for example)
             transitionFuture = null;
-            animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
-                @Override
-                public void onAnimationStarted() {
-                    // If we are launching into another task, cancel the previous task's
-                    // window transition
-                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
-                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
-                    stackView.cancelAllTaskViewAnimations();
-                }
+            animStartedListener = () -> {
+                // If we are launching into another task, cancel the previous task's
+                // window transition
+                EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
+                EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                stackView.cancelAllTaskViewAnimations();
             };
         }
 
+        final ActivityOptions opts = ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
+                mHandler, transitionFuture != null ? transitionFuture.future : null,
+                animStartedListener, true /* scaleUp */);
         if (taskView == null) {
             // If there is no task view, then we do not need to worry about animating out occluding
             // task views, and we can launch immediately
-            startTaskActivity(stack, task, taskView, opts, transitionFuture, animStartedListener,
-                    destinationStack);
+            startTaskActivity(stack, task, taskView, opts, transitionFuture, destinationStack);
         } else {
             LaunchTaskStartedEvent launchStartedEvent = new LaunchTaskStartedEvent(taskView,
                     screenPinningRequested);
@@ -160,14 +152,13 @@ public class RecentsTransitionHelper {
                     @Override
                     public void run() {
                         startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                                animStartedListener, destinationStack);
+                                destinationStack);
                     }
                 });
                 EventBus.getDefault().send(launchStartedEvent);
             } else {
                 EventBus.getDefault().send(launchStartedEvent);
-                startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                        animStartedListener, destinationStack);
+                startTaskActivity(stack, task, taskView, opts, transitionFuture, destinationStack);
             }
         }
         Recents.getSystemServices().sendCloseSystemWindows(
@@ -199,30 +190,31 @@ public class RecentsTransitionHelper {
      * @param destinationStack id of the stack to put the task into.
      */
     private void startTaskActivity(TaskStack stack, Task task, @Nullable TaskView taskView,
-            ActivityOptions opts, IAppTransitionAnimationSpecsFuture transitionFuture,
-            final OnAnimationStartedListener animStartedListener, int destinationStack) {
+            ActivityOptions opts, AppTransitionAnimationSpecsFuture transitionFuture,
+            int destinationStack) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.startActivityFromRecents(mContext, task.key, task.title, opts, destinationStack)) {
-            // Keep track of the index of the task launch
-            int taskIndexFromFront = 0;
-            int taskIndex = stack.indexOfStackTask(task);
-            if (taskIndex > -1) {
-                taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
-            }
-            EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
-        } else {
-            // Dismiss the task if we fail to launch it
-            if (taskView != null) {
-                taskView.dismissTask();
-            }
+        ssp.startActivityFromRecents(mContext, task.key, task.title, opts, destinationStack,
+                succeeded -> {
+            if (succeeded) {
+                // Keep track of the index of the task launch
+                int taskIndexFromFront = 0;
+                int taskIndex = stack.indexOfStackTask(task);
+                if (taskIndex > -1) {
+                    taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
+                }
+                EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
+            } else {
+                // Dismiss the task if we fail to launch it
+                if (taskView != null) {
+                    taskView.dismissTask();
+                }
 
-            // Keep track of failed launches
-            EventBus.getDefault().send(new LaunchTaskFailedEvent());
-        }
-
+                // Keep track of failed launches
+                EventBus.getDefault().send(new LaunchTaskFailedEvent());
+            }
+        });
         if (transitionFuture != null) {
-            ssp.overridePendingAppTransitionMultiThumbFuture(transitionFuture,
-                    wrapStartedListener(animStartedListener), true /* scaleUp */);
+            mHandler.post(transitionFuture::precacheSpecs);
         }
     }
 
@@ -231,21 +223,18 @@ public class RecentsTransitionHelper {
      *
      * @param composer The implementation that composes the specs on the UI thread.
      */
-    public IAppTransitionAnimationSpecsFuture getAppTransitionFuture(
+    public AppTransitionAnimationSpecsFuture getAppTransitionFuture(
             final AnimationSpecComposer composer) {
         synchronized (this) {
             mAppTransitionAnimationSpecs = SPECS_WAITING;
         }
-        return new IAppTransitionAnimationSpecsFuture.Stub() {
+        IAppTransitionAnimationSpecsFuture future = new IAppTransitionAnimationSpecsFuture.Stub() {
             @Override
             public AppTransitionAnimationSpec[] get() throws RemoteException {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (RecentsTransitionHelper.this) {
-                            mAppTransitionAnimationSpecs = composer.composeSpecs();
-                            RecentsTransitionHelper.this.notifyAll();
-                        }
+                mHandler.post(() -> {
+                    synchronized (RecentsTransitionHelper.this) {
+                        mAppTransitionAnimationSpecs = composer.composeSpecs();
+                        RecentsTransitionHelper.this.notifyAll();
                     }
                 });
                 synchronized (RecentsTransitionHelper.this) {
@@ -265,6 +254,7 @@ public class RecentsTransitionHelper {
                 }
             }
         };
+        return new AppTransitionAnimationSpecsFuture(composer, future);
     }
 
     /**
@@ -283,7 +273,7 @@ public class RecentsTransitionHelper {
      * Composes the animation specs for all the tasks in the target stack.
      */
     private List<AppTransitionAnimationSpec> composeAnimationSpecs(final Task task,
-            final TaskStackView stackView, final int destinationStack) {
+            final TaskStackView stackView, final int destinationStack, Rect windowRect) {
         // Ensure we have a valid target stack id
         final int targetStackId = destinationStack != INVALID_STACK_ID ?
                 destinationStack : task.key.stackId;
@@ -309,8 +299,7 @@ public class RecentsTransitionHelper {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
                 mTmpTransform.fillIn(taskView);
-                stackLayout.transformToScreenCoordinates(mTmpTransform,
-                        null /* windowOverrideRect */);
+                stackLayout.transformToScreenCoordinates(mTmpTransform, windowRect);
                 AppTransitionAnimationSpec spec = composeAnimationSpec(stackView, taskView,
                         mTmpTransform, true /* addHeaderBitmap */);
                 if (spec != null) {
@@ -429,5 +418,35 @@ public class RecentsTransitionHelper {
 
     public interface AnimationSpecComposer {
         List<AppTransitionAnimationSpec> composeSpecs();
+    }
+
+    /**
+     * Class to be returned from {@link #composeAnimationSpec} that gives access to both the future
+     * and the anonymous class used for composing.
+     */
+    public class AppTransitionAnimationSpecsFuture {
+
+        private final AnimationSpecComposer composer;
+        private final IAppTransitionAnimationSpecsFuture future;
+
+        private AppTransitionAnimationSpecsFuture(AnimationSpecComposer composer,
+                IAppTransitionAnimationSpecsFuture future) {
+            this.composer = composer;
+            this.future = future;
+        }
+
+        public IAppTransitionAnimationSpecsFuture getFuture() {
+            return future;
+        }
+
+        /**
+         * Manually generates and caches the spec such that they are already available when the
+         * future needs.
+         */
+        public void precacheSpecs() {
+            synchronized (RecentsTransitionHelper.this) {
+                mAppTransitionAnimationSpecs = composer.composeSpecs();
+            }
+        }
     }
 }
