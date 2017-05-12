@@ -135,6 +135,8 @@ public:
     static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
 
     static int copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap);
+
+    static sk_sp<SkImage> makeTextureImage(Bitmap* bitmap);
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
