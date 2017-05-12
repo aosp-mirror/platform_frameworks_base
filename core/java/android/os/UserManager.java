@@ -19,6 +19,7 @@ package android.os;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -2129,7 +2130,7 @@ public class UserManager {
      * @return the list of users that were created.
      * @hide
      */
-    public List<UserInfo> getUsers(boolean excludeDying) {
+    public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         try {
             return mService.getUsers(excludeDying);
         } catch (RemoteException re) {

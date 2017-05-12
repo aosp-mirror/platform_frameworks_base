@@ -20,6 +20,7 @@ import static android.app.AppGlobals.getPackageManager;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
+import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 
@@ -46,6 +47,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -243,11 +245,14 @@ public final class OverlayManagerService extends SystemService {
                     packageFilter, null, null);
 
             final IntentFilter userFilter = new IntentFilter();
+            userFilter.addAction(ACTION_USER_ADDED);
             userFilter.addAction(ACTION_USER_REMOVED);
             getContext().registerReceiverAsUser(new UserReceiver(), UserHandle.ALL,
                     userFilter, null, null);
 
             restoreSettings();
+
+            initIfNeeded();
             onSwitchUser(UserHandle.USER_SYSTEM);
 
             publishBinderService(Context.OVERLAY_SERVICE, mService);
@@ -269,14 +274,31 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
+    private void initIfNeeded() {
+        final UserManager um = getContext().getSystemService(UserManager.class);
+        final List<UserInfo> users = um.getUsers(true /*excludeDying*/);
+        synchronized (mLock) {
+            final int userCount = users.size();
+            for (int i = 0; i < userCount; i++) {
+                final UserInfo userInfo = users.get(i);
+                if (!userInfo.supportsSwitchTo() && userInfo.id != UserHandle.USER_SYSTEM) {
+                    // Initialize any users that can't be switched to, as there state would
+                    // never be setup in onSwitchUser(). We will switch to the system user right
+                    // after this, and its state will be setup there.
+                    final List<String> targets = mImpl.updateOverlaysForUser(users.get(i).id);
+                    updateOverlayPaths(users.get(i).id, targets);
+                }
+            }
+        }
+    }
+
     @Override
     public void onSwitchUser(final int newUserId) {
         // ensure overlays in the settings are up-to-date, and propagate
         // any asset changes to the rest of the system
-        final List<String> targets;
         synchronized (mLock) {
-            targets = mImpl.onSwitchUser(newUserId);
-            updateAssetsLocked(newUserId, targets);
+            final List<String> targets = mImpl.updateOverlaysForUser(newUserId);
+            updateAssets(newUserId, targets);
         }
         schedulePersistSettings();
     }
@@ -428,10 +450,19 @@ public final class OverlayManagerService extends SystemService {
     private final class UserReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
             switch (intent.getAction()) {
+                case ACTION_USER_ADDED:
+                    if (userId != UserHandle.USER_NULL) {
+                        final ArrayList<String> targets;
+                        synchronized (mLock) {
+                            targets = mImpl.updateOverlaysForUser(userId);
+                        }
+                        updateOverlayPaths(userId, targets);
+                    }
+                    break;
+
                 case ACTION_USER_REMOVED:
-                    final int userId =
-                            intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                     if (userId != UserHandle.USER_NULL) {
                         synchronized (mLock) {
                             mImpl.onUserRemoved(userId);
@@ -647,9 +678,7 @@ public final class OverlayManagerService extends SystemService {
         public void onOverlaysChanged(@NonNull final String targetPackageName, final int userId) {
             schedulePersistSettings();
             FgThread.getHandler().post(() -> {
-                synchronized (mLock) {
-                    updateAssetsLocked(userId, targetPackageName);
-                }
+                updateAssets(userId, targetPackageName);
 
                 final Intent intent = new Intent(Intent.ACTION_OVERLAY_CHANGED,
                         Uri.fromParts("package", targetPackageName, null));
@@ -670,13 +699,10 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
-    private void updateAssetsLocked(final int userId, final String targetPackageName) {
-        final List<String> list = new ArrayList<>();
-        list.add(targetPackageName);
-        updateAssetsLocked(userId, list);
-    }
-
-    private void updateAssetsLocked(final int userId, List<String> targetPackageNames) {
+    /**
+     * Updates the target packages' set of enabled overlays in PackageManager.
+     */
+    private void updateOverlayPaths(int userId, List<String> targetPackageNames) {
         if (DEBUG) {
             Slog.d(TAG, "Updating overlay assets");
         }
@@ -706,12 +732,19 @@ public final class OverlayManagerService extends SystemService {
             }
 
             if (!pm.setEnabledOverlayPackages(
-                        userId, targetPackageName, pendingChanges.get(targetPackageName))) {
+                    userId, targetPackageName, pendingChanges.get(targetPackageName))) {
                 Slog.e(TAG, String.format("Failed to change enabled overlays for %s user %d",
-                            targetPackageName, userId));
+                        targetPackageName, userId));
             }
         }
+    }
 
+    private void updateAssets(final int userId, final String targetPackageName) {
+        updateAssets(userId, Collections.singletonList(targetPackageName));
+    }
+
+    private void updateAssets(final int userId, List<String> targetPackageNames) {
+        updateOverlayPaths(userId, targetPackageNames);
         final IActivityManager am = ActivityManager.getService();
         try {
             am.scheduleApplicationInfoChanged(targetPackageNames, userId);
