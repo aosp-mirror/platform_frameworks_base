@@ -16,6 +16,7 @@
 package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -108,6 +109,8 @@ public final class AutoFillUI {
      * Displays an error message to the user.
      */
     public void showError(@Nullable CharSequence message, @NonNull AutoFillUiCallback callback) {
+        Slog.w(TAG, "showError(): " + message);
+
         mHandler.post(() -> {
             if (mCallback != callback) {
                 return;
@@ -237,6 +240,7 @@ public final class AutoFillUI {
      */
     public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info,
             @NonNull String packageName, @NonNull AutoFillUiCallback callback) {
+        if (sVerbose) Slog.v(TAG, "showSaveUi() for " + packageName + ": " + info);
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
         numIds += info.getOptionalIds() == null ? 0 : info.getOptionalIds().length;
