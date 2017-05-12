@@ -668,7 +668,7 @@ final class SystemServiceRegistry {
                                 ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE);
                         ICompanionDeviceManager service =
                                 ICompanionDeviceManager.Stub.asInterface(iBinder);
-                        return new CompanionDeviceManager(service, ctx);
+                        return new CompanionDeviceManager(service, ctx.getOuterContext());
                     }});
 
         registerService(Context.CONSUMER_IR_SERVICE, ConsumerIrManager.class,
