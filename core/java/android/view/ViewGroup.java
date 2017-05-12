@@ -142,7 +142,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // that is or contains a default-focus view.
     private View mDefaultFocus;
     // The last child of this ViewGroup which held focus within the current cluster
-    private View mFocusedInCluster;
+    View mFocusedInCluster;
 
     /**
      * A Transformation used when drawing children, to
@@ -806,10 +806,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mDefaultFocus != null || super.hasDefaultFocus();
     }
 
-    void setFocusedInCluster(View child) {
-        mFocusedInCluster = child;
-    }
-
     /**
      * Removes {@code child} (and associated focusedInCluster chain) from the cluster containing
      * it.
@@ -825,8 +821,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         ViewParent parent = this;
         do {
             ((ViewGroup) parent).mFocusedInCluster = null;
+            if (parent == top) {
+                break;
+            }
             parent = parent.getParent();
-        } while (parent != top && parent instanceof ViewGroup);
+        } while (parent instanceof ViewGroup);
     }
 
     @Override
