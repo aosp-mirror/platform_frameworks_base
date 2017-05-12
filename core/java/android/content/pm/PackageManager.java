@@ -157,6 +157,7 @@ public abstract class PackageManager {
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
             MATCH_INSTANT,
+            MATCH_STATIC_SHARED_LIBRARIES,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
     })
@@ -177,6 +178,7 @@ public abstract class PackageManager {
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
             MATCH_INSTANT,
+            MATCH_STATIC_SHARED_LIBRARIES,
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
@@ -473,6 +475,16 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int MATCH_EXPLICITLY_VISIBLE_ONLY = 0x02000000;
+
+    /**
+     * Internal {@link PackageInfo} flag: include static shared libraries.
+     * Apps that depend on static shared libs can always access the version
+     * of the lib they depend on. System/shell/root can access all shared
+     * libs regardless of dependency but need to explicitly ask for them
+     * via this flag.
+     * @hide
+     */
+    public static final int MATCH_STATIC_SHARED_LIBRARIES = 0x04000000;
 
     /**
      * Internal flag used to indicate that a system component has done their
