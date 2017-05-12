@@ -9819,10 +9819,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 });
 
-        // TODO: STOPSHIP, remove the "true" below after b/34961340 is fixed
-        if (DEBUG_ENERGY_CPU || true) {
-            Slog.d(TAG, "Reading cpu stats took " + (mClocks.elapsedRealtime() - startTimeMs) +
-                    " ms");
+        final long elapse = (mClocks.elapsedRealtime() - startTimeMs);
+        if (DEBUG_ENERGY_CPU || (elapse >= 100)) {
+            Slog.d(TAG, "Reading cpu stats took " + elapse + " ms");
         }
 
         if (mOnBatteryInternal && numWakelocks > 0) {
