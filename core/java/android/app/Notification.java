@@ -2703,6 +2703,7 @@ public class Notification implements Parcelable
         private int mBackgroundColor = COLOR_INVALID;
         private int mForegroundColor = COLOR_INVALID;
         private int mBackgroundColorHint = COLOR_INVALID;
+        private boolean mRebuildStyledRemoteViews;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -4251,7 +4252,7 @@ public class Notification implements Parcelable
          *   @hide
          */
         public RemoteViews createContentView(boolean increasedHeight) {
-            if (mN.contentView != null && (mStyle == null || !mStyle.displayCustomViewInline())) {
+            if (mN.contentView != null && useExistingRemoteView()) {
                 return mN.contentView;
             } else if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeContentView(increasedHeight);
@@ -4262,13 +4263,17 @@ public class Notification implements Parcelable
             return applyStandardTemplate(getBaseLayoutResource());
         }
 
+        private boolean useExistingRemoteView() {
+            return mStyle == null || (!mStyle.displayCustomViewInline()
+                    && !mRebuildStyledRemoteViews);
+        }
+
         /**
          * Construct a RemoteViews for the final big notification layout.
          */
         public RemoteViews createBigContentView() {
             RemoteViews result = null;
-            if (mN.bigContentView != null
-                    && (mStyle == null || !mStyle.displayCustomViewInline())) {
+            if (mN.bigContentView != null && useExistingRemoteView()) {
                 return mN.bigContentView;
             } else if (mStyle != null) {
                 result = mStyle.makeBigContentView();
@@ -4343,8 +4348,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews createHeadsUpContentView(boolean increasedHeight) {
-            if (mN.headsUpContentView != null
-                    && (mStyle == null ||  !mStyle.displayCustomViewInline())) {
+            if (mN.headsUpContentView != null && useExistingRemoteView()) {
                 return mN.headsUpContentView;
             } else if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeHeadsUpContentView(increasedHeight);
@@ -4806,7 +4810,7 @@ public class Notification implements Parcelable
             }
 
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
-                    && (mStyle == null || !mStyle.displayCustomViewInline())) {
+                    && (useExistingRemoteView())) {
                 if (mN.contentView == null) {
                     mN.contentView = createContentView();
                     mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
@@ -4977,6 +4981,19 @@ public class Notification implements Parcelable
          */
         public void setBackgroundColorHint(int backgroundColor) {
             mBackgroundColorHint = backgroundColor;
+        }
+
+
+        /**
+         * Forces all styled remoteViews to be built from scratch and not use any cached
+         * RemoteViews.
+         * This is needed for legacy apps that are baking in their remoteviews into the
+         * notification.
+         *
+         * @hide
+         */
+        public void setRebuildStyledRemoteViews(boolean rebuild) {
+            mRebuildStyledRemoteViews = rebuild;
         }
     }
 
