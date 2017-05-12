@@ -25,11 +25,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Handler;
@@ -40,6 +42,7 @@ import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.util.SharedLog;
 
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -69,6 +72,7 @@ public class UpstreamNetworkMonitorTest {
 
     @Mock private Context mContext;
     @Mock private IConnectivityManager mCS;
+    @Mock private SharedLog mLog;
 
     private TestStateMachine mSM;
     private TestConnectivityManager mCM;
@@ -78,10 +82,12 @@ public class UpstreamNetworkMonitorTest {
         MockitoAnnotations.initMocks(this);
         reset(mContext);
         reset(mCS);
+        reset(mLog);
+        when(mLog.forSubComponent(anyString())).thenReturn(mLog);
 
         mCM = spy(new TestConnectivityManager(mContext, mCS));
         mSM = new TestStateMachine();
-        mUNM = new UpstreamNetworkMonitor(mSM, EVENT_UNM_UPDATE, (ConnectivityManager) mCM);
+        mUNM = new UpstreamNetworkMonitor(mSM, EVENT_UNM_UPDATE, (ConnectivityManager) mCM, mLog);
     }
 
     @After public void tearDown() throws Exception {

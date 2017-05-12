@@ -183,6 +183,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         implements PendingIntent.OnFinished {
     private static final String TAG = ConnectivityService.class.getSimpleName();
 
+    public static final String DIAG_ARG = "--diag";
+    public static final String SHORT_ARG = "--short";
+
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
@@ -1961,7 +1964,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        if (argsContain(args, "--diag")) {
+        if (argsContain(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
             return;
         }
@@ -2053,7 +2056,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.println();
         dumpAvoidBadWifiSettings(pw);
 
-        if (argsContain(args, "--short") == false) {
+        if (argsContain(args, SHORT_ARG) == false) {
             pw.println();
             synchronized (mValidationLogs) {
                 pw.println("mValidationLogs (most recent first):");
