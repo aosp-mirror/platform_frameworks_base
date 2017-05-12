@@ -3925,6 +3925,8 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            getSelectionActionModeHelper().onSelectionAction();
+
             if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
                 return true;
             }
