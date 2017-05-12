@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -87,6 +88,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -114,7 +116,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 156 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 157 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -149,6 +151,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private final KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
+    private final KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader =
+            new KernelUidCpuFreqTimeReader();
 
     private final KernelMemoryBandwidthStats mKernelMemoryBandwidthStats
             = new KernelMemoryBandwidthStats();
@@ -570,6 +574,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
 
+    private long[] mCpuFreqs;
+
     private PowerProfile mPowerProfile;
 
     /*
@@ -954,6 +960,131 @@ public class BatteryStatsImpl extends BatteryStats {
             mCount.set(mLoadedCount);
             mLastCount = 0;
             mUnpluggedCount = mPluggedCount = mLoadedCount;
+        }
+    }
+
+    public static class LongSamplingCounterArray extends LongCounterArray implements TimeBaseObs {
+        final TimeBase mTimeBase;
+        long[] mCounts;
+        long[] mLoadedCounts;
+        long[] mUnpluggedCounts;
+        long[] mPluggedCounts;
+
+        LongSamplingCounterArray(TimeBase timeBase, Parcel in) {
+            mTimeBase = timeBase;
+            mPluggedCounts = in.createLongArray();
+            mCounts = copyArray(mPluggedCounts, mCounts);
+            mLoadedCounts = in.createLongArray();
+            mUnpluggedCounts = in.createLongArray();
+            timeBase.add(this);
+        }
+
+        LongSamplingCounterArray(TimeBase timeBase) {
+            mTimeBase = timeBase;
+            timeBase.add(this);
+        }
+
+        public void writeToParcel(Parcel out) {
+            out.writeLongArray(mCounts);
+            out.writeLongArray(mLoadedCounts);
+            out.writeLongArray(mUnpluggedCounts);
+        }
+
+        @Override
+        public void onTimeStarted(long elapsedRealTime, long baseUptime, long baseRealtime) {
+            mUnpluggedCounts = copyArray(mPluggedCounts, mUnpluggedCounts);
+            mCounts = copyArray(mPluggedCounts, mCounts);
+        }
+
+        @Override
+        public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
+            mPluggedCounts = copyArray(mCounts, mPluggedCounts);
+        }
+
+        @Override
+        public long[] getCountsLocked(int which) {
+            long[] val = copyArray(mTimeBase.isRunning() ? mCounts : mPluggedCounts, null);
+            if (which == STATS_SINCE_UNPLUGGED) {
+                subtract(val, mUnpluggedCounts);
+            } else if (which != STATS_SINCE_CHARGED) {
+                subtract(val, mLoadedCounts);
+            }
+            return val;
+        }
+
+        @Override
+        public void logState(Printer pw, String prefix) {
+            pw.println(prefix + "mCounts=" + Arrays.toString(mCounts)
+                    + " mLoadedCounts=" + Arrays.toString(mLoadedCounts)
+                    + " mUnpluggedCounts=" + Arrays.toString(mUnpluggedCounts)
+                    + " mPluggedCounts=" + Arrays.toString(mPluggedCounts));
+        }
+
+        void addCountLocked(long[] counts) {
+            if (counts == null) {
+                return;
+            }
+            if (mCounts == null) {
+                mCounts = new long[counts.length];
+            }
+            for (int i = 0; i < counts.length; ++i) {
+                mCounts[i] += counts[i];
+            }
+        }
+
+        /**
+         * Clear state of this counter.
+         */
+        void reset(boolean detachIfReset) {
+            fillArray(mCounts, 0);
+            fillArray(mLoadedCounts, 0);
+            fillArray(mPluggedCounts, 0);
+            fillArray(mUnpluggedCounts, 0);
+            if (detachIfReset) {
+                detach();
+            }
+        }
+
+        void detach() {
+            mTimeBase.remove(this);
+        }
+
+        void writeSummaryFromParcelLocked(Parcel out) {
+            out.writeLongArray(mCounts);
+        }
+
+        void readSummaryFromParcelLocked(Parcel in) {
+            mCounts = in.createLongArray();
+            mLoadedCounts = copyArray(mCounts, mLoadedCounts);
+            mUnpluggedCounts = copyArray(mCounts, mUnpluggedCounts);
+            mPluggedCounts = copyArray(mCounts, mPluggedCounts);
+        }
+
+        private void fillArray(long[] a, long val) {
+            if (a != null) {
+                Arrays.fill(a, val);
+            }
+        }
+
+        private void subtract(@NonNull long[] val, long[] toSubtract) {
+            if (toSubtract == null) {
+                return;
+            }
+            for (int i = 0; i < val.length; i++) {
+                val[i] -= toSubtract[i];
+            }
+        }
+
+        private long[] copyArray(long[] src, long[] dest) {
+            if (src == null) {
+                return null;
+            } else {
+                if (dest == null) {
+                    dest = new long[src.length];
+                }
+                System.arraycopy(src, 0, dest, 0, src.length);
+                return dest;
+            }
         }
     }
 
@@ -5483,6 +5614,9 @@ public class BatteryStatsImpl extends BatteryStats {
         LongSamplingCounter mSystemCpuTime;
         LongSamplingCounter[][] mCpuClusterSpeed;
 
+        LongSamplingCounterArray mCpuFreqTimeMs;
+        LongSamplingCounterArray mScreenOffCpuFreqTimeMs;
+
         /**
          * The statistics we have collected for this uid's wake locks.
          */
@@ -5557,6 +5691,42 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiMulticastTimer = new StopwatchTimer(mBsi.mClocks, this, WIFI_MULTICAST_ENABLED,
                     mBsi.mWifiMulticastTimers, mBsi.mOnBatteryTimeBase);
             mProcessStateTimer = new StopwatchTimer[NUM_PROCESS_STATE];
+        }
+
+        @Override
+        public long[] getCpuFreqTimes(int which) {
+            if (mCpuFreqTimeMs == null) {
+                return null;
+            }
+            final long[] cpuFreqTimes = mCpuFreqTimeMs.getCountsLocked(which);
+            if (cpuFreqTimes == null) {
+                return null;
+            }
+            // Return cpuFreqTimes only if atleast one of the elements in non-zero.
+            for (int i = 0; i < cpuFreqTimes.length; ++i) {
+                if (cpuFreqTimes[i] != 0) {
+                    return cpuFreqTimes;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public long[] getScreenOffCpuFreqTimes(int which) {
+            if (mScreenOffCpuFreqTimeMs == null) {
+                return null;
+            }
+            final long[] cpuFreqTimes = mScreenOffCpuFreqTimeMs.getCountsLocked(which);
+            if (cpuFreqTimes == null) {
+                return null;
+            }
+            // Return cpuFreqTimes only if atleast one of the elements in non-zero.
+            for (int i = 0; i < cpuFreqTimes.length; ++i) {
+                if (cpuFreqTimes[i] != 0) {
+                    return cpuFreqTimes;
+                }
+            }
+            return null;
         }
 
         @Override
@@ -6354,6 +6524,13 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
+            if (mCpuFreqTimeMs != null) {
+                mCpuFreqTimeMs.reset(false);
+            }
+            if (mScreenOffCpuFreqTimeMs != null) {
+                mScreenOffCpuFreqTimeMs.reset(false);
+            }
+
             resetLongCounterIfNotNull(mMobileRadioApWakeupCount, false);
             resetLongCounterIfNotNull(mWifiRadioApWakeupCount, false);
 
@@ -6521,6 +6698,13 @@ public class BatteryStatsImpl extends BatteryStats {
                             }
                         }
                     }
+                }
+
+                if (mCpuFreqTimeMs != null) {
+                    mCpuFreqTimeMs.detach();
+                }
+                if (mScreenOffCpuFreqTimeMs != null) {
+                    mScreenOffCpuFreqTimeMs.detach();
                 }
 
                 detachLongCounterIfNotNull(mMobileRadioApWakeupCount);
@@ -6735,6 +6919,19 @@ public class BatteryStatsImpl extends BatteryStats {
                         out.writeInt(0);
                     }
                 }
+            } else {
+                out.writeInt(0);
+            }
+
+            if (mCpuFreqTimeMs != null) {
+                out.writeInt(1);
+                mCpuFreqTimeMs.writeToParcel(out);
+            } else {
+                out.writeInt(0);
+            }
+            if (mScreenOffCpuFreqTimeMs != null) {
+                out.writeInt(1);
+                mScreenOffCpuFreqTimeMs.writeToParcel(out);
             } else {
                 out.writeInt(0);
             }
@@ -6984,6 +7181,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             } else {
                 mCpuClusterSpeed = null;
+            }
+
+            if (in.readInt() != 0) {
+                mCpuFreqTimeMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase, in);
+            } else {
+                mCpuFreqTimeMs = null;
+            }
+            if (in.readInt() != 0) {
+                mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
+                        mBsi.mOnBatteryScreenOffTimeBase, in);
+            } else {
+                mScreenOffCpuFreqTimeMs = null;
             }
 
             if (in.readInt() != 0) {
@@ -8190,6 +8399,10 @@ public class BatteryStatsImpl extends BatteryStats {
         public BatteryStatsImpl getBatteryStats() {
             return mBsi;
         }
+    }
+
+    public long[] getCpuFreqs() {
+        return mCpuFreqs;
     }
 
     public BatteryStatsImpl(File systemDir, Handler handler, ExternalStatsSync externalSync) {
@@ -9812,6 +10025,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 });
 
+        readKernelUidCpuFreqTimesLocked();
+
         final long elapse = (mClocks.elapsedRealtime() - startTimeMs);
         if (DEBUG_ENERGY_CPU || (elapse >= 100)) {
             Slog.d(TAG, "Reading cpu stats took " + elapse + " ms");
@@ -9898,6 +10113,30 @@ public class BatteryStatsImpl extends BatteryStats {
                 mLastPartialTimers.add(timer);
             }
         }
+    }
+
+    void readKernelUidCpuFreqTimesLocked() {
+        mKernelUidCpuFreqTimeReader.readDelta(!mOnBatteryInternal ? null :
+                new KernelUidCpuFreqTimeReader.Callback() {
+                    @Override
+                    public void onCpuFreqs(long[] cpuFreqs) {
+                        mCpuFreqs = cpuFreqs;
+                    }
+
+                    @Override
+                    public void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs) {
+                        final Uid u = getUidStatsLocked(uid);
+                        if (u.mCpuFreqTimeMs == null) {
+                            u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
+                        }
+                        u.mCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
+                        if (u.mScreenOffCpuFreqTimeMs == null) {
+                            u.mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
+                                    mOnBatteryScreenOffTimeBase);
+                        }
+                        u.mScreenOffCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
+                    }
+                });
     }
 
     boolean setChargingLocked(boolean charging) {
@@ -10988,6 +11227,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        mCpuFreqs = in.createLongArray();
+
         final int NU = in.readInt();
         if (NU > 10000) {
             throw new ParcelFormatException("File corrupt: too many uids " + NU);
@@ -11108,6 +11349,20 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             } else {
                 u.mCpuClusterSpeed = null;
+            }
+
+            if (in.readInt() != 0) {
+                u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
+                u.mCpuFreqTimeMs.readSummaryFromParcelLocked(in);
+            } else {
+                u.mCpuFreqTimeMs = null;
+            }
+            if (in.readInt() != 0) {
+                u.mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
+                        mOnBatteryScreenOffTimeBase);
+                u.mScreenOffCpuFreqTimeMs.readSummaryFromParcelLocked(in);
+            } else {
+                u.mScreenOffCpuFreqTimeMs = null;
             }
 
             if (in.readInt() != 0) {
@@ -11360,6 +11615,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        out.writeLongArray(mCpuFreqs);
+
         final int NU = mUidStats.size();
         out.writeInt(NU);
         for (int iu = 0; iu < NU; iu++) {
@@ -11500,6 +11757,19 @@ public class BatteryStatsImpl extends BatteryStats {
                         out.writeInt(0);
                     }
                 }
+            } else {
+                out.writeInt(0);
+            }
+
+            if (u.mCpuFreqTimeMs != null) {
+                out.writeInt(1);
+                u.mCpuFreqTimeMs.writeSummaryFromParcelLocked(out);
+            } else {
+                out.writeInt(0);
+            }
+            if (u.mScreenOffCpuFreqTimeMs != null) {
+                out.writeInt(1);
+                u.mScreenOffCpuFreqTimeMs.writeSummaryFromParcelLocked(out);
             } else {
                 out.writeInt(0);
             }
@@ -11794,6 +12064,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mFlashlightTurnedOnTimers.clear();
         mCameraTurnedOnTimers.clear();
 
+        mCpuFreqs = in.createLongArray();
+
         int numUids = in.readInt();
         mUidStats.clear();
         for (int i = 0; i < numUids; i++) {
@@ -11952,6 +12224,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
         }
+
+        out.writeLongArray(mCpuFreqs);
 
         if (inclUids) {
             int size = mUidStats.size();
