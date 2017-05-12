@@ -17,13 +17,13 @@
 package android.test;
 
 import android.util.Log;
-import com.google.android.collect.Maps;
-import com.google.android.collect.Sets;
 import dalvik.system.DexFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -57,7 +57,7 @@ public class ClassPathPackageInfoSource {
     private static String[] apkPaths;
 
     // A cache of jar file contents
-    private final Map<File, Set<String>> jarFiles = Maps.newHashMap();
+    private final Map<File, Set<String>> jarFiles = new HashMap<>();
     private ClassLoader classLoader;
 
     ClassPathPackageInfoSource() {
@@ -76,7 +76,7 @@ public class ClassPathPackageInfoSource {
     private ClassPathPackageInfo createPackageInfo(String packageName) {
         Set<String> subpackageNames = new TreeSet<String>();
         Set<String> classNames = new TreeSet<String>();
-        Set<Class<?>> topLevelClasses = Sets.newHashSet();
+        Set<Class<?>> topLevelClasses = new HashSet<>();
         findClasses(packageName, classNames, subpackageNames);
         for (String className : classNames) {
             if (className.endsWith(".R") || className.endsWith(".Manifest")) {
@@ -248,7 +248,7 @@ public class ClassPathPackageInfoSource {
             throws IOException {
         Set<String> entryNames = jarFiles.get(jarFile);
         if (entryNames == null) {
-            entryNames = Sets.newHashSet();
+            entryNames = new HashSet<>();
             ZipFile zipFile = new ZipFile(jarFile);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
