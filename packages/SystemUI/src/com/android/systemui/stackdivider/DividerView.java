@@ -1151,7 +1151,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
      */
     public int growsRecents() {
         boolean result = mGrowRecents
-                && mWindowManagerProxy.getDockSide() == WindowManager.DOCKED_TOP
+                && mDockSide == WindowManager.DOCKED_TOP
                 && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position;
         if (result) {
             return getSnapAlgorithm().getMiddleTarget().position;
