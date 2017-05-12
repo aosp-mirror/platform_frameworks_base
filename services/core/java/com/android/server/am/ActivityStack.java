@@ -1933,7 +1933,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      *
      * @return true if {@param r} is visible taken Keyguard state into account, false otherwise
      */
-    private boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
+    boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
             boolean isTop) {
         final boolean isInPinnedStack = r.getStack().getStackId() == PINNED_STACK_ID;
         final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing();
