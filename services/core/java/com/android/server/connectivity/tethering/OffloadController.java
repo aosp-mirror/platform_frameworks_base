@@ -18,7 +18,7 @@ package com.android.server.connectivity.tethering;
 
 import android.net.LinkProperties;
 import android.os.Handler;
-import android.util.Log;
+import android.net.util.SharedLog;
 
 /**
  * A wrapper around hardware offload interface.
@@ -29,16 +29,18 @@ public class OffloadController {
     private static final String TAG = OffloadController.class.getSimpleName();
 
     private final Handler mHandler;
+    private final SharedLog mLog;
     private LinkProperties mUpstreamLinkProperties;
 
-    public OffloadController(Handler h) {
+    public OffloadController(Handler h, SharedLog log) {
         mHandler = h;
+        mLog = log.forSubComponent(TAG);
     }
 
     public void start() {
         // TODO: initOffload() and configure callbacks to be handled on our
         // preferred Handler.
-        Log.d(TAG, "tethering offload not supported");
+        mLog.i("tethering offload not supported");
     }
 
     public void stop() {

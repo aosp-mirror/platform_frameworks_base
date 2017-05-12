@@ -20,6 +20,7 @@ import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
+import static com.android.server.ConnectivityService.SHORT_ARG;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -47,6 +48,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.util.SharedLog;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -62,7 +64,6 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.LocalLog;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -147,9 +148,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
     }
 
-    private final static int MAX_LOG_RECORDS = 500;
-
-    private final LocalLog mLocalLog = new LocalLog(MAX_LOG_RECORDS);
+    private final SharedLog mLog = new SharedLog(TAG);
 
     // used to synchronize public access to members
     private final Object mPublicSync;
@@ -180,7 +179,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     public Tethering(Context context, INetworkManagementService nmService,
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
             Looper looper, MockableSystemProperties systemProperties) {
-        mLocalLog.log("CONSTRUCTED");
+        mLog.mark("constructed");
         mContext = context;
         mNMService = nmService;
         mStatsService = statsService;
@@ -195,9 +194,9 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
-        mOffloadController = new OffloadController(mTetherMasterSM.getHandler());
+        mOffloadController = new OffloadController(mTetherMasterSM.getHandler(), mLog);
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
-                mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
+                mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK, mLog);
         mForwardedDownstreams = new HashSet<>();
 
         mStateReceiver = new StateReceiver();
@@ -1094,7 +1093,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             addState(mSetDnsForwardersErrorState);
 
             mNotifyList = new ArrayList<>();
-            mIPv6TetheringCoordinator = new IPv6TetheringCoordinator(mNotifyList);
+            mIPv6TetheringCoordinator = new IPv6TetheringCoordinator(mNotifyList, mLog);
             setInitialState(mInitialState);
         }
 
@@ -1141,7 +1140,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 try {
                     mNMService.setIpForwardingEnabled(true);
                 } catch (Exception e) {
-                    mLocalLog.log("ERROR " + e);
+                    mLog.e(e);
                     transitionTo(mSetIpForwardingEnabledErrorState);
                     return false;
                 }
@@ -1154,12 +1153,12 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         mNMService.stopTethering();
                         mNMService.startTethering(cfg.dhcpRanges);
                     } catch (Exception ee) {
-                        mLocalLog.log("ERROR " + ee);
+                        mLog.e(ee);
                         transitionTo(mStartTetheringErrorState);
                         return false;
                     }
                 }
-                mLocalLog.log("SET master tether settings: ON");
+                mLog.log("SET master tether settings: ON");
                 return true;
             }
 
@@ -1167,19 +1166,19 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 try {
                     mNMService.stopTethering();
                 } catch (Exception e) {
-                    mLocalLog.log("ERROR " + e);
+                    mLog.e(e);
                     transitionTo(mStopTetheringErrorState);
                     return false;
                 }
                 try {
                     mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {
-                    mLocalLog.log("ERROR " + e);
+                    mLog.e(e);
                     transitionTo(mSetIpForwardingDisabledErrorState);
                     return false;
                 }
                 transitionTo(mInitialState);
-                mLocalLog.log("SET master tether settings: OFF");
+                mLog.log("SET master tether settings: OFF");
                 return true;
             }
 
@@ -1305,13 +1304,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 }
                 try {
                     mNMService.setDnsForwarders(network, dnsServers);
-                    mLocalLog.log(String.format(
-                            "SET DNS forwarders: network=%s dnsServers=[%s]",
+                    mLog.log(String.format(
+                            "SET DNS forwarders: network=%s dnsServers=%s",
                             network, Arrays.toString(dnsServers)));
                 } catch (Exception e) {
                     // TODO: Investigate how this can fail and what exactly
                     // happens if/when such failures occur.
-                    mLocalLog.log("ERROR setting DNS forwarders failed, " + e);
+                    mLog.e("setting DNS forwarders failed, " + e);
                     transitionTo(mSetDnsForwardersErrorState);
                 }
             }
@@ -1788,10 +1787,21 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
         pw.println("Log:");
         pw.increaseIndent();
-        mLocalLog.readOnlyLocalLog().dump(fd, pw, args);
+        if (argsContain(args, SHORT_ARG)) {
+            pw.println("<log removed for brevity>");
+        } else {
+            mLog.dump(fd, pw, args);
+        }
         pw.decreaseIndent();
 
         pw.decreaseIndent();
+    }
+
+    private static boolean argsContain(String[] args, String target) {
+        for (String arg : args) {
+            if (arg.equals(target)) return true;
+        }
+        return false;
     }
 
     @Override
@@ -1807,8 +1817,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
         }
 
-        mLocalLog.log(String.format("OBSERVED iface=%s state=%s error=%s",
-                iface, state, error));
+        mLog.log(String.format("OBSERVED iface=%s state=%s error=%s", iface, state, error));
 
         try {
             // Notify that we're tethering (or not) this interface.
@@ -1846,8 +1855,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private void trackNewTetherableInterface(String iface, int interfaceType) {
         TetherState tetherState;
         tetherState = new TetherState(new TetherInterfaceStateMachine(iface, mLooper,
-                interfaceType, mNMService, mStatsService, this,
-                new IPv6TetheringInterfaceServices(iface, mNMService)));
+                interfaceType, mLog, mNMService, mStatsService, this,
+                new IPv6TetheringInterfaceServices(iface, mNMService, mLog)));
         mTetherStates.put(iface, tetherState);
         tetherState.stateMachine.start();
     }
