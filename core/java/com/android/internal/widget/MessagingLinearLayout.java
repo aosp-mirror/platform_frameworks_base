@@ -138,7 +138,7 @@ public class MessagingLinearLayout extends ViewGroup {
                 first = false;
                 boolean measuredTooSmall = false;
                 if (textChild != null) {
-                    measuredTooSmall = childHeight < textChild.getLayout().getHeight()
+                    measuredTooSmall = childHeight < textChild.getLayoutHeight()
                             + textChild.getPaddingTop() + textChild.getPaddingBottom();
                 }
 
