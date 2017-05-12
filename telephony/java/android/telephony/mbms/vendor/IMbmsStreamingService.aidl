@@ -29,22 +29,8 @@ import android.telephony.SignalStrength;
  */
 interface IMbmsStreamingService
 {
-    /**
-     * Initialize streaming service
-     * Registers this listener, subId with this appName
-     *
-     */
     int initialize(IMbmsStreamingManagerCallback listener, String appName, int subId);
 
-
-    /**
-     * - Registers serviceClasses of interest with the uid/appName/subId key.
-     * - Starts asynch fetching data on streaming services of matching classes to be reported
-     * later by callback.
-     *
-     * Note that subsequent calls with the same callback, appName, subId and uid will replace
-     * the service class list.
-     */
     int getStreamingServices(String appName, int subId, in List<String> serviceClasses);
 
     /**
