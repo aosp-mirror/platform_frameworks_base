@@ -49,11 +49,14 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableContext;
+import android.testing.TestableSettingsProvider;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.Xml;
@@ -81,11 +84,13 @@ import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class RankingHelperTest {
+public class RankingHelperTest extends NotificationTestCase {
     private static final String PKG = "com.android.server.notification";
     private static final int UID = 0;
+    private static final UserHandle USER = UserHandle.getUserHandleForUid(UID);
     private static final String UPDATED_PKG = "updatedPkg";
     private static final int UID2 = 1111111;
+    private static final UserHandle USER2 = UserHandle.getUserHandleForUid(UID2);
     private static final String TEST_CHANNEL_ID = "test_channel_id";
 
     @Mock NotificationUsageStats mUsageStats;
@@ -106,10 +111,6 @@ public class RankingHelperTest {
     private RankingHelper mHelper;
     private AudioAttributes mAudioAttributes;
 
-    private Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -126,6 +127,9 @@ public class RankingHelperTest {
                 InstrumentationRegistry.getContext().getResources());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getApplicationInfo()).thenReturn(legacy);
+        // most tests assume badging is enabled
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 1, UserHandle.getUserId(UID));
 
         mHelper = new RankingHelper(getContext(), mPm, mHandler, mUsageStats,
                 new String[] {ImportanceExtractor.class.getName()});
@@ -1199,4 +1203,36 @@ public class RankingHelperTest {
                     object.getInt("channelCount"));
         }
     }
+
+    @Test
+    public void testBadgingOverrideTrue() throws Exception {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 1,
+                USER.getIdentifier());
+        mHelper.updateBadgingEnabled(); // would be called by settings observer
+        assertTrue(mHelper.badgingEnabled(USER));
+    }
+
+    @Test
+    public void testBadgingOverrideFalse() throws Exception {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 0,
+                USER.getIdentifier());
+        mHelper.updateBadgingEnabled(); // would be called by settings observer
+        assertFalse(mHelper.badgingEnabled(USER));
+    }
+
+    @Test
+    public void testBadgingOverrideUserIsolation() throws Exception {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 0,
+                USER.getIdentifier());
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 1,
+                USER2.getIdentifier());
+        mHelper.updateBadgingEnabled(); // would be called by settings observer
+        assertFalse(mHelper.badgingEnabled(USER));
+        assertTrue(mHelper.badgingEnabled(USER2));
+    }
+
 }
