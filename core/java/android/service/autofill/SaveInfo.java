@@ -326,15 +326,6 @@ public final class SaveInfo implements Parcelable {
             return this;
         }
 
-        /** @hide */
-        // TODO (b/37563972): Remove when callers migrate
-        public @NonNull Builder setNegativeAction(@Nullable CharSequence title,
-                @Nullable IntentSender listener) {
-            throwIfDestroyed();
-            setNegativeAction(NEGATIVE_BUTTON_STYLE_CANCEL, listener);
-            return this;
-        }
-
         /**
          * Sets the style and listener for the negative save action.
          *

@@ -116,15 +116,7 @@ public abstract class AutofillService extends Service {
                 final IFillCallback callback = (IFillCallback) args.arg3;
                 final FillCallback fillCallback = new FillCallback(callback, request.getId());
                 args.recycle();
-                // TODO(b/37563972): temporary try-catch hack to support old method
-                try {
-                    onFillRequest(request, cancellation, fillCallback);
-                } catch (AbstractMethodError e) {
-                    final List<FillContext> contexts = request.getFillContexts();
-                    onFillRequest(contexts.get(contexts.size() - 1).getStructure(),
-                            request.getClientState(), request.getFlags(), cancellation,
-                            fillCallback);
-                }
+                onFillRequest(request, cancellation, fillCallback);
                 break;
             } case MSG_ON_SAVE_REQUEST: {
                 final SomeArgs args = (SomeArgs) msg.obj;
@@ -132,14 +124,7 @@ public abstract class AutofillService extends Service {
                 final ISaveCallback callback = (ISaveCallback) args.arg2;
                 final SaveCallback saveCallback = new SaveCallback(callback);
                 args.recycle();
-                // TODO(b/37563972): temporary try-catch hack to support old method
-                try {
-                    onSaveRequest(request, saveCallback);
-                } catch (AbstractMethodError e) {
-                    final List<FillContext> contexts = request.getFillContexts();
-                    onSaveRequest(contexts.get(contexts.size() - 1).getStructure(),
-                            request.getClientState(), saveCallback);
-                }
+                onSaveRequest(request, saveCallback);
                 break;
             } case MSG_DISCONNECT: {
                 onDisconnected();
@@ -201,37 +186,6 @@ public abstract class AutofillService extends Service {
             @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback);
 
     /**
-     * Called by the Android system do decide if an {@link Activity} can be autofilled by the
-     * service.
-     *
-     * <p>Service must call one of the {@link FillCallback} methods (like
-     * {@link FillCallback#onSuccess(FillResponse)}
-     * or {@link FillCallback#onFailure(CharSequence)})
-     * to notify the result of the request.
-     *
-     * @param structure {@link Activity}'s view structure.
-     * @param data bundle containing data passed by the service in a last call to
-     *        {@link FillResponse.Builder#setExtras(Bundle)}, if any. This bundle allows your
-     *        service to keep state between fill and save requests as well as when filling different
-     *        sections of the UI as the system will try to aggressively unbind from the service to
-     *        conserve resources.
-     *        See {@link FillResponse} for examples of multiple-sections requests.
-     * @param flags either {@code 0} or {@link AutofillManager#FLAG_MANUAL_REQUEST}.
-     * @param cancellationSignal signal for observing cancellation requests. The system will use
-     *     this to notify you that the fill result is no longer needed and you should stop
-     *     handling this fill request in order to save resources.
-     * @param callback object used to notify the result of the request.
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onFillRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
-            int flags, @NonNull CancellationSignal cancellationSignal,
-            @NonNull FillCallback callback) {
-
-    }
-
-    /**
      * Called when user requests service to save the fields of an {@link Activity}.
      *
      * <p>Service must call one of the {@link SaveCallback} methods (like
@@ -244,30 +198,6 @@ public abstract class AutofillService extends Service {
      */
     public abstract void onSaveRequest(@NonNull SaveRequest request,
             @NonNull SaveCallback callback);
-
-    /**
-     * Called when user requests service to save the fields of an {@link Activity}.
-     *
-     * <p>Service must call one of the {@link SaveCallback} methods (like
-     * {@link SaveCallback#onSuccess()} or {@link SaveCallback#onFailure(CharSequence)})
-     * to notify the result of the request.
-     *
-     * @param structure {@link Activity}'s view structure.
-     * @param data bundle containing data passed by the service in a last call to
-     *        {@link FillResponse.Builder#setExtras(Bundle)}, if any. This bundle allows your
-     *        service to keep state between fill and save requests as well as when filling different
-     *        sections of the UI as the system will try to aggressively unbind from the service to
-     *        conserve resources.
-     *        See {@link FillResponse} for examples of multiple-sections requests.
-     * @param callback object used to notify the result of the request.
-     *
-     * @hide
-     */
-    @Deprecated
-    public void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle data,
-            @NonNull SaveCallback callback) {
-
-    }
 
     /**
      * Called when the Android system disconnects from the service.
