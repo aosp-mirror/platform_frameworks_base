@@ -888,7 +888,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
             if (sVerbose) {
                 Slog.v(TAG, "Dumping structure of " + context + " before calling service.save()");
-                context.getStructure().dump();
+                context.getStructure().dump(false);
             }
         }
 
@@ -1402,7 +1402,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     pw.println(context.getStructure() + " (look at logcat)");
 
                     // TODO: add method on AssistStructure to dump on pw
-                    context.getStructure().dump();
+                    context.getStructure().dump(false);
                 }
             }
         } else {
