@@ -66,6 +66,16 @@ public class TestableSettingsProviderTest {
     }
 
     @Test
+    public void testSeparateUsers() {
+        Secure.putStringForUser(mContentResolver, NONEXISTENT_SETTING, "something", 0);
+        Secure.putStringForUser(mContentResolver, NONEXISTENT_SETTING, "else", 1);
+        assertEquals("something",
+                Secure.getStringForUser(mContentResolver, NONEXISTENT_SETTING, 0));
+        assertEquals("else",
+                Secure.getStringForUser(mContentResolver, NONEXISTENT_SETTING, 1));
+    }
+
+    @Test
     public void testPassThrough() {
         // Grab the value of a setting that is not overridden.
         assertTrue(Secure.getInt(mContentResolver, Secure.USER_SETUP_COMPLETE, 0) != 0);

@@ -34,7 +34,6 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.app.NotificationChannel;
 import android.graphics.Color;
 import android.media.AudioAttributes;
@@ -47,7 +46,6 @@ import android.os.Vibrator;
 import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -69,7 +67,7 @@ import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class BuzzBeepBlinkTest {
+public class BuzzBeepBlinkTest extends NotificationTestCase {
 
     @Mock AudioManager mAudioManager;
     @Mock Vibrator mVibrator;
@@ -326,10 +324,6 @@ public class BuzzBeepBlinkTest {
     private void verifyCustomLights() {
         verify(mLight, times(1)).setFlashing(
                 eq(CUSTOM_LIGHT_COLOR), anyInt(), eq(CUSTOM_LIGHT_ON), eq(CUSTOM_LIGHT_OFF));
-    }
-
-    private Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
     }
 
     //

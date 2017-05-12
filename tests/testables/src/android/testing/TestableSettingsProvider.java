@@ -18,6 +18,7 @@ import android.content.ContentProviderClient;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.mock.MockContentProvider;
 import android.util.Log;
@@ -48,9 +49,10 @@ public class TestableSettingsProvider extends MockContentProvider {
     }
 
     void clearValuesAndCheck(Context context) {
-        mValues.put(key("global", MY_UNIQUE_KEY), MY_UNIQUE_KEY);
-        mValues.put(key("secure", MY_UNIQUE_KEY), MY_UNIQUE_KEY);
-        mValues.put(key("system", MY_UNIQUE_KEY), MY_UNIQUE_KEY);
+        int userId = UserHandle.myUserId();
+        mValues.put(key("global", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
+        mValues.put(key("secure", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
+        mValues.put(key("system", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
 
         // Verify that if any test is using TestableContext, they all have the correct settings
         // provider.
@@ -66,11 +68,12 @@ public class TestableSettingsProvider extends MockContentProvider {
 
     public Bundle call(String method, String arg, Bundle extras) {
         // Methods are "GET_system", "GET_global", "PUT_secure", etc.
+        final int userId = extras.getInt(Settings.CALL_METHOD_USER_KEY, 0);
         final String[] commands = method.split("_", 2);
         final String op = commands[0];
         final String table = commands[1];
 
-            String k = key(table, arg);
+            String k = key(table, arg, userId);
             String value;
             Bundle out = new Bundle();
             switch (op) {
@@ -103,8 +106,13 @@ public class TestableSettingsProvider extends MockContentProvider {
             return out;
     }
 
-    private static String key(String table, String key) {
-        return table + "_" + key;
+    private static String key(String table, String key, int userId) {
+        if ("global".equals(table)) {
+            return table + "_" + key;
+        } else {
+            return table + "_" + userId + "_" + key;
+        }
+
     }
 
     /**

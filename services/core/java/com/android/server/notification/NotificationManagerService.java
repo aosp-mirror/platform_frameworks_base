@@ -927,6 +927,8 @@ public class NotificationManagerService extends SystemService {
     };
 
     private final class SettingsObserver extends ContentObserver {
+        private final Uri NOTIFICATION_BADGING_URI
+                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
@@ -938,6 +940,8 @@ public class NotificationManagerService extends SystemService {
 
         void observe() {
             ContentResolver resolver = getContext().getContentResolver();
+            resolver.registerContentObserver(NOTIFICATION_BADGING_URI,
+                    false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
@@ -962,6 +966,9 @@ public class NotificationManagerService extends SystemService {
             if (uri == null || NOTIFICATION_RATE_LIMIT_URI.equals(uri)) {
                 mMaxPackageEnqueueRate = Settings.Global.getFloat(resolver,
                             Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE, mMaxPackageEnqueueRate);
+            }
+            if (uri == null || NOTIFICATION_BADGING_URI.equals(uri)) {
+                mRankingHelper.updateBadgingEnabled();
             }
         }
     }
@@ -4022,6 +4029,7 @@ public class NotificationManagerService extends SystemService {
 
     private void handleRankingSort(Message msg) {
         if (!(msg.obj instanceof Boolean)) return;
+        if (mRankingHelper == null) return;
         boolean forceUpdate = ((Boolean) msg.obj == null) ? false : (boolean) msg.obj;
         synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
