@@ -162,7 +162,7 @@ public class NotificationInflaterTest {
             }
         });
         block.run();
-        countDownLatch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        countDownLatch.await();
         if (exceptionHolder.mException != null) {
             throw exceptionHolder.mException;
         }
