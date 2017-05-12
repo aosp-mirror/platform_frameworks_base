@@ -5999,16 +5999,14 @@ void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales,
     char locale[RESTABLE_MAX_LOCALE_LEN];
 
     forEachConfiguration(false, false, includeSystemLocales, [&](const ResTable_config& cfg) {
-        if (cfg.locale != 0) {
-            cfg.getBcp47Locale(locale, mergeEquivalentLangs /* canonicalize if merging */);
+        cfg.getBcp47Locale(locale, mergeEquivalentLangs /* canonicalize if merging */);
 
-            const auto beginIter = locales->begin();
-            const auto endIter = locales->end();
+        const auto beginIter = locales->begin();
+        const auto endIter = locales->end();
 
-            auto iter = std::lower_bound(beginIter, endIter, locale, compareString8AndCString);
-            if (iter == endIter || strcmp(iter->string(), locale) != 0) {
-                locales->insertAt(String8(locale), std::distance(beginIter, iter));
-            }
+        auto iter = std::lower_bound(beginIter, endIter, locale, compareString8AndCString);
+        if (iter == endIter || strcmp(iter->string(), locale) != 0) {
+            locales->insertAt(String8(locale), std::distance(beginIter, iter));
         }
     });
 }
