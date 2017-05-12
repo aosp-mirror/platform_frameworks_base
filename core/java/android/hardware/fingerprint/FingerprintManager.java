@@ -871,9 +871,11 @@ public class FingerprintManager {
                 case MSG_REMOVED:
                     sendRemovedResult((Long) msg.obj /* deviceId */, msg.arg1 /* fingerId */,
                             msg.arg2 /* groupId */);
+                    break;
                 case MSG_ENUMERATED:
                     sendEnumeratedResult((Long) msg.obj /* deviceId */, msg.arg1 /* fingerId */,
                             msg.arg2 /* groupId */);
+                    break;
             }
         }
 
