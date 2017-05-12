@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,9 +11,9 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
-package com.android.settingslib;
+package com.android.settingslib.suggestions;
 
 import android.Manifest;
 import android.accounts.Account;
@@ -134,12 +134,8 @@ public class SuggestionParser {
         mSmartDismissControl = smartDismissControl;
     }
 
-    public List<Tile> getSuggestions() {
-        return getSuggestions(false);
-    }
-
-    public List<Tile> getSuggestions(boolean isSmartSuggestionEnabled) {
-        List<Tile> suggestions = new ArrayList<>();
+    public SuggestionList getSuggestions(boolean isSmartSuggestionEnabled) {
+        final SuggestionList suggestionList = new SuggestionList();
         final int N = mSuggestionList.size();
         for (int i = 0; i < N; i++) {
             final SuggestionCategory category = mSuggestionList.get(i);
@@ -153,16 +149,19 @@ public class SuggestionParser {
                 // from each suggestion itself is used.
                 readSuggestions(category, exclusiveSuggestions, false /* isSmartSuggestion */);
                 if (!exclusiveSuggestions.isEmpty()) {
-                    return exclusiveSuggestions;
+                    final SuggestionList exclusiveList = new SuggestionList();
+                    exclusiveList.addSuggestions(category, exclusiveSuggestions);
+                    return exclusiveList;
                 }
             } else {
                 // Either the category is not exclusive, or the exclusiveness expired so we should
                 // treat it as a normal category.
+                final List<Tile> suggestions = new ArrayList<>();
                 readSuggestions(category, suggestions, isSmartSuggestionEnabled);
+                suggestionList.addSuggestions(category, suggestions);
             }
         }
-        dedupeSuggestions(suggestions);
-        return suggestions;
+        return suggestionList;
     }
 
     public boolean dismissSuggestion(Tile suggestion) {
@@ -197,22 +196,6 @@ public class SuggestionParser {
                     !satisfiesConnectivity(suggestions.get(i)) ||
                     isDismissed(suggestions.get(i), isSmartSuggestionEnabled)) {
                 suggestions.remove(i--);
-            }
-        }
-    }
-
-    /**
-     * Filter suggestions list so they are all unique.
-     */
-    private void dedupeSuggestions(List<Tile> suggestions) {
-        final Set<String> intents = new ArraySet<>();
-        for (int i = suggestions.size() - 1; i >= 0; i--) {
-            final Tile suggestion = suggestions.get(i);
-            final String intentUri = suggestion.intent.toUri(Intent.URI_INTENT_SCHEME);
-            if (intents.contains(intentUri)) {
-                suggestions.remove(i);
-            } else {
-                intents.add(intentUri);
             }
         }
     }
@@ -422,15 +405,6 @@ public class SuggestionParser {
         } else {
             return suggestion.metaData.getString(META_DATA_DISMISS_CONTROL);
         }
-    }
-
-    @VisibleForTesting
-    static class SuggestionCategory {
-        public String category;
-        public String pkg;
-        public boolean multiple;
-        public boolean exclusive;
-        public long exclusiveExpireDaysInMillis;
     }
 
     private static class SuggestionOrderInflater {
