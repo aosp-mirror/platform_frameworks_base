@@ -2016,7 +2016,7 @@ public class Editor {
     /**
      * Asynchronously invalidates an action mode using the TextClassifier.
      */
-    private void invalidateActionModeAsync() {
+    void invalidateActionModeAsync() {
         getSelectionActionModeHelper().invalidateActionModeAsync();
     }
 
