@@ -118,6 +118,15 @@ public class FingerprintManager {
      * @hide
      */
     public static final int FINGERPRINT_ERROR_VENDOR = 8;
+
+    /**
+     * The operation was canceled because FINGERPRINT_ERROR_LOCKOUT occurred too many times.
+     * Fingerprint authentication is disabled until the user unlocks with strong authentication
+     * (PIN/Pattern/Password)
+     * @hide
+     */
+    public static final int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9;
+
     /**
      * @hide
      */
@@ -1013,6 +1022,9 @@ public class FingerprintManager {
                 return mContext.getString(com.android.internal.R.string.fingerprint_error_canceled);
             case FINGERPRINT_ERROR_LOCKOUT:
                 return mContext.getString(com.android.internal.R.string.fingerprint_error_lockout);
+            case FINGERPRINT_ERROR_LOCKOUT_PERMANENT:
+                return mContext.getString(
+                        com.android.internal.R.string.fingerprint_error_lockout_permanent);
             case FINGERPRINT_ERROR_VENDOR: {
                     String[] msgArray = mContext.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_error_vendor);

@@ -108,6 +108,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         int acquire; // total number of acquisitions. Should be >= accept+reject due to poor image
                      // acquisition in some cases (too fast, too slow, dirty sensor, etc.)
         int lockout; // total number of lockouts
+        int permanentLockout; // total number of permanent lockouts
     }
 
     private final ArrayList<FingerprintServiceLockoutResetMonitor> mLockoutMonitors =
@@ -118,13 +119,16 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             Collections.synchronizedMap(new HashMap<>());
     private final AppOpsManager mAppOps;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
-    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 5;
+    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 20;
+
     private static final long CANCEL_TIMEOUT_LIMIT = 3000; // max wait for onCancel() from HAL,in ms
     private final String mKeyguardPackage;
     private int mCurrentUserId = UserHandle.USER_NULL;
     private final FingerprintUtils mFingerprintUtils = FingerprintUtils.getInstance();
     private Context mContext;
     private long mHalDeviceId;
+    private boolean mTimedLockoutCleared;
     private int mFailedAttempts;
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;
@@ -173,7 +177,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_LOCKOUT_RESET.equals(intent.getAction())) {
-                resetFailedAttempts();
+                resetFailedAttempts(false /* clearAttemptCounter */);
             }
         }
     };
@@ -181,7 +185,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     private final Runnable mResetFailedAttemptsRunnable = new Runnable() {
         @Override
         public void run() {
-            resetFailedAttempts();
+            resetFailedAttempts(true /* clearAttemptCounter */);
         }
     };
 
@@ -369,6 +373,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         if (client != null && client.onError(error, vendorCode)) {
             removeClient(client);
         }
+
         if (DEBUG) Slog.v(TAG, "handleError(client="
                 + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
         // This is the magic code that starts the next client when the old client finishes.
@@ -438,7 +443,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
             removeClient(client);
         }
-        if (mPerformanceStats != null && !inLockoutMode()
+        if (mPerformanceStats != null && getLockoutMode() == AuthenticationClient.LOCKOUT_NONE
                 && client instanceof AuthenticationClient) {
             // ignore enrollment acquisitions or acquisitions when we're locked out
             mPerformanceStats.acquire++;
@@ -482,8 +487,14 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         }
     }
 
-    private boolean inLockoutMode() {
-        return mFailedAttempts >= MAX_FAILED_ATTEMPTS;
+    private int getLockoutMode() {
+        if (mFailedAttempts >= MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT) {
+            return AuthenticationClient.LOCKOUT_PERMANENT;
+        } else if (mFailedAttempts > 0 && mTimedLockoutCleared == false &&
+                (mFailedAttempts % MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED == 0)) {
+            return AuthenticationClient.LOCKOUT_TIMED;
+        }
+        return AuthenticationClient.LOCKOUT_NONE;
     }
 
     private void scheduleLockoutReset() {
@@ -801,22 +812,27 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         AuthenticationClient client = new AuthenticationClient(getContext(), mHalDeviceId, token,
                 receiver, mCurrentUserId, groupId, opId, restricted, opPackageName) {
             @Override
-            public boolean handleFailedAttempt() {
+            public int handleFailedAttempt() {
                 mFailedAttempts++;
-                if (mFailedAttempts == MAX_FAILED_ATTEMPTS) {
+                mTimedLockoutCleared = false;
+                final int lockoutMode = getLockoutMode();
+                if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
+                    mPerformanceStats.permanentLockout++;
+                } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
                     mPerformanceStats.lockout++;
                 }
-                if (inLockoutMode()) {
-                    // Failing multiple times will continue to push out the lockout time.
+
+                // Failing multiple times will continue to push out the lockout time
+                if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
                     scheduleLockoutReset();
-                    return true;
+                    return lockoutMode;
                 }
-                return false;
+                return AuthenticationClient.LOCKOUT_NONE;
             }
 
             @Override
             public void resetFailedAttempts() {
-                FingerprintService.this.resetFailedAttempts();
+                FingerprintService.this.resetFailedAttempts(true /* clearAttemptCounter */);
             }
 
             @Override
@@ -830,11 +846,15 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             }
         };
 
-        if (inLockoutMode()) {
-            Slog.v(TAG, "In lockout mode; disallowing authentication");
-            // Don't bother starting the client. Just send the error message.
-            if (!client.onError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT, 0 /* vendorCode */)) {
-                Slog.w(TAG, "Cannot send timeout message to client");
+        int lockoutMode = getLockoutMode();
+        if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
+            Slog.v(TAG, "In lockout mode(" + lockoutMode +
+                    ") ; disallowing authentication");
+            int errorCode = lockoutMode == AuthenticationClient.LOCKOUT_TIMED ?
+                    FingerprintManager.FINGERPRINT_ERROR_LOCKOUT :
+                    FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
+            if (!client.onError(errorCode, 0 /* vendorCode */)) {
+                Slog.w(TAG, "Cannot send permanent lockout message to client");
             }
             return;
         }
@@ -864,11 +884,16 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         startClient(client, true /* initiatedByClient */);
     }
 
-    protected void resetFailedAttempts() {
-        if (DEBUG && inLockoutMode()) {
-            Slog.v(TAG, "Reset fingerprint lockout");
+    // attempt counter should only be cleared when Keyguard goes away or when
+    // a fingerprint is successfully authenticated
+    protected void resetFailedAttempts(boolean clearAttemptCounter) {
+        if (DEBUG && getLockoutMode() != AuthenticationClient.LOCKOUT_NONE) {
+            Slog.v(TAG, "Reset fingerprint lockout, clearAttemptCounter=" + clearAttemptCounter);
         }
-        mFailedAttempts = 0;
+        if (clearAttemptCounter) {
+            mFailedAttempts = 0;
+        }
+        mTimedLockoutCleared = true;
         // If we're asked to reset failed attempts externally (i.e. from Keyguard),
         // the alarm might still be pending; remove it.
         cancelLockoutReset();
@@ -1301,6 +1326,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 set.put("reject", (stats != null) ? stats.reject : 0);
                 set.put("acquire", (stats != null) ? stats.acquire : 0);
                 set.put("lockout", (stats != null) ? stats.lockout : 0);
+                set.put("permanentLockout", (stats != null) ? stats.permanentLockout : 0);
                 // cryptoStats measures statistics about secure fingerprint transactions
                 // (e.g. to unlock password storage, make secure purchases, etc.)
                 set.put("acceptCrypto", (cryptoStats != null) ? cryptoStats.accept : 0);
@@ -1336,6 +1362,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 proto.write(FingerprintActionStatsProto.REJECT, normal.reject);
                 proto.write(FingerprintActionStatsProto.ACQUIRE, normal.acquire);
                 proto.write(FingerprintActionStatsProto.LOCKOUT, normal.lockout);
+                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, normal.lockout);
                 proto.end(countsToken);
             }
 
@@ -1348,6 +1375,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 proto.write(FingerprintActionStatsProto.REJECT, crypto.reject);
                 proto.write(FingerprintActionStatsProto.ACQUIRE, crypto.acquire);
                 proto.write(FingerprintActionStatsProto.LOCKOUT, crypto.lockout);
+                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, crypto.lockout);
                 proto.end(countsToken);
             }
 
