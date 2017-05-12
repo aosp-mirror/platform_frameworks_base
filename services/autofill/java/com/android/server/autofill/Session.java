@@ -1371,10 +1371,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
-        pw.print(prefix); pw.print("mResponses: "); pw.println(mResponses.size());
-        for (int i = 0; i < mResponses.size(); i++) {
-            pw.print(prefix2); pw.print('#'); pw.print(i); pw.print(' ');
-                pw.println(mResponses.valueAt(i));
+        pw.print(prefix); pw.print("mResponses: ");
+        if (mResponses == null) {
+            pw.println("null");
+        } else {
+            pw.println(mResponses.size());
+            for (int i = 0; i < mResponses.size(); i++) {
+                pw.print(prefix2); pw.print('#'); pw.print(i);
+                pw.print(' '); pw.println(mResponses.valueAt(i));
+            }
         }
         pw.print(prefix); pw.print("mCurrentViewId: "); pw.println(mCurrentViewId);
         pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
