@@ -1696,15 +1696,27 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int installExistingPackage(String packageName) throws NameNotFoundException {
-        return installExistingPackageAsUser(packageName, mContext.getUserId());
+        return installExistingPackage(packageName, PackageManager.INSTALL_REASON_UNKNOWN);
+    }
+
+    @Override
+    public int installExistingPackage(String packageName, int installReason)
+            throws NameNotFoundException {
+        return installExistingPackageAsUser(packageName, installReason, mContext.getUserId());
     }
 
     @Override
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
+        return installExistingPackageAsUser(packageName, PackageManager.INSTALL_REASON_UNKNOWN,
+                userId);
+    }
+
+    private int installExistingPackageAsUser(String packageName, int installReason, int userId)
+            throws NameNotFoundException {
         try {
             int res = mPM.installExistingPackageAsUser(packageName, userId, 0 /*installFlags*/,
-                    PackageManager.INSTALL_REASON_UNKNOWN);
+                    installReason);
             if (res == INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }
