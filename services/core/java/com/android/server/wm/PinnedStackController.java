@@ -158,19 +158,23 @@ class PinnedStackController {
     /**
      * Reloads all the resources for the current configuration.
      */
-    void reloadResources() {
+    private void reloadResources() {
         final Resources res = mService.mContext.getResources();
         mMinSize = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.default_minimal_size_pip_resizable_task);
         mDefaultAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
-        final Size screenEdgeInsetsDp = Size.parseSize(res.getString(
-                com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets));
+        final String screenEdgeInsetsDpString = res.getString(
+                com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets);
+        final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
+                ? Size.parseSize(screenEdgeInsetsDpString)
+                : null;
         mDefaultStackGravity = res.getInteger(
                 com.android.internal.R.integer.config_defaultPictureInPictureGravity);
         mDisplayContent.getDisplay().getRealMetrics(mTmpMetrics);
-        mScreenEdgeInsets = new Point(dpToPx(screenEdgeInsetsDp.getWidth(), mTmpMetrics),
-                dpToPx(screenEdgeInsetsDp.getHeight(), mTmpMetrics));
+        mScreenEdgeInsets = screenEdgeInsetsDp == null ? new Point()
+                : new Point(dpToPx(screenEdgeInsetsDp.getWidth(), mTmpMetrics),
+                        dpToPx(screenEdgeInsetsDp.getHeight(), mTmpMetrics));
         mMinAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
