@@ -886,6 +886,11 @@ public class ShortcutManager {
 
     /**
      * Return the max width for icons, in pixels.
+     *
+     * <p> Note that this method returns max width of icon's visible part. Hence, it does not take
+     * into account the inset introduced by {@link AdaptiveIconDrawable}. To calculate bitmap image
+     * to function as {@link AcaptiveIconDrawable}, multiply
+     * 1 + 2 * {@link AdaptiveIconDrawable#getExtraInsetFraction()} to the returned size.
      */
     public int getIconMaxWidth() {
         try {
