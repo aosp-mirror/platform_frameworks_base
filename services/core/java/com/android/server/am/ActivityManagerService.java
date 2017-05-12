@@ -12814,7 +12814,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             timeout = getInputDispatchingTimeoutLocked(proc);
         }
 
-        if (!inputDispatchingTimedOut(proc, null, null, aboveSystem, reason)) {
+        if (inputDispatchingTimedOut(proc, null, null, aboveSystem, reason)) {
             return -1;
         }
 
