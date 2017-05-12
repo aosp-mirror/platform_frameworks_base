@@ -240,14 +240,17 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
+    @Override
     public char getAlphabeticShortcut() {
         return mShortcutAlphabeticChar;
     }
 
+    @Override
     public int getAlphabeticModifiers() {
         return mShortcutAlphabeticModifiers;
     }
 
+    @Override
     public MenuItem setAlphabeticShortcut(char alphaChar) {
         if (mShortcutAlphabeticChar == alphaChar) return this;
 
@@ -258,6 +261,7 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
+    @Override
     public MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers){
         if (mShortcutAlphabeticChar == alphaChar &&
                 mShortcutAlphabeticModifiers == alphaModifiers) {
@@ -272,14 +276,17 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
+    @Override
     public char getNumericShortcut() {
         return mShortcutNumericChar;
     }
 
+    @Override
     public int getNumericModifiers() {
         return mShortcutNumericModifiers;
     }
 
+    @Override
     public MenuItem setNumericShortcut(char numericChar) {
         if (mShortcutNumericChar == numericChar) return this;
 
@@ -290,6 +297,7 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
+    @Override
     public MenuItem setNumericShortcut(char numericChar, int numericModifiers){
         if (mShortcutNumericChar == numericChar && mShortcutNumericModifiers == numericModifiers) {
             return this;
@@ -303,6 +311,7 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
+    @Override
     public MenuItem setShortcut(char numericChar, char alphaChar) {
         mShortcutNumericChar = numericChar;
         mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
@@ -312,7 +321,8 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
-    public MenuItem setShortcut(char numericChar, int numericModifiers, char alphaChar,
+    @Override
+    public MenuItem setShortcut(char numericChar, char alphaChar, int numericModifiers,
             int alphaModifiers) {
         mShortcutNumericChar = numericChar;
         mShortcutNumericModifiers = KeyEvent.normalizeMetaState(numericModifiers);
