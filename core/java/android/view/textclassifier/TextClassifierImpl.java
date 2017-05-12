@@ -624,8 +624,14 @@ final class TextClassifierImpl implements TextClassifier {
                     return new Intent(Intent.ACTION_VIEW)
                             .setData(Uri.parse(String.format("geo:0,0?q=%s", text)));
                 case TextClassifier.TYPE_URL:
-                    if (!text.startsWith("https://") && !text.startsWith("http://")) {
-                        text = "http://" + text;
+                    final String httpPrefix = "http://";
+                    final String httpsPrefix = "https://";
+                    if (text.toLowerCase().startsWith(httpPrefix)) {
+                        text = httpPrefix + text.substring(httpPrefix.length());
+                    } else if (text.toLowerCase().startsWith(httpsPrefix)) {
+                        text = httpsPrefix + text.substring(httpsPrefix.length());
+                    } else {
+                        text = httpPrefix + text;
                     }
                     return new Intent(Intent.ACTION_VIEW, Uri.parse(text))
                             .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
