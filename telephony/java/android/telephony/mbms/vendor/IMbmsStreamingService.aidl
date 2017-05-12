@@ -21,7 +21,6 @@ import android.telephony.mbms.IMbmsStreamingManagerCallback;
 import android.telephony.mbms.IStreamingServiceCallback;
 import android.telephony.mbms.StreamingService;
 import android.telephony.mbms.StreamingServiceInfo;
-import android.telephony.SignalStrength;
 
 /**
  * The interface the opaque MbmsStreamingService will satisfy.
