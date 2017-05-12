@@ -21,6 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:orientation="vertical"
+    android:elevation="4dp"
     android:background="@drawable/qs_customizer_background"
     android:gravity="center_horizontal">
 

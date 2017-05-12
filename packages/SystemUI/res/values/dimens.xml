@@ -814,4 +814,6 @@
     <dimen name="rounded_corner_radius">0dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
 
+    <dimen name="qs_gutter_height">6dp</dimen>
+
 </resources>
