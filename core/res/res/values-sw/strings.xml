@@ -164,7 +164,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Ukurasa unajumlisha mielekezo mingi ya seva."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Itifaki haiauniwi."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Haikuweza kuanzisha muunganisho salama."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Haikuweza kufungua ukurasa kwa sababu URL ni batili."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Ukurasa haukuweza kufunguka kwa sababu URL si sahihi."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Haikuweza kufikia faili."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Haikuweza kupata faili inayohitajika."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Maombi mengi sana yanashughulikiwa. Jaribu tena baadaye."</string>
@@ -258,6 +258,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Taarifa"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Hali ya mtandao"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Arifa za mtandao"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Hali ya VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Udhibiti wa kifaa"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Arifa"</string>
@@ -1097,6 +1099,14 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sauti za kengele"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sauti za arifa"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Haijulikani"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Mitandao ya Wi-Fi inapatikana</item>
+      <item quantity="one">Mtandao wa Wi-Fi unapatikana</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Fungua mitandao ya Wi-Fi inayopatikana</item>
+      <item quantity="one">Fungua mtandao wa Wi-Fi unaopatikana</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Ingia kwa mtandao wa Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ingia katika mtandao"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1683,8 +1693,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>
     </plurals>
-    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
-    <skip />
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Haijawekwa katika kategoria"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Uliweka mipangilio ya umuhimu wa arifa hizi."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Hii ni muhimu kwa sababu ya watu waliohusika."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Ungependa kuruhusu <xliff:g id="APP">%1$s</xliff:g> iunde Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
@@ -1740,12 +1749,14 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Andika wakati"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Badilisha iwe katika hali ya maandishi wakati wa kuweka muda."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Badilisha umbo liwe la saa ya mishale wakati wa kuweka muda."</string>
-    <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Chaguo za kujaza otomatiki"</string>
+    <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Chaguo za kujaza kiotomatiki"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Hifadhi kwa ajili ya Kujaza Kiotomatiki"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Maudhui hayawezi kujazwa kiotomatiki"</string>
-    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
-    <skip />
-    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Hakuna mapendekezo ya kujaza kiotomatiki"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other">Mapendekezo <xliff:g id="COUNT">%1$s</xliff:g> ya kujaza kiotomatiki</item>
+      <item quantity="one">Pendekezo moja la kujaza kiotomatiki</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"Ungependa kuhifadhi kwenye &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
