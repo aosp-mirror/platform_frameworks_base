@@ -40,6 +40,7 @@ public class SystemNotificationChannels {
     public static String UPDATES = "UPDATES";
     public static String NETWORK_STATUS = "NETWORK_STATUS";
     public static String NETWORK_ALERTS = "NETWORK_ALERTS";
+    public static String NETWORK_AVAILABLE = "NETWORK_AVAILABLE";
     public static String VPN = "VPN";
     public static String DEVICE_ADMIN = "DEVICE_ADMIN";
     public static String ALERTS = "ALERTS";
@@ -97,6 +98,11 @@ public class SystemNotificationChannels {
         networkAlertsChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
                 Notification.AUDIO_ATTRIBUTES_DEFAULT);
         channelsList.add(networkAlertsChannel);
+
+        channelsList.add(new NotificationChannel(
+                NETWORK_AVAILABLE,
+                context.getString(R.string.notification_channel_network_available),
+                NotificationManager.IMPORTANCE_LOW));
 
         channelsList.add(new NotificationChannel(
                 VPN,
