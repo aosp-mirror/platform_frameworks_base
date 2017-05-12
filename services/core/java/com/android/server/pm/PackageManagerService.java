@@ -8695,6 +8695,13 @@ public class PackageManagerService extends IPackageManager.Stub
         MetricsLogger.histogram(mContext, "opt_dialog_time_s", elapsedTimeSeconds);
     }
 
+    /*
+     * Return the prebuilt profile path given a package base code path.
+     */
+    private static String getPrebuildProfilePath(PackageParser.Package pkg) {
+        return pkg.baseCodePath + ".prof";
+    }
+
     /**
      * Performs dexopt on the set of packages in {@code packages} and returns an int array
      * containing statistics about the invocation. The array consists of three elements,
@@ -8712,6 +8719,27 @@ public class PackageManagerService extends IPackageManager.Stub
 
         for (PackageParser.Package pkg : pkgs) {
             numberOfPackagesVisited++;
+
+            if ((isFirstBoot() || isUpgrade()) && isSystemApp(pkg)) {
+                // Copy over initial preopt profiles since we won't get any JIT samples for methods
+                // that are already compiled.
+                File profileFile = new File(getPrebuildProfilePath(pkg));
+                // Copy profile if it exists.
+                if (profileFile.exists()) {
+                    try {
+                        // We could also do this lazily before calling dexopt in
+                        // PackageDexOptimizer to prevent this happening on first boot. The issue
+                        // is that we don't have a good way to say "do this only once".
+                        if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                                pkg.applicationInfo.uid, pkg.packageName)) {
+                            Log.e(TAG, "Installer failed to copy system profile!");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ",
+                                e);
+                    }
+                }
+            }
 
             if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
                 if (DEBUG_DEXOPT) {
