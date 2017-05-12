@@ -107,6 +107,7 @@ public final class WebViewFactory {
     // error for namespace lookup
     public static final int LIBLOAD_FAILED_TO_FIND_NAMESPACE = 10;
 
+
     private static String getWebViewPreparationErrorReason(int error) {
         switch (error) {
             case LIBLOAD_FAILED_WAITING_FOR_RELRO:
@@ -119,10 +120,7 @@ public final class WebViewFactory {
         return "Unknown";
     }
 
-    /**
-     * @hide
-     */
-    public static class MissingWebViewPackageException extends AndroidRuntimeException {
+    private static class MissingWebViewPackageException extends Exception {
         public MissingWebViewPackageException(String message) { super(message); }
         public MissingWebViewPackageException(Exception e) { super(e); }
     }
@@ -184,11 +182,16 @@ public final class WebViewFactory {
             return LIBLOAD_WRONG_PACKAGE_NAME;
         }
 
-        int loadNativeRet = loadNativeLibrary(clazzLoader, packageInfo);
-        // If we failed waiting for relro we want to return that fact even if we successfully load
-        // the relro file.
-        if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
-        return loadNativeRet;
+        try {
+            int loadNativeRet = loadNativeLibrary(clazzLoader, packageInfo);
+            // If we failed waiting for relro we want to return that fact even if we successfully
+            // load the relro file.
+            if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
+            return loadNativeRet;
+        } catch (MissingWebViewPackageException e) {
+            Log.e(LOGTAG, "Couldn't load native library: " + e);
+            return LIBLOAD_FAILED_TO_LOAD_LIBRARY;
+        }
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -259,7 +262,8 @@ public final class WebViewFactory {
     }
 
     // Throws MissingWebViewPackageException on failure
-    private static void verifyPackageInfo(PackageInfo chosen, PackageInfo toUse) {
+    private static void verifyPackageInfo(PackageInfo chosen, PackageInfo toUse)
+            throws MissingWebViewPackageException {
         if (!chosen.packageName.equals(toUse.packageName)) {
             throw new MissingWebViewPackageException("Failed to verify WebView provider, "
                     + "packageName mismatch, expected: "
@@ -285,7 +289,8 @@ public final class WebViewFactory {
      * required values from the donor package. If the ApplicationInfo is for a full WebView,
      * leave it alone. Throws MissingWebViewPackageException if the donor is missing.
      */
-    private static void fixupStubApplicationInfo(ApplicationInfo ai, PackageManager pm) {
+    private static void fixupStubApplicationInfo(ApplicationInfo ai, PackageManager pm)
+            throws MissingWebViewPackageException {
         String donorPackageName = null;
         if (ai.metaData != null) {
             donorPackageName = ai.metaData.getString("com.android.webview.WebViewDonorPackage");
@@ -318,7 +323,7 @@ public final class WebViewFactory {
         }
     }
 
-    private static Context getWebViewContextAndSetProvider() {
+    private static Context getWebViewContextAndSetProvider() throws MissingWebViewPackageException {
         Application initialApplication = AppGlobals.getInitialApplication();
         try {
             WebViewProviderResponse response = null;
@@ -549,10 +554,10 @@ public final class WebViewFactory {
         return prepareWebViewInSystemServer(nativeLibs);
     }
 
-    // throws MissingWebViewPackageException
     private static String getLoadFromApkPath(String apkPath,
                                              String[] abiList,
-                                             String nativeLibFileName) {
+                                             String nativeLibFileName)
+            throws MissingWebViewPackageException {
         // Search the APK for a native library conforming to a listed ABI.
         try (ZipFile z = new ZipFile(apkPath)) {
             for (String abi : abiList) {
@@ -569,8 +574,8 @@ public final class WebViewFactory {
         return "";
     }
 
-    // throws MissingWebViewPackageException
-    private static String[] getWebViewNativeLibraryPaths(PackageInfo packageInfo) {
+    private static String[] getWebViewNativeLibraryPaths(PackageInfo packageInfo)
+            throws MissingWebViewPackageException {
         ApplicationInfo ai = packageInfo.applicationInfo;
         final String NATIVE_LIB_FILE_NAME = getWebViewLibrary(ai);
 
@@ -695,7 +700,8 @@ public final class WebViewFactory {
     }
 
     // Assumes that we have waited for relro creation
-    private static int loadNativeLibrary(ClassLoader clazzLoader, PackageInfo packageInfo) {
+    private static int loadNativeLibrary(ClassLoader clazzLoader, PackageInfo packageInfo)
+            throws MissingWebViewPackageException {
         if (!sAddressSpaceReserved) {
             Log.e(LOGTAG, "can't load with relro file; address space not reserved");
             return LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
