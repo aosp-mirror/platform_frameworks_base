@@ -17,11 +17,14 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
 
@@ -39,6 +42,8 @@ public class QSContainerImpl extends FrameLayout {
     protected float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private QSFooter mQSFooter;
+    private int mGutterHeight;
+    private View mBackground;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -52,6 +57,8 @@ public class QSContainerImpl extends FrameLayout {
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
         mQSFooter = findViewById(R.id.qs_footer);
+        mBackground = findViewById(R.id.qs_background);
+        mGutterHeight = getContext().getResources().getDimensionPixelSize(R.dimen.qs_gutter_height);
     }
 
     @Override
@@ -94,8 +101,9 @@ public class QSContainerImpl extends FrameLayout {
 
     public void updateBottom() {
         int height = calculateContainerHeight();
-        setBottom(getTop() + height);
+        setBottom(getTop() + height + mGutterHeight);
         mQSDetail.setBottom(getTop() + height);
+        mBackground.setBottom(mQSDetail.getBottom());
         // Pin QS Footer to the bottom of the panel.
         mQSFooter.setTranslationY(height - mQSFooter.getHeight());
     }
