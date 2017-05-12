@@ -673,7 +673,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         public void onMediaButtonSessionChanged(MediaSessionRecord oldMediaButtonSession,
                 MediaSessionRecord newMediaButtonSession) {
             if (DEBUG_KEY_EVENT) {
-                Log.d(TAG, "Media button session will be changed to " + newMediaButtonSession);
+                Log.d(TAG, "Media button session is changed to " + newMediaButtonSession);
             }
             synchronized (mLock) {
                 if (oldMediaButtonSession != null) {
