@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="email" msgid="4560673117055050403">"电子邮件"</string>
     <string name="dial" msgid="4204975095406423102">"电话"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"地图"</string>
+    <string name="browse" msgid="6993590095938149861">"浏览器"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"存储空间不足"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"某些系统功能可能无法正常使用"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系统存储空间不足。请确保您有250MB的可用空间，然后重新启动。"</string>
@@ -1689,7 +1687,7 @@
       <item quantity="other">已选择 <xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
       <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"其他"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"未分类"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"这些通知的重要程度由您来设置。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"这条通知涉及特定的人，因此被归为重要通知。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
@@ -1748,6 +1746,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自动填充选项"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"保存以便用于自动填充"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"无法自动填充内容"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"没有自动填充建议"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> 条自动填充建议</item>
+      <item quantity="one">1 条自动填充建议</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"要保存到&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;吗？"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要将<xliff:g id="TYPE">%1$s</xliff:g>保存到&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;吗？"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"要将<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>保存到&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;吗？"</string>
