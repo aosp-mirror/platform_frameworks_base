@@ -807,7 +807,7 @@ public class JobStore {
             ArrayList<JobStatus> result = new ArrayList<JobStatus>();
             for (int i = mJobs.size() - 1; i >= 0; i--) {
                 if (UserHandle.getUserId(mJobs.keyAt(i)) == userId) {
-                    ArraySet<JobStatus> jobs = mJobs.get(i);
+                    ArraySet<JobStatus> jobs = mJobs.valueAt(i);
                     if (jobs != null) {
                         result.addAll(jobs);
                     }
