@@ -59,6 +59,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Process;
@@ -663,13 +664,35 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             synchronized (mLock) {
+                Slog.w(TAG, "Wallpaper service gone: " + name);
+                if (!Objects.equals(name, mWallpaper.wallpaperComponent)) {
+                    Slog.e(TAG, "Does not match expected wallpaper component "
+                            + mWallpaper.wallpaperComponent);
+                }
                 mService = null;
                 mEngine = null;
                 if (mWallpaper.connection == this) {
-                    // The wallpaper disappeared.  If this isn't a system-default one, track
-                    // crashes and fall back to default if it continues to misbehave.
+                    // There is an inherent ordering race between this callback and the
+                    // package monitor that receives notice that a package is being updated,
+                    // so we cannot quite trust at this moment that we know for sure that
+                    // this is not an update.  If we think this is a genuine non-update
+                    // wallpaper outage, we do our "wait for reset" work as a continuation,
+                    // a short time in the future, specifically to allow any pending package
+                    // update message on this same looper thread to be processed.
+                    if (!mWallpaper.wallpaperUpdating) {
+                        mContext.getMainThreadHandler().postDelayed(() -> processDisconnect(this),
+                                1000);
+                    }
+                }
+            }
+        }
+
+        private void processDisconnect(final ServiceConnection connection) {
+            synchronized (mLock) {
+                // The wallpaper disappeared.  If this isn't a system-default one, track
+                // crashes and fall back to default if it continues to misbehave.
+                if (connection == mWallpaper.connection) {
                     final ComponentName wpService = mWallpaper.wallpaperComponent;
-                    Slog.w(TAG, "Wallpaper service gone: " + wpService);
                     if (!mWallpaper.wallpaperUpdating
                             && mWallpaper.userId == mCurrentUserId
                             && !Objects.equals(mDefaultWallpaperComponent, wpService)
@@ -682,7 +705,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         // during {@link #MIN_WALLPAPER_CRASH_TIME} millis.
                         if (mWallpaper.lastDiedTime != 0
                                 && mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME
-                                    > SystemClock.uptimeMillis()) {
+                                > SystemClock.uptimeMillis()) {
                             Slog.w(TAG, "Reverting to built-in wallpaper!");
                             clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId, null);
                         } else {
@@ -690,17 +713,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
                             // If we didn't reset it right away, do so after we couldn't connect to
                             // it for an extended amount of time to avoid having a black wallpaper.
-                            FgThread.getHandler().removeCallbacks(mResetRunnable);
-                            FgThread.getHandler().postDelayed(mResetRunnable,
-                                    WALLPAPER_RECONNECT_TIMEOUT_MS);
+                            final Handler fgHandler = FgThread.getHandler();
+                            fgHandler.removeCallbacks(mResetRunnable);
+                            fgHandler.postDelayed(mResetRunnable, WALLPAPER_RECONNECT_TIMEOUT_MS);
                             if (DEBUG_LIVE) {
                                 Slog.i(TAG, "Started wallpaper reconnect timeout for " + wpService);
                             }
                         }
-                        final String flattened = name.flattenToString();
+                        final String flattened = wpService.flattenToString();
                         EventLog.writeEvent(EventLogTags.WP_WALLPAPER_CRASHED,
                                 flattened.substring(0, Math.min(flattened.length(),
                                         MAX_WALLPAPER_COMPONENT_LOG_LENGTH)));
+                    }
+                } else {
+                    if (DEBUG_LIVE) {
+                        Slog.i(TAG, "Wallpaper changed during disconnect tracking; ignoring");
                     }
                 }
             }
