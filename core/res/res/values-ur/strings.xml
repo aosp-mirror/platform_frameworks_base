@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"متن کی کارروائیاں"</string>
     <string name="email" msgid="4560673117055050403">"ای میل"</string>
     <string name="dial" msgid="4204975095406423102">"فون کریں"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"Maps"</string>
+    <string name="browse" msgid="6993590095938149861">"براؤزر"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"اسٹوریج کی جگہ ختم ہو رہی ہے"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ممکن ہے سسٹم کے کچھ فنکشنز کام نہ کریں"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏سسٹم کیلئے کافی اسٹوریج نہیں ہے۔ اس بات کو یقینی بنائیں کہ آپ کے پاس 250MB خالی جگہ ہے اور دوبارہ شروع کریں۔"</string>
@@ -1690,7 +1688,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> منتخب کردہ</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> منتخب کردہ</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"متفرقات"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"غیر زمرہ بند"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ان اطلاعات کی اہمیت آپ مقرر کرتے ہیں۔"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"اس میں موجود لوگوں کی وجہ سے یہ اہم ہے۔"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> کو <xliff:g id="ACCOUNT">%2$s</xliff:g> کے ساتھ ایک نیا صارف بنانے کی اجازت دیں؟"</string>
@@ -1749,6 +1747,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"آٹو فل کے اختیارات"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"آٹوفل کیلئے محفوظ کریں"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"موادوں کو آٹو فل نہیں کیا جا سکتا"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"کوئی آٹو فل تجاویز نہیں"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> آٹو فل تجاویز</item>
+      <item quantity="one">ایک آٹو فل تجویز</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"‏&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; میں محفوظ کریں؟"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏<xliff:g id="TYPE">%1$s</xliff:g> کو &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; میں محفوظ کریں؟"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"‏<xliff:g id="TYPE_0">%1$s</xliff:g> اور <xliff:g id="TYPE_1">%2$s</xliff:g> کو &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; میں محفوظ کریں؟"</string>

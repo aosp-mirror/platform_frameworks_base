@@ -1024,10 +1024,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksto veiksmai"</string>
     <string name="email" msgid="4560673117055050403">"Siųsti el. laišką"</string>
     <string name="dial" msgid="4204975095406423102">"Telefonas"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"Žemėlapiai"</string>
+    <string name="browse" msgid="6993590095938149861">"Naršyklė"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Mažėja laisvos saugyklos vietos"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kai kurios sistemos funkcijos gali neveikti"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sistemos saugykloje nepakanka vietos. Įsitikinkite, kad yra 250 MB laisvos vietos, ir paleiskite iš naujo."</string>
@@ -1751,7 +1749,7 @@
       <item quantity="many">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
       <item quantity="other">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"Įvairūs"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Be kategorijos"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Galite nustatyti šių pranešimų svarbą."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tai svarbu dėl susijusių žmonių."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją?"</string>
@@ -1810,6 +1808,13 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Automatinio pildymo parinktys"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Išsaugoti Automatinio pildymo paslaugoje"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Turinio negalima pildyti automatiškai"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Nėra jokių automatinio pildymo pasiūlymų"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> automatinio pildymo pasiūlymas</item>
+      <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> automatinio pildymo pasiūlymai</item>
+      <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> automatinio pildymo pasiūlymo</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> automatinio pildymo pasiūlymų</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"Išsaugoti sistemoje &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Išsaugoti <xliff:g id="TYPE">%1$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g> ir <xliff:g id="TYPE_1">%2$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>

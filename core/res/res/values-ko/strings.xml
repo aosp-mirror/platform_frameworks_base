@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="email" msgid="4560673117055050403">"이메일"</string>
     <string name="dial" msgid="4204975095406423102">"전화"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"지도"</string>
+    <string name="browse" msgid="6993590095938149861">"브라우저"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -1689,7 +1687,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>개 선택됨</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>개 선택됨</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"기타"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"지정된 카테고리 없음"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
@@ -1748,6 +1746,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"자동완성 옵션"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"자동완성에 저장"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"콘텐츠를 자동완성할 수 없습니다."</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"자동완성 추천 없음"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other">자동완성 추천 <xliff:g id="COUNT">%1$s</xliff:g>개</item>
+      <item quantity="one">자동완성 추천 1개</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> 및 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
