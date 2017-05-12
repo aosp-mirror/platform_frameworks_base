@@ -1639,12 +1639,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean canInputOrMove = (mMovement != null || getKeyListener() != null);
         boolean clickable = canInputOrMove || isClickable();
         boolean longClickable = canInputOrMove || isLongClickable();
+        int focusable = getFocusable();
 
         n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
             int attr = a.getIndex(i);
 
             switch (attr) {
+                case com.android.internal.R.styleable.View_focusable:
+                    TypedValue val = new TypedValue();
+                    if (a.getValue(attr, val)) {
+                        focusable = (val.type == TypedValue.TYPE_INT_BOOLEAN)
+                                ? (val.data == 0 ? NOT_FOCUSABLE : FOCUSABLE)
+                                : val.data;
+                    }
+
                 case com.android.internal.R.styleable.View_clickable:
                     clickable = a.getBoolean(attr, clickable);
                     break;
@@ -1656,6 +1665,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         a.recycle();
 
+        // Some apps were relying on the undefined behavior of focusable winning over
+        // focusableInTouchMode != focusable in TextViews if both were specified in XML (usually
+        // when starting with EditText and setting only focusable=false). To keep those apps from
+        // breaking, re-apply the focusable attribute here.
+        if (focusable != getFocusable()) {
+            setFocusable(focusable);
+        }
         setClickable(clickable);
         setLongClickable(longClickable);
 
