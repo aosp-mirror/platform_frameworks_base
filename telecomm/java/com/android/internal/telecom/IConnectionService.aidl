@@ -47,6 +47,8 @@ oneway interface IConnectionService {
             boolean isUnknown,
             in Session.Info sessionInfo);
 
+    void createConnectionComplete(String callId, in Session.Info sessionInfo);
+
     void createConnectionFailed(in PhoneAccountHandle connectionManagerPhoneAccount, String callId,
             in ConnectionRequest request, boolean isIncoming, in Session.Info sessionInfo);
 
