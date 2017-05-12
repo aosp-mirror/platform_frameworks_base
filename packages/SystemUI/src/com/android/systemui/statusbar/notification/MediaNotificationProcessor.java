@@ -27,6 +27,7 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 import android.util.LayoutDirection;
 
+import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -110,7 +111,7 @@ public class MediaNotificationProcessor {
                 paletteBuilder.addFilter(mBlackWhiteFilter);
                 palette = paletteBuilder.generate();
                 int foregroundColor;
-                if (ColorUtils.calculateLuminance(backgroundColor) > 0.5) {
+                if (NotificationColorUtil.isColorLight(backgroundColor)) {
                     Palette.Swatch first = palette.getDarkVibrantSwatch();
                     Palette.Swatch second = palette.getVibrantSwatch();
                     if (first != null && second != null) {

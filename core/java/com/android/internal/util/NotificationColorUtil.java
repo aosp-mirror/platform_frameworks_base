@@ -533,11 +533,19 @@ public class NotificationColorUtil {
         return ColorUtilsFromCompat.calculateContrast(foregroundColor, backgroundColor);
     }
 
+    public static boolean satisfiesTextContrast(int backgroundColor, int foregroundColor) {
+        return NotificationColorUtil.calculateContrast(backgroundColor, foregroundColor) >= 4.5;
+    }
+
     /**
      * Composite two potentially translucent colors over each other and returns the result.
      */
     public static int compositeColors(int foreground, int background) {
         return ColorUtilsFromCompat.compositeColors(foreground, background);
+    }
+
+    public static boolean isColorLight(int backgroundColor) {
+        return calculateLuminance(backgroundColor) > 0.5f;
     }
 
     /**
