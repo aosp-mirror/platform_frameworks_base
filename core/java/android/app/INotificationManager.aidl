@@ -71,6 +71,7 @@ interface INotificationManager
     int getDeletedChannelCount(String pkg, int uid);
     void deleteNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
+    boolean onlyHasDefaultChannel(String pkg, int uid);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
