@@ -4666,6 +4666,14 @@ public abstract class PackageManager {
 
     /**
      * If there is already an application with the given package name installed
+     * on the system for other users, also install it for the calling user.
+     * @hide
+     */
+    public abstract int installExistingPackage(String packageName, @InstallReason int installReason)
+            throws NameNotFoundException;
+
+    /**
+     * If there is already an application with the given package name installed
      * on the system for other users, also install it for the specified user.
      * @hide
      */
