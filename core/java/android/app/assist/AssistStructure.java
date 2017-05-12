@@ -19,6 +19,7 @@ import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.FillContext;
+import android.service.autofill.FillRequest;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -494,7 +495,7 @@ public class AssistStructure implements Parcelable {
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
-                    final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                    final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
                             ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
                     view.onProvideAutofillStructure(builder, autofillFlags);
                 } else {
@@ -506,7 +507,7 @@ public class AssistStructure implements Parcelable {
                 }
             }
             if (forAutoFill) {
-                final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
                         ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
                 view.dispatchProvideAutofillStructure(builder, autofillFlags);
             } else {
