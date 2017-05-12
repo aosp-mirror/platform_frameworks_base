@@ -38,7 +38,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationListenerServiceTest {
+public class NotificationListenerServiceTest extends NotificationTestCase {
 
     private String[] mKeys = new String[] { "key", "key1", "key2", "key3"};
 

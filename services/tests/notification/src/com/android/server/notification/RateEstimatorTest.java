@@ -26,7 +26,7 @@ import static org.junit.Assert.assertFalse;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class RateEstimatorTest {
+public class RateEstimatorTest extends NotificationTestCase {
     private long mTestStartTime;
     private RateEstimator mEstimator;
 
