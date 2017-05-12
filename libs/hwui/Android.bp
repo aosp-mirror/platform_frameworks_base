@@ -62,7 +62,7 @@ cc_defaults {
         "libskia",
         "libui",
         "libgui",
-        "libprotobuf-cpp-full",
+        "libprotobuf-cpp-lite",
         "libharfbuzz_ng",
         "libft2",
         "libminikin",
