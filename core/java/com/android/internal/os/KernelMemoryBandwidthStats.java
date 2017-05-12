@@ -8,6 +8,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -24,14 +25,25 @@ import java.io.IOException;
 public class KernelMemoryBandwidthStats {
     private static final String TAG = "KernelMemoryBandwidthStats";
 
-    final protected LongSparseLongArray mBandwidthEntries = new LongSparseLongArray();
     private static final String mSysfsFile = "/sys/kernel/memory_state_time/show_stat";
     private static final boolean DEBUG = false;
 
+    protected final LongSparseLongArray mBandwidthEntries = new LongSparseLongArray();
+    private boolean mStatsDoNotExist = false;
+
     public void updateStats() {
+        if (mStatsDoNotExist) {
+            // Skip reading.
+            return;
+        }
+
         StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskReads();
         try (BufferedReader reader = new BufferedReader(new FileReader(mSysfsFile))) {
             parseStats(reader);
+        } catch (FileNotFoundException e) {
+            Slog.w(TAG, "No kernel memory bandwidth stats available");
+            mBandwidthEntries.clear();
+            mStatsDoNotExist = true;
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read memory bandwidth: " + e.getMessage());
             mBandwidthEntries.clear();
