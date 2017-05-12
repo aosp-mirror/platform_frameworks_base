@@ -44,6 +44,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
  */
 public class PipNotification {
     private static final String TAG = "PipNotification";
+    private static final String NOTIFICATION_TAG = PipNotification.class.getName();
     private static final boolean DEBUG = PipManager.DEBUG;
 
     private static final String ACTION_MENU = "PipNotification.menu";
@@ -56,7 +57,7 @@ public class PipNotification {
 
     private MediaController mMediaController;
     private String mDefaultTitle;
-    private Icon mDefaultIcon;
+    private int mDefaultIconResId;
 
     private boolean mNotified;
     private String mTitle;
@@ -167,9 +168,8 @@ public class PipNotification {
     void onConfigurationChanged(Context context) {
         Resources res = context.getResources();
         mDefaultTitle = res.getString(R.string.pip_notification_unknown_title);
-        mDefaultIcon = Icon.createWithResource(context,
-                res.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_LTR
-                        ? R.drawable.pip_expand_ll : R.drawable.pip_expand_lr);
+        mDefaultIconResId = res.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_LTR
+                        ? R.drawable.pip_expand_ll : R.drawable.pip_expand_lr;
         if (mNotified) {
             // update notification
             notifyPipNotification();
@@ -181,12 +181,16 @@ public class PipNotification {
         mNotificationBuilder
                 .setShowWhen(true)
                 .setWhen(System.currentTimeMillis())
-                // TODO: Sending bitmap doesn't work in launcher side. Once launcher supports it,
-                // we can set icon.
-                //.setSmallIcon(mArt != null ? Icon.createWithBitmap(mArt) : mDefaultIcon)
-                .setSmallIcon(mDefaultIcon.getResId())
+                .setSmallIcon(mDefaultIconResId)
                 .setContentTitle(!TextUtils.isEmpty(mTitle) ? mTitle : mDefaultTitle);
-        mNotificationManager.notify(SystemMessage.NOTE_TV_PIP, mNotificationBuilder.build());
+        if (mArt != null) {
+            mNotificationBuilder.setStyle(new Notification.BigPictureStyle()
+                    .bigPicture(mArt));
+        } else {
+            mNotificationBuilder.setStyle(null);
+        }
+        mNotificationManager.notify(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP,
+                mNotificationBuilder.build());
     }
 
     private void dismissPipNotification() {
