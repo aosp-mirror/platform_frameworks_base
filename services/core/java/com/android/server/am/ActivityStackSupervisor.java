@@ -1333,7 +1333,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         r.startFreezingScreenLocked(app, 0);
-        r.setVisibility(true);
+        if (r.getStack().checkKeyguardVisibility(r, true /* shouldBeVisible */, true /* isTop */)) {
+            // We only set the visibility to true if the activity is allowed to be visible based on
+            // keyguard state. This avoids setting this into motion in window manager that is later
+            // cancelled due to later calls to ensure visible activities that set visibility back to
+            // false.
+            r.setVisibility(true);
+        }
 
         // schedule launch ticks to collect information about slow apps.
         r.startLaunchTickingLocked();
