@@ -34,6 +34,7 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
 import com.android.ims.internal.IImsServiceController;
@@ -1343,4 +1344,15 @@ interface ITelephony {
      * @hide
      */
     boolean getEmergencyCallbackMode(int subId);
+
+    /**
+     * Get the most recently available signal strength information.
+     *
+     * Get the most recent SignalStrength information reported by the modem. Due
+     * to power saving this information may not always be current.
+     * @param subId Subscription index
+     * @return the most recent cached signal strength info from the modem
+     * @hide
+     */
+    SignalStrength getSignalStrength(int subId);
 }
