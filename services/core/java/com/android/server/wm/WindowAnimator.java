@@ -115,8 +115,8 @@ public class WindowAnimator {
         mAnimationTick = () -> {
             synchronized (mService.mWindowMap) {
                 mAnimationTickScheduled = false;
-                animateLocked(mCurrentFrameTime);
             }
+            animate(mCurrentFrameTime);
         };
         mAnimationFrameCallback = frameTimeNs -> {
             synchronized (mService.mWindowMap) {
@@ -126,8 +126,8 @@ public class WindowAnimator {
                     return;
                 }
                 mAnimationTickScheduled = true;
-                mSfChoreographer.scheduleAtSfVsync(mAnimationTick);
             }
+            mSfChoreographer.scheduleAtSfVsync(mAnimationTick);
         };
     }
 
@@ -151,142 +151,158 @@ public class WindowAnimator {
         mDisplayContentsAnimators.delete(displayId);
     }
 
-    /** Locked on mService.mWindowMap. */
-    private void animateLocked(long frameTimeNs) {
-        if (!mInitialized) {
-            return;
-        }
-
-        mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
-        mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
-        boolean wasAnimating = mAnimating;
-        setAnimating(false);
-        mAppWindowAnimating = false;
-        if (DEBUG_WINDOW_TRACE) {
-            Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
-        }
-
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION animateLocked");
-        mService.openSurfaceTransaction();
-        SurfaceControl.setAnimationTransaction();
+    /**
+     * DO NOT HOLD THE WINDOW MANAGER LOCK WHILE CALLING THIS METHOD. Reason: the method closes
+     * an animation transaction, that might be blocking until the next sf-vsync, so we want to make
+     * sure other threads can make progress if this happens.
+     */
+    private void animate(long frameTimeNs) {
+        boolean transactionOpen = false;
+        boolean wasAnimating = false;
         try {
-            final AccessibilityController accessibilityController =
-                    mService.mAccessibilityController;
-            final int numDisplays = mDisplayContentsAnimators.size();
-            for (int i = 0; i < numDisplays; i++) {
-                final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
-                dc.stepAppWindowsAnimation(mCurrentTime);
-                DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
+            synchronized (mService.mWindowMap) {
+                if (!mInitialized) {
+                    return;
+                }
 
-                final ScreenRotationAnimation screenRotationAnimation =
-                        displayAnimator.mScreenRotationAnimation;
-                if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
-                    if (screenRotationAnimation.stepAnimationLocked(mCurrentTime)) {
-                        setAnimating(true);
-                    } else {
-                        mBulkUpdateParams |= SET_UPDATE_ROTATION;
-                        screenRotationAnimation.kill();
-                        displayAnimator.mScreenRotationAnimation = null;
+                mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
+                mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
+                wasAnimating = mAnimating;
+                setAnimating(false);
+                mAppWindowAnimating = false;
+                if (DEBUG_WINDOW_TRACE) {
+                    Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
+                }
 
-                        //TODO (multidisplay): Accessibility supported only for the default display.
-                        if (accessibilityController != null && dc.isDefaultDisplay) {
-                            // We just finished rotation animation which means we did not announce
-                            // the rotation and waited for it to end, announce now.
-                            accessibilityController.onRotationChangedLocked(
-                                    mService.getDefaultDisplayContentLocked());
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION animate");
+                mService.openSurfaceTransaction();
+                transactionOpen = true;
+                SurfaceControl.setAnimationTransaction();
+
+                final AccessibilityController accessibilityController =
+                        mService.mAccessibilityController;
+                final int numDisplays = mDisplayContentsAnimators.size();
+                for (int i = 0; i < numDisplays; i++) {
+                    final int displayId = mDisplayContentsAnimators.keyAt(i);
+                    final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+                    dc.stepAppWindowsAnimation(mCurrentTime);
+                    DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
+
+                    final ScreenRotationAnimation screenRotationAnimation =
+                            displayAnimator.mScreenRotationAnimation;
+                    if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+                        if (screenRotationAnimation.stepAnimationLocked(mCurrentTime)) {
+                            setAnimating(true);
+                        } else {
+                            mBulkUpdateParams |= SET_UPDATE_ROTATION;
+                            screenRotationAnimation.kill();
+                            displayAnimator.mScreenRotationAnimation = null;
+
+                            //TODO (multidisplay): Accessibility supported only for the default
+                            // display.
+                            if (accessibilityController != null && dc.isDefaultDisplay) {
+                                // We just finished rotation animation which means we did not
+                                // announce the rotation and waited for it to end, announce now.
+                                accessibilityController.onRotationChangedLocked(
+                                        mService.getDefaultDisplayContentLocked());
+                            }
                         }
+                    }
+
+                    // Update animations of all applications, including those
+                    // associated with exiting/removed apps
+                    ++mAnimTransactionSequence;
+                    dc.updateWindowsForAnimator(this);
+                    dc.updateWallpaperForAnimator(this);
+                    dc.prepareWindowSurfaces();
+                }
+
+                for (int i = 0; i < numDisplays; i++) {
+                    final int displayId = mDisplayContentsAnimators.keyAt(i);
+                    final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+
+                    dc.checkAppWindowsReadyToShow();
+
+                    final ScreenRotationAnimation screenRotationAnimation =
+                            mDisplayContentsAnimators.valueAt(i).mScreenRotationAnimation;
+                    if (screenRotationAnimation != null) {
+                        screenRotationAnimation.updateSurfacesInTransaction();
+                    }
+
+                    orAnimating(dc.animateDimLayers());
+                    orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
+                    //TODO (multidisplay): Magnification is supported only for the default display.
+                    if (accessibilityController != null && dc.isDefaultDisplay) {
+                        accessibilityController.drawMagnifiedRegionBorderIfNeededLocked();
                     }
                 }
 
-                // Update animations of all applications, including those
-                // associated with exiting/removed apps
-                ++mAnimTransactionSequence;
-                dc.updateWindowsForAnimator(this);
-                dc.updateWallpaperForAnimator(this);
-                dc.prepareWindowSurfaces();
-            }
-
-            for (int i = 0; i < numDisplays; i++) {
-                final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
-
-                dc.checkAppWindowsReadyToShow();
-
-                final ScreenRotationAnimation screenRotationAnimation =
-                        mDisplayContentsAnimators.valueAt(i).mScreenRotationAnimation;
-                if (screenRotationAnimation != null) {
-                    screenRotationAnimation.updateSurfacesInTransaction();
+                if (mService.mDragState != null) {
+                    mAnimating |= mService.mDragState.stepAnimationLocked(mCurrentTime);
                 }
 
-                orAnimating(dc.animateDimLayers());
-                orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
-                //TODO (multidisplay): Magnification is supported only for the default display.
-                if (accessibilityController != null && dc.isDefaultDisplay) {
-                    accessibilityController.drawMagnifiedRegionBorderIfNeededLocked();
+                if (mAnimating) {
+                    mService.scheduleAnimationLocked();
                 }
-            }
 
-            if (mService.mDragState != null) {
-                mAnimating |= mService.mDragState.stepAnimationLocked(mCurrentTime);
-            }
-
-            if (mAnimating) {
-                mService.scheduleAnimationLocked();
-            }
-
-            if (mService.mWatermark != null) {
-                mService.mWatermark.drawIfNeeded();
+                if (mService.mWatermark != null) {
+                    mService.mWatermark.drawIfNeeded();
+                }
             }
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            mService.closeSurfaceTransaction();
-            if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animateLocked");
-        }
-
-        boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
-        boolean doRequest = false;
-        if (mBulkUpdateParams != 0) {
-            doRequest = mService.mRoot.copyAnimToLayoutParams();
-        }
-
-        if (hasPendingLayoutChanges || doRequest) {
-            mWindowPlacerLocked.requestTraversal();
-        }
-
-        if (mAnimating && !wasAnimating) {
-
-            // Usually app transitions but quite a load onto the system already (with all the things
-            // happening in app), so pause task snapshot persisting to not increase the load.
-            mService.mTaskSnapshotController.setPersisterPaused(true);
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
-                Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+            if (transactionOpen) {
+                mService.closeSurfaceTransaction();
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
         }
 
-        if (!mAnimating && wasAnimating) {
-            mWindowPlacerLocked.requestTraversal();
-            mService.mTaskSnapshotController.setPersisterPaused(false);
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
-                Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+        synchronized (mService.mWindowMap) {
+            boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
+            boolean doRequest = false;
+            if (mBulkUpdateParams != 0) {
+                doRequest = mService.mRoot.copyAnimToLayoutParams();
             }
-        }
 
-        if (mRemoveReplacedWindows) {
-            mService.mRoot.removeReplacedWindows();
-            mRemoveReplacedWindows = false;
-        }
+            if (hasPendingLayoutChanges || doRequest) {
+                mWindowPlacerLocked.requestTraversal();
+            }
 
-        mService.stopUsingSavedSurfaceLocked();
-        mService.destroyPreservedSurfaceLocked();
-        mService.mWindowPlacerLocked.destroyPendingSurfaces();
+            if (mAnimating && !wasAnimating) {
 
-        if (DEBUG_WINDOW_TRACE) {
-            Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
-                    + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
-                    + " mPendingLayoutChanges(DEFAULT_DISPLAY)="
-                    + Integer.toHexString(getPendingLayoutChanges(DEFAULT_DISPLAY)));
+                // Usually app transitions but quite a load onto the system already (with all the
+                // things happening in app), so pause task snapshot persisting to not increase the
+                // load.
+                mService.mTaskSnapshotController.setPersisterPaused(true);
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+                }
+            }
+
+            if (!mAnimating && wasAnimating) {
+                mWindowPlacerLocked.requestTraversal();
+                mService.mTaskSnapshotController.setPersisterPaused(false);
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+                }
+            }
+
+            if (mRemoveReplacedWindows) {
+                mService.mRoot.removeReplacedWindows();
+                mRemoveReplacedWindows = false;
+            }
+
+            mService.stopUsingSavedSurfaceLocked();
+            mService.destroyPreservedSurfaceLocked();
+            mService.mWindowPlacerLocked.destroyPendingSurfaces();
+
+            if (DEBUG_WINDOW_TRACE) {
+                Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
+                        + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
+                        + " mPendingLayoutChanges(DEFAULT_DISPLAY)="
+                        + Integer.toHexString(getPendingLayoutChanges(DEFAULT_DISPLAY)));
+            }
         }
     }
 
