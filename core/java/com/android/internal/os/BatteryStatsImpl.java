@@ -936,6 +936,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mCount.incrementAndGet();
         }
 
+        void addAtomic(int delta) {
+            mCount.addAndGet(delta);
+        }
+
         /**
          * Clear state of this counter.
          */
@@ -4842,11 +4846,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteBluetoothScanResultFromSourceLocked(WorkSource ws) {
+    public void noteBluetoothScanResultsFromSourceLocked(WorkSource ws, int numNewResults) {
         final int N = ws.size();
         for (int i = 0; i < N; i++) {
             int uid = mapUid(ws.get(i));
-            getUidStatsLocked(uid).noteBluetoothScanResultLocked();
+            getUidStatsLocked(uid).noteBluetoothScanResultsLocked(numNewResults);
         }
     }
 
@@ -6057,8 +6061,8 @@ public class BatteryStatsImpl extends BatteryStats {
             return mBluetoothScanResultCounter;
         }
 
-        public void noteBluetoothScanResultLocked() {
-            createBluetoothScanResultCounterLocked().stepAtomic();
+        public void noteBluetoothScanResultsLocked(int numNewResults) {
+            createBluetoothScanResultCounterLocked().addAtomic(numNewResults);
         }
 
         @Override
