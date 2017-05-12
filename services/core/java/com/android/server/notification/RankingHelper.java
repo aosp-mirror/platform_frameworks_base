@@ -48,11 +48,13 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 public class RankingHelper implements RankingConfig {
     private static final String TAG = "RankingHelper";
@@ -574,12 +576,8 @@ public class RankingHelper implements RankingConfig {
         updateConfig();
     }
 
-    private void clearLockedFields(NotificationChannel channel) {
-        int clearMask = 0;
-        for (int i = 0; i < NotificationChannel.LOCKABLE_FIELDS.length; i++) {
-            clearMask |= NotificationChannel.LOCKABLE_FIELDS[i];
-        }
-        channel.lockFields(~clearMask);
+    void clearLockedFields(NotificationChannel channel) {
+        channel.unlockFields(channel.getUserLockedFields());
     }
 
     @Override
@@ -597,6 +595,7 @@ public class RankingHelper implements RankingConfig {
         if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             updatedChannel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
         }
+        lockFieldsForUpdate(channel, updatedChannel);
         r.channels.put(updatedChannel.getId(), updatedChannel);
 
         if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(updatedChannel.getId())) {
@@ -803,6 +802,35 @@ public class RankingHelper implements RankingConfig {
         }
         setImportance(packageName, uid,
                 enabled ? DEFAULT_IMPORTANCE : NotificationManager.IMPORTANCE_NONE);
+    }
+
+    @VisibleForTesting
+    void lockFieldsForUpdate(NotificationChannel original, NotificationChannel update) {
+        update.unlockFields(update.getUserLockedFields());
+        update.lockFields(original.getUserLockedFields());
+        if (original.canBypassDnd() != update.canBypassDnd()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_PRIORITY);
+        }
+        if (original.getLockscreenVisibility() != update.getLockscreenVisibility()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_VISIBILITY);
+        }
+        if (original.getImportance() != update.getImportance()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+        }
+        if (original.shouldShowLights() != update.shouldShowLights()
+                || original.getLightColor() != update.getLightColor()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_LIGHTS);
+        }
+        if (!Objects.equals(original.getSound(), update.getSound())) {
+            update.lockFields(NotificationChannel.USER_LOCKED_SOUND);
+        }
+        if (!Arrays.equals(original.getVibrationPattern(), update.getVibrationPattern())
+                || original.shouldVibrate() != update.shouldVibrate()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_VIBRATION);
+        }
+        if (original.canShowBadge() != update.canShowBadge()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_SHOW_BADGE);
+        }
     }
 
     public void dump(PrintWriter pw, String prefix, NotificationManagerService.DumpFilter filter) {
