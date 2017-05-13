@@ -69,7 +69,12 @@ class PngChunkFilter : public io::InputStream {
   bool Rewind() override;
   size_t ByteCount() const override { return window_start_; }
 
-  bool HadError() const override { return error_; }
+  bool HadError() const override {
+    return !error_msg_.empty();
+  }
+  std::string GetError() const override {
+    return error_msg_;
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PngChunkFilter);
@@ -79,13 +84,13 @@ class PngChunkFilter : public io::InputStream {
   android::StringPiece data_;
   size_t window_start_ = 0;
   size_t window_end_ = 0;
-  bool error_ = false;
+  std::string error_msg_;
 };
 
 /**
  * Reads a PNG from the InputStream into memory as an RGBA Image.
  */
-std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in);
+std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::InputStream* in);
 
 /**
  * Writes the RGBA Image, with optional 9-patch meta-data, into the OutputStream

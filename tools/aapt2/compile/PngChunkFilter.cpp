@@ -16,11 +16,13 @@
 
 #include "compile/Png.h"
 
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
 #include "io/Io.h"
 
 using android::StringPiece;
+using android::base::StringPrintf;
 
 namespace aapt {
 
@@ -73,7 +75,7 @@ PngChunkFilter::PngChunkFilter(const StringPiece& data) : data_(data) {
     window_start_ = 0;
     window_end_ = kPngSignatureSize;
   } else {
-    error_ = true;
+    error_msg_ = "PNG does not start with PNG signature";
   }
 }
 
@@ -90,7 +92,7 @@ bool PngChunkFilter::ConsumeWindow(const void** buffer, size_t* len) {
 }
 
 bool PngChunkFilter::Next(const void** buffer, size_t* len) {
-  if (error_) {
+  if (HadError()) {
     return false;
   }
 
@@ -106,16 +108,21 @@ bool PngChunkFilter::Next(const void** buffer, size_t* len) {
     const size_t kMinChunkHeaderSize = 3 * sizeof(uint32_t);
 
     // Is there enough room for a chunk header?
-    if (data_.size() - window_start_ < kMinChunkHeaderSize) {
-      error_ = true;
+    if (data_.size() - window_end_ < kMinChunkHeaderSize) {
+      error_msg_ = StringPrintf("Not enough space for a PNG chunk @ byte %zu/%zu", window_end_,
+                                data_.size());
       return false;
     }
 
     // Verify the chunk length.
     const uint32_t chunk_len = Peek32LE(data_.data() + window_end_);
-    if (((uint64_t)chunk_len) + ((uint64_t)window_end_) + sizeof(uint32_t) > data_.size()) {
+    if ((size_t)chunk_len > data_.size() - window_end_ - kMinChunkHeaderSize) {
       // Overflow.
-      error_ = true;
+      const uint32_t chunk_type = Peek32LE(data_.data() + window_end_ + sizeof(uint32_t));
+      error_msg_ = StringPrintf(
+          "PNG chunk type %08x is too large: chunk length is %zu but chunk "
+          "starts at byte %zu/%zu",
+          chunk_type, (size_t)chunk_len, window_end_ + kMinChunkHeaderSize, data_.size());
       return false;
     }
 
@@ -124,6 +131,16 @@ bool PngChunkFilter::Next(const void** buffer, size_t* len) {
     if (IsPngChunkWhitelisted(chunk_type)) {
       // Advance the window to include this chunk.
       window_end_ += kMinChunkHeaderSize + chunk_len;
+
+      // Special case the IEND chunk, which MUST appear last and libpng stops parsing once it hits
+      // such a chunk (let's do the same).
+      if (chunk_type == kPngChunkIEND) {
+        // Truncate the data to the end of this chunk. There may be garbage trailing after
+        // (b/38169876)
+        data_ = data_.substr(0, window_end_);
+        break;
+      }
+
     } else {
       // We want to strip this chunk. If we accumulated a window,
       // we must return the window now.
@@ -145,14 +162,14 @@ bool PngChunkFilter::Next(const void** buffer, size_t* len) {
 }
 
 void PngChunkFilter::BackUp(size_t count) {
-  if (error_) {
+  if (HadError()) {
     return;
   }
   window_start_ -= count;
 }
 
 bool PngChunkFilter::Rewind() {
-  if (error_) {
+  if (HadError()) {
     return false;
   }
   window_start_ = 0;
