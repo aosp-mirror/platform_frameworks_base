@@ -498,6 +498,7 @@ public class PackageParserTest {
         pkg.mRestrictedAccountType = "foo19";
         pkg.mRequiredAccountType = "foo20";
         pkg.mOverlayTarget = "foo21";
+        pkg.mOverlayPriority = 100;
         pkg.mSigningKeys = new ArraySet<>();
         pkg.mUpgradeKeySets = new ArraySet<>();
         pkg.mKeySetMapping = new ArrayMap<>();
