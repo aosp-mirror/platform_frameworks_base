@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +34,7 @@ import android.widget.FrameLayout.LayoutParams;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
+import com.android.systemui.R.style;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
@@ -67,6 +69,7 @@ public class QSFragment extends Fragment implements QS {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
+        inflater =inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme));
         return inflater.inflate(R.layout.qs_panel, container, false);
     }
 
