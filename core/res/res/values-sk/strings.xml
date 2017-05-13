@@ -266,6 +266,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Aktualizácie"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Stav siete"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Upozornenia týkajúce sa siete"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Stav pripojenia VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Správa zariadenia"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornenia"</string>
@@ -1139,6 +1141,18 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Zvuky budíka"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Zvuky upozornení"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Neznáme"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="few">K dispozícii sú siete Wi-Fi</item>
+      <item quantity="many">K dispozícii sú siete Wi-Fi</item>
+      <item quantity="other">K dispozícii sú siete Wi-Fi</item>
+      <item quantity="one">K dispozícii je sieť Wi-Fi</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="few">K dispozícii sú verejné siete Wi-Fi</item>
+      <item quantity="many">K dispozícii sú verejné siete Wi-Fi</item>
+      <item quantity="other">K dispozícii sú verejné siete Wi-Fi</item>
+      <item quantity="one">K dispozícii je verejná sieť Wi-Fi</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prihlásiť sa do siete Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prihlásenie do siete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
