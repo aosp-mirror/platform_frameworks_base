@@ -295,6 +295,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["original-package"];
   manifest_action["protected-broadcast"];
   manifest_action["uses-permission"];
+  manifest_action["uses-permission-sdk-23"];
   manifest_action["permission"];
   manifest_action["permission-tree"];
   manifest_action["permission-group"];
