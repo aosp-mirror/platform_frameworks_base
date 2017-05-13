@@ -335,6 +335,7 @@ public final class AutofillManagerService extends SystemService {
     void listSessions(int userId, IResultReceiver receiver) {
         Slog.i(TAG, "listSessions() for userId " + userId);
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         final Bundle resultData = new Bundle();
         final ArrayList<String> sessions = new ArrayList<>();
 
@@ -364,6 +365,7 @@ public final class AutofillManagerService extends SystemService {
     void reset() {
         Slog.i(TAG, "reset()");
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         synchronized (mLock) {
             final int size = mServicesCache.size();
             for (int i = 0; i < size; i++) {
@@ -376,6 +378,8 @@ public final class AutofillManagerService extends SystemService {
     // Called by Shell command.
     void setLogLevel(int level) {
         Slog.i(TAG, "setLogLevel(): " + level);
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         boolean debug = false;
         boolean verbose = false;
         if (level == AutofillManager.FLAG_ADD_CLIENT_VERBOSE) {
@@ -391,6 +395,8 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     int getLogLevel() {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         synchronized (mLock) {
             if (sVerbose) return AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
             if (sDebug) return AutofillManager.FLAG_ADD_CLIENT_DEBUG;
@@ -400,6 +406,8 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     public int getMaxPartitions() {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         synchronized (mLock) {
             return sPartitionMaxCount;
         }
@@ -407,6 +415,7 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     public void setMaxPartitions(int max) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxPartitions(): " + max);
         synchronized (mLock) {
             sPartitionMaxCount = max;

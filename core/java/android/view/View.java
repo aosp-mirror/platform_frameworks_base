@@ -2770,6 +2770,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
      *       1                           PFLAG3_NO_REVEAL_ON_FOCUS
+     *      1                            PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT
      * |-------|-------|-------|-------|
      */
 
@@ -2857,14 +2858,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * when this view can scroll in the end direction.
      */
     static final int PFLAG3_SCROLL_INDICATOR_END = 0x2000;
-
-    /**
-     * Flag indicating that when layout is completed we should notify
-     * that the view was entered for autofill purposes. To minimize
-     * showing autofill for views not visible to the user we evaluate
-     * user visibility which cannot be done until the view is laid out.
-     */
-    static final int PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT = 0x4000;
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
 
@@ -3049,6 +3042,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getRevealOnFocusHint()
      */
     private static final int PFLAG3_NO_REVEAL_ON_FOCUS = 0x4000000;
+
+    /**
+     * Flag indicating that when layout is completed we should notify
+     * that the view was entered for autofill purposes. To minimize
+     * showing autofill for views not visible to the user we evaluate
+     * user visibility which cannot be done until the view is laid out.
+     */
+    static final int PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT = 0x8000000;
 
     /* End of masks for mPrivateFlags3 */
 
