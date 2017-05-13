@@ -54,4 +54,7 @@ message FingerprintActionStatsProto {
 
     // Total number of lockouts.
     int32 lockout = 4;
+
+    // Total number of permanent lockouts.
+    int32 lockout_permanent = 5;
 }

@@ -2289,6 +2289,7 @@
   <java-symbol type="array" name="fingerprint_acquired_vendor" />
   <java-symbol type="string" name="fingerprint_error_canceled" />
   <java-symbol type="string" name="fingerprint_error_lockout" />
+  <java-symbol type="string" name="fingerprint_error_lockout_permanent" />
   <java-symbol type="string" name="fingerprint_name_template" />
 
   <!-- Fingerprint config -->
