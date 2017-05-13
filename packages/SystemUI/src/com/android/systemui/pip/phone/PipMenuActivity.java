@@ -303,7 +303,6 @@ public class PipMenuActivity extends Activity {
                 mMenuContainerAnimator.cancel();
             }
             notifyMenuStateChange(menuState);
-            updateExpandButtonFromBounds(stackBounds, movementBounds);
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
@@ -386,24 +385,6 @@ public class PipMenuActivity extends Activity {
             boolean allowMenuTimeout = intent.getBooleanExtra(EXTRA_ALLOW_TIMEOUT, true);
             showMenu(menuState, stackBounds, movementBounds, allowMenuTimeout);
         }
-    }
-
-    private void updateExpandButtonFromBounds(Rect stackBounds, Rect movementBounds) {
-        if (stackBounds == null) {
-            return;
-        }
-
-        boolean isLandscapePip = stackBounds.width() > stackBounds.height();
-        boolean left = stackBounds.left < movementBounds.centerX();
-        boolean top = stackBounds.top < movementBounds.centerY();
-        boolean expandL = (left && top) || (!left && !top);
-        int iconResId;
-        if (isLandscapePip) {
-            iconResId = expandL ? R.drawable.pip_expand_ll : R.drawable.pip_expand_lr;
-        } else {
-            iconResId = expandL ? R.drawable.pip_expand_pl : R.drawable.pip_expand_pr;
-        }
-        mExpandButton.setImageResource(iconResId);
     }
 
     private void setActions(Rect stackBounds, List<RemoteAction> actions) {
