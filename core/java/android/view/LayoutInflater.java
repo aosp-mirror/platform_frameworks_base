@@ -639,6 +639,11 @@ public abstract class LayoutInflater {
                 }
             }
 
+            Object lastContext = mConstructorArgs[0];
+            if (mConstructorArgs[0] == null) {
+                // Fill in the context if not already within inflation.
+                mConstructorArgs[0] = mContext;
+            }
             Object[] args = mConstructorArgs;
             args[1] = attrs;
 
@@ -648,6 +653,7 @@ public abstract class LayoutInflater {
                 final ViewStub viewStub = (ViewStub) view;
                 viewStub.setLayoutInflater(cloneInContext((Context) args[0]));
             }
+            mConstructorArgs[0] = lastContext;
             return view;
 
         } catch (NoSuchMethodException e) {
