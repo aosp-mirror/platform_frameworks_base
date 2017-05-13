@@ -1921,7 +1921,7 @@ public class Instrumentation {
 
     /** @hide */
     public static void checkStartActivityResult(int res, Object intent) {
-        if (res >= ActivityManager.START_SUCCESS) {
+        if (!ActivityManager.isStartResultFatalError(res)) {
             return;
         }
 
