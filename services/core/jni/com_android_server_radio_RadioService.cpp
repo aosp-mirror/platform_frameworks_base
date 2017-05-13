@@ -49,10 +49,16 @@ using V1_0::ITuner;
 
 static Mutex gContextMutex;
 
-static jclass gTunerClass;
-static jmethodID gTunerCstor;
+static struct {
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+    } Tuner;
 
-static jclass gServiceClass;
+    struct {
+        jclass clazz;
+    } RadioService;
+} gjni;
 
 struct ServiceContext {
     ServiceContext() {}
@@ -123,6 +129,8 @@ static sp<V1_0::IBroadcastRadio> getModule(jlong nativeContext) {
 static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jint moduleId,
         jobject bandConfig, bool withAudio, jobject callback) {
     ALOGV("nativeOpenTuner()");
+    EnvWrapper wrap(env);
+
     if (callback == nullptr) {
         ALOGE("Callback is empty");
         return nullptr;
@@ -146,7 +154,8 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
     Region region;
     BandConfig bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
 
-    jobject tuner = env->NewObject(gTunerClass, gTunerCstor, callback, halRev, region, withAudio);
+    auto tuner = wrap(env->NewObject(gjni.Tuner.clazz, gjni.Tuner.cstor,
+            callback, halRev, region, withAudio));
     if (tuner == nullptr) {
         ALOGE("Unable to create new tuner object.");
         return nullptr;
@@ -165,13 +174,12 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
         ALOGE("Couldn't open tuner");
         ALOGE_IF(hidlResult.isOk(), "halResult = %d", halResult);
         ALOGE_IF(!hidlResult.isOk(), "hidlResult = %s", hidlResult.description().c_str());
-        env->DeleteLocalRef(tuner);
         return nullptr;
     }
 
     Tuner::setHalTuner(env, tuner, halTuner);
     ALOGI("Opened tuner %p", halTuner.get());
-    return tuner;
+    return tuner.release();
 }
 
 static const JNINativeMethod gRadioServiceMethods[] = {
@@ -192,12 +200,12 @@ void register_android_server_radio_RadioService(JNIEnv *env) {
     register_android_server_radio_convert(env);
 
     auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
-    gTunerClass = MakeGlobalRefOrDie(env, tunerClass);
-    gTunerCstor = GetMethodIDOrDie(env, tunerClass, "<init>",
+    gjni.Tuner.clazz = MakeGlobalRefOrDie(env, tunerClass);
+    gjni.Tuner.cstor = GetMethodIDOrDie(env, tunerClass, "<init>",
             "(Landroid/hardware/radio/ITunerCallback;IIZ)V");
 
     auto serviceClass = FindClassOrDie(env, "com/android/server/radio/RadioService");
-    gServiceClass = MakeGlobalRefOrDie(env, serviceClass);
+    gjni.RadioService.clazz = MakeGlobalRefOrDie(env, serviceClass);
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/radio/RadioService",
             gRadioServiceMethods, NELEM(gRadioServiceMethods));

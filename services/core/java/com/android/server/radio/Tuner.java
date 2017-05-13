@@ -31,15 +31,18 @@ class Tuner extends ITuner.Stub {
      */
     private final long mNativeContext;
 
+    @NonNull private final TunerCallback mTunerCallback;
     private final Object mLock = new Object();
+    private boolean mIsClosed = false;
     private boolean mIsMuted = false;
     private int mRegion;  // TODO(b/36863239): find better solution to manage regions
     private final boolean mWithAudio;
 
     Tuner(@NonNull ITunerCallback clientCallback, int halRev, int region, boolean withAudio) {
+        mTunerCallback = new TunerCallback(this, clientCallback, halRev);
         mRegion = region;
         mWithAudio = withAudio;
-        mNativeContext = nativeInit(clientCallback, halRev);
+        mNativeContext = nativeInit(halRev);
     }
 
     @Override
@@ -48,7 +51,7 @@ class Tuner extends ITuner.Stub {
         super.finalize();
     }
 
-    private native long nativeInit(@NonNull ITunerCallback clientCallback, int halRev);
+    private native long nativeInit(int halRev);
     private native void nativeFinalize(long nativeContext);
     private native void nativeClose(long nativeContext);
 
@@ -66,7 +69,16 @@ class Tuner extends ITuner.Stub {
     @Override
     public void close() {
         synchronized (mLock) {
+            if (mIsClosed) return;
+            mTunerCallback.detach();
             nativeClose(mNativeContext);
+            mIsClosed = true;
+        }
+    }
+
+    private void checkNotClosedLocked() {
+        if (mIsClosed) {
+            throw new IllegalStateException("Tuner is closed, no further operations are allowed");
         }
     }
 
@@ -76,6 +88,7 @@ class Tuner extends ITuner.Stub {
             throw new IllegalArgumentException("The argument must not be a null pointer");
         }
         synchronized (mLock) {
+            checkNotClosedLocked();
             nativeSetConfiguration(mNativeContext, config);
             mRegion = config.getRegion();
         }
@@ -84,6 +97,7 @@ class Tuner extends ITuner.Stub {
     @Override
     public RadioManager.BandConfig getConfiguration() {
         synchronized (mLock) {
+            checkNotClosedLocked();
             return nativeGetConfiguration(mNativeContext, mRegion);
         }
     }
@@ -94,6 +108,7 @@ class Tuner extends ITuner.Stub {
             throw new IllegalStateException("Can't operate on mute - no audio requested");
         }
         synchronized (mLock) {
+            checkNotClosedLocked();
             if (mIsMuted == mute) return;
             mIsMuted = mute;
 
@@ -109,6 +124,7 @@ class Tuner extends ITuner.Stub {
             return true;
         }
         synchronized (mLock) {
+            checkNotClosedLocked();
             return mIsMuted;
         }
     }
@@ -116,6 +132,7 @@ class Tuner extends ITuner.Stub {
     @Override
     public void step(boolean directionDown, boolean skipSubChannel) {
         synchronized (mLock) {
+            checkNotClosedLocked();
             nativeStep(mNativeContext, directionDown, skipSubChannel);
         }
     }
@@ -123,6 +140,7 @@ class Tuner extends ITuner.Stub {
     @Override
     public void scan(boolean directionDown, boolean skipSubChannel) {
         synchronized (mLock) {
+            checkNotClosedLocked();
             nativeScan(mNativeContext, directionDown, skipSubChannel);
         }
     }
@@ -130,6 +148,7 @@ class Tuner extends ITuner.Stub {
     @Override
     public void tune(int channel, int subChannel) {
         synchronized (mLock) {
+            checkNotClosedLocked();
             nativeTune(mNativeContext, channel, subChannel);
         }
     }
@@ -137,6 +156,7 @@ class Tuner extends ITuner.Stub {
     @Override
     public void cancel() {
         synchronized (mLock) {
+            checkNotClosedLocked();
             nativeCancel(mNativeContext);
         }
     }
@@ -144,6 +164,7 @@ class Tuner extends ITuner.Stub {
     @Override
     public RadioManager.ProgramInfo getProgramInformation() {
         synchronized (mLock) {
+            checkNotClosedLocked();
             return nativeGetProgramInformation(mNativeContext);
         }
     }
