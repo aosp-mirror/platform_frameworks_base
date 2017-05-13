@@ -792,7 +792,7 @@
 
     <!-- The bottom margin of the expand container when there are actions.
          Equal to pip_action_size - pip_action_padding. -->
-    <dimen name="pip_expand_container_edge_margin">36dp</dimen>
+    <dimen name="pip_expand_container_edge_margin">30dp</dimen>
 
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
