@@ -48,6 +48,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * A Task load queue
  */
 class TaskResourceLoadQueue {
+
     ConcurrentLinkedQueue<Task> mQueue = new ConcurrentLinkedQueue<Task>();
 
     /** Adds a new task to the load queue */
@@ -104,15 +105,18 @@ class BackgroundTaskLoader implements Runnable {
     boolean mCancelled;
     boolean mWaitingOnLoadQueue;
 
+    private final OnIdleChangedListener mOnIdleChangedListener;
+
     /** Constructor, creates a new loading thread that loads task resources in the background */
     public BackgroundTaskLoader(TaskResourceLoadQueue loadQueue,
             TaskKeyLruCache<Drawable> iconCache, Bitmap defaultThumbnail,
-            BitmapDrawable defaultIcon) {
+            BitmapDrawable defaultIcon, OnIdleChangedListener onIdleChangedListener) {
         mLoadQueue = loadQueue;
         mIconCache = iconCache;
         mDefaultThumbnail = defaultThumbnail;
         mDefaultIcon = defaultIcon;
         mMainThreadHandler = new Handler();
+        mOnIdleChangedListener = onIdleChangedListener;
         mLoadThread = new HandlerThread("Recents-TaskResourceLoader",
                 android.os.Process.THREAD_PRIORITY_BACKGROUND);
         mLoadThread.start();
@@ -169,7 +173,11 @@ class BackgroundTaskLoader implements Runnable {
                     synchronized(mLoadQueue) {
                         try {
                             mWaitingOnLoadQueue = true;
+                            mMainThreadHandler.post(
+                                    () -> mOnIdleChangedListener.onIdleChanged(true));
                             mLoadQueue.wait();
+                            mMainThreadHandler.post(
+                                    () -> mOnIdleChangedListener.onIdleChanged(false));
                             mWaitingOnLoadQueue = false;
                         } catch (InterruptedException ie) {
                             ie.printStackTrace();
@@ -229,6 +237,10 @@ class BackgroundTaskLoader implements Runnable {
                         () -> t.notifyTaskDataLoaded(cachedThumbnailData, finalIcon));
             }
         }
+    }
+
+    interface OnIdleChangedListener {
+        void onIdleChanged(boolean idle);
     }
 }
 
@@ -298,15 +310,16 @@ public class RecentsTaskLoader {
 
         // Initialize the proxy, cache and loaders
         int numRecentTasks = ActivityManager.getMaxRecentTasksStatic();
+        mHighResThumbnailLoader = new HighResThumbnailLoader(Recents.getSystemServices(),
+                Looper.getMainLooper());
         mLoadQueue = new TaskResourceLoadQueue();
         mIconCache = new TaskKeyLruCache<>(iconCacheSize, mClearActivityInfoOnEviction);
         mActivityLabelCache = new TaskKeyLruCache<>(numRecentTasks, mClearActivityInfoOnEviction);
         mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks,
                 mClearActivityInfoOnEviction);
         mActivityInfoCache = new LruCache(numRecentTasks);
-        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mDefaultThumbnail, mDefaultIcon);
-        mHighResThumbnailLoader = new HighResThumbnailLoader(Recents.getSystemServices(),
-                Looper.getMainLooper());
+        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mDefaultThumbnail, mDefaultIcon,
+                mHighResThumbnailLoader::setTaskLoadQueueIdle);
     }
 
     /** Returns the size of the app icon cache. */
@@ -360,9 +373,6 @@ public class RecentsTaskLoader {
         mTempCache.evictAll();
         if (!opts.onlyLoadForCache) {
             mNumVisibleTasksLoaded = opts.numVisibleTasks;
-
-            // Start the loader
-            mLoader.start(context);
         }
     }
 
@@ -605,6 +615,13 @@ public class RecentsTaskLoader {
             mActivityInfoCache.put(cn, activityInfo);
         }
         return activityInfo;
+    }
+
+    /**
+     * Starts loading tasks.
+     */
+    public void startLoader(Context ctx) {
+        mLoader.start(ctx);
     }
 
     /**

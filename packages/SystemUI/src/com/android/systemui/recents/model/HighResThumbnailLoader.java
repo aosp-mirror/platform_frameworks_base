@@ -50,6 +50,7 @@ public class HighResThumbnailLoader implements TaskCallbacks {
     private boolean mLoading;
     private boolean mVisible;
     private boolean mFlingingFast;
+    private boolean mTaskLoadQueueIdle;
 
     public HighResThumbnailLoader(SystemServicesProxy ssp, Looper looper) {
         mMainThreadHandler = new Handler(looper);
@@ -71,13 +72,22 @@ public class HighResThumbnailLoader implements TaskCallbacks {
         updateLoading();
     }
 
+    /**
+     * Sets whether the other task load queue is idling. Avoid double-loading bitmaps by not
+     * starting this queue until the other queue is idling.
+     */
+    public void setTaskLoadQueueIdle(boolean idle) {
+        mTaskLoadQueueIdle = idle;
+        updateLoading();
+    }
+
     @VisibleForTesting
     boolean isLoading() {
         return mLoading;
     }
 
     private void updateLoading() {
-        setLoading(mVisible && !mFlingingFast);
+        setLoading(mVisible && !mFlingingFast && mTaskLoadQueueIdle);
     }
 
     private void setLoading(boolean loading) {
