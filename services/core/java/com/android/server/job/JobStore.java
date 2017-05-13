@@ -454,10 +454,12 @@ public class JobStore {
                 synchronized (mLock) {
                     jobs = readJobMapImpl(fis);
                     if (jobs != null) {
+                        long now = SystemClock.elapsedRealtime();
                         IActivityManager am = ActivityManager.getService();
                         for (int i=0; i<jobs.size(); i++) {
                             JobStatus js = jobs.get(i);
                             js.prepareLocked(am);
+                            js.enqueueTime = now;
                             this.jobSet.add(js);
                         }
                     }
