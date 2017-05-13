@@ -10772,7 +10772,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (id) {
             case ID_SELECT_ALL:
+                final boolean hadSelection = hasSelection();
                 selectAllText();
+                if (mEditor != null && hadSelection) {
+                    mEditor.invalidateActionModeAsync();
+                }
                 return true;
 
             case ID_UNDO:
