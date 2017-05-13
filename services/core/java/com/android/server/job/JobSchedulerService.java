@@ -218,6 +218,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_BG_MODERATE_JOB_COUNT = "bg_moderate_job_count";
         private static final String KEY_BG_LOW_JOB_COUNT = "bg_low_job_count";
         private static final String KEY_BG_CRITICAL_JOB_COUNT = "bg_critical_job_count";
+        private static final String KEY_MAX_STANDARD_RESCHEDULE_COUNT
+                = "max_standard_reschedule_count";
+        private static final String KEY_MAX_WORK_RESCHEDULE_COUNT = "max_work_reschedule_count";
+        private static final String KEY_MIN_LINEAR_BACKOFF_TIME = "min_linear_backoff_time";
+        private static final String KEY_MIN_EXP_BACKOFF_TIME = "min_exp_backoff_time";
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
@@ -233,6 +238,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_BG_MODERATE_JOB_COUNT = 4;
         private static final int DEFAULT_BG_LOW_JOB_COUNT = 1;
         private static final int DEFAULT_BG_CRITICAL_JOB_COUNT = 1;
+        private static final int DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT = Integer.MAX_VALUE;
+        private static final int DEFAULT_MAX_WORK_RESCHEDULE_COUNT = Integer.MAX_VALUE;
+        private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
+        private static final long DEFAULT_MIN_EXP_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
 
         /**
          * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
@@ -303,6 +312,24 @@ public final class JobSchedulerService extends com.android.server.SystemService
          * memory state.
          */
         int BG_CRITICAL_JOB_COUNT = DEFAULT_BG_CRITICAL_JOB_COUNT;
+        /**
+         * The maximum number of times we allow a job to have itself rescheduled before
+         * giving up on it, for standard jobs.
+         */
+        int MAX_STANDARD_RESCHEDULE_COUNT = DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT;
+        /**
+         * The maximum number of times we allow a job to have itself rescheduled before
+         * giving up on it, for jobs that are executing work.
+         */
+        int MAX_WORK_RESCHEDULE_COUNT = DEFAULT_MAX_WORK_RESCHEDULE_COUNT;
+        /**
+         * The minimum backoff time to allow for linear backoff.
+         */
+        long MIN_LINEAR_BACKOFF_TIME = DEFAULT_MIN_LINEAR_BACKOFF_TIME;
+        /**
+         * The minimum backoff time to allow for exponential backoff.
+         */
+        long MIN_EXP_BACKOFF_TIME = DEFAULT_MIN_EXP_BACKOFF_TIME;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -374,6 +401,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 if ((FG_JOB_COUNT+BG_CRITICAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
                     BG_CRITICAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
                 }
+                MAX_STANDARD_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_STANDARD_RESCHEDULE_COUNT,
+                        DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
+                MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
+                        DEFAULT_MAX_WORK_RESCHEDULE_COUNT);
+                MIN_LINEAR_BACKOFF_TIME = mParser.getLong(KEY_MIN_LINEAR_BACKOFF_TIME,
+                        DEFAULT_MIN_LINEAR_BACKOFF_TIME);
+                MIN_EXP_BACKOFF_TIME = mParser.getLong(KEY_MIN_EXP_BACKOFF_TIME,
+                        DEFAULT_MIN_EXP_BACKOFF_TIME);
             }
         }
 
@@ -421,10 +456,37 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             pw.print("    "); pw.print(KEY_BG_CRITICAL_JOB_COUNT); pw.print("=");
             pw.print(BG_CRITICAL_JOB_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MAX_STANDARD_RESCHEDULE_COUNT); pw.print("=");
+            pw.print(MAX_STANDARD_RESCHEDULE_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MAX_WORK_RESCHEDULE_COUNT); pw.print("=");
+            pw.print(MAX_WORK_RESCHEDULE_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_LINEAR_BACKOFF_TIME); pw.print("=");
+            pw.print(MIN_LINEAR_BACKOFF_TIME); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_EXP_BACKOFF_TIME); pw.print("=");
+            pw.print(MIN_EXP_BACKOFF_TIME); pw.println();
         }
     }
 
     final Constants mConstants;
+
+    static final Comparator<JobStatus> mEnqueueTimeComparator = (o1, o2) -> {
+        if (o1.enqueueTime < o2.enqueueTime) {
+            return -1;
+        }
+        return o1.enqueueTime > o2.enqueueTime ? 1 : 0;
+    };
+
+    static <T> void addOrderedItem(ArrayList<T> array, T newItem, Comparator<T> comparator) {
+        int where = Collections.binarySearch(array, newItem, comparator);
+        if (where < 0) {
+            where = ~where;
+        }
+        array.add(where, newItem);
+    }
 
     /**
      * Cleans up outstanding jobs when a package is removed. Even if it's being replaced later we
@@ -647,7 +709,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 // This is a new job, we can just immediately put it on the pending
                 // list and try to run it.
                 mJobPackageTracker.notePending(jobStatus);
-                mPendingJobs.add(jobStatus);
+                addOrderedItem(mPendingJobs, jobStatus, mEnqueueTimeComparator);
                 maybeRunPendingJobsLocked();
             }
         }
@@ -771,7 +833,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 // except those using the idle exemption flag.
                 for (int i=0; i<mActiveServices.size(); i++) {
                     JobServiceContext jsc = mActiveServices.get(i);
-                    final JobStatus executing = jsc.getRunningJob();
+                    final JobStatus executing = jsc.getRunningJobLocked();
                     if (executing != null
                             && (executing.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0) {
                         jsc.cancelExecutingJobLocked(JobParameters.REASON_DEVICE_IDLE);
@@ -798,7 +860,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         if (mPendingJobs.size() <= 0) {
             for (int i=0; i<mActiveServices.size(); i++) {
                 final JobServiceContext jsc = mActiveServices.get(i);
-                final JobStatus job = jsc.getRunningJob();
+                final JobStatus job = jsc.getRunningJobLocked();
                 if (job != null
                         && (job.getJob().getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0
                         && !job.dozeWhitelisted) {
@@ -918,6 +980,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         if (!jobStatus.isPreparedLocked()) {
             Slog.wtf(TAG, "Not yet prepared when started tracking: " + jobStatus);
         }
+        jobStatus.enqueueTime = SystemClock.elapsedRealtime();
         final boolean update = mJobs.add(jobStatus);
         if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
@@ -953,7 +1016,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     private boolean stopJobOnServiceContextLocked(JobStatus job, int reason) {
         for (int i=0; i<mActiveServices.size(); i++) {
             JobServiceContext jsc = mActiveServices.get(i);
-            final JobStatus executing = jsc.getRunningJob();
+            final JobStatus executing = jsc.getRunningJobLocked();
             if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
                 jsc.cancelExecutingJobLocked(reason);
                 return true;
@@ -970,11 +1033,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     private boolean isCurrentlyActiveLocked(JobStatus job) {
         for (int i=0; i<mActiveServices.size(); i++) {
             JobServiceContext serviceContext = mActiveServices.get(i);
-            // The 'unsafe' direct-internal-reference running-job inspector is okay to
-            // use here because we are already holding the necessary lock *and* we
-            // immediately discard the returned object reference, if any; we return
-            // only a boolean state indicator to the caller.
-            final JobStatus running = serviceContext.getRunningJobUnsafeLocked();
+            final JobStatus running = serviceContext.getRunningJobLocked();
             if (running != null && running.matches(job.getUid(), job.getJobId())) {
                 return true;
             }
@@ -1016,18 +1075,38 @@ public final class JobSchedulerService extends com.android.server.SystemService
         final int backoffAttempts = failureToReschedule.getNumFailures() + 1;
         long delayMillis;
 
+        if (failureToReschedule.hasWorkLocked()) {
+            if (backoffAttempts > mConstants.MAX_WORK_RESCHEDULE_COUNT) {
+                Slog.w(TAG, "Not rescheduling " + failureToReschedule + ": attempt #"
+                        + backoffAttempts + " > work limit "
+                        + mConstants.MAX_STANDARD_RESCHEDULE_COUNT);
+                return null;
+            }
+        } else if (backoffAttempts > mConstants.MAX_STANDARD_RESCHEDULE_COUNT) {
+            Slog.w(TAG, "Not rescheduling " + failureToReschedule + ": attempt #"
+                    + backoffAttempts + " > std limit " + mConstants.MAX_STANDARD_RESCHEDULE_COUNT);
+            return null;
+        }
+
         switch (job.getBackoffPolicy()) {
-            case JobInfo.BACKOFF_POLICY_LINEAR:
-                delayMillis = initialBackoffMillis * backoffAttempts;
-                break;
+            case JobInfo.BACKOFF_POLICY_LINEAR: {
+                long backoff = initialBackoffMillis;
+                if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME) {
+                    backoff = mConstants.MIN_LINEAR_BACKOFF_TIME;
+                }
+                delayMillis = backoff * backoffAttempts;
+            } break;
             default:
                 if (DEBUG) {
                     Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
                 }
-            case JobInfo.BACKOFF_POLICY_EXPONENTIAL:
-                delayMillis =
-                        (long) Math.scalb(initialBackoffMillis, backoffAttempts - 1);
-                break;
+            case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
+                long backoff = initialBackoffMillis;
+                if (backoff < mConstants.MIN_EXP_BACKOFF_TIME) {
+                    backoff = mConstants.MIN_EXP_BACKOFF_TIME;
+                }
+                delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
+            } break;
         }
         delayMillis =
                 Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
@@ -1163,7 +1242,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         // state is such that all ready jobs should be run immediately.
                         if (runNow != null && isReadyToBeExecutedLocked(runNow)) {
                             mJobPackageTracker.notePending(runNow);
-                            mPendingJobs.add(runNow);
+                            addOrderedItem(mPendingJobs, runNow, mEnqueueTimeComparator);
                         } else {
                             queueReadyJobsForExecutionLocked();
                         }
@@ -1237,6 +1316,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (newReadyJobs != null) {
                 noteJobsPending(newReadyJobs);
                 mPendingJobs.addAll(newReadyJobs);
+                if (mPendingJobs.size() > 1) {
+                    mPendingJobs.sort(mEnqueueTimeComparator);
+                }
             }
             newReadyJobs = null;
         }
@@ -1326,6 +1408,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
                 noteJobsPending(runnableJobs);
                 mPendingJobs.addAll(runnableJobs);
+                if (mPendingJobs.size() > 1) {
+                    mPendingJobs.sort(mEnqueueTimeComparator);
+                }
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Not running anything.");
@@ -1515,7 +1600,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         int numForeground = 0;
         for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
             final JobServiceContext js = mActiveServices.get(i);
-            final JobStatus status = js.getRunningJob();
+            final JobStatus status = js.getRunningJobLocked();
             if ((contextIdToJobMap[i] = status) != null) {
                 numActive++;
                 if (status.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
@@ -1591,10 +1676,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
         for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
             boolean preservePreferredUid = false;
             if (act[i]) {
-                JobStatus js = mActiveServices.get(i).getRunningJob();
+                JobStatus js = mActiveServices.get(i).getRunningJobLocked();
                 if (js != null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "preempting job: " + mActiveServices.get(i).getRunningJob());
+                        Slog.d(TAG, "preempting job: " + mActiveServices.get(i).getRunningJobLocked());
                     }
                     // preferredUid will be set to uid of currently running job.
                     mActiveServices.get(i).preemptExecutingJobLocked();
@@ -2099,7 +2184,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         continue;
                     }
 
-                    job.dump(pw, "    ", true);
+                    job.dump(pw, "    ", true, now);
                     pw.print("    Ready: ");
                     pw.print(isReadyToBeExecutedLocked(job));
                     pw.print(" (job=");
@@ -2169,22 +2254,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 JobStatus job = mPendingJobs.get(i);
                 pw.print("  Pending #"); pw.print(i); pw.print(": ");
                 pw.println(job.toShortString());
-                job.dump(pw, "    ", false);
+                job.dump(pw, "    ", false, now);
                 int priority = evaluateJobPriorityLocked(job);
                 if (priority != JobInfo.PRIORITY_DEFAULT) {
                     pw.print("    Evaluated priority: "); pw.println(priority);
                 }
                 pw.print("    Tag: "); pw.println(job.getTag());
                 pw.print("    Enq: ");
-                TimeUtils.formatDuration(now - job.madePending, pw);
-                pw.println(" ago");
+                TimeUtils.formatDuration(job.madePending - now, pw);
+                pw.println();
             }
             pw.println();
             pw.println("Active jobs:");
             for (int i=0; i<mActiveServices.size(); i++) {
                 JobServiceContext jsc = mActiveServices.get(i);
                 pw.print("  Slot #"); pw.print(i); pw.print(": ");
-                final JobStatus job = jsc.getRunningJob();
+                final JobStatus job = jsc.getRunningJobLocked();
                 if (job == null) {
                     pw.println("inactive");
                     continue;
@@ -2195,13 +2280,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     pw.print(", timeout at: ");
                     TimeUtils.formatDuration(jsc.getTimeoutElapsed() - now, pw);
                     pw.println();
-                    job.dump(pw, "    ", false);
-                    int priority = evaluateJobPriorityLocked(jsc.getRunningJob());
+                    job.dump(pw, "    ", false, now);
+                    int priority = evaluateJobPriorityLocked(jsc.getRunningJobLocked());
                     if (priority != JobInfo.PRIORITY_DEFAULT) {
                         pw.print("    Evaluated priority: "); pw.println(priority);
                     }
-                    pw.print("    Active at "); pw.println(job.madeActive);
-                    pw.print("    Pending for ");
+                    pw.print("    Active at ");
+                    TimeUtils.formatDuration(job.madeActive - now, pw);
+                    pw.print(", pending for ");
                     TimeUtils.formatDuration(job.madeActive - job.madePending, pw);
                     pw.println();
                 }

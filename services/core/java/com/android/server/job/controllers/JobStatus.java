@@ -22,14 +22,10 @@ import android.app.job.JobInfo;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
-import android.content.ContentProvider;
-import android.content.Intent;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -180,7 +176,10 @@ public final class JobStatus {
     // Used by shell commands
     public int overrideState = 0;
 
-    // Metrics about queue latency
+    // When this job was enqueued, for ordering.  (in elapsedRealtimeMillis)
+    public long enqueueTime;
+
+    // Metrics about queue latency.  (in uptimeMillis)
     public long madePending;
     public long madeActive;
 
@@ -347,6 +346,10 @@ public final class JobStatus {
             return work;
         }
         return null;
+    }
+
+    public boolean hasWorkLocked() {
+        return (pendingWork != null && pendingWork.size() > 0) || hasExecutingWorkLocked();
     }
 
     public boolean hasExecutingWorkLocked() {
@@ -744,10 +747,11 @@ public final class JobStatus {
         sb.append(getSourceUid());
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME
                 || latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
+            long now = SystemClock.elapsedRealtime();
             sb.append(" TIME=");
-            sb.append(formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME));
-            sb.append("-");
-            sb.append(formatRunTime(latestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME));
+            formatRunTime(sb, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, now);
+            sb.append(":");
+            formatRunTime(sb, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, now);
         }
         if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
             sb.append(" NET=");
@@ -789,17 +793,19 @@ public final class JobStatus {
         return sb.toString();
     }
 
-    private String formatRunTime(long runtime, long  defaultValue) {
+    private void formatRunTime(PrintWriter pw, long runtime, long  defaultValue, long now) {
         if (runtime == defaultValue) {
-            return "none";
+            pw.print("none");
         } else {
-            long elapsedNow = SystemClock.elapsedRealtime();
-            long nextRuntime = runtime - elapsedNow;
-            if (nextRuntime > 0) {
-                return DateUtils.formatElapsedTime(nextRuntime / 1000);
-            } else {
-                return "-" + DateUtils.formatElapsedTime(nextRuntime / -1000);
-            }
+            TimeUtils.formatDuration(runtime - now, pw);
+        }
+    }
+
+    private void formatRunTime(StringBuilder sb, long runtime, long  defaultValue, long now) {
+        if (runtime == defaultValue) {
+            sb.append("none");
+        } else {
+            TimeUtils.formatDuration(runtime - now, sb);
         }
     }
 
@@ -881,7 +887,7 @@ public final class JobStatus {
     }
 
     // Dumpsys infrastructure
-    public void dump(PrintWriter pw, String prefix, boolean full) {
+    public void dump(PrintWriter pw, String prefix, boolean full, long elapsedRealtimeMillis) {
         pw.print(prefix); UserHandle.formatUid(pw, callingUid);
         pw.print(" tag="); pw.println(tag);
         pw.print(prefix);
@@ -1020,10 +1026,14 @@ public final class JobStatus {
                 dumpJobWorkItem(pw, prefix, executingWork.get(i), i);
             }
         }
-        pw.print(prefix); pw.print("Earliest run time: ");
-        pw.println(formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME));
-        pw.print(prefix); pw.print("Latest run time: ");
-        pw.println(formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME));
+        pw.print(prefix); pw.print("Enqueue time: ");
+        TimeUtils.formatDuration(enqueueTime, elapsedRealtimeMillis, pw);
+        pw.println();
+        pw.print(prefix); pw.print("Run time: earliest=");
+        formatRunTime(pw, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, elapsedRealtimeMillis);
+        pw.print(", latest=");
+        formatRunTime(pw, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, elapsedRealtimeMillis);
+        pw.println();
         if (numFailures != 0) {
             pw.print(prefix); pw.print("Num failures: "); pw.println(numFailures);
         }
