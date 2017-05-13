@@ -975,11 +975,11 @@ public final class UiAutomation {
     }
 
     /**
-     * Executes a shell command. This method returs a file descriptor that points
+     * Executes a shell command. This method returns a file descriptor that points
      * to the standard output stream. The command execution is similar to running
      * "adb shell <command>" from a host connected to the device.
      * <p>
-     * <strong>Note:</strong> It is your responsibility to close the retunred file
+     * <strong>Note:</strong> It is your responsibility to close the returned file
      * descriptor once you are done reading.
      * </p>
      *
@@ -1000,7 +1000,7 @@ public final class UiAutomation {
             sink = pipe[1];
 
             // Calling out without a lock held.
-            mUiAutomationConnection.executeShellCommand(command, sink);
+            mUiAutomationConnection.executeShellCommand(command, sink, null);
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "Error executing shell command!", ioe);
         } catch (RemoteException re) {
@@ -1010,6 +1010,59 @@ public final class UiAutomation {
         }
 
         return source;
+    }
+
+    /**
+     * Executes a shell command. This method returns two file descriptors,
+     * one that points to the standard output stream (element at index 0), and one that points
+     * to the standard input stream (element at index 1). The command execution is similar
+     * to running "adb shell <command>" from a host connected to the device.
+     * <p>
+     * <strong>Note:</strong> It is your responsibility to close the returned file
+     * descriptors once you are done reading/writing.
+     * </p>
+     *
+     * @param command The command to execute.
+     * @return File descriptors (out, in) to the standard output/input streams.
+     *
+     * @hide
+     */
+    @TestApi
+    public ParcelFileDescriptor[] executeShellCommandRw(String command) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+
+        ParcelFileDescriptor source_read = null;
+        ParcelFileDescriptor sink_read = null;
+
+        ParcelFileDescriptor source_write = null;
+        ParcelFileDescriptor sink_write = null;
+
+        try {
+            ParcelFileDescriptor[] pipe_read = ParcelFileDescriptor.createPipe();
+            source_read = pipe_read[0];
+            sink_read = pipe_read[1];
+
+            ParcelFileDescriptor[] pipe_write = ParcelFileDescriptor.createPipe();
+            source_write = pipe_write[0];
+            sink_write = pipe_write[1];
+
+            // Calling out without a lock held.
+            mUiAutomationConnection.executeShellCommand(command, sink_read, source_write);
+        } catch (IOException ioe) {
+            Log.e(LOG_TAG, "Error executing shell command!", ioe);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error executing shell command!", re);
+        } finally {
+            IoUtils.closeQuietly(sink_read);
+            IoUtils.closeQuietly(source_write);
+        }
+
+        ParcelFileDescriptor[] result = new ParcelFileDescriptor[2];
+        result[0] = source_read;
+        result[1] = sink_write;
+        return result;
     }
 
     private static float getDegreesForRotation(int value) {
