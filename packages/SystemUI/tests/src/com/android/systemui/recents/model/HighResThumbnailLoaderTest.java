@@ -62,6 +62,7 @@ public class HighResThumbnailLoaderTest extends SysuiTestCase {
         when(mMockSystemServicesProxy.getTaskThumbnail(anyInt(), anyBoolean()))
                 .thenReturn(mThumbnailData);
         mLoader.setVisible(true);
+        mLoader.setTaskLoadQueueIdle(true);
     }
 
     @Test
@@ -74,6 +75,11 @@ public class HighResThumbnailLoaderTest extends SysuiTestCase {
         mLoader.setFlingingFast(true);
         assertFalse(mLoader.isLoading());
         mLoader.setFlingingFast(false);
+        assertTrue(mLoader.isLoading());
+        mLoader.setFlingingFast(false);
+        mLoader.setTaskLoadQueueIdle(false);
+        assertFalse(mLoader.isLoading());
+        mLoader.setTaskLoadQueueIdle(true);
         assertTrue(mLoader.isLoading());
     }
 
