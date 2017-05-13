@@ -168,8 +168,7 @@ public class PipNotification {
     void onConfigurationChanged(Context context) {
         Resources res = context.getResources();
         mDefaultTitle = res.getString(R.string.pip_notification_unknown_title);
-        mDefaultIconResId = res.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_LTR
-                        ? R.drawable.pip_expand_ll : R.drawable.pip_expand_lr;
+        mDefaultIconResId = R.drawable.pip_expand;
         if (mNotified) {
             // update notification
             notifyPipNotification();

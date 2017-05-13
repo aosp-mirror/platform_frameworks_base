@@ -38,6 +38,8 @@
               android:layout_height="60dp"
               android:layout_gravity="center"
               android:contentDescription="@string/pip_phone_expand"
+              android:padding="10dp"
+              android:src="@drawable/pip_expand"
               android:background="?android:selectableItemBackgroundBorderless" />
       </FrameLayout>
 
