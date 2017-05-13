@@ -546,12 +546,12 @@ public class LauncherAppsService extends SystemService {
             try {
                 code = mActivityManagerInternal.startActivitiesAsPackage(publisherPackage,
                         userId, intents, startActivityOptions);
-                if (code >= ActivityManager.START_SUCCESS) {
+                if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
                 } else {
                     Log.e(TAG, "Couldn't start activity, code=" + code);
                 }
-                return code >= ActivityManager.START_SUCCESS;
+                return false;
             } catch (SecurityException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "SecurityException while launching intent", e);
