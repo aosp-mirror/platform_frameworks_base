@@ -1667,32 +1667,17 @@ public class PopupWindow {
             int anchorHeight, int drawingLocationY, int screenLocationY, int displayFrameTop,
             int displayFrameBottom, boolean allowResize) {
         final int winOffsetY = screenLocationY - drawingLocationY;
-        final int popupScreenTop = outParams.y + winOffsetY;
-        final int spaceBelow = displayFrameBottom - popupScreenTop;
-        if (popupScreenTop >= 0 && height <= spaceBelow) {
+        final int anchorTopInScreen = outParams.y + winOffsetY;
+        final int spaceBelow = displayFrameBottom - anchorTopInScreen;
+        if (anchorTopInScreen >= 0 && height <= spaceBelow) {
             return true;
         }
 
-        final int popupScreenBottom;
-        if (mOverlapAnchor) {
-            // popupScreenTop equals the anchor's top at this point.
-            // When shown above the anchor, an overlapping popup's bottom should be aligned with
-            // the anchor's bottom.
-            popupScreenBottom = popupScreenTop + anchorHeight;
-        } else {
-            // popupScreenTop equals the anchor's bottom at this point.
-            // When shown above the anchor, a non-overlapping popup's bottom is aligned with
-            // the anchor's top.
-            popupScreenBottom = popupScreenTop - anchorHeight;
-        }
-        final int spaceAbove = popupScreenBottom - displayFrameTop;
+        final int spaceAbove = anchorTopInScreen - anchorHeight - displayFrameTop;
         if (height <= spaceAbove) {
             // Move everything up.
             if (mOverlapAnchor) {
-                // Add one anchorHeight to compensate for the correction made at the start of
-                // findDropDownPosition, and another to account for being aligned to the anchor's
-                // bottom, not top.
-                yOffset += anchorHeight * 2;
+                yOffset += anchorHeight;
             }
             outParams.y = drawingLocationY - height + yOffset;
 
