@@ -818,6 +818,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
             if (atLeastOneChanged) {
+                if (sDebug) Slog.d(TAG, "at least one field changed - showing save UI");
                 mService.setSaveShown();
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName,
                         this);
