@@ -21,7 +21,9 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.UserHandle;
+import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -56,7 +58,8 @@ public class KeyguardStatusView extends GridLayout {
 
     private View[] mVisibleInDoze;
     private boolean mPulsing;
-    private boolean mDark;
+    private float mDarkAmount;
+    private int mTextColor;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -124,6 +127,7 @@ public class KeyguardStatusView extends GridLayout {
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
         mVisibleInDoze = new View[]{mBatteryDoze, mClockView};
+        mTextColor = mClockView.getCurrentTextColor();
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -281,12 +285,13 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
-    public void setDark(boolean dark) {
-        if (mDark == dark) {
+    public void setDark(float darkAmount) {
+        if (mDarkAmount == darkAmount) {
             return;
         }
-        mDark = dark;
+        mDarkAmount = darkAmount;
 
+        boolean dark = darkAmount == 1;
         final int N = mClockContainer.getChildCount();
         for (int i = 0; i < N; i++) {
             View child = mClockContainer.getChildAt(i);
@@ -297,6 +302,7 @@ public class KeyguardStatusView extends GridLayout {
         }
         updateDozeVisibleViews();
         mBatteryDoze.setDark(dark);
+        mClockView.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
     }
 
     public void setPulsing(boolean pulsing) {
@@ -306,7 +312,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private void updateDozeVisibleViews() {
         for (View child : mVisibleInDoze) {
-            child.setAlpha(mDark && mPulsing ? 0.8f : 1);
+            child.setAlpha(mDarkAmount == 1 && mPulsing ? 0.8f : 1);
         }
     }
 }

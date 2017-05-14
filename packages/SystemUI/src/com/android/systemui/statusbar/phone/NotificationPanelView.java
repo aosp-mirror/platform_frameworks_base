@@ -2550,7 +2550,7 @@ public class NotificationPanelView extends PanelView implements
 
     private void setDarkAmount(float amount) {
         mDarkAmount = amount;
-        mKeyguardStatusView.setDark(amount == 1);
+        mKeyguardStatusView.setDark(mDarkAmount);
         positionClockAndNotifications();
     }
 

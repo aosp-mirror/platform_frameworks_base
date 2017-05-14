@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 <resources>
-
-    <!-- Clock -->
-    <color name="clock_white">#ffffffff</color>
-    <color name="clock_gray">@*android:color/secondary_text_default_material_dark</color>
+    <color name="keyguard_numpad_divider_light">#80FFFFFF</color> <!-- 50% white -->
+    <color name="keyguard_numpad_divider_dark">#FF9FA4A6</color>
+    <color name="keyguard_numpad_delete_light">#FFFFFFFF</color>
+    <color name="keyguard_numpad_delete_dark">@color/material_grey_600</color>
 </resources>
