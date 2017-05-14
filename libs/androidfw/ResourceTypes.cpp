@@ -3538,7 +3538,8 @@ status_t ResTable::Theme::applyStyle(uint32_t resID, bool force)
                     attrRes, bag->map.value.dataType, bag->map.value.data,
                     curEntry->value.dataType);
         }
-        if (force || curEntry->value.dataType == Res_value::TYPE_NULL) {
+        if (force || (curEntry->value.dataType == Res_value::TYPE_NULL
+                && curEntry->value.data != Res_value::DATA_NULL_EMPTY)) {
             curEntry->stringBlock = bag->stringBlock;
             curEntry->typeSpecFlags |= bagTypeSpecFlags;
             curEntry->value = bag->map.value;
@@ -3674,7 +3675,8 @@ ssize_t ResTable::Theme::getAttribute(uint32_t resID, Res_value* outValue,
                             }
                             ALOGW("Too many attribute references, stopped at: 0x%08x\n", resID);
                             return BAD_INDEX;
-                        } else if (type != Res_value::TYPE_NULL) {
+                        } else if (type != Res_value::TYPE_NULL
+                                || te.value.data == Res_value::DATA_NULL_EMPTY) {
                             *outValue = te.value;
                             return te.stringBlock;
                         }
@@ -5997,16 +5999,14 @@ void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales,
     char locale[RESTABLE_MAX_LOCALE_LEN];
 
     forEachConfiguration(false, false, includeSystemLocales, [&](const ResTable_config& cfg) {
-        if (cfg.locale != 0) {
-            cfg.getBcp47Locale(locale, mergeEquivalentLangs /* canonicalize if merging */);
+        cfg.getBcp47Locale(locale, mergeEquivalentLangs /* canonicalize if merging */);
 
-            const auto beginIter = locales->begin();
-            const auto endIter = locales->end();
+        const auto beginIter = locales->begin();
+        const auto endIter = locales->end();
 
-            auto iter = std::lower_bound(beginIter, endIter, locale, compareString8AndCString);
-            if (iter == endIter || strcmp(iter->string(), locale) != 0) {
-                locales->insertAt(String8(locale), std::distance(beginIter, iter));
-            }
+        auto iter = std::lower_bound(beginIter, endIter, locale, compareString8AndCString);
+        if (iter == endIter || strcmp(iter->string(), locale) != 0) {
+            locales->insertAt(String8(locale), std::distance(beginIter, iter));
         }
     });
 }

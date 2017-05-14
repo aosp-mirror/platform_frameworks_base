@@ -126,6 +126,14 @@ public class ActivityManager {
 
     private static volatile boolean sSystemReady = false;
 
+
+    private static final int FIRST_START_FATAL_ERROR_CODE = -100;
+    private static final int LAST_START_FATAL_ERROR_CODE = -1;
+    private static final int FIRST_START_SUCCESS_CODE = 0;
+    private static final int LAST_START_SUCCESS_CODE = 99;
+    private static final int FIRST_START_NON_FATAL_ERROR_CODE = 100;
+    private static final int LAST_START_NON_FATAL_ERROR_CODE = 199;
+
     /**
      * System property to enable task snapshots.
      * @hide
@@ -219,53 +227,56 @@ public class ActivityManager {
      */
     public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
 
+    // NOTE: Before adding a new start result, please reference the defined ranges to ensure the
+    // result is properly categorized.
+
     /**
      * Result for IActivityManager.startVoiceActivity: active session is currently hidden.
      * @hide
      */
-    public static final int START_VOICE_HIDDEN_SESSION = -10;
+    public static final int START_VOICE_HIDDEN_SESSION = FIRST_START_FATAL_ERROR_CODE;
 
     /**
      * Result for IActivityManager.startVoiceActivity: active session does not match
      * the requesting token.
      * @hide
      */
-    public static final int START_VOICE_NOT_ACTIVE_SESSION = -9;
+    public static final int START_VOICE_NOT_ACTIVE_SESSION = FIRST_START_FATAL_ERROR_CODE + 1;
 
     /**
      * Result for IActivityManager.startActivity: trying to start a background user
      * activity that shouldn't be displayed for all users.
      * @hide
      */
-    public static final int START_NOT_CURRENT_USER_ACTIVITY = -8;
+    public static final int START_NOT_CURRENT_USER_ACTIVITY = FIRST_START_FATAL_ERROR_CODE + 2;
 
     /**
      * Result for IActivityManager.startActivity: trying to start an activity under voice
      * control when that activity does not support the VOICE category.
      * @hide
      */
-    public static final int START_NOT_VOICE_COMPATIBLE = -7;
+    public static final int START_NOT_VOICE_COMPATIBLE = FIRST_START_FATAL_ERROR_CODE + 3;
 
     /**
      * Result for IActivityManager.startActivity: an error where the
      * start had to be canceled.
      * @hide
      */
-    public static final int START_CANCELED = -6;
+    public static final int START_CANCELED = FIRST_START_FATAL_ERROR_CODE + 4;
 
     /**
      * Result for IActivityManager.startActivity: an error where the
      * thing being started is not an activity.
      * @hide
      */
-    public static final int START_NOT_ACTIVITY = -5;
+    public static final int START_NOT_ACTIVITY = FIRST_START_FATAL_ERROR_CODE + 5;
 
     /**
      * Result for IActivityManager.startActivity: an error where the
      * caller does not have permission to start the activity.
      * @hide
      */
-    public static final int START_PERMISSION_DENIED = -4;
+    public static final int START_PERMISSION_DENIED = FIRST_START_FATAL_ERROR_CODE + 6;
 
     /**
      * Result for IActivityManager.startActivity: an error where the
@@ -273,49 +284,49 @@ public class ActivityManager {
      * a result.
      * @hide
      */
-    public static final int START_FORWARD_AND_REQUEST_CONFLICT = -3;
+    public static final int START_FORWARD_AND_REQUEST_CONFLICT = FIRST_START_FATAL_ERROR_CODE + 7;
 
     /**
      * Result for IActivityManager.startActivity: an error where the
      * requested class is not found.
      * @hide
      */
-    public static final int START_CLASS_NOT_FOUND = -2;
+    public static final int START_CLASS_NOT_FOUND = FIRST_START_FATAL_ERROR_CODE + 8;
 
     /**
      * Result for IActivityManager.startActivity: an error where the
      * given Intent could not be resolved to an activity.
      * @hide
      */
-    public static final int START_INTENT_NOT_RESOLVED = -1;
+    public static final int START_INTENT_NOT_RESOLVED = FIRST_START_FATAL_ERROR_CODE + 9;
 
     /**
      * Result for IActivityManaqer.startActivity: the activity was started
      * successfully as normal.
      * @hide
      */
-    public static final int START_SUCCESS = 0;
+    public static final int START_SUCCESS = FIRST_START_SUCCESS_CODE;
 
     /**
      * Result for IActivityManaqer.startActivity: the caller asked that the Intent not
      * be executed if it is the recipient, and that is indeed the case.
      * @hide
      */
-    public static final int START_RETURN_INTENT_TO_CALLER = 1;
+    public static final int START_RETURN_INTENT_TO_CALLER = FIRST_START_SUCCESS_CODE + 1;
 
     /**
      * Result for IActivityManaqer.startActivity: activity wasn't really started, but
      * a task was simply brought to the foreground.
      * @hide
      */
-    public static final int START_TASK_TO_FRONT = 2;
+    public static final int START_TASK_TO_FRONT = FIRST_START_SUCCESS_CODE + 2;
 
     /**
      * Result for IActivityManaqer.startActivity: activity wasn't really started, but
      * the given Intent was given to the existing top activity.
      * @hide
      */
-    public static final int START_DELIVERED_TO_TOP = 3;
+    public static final int START_DELIVERED_TO_TOP = FIRST_START_SUCCESS_CODE + 3;
 
     /**
      * Result for IActivityManaqer.startActivity: request was canceled because
@@ -323,14 +334,15 @@ public class ActivityManager {
      * (such as pressing home) is performed.
      * @hide
      */
-    public static final int START_SWITCHES_CANCELED = 4;
+    public static final int START_SWITCHES_CANCELED = FIRST_START_NON_FATAL_ERROR_CODE;
 
     /**
      * Result for IActivityManaqer.startActivity: a new activity was attempted to be started
      * while in Lock Task Mode.
      * @hide
      */
-    public static final int START_RETURN_LOCK_TASK_MODE_VIOLATION = 5;
+    public static final int START_RETURN_LOCK_TASK_MODE_VIOLATION =
+            FIRST_START_NON_FATAL_ERROR_CODE + 1;
 
     /**
      * Flag for IActivityManaqer.startActivity: do special start mode where
@@ -563,6 +575,22 @@ public class ActivityManager {
 
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
+    }
+
+    /**
+     * Returns whether the launch was successful.
+     * @hide
+     */
+    public static final boolean isStartResultSuccessful(int result) {
+        return FIRST_START_SUCCESS_CODE <= result && result <= LAST_START_SUCCESS_CODE;
+    }
+
+    /**
+     * Returns whether the launch result was a fatal error.
+     * @hide
+     */
+    public static final boolean isStartResultFatalError(int result) {
+        return FIRST_START_FATAL_ERROR_CODE <= result && result <= LAST_START_FATAL_ERROR_CODE;
     }
 
     /**

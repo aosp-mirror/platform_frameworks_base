@@ -260,6 +260,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Uppfærslur"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Staða netkerfis"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Viðvaranir netkerfis"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Staða VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Stjórnun tækis"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Tilkynningar"</string>
@@ -1099,6 +1101,14 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Vekjarahljóð"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Tilkynningarhljóð"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Óþekkt"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Wi-Fi net í boði</item>
+      <item quantity="other">Wi-Fi net í boði</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">Opin Wi-Fi net í boði</item>
+      <item quantity="other">Opin Wi-Fi net í boði</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Skrá inn á Wi-Fi net"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Skrá inn á net"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1686,8 +1696,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> valið</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valin</item>
     </plurals>
-    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
-    <skip />
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Óflokkað"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Þú stilltir mikilvægi þessara tilkynninga."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Þetta er mikilvægt vegna fólksins sem tekur þátt í þessu."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
@@ -1746,9 +1755,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Valkostir sjálfvirkrar útfyllingar"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Vista fyrir sjálfvirka útfyllingu"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Ekki er hægt að fylla innihald út sjálfkrafa"</string>
-    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
-    <skip />
-    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Engar tillögur fyrir sjálfvirka útfyllingu"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> tillaga fyrir sjálfvirka útfyllingu</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> tillögur fyrir sjálfvirka útfyllingu</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"Vista á &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vista <xliff:g id="TYPE">%1$s</xliff:g> á &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Vista <xliff:g id="TYPE_0">%1$s</xliff:g> og <xliff:g id="TYPE_1">%2$s</xliff:g> á &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>

@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"你不會受到聲音和震動干擾，但鬧鐘、提醒、活動和指定來電者除外。"</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"裝置不會發出音效或震動造成干擾，但會保留鬧鐘、提醒、活動和你指定的來電者響鈴。如果你選擇播放特定音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"裝置不會發出音效或震動造成干擾，但會保留鬧鐘響鈴。如果你選擇播放特定音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"自訂"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內，但你仍然可以撥打電話。"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內。"</string>
@@ -472,7 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了，謝謝"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"立刻結束"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"立即停用"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>

@@ -354,7 +354,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"検索します"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"上にスライドして<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>を行います。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"左にスライドして<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>を行います。"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"アラーム、リマインダー、予定、指定した人からの着信以外で音やバイブレーションに煩わされることはありません。"</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"アラーム、リマインダー、予定、指定した人からの着信以外で音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"アラーム以外で音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"カスタマイズ"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"アラーム、音楽、動画、ゲームを含むすべての音とバイブレーションがブロックされます。電話をかけることはできます。"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"アラーム、音楽、動画、ゲームを含むすべての音とバイブレーションがブロックされます。"</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"キャンセル"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"今すぐ終了"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"オフにする"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"折りたたむ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"画面が固定されました"</string>

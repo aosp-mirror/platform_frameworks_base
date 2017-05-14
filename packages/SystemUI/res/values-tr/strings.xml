@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Ara"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için yukarı kaydırın."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için sola kaydırın."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Belirttiğiniz alarmlar, hatırlatıcılar, etkinlikler ve arayanlar hariç olmak üzere, sesler ve titreşimlerle rahatsız edilmeyeceksiniz."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Alarmlar, hatırlatıcılar, etkinlikler ve sizin seçtiğiniz arayan kişiler dışında hiçbir ses ve titreşimle rahatsız edilmeyeceksiniz. O sırada çaldığınız, seyrettiğiniz ya da oynadığınız müzik, video ve oyunların sesini duymaya devam edeceksiniz"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Alarmlar dışında hiçbir ses ve titreşimle rahatsız edilmeyeceksiniz. O sırada çaldığınız, seyrettiğiniz ya da oynadığınız müzik, video ve oyunların sesini duymaya devam edeceksiniz."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Özelleştir"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Bu seçenek TÜM sesleri ve titreşimleri engeller. Buna alarmlar, müzik, videolar ve oyunlar dahildir. Telefon aramaları yapmaya devam edebileceksiniz."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Bu seçenek TÜM sesleri ve titreşimleri engeller. Buna alarmlar, müzik, videolar ve oyunlar dahildir."</string>
@@ -472,7 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hayır, teşekkürler"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Kur"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Şimdi sona erdir"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Şimdi kapat"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Genişlet"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Daralt"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran sabitlendi"</string>

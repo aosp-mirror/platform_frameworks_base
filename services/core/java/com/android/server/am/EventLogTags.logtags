@@ -34,7 +34,7 @@ option java_package com.android.server.am
 # Application process bound to work
 30010 am_proc_bound (User|1|5),(PID|1|5),(Process Name|3)
 # Application process died
-30011 am_proc_died (User|1|5),(PID|1|5),(Process Name|3)
+30011 am_proc_died (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(ProcState|1|5)
 # The Activity Manager failed to pause the given activity.
 30012 am_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
 # Attempting to pause the current activity

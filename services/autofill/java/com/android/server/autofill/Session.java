@@ -26,6 +26,7 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.ViewState.STATE_AUTOFILLED;
 import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
@@ -161,6 +162,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /** Whether the session is currently saving */
     @GuardedBy("mLock")
     private boolean mIsSaving;
+
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -816,6 +818,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
             if (atLeastOneChanged) {
+                if (sDebug) Slog.d(TAG, "at least one field changed - showing save UI");
                 mService.setSaveShown();
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName,
                         this);
@@ -885,7 +888,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
             if (sVerbose) {
                 Slog.v(TAG, "Dumping structure of " + context + " before calling service.save()");
-                context.getStructure().dump();
+                context.getStructure().dump(false);
             }
         }
 
@@ -933,7 +936,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private static final int PARTITION_MAX_COUNT = 64;
     /**
      * Determines if a new partition should be started for an id.
      *
@@ -947,8 +949,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final int numResponses = mResponses.size();
-        if (numResponses >= PARTITION_MAX_COUNT) {
-            Slog.e(TAG, "Cannot create more than 64 partitions. Not creating a new partition.");
+        if (numResponses >= sPartitionMaxCount) {
+            Slog.e(TAG, "Not starting a new partition on " + id + " because session " + this.id
+                    + " reached maximum of " + sPartitionMaxCount);
             return false;
         }
 
@@ -1120,7 +1123,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void notifyUnavailableToClient() {
         synchronized (mLock) {
-            if (!mHasCallback) return;
+            if (!mHasCallback || mCurrentViewId == null) return;
             try {
                 mClient.notifyNoFillUi(id, mCurrentViewId);
             } catch (RemoteException e) {
@@ -1369,10 +1372,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
-        pw.print(prefix); pw.print("mResponses: "); pw.println(mResponses.size());
-        for (int i = 0; i < mResponses.size(); i++) {
-            pw.print(prefix2); pw.print('#'); pw.print(i); pw.print(' ');
-                pw.println(mResponses.valueAt(i));
+        pw.print(prefix); pw.print("mResponses: ");
+        if (mResponses == null) {
+            pw.println("null");
+        } else {
+            pw.println(mResponses.size());
+            for (int i = 0; i < mResponses.size(); i++) {
+                pw.print(prefix2); pw.print('#'); pw.print(i);
+                pw.print(' '); pw.println(mResponses.valueAt(i));
+            }
         }
         pw.print(prefix); pw.print("mCurrentViewId: "); pw.println(mCurrentViewId);
         pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
@@ -1394,7 +1402,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     pw.println(context.getStructure() + " (look at logcat)");
 
                     // TODO: add method on AssistStructure to dump on pw
-                    context.getStructure().dump();
+                    context.getStructure().dump(false);
                 }
             }
         } else {

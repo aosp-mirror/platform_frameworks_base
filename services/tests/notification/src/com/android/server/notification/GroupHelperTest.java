@@ -34,10 +34,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -46,14 +44,10 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class GroupHelperTest {
+public class GroupHelperTest extends NotificationTestCase {
     private @Mock GroupHelper.Callback mCallback;
 
     private GroupHelper mGroupHelper;
-
-    private Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
 
     @Before
     public void setUp() {

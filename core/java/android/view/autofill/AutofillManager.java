@@ -16,6 +16,7 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 
@@ -98,14 +99,6 @@ public final class AutofillManager {
 
     static final String SESSION_ID_TAG = "android:sessionId";
     static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
-
-    /**
-     * @deprecated Use {@link android.service.autofill.FillRequest#FLAG_MANUAL_REQUEST}
-     * @hide
-     */
-    // TODO(b/37563972): remove (and change value of private flags)
-    @Deprecated
-    public static final int FLAG_MANUAL_REQUEST = 0x1;
 
     /** @hide */ public static final int ACTION_START_SESSION = 1;
     /** @hide */ public static final int ACTION_VIEW_ENTERED =  2;

@@ -344,6 +344,7 @@ public class NotificationManagerService extends SystemService {
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
+    private static final IBinder WHITELIST_TOKEN = new Binder();
     private RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
@@ -926,6 +927,8 @@ public class NotificationManagerService extends SystemService {
     };
 
     private final class SettingsObserver extends ContentObserver {
+        private final Uri NOTIFICATION_BADGING_URI
+                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
@@ -937,6 +940,8 @@ public class NotificationManagerService extends SystemService {
 
         void observe() {
             ContentResolver resolver = getContext().getContentResolver();
+            resolver.registerContentObserver(NOTIFICATION_BADGING_URI,
+                    false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
@@ -962,6 +967,9 @@ public class NotificationManagerService extends SystemService {
                 mMaxPackageEnqueueRate = Settings.Global.getFloat(resolver,
                             Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE, mMaxPackageEnqueueRate);
             }
+            if (uri == null || NOTIFICATION_BADGING_URI.equals(uri)) {
+                mRankingHelper.updateBadgingEnabled();
+            }
         }
     }
 
@@ -983,6 +991,7 @@ public class NotificationManagerService extends SystemService {
 
     public NotificationManagerService(Context context) {
         super(context);
+        Notification.processWhitelistToken = WHITELIST_TOKEN;
     }
 
     // TODO - replace these methods with a single VisibleForTesting constructor
@@ -1815,6 +1824,12 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUI("getNumNotificationChannelsForPackage");
             return mRankingHelper.getNotificationChannels(pkg, uid, includeDeleted)
                     .getList().size();
+        }
+
+        @Override
+        public boolean onlyHasDefaultChannel(String pkg, int uid) {
+            enforceSystemOrSystemUI("onlyHasDefaultChannel");
+            return mRankingHelper.onlyHasDefaultChannel(pkg, uid);
         }
 
         @Override
@@ -3256,7 +3271,8 @@ public class NotificationManagerService extends SystemService {
                 for (int i = 0; i < intentCount; i++) {
                     PendingIntent pendingIntent = notification.allPendingIntents.valueAt(i);
                     if (pendingIntent != null) {
-                        am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(), duration);
+                        am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(),
+                                WHITELIST_TOKEN, duration);
                     }
                 }
             }
@@ -3794,17 +3810,11 @@ public class NotificationManagerService extends SystemService {
             updateLightsLocked();
         }
         if (buzz || beep || blink) {
-            if (((record.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0)) {
-                if (DBG) Slog.v(TAG, "Suppressed SystemUI from triggering screen on");
-            } else {
-                MetricsLogger.action(record.getLogMaker()
-                        .setCategory(MetricsEvent.NOTIFICATION_ALERT)
-                        .setType(MetricsEvent.TYPE_OPEN)
-                        .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
-                EventLogTags.writeNotificationAlert(key,
-                        buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
-            }
+            MetricsLogger.action(record.getLogMaker()
+                    .setCategory(MetricsEvent.NOTIFICATION_ALERT)
+                    .setType(MetricsEvent.TYPE_OPEN)
+                    .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
+            EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
         }
     }
 
@@ -4025,6 +4035,7 @@ public class NotificationManagerService extends SystemService {
 
     private void handleRankingSort(Message msg) {
         if (!(msg.obj instanceof Boolean)) return;
+        if (mRankingHelper == null) return;
         boolean forceUpdate = ((Boolean) msg.obj == null) ? false : (boolean) msg.obj;
         synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
@@ -4072,6 +4083,8 @@ public class NotificationManagerService extends SystemService {
                     | (mZenModeHelper.shouldSuppressWhenScreenOn()
                     ? SUPPRESSED_EFFECT_SCREEN_ON : 0);
             record.setSuppressedVisualEffects(suppressed);
+        } else {
+            record.setSuppressedVisualEffects(0);
         }
     }
 

@@ -841,7 +841,7 @@ class UsbProfileGroupSettingsManager {
     // Only one of device and accessory should be non-null.
     private boolean packageMatchesLocked(ResolveInfo info, String metaDataName,
             UsbDevice device, UsbAccessory accessory) {
-        if (info.getComponentInfo().name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+        if (isForwardMatch(info)) {
             return true;
         }
 
@@ -902,6 +902,17 @@ class UsbProfileGroupSettingsManager {
     }
 
     /**
+     * If this match used to forward the intent to another profile?
+     *
+     * @param match The match
+     *
+     * @return {@code true} iff this is such a forward match
+     */
+    private boolean isForwardMatch(@NonNull ResolveInfo match) {
+        return match.getComponentInfo().name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE);
+    }
+
+    /**
      * Only return those matches with the highest priority.
      *
      * @param matches All matches, some might have lower priority
@@ -909,15 +920,22 @@ class UsbProfileGroupSettingsManager {
      * @return The matches with the highest priority
      */
     @NonNull
-    private ArrayList<ResolveInfo> preferHighPriority(
-            @NonNull ArrayList<ResolveInfo> matches) {
+    private ArrayList<ResolveInfo> preferHighPriority(@NonNull ArrayList<ResolveInfo> matches) {
         SparseArray<ArrayList<ResolveInfo>> highestPriorityMatchesByUserId = new SparseArray<>();
         SparseIntArray highestPriorityByUserId = new SparseIntArray();
+        ArrayList<ResolveInfo> forwardMatches = new ArrayList<>();
 
         // Create list of highest priority matches per user in highestPriorityMatchesByUserId
         int numMatches = matches.size();
         for (int matchNum = 0; matchNum < numMatches; matchNum++) {
             ResolveInfo match = matches.get(matchNum);
+
+            // Unnecessary forward matches are filtered out later, hence collect them all to add
+            // them below
+            if (isForwardMatch(match)) {
+                forwardMatches.add(match);
+                continue;
+            }
 
             // If this a previously unknown user?
             if (highestPriorityByUserId.indexOfKey(match.targetUserId) < 0) {
@@ -940,15 +958,61 @@ class UsbProfileGroupSettingsManager {
             }
         }
 
-        // Combine all users back together. This means that all matches have the same priority for a
-        // user. Matches for different users might have different priority.
-        ArrayList<ResolveInfo> combinedMatches = new ArrayList<>();
+        // Combine all users (+ forward matches) back together. This means that all non-forward
+        // matches have the same priority for a user. Matches for different users might have
+        // different priority.
+        ArrayList<ResolveInfo> combinedMatches = new ArrayList<>(forwardMatches);
         int numMatchArrays = highestPriorityMatchesByUserId.size();
         for (int matchArrayNum = 0; matchArrayNum < numMatchArrays; matchArrayNum++) {
             combinedMatches.addAll(highestPriorityMatchesByUserId.valueAt(matchArrayNum));
         }
 
         return combinedMatches;
+    }
+
+    /**
+     * If there are no matches for a profile, remove the forward intent to this profile.
+     *
+     * @param rawMatches The matches that contain all forward intents
+     *
+     * @return The matches with the unnecessary forward intents removed
+     */
+    @NonNull private ArrayList<ResolveInfo> removeForwardIntentIfNotNeeded(
+            @NonNull ArrayList<ResolveInfo> rawMatches) {
+        final int numRawMatches = rawMatches.size();
+
+        // The raw matches contain the activities that can be started but also the intents to
+        // forward the intent to the other profile
+        int numParentActivityMatches = 0;
+        int numNonParentActivityMatches = 0;
+        for (int i = 0; i < numRawMatches; i++) {
+            final ResolveInfo rawMatch = rawMatches.get(i);
+            if (!isForwardMatch(rawMatch)) {
+                if (UserHandle.getUserHandleForUid(
+                        rawMatch.activityInfo.applicationInfo.uid).equals(mParentUser)) {
+                    numParentActivityMatches++;
+                } else {
+                    numNonParentActivityMatches++;
+                }
+            }
+        }
+
+        // If only one profile has activity matches, we need to remove all switch intents
+        if (numParentActivityMatches == 0 || numNonParentActivityMatches == 0) {
+            ArrayList<ResolveInfo> matches = new ArrayList<>(
+                    numParentActivityMatches + numNonParentActivityMatches);
+
+            for (int i = 0; i < numRawMatches; i++) {
+                ResolveInfo rawMatch = rawMatches.get(i);
+                if (!isForwardMatch(rawMatch)) {
+                    matches.add(rawMatch);
+                }
+            }
+            return matches;
+
+        } else {
+            return rawMatches;
+        }
     }
 
     private final ArrayList<ResolveInfo> getDeviceMatchesLocked(UsbDevice device, Intent intent) {
@@ -961,7 +1025,8 @@ class UsbProfileGroupSettingsManager {
                 matches.add(resolveInfo);
             }
         }
-        return preferHighPriority(matches);
+
+        return removeForwardIntentIfNotNeeded(preferHighPriority(matches));
     }
 
     private final ArrayList<ResolveInfo> getAccessoryMatchesLocked(
@@ -975,7 +1040,8 @@ class UsbProfileGroupSettingsManager {
                 matches.add(resolveInfo);
             }
         }
-        return preferHighPriority(matches);
+
+        return removeForwardIntentIfNotNeeded(preferHighPriority(matches));
     }
 
     public void deviceAttached(UsbDevice device) {
@@ -1067,34 +1133,16 @@ class UsbProfileGroupSettingsManager {
      * Start the appropriate package when an device/accessory got attached.
      *
      * @param intent The intent to start the package
-     * @param rawMatches The available resolutions of the intent
+     * @param matches The available resolutions of the intent
      * @param defaultActivity The default activity for the device (if set)
      * @param device The device if a device was attached
      * @param accessory The accessory if a device was attached
      */
-    private void resolveActivity(@NonNull Intent intent, @NonNull ArrayList<ResolveInfo> rawMatches,
+    private void resolveActivity(@NonNull Intent intent, @NonNull ArrayList<ResolveInfo> matches,
             @Nullable ActivityInfo defaultActivity, @Nullable UsbDevice device,
             @Nullable UsbAccessory accessory) {
-        final int numRawMatches = rawMatches.size();
-
-        // The raw matches contain the activities that can be started but also the intents to switch
-        // between the profiles
-        int numParentActivityMatches = 0;
-        int numNonParentActivityMatches = 0;
-        for (int i = 0; i < numRawMatches; i++) {
-            final ResolveInfo rawMatch = rawMatches.get(i);
-            if (!rawMatch.getComponentInfo().name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
-                if (UserHandle.getUserHandleForUid(
-                        rawMatch.activityInfo.applicationInfo.uid).equals(mParentUser)) {
-                    numParentActivityMatches++;
-                } else {
-                    numNonParentActivityMatches++;
-                }
-            }
-        }
-
         // don't show the resolver activity if there are no choices available
-        if (numParentActivityMatches + numNonParentActivityMatches == 0) {
+        if (matches.size() == 0) {
             if (accessory != null) {
                 String uri = accessory.getUri();
                 if (uri != null && uri.length() > 0) {
@@ -1115,21 +1163,6 @@ class UsbProfileGroupSettingsManager {
 
             // do nothing
             return;
-        }
-
-        // If only one profile has activity matches, we need to remove all switch intents
-        ArrayList<ResolveInfo> matches;
-        if (numParentActivityMatches == 0 || numNonParentActivityMatches == 0) {
-            matches = new ArrayList<>(numParentActivityMatches + numNonParentActivityMatches);
-
-            for (int i = 0; i < numRawMatches; i++) {
-                ResolveInfo rawMatch = rawMatches.get(i);
-                if (!rawMatch.getComponentInfo().name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
-                    matches.add(rawMatch);
-                }
-            }
-        } else {
-            matches = rawMatches;
         }
 
         if (defaultActivity != null) {
@@ -1216,10 +1249,10 @@ class UsbProfileGroupSettingsManager {
         if (matches.size() == 1) {
             final ActivityInfo activityInfo = matches.get(0).activityInfo;
             if (activityInfo != null) {
-                // bypass dialog and launch the only matching activity
                 if (mDisablePermissionDialogs) {
                     return activityInfo;
                 }
+                // System apps are considered default unless there are other matches
                 if (activityInfo.applicationInfo != null
                         && (activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
                                 != 0) {

@@ -266,6 +266,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Абнаўленні"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Стан сеткі"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Абвесткі сеткі"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Стан VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Адміністраванне прылады"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Абвесткi"</string>
@@ -1139,6 +1141,18 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Гукі будзільніка"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Гукі апавяшчэнняў"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Невядома"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">сетка Wi-Fi даступная</item>
+      <item quantity="few">сеткі Wi-Fi даступныя</item>
+      <item quantity="many">сетак Wi-Fi даступна</item>
+      <item quantity="other">сеткі Wi-Fi даступна</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">адкрытая сетка Wi-Fi даступная</item>
+      <item quantity="few">адкрытыя сеткі Wi-Fi даступныя</item>
+      <item quantity="many">адкрытых сетак Wi-Fi даступна</item>
+      <item quantity="other">адкрытай сеткі Wi-Fi даступна</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Уваход у сетку Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Увайдзіце ў сетку"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1747,8 +1761,7 @@
       <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> выбрана</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> выбрана</item>
     </plurals>
-    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
-    <skip />
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Некатэгарызаванае"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Вы задалі важнасць гэтых апавяшчэнняў."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Гэта важна, бо з гэтым звязаны пэўныя людзі."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Дазволіць <xliff:g id="APP">%1$s</xliff:g> стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
@@ -1807,9 +1820,13 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Параметры аўтазапаўнення"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Захаваць для аўтазапаўнення"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Для гэтага змесціва аўтазапаўненне немагчымае"</string>
-    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
-    <skip />
-    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Няма прапаноў аўтазапаўнення"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> прапанова аўтазапаўнення</item>
+      <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> прапановы аўтазапаўнення</item>
+      <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> прапаноў аўтазапаўнення</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> прапановы аўтазапаўнення</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"Захаваць у &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Захаваць <xliff:g id="TYPE">%1$s</xliff:g> у &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Захаваць <xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g> у &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>

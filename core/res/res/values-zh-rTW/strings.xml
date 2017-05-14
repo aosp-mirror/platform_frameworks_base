@@ -260,6 +260,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"更新"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"網路狀態"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"網路警示"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN 狀態"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"裝置管理"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"快訊"</string>
@@ -1099,6 +1101,14 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"鬧鐘音效"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"通知音效"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"不明"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">有多個可用的 Wi-Fi 網路</item>
+      <item quantity="one">有一個可用的 Wi-Fi 網路</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">有多個可用的開放 Wi-Fi 網路</item>
+      <item quantity="one">有多個可用的開放 Wi-Fi 網路</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登入 Wi-Fi 網路"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登入網路"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1685,8 +1695,7 @@
       <item quantity="other">已選取 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目</item>
       <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
     </plurals>
-    <!-- no translation found for default_notification_channel_label (5929663562028088222) -->
-    <skip />
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"未分類"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"這些通知的重要性由你決定。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"這則通知涉及特定人士，因此被歸為重要通知。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"要允許 <xliff:g id="APP">%1$s</xliff:g> 為 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
@@ -1745,9 +1754,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自動填入選項"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"儲存以便用於自動填入"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"無法自動填入內容"</string>
-    <!-- no translation found for autofill_picker_no_suggestions (3908514303773350735) -->
-    <skip />
-    <!-- no translation found for autofill_picker_some_suggestions (5506565809835815274) -->
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"沒有任何自動填入建議"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> 項自動填入建議</item>
+      <item quantity="one">1 項自動填入建議</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"要儲存到「<xliff:g id="LABEL">%1$s</xliff:g>」嗎？"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存到「<xliff:g id="LABEL">%2$s</xliff:g>」嗎？"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>儲存到「<xliff:g id="LABEL">%3$s</xliff:g>」嗎？"</string>

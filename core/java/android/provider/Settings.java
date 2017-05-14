@@ -6946,6 +6946,13 @@ public final class Settings {
         public static final String CMAS_ADDITIONAL_BROADCAST_PKG = "cmas_additional_broadcast_pkg";
 
         /**
+         * Whether the launcher should show any notification badges.
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String NOTIFICATION_BADGING = "notification_badging";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -7040,7 +7047,8 @@ public final class Settings {
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             ASSIST_GESTURE_ENABLED,
             ASSIST_GESTURE_SENSITIVITY,
-            VR_DISPLAY_MODE
+            VR_DISPLAY_MODE,
+            NOTIFICATION_BADGING
         };
 
         /**
@@ -9947,7 +9955,8 @@ public final class Settings {
             CALL_AUTO_RETRY,
             DOCK_AUDIO_MEDIA_ENABLED,
             ENCODED_SURROUND_OUTPUT,
-            LOW_POWER_MODE_TRIGGER_LEVEL
+            LOW_POWER_MODE_TRIGGER_LEVEL,
+            BLUETOOTH_ON
         };
 
         private static final ContentProviderHolder sProviderHolder =

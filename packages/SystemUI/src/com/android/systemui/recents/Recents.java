@@ -324,14 +324,14 @@ public class Recents extends SystemUI
 
     @Override
     public void toggleRecentApps() {
-        toggleRecents(mContext.getSystemService(WindowManager.class).getDefaultDisplay());
+        toggleRecents();
     }
 
     /**
      * Toggles the Recents activity.
      */
     @Override
-    public void toggleRecents(Display display) {
+    public void toggleRecents() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {

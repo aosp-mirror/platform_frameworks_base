@@ -621,16 +621,17 @@ final class AutofillManagerServiceImpl {
         @Override
         protected Void doInBackground(Void... ignored) {
             int numSessionsToRemove;
-            ArrayMap<IBinder, Integer> sessionsToRemove;
+
+            SparseArray<IBinder> sessionsToRemove;
 
             synchronized (mLock) {
                 numSessionsToRemove = mSessions.size();
-                sessionsToRemove = new ArrayMap<>(numSessionsToRemove);
+                sessionsToRemove = new SparseArray<>(numSessionsToRemove);
 
                 for (int i = 0; i < numSessionsToRemove; i++) {
                     Session session = mSessions.valueAt(i);
 
-                    sessionsToRemove.put(session.getActivityTokenLocked(), session.id);
+                    sessionsToRemove.put(session.id, session.getActivityTokenLocked());
                 }
             }
 
@@ -640,7 +641,7 @@ final class AutofillManagerServiceImpl {
             for (int i = 0; i < numSessionsToRemove; i++) {
                 try {
                     // The activity manager cannot resolve activities that have been removed
-                    if (am.getActivityClassForToken(sessionsToRemove.keyAt(i)) != null) {
+                    if (am.getActivityClassForToken(sessionsToRemove.valueAt(i)) != null) {
                         sessionsToRemove.removeAt(i);
                         i--;
                         numSessionsToRemove--;
@@ -652,9 +653,10 @@ final class AutofillManagerServiceImpl {
 
             synchronized (mLock) {
                 for (int i = 0; i < numSessionsToRemove; i++) {
-                    Session sessionToRemove = mSessions.get(sessionsToRemove.valueAt(i));
+                    Session sessionToRemove = mSessions.get(sessionsToRemove.keyAt(i));
 
-                    if (sessionToRemove != null) {
+                    if (sessionToRemove != null && sessionsToRemove.valueAt(i)
+                            == sessionToRemove.getActivityTokenLocked()) {
                         if (sessionToRemove.isSavingLocked()) {
                             if (sVerbose) {
                                 Slog.v(TAG, "Session " + sessionToRemove.id + " is saving");

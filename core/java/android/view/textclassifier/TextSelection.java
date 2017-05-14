@@ -34,13 +34,16 @@ public final class TextSelection {
     private final int mEndIndex;
     @NonNull private final EntityConfidence<String> mEntityConfidence;
     @NonNull private final List<String> mEntities;
+    @NonNull private final String mLogSource;
 
     private TextSelection(
-            int startIndex, int endIndex, @NonNull EntityConfidence<String> entityConfidence) {
+            int startIndex, int endIndex, @NonNull EntityConfidence<String> entityConfidence,
+            @NonNull String logSource) {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
         mEntities = mEntityConfidence.getEntities();
+        mLogSource = logSource;
     }
 
     /**
@@ -87,6 +90,14 @@ public final class TextSelection {
         return mEntityConfidence.getConfidenceScore(entity);
     }
 
+    /**
+     * Returns a tag for the source classifier used to generate this result.
+     * @hide
+     */
+    public String getSourceClassifier() {
+        return mLogSource;
+    }
+
     @Override
     public String toString() {
         return String.format("TextSelection {%d, %d, %s}",
@@ -102,6 +113,7 @@ public final class TextSelection {
         private final int mEndIndex;
         @NonNull private final EntityConfidence<String> mEntityConfidence =
                 new EntityConfidence<>();
+        @NonNull private String mLogSource = "";
 
         /**
          * Creates a builder used to build {@link TextSelection} objects.
@@ -131,10 +143,19 @@ public final class TextSelection {
         }
 
         /**
+         * Sets a tag for the source classifier used to generate this result.
+         * @hide
+         */
+        Builder setLogSource(@NonNull String logSource) {
+            mLogSource = Preconditions.checkNotNull(logSource);
+            return this;
+        }
+
+        /**
          * Builds and returns {@link TextSelection} object.
          */
         public TextSelection build() {
-            return new TextSelection(mStartIndex, mEndIndex, mEntityConfidence);
+            return new TextSelection(mStartIndex, mEndIndex, mEntityConfidence, mLogSource);
         }
     }
 }

@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,6 +33,8 @@ import android.widget.FrameLayout.LayoutParams;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.R.id;
+import com.android.systemui.R.style;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
@@ -61,10 +64,12 @@ public class QSFragment extends Fragment implements QS {
     private QSContainerImpl mContainer;
     private int mLayoutDirection;
     private QSFooter mFooter;
+    private int mGutterHeight;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
+        inflater =inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme));
         return inflater.inflate(R.layout.qs_panel, container, false);
     }
 
@@ -75,7 +80,8 @@ public class QSFragment extends Fragment implements QS {
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
-        mContainer = (QSContainerImpl) view;
+        mContainer = view.findViewById(id.quick_settings_container);
+        mGutterHeight = getContext().getResources().getDimensionPixelSize(R.dimen.qs_gutter_height);
 
         mQSDetail.setQsPanel(mQSPanel, mHeader);
 
@@ -239,7 +245,8 @@ public class QSFragment extends Fragment implements QS {
         mContainer.setExpansion(expansion);
         final float translationScaleY = expansion - 1;
         if (!mHeaderAnimating) {
-            getView().setTranslationY(mKeyguardShowing ? (translationScaleY * mHeader.getHeight())
+            int height = mHeader.getHeight() + mGutterHeight;
+            getView().setTranslationY(mKeyguardShowing ? (translationScaleY * height)
                     : headerTranslation);
         }
         mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
@@ -321,19 +328,19 @@ public class QSFragment extends Fragment implements QS {
             LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
             int panelHeight = layoutParams.topMargin + layoutParams.bottomMargin +
                     + mQSPanel.getMeasuredHeight();
-            return panelHeight + getView().getPaddingBottom();
+            return panelHeight + getView().getPaddingBottom() + mGutterHeight;
         } else {
-            return getView().getMeasuredHeight();
+            return getView().getMeasuredHeight() + mGutterHeight;
         }
     }
 
     @Override
     public void setHeightOverride(int desiredHeight) {
-        mContainer.setHeightOverride(desiredHeight);
+        mContainer.setHeightOverride(desiredHeight - mGutterHeight);
     }
 
     public int getQsMinExpansionHeight() {
-        return mHeader.getHeight();
+        return mHeader.getHeight() + mGutterHeight;
     }
 
     @Override

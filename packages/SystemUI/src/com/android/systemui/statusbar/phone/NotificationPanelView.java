@@ -1985,6 +1985,18 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    protected void onUnlockHintFinished() {
+        super.onUnlockHintFinished();
+        mNotificationStackScroller.setUnlockHintRunning(false);
+    }
+
+    @Override
+    protected void onUnlockHintStarted() {
+        super.onUnlockHintStarted();
+        mNotificationStackScroller.setUnlockHintRunning(true);
+    }
+
+    @Override
     public KeyguardAffordanceView getLeftIcon() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
                 ? mKeyguardBottomArea.getRightView()
@@ -2499,7 +2511,7 @@ public class NotificationPanelView extends PanelView implements
         if (animate) {
             mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, darkAmount);
             mDarkAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-            mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
             mDarkAnimator.start();
         } else {
             setDarkAmount(darkAmount);

@@ -352,7 +352,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"ਖੋਜੋ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਲਈ ਉੱਪਰ ਸਲਾਈਡ ਕਰੋ।"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਤੱਕ ਖੱਬੇ ਪਾਸੇ ਸਲਾਈਡ ਕਰੋ।"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"ਤੁਹਾਡੇ ਦੁਆਰਾ ਤੈਅ ਕੀਤੇ ਅਲਾਰਮਾਂ, ਯਾਦ-ਦਹਾਨੀਆਂ, ਵਰਤਾਰਿਆਂ, ਅਤੇ ਕਾਲ ਕਰਨ ਵਾਲਿਆਂ ਨੂੰ ਛੱਡਕੇ, ਤੁਹਾਨੂੰ ਧੁਨੀਆਂ ਅਤੇ ਥਰਥਰਾਹਟਾਂ ਵੱਲੋਂ ਪਰੇਸ਼ਾਨ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
+    <!-- no translation found for zen_priority_introduction (7577965386868311310) -->
+    <skip />
+    <!-- no translation found for zen_alarms_introduction (7034415210361973827) -->
+    <skip />
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓ, ਅਤੇ ਗੇਮਾਂ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਥਰਥਰਾਹਟ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਫ਼ੋਨ ਕਾਲ ਕਰਨ ਦੇ ਯੋਗ ਹੋਵੋਂਗੇ।"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓਜ਼, ਅਤੇ ਗੇਮਸ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ।"</string>
@@ -472,7 +475,8 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"ਹੁਣੇ ਸਮਾਪਤ ਕਰੋ"</string>
+    <!-- no translation found for volume_zen_end_now (6930243045593601084) -->
+    <skip />
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ਨਸ਼ਟ ਕਰੋ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
@@ -699,7 +703,7 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> ਸੂਚਨਾ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰ ਸਕੇ।"</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇਆਂ \'ਤੇ ਲਾਂਚ ਕਰਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਨੂੰ ਖੋਲ੍ਹੋ।"</string>

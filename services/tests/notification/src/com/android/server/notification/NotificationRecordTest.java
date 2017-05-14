@@ -40,7 +40,6 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -56,7 +55,7 @@ import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationRecordTest {
+public class NotificationRecordTest extends NotificationTestCase {
 
     private final Context mMockContext = Mockito.mock(Context.class);
     @Mock PackageManager mPm;
@@ -96,8 +95,7 @@ public class NotificationRecordTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockContext.getResources()).thenReturn(
-                InstrumentationRegistry.getContext().getResources());
+        when(mMockContext.getResources()).thenReturn(getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
 
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
