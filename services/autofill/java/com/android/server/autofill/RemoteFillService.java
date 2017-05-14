@@ -404,9 +404,85 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     private static abstract class PendingRequest implements Runnable {
-        void cancel() {
+        protected final Object mLock = new Object();
+        private final WeakReference<RemoteFillService> mWeakService;
 
+        private final Runnable mTimeoutTrigger;
+        private final Handler mServiceHandler;
+
+        @GuardedBy("mLock")
+        private boolean mCancelled;
+
+        @GuardedBy("mLock")
+        private boolean mCompleted;
+
+        PendingRequest(RemoteFillService service) {
+            mWeakService = new WeakReference<>(service);
+            mServiceHandler = service.mHandler.getHandler();
+            mTimeoutTrigger = () -> {
+                synchronized (mLock) {
+                    if (mCancelled) {
+                        return;
+                    }
+                    mCompleted = true;
+                }
+
+                final RemoteFillService remoteService = mWeakService.get();
+                if (remoteService != null) {
+                    fail(remoteService);
+                }
+            };
+            mServiceHandler.postAtTime(mTimeoutTrigger,
+                    SystemClock.uptimeMillis() + TIMEOUT_REMOTE_REQUEST_MILLIS);
         }
+
+        protected RemoteFillService getService() {
+            return mWeakService.get();
+        }
+
+        /**
+         * Sub-classes must call this method when the remote service finishes, i.e., when it
+         * called {@code onFill...} or {@code onSave...}.
+         *
+         * @return {@code false} in the service is already finished, {@code true} otherwise.
+         */
+        protected final boolean finish() {
+            synchronized (mLock) {
+                if (mCompleted || mCancelled) {
+                    return false;
+                }
+                mCompleted = true;
+            }
+            mServiceHandler.removeCallbacks(mTimeoutTrigger);
+            return true;
+        }
+
+        protected boolean isCancelledLocked() {
+            return mCancelled;
+        }
+
+        /**
+         * Cancels the service.
+         *
+         * @return {@code false} if service is already canceled, {@code true} otherwise.
+         */
+        boolean cancel() {
+            synchronized (mLock) {
+                if (mCancelled || mCompleted) {
+                    return false;
+                }
+                mCancelled = true;
+            }
+
+            mServiceHandler.removeCallbacks(mTimeoutTrigger);
+            return true;
+        }
+
+        /**
+         * Called by the self-destructure timeout when the AutofilllService didn't reply to the
+         * request on time.
+         */
+        abstract void fail(RemoteFillService remoteService);
 
         /**
          * @return whether this request leads to a final state where no
@@ -418,22 +494,14 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     private static final class PendingFillRequest extends PendingRequest {
-        private final Object mLock = new Object();
-
-        private final WeakReference<RemoteFillService> mWeakService;
         private final FillRequest mRequest;
         private final IFillCallback mCallback;
         private ICancellationSignal mCancellation;
 
-        @GuardedBy("mLock")
-        private boolean mCancelled;
-
-        @GuardedBy("mLock")
-        private boolean mCompleted;
-
         public PendingFillRequest(FillRequest request, RemoteFillService service) {
+            super(service);
             mRequest = request;
-            mWeakService = new WeakReference<>(service);
+
             mCallback = new IFillCallback.Stub() {
                 @Override
                 public void onCancellable(ICancellationSignal cancellation) {
@@ -441,7 +509,7 @@ final class RemoteFillService implements DeathRecipient {
                         final boolean cancelled;
                         synchronized (mLock) {
                             mCancellation = cancellation;
-                            cancelled = mCancelled;
+                            cancelled = isCancelledLocked();
                         }
                         if (cancelled) {
                             try {
@@ -455,15 +523,10 @@ final class RemoteFillService implements DeathRecipient {
 
                 @Override
                 public void onSuccess(FillResponse response) {
-                    synchronized (mLock) {
-                        if (mCompleted) {
-                            return;
-                        }
-                        mCompleted = true;
-                    }
-                    RemoteFillService remoteService = mWeakService.get();
+                    if (!finish()) return;
+
+                    final RemoteFillService remoteService = getService();
                     if (remoteService != null) {
-                        service.mHandler.getHandler().removeCallbacks(PendingFillRequest.this);
                         remoteService.dispatchOnFillRequestSuccess(PendingFillRequest.this,
                                 getCallingUid(), request.getFlags(), response);
                     }
@@ -471,132 +534,100 @@ final class RemoteFillService implements DeathRecipient {
 
                 @Override
                 public void onFailure(CharSequence message) {
-                    synchronized (mLock) {
-                        if (mCompleted) {
-                            return;
-                        }
-                        mCompleted = true;
-                    }
-                    RemoteFillService remoteService = mWeakService.get();
+                    if (!finish()) return;
+
+                    final RemoteFillService remoteService = getService();
                     if (remoteService != null) {
-                        service.mHandler.getHandler().removeCallbacks(PendingFillRequest.this);
                         remoteService.dispatchOnFillRequestFailure(
                                 PendingFillRequest.this, message);
                     }
                 }
             };
-            service.mHandler.getHandler().postAtTime(() -> {
-                cancel();
-                try {
-                    mCallback.onFailure(null);
-                } catch (RemoteException e) {
-                    /* ignore */
-                }
-            }, PendingFillRequest.this,
-                    SystemClock.uptimeMillis() + TIMEOUT_REMOTE_REQUEST_MILLIS);
+        }
+
+        @Override
+        void fail(RemoteFillService remoteService) {
+            remoteService.dispatchOnFillRequestFailure(PendingFillRequest.this, null);
         }
 
         @Override
         public void run() {
-            RemoteFillService remoteService = mWeakService.get();
+            final RemoteFillService remoteService = getService();
             if (remoteService != null) {
                 try {
                     remoteService.mAutoFillService.onFillRequest(mRequest, mCallback);
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling on fill request", e);
-                    cancel();
+
+                    remoteService.dispatchOnFillRequestFailure(PendingFillRequest.this, null);
                 }
             }
         }
 
         @Override
-        public void cancel() {
-            final ICancellationSignal cancellation;
-            synchronized (mLock) {
-                if (mCancelled) {
-                    return;
+        public boolean cancel() {
+            if (!super.cancel()) return false;
+
+            final ICancellationSignal cancellation = mCancellation;
+            if (cancellation != null) {
+                try {
+                    cancellation.cancel();
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Error cancelling a fill request", e);
                 }
-                mCancelled = true;
-                cancellation = mCancellation;
             }
-            if (cancellation == null) {
-                return;
-            }
-            try {
-                cancellation.cancel();
-            } catch (RemoteException e) {
-                Slog.e(LOG_TAG, "Error cancelling a fill request", e);
-            }
+            return true;
         }
     }
 
     private static final class PendingSaveRequest extends PendingRequest {
-        private final Object mLock = new Object();
-
-        private final WeakReference<RemoteFillService> mWeakService;
         private final SaveRequest mRequest;
         private final ISaveCallback mCallback;
 
-        @GuardedBy("mLock")
-        private boolean mCompleted;
-
         public PendingSaveRequest(@NonNull SaveRequest request,
                 @NonNull RemoteFillService service) {
+            super(service);
             mRequest = request;
-            mWeakService = new WeakReference<>(service);
+
             mCallback = new ISaveCallback.Stub() {
                 @Override
                 public void onSuccess() {
-                    synchronized (mLock) {
-                        if (mCompleted) {
-                            return;
-                        }
-                        mCompleted = true;
-                    }
-                    cancel();
-                    RemoteFillService service = mWeakService.get();
-                    if (service != null) {
-                        service.mHandler.getHandler().removeCallbacks(PendingSaveRequest.this);
-                        service.dispatchOnSaveRequestSuccess(
-                                PendingSaveRequest.this);
+                    if (!finish()) return;
+
+                    final RemoteFillService remoteService = getService();
+                    if (remoteService != null) {
+                        remoteService.dispatchOnSaveRequestSuccess(PendingSaveRequest.this);
                     }
                 }
 
                 @Override
                 public void onFailure(CharSequence message) {
-                    synchronized (mLock) {
-                        if (mCompleted) {
-                            return;
-                        }
-                        mCompleted = true;
-                    }
-                    RemoteFillService service = mWeakService.get();
-                    if (service != null) {
-                        service.mHandler.getHandler().removeCallbacks(PendingSaveRequest.this);
-                        service.dispatchOnSaveRequestFailure(
-                                PendingSaveRequest.this, message);
+                    if (!finish()) return;
+
+                    final RemoteFillService remoteService = getService();
+                    if (remoteService != null) {
+                        remoteService.dispatchOnSaveRequestFailure(PendingSaveRequest.this,
+                                message);
                     }
                 }
             };
-            service.mHandler.getHandler().postAtTime(() -> {
-                cancel();
-                try {
-                    mCallback.onFailure(null);
-                } catch (RemoteException e) {
-                    /* ignore */
-                }
-            }, PendingSaveRequest.this,
-                    SystemClock.uptimeMillis() + TIMEOUT_REMOTE_REQUEST_MILLIS);
+        }
+
+        @Override
+        void fail(RemoteFillService remoteService) {
+            remoteService.dispatchOnSaveRequestFailure(PendingSaveRequest.this, null);
         }
 
         @Override
         public void run() {
-            final RemoteFillService service = mWeakService.get();
-            if (service != null) {
+            final RemoteFillService remoteService = getService();
+            if (remoteService != null) {
                 try {
-                    service.mAutoFillService.onSaveRequest(mRequest, mCallback);
+                    remoteService.mAutoFillService.onSaveRequest(mRequest, mCallback);
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling on save request", e);
+
+                    remoteService.dispatchOnFillRequestFailure(PendingSaveRequest.this, null);
                 }
             }
         }
