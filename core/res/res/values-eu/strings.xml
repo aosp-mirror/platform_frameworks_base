@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Testu-ekintzak"</string>
     <string name="email" msgid="4560673117055050403">"Posta"</string>
     <string name="dial" msgid="4204975095406423102">"Telefonoa"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"Mapak"</string>
+    <string name="browse" msgid="6993590095938149861">"Arakatzailea"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>
@@ -1619,7 +1617,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren errendimendua murrizten du, eta dardara, kokapen-zerbitzuak eta atzeko planoko datu gehienak mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzeko konektatutakoan, bateria-aurrezlea automatikoki desaktibatuko da."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1690,7 +1688,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> hautatuta</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> hautatuta</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"Askotarikoak"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Kategoriarik gabea"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Zuk ezarri duzu jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Garrantzitsua da eragiten dien pertsonengatik."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzea baimendu nahi diozu?"</string>
@@ -1749,6 +1747,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Betetze automatikoaren aukerak"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Gorde betetze automatikoarekin erabiltzeko"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Ezin dira bete automatikoki eremuak"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Ez dago automatikoki betetzeko iradokizunik"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other">Automatikoki betetzeko <xliff:g id="COUNT">%1$s</xliff:g> iradokizun</item>
+      <item quantity="one">Automatikoki betetzeko 1 iradokizun</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi duzu?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi duzu?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> eta <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; zerbitzuan gorde nahi dituzu?"</string>

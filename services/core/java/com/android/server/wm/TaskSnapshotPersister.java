@@ -60,6 +60,8 @@ class TaskSnapshotPersister {
     private final ArrayDeque<WriteQueueItem> mWriteQueue = new ArrayDeque<>();
     @GuardedBy("mLock")
     private boolean mQueueIdling;
+    @GuardedBy("mLock")
+    private boolean mPaused;
     private boolean mStarted;
     private final Object mLock = new Object();
     private final DirectoryResolver mDirectoryResolver;
@@ -127,6 +129,15 @@ class TaskSnapshotPersister {
         }
     }
 
+    void setPaused(boolean paused) {
+        synchronized (mLock) {
+            mPaused = paused;
+            if (!paused) {
+                mLock.notifyAll();
+            }
+        }
+    }
+
     @TestApi
     void waitForQueueEmpty() {
         while (true) {
@@ -142,7 +153,9 @@ class TaskSnapshotPersister {
     @GuardedBy("mLock")
     private void sendToQueueLocked(WriteQueueItem item) {
         mWriteQueue.offer(item);
-        mLock.notifyAll();
+        if (!mPaused) {
+            mLock.notifyAll();
+        }
     }
 
     private File getDirectory(int userId) {
@@ -185,7 +198,11 @@ class TaskSnapshotPersister {
             while (true) {
                 WriteQueueItem next;
                 synchronized (mLock) {
-                    next = mWriteQueue.poll();
+                    if (mPaused) {
+                        next = null;
+                    } else {
+                        next = mWriteQueue.poll();
+                    }
                 }
                 if (next != null) {
                     next.write();

@@ -33,6 +33,7 @@ struct R {
       attr_five = 0x7f010004u,
       attr_indirect = 0x7f010005u,
       attr_six = 0x7f010006u,
+      attr_empty = 0x7f010007u,
     };
   };
 

@@ -35,7 +35,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -51,7 +50,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationComparatorTest {
+public class NotificationComparatorTest extends NotificationTestCase {
     @Mock Context mContext;
     @Mock TelecomManager mTm;
     @Mock RankingHandler handler;
@@ -83,10 +82,8 @@ public class NotificationComparatorTest {
         MockitoAnnotations.initMocks(this);
         int userId = UserHandle.myUserId();
 
-        when(mContext.getResources()).thenReturn(
-                InstrumentationRegistry.getTargetContext().getResources());
-        when(mContext.getContentResolver()).thenReturn(
-                InstrumentationRegistry.getTargetContext().getContentResolver());
+        when(mContext.getResources()).thenReturn(getContext().getResources());
+        when(mContext.getContentResolver()).thenReturn(getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getSystemService(eq(Context.TELECOM_SERVICE))).thenReturn(mTm);
         when(mTm.getDefaultDialerPackage()).thenReturn(callPkg);

@@ -310,6 +310,16 @@ public class Installer extends SystemService {
         }
     }
 
+    public boolean copySystemProfile(String systemProfile, int uid, String packageName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.copySystemProfile(systemProfile, uid, packageName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void idmap(String targetApkPath, String overlayApkPath, int uid)
             throws InstallerException {
         if (!checkBeforeRemote()) return;

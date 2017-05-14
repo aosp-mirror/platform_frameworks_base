@@ -635,6 +635,12 @@ public class PackageManagerStub extends PackageManager {
     }
 
     @Override
+    public int installExistingPackage(String packageName, int installReason)
+            throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
         return 0;

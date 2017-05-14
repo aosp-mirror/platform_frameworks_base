@@ -23,7 +23,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.NetworkBadging;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.support.v7.preference.Preference;
@@ -164,7 +163,7 @@ public class AccessPointPreference extends Preference {
         TronUtils.logWifiSettingsBadge(context, mWifiBadge);
         Drawable drawable = NetworkBadging.getWifiIcon(level, mWifiBadge, getContext().getTheme());
         if (!mForSavedNetworks && drawable != null) {
-            drawable.setTint(Utils.getColorAccent(getContext()));
+            drawable.setTint(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
             setIcon(drawable);
         } else {
             safeSetDefaultIcon();

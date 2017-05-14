@@ -99,6 +99,7 @@ public class FocusRequester {
         mFocusGainRequest = focusRequest;
         mGrantFlags = grantFlags;
         mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
+        mFocusLossWasNotified = true;
         mFocusController = ctlr;
         mSdkTarget = sdk;
     }
@@ -111,6 +112,7 @@ public class FocusRequester {
         mCallingUid = afi.getClientUid();
         mFocusGainRequest = afi.getGainRequest();
         mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
+        mFocusLossWasNotified = true;
         mGrantFlags = afi.getFlags();
         mSdkTarget = afi.getSdkTarget();
 
@@ -324,7 +326,6 @@ public class FocusRequester {
                 }
             }
             mFocusController.unduckPlayers(this);
-            mFocusLossWasNotified = false;
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal gain of audio focus due to: ", e);
         }
@@ -378,6 +379,12 @@ public class FocusRequester {
                             // the focus loser declared it would pause instead of duck, let it
                             // handle it (the framework doesn't pause for apps)
                             handled = false;
+                            Log.v(TAG, "not ducking uid " + this.mCallingUid + " - flags");
+                        } else if (MediaFocusControl.ENFORCE_DUCKING_FOR_NEW &&
+                                this.getSdkTarget() <= MediaFocusControl.DUCKING_IN_APP_SDK_LEVEL) {
+                            // legacy behavior, apps used to be notified when they should be ducking
+                            handled = false;
+                            Log.v(TAG, "not ducking uid " + this.mCallingUid + " - old SDK");
                         } else {
                             handled = mFocusController.duckPlayers(fr, this);
                         }

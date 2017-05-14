@@ -146,7 +146,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     }
 
     /**
-     * Give a job to this context for execution. Callers must first check {@link #getRunningJob()}
+     * Give a job to this context for execution. Callers must first check {@link #getRunningJobLocked()}
      * and ensure it is null to make sure this is a valid context.
      * @param job The status of the job that we are going to run.
      * @return True if the job is valid and is running. False if the job cannot be executed.
@@ -210,23 +210,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
 
     /**
      * Used externally to query the running job. Will return null if there is no job running.
-     * Be careful when using this function, at any moment it's possible that the job returned may
-     * stop executing.
      */
-    JobStatus getRunningJob() {
-        final JobStatus job;
-        synchronized (mLock) {
-            job = mRunningJob;
-        }
-        return job == null ? null : new JobStatus(job);
-    }
-
-    /**
-     * Internal non-cloning inspection of the currently running job, if any.  The lock
-     * must be held when calling this *and* for the entire lifetime of using its returned
-     * JobStatus object!
-     */
-    JobStatus getRunningJobUnsafeLocked() {
+    JobStatus getRunningJobLocked() {
         return mRunningJob;
     }
 
@@ -256,7 +241,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     }
 
     boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId) {
-        final JobStatus executing = getRunningJob();
+        final JobStatus executing = getRunningJobLocked();
         if (executing != null && (userId == UserHandle.USER_ALL || userId == executing.getUserId())
                 && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
                 && (!matchJobId || jobId == executing.getJobId())) {

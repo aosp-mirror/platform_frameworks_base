@@ -3058,13 +3058,6 @@ public class DevicePolicyManager {
      */
     public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1;
 
-    /**
-     * Instead use {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
-     * @removed
-     */
-    @Deprecated
-    public static final int FLAG_EVICT_CE_KEY = 1;
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag=true, value={FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY})

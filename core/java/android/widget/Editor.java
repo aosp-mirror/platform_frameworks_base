@@ -2016,7 +2016,7 @@ public class Editor {
     /**
      * Asynchronously invalidates an action mode using the TextClassifier.
      */
-    private void invalidateActionModeAsync() {
+    void invalidateActionModeAsync() {
         getSelectionActionModeHelper().invalidateActionModeAsync();
     }
 
@@ -3925,6 +3925,8 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            getSelectionActionModeHelper().onSelectionAction();
+
             if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
                 return true;
             }

@@ -169,7 +169,8 @@ public abstract class ActivityManagerInternal {
      *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
      *  such as Power Save mode.
      */
-    public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
+    public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
+            IBinder whitelistToken, long duration);
 
     /**
      * Allow DeviceIdleController to tell us about what apps are whitelisted.

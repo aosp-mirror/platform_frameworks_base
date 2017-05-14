@@ -4365,7 +4365,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                     }
                                     addWidgetLocked(id);
                                 }
-                                if (id.provider.info != null) {
+                                if (id.provider != null && id.provider.info != null) {
                                     stashProviderRestoreUpdateLocked(id.provider,
                                             restoredId, id.appWidgetId);
                                 } else {

@@ -16,23 +16,18 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v4.view.ViewCompat;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.widget.TextView;
-import com.android.settingslib.accessibility.LinkAccessibilityHelper;
+
 /**
- * Copied from setup wizard. This TextView performs two functions. The first is to make it so the
- * link behaves properly and becomes clickable. The second is that it makes the link visible to
- * accessibility services.
+ * Copied from setup wizard. This TextView performed two functions. The first is to make it so the
+ * link behaves properly and becomes clickable. The second was that it made the link visible to
+ * accessibility services, but from O forward support for links is provided natively.
  */
 public class LinkTextView extends TextView {
-
-    private LinkAccessibilityHelper mAccessibilityHelper;
 
     public LinkTextView(Context context) {
         this(context, null);
@@ -40,8 +35,6 @@ public class LinkTextView extends TextView {
 
     public LinkTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mAccessibilityHelper = new LinkAccessibilityHelper(this);
-        ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper);
     }
 
     @Override
@@ -54,13 +47,5 @@ public class LinkTextView extends TextView {
                 setMovementMethod(LinkMovementMethod.getInstance());
             }
         }
-    }
-
-    @Override
-    protected boolean dispatchHoverEvent(@NonNull MotionEvent event) {
-        if (mAccessibilityHelper.dispatchHoverEvent(event)) {
-            return true;
-        }
-        return super.dispatchHoverEvent(event);
     }
 }

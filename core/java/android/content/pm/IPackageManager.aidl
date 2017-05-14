@@ -656,6 +656,8 @@ interface IPackageManager {
 
     void deletePreloadsFileCache();
 
+    ComponentName getInstantAppResolverComponent();
+
     ComponentName getInstantAppResolverSettingsComponent();
 
     ComponentName getInstantAppInstallerComponent();

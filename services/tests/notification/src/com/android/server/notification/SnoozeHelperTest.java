@@ -27,11 +27,9 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Slog;
@@ -51,7 +49,7 @@ import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class SnoozeHelperTest {
+public class SnoozeHelperTest extends NotificationTestCase {
     private static final String TEST_CHANNEL_ID = "test_channel_id";
 
     @Mock SnoozeHelper.Callback mCallback;
@@ -59,10 +57,6 @@ public class SnoozeHelperTest {
     @Mock ManagedServices.UserProfiles mUserProfiles;
 
     private SnoozeHelper mSnoozeHelper;
-
-    private Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
 
     @Before
     public void setUp() {

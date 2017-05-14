@@ -16,6 +16,7 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 
@@ -98,14 +99,6 @@ public final class AutofillManager {
 
     static final String SESSION_ID_TAG = "android:sessionId";
     static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
-
-    /**
-     * @deprecated Use {@link android.service.autofill.FillRequest#FLAG_MANUAL_REQUEST}
-     * @hide
-     */
-    // TODO(b/37563972): remove (and change value of private flags)
-    @Deprecated
-    public static final int FLAG_MANUAL_REQUEST = 0x1;
 
     /** @hide */ public static final int ACTION_START_SESSION = 1;
     /** @hide */ public static final int ACTION_VIEW_ENTERED =  2;
@@ -811,9 +804,26 @@ public final class AutofillManager {
                     + ", value=" + value + ", action=" + action + ", flags=" + flags);
         }
 
+        boolean restartIfNecessary = (flags & FLAG_MANUAL_REQUEST) != 0;
+
         try {
-            mService.updateSession(mSessionId, id, bounds, value, action, flags,
-                    mContext.getUserId());
+            if (restartIfNecessary) {
+                final int newId = mService.updateOrRestartSession(mContext.getActivityToken(),
+                        mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
+                        mCallback != null, flags, mContext.getOpPackageName(), mSessionId, action);
+                if (newId != mSessionId) {
+                    if (sDebug) Log.d(TAG, "Session restarted: " + mSessionId + "=>" + newId);
+                    mSessionId = newId;
+                    final AutofillClient client = getClientLocked();
+                    if (client != null) {
+                        client.autofillCallbackResetableStateAvailable();
+                    }
+                }
+            } else {
+                mService.updateSession(mSessionId, id, bounds, value, action, flags,
+                        mContext.getUserId());
+            }
+
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

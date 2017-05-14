@@ -987,6 +987,15 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
+    public int installExistingPackage(String packageName, int installReason)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
         throw new UnsupportedOperationException();

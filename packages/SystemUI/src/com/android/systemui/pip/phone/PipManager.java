@@ -73,7 +73,8 @@ public class PipManager implements BasePipManager {
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
             mMenuController.onActivityPinned();
-            mNotificationController.onActivityPinned(packageName);
+            mNotificationController.onActivityPinned(packageName,
+                    true /* deferUntilAnimationEnds */);
 
             SystemServicesProxy.getInstance(mContext).setPipVisibility(true);
         }
@@ -104,6 +105,7 @@ public class PipManager implements BasePipManager {
             mTouchHandler.setTouchEnabled(true);
             mTouchHandler.onPinnedStackAnimationEnded();
             mMenuController.onPinnedStackAnimationEnded();
+            mNotificationController.onPinnedStackAnimationEnded();
         }
 
         @Override

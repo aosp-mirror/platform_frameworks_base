@@ -222,6 +222,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                                 getApplicationContext()).onActionEnd(
                                 LatencyTracker.ACTION_TOGGLE_RECENTS));
                     }
+                    DejankUtils.postAfterTraversal(() -> {
+                        Recents.getTaskLoader().startLoader(RecentsActivity.this);
+                        Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(true);
+                    });
                     return true;
                 }
             };
@@ -378,8 +382,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mRecentsView.onStart();
         // Notify of the next draw
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
-
-        Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(true);
     }
 
     @Override

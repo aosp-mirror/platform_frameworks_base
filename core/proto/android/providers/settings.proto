@@ -503,6 +503,7 @@ message SecureSettingsProto {
     SettingProto demo_user_setup_complete = 165;
     SettingProto instant_apps_enabled = 166;
     SettingProto device_paired = 167;
+    SettingProto notification_badging = 168;
 }
 
 message SystemSettingsProto {

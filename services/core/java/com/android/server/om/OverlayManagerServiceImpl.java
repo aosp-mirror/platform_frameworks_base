@@ -68,15 +68,15 @@ final class OverlayManagerServiceImpl {
         mListener = listener;
     }
 
-    /*
-     * Call this when switching to a new Android user. Will return a list of
-     * target packages that must refresh their overlays. This list is the union
+    /**
+     * Call this to synchronize the Settings for a user with what PackageManager knows about a user.
+     * Returns a list of target packages that must refresh their overlays. This list is the union
      * of two sets: the set of targets with currently active overlays, and the
      * set of targets that had, but no longer have, active overlays.
      */
-    List<String> onSwitchUser(final int newUserId) {
+    ArrayList<String> updateOverlaysForUser(final int newUserId) {
         if (DEBUG) {
-            Slog.d(TAG, "onSwitchUser newUserId=" + newUserId);
+            Slog.d(TAG, "updateOverlaysForUser newUserId=" + newUserId);
         }
 
         final Set<String> packagesToUpdateAssets = new ArraySet<>();

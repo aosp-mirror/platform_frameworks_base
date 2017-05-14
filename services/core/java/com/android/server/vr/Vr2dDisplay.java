@@ -123,19 +123,14 @@ class Vr2dDisplay {
      * Creates and Destroys the virtual display depending on the current state of VrMode.
      */
     private void updateVirtualDisplay() {
-        boolean createVirtualDisplay = "true".equals(SystemProperties.get("vr_virtualdisplay"));
         if (DEBUG) {
-            Log.i(TAG, "isVrMode: " + mIsVrModeEnabled + ", createVD: " + createVirtualDisplay +
-                    ", override: " + mIsVrModeOverrideEnabled);
+            Log.i(TAG, "isVrMode: " + mIsVrModeEnabled + ", override: " + mIsVrModeOverrideEnabled);
         }
 
-        if (mIsVrModeEnabled || (createVirtualDisplay && mIsVrModeOverrideEnabled)) {
+        if (mIsVrModeEnabled || mIsVrModeOverrideEnabled) {
             // TODO: Consider not creating the display until ActivityManager needs one on
             // which to display a 2D application.
-            // TODO: STOPSHIP Remove createVirtualDisplay conditional before launching.
-            if (createVirtualDisplay) {
-                startVirtualDisplay();
-            }
+            startVirtualDisplay();
         } else {
             // Stop virtual display to test exit condition
             stopVirtualDisplay();
@@ -150,9 +145,7 @@ class Vr2dDisplay {
      * @param context The context.
      */
     private void startDebugOnlyBroadcastReceiver(Context context) {
-        // STOPSHIP: remove vr_debug_vd_receiver test.
-        boolean debugBroadcast = "true".equals(SystemProperties.get("vr_debug_vd_receiver"));
-        if (DEBUG || debugBroadcast) {
+        if (DEBUG) {
             IntentFilter intentFilter = new IntentFilter(DEBUG_ACTION_SET_MODE);
             intentFilter.addAction(DEBUG_ACTION_SET_SURFACE);
 
@@ -203,18 +196,20 @@ class Vr2dDisplay {
     public void setVirtualDisplayProperties(Vr2dDisplayProperties compatDisplayProperties) {
         synchronized(mVdLock) {
             if (DEBUG) {
-                Log.i(TAG, "VD setVirtualDisplayProperties: res = " +
-                        compatDisplayProperties.getWidth() + "X" + compatDisplayProperties.getHeight() +
-                        ", dpi = " + compatDisplayProperties.getDpi());
+                Log.i(TAG, "VD setVirtualDisplayProperties: res = "
+                        + compatDisplayProperties.getWidth() + "X"
+                        + compatDisplayProperties.getHeight() + ", dpi = "
+                        + compatDisplayProperties.getDpi());
             }
 
             if (compatDisplayProperties.getWidth() < MIN_VR_DISPLAY_WIDTH ||
                 compatDisplayProperties.getHeight() < MIN_VR_DISPLAY_HEIGHT ||
                 compatDisplayProperties.getDpi() < MIN_VR_DISPLAY_DPI) {
                 throw new IllegalArgumentException (
-                        "Illegal argument: height, width, dpi cannot be negative. res = " +
-                        compatDisplayProperties.getWidth() + "X" + compatDisplayProperties.getHeight() +
-                        ", dpi = " + compatDisplayProperties.getDpi());
+                        "Illegal argument: height, width, dpi cannot be negative. res = "
+                        + compatDisplayProperties.getWidth() + "X"
+                        + compatDisplayProperties.getHeight()
+                        + ", dpi = " + compatDisplayProperties.getDpi());
             }
 
             mVirtualDisplayWidth = compatDisplayProperties.getWidth();

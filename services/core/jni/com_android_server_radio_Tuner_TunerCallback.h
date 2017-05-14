@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_TUNER_TUNERCALLBACK_H
-#define _ANDROID_SERVER_RADIO_TUNER_TUNERCALLBACK_H
+// TODO(b/36863239): rename s/_Tuner_TunerCallback/_TunerCallback/, as this
+// module is no longer a part of Tuner - it's an independent java class.
+#ifndef _ANDROID_SERVER_RADIO_TUNERCALLBACK_H
+#define _ANDROID_SERVER_RADIO_TUNERCALLBACK_H
 
+#include "JavaRef.h"
 #include "NativeCallbackThread.h"
 #include "com_android_server_radio_types.h"
 
@@ -25,50 +28,18 @@
 
 namespace android {
 
-void register_android_server_radio_Tuner_TunerCallback(JavaVM *vm, JNIEnv *env);
+void register_android_server_radio_TunerCallback(JavaVM *vm, JNIEnv *env);
 
 namespace server {
 namespace radio {
-namespace Tuner {
+namespace TunerCallback {
 
-class TunerCallback : public hardware::broadcastradio::V1_1::ITunerCallback {
-    jobject mTuner;
-    jobject mClientCallback;
-    NativeCallbackThread mCallbackThread;
-    HalRevision mHalRev;
+sp<hardware::broadcastradio::V1_1::ITunerCallback>
+getNativeCallback(JNIEnv *env, jobject jTunerCallback);
 
-    DISALLOW_COPY_AND_ASSIGN(TunerCallback);
-
-public:
-    TunerCallback(JNIEnv *env, jobject tuner, jobject clientCallback, HalRevision halRev);
-    virtual ~TunerCallback();
-
-    void detach();
-
-    virtual hardware::Return<void> hardwareFailure();
-    virtual hardware::Return<void> configChange(hardware::broadcastradio::V1_0::Result result,
-            const hardware::broadcastradio::V1_0::BandConfig& config);
-    virtual hardware::Return<void> tuneComplete(hardware::broadcastradio::V1_0::Result result,
-            const hardware::broadcastradio::V1_0::ProgramInfo& info);
-    virtual hardware::Return<void> afSwitch(
-            const hardware::broadcastradio::V1_0::ProgramInfo& info);
-    virtual hardware::Return<void> antennaStateChange(bool connected);
-    virtual hardware::Return<void> trafficAnnouncement(bool active);
-    virtual hardware::Return<void> emergencyAnnouncement(bool active);
-    virtual hardware::Return<void> newMetadata(uint32_t channel, uint32_t subChannel,
-            const hardware::hidl_vec<hardware::broadcastradio::V1_0::MetaData>& metadata);
-    virtual hardware::Return<void> tuneComplete_1_1(hardware::broadcastradio::V1_0::Result result,
-            const hardware::broadcastradio::V1_1::ProgramInfo& info);
-    virtual hardware::Return<void> afSwitch_1_1(const hardware::broadcastradio::V1_1::ProgramInfo& info);
-    virtual hardware::Return<void> backgroundScanAvailable(bool isAvailable);
-    virtual hardware::Return<void> backgroundScanComplete(
-            hardware::broadcastradio::V1_1::ProgramListResult result);
-    virtual hardware::Return<void> programListChanged();
-};
-
-} // namespace Tuner
+} // namespace TunerCallback
 } // namespace radio
 } // namespace server
 } // namespace android
 
-#endif // _ANDROID_SERVER_RADIO_TUNER_TUNERCALLBACK_H
+#endif // _ANDROID_SERVER_RADIO_TUNERCALLBACK_H

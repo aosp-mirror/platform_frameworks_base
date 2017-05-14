@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="email" msgid="4560673117055050403">"電郵"</string>
     <string name="dial" msgid="4204975095406423102">"撥打電話"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"地圖"</string>
+    <string name="browse" msgid="6993590095938149861">"瀏覽器"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確認裝置有 250 MB 的可用空間，然後重新啟動。"</string>
@@ -1618,40 +1616,40 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由您的管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"為延長電池壽命，省電模式會降低裝置效能，並限制震動、位置資訊服務及大部分背景數據傳輸。如電郵、短訊及其他使用同步功能的應用程式沒有開啟，便不會自動更新。\n\n裝置充電時，省電模式會自動關閉。"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式雖可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"要啟用數據節省程式嗎？"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">需時 %1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="other">需時 %1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 分鐘 (直至<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 分鐘 (直至<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">需時 %1$d 小時 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 小時 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 小時 (直至<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 小時 (直至<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">需時 %1$d 小時 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 小時 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 小時 (直至<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 小時 (直至<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">需時 %d 分鐘</item>
-      <item quantity="one">需時 1 分鐘</item>
+      <item quantity="other">%d 分鐘</item>
+      <item quantity="one">1 分鐘</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="other">需時 %d 分鐘</item>
-      <item quantity="one">需時 1 分鐘</item>
+      <item quantity="other">%d 分鐘</item>
+      <item quantity="one">1 分鐘</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">需時 %d 小時</item>
-      <item quantity="one">需時 1 小時</item>
+      <item quantity="other">%d 小時</item>
+      <item quantity="one">1 小時</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">需時 %d 小時</item>
-      <item quantity="one">需時 1 小時</item>
+      <item quantity="other">%d 小時</item>
+      <item quantity="one">1 小時</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"完成時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"直至<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (下一次響鬧)"</string>
@@ -1689,7 +1687,7 @@
       <item quantity="other">已選取 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目</item>
       <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"其他"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"未分類"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"您可以設定這些通知的重要性。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"列為重要的原因：涉及的人。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
@@ -1748,6 +1746,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"自動填入選項"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"儲存資料，方便您自動填入"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"無法自動填入內容"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"冇任何自動填入建議"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> 個自動填入建議</item>
+      <item quantity="one">一個自動填入建議</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"要儲存至「&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;」嗎？"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;」嗎？"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;」嗎？"</string>

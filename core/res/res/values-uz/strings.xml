@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Matn yozish"</string>
     <string name="email" msgid="4560673117055050403">"E-pochta"</string>
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"Xaritalar"</string>
+    <string name="browse" msgid="6993590095938149861">"Brauzer"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Xotirada bo‘sh joy tugamoqda"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>
@@ -1690,7 +1688,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta tanlandi</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta tanlandi</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"Boshqa"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Turkumlanmagan"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Siz ushbu bildirishnomalarning muhimligini belgilagansiz."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Bu odamlar siz uchun muhim."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
@@ -1749,6 +1747,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Avtomatik to‘ldirish parametrlari"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Avtomatik to‘ldirish xizmatiga saqlash"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Avtomatik to‘ldirib bo‘lmaydi"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Avtomatik to‘ldirishga oid takliflar yo‘q"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other">Avtomatik to‘ldirishga oid <xliff:g id="COUNT">%1$s</xliff:g> ta taklif</item>
+      <item quantity="one">Avtomatik to‘ldirishga oid bitta taklif</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>

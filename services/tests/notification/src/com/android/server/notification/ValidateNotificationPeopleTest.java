@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ValidateNotificationPeopleTest {
+public class ValidateNotificationPeopleTest extends NotificationTestCase {
 
     @Test
     public void testNoExtra() throws Exception {

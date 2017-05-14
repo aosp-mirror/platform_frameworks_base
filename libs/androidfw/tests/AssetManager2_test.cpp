@@ -264,7 +264,7 @@ TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
 
   const ResolvedBag* bag_two = assetmanager.GetBag(app::R::style::StyleTwo);
   ASSERT_NE(nullptr, bag_two);
-  ASSERT_EQ(5u, bag_two->entry_count);
+  ASSERT_EQ(6u, bag_two->entry_count);
 
   // attr_one is inherited from StyleOne.
   EXPECT_EQ(app::R::attr::attr_one, bag_two->entries[0].key);
@@ -295,6 +295,11 @@ TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
   EXPECT_EQ(Res_value::TYPE_INT_DEC, bag_two->entries[4].value.dataType);
   EXPECT_EQ(3u, bag_two->entries[4].value.data);
   EXPECT_EQ(0, bag_two->entries[4].cookie);
+
+  EXPECT_EQ(app::R::attr::attr_empty, bag_two->entries[5].key);
+  EXPECT_EQ(Res_value::TYPE_NULL, bag_two->entries[5].value.dataType);
+  EXPECT_EQ(Res_value::DATA_NULL_EMPTY, bag_two->entries[5].value.data);
+  EXPECT_EQ(0, bag_two->entries[5].cookie);
 }
 
 TEST_F(AssetManager2Test, ResolveReferenceToResource) {

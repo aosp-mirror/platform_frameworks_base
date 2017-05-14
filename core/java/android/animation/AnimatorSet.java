@@ -28,6 +28,7 @@ import android.view.animation.Animation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -1341,15 +1342,16 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         // One problem is that the old node dependencies point to nodes in the old AnimatorSet.
         // We need to track the old/new nodes in order to reconstruct the dependencies in the clone.
 
+        HashMap<Node, Node> clonesMap = new HashMap<>(nodeCount);
         for (int n = 0; n < nodeCount; n++) {
             final Node node = mNodes.get(n);
             Node nodeClone = node.clone();
-            node.mTmpClone = nodeClone;
+            clonesMap.put(node, nodeClone);
             anim.mNodes.add(nodeClone);
             anim.mNodeMap.put(nodeClone.mAnimation, nodeClone);
         }
 
-        anim.mRootNode = mRootNode.mTmpClone;
+        anim.mRootNode = clonesMap.get(mRootNode);
         anim.mDelayAnim = (ValueAnimator) anim.mRootNode.mAnimation;
 
         // Now that we've cloned all of the nodes, we're ready to walk through their
@@ -1357,24 +1359,21 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         for (int i = 0; i < nodeCount; i++) {
             Node node = mNodes.get(i);
             // Update dependencies for node's clone
-            node.mTmpClone.mLatestParent = node.mLatestParent == null ?
-                    null : node.mLatestParent.mTmpClone;
+            Node nodeClone = clonesMap.get(node);
+            nodeClone.mLatestParent = node.mLatestParent == null
+                    ? null : clonesMap.get(node.mLatestParent);
             int size = node.mChildNodes == null ? 0 : node.mChildNodes.size();
             for (int j = 0; j < size; j++) {
-                node.mTmpClone.mChildNodes.set(j, node.mChildNodes.get(j).mTmpClone);
+                nodeClone.mChildNodes.set(j, clonesMap.get(node.mChildNodes.get(j)));
             }
             size = node.mSiblings == null ? 0 : node.mSiblings.size();
             for (int j = 0; j < size; j++) {
-                node.mTmpClone.mSiblings.set(j, node.mSiblings.get(j).mTmpClone);
+                nodeClone.mSiblings.set(j, clonesMap.get(node.mSiblings.get(j)));
             }
             size = node.mParents == null ? 0 : node.mParents.size();
             for (int j = 0; j < size; j++) {
-                node.mTmpClone.mParents.set(j, node.mParents.get(j).mTmpClone);
+                nodeClone.mParents.set(j, clonesMap.get(node.mParents.get(j)));
             }
-        }
-
-        for (int n = 0; n < nodeCount; n++) {
-            mNodes.get(n).mTmpClone = null;
         }
         return anim;
     }
@@ -1746,11 +1745,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
          * after current node.
          */
         ArrayList<Node> mChildNodes = null;
-
-        /**
-         * Temporary field to hold the clone in AnimatorSet#clone. Cleaned after clone is complete
-         */
-        private Node mTmpClone = null;
 
         /**
          * Flag indicating whether the animation in this node is finished. This flag

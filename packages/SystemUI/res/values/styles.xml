@@ -290,7 +290,14 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings" />
+    <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+        <item name="lightIconTheme">@style/DualToneLightTheme</item>
+        <item name="darkIconTheme">@style/DualToneDarkTheme</item>
+    </style>
+    <style name="qs_theme" parent="systemui_theme">
+        <item name="lightIconTheme">@style/QSIconTheme</item>
+        <item name="darkIconTheme">@style/QSIconTheme</item>
+    </style>
 
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
@@ -345,6 +352,11 @@
         <item name="backgroundColor">@color/dark_mode_icon_color_dual_tone_background</item>
         <item name="fillColor">@color/dark_mode_icon_color_dual_tone_fill</item>
         <item name="singleToneColor">@color/dark_mode_icon_color_single_tone</item>
+    </style>
+    <style name="QSIconTheme">
+        <item name="backgroundColor">?android:attr/textColorHint</item>
+        <item name="fillColor">?android:attr/textColorPrimary</item>
+        <item name="singleToneColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Volume">

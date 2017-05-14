@@ -19,6 +19,7 @@ package android.os;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -900,6 +901,20 @@ public class UserManager {
     public String getUserName() {
         try {
             return mService.getUserInfo(getUserHandle()).name;
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether user name has been set.
+     * <p>This method can be used to check that the value returned by {@link #getUserName()} was
+     * set by the user and is not a placeholder string provided by the system.
+     * @hide
+     */
+    public boolean isUserNameSet() {
+        try {
+            return mService.isUserNameSet(getUserHandle());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2115,7 +2130,7 @@ public class UserManager {
      * @return the list of users that were created.
      * @hide
      */
-    public List<UserInfo> getUsers(boolean excludeDying) {
+    public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         try {
             return mService.getUsers(excludeDying);
         } catch (RemoteException re) {

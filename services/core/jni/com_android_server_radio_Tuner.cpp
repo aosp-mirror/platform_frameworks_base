@@ -50,6 +50,7 @@ static struct {
     struct {
         jfieldID nativeContext;
         jfieldID region;
+        jfieldID tunerCallback;
     } Tuner;
 } gjni;
 
@@ -59,7 +60,6 @@ struct TunerContext {
     HalRevision mHalRev;
     sp<V1_0::ITuner> mHalTuner;
     sp<V1_1::ITuner> mHalTuner11;
-    sp<TunerCallback> mNativeCallback;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(TunerContext);
@@ -74,17 +74,16 @@ static TunerContext& getNativeContext(jlong nativeContextHandle) {
 /**
  * Always lock gContextMutex when using native context.
  */
-static TunerContext& getNativeContext(JNIEnv *env, jobject obj) {
-    return getNativeContext(env->GetLongField(obj, gjni.Tuner.nativeContext));
+static TunerContext& getNativeContext(JNIEnv *env, JavaRef<jobject> const &jTuner) {
+    return getNativeContext(env->GetLongField(jTuner.get(), gjni.Tuner.nativeContext));
 }
 
-static jlong nativeInit(JNIEnv *env, jobject obj, jobject clientCallback, jint halRev) {
+static jlong nativeInit(JNIEnv *env, jobject obj, jint halRev) {
     ALOGV("nativeInit()");
     AutoMutex _l(gContextMutex);
 
     auto ctx = new TunerContext();
     ctx->mHalRev = static_cast<HalRevision>(halRev);
-    ctx->mNativeCallback = new TunerCallback(env, obj, clientCallback, ctx->mHalRev);
 
     static_assert(sizeof(jlong) >= sizeof(ctx), "jlong is smaller than a pointer");
     return reinterpret_cast<jlong>(ctx);
@@ -98,12 +97,12 @@ static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
     delete ctx;
 }
 
-void setHalTuner(JNIEnv *env, jobject obj, sp<V1_0::ITuner> halTuner) {
+void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> halTuner) {
     ALOGV("setHalTuner(%p)", halTuner.get());
     ALOGE_IF(halTuner == nullptr, "HAL tuner is a nullptr");
 
     AutoMutex _l(gContextMutex);
-    auto& ctx = getNativeContext(env, obj);
+    auto& ctx = getNativeContext(env, jTuner);
 
     ctx.mHalTuner = halTuner;
     ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
@@ -114,21 +113,18 @@ void setHalTuner(JNIEnv *env, jobject obj, sp<V1_0::ITuner> halTuner) {
 sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
     AutoMutex _l(gContextMutex);
     auto tuner = getNativeContext(nativeContext).mHalTuner;
-    LOG_ALWAYS_FATAL_IF(tuner == nullptr, "HAL tuner not set");
+    LOG_ALWAYS_FATAL_IF(tuner == nullptr, "HAL tuner is not open");
     return tuner;
 }
 
 sp<V1_1::ITuner> getHalTuner11(jlong nativeContext) {
     AutoMutex _l(gContextMutex);
-    auto tuner = getNativeContext(nativeContext).mHalTuner11;
-    LOG_ALWAYS_FATAL_IF(tuner == nullptr, "HAL tuner not set");
-    return tuner;
+    return getNativeContext(nativeContext).mHalTuner11;
 }
 
-sp<ITunerCallback> getNativeCallback(JNIEnv *env, jobject obj) {
-    AutoMutex _l(gContextMutex);
-    auto& ctx = getNativeContext(env, obj);
-    return ctx.mNativeCallback;
+sp<ITunerCallback> getNativeCallback(JNIEnv *env, JavaRef<jobject> const &tuner) {
+    return TunerCallback::getNativeCallback(env,
+            env->GetObjectField(tuner.get(), gjni.Tuner.tunerCallback));
 }
 
 Region getRegion(JNIEnv *env, jobject obj) {
@@ -138,16 +134,16 @@ Region getRegion(JNIEnv *env, jobject obj) {
 static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
+    if (ctx.mHalTuner == nullptr) return;
     ALOGI("Closing tuner %p", ctx.mHalTuner.get());
-    ctx.mNativeCallback->detach();
     ctx.mHalTuner11 = nullptr;
     ctx.mHalTuner = nullptr;
-    ctx.mNativeCallback = nullptr;
 }
 
 static void nativeSetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext, jobject config) {
     ALOGV("nativeSetConfiguration()");
     auto halTuner = getHalTuner(nativeContext);
+    if (halTuner == nullptr) return;
 
     Region region_unused;
     BandConfig bandConfigHal = convert::BandConfigToHal(env, config, region_unused);
@@ -159,6 +155,7 @@ static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeCont
         Region region) {
     ALOGV("nativeSetConfiguration()");
     auto halTuner = getHalTuner(nativeContext);
+    if (halTuner == nullptr) return nullptr;
 
     BandConfig halConfig;
     Result halResult;
@@ -177,6 +174,7 @@ static void nativeStep(JNIEnv *env, jobject obj, jlong nativeContext,
         bool directionDown, bool skipSubChannel) {
     ALOGV("nativeStep()");
     auto halTuner = getHalTuner(nativeContext);
+    if (halTuner == nullptr) return;
 
     auto dir = convert::DirectionToHal(directionDown);
     convert::ThrowIfFailed(env, halTuner->step(dir, skipSubChannel));
@@ -186,6 +184,7 @@ static void nativeScan(JNIEnv *env, jobject obj, jlong nativeContext,
         bool directionDown, bool skipSubChannel) {
     ALOGV("nativeScan()");
     auto halTuner = getHalTuner(nativeContext);
+    if (halTuner == nullptr) return;
 
     auto dir = convert::DirectionToHal(directionDown);
     convert::ThrowIfFailed(env, halTuner->scan(dir, skipSubChannel));
@@ -195,6 +194,7 @@ static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext,
         jint channel, jint subChannel) {
     ALOGV("nativeTune(%d, %d)", channel, subChannel);
     auto halTuner = getHalTuner(nativeContext);
+    if (halTuner == nullptr) return;
 
     convert::ThrowIfFailed(env, halTuner->tune(channel, subChannel));
 }
@@ -202,6 +202,7 @@ static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext,
 static void nativeCancel(JNIEnv *env, jobject obj, jlong nativeContext) {
     ALOGV("nativeCancel()");
     auto halTuner = getHalTuner(nativeContext);
+    if (halTuner == nullptr) return;
 
     convert::ThrowIfFailed(env, halTuner->cancel());
 }
@@ -210,6 +211,7 @@ static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativ
     ALOGV("nativeGetProgramInformation()");
     auto halTuner10 = getHalTuner(nativeContext);
     auto halTuner11 = getHalTuner11(nativeContext);
+    if (halTuner10 == nullptr) return nullptr;
 
     V1_1::ProgramInfo halInfo;
     Result halResult;
@@ -234,7 +236,7 @@ static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativ
 }
 
 static const JNINativeMethod gTunerMethods[] = {
-    { "nativeInit", "(Landroid/hardware/radio/ITunerCallback;I)J", (void*)nativeInit },
+    { "nativeInit", "(I)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
     { "nativeClose", "(J)V", (void*)nativeClose },
     { "nativeSetConfiguration", "(JLandroid/hardware/radio/RadioManager$BandConfig;)V",
@@ -256,11 +258,13 @@ static const JNINativeMethod gTunerMethods[] = {
 void register_android_server_radio_Tuner(JavaVM *vm, JNIEnv *env) {
     using namespace server::radio::Tuner;
 
-    register_android_server_radio_Tuner_TunerCallback(vm, env);
+    register_android_server_radio_TunerCallback(vm, env);
 
     auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
     gjni.Tuner.nativeContext = GetFieldIDOrDie(env, tunerClass, "mNativeContext", "J");
     gjni.Tuner.region = GetFieldIDOrDie(env, tunerClass, "mRegion", "I");
+    gjni.Tuner.tunerCallback = GetFieldIDOrDie(env, tunerClass, "mTunerCallback",
+            "Lcom/android/server/radio/TunerCallback;");
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/radio/Tuner",
             gTunerMethods, NELEM(gTunerMethods));

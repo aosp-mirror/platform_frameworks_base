@@ -984,10 +984,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ટેક્સ્ટ ક્રિયાઓ"</string>
     <string name="email" msgid="4560673117055050403">"ઇમેઇલ"</string>
     <string name="dial" msgid="4204975095406423102">"ફોન"</string>
-    <!-- no translation found for map (6068210738233985748) -->
-    <skip />
-    <!-- no translation found for browse (6993590095938149861) -->
-    <skip />
+    <string name="map" msgid="6068210738233985748">"નકશા"</string>
+    <string name="browse" msgid="6993590095938149861">"બ્રાઉઝર"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"કેટલાક સિસ્ટમ કાર્યો કામ કરી શકશે નહીં"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"સિસ્ટમ માટે પર્યાપ્ત સ્ટોરેજ નથી. ખાતરી કરો કે તમારી પાસે 250MB ખાલી સ્થાન છે અને ફરીથી પ્રારંભ કરો."</string>
@@ -1690,7 +1688,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> પસંદ કરી</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> પસંદ કરી</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"વિવિધ"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"અવર્ગીકૃત"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"તમે આ સૂચનાઓનું મહત્વ સેટ કર્યું છે."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"શામેલ થયેલ લોકોને કારણે આ મહત્વપૂર્ણ છે."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ને <xliff:g id="ACCOUNT">%2$s</xliff:g> સાથે એક નવા વપરાશકર્તાને બનાવવાની મંજૂરી આપીએ?"</string>
@@ -1749,6 +1747,11 @@
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"સ્વતઃભરણના વિકલ્પો"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"સ્વતઃભરણ માટે સાચવો"</string>
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"કન્ટેન્ટ સ્વતઃ ભરી શકાતું નથી"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"સ્વતઃભરણ વિશે કોઈ સૂચન નથી"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="one">સ્વતઃભરણ વિશે <xliff:g id="COUNT">%1$s</xliff:g> સૂચન</item>
+      <item quantity="other">સ્વતઃભરણ વિશે <xliff:g id="COUNT">%1$s</xliff:g> સૂચન</item>
+    </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;માં સાચવીએ?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>ને &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;માં સાચવીએ?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> અને <xliff:g id="TYPE_1">%2$s</xliff:g>ને &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;માં સાચવીએ?"</string>

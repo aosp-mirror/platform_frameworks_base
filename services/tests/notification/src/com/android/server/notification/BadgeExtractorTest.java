@@ -18,20 +18,19 @@ package com.android.server.notification;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
+
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.os.UserHandle;
+import android.provider.Settings.Secure;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -43,7 +42,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class BadgeExtractorTest {
+public class BadgeExtractorTest extends NotificationTestCase {
 
     @Mock RankingConfig mConfig;
 
@@ -59,7 +58,11 @@ public class BadgeExtractorTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    private NotificationRecord getNotificationRecord(NotificationChannel channel) {
+    private NotificationRecord getNotificationRecord(boolean showBadge, int importanceHigh) {
+        NotificationChannel channel = new NotificationChannel("a", "a", importanceHigh);
+        channel.setShowBadge(showBadge);
+        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
+
         final Builder builder = new Builder(getContext())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -73,10 +76,6 @@ public class BadgeExtractorTest {
         return r;
     }
 
-    private Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
-
     //
     // Tests
     //
@@ -86,13 +85,9 @@ public class BadgeExtractorTest {
         BadgeExtractor extractor = new BadgeExtractor();
         extractor.setConfig(mConfig);
 
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
         when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
-        NotificationChannel channel =
-                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
-        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
-        channel.setShowBadge(false);
-
-        NotificationRecord r = getNotificationRecord(channel);
+        NotificationRecord r = getNotificationRecord(false, IMPORTANCE_UNSPECIFIED);
 
         extractor.process(r);
 
@@ -104,13 +99,9 @@ public class BadgeExtractorTest {
         BadgeExtractor extractor = new BadgeExtractor();
         extractor.setConfig(mConfig);
 
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
         when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(false);
-        NotificationChannel channel =
-                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_HIGH);
-        channel.setShowBadge(true);
-        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
-
-        NotificationRecord r = getNotificationRecord(channel);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_HIGH);
 
         extractor.process(r);
 
@@ -122,13 +113,9 @@ public class BadgeExtractorTest {
         BadgeExtractor extractor = new BadgeExtractor();
         extractor.setConfig(mConfig);
 
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
         when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
-        NotificationChannel channel =
-                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
-        channel.setShowBadge(true);
-        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
-
-        NotificationRecord r = getNotificationRecord(channel);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
 
         extractor.process(r);
 
@@ -140,13 +127,23 @@ public class BadgeExtractorTest {
         BadgeExtractor extractor = new BadgeExtractor();
         extractor.setConfig(mConfig);
 
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
         when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(false);
-        NotificationChannel channel =
-                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
-        channel.setShowBadge(false);
-        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
+        NotificationRecord r = getNotificationRecord(false, IMPORTANCE_UNSPECIFIED);
 
-        NotificationRecord r = getNotificationRecord(channel);
+        extractor.process(r);
+
+        assertFalse(r.canShowBadge());
+    }
+
+    @Test
+    public void testAppYesChannelYesUserNo() throws Exception {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.badgingEnabled(mUser)).thenReturn(false);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_HIGH);
 
         extractor.process(r);
 

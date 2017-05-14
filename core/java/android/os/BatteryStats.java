@@ -203,6 +203,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String APK_DATA = "apk";
     private static final String PROCESS_DATA = "pr";
     private static final String CPU_DATA = "cpu";
+    private static final String GLOBAL_CPU_FREQ_DATA = "gcf";
+    private static final String CPU_TIMES_AT_FREQ_DATA = "ctf";
     private static final String SENSOR_DATA = "sr";
     private static final String VIBRATOR_DATA = "vib";
     private static final String FOREGROUND_DATA = "fg";
@@ -265,6 +267,13 @@ public abstract class BatteryStats implements Parcelable {
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
 
     /**
+     * Indicates times spent by the uid at each cpu frequency in all process states.
+     *
+     * Other types might include times spent in foreground, background etc.
+     */
+    private final String UID_TIMES_TYPE_ALL = "A";
+
+    /**
      * State for keeping track of counting information.
      */
     public static abstract class Counter {
@@ -295,6 +304,24 @@ public abstract class BatteryStats implements Parcelable {
          * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          */
         public abstract long getCountLocked(int which);
+
+        /**
+         * Temporary for debugging.
+         */
+        public abstract void logState(Printer pw, String prefix);
+    }
+
+    /**
+     * State for keeping track of array of long counting information.
+     */
+    public static abstract class LongCounterArray {
+        /**
+         * Returns the counts associated with this Counter for the
+         * selected type of statistics.
+         *
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
+         */
+        public abstract long[] getCountsLocked(int which);
 
         /**
          * Temporary for debugging.
@@ -522,6 +549,9 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getBluetoothScanTimer();
         public abstract Timer getBluetoothScanBackgroundTimer();
         public abstract Counter getBluetoothScanResultCounter();
+
+        public abstract long[] getCpuFreqTimes(int which);
+        public abstract long[] getScreenOffCpuFreqTimes(int which);
 
         // Note: the following times are disjoint.  They can be added together to find the
         // total time a uid has had any processes running at all.
@@ -1076,6 +1106,8 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getNextMinDailyDeadline();
 
     public abstract long getNextMaxDailyDeadline();
+
+    public abstract long[] getCpuFreqs();
 
     public final static class HistoryTag {
         public String string;
@@ -3277,6 +3309,15 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
+        final long[] cpuFreqs = getCpuFreqs();
+        if (cpuFreqs != null) {
+            sb.setLength(0);
+            for (int i = 0; i < cpuFreqs.length; ++i) {
+                sb.append((i == 0 ? "" : ",") + cpuFreqs[i]);
+            }
+            dumpLine(pw, 0 /* uid */, category, GLOBAL_CPU_FREQ_DATA, sb.toString());
+        }
+
         for (int iu = 0; iu < NU; iu++) {
             final int uid = uidStats.keyAt(iu);
             if (reqUid >= 0 && uid != reqUid) {
@@ -3507,6 +3548,27 @@ public abstract class BatteryStats implements Parcelable {
             if (userCpuTimeUs > 0 || systemCpuTimeUs > 0) {
                 dumpLine(pw, uid, category, CPU_DATA, userCpuTimeUs / 1000, systemCpuTimeUs / 1000,
                         0 /* old cpu power, keep for compatibility */);
+            }
+
+            final long[] cpuFreqTimeMs = u.getCpuFreqTimes(which);
+            // If total cpuFreqTimes is null, then we don't need to check for screenOffCpuFreqTimes.
+            if (cpuFreqTimeMs != null) {
+                sb.setLength(0);
+                for (int i = 0; i < cpuFreqTimeMs.length; ++i) {
+                    sb.append((i == 0 ? "" : ",") + cpuFreqTimeMs[i]);
+                }
+                final long[] screenOffCpuFreqTimeMs = u.getScreenOffCpuFreqTimes(which);
+                if (screenOffCpuFreqTimeMs != null) {
+                    for (int i = 0; i < screenOffCpuFreqTimeMs.length; ++i) {
+                        sb.append("," + screenOffCpuFreqTimeMs[i]);
+                    }
+                } else {
+                    for (int i = 0; i < cpuFreqTimeMs.length; ++i) {
+                        sb.append(",0");
+                    }
+                }
+                dumpLine(pw, uid, category, CPU_TIMES_AT_FREQ_DATA, UID_TIMES_TYPE_ALL,
+                        cpuFreqTimeMs.length, sb.toString());
             }
 
             final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats
@@ -4376,6 +4438,16 @@ public abstract class BatteryStats implements Parcelable {
             pw.println(sb.toString());
         }
 
+        final long[] cpuFreqs = getCpuFreqs();
+        if (cpuFreqs != null) {
+            sb.setLength(0);
+            sb.append("CPU freqs:");
+            for (int i = 0; i < cpuFreqs.length; ++i) {
+                sb.append(" " + cpuFreqs[i]);
+            }
+            pw.println(sb.toString());
+        }
+
         for (int iu=0; iu<NU; iu++) {
             final int uid = uidStats.keyAt(iu);
             if (reqUid >= 0 && uid != reqUid && uid != Process.SYSTEM_UID) {
@@ -4835,6 +4907,25 @@ public abstract class BatteryStats implements Parcelable {
                 formatTimeMs(sb, userCpuTimeUs / 1000);
                 sb.append("s=");
                 formatTimeMs(sb, systemCpuTimeUs / 1000);
+                pw.println(sb.toString());
+            }
+
+            final long[] cpuFreqTimes = u.getCpuFreqTimes(which);
+            if (cpuFreqTimes != null) {
+                sb.setLength(0);
+                sb.append("    Total cpu time per freq:");
+                for (int i = 0; i < cpuFreqTimes.length; ++i) {
+                    sb.append(" " + cpuFreqTimes[i]);
+                }
+                pw.println(sb.toString());
+            }
+            final long[] screenOffCpuFreqTimes = u.getScreenOffCpuFreqTimes(which);
+            if (screenOffCpuFreqTimes != null) {
+                sb.setLength(0);
+                sb.append("    Total screen-off cpu time per freq:");
+                for (int i = 0; i < screenOffCpuFreqTimes.length; ++i) {
+                    sb.append(" " + screenOffCpuFreqTimes[i]);
+                }
                 pw.println(sb.toString());
             }
 

@@ -33,12 +33,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 /** Quick settings tile: Work profile on/off */
 public class WorkModeTile extends QSTileImpl<BooleanState> implements
         ManagedProfileController.Callback {
-    private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_signal_workmode_enable_animation,
-                    R.drawable.ic_signal_workmode_disable);
-    private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_signal_workmode_disable_animation,
-                    R.drawable.ic_signal_workmode_enable);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_signal_workmode_disable);
 
     private final ManagedProfileController mProfileController;
 
@@ -93,6 +88,10 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
+
         if (arg instanceof Boolean) {
             state.value = (Boolean) arg;
         } else {
@@ -100,12 +99,13 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
         }
 
         state.label = mContext.getString(R.string.quick_settings_work_mode_label);
+        state.icon = mIcon;
         if (state.value) {
-            state.icon = mEnable;
+            state.slash.isSlashed = false;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_on);
         } else {
-            state.icon = mDisable;
+            state.slash.isSlashed = true;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_off);
         }

@@ -20,6 +20,7 @@ import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.bundleToString;
 
@@ -170,7 +171,6 @@ public final class AutofillManagerService extends SystemService {
         });
         startTrackingPackageChanges();
     }
-
 
     private void startTrackingPackageChanges() {
         PackageMonitor monitor = new PackageMonitor() {
@@ -334,6 +334,7 @@ public final class AutofillManagerService extends SystemService {
     void listSessions(int userId, IResultReceiver receiver) {
         Slog.i(TAG, "listSessions() for userId " + userId);
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         final Bundle resultData = new Bundle();
         final ArrayList<String> sessions = new ArrayList<>();
 
@@ -363,6 +364,7 @@ public final class AutofillManagerService extends SystemService {
     void reset() {
         Slog.i(TAG, "reset()");
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         synchronized (mLock) {
             final int size = mServicesCache.size();
             for (int i = 0; i < size; i++) {
@@ -375,6 +377,8 @@ public final class AutofillManagerService extends SystemService {
     // Called by Shell command.
     void setLogLevel(int level) {
         Slog.i(TAG, "setLogLevel(): " + level);
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         boolean debug = false;
         boolean verbose = false;
         if (level == AutofillManager.FLAG_ADD_CLIENT_VERBOSE) {
@@ -390,10 +394,30 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     int getLogLevel() {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
         synchronized (mLock) {
             if (sVerbose) return AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
             if (sDebug) return AutofillManager.FLAG_ADD_CLIENT_DEBUG;
             return 0;
+        }
+    }
+
+    // Called by Shell command.
+    public int getMaxPartitions() {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
+        synchronized (mLock) {
+            return sPartitionMaxCount;
+        }
+    }
+
+    // Called by Shell command.
+    public void setMaxPartitions(int max) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        Slog.i(TAG, "setMaxPartitions(): " + max);
+        synchronized (mLock) {
+            sPartitionMaxCount = max;
         }
     }
 
@@ -534,15 +558,36 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
-        public void updateSession(int sessionId, AutofillId id, Rect bounds,
+        public void updateSession(int sessionId, AutofillId autoFillId, Rect bounds,
                 AutofillValue value, int action, int flags, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    service.updateSessionLocked(sessionId, getCallingUid(), id, bounds, value,
-                            action, flags);
+                    service.updateSessionLocked(sessionId, getCallingUid(), autoFillId, bounds,
+                            value, action, flags);
                 }
             }
+        }
+
+        @Override
+        public int updateOrRestartSession(IBinder activityToken, IBinder appCallback,
+                AutofillId autoFillId, Rect bounds, AutofillValue value, int userId,
+                boolean hasCallback, int flags, String packageName, int sessionId, int action) {
+            boolean restart = false;
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    restart = service.updateSessionLocked(sessionId, getCallingUid(), autoFillId,
+                            bounds, value, action, flags);
+                }
+            }
+            if (restart) {
+                return startSession(activityToken, appCallback, autoFillId, bounds, value, userId,
+                        hasCallback, flags, packageName);
+            }
+
+            // Nothing changed...
+            return sessionId;
         }
 
         @Override
@@ -628,6 +673,7 @@ public final class AutofillManagerService extends SystemService {
                     pw.print("Debug mode: "); pw.println(oldDebug);
                     pw.print("Verbose mode: "); pw.println(sVerbose);
                     pw.print("Disabled users: "); pw.println(mDisabledUsers);
+                    pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
                     final int size = mServicesCache.size();
                     pw.print("Cached services: ");
                     if (size == 0) {

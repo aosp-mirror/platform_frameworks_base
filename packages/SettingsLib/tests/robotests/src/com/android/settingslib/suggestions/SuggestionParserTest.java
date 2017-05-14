@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib;
+package com.android.settingslib.suggestions;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +24,8 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import com.android.settingslib.SettingLibRobolectricTestRunner;
+import com.android.settingslib.TestConfig;
 import com.android.settingslib.drawer.Tile;
 import com.android.settingslib.drawer.TileUtilsTest;
 
@@ -49,9 +51,9 @@ public class SuggestionParserTest {
     private Context mContext;
     private RobolectricPackageManager mPackageManager;
     private SuggestionParser mSuggestionParser;
-    private SuggestionParser.SuggestionCategory mMultipleCategory;
-    private SuggestionParser.SuggestionCategory mExclusiveCategory;
-    private SuggestionParser.SuggestionCategory mExpiredExclusiveCategory;
+    private SuggestionCategory mMultipleCategory;
+    private SuggestionCategory mExclusiveCategory;
+    private SuggestionCategory mExpiredExclusiveCategory;
     private List<Tile> mSuggestionsBeforeDismiss;
     private List<Tile> mSuggestionsAfterDismiss;
     private SharedPreferences mPrefs;
@@ -68,13 +70,13 @@ public class SuggestionParserTest {
         mSuggestion.intent = new Intent("action");
         mSuggestion.intent.setComponent(new ComponentName("pkg", "cls"));
         mSuggestion.metaData = new Bundle();
-        mMultipleCategory = new SuggestionParser.SuggestionCategory();
+        mMultipleCategory = new SuggestionCategory();
         mMultipleCategory.category = "category1";
         mMultipleCategory.multiple = true;
-        mExclusiveCategory = new SuggestionParser.SuggestionCategory();
+        mExclusiveCategory = new SuggestionCategory();
         mExclusiveCategory.category = "category2";
         mExclusiveCategory.exclusive = true;
-        mExpiredExclusiveCategory = new SuggestionParser.SuggestionCategory();
+        mExpiredExclusiveCategory = new SuggestionCategory();
         mExpiredExclusiveCategory.category = "category3";
         mExpiredExclusiveCategory.exclusive = true;
         mExpiredExclusiveCategory.exclusiveExpireDaysInMillis = 0;
@@ -83,16 +85,16 @@ public class SuggestionParserTest {
                 Arrays.asList(mMultipleCategory, mExclusiveCategory, mExpiredExclusiveCategory),
                 "0,0");
 
-        ResolveInfo info1 = TileUtilsTest.newInfo(true, "category1");
+        ResolveInfo info1 = TileUtilsTest.newInfo(true, null);
         info1.activityInfo.packageName = "pkg";
-        ResolveInfo infoDupe1 = TileUtilsTest.newInfo(true, "category1");
+        ResolveInfo infoDupe1 = TileUtilsTest.newInfo(true, null);
         infoDupe1.activityInfo.packageName = "pkg";
 
-        ResolveInfo info2 = TileUtilsTest.newInfo(true, "category1");
+        ResolveInfo info2 = TileUtilsTest.newInfo(true, null);
         info2.activityInfo.packageName = "pkg2";
-        ResolveInfo info3 = TileUtilsTest.newInfo(true, "category2");
+        ResolveInfo info3 = TileUtilsTest.newInfo(true, null);
         info3.activityInfo.packageName = "pkg3";
-        ResolveInfo info4 = TileUtilsTest.newInfo(true, "category3");
+        ResolveInfo info4 = TileUtilsTest.newInfo(true, null);
         info4.activityInfo.packageName = "pkg4";
 
         Intent intent1 = new Intent(Intent.ACTION_MAIN).addCategory("category1");
@@ -143,12 +145,12 @@ public class SuggestionParserTest {
                 "pkg4");
 
         // If exclusive item is not available, the other categories should be shown
-        final List<Tile> suggestions = mSuggestionParser.getSuggestions();
-
+        final SuggestionList sl =
+                mSuggestionParser.getSuggestions(false /* isSmartSuggestionEnabled */);
+        final List<Tile> suggestions = sl.getSuggestions();
         assertThat(suggestions).hasSize(2);
-        assertThat(suggestions.get(0).category).isEqualTo("category1");
+
         assertThat(suggestions.get(0).intent.getComponent().getPackageName()).isEqualTo("pkg");
-        assertThat(suggestions.get(1).category).isEqualTo("category1");
         assertThat(suggestions.get(1).intent.getComponent().getPackageName()).isEqualTo("pkg2");
     }
 
@@ -165,18 +167,27 @@ public class SuggestionParserTest {
                 .commit();
 
         // If exclusive is expired, they should be shown together with the other categories
-        final List<Tile> suggestions = mSuggestionParser.getSuggestions();
+        final SuggestionList sl =
+                mSuggestionParser.getSuggestions(true /* isSmartSuggestionEnabled */);
+        final List<Tile> suggestions = sl.getSuggestions();
+
         assertThat(suggestions).hasSize(3);
-        assertThat(suggestions.get(0).category).isEqualTo("category1");
-        assertThat(suggestions.get(1).category).isEqualTo("category1");
-        assertThat(suggestions.get(2).category).isEqualTo("category3");
+
+        final List<Tile> category1Suggestions = sl.getSuggestionForCategory("category1");
+        final List<Tile> category3Suggestions = sl.getSuggestionForCategory("category3");
+
+        assertThat(category1Suggestions).hasSize(2);
+        assertThat(category3Suggestions).hasSize(1);
     }
 
     @Test
     public void testGetSuggestions_exclusive() {
-        final List<Tile> suggestions = mSuggestionParser.getSuggestions();
+        final SuggestionList sl =
+                mSuggestionParser.getSuggestions(false /* isSmartSuggestionEnabled */);
+        final List<Tile> suggestions = sl.getSuggestions();
+
         assertThat(suggestions).hasSize(1);
-        assertThat(suggestions.get(0).category).isEqualTo("category2");
+        assertThat(sl.getSuggestionForCategory("category2")).hasSize(1);
     }
 
     private void readAndDismissSuggestion(boolean isSmartSuggestionEnabled) {
@@ -184,10 +195,11 @@ public class SuggestionParserTest {
         mSuggestionsAfterDismiss = new ArrayList<>();
         mSuggestionParser.readSuggestions(
                 mMultipleCategory, mSuggestionsBeforeDismiss, isSmartSuggestionEnabled);
+
         final Tile suggestion = mSuggestionsBeforeDismiss.get(0);
         if (mSuggestionParser.dismissSuggestion(suggestion, isSmartSuggestionEnabled)) {
             RuntimeEnvironment.getRobolectricPackageManager().removeResolveInfosForIntent(
-                    new Intent(Intent.ACTION_MAIN).addCategory(suggestion.category),
+                    new Intent(Intent.ACTION_MAIN).addCategory(mMultipleCategory.category),
                     suggestion.intent.getComponent().getPackageName());
         }
         mSuggestionParser.readSuggestions(

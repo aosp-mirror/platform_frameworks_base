@@ -19,6 +19,8 @@
 
 #include "com_android_server_radio_types.h"
 
+#include "JavaRef.h"
+
 #include <android/hardware/broadcastradio/1.1/ITuner.h>
 #include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
 #include <jni.h>
@@ -32,9 +34,11 @@ namespace server {
 namespace radio {
 namespace Tuner {
 
-void setHalTuner(JNIEnv *env, jobject obj, sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
+void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner,
+        sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
 
-sp<hardware::broadcastradio::V1_1::ITunerCallback> getNativeCallback(JNIEnv *env, jobject obj);
+sp<hardware::broadcastradio::V1_1::ITunerCallback>
+getNativeCallback(JNIEnv *env, JavaRef<jobject> const &tuner);
 
 Region getRegion(JNIEnv *env, jobject obj);
 

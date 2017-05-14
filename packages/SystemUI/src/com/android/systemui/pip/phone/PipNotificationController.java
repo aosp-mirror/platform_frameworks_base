@@ -60,6 +60,9 @@ public class PipNotificationController {
 
     private PipMotionHelper mMotionHelper;
 
+    // Used when building a deferred notification
+    private String mDeferredNotificationPackageName;
+
     private AppOpsManager.OnOpChangedListener mAppOpsChangedListener = new OnOpChangedListener() {
         @Override
         public void onOpChanged(String op, String packageName) {
@@ -87,10 +90,47 @@ public class PipNotificationController {
         mMotionHelper = motionHelper;
     }
 
-    public void onActivityPinned(String packageName) {
+    public void onActivityPinned(String packageName, boolean deferUntilAnimationEnds) {
         // Clear any existing notification
         mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
 
+        if (deferUntilAnimationEnds) {
+            mDeferredNotificationPackageName = packageName;
+        } else {
+            showNotificationForApp(mDeferredNotificationPackageName);
+        }
+
+        // Register for changes to the app ops setting for this package while it is in PiP
+        registerAppOpsListener(packageName);
+    }
+
+    public void onPinnedStackAnimationEnded() {
+        if (mDeferredNotificationPackageName != null) {
+            showNotificationForApp(mDeferredNotificationPackageName);
+            mDeferredNotificationPackageName = null;
+        }
+    }
+
+    public void onActivityUnpinned(ComponentName topPipActivity) {
+        // Unregister for changes to the previously PiP'ed package
+        unregisterAppOpsListener();
+
+        // Reset the deferred notification package
+        mDeferredNotificationPackageName = null;
+
+        if (topPipActivity != null) {
+            // onActivityUnpinned() is only called after the transition is complete, so we don't
+            // need to defer until the animation ends to update the notification
+            onActivityPinned(topPipActivity.getPackageName(), false /* deferUntilAnimationEnds */);
+        } else {
+            mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
+        }
+    }
+
+    /**
+     * Builds and shows the notification for the given app.
+     */
+    private void showNotificationForApp(String packageName) {
         // Build a new notification
         final Notification.Builder builder =
                 new Notification.Builder(mContext, NotificationChannels.GENERAL)
@@ -104,20 +144,6 @@ public class PipNotificationController {
 
             // Show the new notification
             mNotificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, builder.build());
-        }
-
-        // Register for changes to the app ops setting for this package while it is in PiP
-        registerAppOpsListener(packageName);
-    }
-
-    public void onActivityUnpinned(ComponentName topPipActivity) {
-        // Unregister for changes to the previously PiP'ed package
-        unregisterAppOpsListener();
-
-        if (topPipActivity != null) {
-            onActivityPinned(topPipActivity.getPackageName());
-        } else {
-            mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
         }
     }
 

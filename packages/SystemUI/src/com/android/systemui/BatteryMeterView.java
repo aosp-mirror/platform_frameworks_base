@@ -17,25 +17,28 @@ package com.android.systemui;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
+import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
-import android.util.ArraySet;
-import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.ArraySet;
+import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import android.widget.TextView;
+
+import com.android.settingslib.Utils;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -62,6 +65,12 @@ public class BatteryMeterView extends LinearLayout implements
     private int mTextColor;
     private int mLevel;
     private boolean mForceShowPercent;
+
+    private int mDarkModeBackgroundColor;
+    private int mDarkModeFillColor;
+
+    private int mLightModeBackgroundColor;
+    private int mLightModeFillColor;
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -98,6 +107,16 @@ public class BatteryMeterView extends LinearLayout implements
         addView(mBatteryIconView, mlp);
 
         updateShowPercent();
+
+        Context dualToneDarkTheme = new ContextThemeWrapper(context,
+                Utils.getThemeAttr(context, R.attr.darkIconTheme));
+        Context dualToneLightTheme = new ContextThemeWrapper(context,
+                Utils.getThemeAttr(context, R.attr.lightIconTheme));
+        mDarkModeBackgroundColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.backgroundColor);
+        mDarkModeFillColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.fillColor);
+        mLightModeBackgroundColor = Utils.getColorAttr(dualToneLightTheme, R.attr.backgroundColor);
+        mLightModeFillColor = Utils.getColorAttr(dualToneLightTheme, R.attr.fillColor);
+
         // Init to not dark at all.
         onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
     }
@@ -105,11 +124,6 @@ public class BatteryMeterView extends LinearLayout implements
     public void setForceShowPercent(boolean show) {
         mForceShowPercent = show;
         updateShowPercent();
-    }
-
-    // StatusBarIconController reaches in here and adjusts the layout parameters of the icon
-    public ImageView getBatteryIconView() {
-        return mBatteryIconView;
     }
 
     @Override
@@ -170,7 +184,7 @@ public class BatteryMeterView extends LinearLayout implements
     private void updatePercentText() {
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setText(
-                    NumberFormat.getPercentInstance().format(mLevel/100f));
+                    NumberFormat.getPercentInstance().format(mLevel / 100f));
         }
     }
 
@@ -224,8 +238,13 @@ public class BatteryMeterView extends LinearLayout implements
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        mDrawable.setDarkIntensity(DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0);
-        setTextColor(DarkIconDispatcher.getTint(area, this, tint));
+        float intensity = DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0;
+        int foreground = getColorForDarkIntensity(intensity, mLightModeFillColor,
+                mDarkModeFillColor);
+        int background = getColorForDarkIntensity(intensity, mLightModeBackgroundColor,
+                mDarkModeBackgroundColor);
+        mDrawable.setColors(foreground, background);
+        setTextColor(foreground);
     }
 
     public void setTextColor(int color) {
@@ -235,8 +254,8 @@ public class BatteryMeterView extends LinearLayout implements
         }
     }
 
-    public void setRawColors(int fgColor, int bgColor) {
-        mDrawable.setColors(fgColor, bgColor);
+    private int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
+        return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
     }
 
     private final class SettingObserver extends ContentObserver {

@@ -204,6 +204,13 @@ public class Utils {
         return colorAccent;
     }
 
+    public static int getThemeAttr(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        int theme = ta.getResourceId(0, 0);
+        ta.recycle();
+        return theme;
+    }
+
     public static Drawable getDrawable(Context context, int attr) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
         Drawable drawable = ta.getDrawable(0);
