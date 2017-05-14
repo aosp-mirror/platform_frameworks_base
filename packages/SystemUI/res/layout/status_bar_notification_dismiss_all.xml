@@ -30,5 +30,6 @@
             android:focusable="true"
             android:contentDescription="@string/accessibility_clear_all"
             android:text="@string/clear_all_notifications_text"
+            android:textColor="?attr/bgProtectTextColor"
             android:textAllCaps="true"/>
 </com.android.systemui.statusbar.DismissView>

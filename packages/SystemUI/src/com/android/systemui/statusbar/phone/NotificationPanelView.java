@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.MathUtils;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -47,8 +48,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
@@ -58,6 +61,7 @@ import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -65,6 +69,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -112,7 +117,6 @@ public class NotificationPanelView extends PanelView implements
     private QS mQs;
     private FrameLayout mQsFrame;
     private KeyguardStatusView mKeyguardStatusView;
-    private TextView mClockView;
     private View mReserveNotificationSpace;
     private View mQsNavbarScrim;
     protected NotificationsQuickSettingsContainer mNotificationContainerParent;
@@ -232,6 +236,8 @@ public class NotificationPanelView extends PanelView implements
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mNoVisibleNotifications = true;
     private ValueAnimator mDarkAnimator;
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private boolean mUserSetupComplete;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -243,6 +249,7 @@ public class NotificationPanelView extends PanelView implements
 
     public void setStatusBar(StatusBar bar) {
         mStatusBar = bar;
+        mKeyguardBottomArea.setStatusBar(mStatusBar);
     }
 
     @Override
@@ -250,7 +257,6 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
-        mClockView = findViewById(R.id.clock_view);
 
         mNotificationContainerParent = (NotificationsQuickSettingsContainer)
                 findViewById(R.id.notification_container_parent);
@@ -261,9 +267,9 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setOnEmptySpaceClickListener(this);
         mKeyguardBottomArea = findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
-        mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext());
-        mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mLastOrientation = getResources().getConfiguration().orientation;
+
+        initBottomArea();
 
         mQsFrame = findViewById(R.id.qs_frame);
     }
@@ -324,6 +330,38 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
+    public void onOverlayChanged() {
+        // Re-inflate the status view group.
+        int index = indexOfChild(mKeyguardStatusView);
+        removeView(mKeyguardStatusView);
+        mKeyguardStatusView = (KeyguardStatusView) LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_status_view,
+                this,
+                false);
+        addView(mKeyguardStatusView, index);
+
+        // Update keyguard bottom area
+        index = indexOfChild(mKeyguardBottomArea);
+        removeView(mKeyguardBottomArea);
+        mKeyguardBottomArea = (KeyguardBottomAreaView) LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_bottom_area,
+                this,
+                false);
+        addView(mKeyguardBottomArea, index);
+        initBottomArea();
+    }
+
+    private void initBottomArea() {
+        mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext());
+        mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
+        mKeyguardBottomArea.setStatusBar(mStatusBar);
+        mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
+    }
+
+    public void setKeyguardIndicationController(KeyguardIndicationController indicationController) {
+        mKeyguardBottomArea.setKeyguardIndicationController(indicationController);
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -331,7 +369,8 @@ public class NotificationPanelView extends PanelView implements
 
         // Update Clock Pivot
         mKeyguardStatusView.setPivotX(getWidth() / 2);
-        mKeyguardStatusView.setPivotY((FONT_HEIGHT - CAP_HEIGHT) / 2048f * mClockView.getTextSize());
+        mKeyguardStatusView.setPivotY((FONT_HEIGHT - CAP_HEIGHT) / 2048f *
+                mKeyguardStatusView.getClockTextSize());
 
         // Calculate quick setting heights.
         int oldMaxHeight = mQsMaxExpansionHeight;
@@ -2570,5 +2609,32 @@ public class NotificationPanelView extends PanelView implements
             mAmbientIndicationBottomPadding = ambientIndicationBottomPadding;
             mStatusBar.updateKeyguardMaxNotifications();
         }
+    }
+
+    public void refreshTime() {
+        mKeyguardStatusView.refreshTime();
+    }
+
+    public void setStatusAccessibilityImportance(int mode) {
+         mKeyguardStatusView.setImportantForAccessibility(mode);
+    }
+
+    /**
+     * TODO: this should be removed.
+     * It's not correct to pass this view forward because other classes will end up adding
+     * children to it. Theme will be out of sync.
+     * @return bottom area view
+     */
+    public KeyguardBottomAreaView getKeyguardBottomAreaView() {
+        return mKeyguardBottomArea;
+    }
+
+    public void setUserSetupComplete(boolean userSetupComplete) {
+        mUserSetupComplete = userSetupComplete;
+        mKeyguardBottomArea.setUserSetupComplete(userSetupComplete);
+    }
+
+    public LockIcon getLockIcon() {
+        return mKeyguardBottomArea.getLockIcon();
     }
 }

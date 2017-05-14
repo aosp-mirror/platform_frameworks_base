@@ -49,6 +49,7 @@ import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.app.TaskStackBuilder;
+import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -57,6 +58,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.om.IOverlayManager;
+import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -150,7 +153,6 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
-import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -243,6 +245,8 @@ import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.volume.VolumeComponent;
 
+import com.google.android.colorextraction.ColorExtractor;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -262,7 +266,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         OnHeadsUpChangedListener, VisualStabilityManager.Callback, CommandQueue.Callbacks,
         ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener, InflationCallback {
+        ExpandableNotificationRow.OnExpandClickListener, InflationCallback,
+        ColorExtractor.OnColorsChangedListener {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_REMOTE_INPUT =
@@ -300,7 +305,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private static final String NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION
             = "com.android.systemui.statusbar.work_challenge_unlocked_notification_action";
     public static final String TAG = "StatusBar";
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
@@ -426,6 +431,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     Object mQueueLock = new Object();
 
     protected StatusBarIconController mIconController;
+    private IconManager mIconManager;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -444,8 +450,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // top bar
     protected KeyguardStatusBarView mKeyguardStatusBar;
-    KeyguardStatusView mKeyguardStatusView;
-    KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
     KeyguardIndicationController mKeyguardIndicationController;
 
@@ -512,8 +516,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mUserSetup = userSetup;
                 if (!mUserSetup && mStatusBarView != null)
                     animateCollapseQuickSettings();
-                if (mKeyguardBottomArea != null) {
-                    mKeyguardBottomArea.setUserSetupComplete(mUserSetup);
+                if (mNotificationPanel != null) {
+                    mNotificationPanel.setUserSetupComplete(mUserSetup);
                 }
                 updateQsExpansionEnabled();
             }
@@ -722,6 +726,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private KeyguardMonitorImpl mKeyguardMonitor;
     private BatteryController mBatteryController;
     protected boolean mPanelExpanded;
+    private IOverlayManager mOverlayManager;
     private boolean mKeyguardRequested;
     private boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;
@@ -732,6 +737,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
     @Nullable private View mAmbientIndicationContainer;
+    private ColorExtractor mColorExtractor;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -774,6 +780,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAssistManager = Dependency.get(AssistManager.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
+        mOverlayManager = IOverlayManager.Stub.asInterface(
+                ServiceManager.getService(Context.OVERLAY_SERVICE));
+
+        mColorExtractor = Dependency.get(ColorExtractor.class);
+        mColorExtractor.addOnColorsChangedListener(this);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
@@ -970,8 +981,16 @@ public class StatusBar extends SystemUI implements DemoMode,
             public void onDensityOrFontScaleChanged() {
                 StatusBar.this.onDensityOrFontScaleChanged();
             }
+
+            @Override
+            public void onOverlayChanged() {
+                StatusBar.this.onOverlayChanged();
+            }
         };
         Dependency.get(ConfigurationController.class).addCallback(mConfigurationListener);
+
+        // Make sure that we're using the correct theme
+        onOverlayChanged();
     }
 
     protected void createIconController() {
@@ -1020,8 +1039,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .replace(R.id.status_bar_container, new CollapsedStatusBarFragment(),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
-        Dependency.get(StatusBarIconController.class).addIconGroup(
-                new IconManager((ViewGroup) mKeyguardStatusBar.findViewById(R.id.statusIcons)));
+        mIconManager = new IconManager(mKeyguardStatusBar.findViewById(R.id.statusIcons));
+        Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         mIconController = Dependency.get(StatusBarIconController.class);
 
         mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow, mGroupManager);
@@ -1073,15 +1092,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
         }
 
-        mKeyguardStatusView =
-                (KeyguardStatusView) mStatusBarWindow.findViewById(R.id.keyguard_status_view);
-        mKeyguardBottomArea =
-                (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
                 (ViewGroup) mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
-                mKeyguardBottomArea.getLockIcon());
-        mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
+                mNotificationPanel.getLockIcon());
+        mNotificationPanel.setKeyguardIndicationController(mKeyguardIndicationController);
+
 
         mAmbientIndicationContainer = mStatusBarWindow.findViewById(
                 R.id.ambient_indication_container);
@@ -1134,8 +1150,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Other icons
         mVolumeComponent = getComponent(VolumeComponent.class);
 
-        mKeyguardBottomArea.setStatusBar(this);
-        mKeyguardBottomArea.setUserSetupComplete(mUserSetup);
+        mNotificationPanel.setUserSetupComplete(mUserSetup);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
             createUserSwitcher();
         }
@@ -1285,12 +1300,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();
         }
-        inflateSignalClusters();
-        mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
-        inflateDismissView();
-        updateClearAll();
-        inflateEmptyShadeView();
-        updateEmptyShadeView();
         mStatusBarKeyguardViewManager.onDensityOrFontScaleChanged();
         // TODO: Bring these out of StatusBar.
         ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
@@ -1299,6 +1308,44 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mKeyguardUserSwitcher != null) {
             mKeyguardUserSwitcher.onDensityOrFontScaleChanged();
         }
+        mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+
+        reevaluateStyles();
+    }
+
+    protected void onOverlayChanged() {
+        final boolean usingDarkTheme = isUsingDarkTheme();
+        if (DEBUG) {
+            Log.d(TAG, "Updating theme because overlay changed. Is theme dark? " + usingDarkTheme);
+        }
+        reevaluateStyles();
+
+        // Clock and bottom icons
+        mNotificationPanel.onOverlayChanged();
+
+        // Recreate Indication controller because internal references changed
+        // TODO: unregister callbacks before recreating
+        mKeyguardIndicationController =
+                SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
+                        mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
+                        mNotificationPanel.getLockIcon());
+        mNotificationPanel.setKeyguardIndicationController(mKeyguardIndicationController);
+        mKeyguardIndicationController
+                .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
+        mKeyguardIndicationController.setVisible(mState == StatusBarState.KEYGUARD);
+        mKeyguardIndicationController.setDozing(mDozing);
+
+        // Top status bar with system icons and clock
+        mKeyguardStatusBar.onOverlayChanged();
+        mIconManager.onOverlayChanged();
+    }
+
+    protected void reevaluateStyles() {
+        inflateSignalClusters();
+        inflateDismissView();
+        updateClearAll();
+        inflateEmptyShadeView();
+        updateEmptyShadeView();
     }
 
     private void updateNotificationsOnDensityOrFontScaleChanged() {
@@ -1347,20 +1394,20 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void inflateEmptyShadeView() {
+        if (mStackScroller == null) {
+            return;
+        }
         mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_no_notifications, mStackScroller, false);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
     }
 
     private void inflateDismissView() {
-        if (!mClearAllEnabled) {
+        if (!mClearAllEnabled || mStackScroller == null) {
             return;
         }
 
-        // Always inflate with a dark theme, since this sits on the scrim.
-        ContextThemeWrapper themedContext = new ContextThemeWrapper(mContext,
-                style.Theme_DeviceDefault);
-        mDismissView = (DismissView) LayoutInflater.from(themedContext).inflate(
+        mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
         mDismissView.setOnButtonClickListener(new View.OnClickListener() {
             @Override
@@ -1476,10 +1523,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mScrimController,
                 mFingerprintUnlockController);
-        mKeyguardIndicationController.setStatusBarKeyguardViewManager(
-                mStatusBarKeyguardViewManager);
-        mKeyguardIndicationController.setUserInfoController(
-                Dependency.get(UserInfoController.class));
+        mKeyguardIndicationController
+                .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mFingerprintUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputController.addCallback(mStatusBarKeyguardViewManager);
 
@@ -2589,7 +2634,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void setQsExpanded(boolean expanded) {
         mStatusBarWindowManager.setQsExpanded(expanded);
-        mKeyguardStatusView.setImportantForAccessibility(expanded
+        mNotificationPanel.setStatusAccessibilityImportance(expanded
                 ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     }
@@ -2783,8 +2828,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mNotificationPanel.hideStatusBarIconsWhenExpanded();
     }
 
-    public KeyguardIndicationController getKeyguardIndicationController() {
-        return mKeyguardIndicationController;
+    @Override
+    public void onColorsChanged(ColorExtractor.GradientColors colors, int which) {
+        updateTheme();
+    }
+
+    public boolean isUsingDarkTheme() {
+        OverlayInfo themeInfo = null;
+        try {
+            themeInfo = mOverlayManager.getOverlayInfo("com.android.systemui.theme.dark",
+                    mCurrentUserId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return themeInfo != null && themeInfo.isEnabled();
     }
 
     @Nullable
@@ -4426,6 +4483,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mScrimController.setKeyguardShowing(false);
         }
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
+        updateTheme();
         updateDozingState();
         updatePublicMode();
         updateStackScrollerState(goingToFullShade, fromShadeLocked);
@@ -4436,6 +4494,35 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mUnlockMethodCache.isMethodSecure(),
                 mStatusBarKeyguardViewManager.isOccluded());
         Trace.endSection();
+    }
+
+    /**
+     * Switches theme from light to dark and vice-versa.
+     */
+    private void updateTheme() {
+        boolean useDarkTheme;
+        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK)
+                    .supportsDarkText();
+        } else {
+            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM)
+                    .supportsDarkText();
+        }
+
+        // Enable/Disable dark overlay
+        if (isUsingDarkTheme() != useDarkTheme) {
+            if (DEBUG) {
+                Log.d(TAG, "Switching theme to: " + (useDarkTheme ? "Dark" : "Light"));
+            }
+            try {
+                mOverlayManager.setEnabled("com.android.systemui.theme.dark",
+                        useDarkTheme, mCurrentUserId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't change theme", e);
+                return;
+            }
+            mStatusBarWindowManager.setKeyguardDark(useDarkTheme);
+        }
     }
 
     private void updateDozingState() {
@@ -4585,6 +4672,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStackScroller.setStatusBarState(state);
         updateReportRejectedTouchVisibility();
         updateDozing();
+        updateTheme();
         mNotificationShelf.setStatusBarState(state);
     }
 
@@ -4665,8 +4753,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mNavigationBarView;
     }
 
+    /**
+     * TODO: Remove this method. Views should not be passed forward. Will cause theme issues.
+     * @return bottom area view
+     */
     public KeyguardBottomAreaView getKeyguardBottomAreaView() {
-        return mKeyguardBottomArea;
+        return mNotificationPanel.getKeyguardBottomAreaView();
     }
 
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
@@ -5177,7 +5269,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void dozeTimeTick() {
-            mKeyguardStatusView.refreshTime();
+            mNotificationPanel.refreshTime();
         }
 
         @Override

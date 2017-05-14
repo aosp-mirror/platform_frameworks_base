@@ -75,8 +75,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs, int defStyle) {
-        super(new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault), attrs,
-                defStyle);
+        super(context, attrs, defStyle);
         mSecurityModel = new KeyguardSecurityModel(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);

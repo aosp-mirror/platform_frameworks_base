@@ -65,16 +65,16 @@ public class KeyguardIndicationController {
     private static final long TRANSIENT_FP_ERROR_TIMEOUT = 1300;
 
     private final Context mContext;
-    private final ViewGroup mIndicationArea;
-    private final KeyguardIndicationTextView mTextView;
-    private final KeyguardIndicationTextView mDisclosure;
+    private ViewGroup mIndicationArea;
+    private KeyguardIndicationTextView mTextView;
+    private KeyguardIndicationTextView mDisclosure;
     private final UserManager mUserManager;
     private final IBatteryStats mBatteryInfo;
     private final SettableWakeLock mWakeLock;
 
     private final int mSlowThreshold;
     private final int mFastThreshold;
-    private final LockIcon mLockIcon;
+    private LockIcon mLockIcon;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private String mRestingIndication;
@@ -115,7 +115,7 @@ public class KeyguardIndicationController {
         mIndicationArea = indicationArea;
         mTextView = (KeyguardIndicationTextView) indicationArea.findViewById(
                 R.id.keyguard_indication_text);
-        mInitialTextColor = mTextView.getCurrentTextColor();
+        mInitialTextColor = mTextView != null ? mTextView.getCurrentTextColor() : Color.WHITE;
         mDisclosure = (KeyguardIndicationTextView) indicationArea.findViewById(
                 R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;

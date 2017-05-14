@@ -111,6 +111,18 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         mLpChanged.copyFrom(mLp);
     }
 
+    public void setKeyguardDark(boolean dark) {
+        int vis = mStatusBarView.getSystemUiVisibility();
+        if (dark) {
+            vis = vis | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            vis = vis | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        } else {
+            vis = vis & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            vis = vis & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        }
+        mStatusBarView.setSystemUiVisibility(vis);
+    }
+
     private void applyKeyguardFlags(State state) {
         if (state.keyguardShowing) {
             mLpChanged.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;

@@ -293,7 +293,18 @@
     <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
+        <item name="bgProtectTextColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="bgProtectSecondaryTextColor">?android:attr/textColorSecondaryInverse</item>
+        <item name="pinDividerColor">@color/pin_divider_color</item>
+        <item name="pinDeleteColor">@color/pin_delete_color</item>
+        <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
     </style>
+
+    <style name="LockPatternStyle">
+        <item name="*android:regularColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="*android:successColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
     <style name="qs_theme" parent="systemui_theme">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
