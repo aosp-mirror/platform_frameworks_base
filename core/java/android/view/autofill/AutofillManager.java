@@ -804,9 +804,26 @@ public final class AutofillManager {
                     + ", value=" + value + ", action=" + action + ", flags=" + flags);
         }
 
+        boolean restartIfNecessary = (flags & FLAG_MANUAL_REQUEST) != 0;
+
         try {
-            mService.updateSession(mSessionId, id, bounds, value, action, flags,
-                    mContext.getUserId());
+            if (restartIfNecessary) {
+                final int newId = mService.updateOrRestartSession(mContext.getActivityToken(),
+                        mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
+                        mCallback != null, flags, mContext.getOpPackageName(), mSessionId, action);
+                if (newId != mSessionId) {
+                    if (sDebug) Log.d(TAG, "Session restarted: " + mSessionId + "=>" + newId);
+                    mSessionId = newId;
+                    final AutofillClient client = getClientLocked();
+                    if (client != null) {
+                        client.autofillCallbackResetableStateAvailable();
+                    }
+                }
+            } else {
+                mService.updateSession(mSessionId, id, bounds, value, action, flags,
+                        mContext.getUserId());
+            }
+
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
