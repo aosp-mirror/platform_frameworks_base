@@ -124,10 +124,6 @@
     <declare-styleable name="PluginInflateContainer">
         <attr name="viewType" format="string" />
     </declare-styleable>
-    <declare-styleable name="ScrimView">
-        <!-- The initial color for the scrim. -->
-        <attr name="scrimColor" format="color" />
-    </declare-styleable>
 
     <attr name="lightIconTheme" format="reference" />
     <attr name="darkIconTheme" format="reference" />
