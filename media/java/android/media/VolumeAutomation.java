@@ -31,9 +31,9 @@ public interface VolumeAutomation {
      * @param configuration the {@link VolumeShaper.Configuration configuration}
      *        that specifies the curve and duration to use.
      * @return a {@code VolumeShaper} object
-     * @throws IllegalArgumentException if the configuration is not allowed by the player.
-     * @throws IllegalStateException if too many VolumeShapers are requested or the state of
-     * the player does not permit its creation (e.g. player is released).
+     * @throws IllegalArgumentException if the {@code configuration} is not allowed by the player.
+     * @throws IllegalStateException if too many {@code VolumeShaper}s are requested
+     *         or the state of the player does not permit its creation (e.g. player is released).
      */
     public @NonNull VolumeShaper createVolumeShaper(
             @NonNull VolumeShaper.Configuration configuration);
