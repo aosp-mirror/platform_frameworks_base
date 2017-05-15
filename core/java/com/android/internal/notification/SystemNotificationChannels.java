@@ -47,6 +47,7 @@ public class SystemNotificationChannels {
     public static String RETAIL_MODE = "RETAIL_MODE";
     public static String USB = "USB";
     public static String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
+    public static String ALERT_WINDOW = "ALERT_WINDOW";
 
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
@@ -135,6 +136,11 @@ public class SystemNotificationChannels {
         channelsList.add(new NotificationChannel(
                 FOREGROUND_SERVICE,
                 context.getString(R.string.notification_channel_foreground_service),
+                NotificationManager.IMPORTANCE_MIN));
+
+        channelsList.add(new NotificationChannel(
+                ALERT_WINDOW,
+                context.getString(R.string.alert_windows_notification_channel_name),
                 NotificationManager.IMPORTANCE_MIN));
 
         nm.createNotificationChannels(channelsList);
