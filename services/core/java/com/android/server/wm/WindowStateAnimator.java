@@ -968,10 +968,8 @@ class WindowStateAnimator {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
 
-            //TODO (multidisplay): Magnification is supported only for the default display.
-            if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
-                MagnificationSpec spec = mService.mAccessibilityController
-                        .getMagnificationSpecForWindowLocked(mWin);
+            MagnificationSpec spec = getMagnificationSpec();
+            if (spec != null) {
                 applyMagnificationSpec(spec, tmpMatrix);
             }
 
@@ -1058,11 +1056,7 @@ class WindowStateAnimator {
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
 
-        MagnificationSpec spec = null;
-        //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
-            spec = mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
-        }
+        MagnificationSpec spec = getMagnificationSpec();
         if (spec != null) {
             final Rect frame = mWin.mFrame;
             final float tmpFloats[] = mService.mTmpFloats;
@@ -1097,6 +1091,14 @@ class WindowStateAnimator {
             mDtDy = 0;
             mDsDy = mWin.mGlobalScale;
         }
+    }
+
+    private MagnificationSpec getMagnificationSpec() {
+        //TODO (multidisplay): Magnification is supported only for the default display.
+        if (mService.mAccessibilityController != null && mWin.getDisplayId() == DEFAULT_DISPLAY) {
+            return mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
+        }
+        return null;
     }
 
     /**
@@ -1136,6 +1138,27 @@ class WindowStateAnimator {
         if (StackId.tasksAreFloating(stack.mStackId)) {
             w.expandForSurfaceInsets(finalClipRect);
         }
+
+        // We may be applying a magnification spec to all windows,
+        // simulating a transformation in screen space, in which case
+        // we need to transform all other screen space values...including
+        // the final crop. This is kind of messed up and we should look
+        // in to actually transforming screen-space via a parent-layer.
+        // b/38322835
+        MagnificationSpec spec = getMagnificationSpec();
+        if (spec != null && !spec.isNop()) {
+            Matrix transform = mWin.mTmpMatrix;
+            RectF finalCrop = mService.mTmpRectF;
+            transform.reset();
+            transform.postScale(spec.scale, spec.scale);
+            transform.postTranslate(-spec.offsetX, -spec.offsetY);
+            transform.mapRect(finalCrop);
+            finalClipRect.top = (int)finalCrop.top;
+            finalClipRect.left = (int)finalCrop.left;
+            finalClipRect.right = (int)finalClipRect.right;
+            finalClipRect.bottom = (int)finalClipRect.bottom;
+        }
+
         return true;
     }
 
