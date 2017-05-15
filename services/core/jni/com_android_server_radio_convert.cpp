@@ -285,19 +285,27 @@ static JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaDa
     return jMetadata;
 }
 
-JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info11) {
+static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info10,
+        const V1_1::ProgramInfo *info11) {
     ALOGV("ProgramInfoFromHal()");
     EnvWrapper wrap(env);
 
-    auto& info10 = info11.base;
     auto jMetadata = MetadataFromHal(env, info10.metadata);
-    auto jVendorExtension = wrap(env->NewStringUTF(info11.vendorExension.c_str()));
+    auto jVendorExtension = info11 ?
+            wrap(env->NewStringUTF(info11->vendorExension.c_str())) : nullptr;
 
     return wrap(env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor, info10.channel,
             info10.subChannel, info10.tuned, info10.stereo, info10.digital, info10.signalStrength,
-            jMetadata.get(), info11.flags, jVendorExtension.get()));
+            jMetadata.get(), info11 ? info11->flags : 0, jVendorExtension.get()));
 }
 
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info) {
+    return ProgramInfoFromHal(env, info, nullptr);
+}
+
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info) {
+    return ProgramInfoFromHal(env, info.base, &info);
+}
 
 } // namespace convert
 } // namespace radio

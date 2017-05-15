@@ -218,26 +218,28 @@ static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativ
     auto halTuner11 = getHalTuner11(nativeContext);
     if (halTuner10 == nullptr) return nullptr;
 
-    V1_1::ProgramInfo halInfo;
+    JavaRef<jobject> jInfo;
     Result halResult;
     Return<void> hidlResult;
     if (halTuner11 != nullptr) {
         hidlResult = halTuner11->getProgramInformation_1_1([&](Result result,
                 const V1_1::ProgramInfo& info) {
             halResult = result;
-            halInfo = info;
+            if (result != Result::OK) return;
+            jInfo = convert::ProgramInfoFromHal(env, info);
         });
     } else {
         hidlResult = halTuner10->getProgramInformation([&](Result result,
                 const V1_0::ProgramInfo& info) {
             halResult = result;
-            halInfo.base = info;
+            if (result != Result::OK) return;
+            jInfo = convert::ProgramInfoFromHal(env, info);
         });
     }
 
-    if (convert::ThrowIfFailed(env, hidlResult, halResult)) return nullptr;
-
-    return convert::ProgramInfoFromHal(env, halInfo).release();
+    if (jInfo != nullptr) return jInfo.release();
+    convert::ThrowIfFailed(env, hidlResult, halResult);
+    return nullptr;
 }
 
 static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeContext) {
