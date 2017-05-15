@@ -43,6 +43,8 @@ JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info);
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info);
 
 
+void ThrowParcelableRuntimeException(JNIEnv *env, const std::string& msg);
+
 // These three are only for internal use by template functions below.
 bool __ThrowIfFailedHidl(JNIEnv *env,
         const hardware::details::return_status &hidlResult);
