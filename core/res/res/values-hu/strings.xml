@@ -260,6 +260,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Frissítések"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Hálózati állapot"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Hálózati értesítések"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-állapot"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Eszközfelügyelet"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Értesítések"</string>
@@ -1099,6 +1101,14 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Ébresztőhangok"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Értesítőhangok"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Ismeretlen"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Wi-Fi hálózatok érhetők el</item>
+      <item quantity="one">Van elérhető Wi-Fi hálózat</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Nyílt Wi-Fi hálózatok érhetők el</item>
+      <item quantity="one">Nyílt Wi-Fi hálózat érhető el</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Bejelentkezés Wi-Fi hálózatba"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Bejelentkezés a hálózatba"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

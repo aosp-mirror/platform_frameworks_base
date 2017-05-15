@@ -7652,6 +7652,21 @@ public final class Settings {
        public static final String FORCE_ALLOW_ON_EXTERNAL = "force_allow_on_external";
 
         /**
+         * The default SM-DP+ configured for this device.
+         *
+         * <p>An SM-DP+ is used by an LPA (see {@link android.service.euicc.EuiccService}) to
+         * download profiles. If this value is set, the LPA will query this server for any profiles
+         * available to this device. If any are available, they may be downloaded during device
+         * provisioning or in settings without needing the user to enter an activation code.
+         *
+         * @see android.service.euicc.EuiccService
+         * @hide
+         *
+         * TODO(b/35851809): Make this a SystemApi.
+         */
+        public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
+
+        /**
          * Whether any activity can be resized. When this is true, any
          * activity, regardless of manifest values, can be resized for multi-window.
          * (0 = false, 1 = true)

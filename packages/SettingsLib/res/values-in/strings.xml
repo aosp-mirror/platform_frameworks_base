@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Tidak dapat memindai jaringan"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Tidak Ada"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Tidak ada"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Disimpan"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Kegagalan Konfigurasi IP"</string>
@@ -229,7 +229,7 @@
     <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Monitor Telefoni akan mengumpulkan log jika mendeteksi masalah pada fungsi telefoni/modem dan mengirimkan notifikasi ke pengguna untuk melaporkan bug"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Masukan"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Gambar"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Render yang dipercepat perangkat keras"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Render yang dipercepat hardware"</string>
     <string name="media_category" msgid="4388305075496848353">"Media"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Memantau"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Mode ketat diaktifkan"</string>
