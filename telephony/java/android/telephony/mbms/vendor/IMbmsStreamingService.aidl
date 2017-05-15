@@ -55,8 +55,6 @@ interface IMbmsStreamingService
 
     Uri getPlaybackUri(String appName, int subId, String serviceId);
 
-    void switchStreams(String appName, int subId, String oldServiceId, String newServiceId);
-
     int getState(String appName, int subId, String serviceId);
 
     void stopStreaming(String appName, int subId, String serviceId);
