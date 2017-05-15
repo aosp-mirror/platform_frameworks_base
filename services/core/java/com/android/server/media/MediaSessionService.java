@@ -1505,7 +1505,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         private boolean isVoiceKey(int keyCode) {
-            return keyCode == KeyEvent.KEYCODE_HEADSETHOOK;
+            return keyCode == KeyEvent.KEYCODE_HEADSETHOOK
+                    || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
         }
 
         private boolean isUserSetupComplete() {
