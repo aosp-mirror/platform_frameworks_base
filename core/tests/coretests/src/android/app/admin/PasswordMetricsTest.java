@@ -16,16 +16,14 @@
 
 package android.app.admin;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.Assert.assertEquals;
 
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /** Unit tests for {@link PasswordMetrics}. */
 @RunWith(AndroidJUnit4.class)
@@ -43,20 +41,6 @@ public class PasswordMetricsTest {
         assertEquals(0, metrics.numeric);
         assertEquals(0, metrics.symbols);
         assertEquals(0, metrics.nonLetter);
-        assertTrue("default constructor does not produce default metrics", metrics.isDefault());
-    }
-
-    @Test
-    public void testIsNotDefault() {
-        final PasswordMetrics metrics = new PasswordMetrics(
-                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC, 12);
-        assertFalse("non-default metrics are repoted as default", metrics.isDefault());
-    }
-
-    @Test
-    public void testComputeForEmptyPassword() {
-        final PasswordMetrics metrics = PasswordMetrics.computeForPassword("");
-        assertTrue("empty password has default metrics", metrics.isDefault());
     }
 
     @Test
