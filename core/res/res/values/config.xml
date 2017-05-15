@@ -2849,6 +2849,11 @@
     <!-- Default data warning level in mb -->
     <integer name="default_data_warning_level_mb">2048</integer>
 
+    <!-- When true, indicates that the vendor's IMS implementation requires a workaround when
+     sending a request to enable or disable the camera while the video session is also
+     paused. -->
+    <bool name="config_useVideoPauseWorkaround">false</bool>
+
     <!-- Whether to send a custom package name with the PSD.-->
     <bool name="config_sendPackageName">false</bool>
 
