@@ -141,7 +141,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         private final BatteryMeterDrawableBase mDrawable
                 = new BatteryMeterDrawableBase(
                         mHost.getContext(),
-                        mHost.getContext().getColor(R.color.batterymeter_frame_color));
+                        mHost.getContext().getColor(R.color.meter_background_color));
         private View mCurrentView;
 
         @Override

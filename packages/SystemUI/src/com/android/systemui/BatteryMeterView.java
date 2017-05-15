@@ -89,7 +89,7 @@ public class BatteryMeterView extends LinearLayout implements
         TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
-                context.getColor(R.color.batterymeter_frame_color));
+                context.getColor(R.color.meter_background_color));
         mDrawable = new BatteryMeterDrawableBase(context, frameColor);
         atts.recycle();
 

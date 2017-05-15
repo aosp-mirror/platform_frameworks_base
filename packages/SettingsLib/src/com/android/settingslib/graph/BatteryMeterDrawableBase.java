@@ -141,7 +141,7 @@ public class BatteryMeterDrawableBase extends Drawable {
             mWarningTextPaint.setColor(mColors[1]);
         }
 
-        mChargeColor = Utils.getDefaultColor(mContext, R.color.batterymeter_charge_color);
+        mChargeColor = Utils.getDefaultColor(mContext, R.color.meter_consumed_color);
 
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBoltPaint.setColor(Utils.getDefaultColor(mContext, R.color.batterymeter_bolt_color));
