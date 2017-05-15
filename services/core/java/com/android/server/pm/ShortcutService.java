@@ -1374,7 +1374,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     case Icon.TYPE_ADAPTIVE_BITMAP: {
                         bitmap = icon.getBitmap(); // Don't recycle in this case.
                         maxIconDimension *= (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction());
-
+                        break;
                     }
                     default:
                         // This shouldn't happen because we've already validated the icon, but
