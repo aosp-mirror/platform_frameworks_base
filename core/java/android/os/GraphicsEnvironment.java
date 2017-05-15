@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.opengl.EGL14;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -79,6 +80,12 @@ public final class GraphicsEnvironment {
                     Log.w(TAG, "updated driver package has no compatible native libraries");
                 }
             }
+            return;
+        }
+        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+            // O drivers are restricted to the sphal linker namespace, so don't try to use
+            // packages unless they declare they're compatible with that restriction.
+            Log.w(TAG, "updated driver package is not known to be compatible with O");
             return;
         }
 
