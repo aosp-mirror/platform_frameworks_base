@@ -17,13 +17,21 @@
 package android.telephony.mbms;
 
 import android.net.Uri;
-import android.telephony.SignalStrength;
 
 /**
  * A Callback class for use when the applicaiton is actively streaming content.
  * @hide
  */
 public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
+
+    /**
+     * Indicates broadcast signal strength is not available for this service.
+     *
+     * This may be due to the service no longer being available due to geography
+     * or timing (end of service) or because lack of demand has caused the service
+     * to be delivered via unicast.
+     */
+    public static final int SIGNAL_STRENGTH_UNAVAILABLE = -1;
 
 
     public void error(int errorCode, String message) {
@@ -51,19 +59,16 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
     }
 
     /**
-     * Signal Strength updated.
+     * Broadcast Signal Strength updated.
      *
      * This signal strength is the BROADCAST signal strength which,
      * depending on technology in play and it's deployment, may be
      * stronger or weaker than the traditional UNICAST signal
-     * strength.
-     *
-     * A {@link android.telephony.SignalStrength#getLevel} result of 0 means
-     * you don't have coverage for this stream, either due to geographic
-     * restrictions, poor tower coverage or something (yards of concrete?)
-     * interferring with the signal.
+     * strength.  It a simple int from 0-4 for valid levels or
+     * {@link #SIGNAL_STRENGTH_UNAVAILABLE} if broadcast is not available
+     * for this service due to timing, geography or popularity.
      */
-    public void signalStrengthUpdated(SignalStrength signalStrength) {
+    public void broadcastSignalStrengthUpdated(int signalStrength) {
         // default implementation empty
     }
 }

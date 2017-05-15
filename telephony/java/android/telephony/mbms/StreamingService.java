@@ -19,7 +19,6 @@ package android.telephony.mbms;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.SignalStrength;
 
 /**
  * @hide
