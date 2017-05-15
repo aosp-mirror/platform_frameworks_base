@@ -17,7 +17,6 @@ package android.telephony.euicc;
 
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -124,6 +123,16 @@ public class EuiccManager {
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTION";
 
     /**
+     * Key for an extra set on {@link #getDefaultDownloadableSubscriptionList} PendingIntent result
+     * callbacks providing the list of available downloadable subscriptions.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    public static final String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS =
+            "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS";
+
+    /**
      * Key for an extra set on {@link PendingIntent} result callbacks providing the resolution
      * pending intent for {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR}s.
      * @hide
@@ -195,10 +204,11 @@ public class EuiccManager {
     /**
      * Attempt to download the given {@link DownloadableSubscription}.
      *
-     * <p>Requires the calling app to be authorized to manage both the currently-active subscription
-     * and the subscription to be downloaded according to the subscription metadata. Without the
-     * former, a {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the
-     * callback intent to prompt the user to accept the download.
+     * <p>Requires the {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
+     * or the calling app must be authorized to manage both the currently-active subscription and
+     * the subscription to be downloaded according to the subscription metadata. Without the former,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
+     * intent to prompt the user to accept the download.
      *
      * @param subscription the subscription to download.
      * @param switchAfterDownload if true, the profile will be activated upon successful download.
@@ -261,8 +271,9 @@ public class EuiccManager {
      *     For example, this may indicate whether the user has consented or may include the input
      *     they provided.
      * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
      */
-    @SystemApi
     public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
         if (!isEnabled()) {
             PendingIntent callbackIntent =
@@ -299,7 +310,6 @@ public class EuiccManager {
      *
      * TODO(b/35851809): Make this a SystemApi.
      */
-    @SystemApi
     public void getDownloadableSubscriptionMetadata(
             DownloadableSubscription subscription, PendingIntent callbackIntent) {
         if (!isEnabled()) {
@@ -308,6 +318,153 @@ public class EuiccManager {
         }
         try {
             mController.getDownloadableSubscriptionMetadata(subscription, callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets metadata for subscription which are available for download on this device.
+     *
+     * <p>Subscriptions returned here may be passed to {@link #downloadSubscription}. They may have
+     * been pre-assigned to this particular device, for example. The callback will be triggered with
+     * an Intent with {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS} set to the
+     * list of available subscriptions upon success.
+     *
+     * <p>Requires that the calling app has the
+     * {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission. This is for
+     * internal system use only.
+     *
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    public void getDefaultDownloadableSubscriptionList(PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            mController.getDefaultDownloadableSubscriptionList(callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns information about the eUICC chip/device.
+     *
+     * @return the {@link EuiccInfo}. May be null if {@link #isEnabled()} is false or the eUICC is
+     *     not ready.
+     */
+    @Nullable
+    public EuiccInfo getEuiccInfo() {
+        if (!isEnabled()) {
+            return null;
+        }
+        try {
+            return mController.getEuiccInfo();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Deletes the given subscription.
+     *
+     * <p>If this subscription is currently active, the device will first switch away from it onto
+     * an "empty" subscription.
+     *
+     * <p>Requires that the calling app has carrier privileges according to the metadata of the
+     * profile to be deleted, or the
+     * {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @param subscriptionId the ID of the subscription to delete.
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     */
+    public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            mController.deleteSubscription(
+                    subscriptionId, mContext.getOpPackageName(), callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Switch to (enable) the given subscription.
+     *
+     * <p>Requires the {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
+     * or the calling app must be authorized to manage both the currently-active subscription and
+     * the subscription to be enabled according to the subscription metadata. Without the former,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
+     * intent to prompt the user to accept the download.
+     *
+     * @param subscriptionId the ID of the subscription to enable. May be
+     *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
+     *     current profile without activating another profile to replace it.
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     */
+    public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            mController.switchToSubscription(
+                    subscriptionId, mContext.getOpPackageName(), callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Update the nickname for the given subscription.
+     *
+     * <p>Requires that the calling app has the
+     * {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission. This is for
+     * internal system use only.
+     *
+     * @param subscriptionId the ID of the subscription to update.
+     * @param nickname the new nickname to apply.
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     * @hide
+     */
+    public void updateSubscriptionNickname(
+            int subscriptionId, String nickname, PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            mController.updateSubscriptionNickname(subscriptionId, nickname, callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Erase all subscriptions and reset the eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission. This is for
+     * internal system use only.
+     *
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     * @hide
+     */
+    public void eraseSubscriptions(PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            mController.eraseSubscriptions(callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

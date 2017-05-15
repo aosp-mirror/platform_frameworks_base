@@ -23,22 +23,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Result of a {@link EuiccService#onDownloadSubscription} operation.
+ * Result of a {@link EuiccService#onSwitchToSubscription} operation.
  * @hide
  *
  * TODO(b/35851809): Make this a SystemApi.
  */
-public final class DownloadResult implements Parcelable {
+public final class SwitchResult implements Parcelable {
 
-    public static final Creator<DownloadResult> CREATOR = new Creator<DownloadResult>() {
+    public static final Creator<SwitchResult> CREATOR = new Creator<SwitchResult>() {
         @Override
-        public DownloadResult createFromParcel(Parcel in) {
-            return new DownloadResult(in);
+        public SwitchResult createFromParcel(Parcel in) {
+            return new SwitchResult(in);
         }
 
         @Override
-        public DownloadResult[] newArray(int size) {
-            return new DownloadResult[size];
+        public SwitchResult[] newArray(int size) {
+            return new SwitchResult[size];
         }
     };
 
@@ -61,12 +61,12 @@ public final class DownloadResult implements Parcelable {
     /** Implementation-defined detailed error code in case of a failure not covered here. */
     public final int detailedCode;
 
-    private DownloadResult(int result, int detailedCode) {
+    private SwitchResult(int result, int detailedCode) {
         this.result = result;
         this.detailedCode = detailedCode;
     }
 
-    private DownloadResult(Parcel in) {
+    private SwitchResult(Parcel in) {
         this.result = in.readInt();
         this.detailedCode = in.readInt();
     }
@@ -77,16 +77,16 @@ public final class DownloadResult implements Parcelable {
         dest.writeInt(detailedCode);
     }
 
-    /** Return a result indicating that the download was successful. */
-    public static DownloadResult success() {
-        return new DownloadResult(RESULT_OK, 0);
+    /** Return a result indicating that the switch was successful. */
+    public static SwitchResult success() {
+        return new SwitchResult(RESULT_OK, 0);
     }
 
     /**
      * Return a result indicating that an active SIM must be deactivated to perform the operation.
      */
-    public static DownloadResult mustDeactivateSim() {
-        return new DownloadResult(RESULT_MUST_DEACTIVATE_SIM, 0);
+    public static SwitchResult mustDeactivateSim() {
+        return new SwitchResult(RESULT_MUST_DEACTIVATE_SIM, 0);
     }
 
     /**
@@ -95,8 +95,8 @@ public final class DownloadResult implements Parcelable {
      *
      * @param detailedCode an implemenation-defined detailed error code for debugging purposes.
      */
-    public static DownloadResult genericError(int detailedCode) {
-        return new DownloadResult(RESULT_GENERIC_ERROR, detailedCode);
+    public static SwitchResult genericError(int detailedCode) {
+        return new SwitchResult(RESULT_GENERIC_ERROR, detailedCode);
     }
 
     @Override

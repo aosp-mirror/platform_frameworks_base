@@ -16,10 +16,16 @@
 
 package android.service.euicc;
 
+import android.service.euicc.IDeleteSubscriptionCallback;
 import android.service.euicc.IDownloadSubscriptionCallback;
+import android.service.euicc.IEraseSubscriptionsCallback;
+import android.service.euicc.IGetDefaultDownloadableSubscriptionListCallback;
 import android.service.euicc.IGetDownloadableSubscriptionMetadataCallback;
 import android.service.euicc.IGetEidCallback;
+import android.service.euicc.IGetEuiccInfoCallback;
 import android.service.euicc.IGetEuiccProfileInfoListCallback;
+import android.service.euicc.ISwitchToSubscriptionCallback;
+import android.service.euicc.IUpdateSubscriptionNicknameCallback;
 import android.telephony.euicc.DownloadableSubscription;
 
 /** @hide */
@@ -31,4 +37,13 @@ oneway interface IEuiccService {
             boolean forceDeactivateSim, in IGetDownloadableSubscriptionMetadataCallback callback);
     void getEid(int slotId, in IGetEidCallback callback);
     void getEuiccProfileInfoList(int slotId, in IGetEuiccProfileInfoListCallback callback);
+    void getDefaultDownloadableSubscriptionList(int slotId, boolean forceDeactivateSim,
+            in IGetDefaultDownloadableSubscriptionListCallback callback);
+    void getEuiccInfo(int slotId, in IGetEuiccInfoCallback callback);
+    void deleteSubscription(int slotId, String iccid, in IDeleteSubscriptionCallback callback);
+    void switchToSubscription(int slotId, String iccid, boolean forceDeactivateSim,
+            in ISwitchToSubscriptionCallback callback);
+    void updateSubscriptionNickname(int slotId, String iccid, String nickname,
+            in IUpdateSubscriptionNicknameCallback callback);
+    void eraseSubscriptions(int slotId, in IEraseSubscriptionsCallback callback);
 }
