@@ -1952,6 +1952,16 @@ public class WindowManagerService extends IWindowManager.Stub
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
                             || !win.mAppToken.isClientHidden())) {
+
+                // We are about to create a surface, but we didn't run a layout yet. So better run
+                // a layout now that we already know the right size, as a resize call will make the
+                // surface transaction blocking until next vsync and slow us down.
+                // TODO: Ideally we'd create the surface after running layout a bit further down,
+                // but moving this seems to be too risky at this point in the release.
+                if (win.mLayoutSeq == -1) {
+                    win.setDisplayLayoutNeeded();
+                    mWindowPlacerLocked.performSurfacePlacement(true);
+                }
                 result = win.relayoutVisibleWindow(mergedConfiguration, result, attrChanges,
                         oldVisibility);
                 try {
