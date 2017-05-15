@@ -889,7 +889,8 @@ class PackageManagerShellCommand extends ShellCommand {
             userId = UserHandle.USER_SYSTEM;
             flags |= PackageManager.DELETE_ALL_USERS;
         } else {
-            final PackageInfo info = mInterface.getPackageInfo(packageName, 0, userId);
+            final PackageInfo info = mInterface.getPackageInfo(packageName,
+                    PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
             if (info == null) {
                 pw.println("Failure [not installed for " + userId + "]");
                 return 1;
