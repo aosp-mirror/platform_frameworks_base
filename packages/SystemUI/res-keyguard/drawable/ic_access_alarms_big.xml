@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2014 The Android Open Source Project
+Copyright (C) 2017 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ Copyright (C) 2014 The Android Open Source Project
     android:height="18dp"
     android:viewportWidth="24.0"
     android:viewportHeight="24.0">
-
     <path
         android:fillColor="?attr/bgProtectSecondaryTextColor"
-        android:pathData="M22.0,5.7l-4.6,-3.9l-1.3,1.5l4.6,3.9L22.0,5.7zM7.9,3.4L6.6,1.9L2.0,5.7l1.3,1.5L7.9,3.4zM12.5,8.0L11.0,8.0l0.0,6.0l4.7,2.9l0.8,-1.2l-4.0,-2.4L12.5,8.0zM12.0,4.0c-5.0,0.0 -9.0,4.0 -9.0,9.0c0.0,5.0 4.0,9.0 9.0,9.0s9.0,-4.0 9.0,-9.0C21.0,8.0 17.0,4.0 12.0,4.0zM12.0,20.0c-3.9,0.0 -7.0,-3.1 -7.0,-7.0c0.0,-3.9 3.1,-7.0 7.0,-7.0c3.9,0.0 7.0,3.1 7.0,7.0C19.0,16.9 15.9,20.0 12.0,20.0z"/>
+        android:pathData="M21.35,6.49c-0.35,0.42 -0.98,0.47 -1.4,0.12l-3.07,-2.57a1,1 0,1 1,1.29 -1.53l3.07,2.57c0.42,0.35 0.47,0.98 0.11,1.41zM7.24,2.63a1,1 0,0 0,-1.41 -0.13L2.77,5.07A0.996,0.996 0,1 0,4.05 6.6l3.06,-2.57c0.43,-0.35 0.48,-0.98 0.13,-1.4zM11.75,8c-0.41,0 -0.75,0.34 -0.75,0.75v4.68c0,0.35 0.18,0.68 0.49,0.86l3.65,2.19c0.34,0.2 0.78,0.1 0.98,-0.24a0.71,0.71 0,0 0,-0.25 -0.99l-3.37,-2v-4.5c0,-0.41 -0.34,-0.75 -0.75,-0.75zM12,5.9c-3.91,0 -7.1,3.18 -7.1,7.1s3.19,7.1 7.1,7.1 7.1,-3.18 7.1,-7.1 -3.19,-7.1 -7.1,-7.1M12,4a9,9 0,1 1,-0.001 18.001A9,9 0,0 1,12 4z" />
 </vector>

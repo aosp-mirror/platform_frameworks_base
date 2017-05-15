@@ -37,7 +37,7 @@ import com.android.systemui.statusbar.policy.LocationController.LocationChangeCa
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(drawable.ic_signal_location_disable);
+    private final Icon mIcon = ResourceIcon.get(drawable.ic_signal_location);
 
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;

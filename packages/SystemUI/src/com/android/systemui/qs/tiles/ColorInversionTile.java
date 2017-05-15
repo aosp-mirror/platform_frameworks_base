@@ -34,7 +34,7 @@ import com.android.systemui.qs.SecureSetting;
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(drawable.ic_invert_colors_disable);
+    private final Icon mIcon = ResourceIcon.get(drawable.ic_invert_colors);
     private final SecureSetting mSetting;
 
     private boolean mListening;
