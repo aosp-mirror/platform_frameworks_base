@@ -85,11 +85,6 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     }
 
     @Override
-    public void switchStreams(String appName, int subId, String oldServiceId, String newServiceId)
-            throws RemoteException {
-    }
-
-    @Override
     public int getState(String appName, int subId, String serviceId) throws RemoteException {
         return 0;
     }
