@@ -58,4 +58,30 @@ interface ITuner {
     void cancel();
 
     RadioManager.ProgramInfo getProgramInformation();
+
+    /**
+     * @returns {@code true} if the scan was properly scheduled,
+     *          {@code false} if the scan feature is unavailable
+     */
+    boolean startBackgroundScan();
+
+    /**
+     * @returns the list, or null if scan is in progress
+     * @throws IllegalArgumentException if invalid arguments are passed
+     * @throws IllegalStateException if the scan has not been started, client may
+     *         call startBackgroundScan to fix this.
+     */
+    List<RadioManager.ProgramInfo> getProgramList(String filter);
+
+    /**
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     */
+    boolean isAnalogForced();
+
+    /**
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     */
+    void setAnalogForced(boolean isForced);
 }

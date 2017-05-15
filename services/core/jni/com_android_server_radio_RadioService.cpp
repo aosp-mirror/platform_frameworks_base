@@ -54,10 +54,6 @@ static struct {
         jclass clazz;
         jmethodID cstor;
     } Tuner;
-
-    struct {
-        jclass clazz;
-    } RadioService;
 } gjni;
 
 struct ServiceContext {
@@ -203,9 +199,6 @@ void register_android_server_radio_RadioService(JNIEnv *env) {
     gjni.Tuner.clazz = MakeGlobalRefOrDie(env, tunerClass);
     gjni.Tuner.cstor = GetMethodIDOrDie(env, tunerClass, "<init>",
             "(Landroid/hardware/radio/ITunerCallback;IIZ)V");
-
-    auto serviceClass = FindClassOrDie(env, "com/android/server/radio/RadioService");
-    gjni.RadioService.clazz = MakeGlobalRefOrDie(env, serviceClass);
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/radio/RadioService",
             gRadioServiceMethods, NELEM(gRadioServiceMethods));
