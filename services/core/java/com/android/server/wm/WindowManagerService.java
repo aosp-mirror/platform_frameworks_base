@@ -2093,6 +2093,7 @@ public class WindowManagerService extends IWindowManager.Stub
             outFrame.set(win.mCompatFrame);
             outOverscanInsets.set(win.mOverscanInsets);
             outContentInsets.set(win.mContentInsets);
+            win.mLastRelayoutContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             outStableInsets.set(win.mStableInsets);
             outOutsets.set(win.mOutsets);
