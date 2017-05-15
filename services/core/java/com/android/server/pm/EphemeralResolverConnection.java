@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.InstantAppResolveInfo;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -140,7 +141,12 @@ final class EphemeralResolverConnection implements DeathRecipient {
             if (mRemoteInstance != null) {
                 return mRemoteInstance;
             }
-            bindLocked(token);
+            long binderToken = Binder.clearCallingIdentity();
+            try {
+                bindLocked(token);
+            } finally {
+                Binder.restoreCallingIdentity(binderToken);
+            }
             return mRemoteInstance;
         }
     }
