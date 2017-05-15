@@ -354,10 +354,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pretraga"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Prevucite nagore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Prevucite ulevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_priority_introduction (7577965386868311310) -->
-    <skip />
-    <!-- no translation found for zen_alarms_introduction (7034415210361973827) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Neće vas uznemiravati zvukovi i vibracije osim za alarme, podsetnike, događaje i pozivaoce koje navedete. I dalje ćete čuti sve što odaberete da pustite, uključujući muziku, video snimke i igre."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Neće vas uznemiravati zvukovi i vibracije osim za alarme. I dalje ćete čuti sve što odaberete da pustite, uključujući muziku, video snimke i igre."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prilagodi"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ovo blokira SVE zvukove i vibracije uključujući alarme, muziku, video snimke i igre. I dalje ćete moći da upućujete pozive."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ovo blokira SVE zvukove i vibracije uključujući alarme, muziku, video snimke i igre."</string>
@@ -477,8 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ne, hvala"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Podesi"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for volume_zen_end_now (6930243045593601084) -->
-    <skip />
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Isključi odmah"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skupi"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je zakačen"</string>

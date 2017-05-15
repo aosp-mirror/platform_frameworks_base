@@ -354,10 +354,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Bilatu"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lerratu gora hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lerratu ezkerrera hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_priority_introduction (7577965386868311310) -->
-    <skip />
-    <!-- no translation found for zen_alarms_introduction (7034415210361973827) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaeren abisu-tonuak eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pertsonalizatu"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak."</string>
@@ -477,8 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ez, eskerrik asko"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Konfiguratu"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for volume_zen_end_now (6930243045593601084) -->
-    <skip />
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Desaktibatu"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Zabaldu"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Tolestu"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantaila ainguratuta dago"</string>

@@ -673,7 +673,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         public void onMediaButtonSessionChanged(MediaSessionRecord oldMediaButtonSession,
                 MediaSessionRecord newMediaButtonSession) {
             if (DEBUG_KEY_EVENT) {
-                Log.d(TAG, "Media button session will be changed to " + newMediaButtonSession);
+                Log.d(TAG, "Media button session is changed to " + newMediaButtonSession);
             }
             synchronized (mLock) {
                 if (oldMediaButtonSession != null) {
@@ -1505,7 +1505,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         private boolean isVoiceKey(int keyCode) {
-            return keyCode == KeyEvent.KEYCODE_HEADSETHOOK;
+            return keyCode == KeyEvent.KEYCODE_HEADSETHOOK
+                    || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
         }
 
         private boolean isUserSetupComplete() {

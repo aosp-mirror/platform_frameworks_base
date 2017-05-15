@@ -352,10 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Llisca cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Llisca cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_priority_introduction (7577965386868311310) -->
-    <skip />
-    <!-- no translation found for zen_alarms_introduction (7034415210361973827) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalitza"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
@@ -475,8 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configura"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for volume_zen_end_now (6930243045593601084) -->
-    <skip />
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Desactiva ara"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Amplia"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Replega"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La pantalla està fixada"</string>

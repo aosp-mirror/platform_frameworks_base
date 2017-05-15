@@ -16,6 +16,7 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.NO_SESSION;
 
@@ -275,7 +276,7 @@ final class AutofillManagerServiceImpl {
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, flags, packageName);
+                hasCallback, packageName);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -359,8 +360,7 @@ final class AutofillManagerServiceImpl {
     }
 
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
-            @NonNull IBinder appCallbackToken, boolean hasCallback, int flags,
-            @NonNull String packageName) {
+            @NonNull IBinder appCallbackToken, boolean hasCallback, @NonNull String packageName) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -402,18 +402,29 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    void updateSessionLocked(int sessionId, int uid, AutofillId autofillId, Rect virtualBounds,
+    /**
+     * Updates a session and returns whether it should be restarted.
+     */
+    boolean updateSessionLocked(int sessionId, int uid, AutofillId autofillId, Rect virtualBounds,
             AutofillValue value, int action, int flags) {
         final Session session = mSessions.get(sessionId);
         if (session == null || session.uid != uid) {
-            if (sVerbose) {
-                Slog.v(TAG, "updateSessionLocked(): session gone for " + sessionId + "(" + uid
-                        + ")");
+            if ((flags & FLAG_MANUAL_REQUEST) != 0) {
+                if (sDebug) {
+                    Slog.d(TAG, "restarting session " + sessionId + " due to manual request on "
+                            + autofillId);
+                }
+                return true;
             }
-            return;
+            if (sVerbose) {
+                Slog.v(TAG, "updateSessionLocked(): session gone for " + sessionId
+                        + "(" + uid + ")");
+            }
+            return false;
         }
 
         session.updateLocked(autofillId, virtualBounds, value, action, flags);
+        return false;
     }
 
     void removeSessionLocked(int sessionId) {

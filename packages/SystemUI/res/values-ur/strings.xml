@@ -352,10 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"تلاش کریں"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> کیلئے اوپر سلائیڈ کریں۔"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> کیلئے بائیں سلائیڈ کریں۔"</string>
-    <!-- no translation found for zen_priority_introduction (7577965386868311310) -->
-    <skip />
-    <!-- no translation found for zen_alarms_introduction (7034415210361973827) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"الارمز، یاد دہانیوں، ایونٹس اور آپ کے متعین کردہ کالرز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ابھی بھی ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"الارمز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"حسب ضرورت بنائیں"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔ آپ ابھی بھی فون کالز کر سکیں گے۔"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔"</string>
@@ -475,8 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نہیں شکریہ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ترتیب دیں"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>۔ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for volume_zen_end_now (6930243045593601084) -->
-    <skip />
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"ابھی بند کریں"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"سکیڑیں"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
