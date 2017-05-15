@@ -358,10 +358,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Поиск"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведите влево, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_priority_introduction (7577965386868311310) -->
-    <skip />
-    <!-- no translation found for zen_alarms_introduction (7034415210361973827) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Настроить"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"В этом режиме будут отключены вибросигнал и все звуки (в том числе для будильника, музыкального проигрывателя, игр и видео). При этом вы сможете разговаривать по телефону."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"В этом режиме будут отключены вибросигнал и все звуки (в том числе для будильника, музыкального проигрывателя, игр и видео)."</string>
@@ -481,8 +479,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Закрыть"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Настроить"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>."</string>
-    <!-- no translation found for volume_zen_end_now (6930243045593601084) -->
-    <skip />
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Отключить"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Развернуть"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Свернуть"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Блокировка в приложении включена"</string>

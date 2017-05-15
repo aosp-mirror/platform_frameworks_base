@@ -352,10 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Αναζήτηση"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Κύλιση προς τα επάνω για <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Κύλιση προς τα αριστερά για <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_priority_introduction (7577965386868311310) -->
-    <skip />
-    <!-- no translation found for zen_alarms_introduction (7034415210361973827) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Δεν θα ενοχλείστε από ήχους και δονήσεις, παρά μόνο από ξυπνητήρια, υπενθυμίσεις, συμβάντα και καλούντες που έχετε καθορίσει. Θα εξακολουθείτε να ακούτε όλο το περιεχόμενο που επιλέγετε να αναπαραγάγετε, συμπεριλαμβανομένων μουσικής, βίντεο και παιχνιδιών."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Δεν θα ενοχλείστε από ήχους και δονήσεις, παρά μόνο από ξυπνητήρια. Θα εξακολουθείτε να ακούτε όλο το περιεχόμενο που επιλέγετε να αναπαραγάγετε, συμπεριλαμβανομένων μουσικής, βίντεο και παιχνιδιών."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Προσαρμογή"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Αυτή η επιλογή αποκλείει όλους τους ήχους και τις δονήσεις, μεταξύ των οποίων των ξυπνητηριών, της μουσικής, των βίντεο και των παιχνιδιών. Θα εξακολουθείτε να είστε σε θέση να πραγματοποιήσετε τηλεφωνικές κλήσεις."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Αυτή η επιλογή αποκλείει όλους τους ήχους και τις δονήσεις, μεταξύ των οποίων των ξυπνητηριών, της μουσικής, των βίντεο και των παιχνιδιών."</string>
@@ -475,8 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Όχι"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Ρύθμιση"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for volume_zen_end_now (6930243045593601084) -->
-    <skip />
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Απενεργοποίηση τώρα"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Ανάπτυξη"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Σύμπτυξη"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Η οθόνη καρφιτσώθηκε"</string>
