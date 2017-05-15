@@ -2900,6 +2900,7 @@ public abstract class Context {
             WIFI_AWARE_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
+            //@hide: LOWPAN_SERVICE,
             //@hide: WIFI_RTT_SERVICE,
             //@hide: ETHERNET_SERVICE,
             WIFI_RTT_SERVICE,
@@ -3425,6 +3426,18 @@ public abstract class Context {
      */
     @SystemApi
     public static final String WIFI_RTT_SERVICE = "rttmanager";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.lowpan.LowpanManager} for handling management of
+     * LoWPAN access.
+     *
+     * @see #getSystemService
+     * @see android.net.lowpan.LowpanManager
+     *
+     * @hide
+     */
+    public static final String LOWPAN_SERVICE = "lowpan";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
