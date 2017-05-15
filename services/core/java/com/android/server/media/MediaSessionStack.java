@@ -124,9 +124,7 @@ class MediaSessionStack {
             // When the media button session is removed, nullify the media button session and do not
             // search for the alternative media session within the app. It's because the alternative
             // media session might be a dummy which isn't able to handle the media key events.
-            mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
-                    mMediaButtonSession, null);
-            mMediaButtonSession = null;
+            updateMediaButtonSession(null);
         }
         clearCache(record.getUserId());
     }
@@ -163,9 +161,7 @@ class MediaSessionStack {
             MediaSessionRecord newMediaButtonSession =
                     findMediaButtonSession(mMediaButtonSession.getUid());
             if (newMediaButtonSession != mMediaButtonSession) {
-                mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
-                        mMediaButtonSession, newMediaButtonSession);
-                mMediaButtonSession = newMediaButtonSession;
+                updateMediaButtonSession(newMediaButtonSession);
             }
         }
     }
@@ -199,9 +195,7 @@ class MediaSessionStack {
                 // Found the media button session.
                 mAudioPlaybackMonitor.cleanUpAudioPlaybackUids(mediaButtonSession.getUid());
                 if (mMediaButtonSession != mediaButtonSession) {
-                    mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
-                            mMediaButtonSession, mediaButtonSession);
-                    mMediaButtonSession = mediaButtonSession;
+                    updateMediaButtonSession(mediaButtonSession);
                 }
                 return;
             }
@@ -260,6 +254,13 @@ class MediaSessionStack {
      */
     public MediaSessionRecord getMediaButtonSession() {
         return mMediaButtonSession;
+    }
+
+    private void updateMediaButtonSession(MediaSessionRecord newMediaButtonSession) {
+        MediaSessionRecord oldMediaButtonSession = mMediaButtonSession;
+        mMediaButtonSession = newMediaButtonSession;
+        mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
+                oldMediaButtonSession, newMediaButtonSession);
     }
 
     public MediaSessionRecord getDefaultVolumeSession() {
