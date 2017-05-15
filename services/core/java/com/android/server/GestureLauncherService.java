@@ -71,14 +71,18 @@ public class GestureLauncherService extends SystemService {
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
+    private final CameraLiftTriggerEventListener mCameraLiftTriggerListener =
+            new CameraLiftTriggerEventListener();
 
     private Sensor mCameraLaunchSensor;
+    private Sensor mCameraLiftTriggerSensor;
     private Context mContext;
     private final MetricsLogger mMetricsLogger;
 
     /** The wake lock held when a gesture is detected. */
     private WakeLock mWakeLock;
-    private boolean mRegistered;
+    private boolean mCameraLaunchRegistered;
+    private boolean mCameraLiftRegistered;
     private int mUserId;
 
     // Below are fields used for event logging only.
@@ -161,6 +165,9 @@ public class GestureLauncherService extends SystemService {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED),
                 false, mSettingObserver, mUserId);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED),
+                false, mSettingObserver, mUserId);
     }
 
     private void updateCameraRegistered() {
@@ -169,6 +176,12 @@ public class GestureLauncherService extends SystemService {
             registerCameraLaunchGesture(resources);
         } else {
             unregisterCameraLaunchGesture();
+        }
+
+        if (isCameraLiftTriggerSettingEnabled(mContext, mUserId)) {
+            registerCameraLiftTrigger(resources);
+        } else {
+            unregisterCameraLiftTrigger();
         }
     }
 
@@ -181,8 +194,8 @@ public class GestureLauncherService extends SystemService {
     }
 
     private void unregisterCameraLaunchGesture() {
-        if (mRegistered) {
-            mRegistered = false;
+        if (mCameraLaunchRegistered) {
+            mCameraLaunchRegistered = false;
             mCameraGestureOnTimeMs = 0L;
             mCameraGestureLastEventTime = 0L;
             mCameraGestureSensor1LastOnTimeMs = 0;
@@ -199,7 +212,7 @@ public class GestureLauncherService extends SystemService {
      * Registers for the camera launch gesture.
      */
     private void registerCameraLaunchGesture(Resources resources) {
-        if (mRegistered) {
+        if (mCameraLaunchRegistered) {
             return;
         }
         mCameraGestureOnTimeMs = SystemClock.elapsedRealtime();
@@ -209,7 +222,7 @@ public class GestureLauncherService extends SystemService {
         int cameraLaunchGestureId = resources.getInteger(
                 com.android.internal.R.integer.config_cameraLaunchGestureSensorType);
         if (cameraLaunchGestureId != -1) {
-            mRegistered = false;
+            mCameraLaunchRegistered = false;
             String sensorName = resources.getString(
                 com.android.internal.R.string.config_cameraLaunchGestureSensorStringType);
             mCameraLaunchSensor = sensorManager.getDefaultSensor(
@@ -221,7 +234,7 @@ public class GestureLauncherService extends SystemService {
             // makes the code more robust.
             if (mCameraLaunchSensor != null) {
                 if (sensorName.equals(mCameraLaunchSensor.getStringType())) {
-                    mRegistered = sensorManager.registerListener(mGestureListener,
+                    mCameraLaunchRegistered = sensorManager.registerListener(mGestureListener,
                             mCameraLaunchSensor, 0);
                 } else {
                     String message = String.format("Wrong configuration. Sensor type and sensor "
@@ -230,9 +243,58 @@ public class GestureLauncherService extends SystemService {
                     throw new RuntimeException(message);
                 }
             }
-            if (DBG) Slog.d(TAG, "Camera launch sensor registered: " + mRegistered);
+            if (DBG) Slog.d(TAG, "Camera launch sensor registered: " + mCameraLaunchRegistered);
         } else {
             if (DBG) Slog.d(TAG, "Camera launch sensor is not specified.");
+        }
+    }
+
+    private void unregisterCameraLiftTrigger() {
+        if (mCameraLiftRegistered) {
+            mCameraLiftRegistered = false;
+
+            SensorManager sensorManager = (SensorManager) mContext.getSystemService(
+                    Context.SENSOR_SERVICE);
+            sensorManager.unregisterListener(mCameraLiftTriggerListener);
+        }
+    }
+
+    /**
+     * Registers for the camera lift trigger.
+     */
+    private void registerCameraLiftTrigger(Resources resources) {
+        if (mCameraLiftRegistered) {
+            return;
+        }
+        SensorManager sensorManager = (SensorManager) mContext.getSystemService(
+                Context.SENSOR_SERVICE);
+        int cameraLiftTriggerId = resources.getInteger(
+                com.android.internal.R.integer.config_cameraLiftTriggerSensorType);
+        if (cameraLiftTriggerId != -1) {
+            mCameraLiftRegistered = false;
+            String sensorName = resources.getString(
+                com.android.internal.R.string.config_cameraLiftTriggerSensorStringType);
+            mCameraLiftTriggerSensor = sensorManager.getDefaultSensor(
+                    cameraLiftTriggerId,
+                    false /*wakeUp*/);
+
+            // Compare the camera lift trigger string type to that in the resource file to make
+            // sure we are registering the correct sensor. This is redundant check, it
+            // makes the code more robust.
+            if (mCameraLiftTriggerSensor != null) {
+                if (sensorName.equals(mCameraLiftTriggerSensor.getStringType())) {
+                    mCameraLiftRegistered = sensorManager.registerListener(mCameraLiftTriggerListener,
+                            mCameraLiftTriggerSensor, 0);
+                } else {
+                    String message = String.format("Wrong configuration. Sensor type and sensor "
+                            + "string type don't match: %s in resources, %s in the sensor.",
+                            sensorName, mCameraLiftTriggerSensor.getStringType());
+                    throw new RuntimeException(message);
+                }
+            }
+            if (DBG) Slog.d(TAG, "Camera lift trigger sensor registered: " + mCameraLiftRegistered);
+        } else {
+            if (DBG) Slog.d(TAG, "Camera lift trigger sensor is not specified.");
         }
     }
 
@@ -246,6 +308,12 @@ public class GestureLauncherService extends SystemService {
         return isCameraDoubleTapPowerEnabled(context.getResources())
                 && (Settings.Secure.getIntForUser(context.getContentResolver(),
                         Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, 0, userId) == 0);
+    }
+
+    public static boolean isCameraLiftTriggerSettingEnabled(Context context, int userId) {
+        return isCameraLiftTriggerEnabled(context.getResources())
+                && (Settings.Secure.getIntForUser(context.getContentResolver(),
+                        Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, 0, userId) != 0);
     }
 
     /**
@@ -263,11 +331,18 @@ public class GestureLauncherService extends SystemService {
                 com.android.internal.R.bool.config_cameraDoubleTapPowerGestureEnabled);
     }
 
+    public static boolean isCameraLiftTriggerEnabled(Resources resources) {
+        boolean configSet = resources.getInteger(
+                com.android.internal.R.integer.config_cameraLiftTriggerSensorType) != -1;
+        return configSet;
+    }
+
     /**
      * Whether GestureLauncherService should be enabled according to system properties.
      */
     public static boolean isGestureLauncherEnabled(Resources resources) {
-        return isCameraLaunchEnabled(resources) || isCameraDoubleTapPowerEnabled(resources);
+        return isCameraLaunchEnabled(resources) || isCameraDoubleTapPowerEnabled(resources) ||
+                isCameraLiftTriggerEnabled(resources);
     }
 
     public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
@@ -296,7 +371,7 @@ public class GestureLauncherService extends SystemService {
         if (launched) {
             Slog.i(TAG, "Power button double tap gesture detected, launching camera. Interval="
                     + powerTapInterval + "ms");
-            launched = handleCameraLaunchGesture(false /* useWakelock */,
+            launched = handleCameraGesture(false /* useWakelock */,
                     StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
             if (launched) {
                 mMetricsLogger.action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
@@ -313,17 +388,17 @@ public class GestureLauncherService extends SystemService {
      * @return true if camera was launched, false otherwise.
      */
     @VisibleForTesting
-    boolean handleCameraLaunchGesture(boolean useWakelock, int source) {
+    boolean handleCameraGesture(boolean useWakelock, int source) {
         boolean userSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
         if (!userSetupComplete) {
             if (DBG) Slog.d(TAG, String.format(
-                    "userSetupComplete = %s, ignoring camera launch gesture.",
+                    "userSetupComplete = %s, ignoring camera gesture.",
                     userSetupComplete));
             return false;
         }
         if (DBG) Slog.d(TAG, String.format(
-                "userSetupComplete = %s, performing camera launch gesture.",
+                "userSetupComplete = %s, performing camera gesture.",
                 userSetupComplete));
 
         if (useWakelock) {
@@ -361,7 +436,7 @@ public class GestureLauncherService extends SystemService {
     private final class GestureEventListener implements SensorEventListener {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (!mRegistered) {
+            if (!mCameraLaunchRegistered) {
               if (DBG) Slog.d(TAG, "Ignoring gesture event because it's unregistered.");
               return;
             }
@@ -371,7 +446,7 @@ public class GestureLauncherService extends SystemService {
                     Slog.d(TAG, String.format("Received a camera launch event: " +
                             "values=[%.4f, %.4f, %.4f].", values[0], values[1], values[2]));
                 }
-                if (handleCameraLaunchGesture(true /* useWakelock */,
+                if (handleCameraGesture(true /* useWakelock */,
                         StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)) {
                     mMetricsLogger.action(MetricsEvent.ACTION_WIGGLE_CAMERA_GESTURE);
                     trackCameraLaunchEvent(event);
@@ -428,6 +503,33 @@ public class GestureLauncherService extends SystemService {
             mCameraGestureSensor1LastOnTimeMs = sensor1OnTime;
             mCameraGestureSensor2LastOnTimeMs = sensor2OnTime;
             mCameraLaunchLastEventExtra = extra;
+        }
+    }
+
+    private final class CameraLiftTriggerEventListener implements SensorEventListener {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (!mCameraLiftRegistered) {
+              if (DBG) Slog.d(TAG, "Ignoring camera lift event because it's unregistered.");
+              return;
+            }
+            if (event.sensor == mCameraLiftTriggerSensor) {
+                if (DBG) {
+                    float[] values = event.values;
+                    Slog.d(TAG, String.format("Received a camera lift trigger event: " +
+                            "values=[%.4f].", values[0]));
+                }
+                if (handleCameraGesture(true /* useWakelock */,
+                        StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER)) {
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_CAMERA_LIFT_TRIGGER);
+                }
+                return;
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            // Ignored.
         }
     }
 }
