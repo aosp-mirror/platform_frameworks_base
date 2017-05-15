@@ -95,6 +95,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -164,6 +165,7 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
@@ -546,6 +548,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     protected ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -4394,7 +4397,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         checkBarModes();
         updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
         mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mStatusBarKeyguardViewManager.isSecure(),
+                mUnlockMethodCache.isMethodSecure(),
                 mStatusBarKeyguardViewManager.isOccluded());
         Trace.endSection();
     }
@@ -6973,11 +6976,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
-        try {
-            mBarService.onNotificationExpansionChanged(key, userAction, expanded);
-        } catch (RemoteException e) {
-            // Ignore.
-        }
+        mUiOffloadThread.submit(() -> {
+            try {
+                mBarService.onNotificationExpansionChanged(key, userAction, expanded);
+            } catch (RemoteException e) {
+                // Ignore.
+            }
+        });
     }
 
     public boolean isKeyguardSecure() {
