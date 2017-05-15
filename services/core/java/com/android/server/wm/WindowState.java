@@ -257,6 +257,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     final Rect mContentInsets = new Rect();
     final Rect mLastContentInsets = new Rect();
+
+    /**
+     * The last content insets returned to the client in relayout. We use
+     * these in the bounds animation to ensure we only observe inset changes
+     * at the same time that a client resizes it's surface so that we may use
+     * the geometryAppliesWithResize synchronization mechanism to keep
+     * the contents in place.
+     */
+    final Rect mLastRelayoutContentInsets = new Rect();
+
     private boolean mContentInsetsChanged;
 
     /**
