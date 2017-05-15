@@ -248,7 +248,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             mRadialTimePickerHeader.setVisibility(View.GONE);
             mTextInputPickerHeader.setVisibility(View.VISIBLE);
             mTextInputPickerView.setVisibility(View.VISIBLE);
-            mRadialTimePickerModeButton.setImageResource(R.drawable.btn_event_material);
+            mRadialTimePickerModeButton.setImageResource(R.drawable.btn_clock_material);
             mRadialTimePickerModeButton.setContentDescription(
                     mRadialTimePickerModeEnabledDescription);
             mRadialPickerModeEnabled = false;
