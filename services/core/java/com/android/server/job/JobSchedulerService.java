@@ -63,6 +63,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 import android.util.Slog;
@@ -751,6 +752,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private void cancelJobsForNonExistentUsers() {
+        UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        synchronized (mLock) {
+            mJobs.removeJobsOfNonUsers(umi.getUserIds());
+        }
+    }
+
     void cancelJobsForPackageAndUid(String pkgName, int uid) {
         synchronized (mLock) {
             final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
@@ -941,6 +949,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
             }
+            // Remove any jobs that are not associated with any of the current users.
+            cancelJobsForNonExistentUsers();
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
                 // Let's go!
