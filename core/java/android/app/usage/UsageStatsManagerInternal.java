@@ -127,7 +127,12 @@ public abstract class UsageStatsManagerInternal {
 
     public abstract void applyRestoredPayload(int user, String key, byte[] payload);
 
-    /* Cache Quota Service API */
+    /**
+     * Return usage stats.
+     *
+     * @param obfuscateInstantApps whether instant app package names need to be obfuscated in the
+     *     result.
+     */
     public abstract List<UsageStats> queryUsageStatsForUser(
-            int userId, int interval, long beginTime, long endTime);
+            int userId, int interval, long beginTime, long endTime, boolean obfuscateInstantApps);
 }
