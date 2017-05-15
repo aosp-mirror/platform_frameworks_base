@@ -402,7 +402,7 @@ public interface ViewParent {
      * descendants has changed and that the structure of the subtree is
      * different.
      * @param child The direct child whose subtree has changed.
-     * @param source The descendant view that changed.
+     * @param source The descendant view that changed. May not be {@code null}.
      * @param changeType A bit mask of the types of changes that occurred. One
      *            or more of:
      *            <ul>
@@ -412,7 +412,8 @@ public interface ViewParent {
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
      *            </ul>
      */
-    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType);
+    public void notifySubtreeAccessibilityStateChanged(
+            View child, @NonNull View source, int changeType);
 
     /**
      * Tells if this view parent can resolve the layout direction.
