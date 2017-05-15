@@ -835,6 +835,29 @@ public class ConnectivityManager {
     }
 
     /**
+     * Checks if a VPN app supports always-on mode.
+     *
+     * In order to support the always-on feature, an app has to
+     * <ul>
+     *     <li>target {@link VERSION_CODES#N API 24} or above, and
+     *     <li>not opt out through the {@link VpnService#METADATA_SUPPORTS_ALWAYS_ON} meta-data
+     *         field.
+     * </ul>
+     *
+     * @param userId The identifier of the user for whom the VPN app is installed.
+     * @param vpnPackage The canonical package name of the VPN app.
+     * @return {@code true} if and only if the VPN app exists and supports always-on mode.
+     * @hide
+     */
+    public boolean isAlwaysOnVpnPackageSupportedForUser(int userId, @Nullable String vpnPackage) {
+        try {
+            return mService.isAlwaysOnVpnPackageSupported(userId, vpnPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Configures an always-on VPN connection through a specific application.
      * This connection is automatically granted and persisted after a reboot.
      *

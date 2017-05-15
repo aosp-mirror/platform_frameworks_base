@@ -123,6 +123,7 @@ interface IConnectivityManager
     VpnInfo[] getAllVpnInfo();
 
     boolean updateLockdownVpn();
+    boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
     boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown);
     String getAlwaysOnVpnPackage(int userId);
 
