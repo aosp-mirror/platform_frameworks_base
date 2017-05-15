@@ -260,6 +260,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"ອັບເດດ"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"ສະຖານະເຄືອຂ່າຍ"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ແຈ້ງເຕືອນເຄືອຂ່າຍ"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"ສະຖານະ VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"ການເບິ່ງແຍງອຸປະກອນ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ການເຕືອນ"</string>
@@ -1099,6 +1101,14 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarm sounds"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Notification sounds"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"ບໍ່ຮູ້ຈັກ"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
+      <item quantity="one">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
+      <item quantity="one">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ເຂົ້າສູ່ລະບົບເຄືອຂ່າຍ Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

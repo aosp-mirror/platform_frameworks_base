@@ -260,6 +260,8 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"යාවත්කාලීන කිරීම්"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"ජාල තත්ත්වය"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ජාල ඇඟවීම්"</string>
+    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
+    <skip />
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN තත්ත්වය"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"උපාංග පරිපාලනය"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ඇඟවීම්"</string>
@@ -1101,6 +1103,14 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"එලාම හඬ"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"දැනුම්දීම් හඬ"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"නොදනී"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Wi-Fi ජාල තිබේ</item>
+      <item quantity="other">Wi-Fi ජාල තිබේ</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">විවෘත Wi-Fi ජාල තිබේ</item>
+      <item quantity="other">විවෘත Wi-Fi ජාල තිබේ</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ජාලයට පුරනය වන්න"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ජාලයට පුරනය වන්න"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
