@@ -115,25 +115,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mPm = pm;
         mAppSettingsClickListener = onAppSettingsClick;
         mStartingUserImportance = startingUserImportance;
-        int numTotalChannels = 1;
-        numTotalChannels = iNotificationManager.getNumNotificationChannelsForPackage(
-                pkg, mAppUid, false /* includeDeleted */);
-        if (mNotificationChannels.isEmpty()) {
-            throw new IllegalArgumentException("bindNotification requires at least one channel");
-        } else  {
-            if (mNotificationChannels.size() == 1) {
-                mSingleNotificationChannel = mNotificationChannels.get(0);
-                // Special behavior for the Default channel if no other channels have been defined.
-                mIsSingleDefaultChannel =
-                        (mSingleNotificationChannel.getId()
-                                .equals(NotificationChannel.DEFAULT_CHANNEL_ID) &&
-                        numTotalChannels <= 1);
-            } else {
-                mSingleNotificationChannel = null;
-                mIsSingleDefaultChannel = false;
-            }
-        }
-
         mAppName = mPkg;
         Drawable pkgicon = null;
         CharSequence channelNameText = "";
@@ -154,6 +135,24 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             pkgicon = pm.getDefaultActivityIcon();
         }
         ((ImageView) findViewById(R.id.pkgicon)).setImageDrawable(pkgicon);
+
+        int numTotalChannels = iNotificationManager.getNumNotificationChannelsForPackage(
+                pkg, mAppUid, false /* includeDeleted */);
+        if (mNotificationChannels.isEmpty()) {
+            throw new IllegalArgumentException("bindNotification requires at least one channel");
+        } else  {
+            if (mNotificationChannels.size() == 1) {
+                mSingleNotificationChannel = mNotificationChannels.get(0);
+                // Special behavior for the Default channel if no other channels have been defined.
+                mIsSingleDefaultChannel =
+                        (mSingleNotificationChannel.getId()
+                                .equals(NotificationChannel.DEFAULT_CHANNEL_ID) &&
+                        numTotalChannels <= 1);
+            } else {
+                mSingleNotificationChannel = null;
+                mIsSingleDefaultChannel = false;
+            }
+        }
 
         String channelsDescText;
         mNumChannelsView = findViewById(R.id.num_channels_desc);
