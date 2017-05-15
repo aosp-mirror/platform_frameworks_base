@@ -207,7 +207,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         public boolean handleMessage(Message msg) {
             // Cache package manager data without the lock held
             final PackageInfo pkgInfo = mPm.getPackageInfo(
-                    params.appPackageName, PackageManager.GET_SIGNATURES /*flags*/, userId);
+                    params.appPackageName, PackageManager.GET_SIGNATURES
+                            | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
             final ApplicationInfo appInfo = mPm.getApplicationInfo(
                     params.appPackageName, 0, userId);
 
