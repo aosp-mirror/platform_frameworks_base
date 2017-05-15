@@ -69,17 +69,6 @@ public class StreamingService {
     public void stopStreaming() {
     }
 
-    /**
-     * Switch this stream to a different service.  Used for smooth transitions.
-     *
-     * This may throw a RemoteException.
-     *
-     * Asynchronous errors through the listener include any of the errors except
-     * <li>ERROR_MSDC_UNABLE_TO_INITIALIZE</li>
-     */
-    public void switchStream(StreamingServiceInfo streamingServiceInfo) {
-    }
-
     public void dispose() {
     }
 
