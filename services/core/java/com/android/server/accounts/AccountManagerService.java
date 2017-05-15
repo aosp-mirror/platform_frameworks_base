@@ -5922,6 +5922,13 @@ public class AccountManagerService
                 return;
             }
 
+            int visibility =
+                resolveAccountVisibility(account, packageName, getUserAccounts(userId));
+            if (visibility == AccountManager.VISIBILITY_NOT_VISIBLE) {
+                Slog.w(TAG, "requestAccountAccess: account is hidden");
+                return;
+            }
+
             if (AccountManagerService.this.hasAccountAccess(account, packageName,
                     new UserHandle(userId))) {
                 Bundle result = new Bundle();
