@@ -270,7 +270,7 @@ public class KeyguardIndicationController {
                 return;
             }
 
-            if (!mUserManager.isUserUnlocked(ActivityManager.getCurrentUser())) {
+            if (!mUserManager.isUserUnlocked(KeyguardUpdateMonitor.getCurrentUser())) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
                 mTextView.setTextColor(Color.WHITE);
 
@@ -365,6 +365,9 @@ public class KeyguardIndicationController {
     };
 
     public void setDozing(boolean dozing) {
+        if (mDozing == dozing) {
+            return;
+        }
         mDozing = dozing;
         updateIndication();
         updateDisclosure();

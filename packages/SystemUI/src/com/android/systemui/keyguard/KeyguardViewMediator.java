@@ -51,6 +51,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.provider.Settings.System;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
@@ -76,9 +77,13 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.LatencyTracker;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.phone.FingerprintUnlockController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -195,6 +200,7 @@ public class KeyguardViewMediator extends SystemUI {
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     private boolean mSystemReady;
     private boolean mBootCompleted;
@@ -1199,18 +1205,20 @@ public class KeyguardViewMediator extends SystemUI {
             updateInputRestrictedLocked();
         }
     }
+
     private void updateInputRestrictedLocked() {
         boolean inputRestricted = isInputRestricted();
         if (mInputRestricted != inputRestricted) {
             mInputRestricted = inputRestricted;
             int size = mKeyguardStateCallbacks.size();
             for (int i = size - 1; i >= 0; i--) {
+                final IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
                 try {
-                    mKeyguardStateCallbacks.get(i).onInputRestrictedStateChanged(inputRestricted);
+                    callback.onInputRestrictedStateChanged(inputRestricted);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to call onDeviceProvisioned", e);
                     if (e instanceof DeadObjectException) {
-                        mKeyguardStateCallbacks.remove(i);
+                        mKeyguardStateCallbacks.remove(callback);
                     }
                 }
             }
@@ -1569,9 +1577,11 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleKeyguardDone() {
         Trace.beginSection("KeyguardViewMediator#handleKeyguardDone");
         final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
-        if (mLockPatternUtils.isSecure(currentUser)) {
-            mLockPatternUtils.getDevicePolicyManager().reportKeyguardDismissed(currentUser);
-        }
+        mUiOffloadThread.submit(() -> {
+            if (mLockPatternUtils.isSecure(currentUser)) {
+                mLockPatternUtils.getDevicePolicyManager().reportKeyguardDismissed(currentUser);
+            }
+        });
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
         synchronized (this) {
             resetKeyguardDonePendingLocked();
@@ -1611,10 +1621,12 @@ public class KeyguardViewMediator extends SystemUI {
                 final UserHandle currentUser = new UserHandle(currentUserId);
                 final UserManager um = (UserManager) mContext.getSystemService(
                         Context.USER_SERVICE);
-                for (int profileId : um.getProfileIdsWithDisabled(currentUser.getIdentifier())) {
-                    mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, UserHandle.of(profileId));
-                }
-                getLockPatternUtils().userPresent(currentUserId);
+                mUiOffloadThread.submit(() -> {
+                    for (int profileId : um.getProfileIdsWithDisabled(currentUser.getIdentifier())) {
+                        mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, UserHandle.of(profileId));
+                    }
+                    getLockPatternUtils().userPresent(currentUserId);
+                });
             } else {
                 mBootSendUserPresent = true;
             }
@@ -1659,11 +1671,18 @@ public class KeyguardViewMediator extends SystemUI {
                 if (mAudioManager == null) return;
                 mUiSoundsStreamType = mAudioManager.getUiSoundsStreamType();
             }
-            // If the stream is muted, don't play the sound
-            if (mAudioManager.isStreamMute(mUiSoundsStreamType)) return;
 
-            mLockSoundStreamId = mLockSounds.play(soundId,
-                    mLockSoundVolume, mLockSoundVolume, 1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/);
+            mUiOffloadThread.submit(() -> {
+                // If the stream is muted, don't play the sound
+                if (mAudioManager.isStreamMute(mUiSoundsStreamType)) return;
+
+                int id = mLockSounds.play(soundId,
+                        mLockSoundVolume, mLockSoundVolume, 1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/);
+                synchronized (this) {
+                    mLockSoundStreamId = id;
+                }
+            });
+
         }
     }
 
@@ -1671,13 +1690,13 @@ public class KeyguardViewMediator extends SystemUI {
         playSound(mTrustedSoundId);
     }
 
-    private void updateActivityLockScreenState() {
-        Trace.beginSection("KeyguardViewMediator#updateActivityLockScreenState");
-        try {
-            ActivityManager.getService().setLockScreenShown(mShowing);
-        } catch (RemoteException e) {
-        }
-        Trace.endSection();
+    private void updateActivityLockScreenState(boolean showing) {
+        mUiOffloadThread.submit(() -> {
+            try {
+                ActivityManager.getService().setLockScreenShown(showing);
+            } catch (RemoteException e) {
+            }
+        });
     }
 
     /**
@@ -1846,7 +1865,10 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
             if (!(mContext instanceof Activity)) {
-                mStatusBarManager.disable(flags);
+                final int finalFlags = flags;
+                mUiOffloadThread.submit(() -> {
+                    mStatusBarManager.disable(finalFlags);
+                });
             }
         }
     }
@@ -2044,18 +2066,21 @@ public class KeyguardViewMediator extends SystemUI {
             mShowing = showing;
             int size = mKeyguardStateCallbacks.size();
             for (int i = size - 1; i >= 0; i--) {
+                IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
                 try {
-                    mKeyguardStateCallbacks.get(i).onShowingStateChanged(showing);
+                    callback.onShowingStateChanged(showing);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to call onShowingStateChanged", e);
                     if (e instanceof DeadObjectException) {
-                        mKeyguardStateCallbacks.remove(i);
+                        mKeyguardStateCallbacks.remove(callback);
                     }
                 }
             }
             updateInputRestrictedLocked();
-            mTrustManager.reportKeyguardShowingChanged();
-            updateActivityLockScreenState();
+            mUiOffloadThread.submit(() -> {
+                mTrustManager.reportKeyguardShowingChanged();
+            });
+            updateActivityLockScreenState(showing);
         }
     }
 
