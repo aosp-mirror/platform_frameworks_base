@@ -12,6 +12,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under,src)
 # regressions are reflected in test data
 LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res \
+    frameworks/support/core-ui/res \
     frameworks/support/design/res \
     frameworks/support/v7/appcompat/res \
     frameworks/support/v7/cardview/res \
