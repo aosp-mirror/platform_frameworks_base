@@ -3480,6 +3480,31 @@ public class PackageManagerService extends IPackageManager.Stub
         return cur;
     }
 
+    /**
+     * Returns whether or not a full application can see an instant application.
+     * <p>
+     * Currently, there are three cases in which this can occur:
+     * <ol>
+     * <li>The calling application is a "special" process. The special
+     *     processes are {@link Process#SYSTEM_UID}, {@link Process#SHELL_UID}
+     *     and {@code 0}</li>
+     * <li>The calling application has the permission
+     *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}</li>
+     * <li>[TODO] The calling application is the default launcher on the
+     *     system partition.</li>
+     * </ol>
+     */
+    private boolean canAccessInstantApps(int callingUid) {
+        final boolean isSpecialProcess =
+                callingUid == Process.SYSTEM_UID
+                        || callingUid == Process.SHELL_UID
+                        || callingUid == 0;
+        final boolean allowMatchInstant =
+                isSpecialProcess
+                        || mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.ACCESS_INSTANT_APPS) == PERMISSION_GRANTED;
+        return allowMatchInstant;
+    }
     private PackageInfo generatePackageInfo(PackageSetting ps, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
         if (ps == null) {
@@ -3489,19 +3514,15 @@ public class PackageManagerService extends IPackageManager.Stub
         if (p == null) {
             return null;
         }
+        final int callingUid =  Binder.getCallingUid();
         // Filter out ephemeral app metadata:
         //   * The system/shell/root can see metadata for any app
         //   * An installed app can see metadata for 1) other installed apps
         //     and 2) ephemeral apps that have explicitly interacted with it
         //   * Ephemeral apps can only see their own data and exposed installed apps
         //   * Holding a signature permission allows seeing instant apps
-        final int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
-        if (callingAppId != Process.SYSTEM_UID
-                && callingAppId != Process.SHELL_UID
-                && callingAppId != Process.ROOT_UID
-                && checkUidPermission(Manifest.permission.ACCESS_INSTANT_APPS,
-                        Binder.getCallingUid()) != PackageManager.PERMISSION_GRANTED) {
-            final String instantAppPackageName = getInstantAppPackageName(Binder.getCallingUid());
+        if (!canAccessInstantApps(callingUid)) {
+            final String instantAppPackageName = getInstantAppPackageName(callingUid);
             if (instantAppPackageName != null) {
                 // ephemeral apps can only get information on themselves or
                 // installed apps that are exposed.
@@ -3512,6 +3533,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 if (ps.getInstantApp(userId)) {
                     // only get access to the ephemeral app if we've been granted access
+                    final int callingAppId = UserHandle.getAppId(callingUid);
                     if (!mInstantAppRegistry.isInstantAccessGranted(
                             userId, callingAppId, ps.appId)) {
                         return null;
@@ -23843,6 +23865,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             synchronized (mPackages) {
                 return getUidTargetSdkVersionLockedLPr(uid);
             }
+        }
+
+        @Override
+        public boolean canAccessInstantApps(int callingUid) {
+            return PackageManagerService.this.canAccessInstantApps(callingUid);
         }
     }
 
