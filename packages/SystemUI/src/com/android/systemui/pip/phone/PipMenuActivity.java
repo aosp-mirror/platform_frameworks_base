@@ -573,13 +573,11 @@ public class PipMenuActivity extends Activity {
     }
 
     private void cancelDelayedFinish() {
-        View v = getWindow().getDecorView();
-        v.removeCallbacks(mFinishRunnable);
+        mHandler.removeCallbacks(mFinishRunnable);
     }
 
     private void repostDelayedFinish(long delay) {
-        View v = getWindow().getDecorView();
-        v.removeCallbacks(mFinishRunnable);
-        v.postDelayed(mFinishRunnable, delay);
+        mHandler.removeCallbacks(mFinishRunnable);
+        mHandler.postDelayed(mFinishRunnable, delay);
     }
 }
