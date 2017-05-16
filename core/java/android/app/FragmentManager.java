@@ -2303,11 +2303,15 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
      */
     private void completeExecute(BackStackRecord record, boolean isPop, boolean runTransitions,
             boolean moveToState) {
+        if (isPop) {
+            record.executePopOps(moveToState);
+        } else {
+            record.executeOps();
+        }
         ArrayList<BackStackRecord> records = new ArrayList<>(1);
         ArrayList<Boolean> isRecordPop = new ArrayList<>(1);
         records.add(record);
         isRecordPop.add(isPop);
-        executeOps(records, isRecordPop, 0, 1);
         if (runTransitions) {
             FragmentTransition.startTransitions(this, records, isRecordPop, 0, 1, true);
         }
