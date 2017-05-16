@@ -25,11 +25,14 @@ import static android.system.OsConstants.S_ISDIR;
 import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IXOTH;
 
-import android.app.PackageInstallObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
@@ -46,7 +49,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
-import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageListener;
 import android.os.storage.StorageManager;
@@ -67,9 +69,13 @@ import com.android.internal.content.PackageHelper;
 
 import dalvik.system.VMRuntime;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -77,6 +83,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 public class PackageManagerTests extends AndroidTestCase {
@@ -130,29 +137,7 @@ public class PackageManagerTests extends AndroidTestCase {
         super.tearDown();
     }
 
-    private class TestInstallObserver extends PackageInstallObserver {
-        public int returnCode;
-
-        private boolean doneFlag = false;
-
-        @Override
-        public void onPackageInstalled(String basePackageName, int returnCode, String msg,
-                Bundle extras) {
-            Log.d(TAG, "onPackageInstalled: code=" + returnCode + ", msg=" + msg + ", extras="
-                    + extras);
-            synchronized (this) {
-                this.returnCode = returnCode;
-                doneFlag = true;
-                notifyAll();
-            }
-        }
-
-        public boolean isDone() {
-            return doneFlag;
-        }
-    }
-
-    abstract class GenericReceiver extends BroadcastReceiver {
+    private abstract static class GenericReceiver extends BroadcastReceiver {
         private boolean doneFlag = false;
 
         boolean received = false;
@@ -184,7 +169,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    class InstallReceiver extends GenericReceiver {
+    private static class InstallReceiver extends GenericReceiver {
         String pkgName;
 
         InstallReceiver(String pkgName) {
@@ -208,100 +193,152 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    private static class LocalIntentReceiver {
+        private final SynchronousQueue<Intent> mResult = new SynchronousQueue<>();
+
+        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+            @Override
+            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+                try {
+                    mResult.offer(intent, 5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        public IntentSender getIntentSender() {
+            return new IntentSender((IIntentSender) mLocalSender);
+        }
+
+        public Intent getResult() {
+            try {
+                return mResult.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private PackageManager getPm() {
         return mContext.getPackageManager();
     }
 
-    private IPackageManager getIPm() {
-        IPackageManager ipm  = IPackageManager.Stub.asInterface(
-                ServiceManager.getService("package"));
-        return ipm;
+    private PackageInstaller getPi() {
+        return getPm().getPackageInstaller();
     }
 
-    public void invokeInstallPackage(Uri packageURI, int flags, GenericReceiver receiver,
-            boolean shouldSucceed) {
-        TestInstallObserver observer = new TestInstallObserver();
-        mContext.registerReceiver(receiver, receiver.filter);
+    private void writeSplitToInstallSession(PackageInstaller.Session session, String inPath,
+            String splitName) throws RemoteException {
+        long sizeBytes = 0;
+        final File file = new File(inPath);
+        if (file.isFile()) {
+            sizeBytes = file.length();
+        } else {
+            return;
+        }
+
+        InputStream in = null;
+        OutputStream out = null;
         try {
-            // Wait on observer
-            synchronized (observer) {
-                synchronized (receiver) {
-                    getPm().installPackage(packageURI, observer, flags, null);
-                    long waitTime = 0;
-                    while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                        try {
-                            observer.wait(WAIT_TIME_INCR);
-                            waitTime += WAIT_TIME_INCR;
-                        } catch (InterruptedException e) {
-                            Log.i(TAG, "Interrupted during sleep", e);
-                        }
-                    }
-                    if (!observer.isDone()) {
-                        fail("Timed out waiting for packageInstalled callback");
-                    }
+            in = new FileInputStream(inPath);
+            out = session.openWrite(splitName, 0, sizeBytes);
 
-                    if (shouldSucceed) {
-                        if (observer.returnCode != PackageManager.INSTALL_SUCCEEDED) {
-                            fail("Package installation should have succeeded, but got code "
-                                    + observer.returnCode);
-                        }
-                    } else {
-                        if (observer.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                            fail("Package installation should fail");
-                        }
-
-                        /*
-                         * We'll never expect get a notification since we
-                         * shouldn't succeed.
-                         */
-                        return;
-                    }
-
-                    // Verify we received the broadcast
-                    waitTime = 0;
-                    while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                        try {
-                            receiver.wait(WAIT_TIME_INCR);
-                            waitTime += WAIT_TIME_INCR;
-                        } catch (InterruptedException e) {
-                            Log.i(TAG, "Interrupted during sleep", e);
-                        }
-                    }
-                    if (!receiver.isDone()) {
-                        fail("Timed out waiting for PACKAGE_ADDED notification");
-                    }
-                }
+            int total = 0;
+            byte[] buffer = new byte[65536];
+            int c;
+            while ((c = in.read(buffer)) != -1) {
+                total += c;
+                out.write(buffer, 0, c);
             }
+            session.fsync(out);
+        } catch (IOException e) {
+            fail("Error: failed to write; " + e.getMessage());
         } finally {
-            mContext.unregisterReceiver(receiver);
+            IoUtils.closeQuietly(out);
+            IoUtils.closeQuietly(in);
+            IoUtils.closeQuietly(session);
         }
     }
 
-    public void invokeInstallPackageFail(Uri packageURI, int flags, int expectedResult) {
-        TestInstallObserver observer = new TestInstallObserver();
-        try {
-            // Wait on observer
-            synchronized (observer) {
-                getPm().installPackage(packageURI, observer, flags, null);
+    private void invokeInstallPackage(Uri packageUri, int flags, GenericReceiver receiver,
+            boolean shouldSucceed) {
+        mContext.registerReceiver(receiver, receiver.filter);
+        synchronized (receiver) {
+            final String inPath = packageUri.getPath();
+            PackageInstaller.Session session = null;
+            try {
+                final SessionParams sessionParams =
+                        new SessionParams(SessionParams.MODE_FULL_INSTALL);
+                sessionParams.installFlags = flags;
+                final int sessionId = getPi().createSession(sessionParams);
+                session = getPi().openSession(sessionId);
+                writeSplitToInstallSession(session, inPath, "base.apk");
+                final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
+                session.commit(localReceiver.getIntentSender());
+                final Intent result = localReceiver.getResult();
+                final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                        PackageInstaller.STATUS_FAILURE);
+                if (shouldSucceed) {
+                    if (status != PackageInstaller.STATUS_SUCCESS) {
+                        fail("Installation should have succeeded, but got code " + status);
+                    }
+                } else {
+                    if (status == PackageInstaller.STATUS_SUCCESS) {
+                        fail("Installation should have failed");
+                    }
+                    // We'll never get a broadcast since the package failed to install
+                    return;
+                }
+                // Verify we received the broadcast
                 long waitTime = 0;
-                while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
+                while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
                     try {
-                        observer.wait(WAIT_TIME_INCR);
+                        receiver.wait(WAIT_TIME_INCR);
                         waitTime += WAIT_TIME_INCR;
                     } catch (InterruptedException e) {
                         Log.i(TAG, "Interrupted during sleep", e);
                     }
                 }
-                if (!observer.isDone()) {
-                    fail("Timed out waiting for packageInstalled callback");
+                if (!receiver.isDone()) {
+                    fail("Timed out waiting for PACKAGE_ADDED notification");
                 }
-                assertEquals(expectedResult, observer.returnCode);
+            } catch (IllegalArgumentException | IOException | RemoteException e) {
+                Log.w(TAG, "Failed to install package; path=" + inPath, e);
+                fail("Failed to install package; path=" + inPath + ", e=" + e);
+            } finally {
+                IoUtils.closeQuietly(session);
+                mContext.unregisterReceiver(receiver);
             }
-        } finally {
         }
     }
 
-    Uri getInstallablePackage(int fileResId, File outFile) {
+    private void invokeInstallPackageFail(Uri packageUri, int flags, int expectedResult) {
+        final String inPath = packageUri.getPath();
+        PackageInstaller.Session session = null;
+        try {
+            final SessionParams sessionParams =
+                    new SessionParams(SessionParams.MODE_FULL_INSTALL);
+            sessionParams.installFlags = flags;
+            final int sessionId = getPi().createSession(sessionParams);
+            session = getPi().openSession(sessionId);
+            writeSplitToInstallSession(session, inPath, "base.apk");
+            final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
+            session.commit(localReceiver.getIntentSender());
+            final Intent result = localReceiver.getResult();
+            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_SUCCESS);
+            assertEquals(expectedResult, status);
+        } catch (IllegalArgumentException | IOException | RemoteException e) {
+            Log.w(TAG, "Failed to install package; path=" + inPath, e);
+            fail("Failed to install package; path=" + inPath + ", e=" + e);
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+    }
+
+    private Uri getInstallablePackage(int fileResId, File outFile) {
         Resources res = mContext.getResources();
         InputStream is = null;
         try {
@@ -598,7 +635,8 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    private InstallParams sampleInstallFromRawResource(int flags, boolean cleanUp) throws Exception {
+    private InstallParams sampleInstallFromRawResource(int flags, boolean cleanUp)
+            throws Exception {
         return installFromRawResource("install.apk", R.raw.install, flags, cleanUp, false, -1,
                 PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
@@ -721,7 +759,7 @@ public class PackageManagerTests extends AndroidTestCase {
                         PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
                 invokeDeletePackage(pkg.packageName, 0, receiver);
-            } catch (NameNotFoundException e) {
+            } catch (IllegalArgumentException | NameNotFoundException e) {
             }
         }
         try {
@@ -984,10 +1022,11 @@ public class PackageManagerTests extends AndroidTestCase {
 
         mContext.registerReceiver(receiver, receiver.filter);
         try {
-            DeleteObserver observer = new DeleteObserver(pkgName);
-
-            getPm().deletePackage(pkgName, observer, flags | PackageManager.DELETE_ALL_USERS);
-            observer.waitForCompletion(MAX_WAIT_TIME);
+            final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
+            getPi().uninstall(pkgName,
+                    flags | PackageManager.DELETE_ALL_USERS,
+                    localReceiver.getIntentSender());
+            localReceiver.getResult();
 
             assertUninstalled(info);
 
@@ -1342,9 +1381,11 @@ public class PackageManagerTests extends AndroidTestCase {
             final ApplicationInfo info = getPm().getApplicationInfo(pkgName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES);
             if (info != null) {
-                DeleteObserver observer = new DeleteObserver(pkgName);
-                getPm().deletePackage(pkgName, observer, PackageManager.DELETE_ALL_USERS);
-                observer.waitForCompletion(MAX_WAIT_TIME);
+                final LocalIntentReceiver localReceiver = new LocalIntentReceiver();
+                getPi().uninstall(pkgName,
+                        PackageManager.DELETE_ALL_USERS,
+                        localReceiver.getIntentSender());
+                localReceiver.getResult();
                 assertUninstalled(info);
             }
         } catch (IllegalArgumentException | NameNotFoundException e) {
@@ -1771,7 +1812,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // Try to install and make sure an error code is returned.
             installFromRawResource("install.apk", R.raw.install,
                     PackageManager.INSTALL_EXTERNAL, false,
-                    true, PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    true, PackageInstaller.STATUS_FAILURE_STORAGE,
                     PackageInfo.INSTALL_LOCATION_AUTO);
         } finally {
             // Restore original media state
@@ -1859,7 +1900,7 @@ public class PackageManagerTests extends AndroidTestCase {
         installFromRawResource("install.apk", R.raw.install,
                 PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_INTERNAL,
                 false,
-                true, PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+                true, PackageInstaller.STATUS_FAILURE_STORAGE,
                 PackageInfo.INSTALL_LOCATION_AUTO);
     }
 
@@ -1896,7 +1937,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_INTERNAL |
                 PackageManager.INSTALL_EXTERNAL,
                 false,
-                true, PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+                true, PackageInstaller.STATUS_FAILURE_STORAGE,
                 PackageInfo.INSTALL_LOCATION_AUTO);
     }
 
@@ -2905,7 +2946,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchNoCerts1() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT3, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -2915,7 +2956,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchNoCerts2() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT3_CERT4, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -2925,7 +2966,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchSomeCerts1() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT1, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -2935,7 +2976,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchSomeCerts2() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT2, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -2945,7 +2986,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchMoreCerts() throws Exception {
         replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -2956,7 +2997,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchMoreCertsReplaceSomeCerts() throws Exception {
         InstallParams ip = replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, false, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
         try {
             int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
             installFromRawResource("install.apk", APP1_CERT1, rFlags, false,
@@ -2996,7 +3037,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void testUpgradeKSWithWrongKey() throws Exception {
         replaceCerts(R.raw.keyset_sa_ua, R.raw.keyset_sb_ua, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -3005,7 +3046,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void testUpgradeKSWithWrongSigningKey() throws Exception {
         replaceCerts(R.raw.keyset_sa_ub, R.raw.keyset_sa_ub, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -3037,7 +3078,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void testMultipleUpgradeKSWithSigningKey() throws Exception {
         replaceCerts(R.raw.keyset_sau_ub, R.raw.keyset_sa_ua, true, true,
-                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                PackageInstaller.STATUS_FAILURE_CONFLICT);
     }
 
     /*
@@ -3471,7 +3512,12 @@ public class PackageManagerTests extends AndroidTestCase {
             int rawResId = apk2;
             Uri packageURI = getInstallablePackage(rawResId, outFile);
             PackageParser.Package pkg = parsePackage(packageURI);
-            getPm().deletePackage(pkg.packageName, null, PackageManager.DELETE_ALL_USERS);
+            try {
+                getPi().uninstall(pkg.packageName,
+                        PackageManager.DELETE_ALL_USERS,
+                        null /*statusReceiver*/);
+            } catch (IllegalArgumentException ignore) {
+            }
             // Check signatures now
             int match = mContext.getPackageManager().checkSignatures(
                     ip.pkg.packageName, pkg.packageName);
@@ -3487,7 +3533,7 @@ public class PackageManagerTests extends AndroidTestCase {
         String apk1Name = "install1.apk";
 
         installFromRawResource(apk1Name, apk1, 0, false,
-                true, PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                true, PackageInstaller.STATUS_FAILURE_INVALID,
                 PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
@@ -3557,7 +3603,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk1 = SHARED1_CERT1;
         int apk2 = SHARED2_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         int expMatchResult = -1;
         checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
     }
@@ -3571,7 +3617,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT1;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         int expMatchResult = -1;
         checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
     }
@@ -3585,7 +3631,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk1 = SHARED1_CERT1_CERT2;
         int apk2 = SHARED2_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         int expMatchResult = -1;
         checkSharedSignatures(apk1, apk2, true, fail, retCode, expMatchResult);
     }
@@ -3604,7 +3650,11 @@ public class PackageManagerTests extends AndroidTestCase {
             PackageManager pm = mContext.getPackageManager();
             // Delete app2
             PackageParser.Package pkg = getParsedPackage(apk2Name, apk2);
-            getPm().deletePackage(pkg.packageName, null, PackageManager.DELETE_ALL_USERS);
+            try {
+                getPi().uninstall(
+                        pkg.packageName, PackageManager.DELETE_ALL_USERS, null /*statusReceiver*/);
+            } catch (IllegalArgumentException ignore) {
+            }
             // Check signatures now
             int match = mContext.getPackageManager().checkSignatures(
                     ip1.pkg.packageName, pkg.packageName);
@@ -3640,7 +3690,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1_CERT2;
         int rapk1 = SHARED1_CERT1;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3652,7 +3702,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1_CERT2;
         int rapk2 = SHARED2_CERT1;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3664,7 +3714,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk1 = SHARED1_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3676,7 +3726,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk2 = SHARED2_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3688,7 +3738,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk1 = SHARED1_CERT1_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3700,7 +3750,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk2 = SHARED2_CERT1_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+        int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3724,7 +3774,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @LargeTest
     public void testInstallNonexistentFile() throws Exception {
-        int retCode = PackageManager.INSTALL_FAILED_INVALID_URI;
+        int retCode = PackageInstaller.STATUS_FAILURE_INVALID;
         File invalidFile = new File("/nonexistent-file.apk");
         invokeInstallPackageFail(Uri.fromFile(invalidFile), 0, retCode);
     }
@@ -3845,7 +3895,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @Suppress
     public void testInstall_BadDex_CleanUp() throws Exception {
-        int retCode = PackageManager.INSTALL_FAILED_DEXOPT;
+        int retCode = PackageInstaller.STATUS_FAILURE_INVALID;
         installFromRawResource("install.apk", R.raw.install_bad_dex, 0, true, true, retCode,
                 PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
