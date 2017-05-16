@@ -500,4 +500,9 @@ public class MockStorageManager implements IStorageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void secdiscard(String path) throws RemoteException {
+        throw new UnsupportedOperationException();
+    }
+
 }

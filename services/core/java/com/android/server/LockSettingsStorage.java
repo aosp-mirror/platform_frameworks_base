@@ -26,6 +26,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -336,8 +337,11 @@ class LockSettingsStorage {
         synchronized (mFileWriteLock) {
             RandomAccessFile raf = null;
             try {
-                // Write the hash to file
-                raf = new RandomAccessFile(name, "rw");
+                // Write the hash to file, requiring each write to be synchronized to the
+                // underlying storage device immediately to avoid data loss in case of power loss.
+                // This also ensures future secdiscard operation on the file succeeds since the
+                // file would have been allocated on flash.
+                raf = new RandomAccessFile(name, "rws");
                 // Truncate the file if pattern is null, to clear the lock
                 if (hash == null || hash.length == 0) {
                     raf.setLength(0);
@@ -432,12 +436,17 @@ class LockSettingsStorage {
         return readFile(getSynthenticPasswordStateFilePathForUser(userId, handle, name));
     }
 
-    public void deleteSyntheticPasswordState(int userId, long handle, String name, boolean secure) {
+    public void deleteSyntheticPasswordState(int userId, long handle, String name) {
         String path = getSynthenticPasswordStateFilePathForUser(userId, handle, name);
         File file = new File(path);
         if (file.exists()) {
-            //TODO: (b/34600579) invoke secdiscardable
-            file.delete();
+            try {
+                mContext.getSystemService(StorageManager.class).secdiscard(file.getAbsolutePath());
+            } catch (Exception e) {
+                Slog.w(TAG, "Failed to secdiscard " + path, e);
+            } finally {
+                file.delete();
+            }
             mCache.putFile(path, null);
         }
     }
