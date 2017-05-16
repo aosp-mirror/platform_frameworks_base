@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.content.Context.TELEPHONY_SERVICE;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
@@ -47,9 +48,9 @@ import java.util.StringJoiner;
 public class TetheringConfiguration {
     private static final String TAG = TetheringConfiguration.class.getSimpleName();
 
-    private static final int DUN_NOT_REQUIRED = 0;
-    private static final int DUN_REQUIRED = 1;
-    private static final int DUN_UNSPECIFIED = 2;
+    public static final int DUN_NOT_REQUIRED = 0;
+    public static final int DUN_REQUIRED = 1;
+    public static final int DUN_UNSPECIFIED = 2;
 
     // USB is  192.168.42.1 and 255.255.255.0
     // Wifi is 192.168.43.1 and 255.255.255.0
@@ -81,8 +82,9 @@ public class TetheringConfiguration {
         tetherableBluetoothRegexs = ctx.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_bluetooth_regexs);
 
-        isDunRequired = checkDunRequired(ctx);
-        preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(ctx, isDunRequired);
+        final int dunCheck = checkDunRequired(ctx);
+        preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(ctx, dunCheck);
+        isDunRequired = preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN);
 
         dhcpRanges = getDhcpRanges(ctx);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
@@ -138,14 +140,12 @@ public class TetheringConfiguration {
         pw.println();
     }
 
-    private static boolean checkDunRequired(Context ctx) {
-        final TelephonyManager tm = ctx.getSystemService(TelephonyManager.class);
-        final int secureSetting =
-                (tm != null) ? tm.getTetherApnRequired() : DUN_UNSPECIFIED;
-        return (secureSetting == DUN_REQUIRED);
+    private static int checkDunRequired(Context ctx) {
+        final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
+        return (tm != null) ? tm.getTetherApnRequired() : DUN_UNSPECIFIED;
     }
 
-    private static Collection<Integer> getUpstreamIfaceTypes(Context ctx, boolean requiresDun) {
+    private static Collection<Integer> getUpstreamIfaceTypes(Context ctx, int dunCheck) {
         final int ifaceTypes[] = ctx.getResources().getIntArray(
                 com.android.internal.R.array.config_tether_upstream_types);
         final ArrayList<Integer> upstreamIfaceTypes = new ArrayList<>(ifaceTypes.length);
@@ -153,10 +153,10 @@ public class TetheringConfiguration {
             switch (i) {
                 case TYPE_MOBILE:
                 case TYPE_MOBILE_HIPRI:
-                    if (requiresDun) continue;
+                    if (dunCheck == DUN_REQUIRED) continue;
                     break;
                 case TYPE_MOBILE_DUN:
-                    if (!requiresDun) continue;
+                    if (dunCheck == DUN_NOT_REQUIRED) continue;
                     break;
             }
             upstreamIfaceTypes.add(i);
@@ -166,7 +166,7 @@ public class TetheringConfiguration {
         // of the value of |requiresDun|, cell data of one form or another is
         // *always* an upstream, regardless of the upstream interface types
         // specified by configuration resources.
-        if (requiresDun) {
+        if (dunCheck == DUN_REQUIRED) {
             if (!upstreamIfaceTypes.contains(TYPE_MOBILE_DUN)) {
                 upstreamIfaceTypes.add(TYPE_MOBILE_DUN);
             }
