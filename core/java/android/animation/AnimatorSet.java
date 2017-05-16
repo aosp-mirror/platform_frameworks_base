@@ -1346,6 +1346,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         for (int n = 0; n < nodeCount; n++) {
             final Node node = mNodes.get(n);
             Node nodeClone = node.clone();
+            // Remove the old internal listener from the cloned child
+            nodeClone.mAnimation.removeListener(mDummyListener);
             clonesMap.put(node, nodeClone);
             anim.mNodes.add(nodeClone);
             anim.mNodeMap.put(nodeClone.mAnimation, nodeClone);
