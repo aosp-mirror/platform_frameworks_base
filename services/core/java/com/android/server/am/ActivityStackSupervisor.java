@@ -2998,7 +2998,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
                 true /* schedulePipModeChangedOnAnimationEnd */);
-        mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName);
+        mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName,
+                r.getTask().taskId);
     }
 
     /** Move activity with its stack to front and make the stack focused. */

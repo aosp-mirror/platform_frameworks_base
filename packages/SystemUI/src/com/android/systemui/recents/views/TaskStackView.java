@@ -57,6 +57,7 @@ import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
+import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
@@ -72,7 +73,11 @@ import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
+import com.android.systemui.recents.events.activity.ShowEmptyViewEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
+import com.android.systemui.recents.events.component.ActivityPinnedEvent;
+import com.android.systemui.recents.events.component.ExpandPipEvent;
+import com.android.systemui.recents.events.component.HidePipMenuEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
@@ -379,8 +384,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Only notify if we are already initialized, otherwise, everything will pick up all the
         // new and old tasks when we next layout
-        mStack.setTasks(getContext(), stack.computeAllTasksList(),
-                allowNotifyStackChanges && isInitialized);
+        mStack.setTasks(getContext(), stack, allowNotifyStackChanges && isInitialized);
     }
 
     /** Returns the task stack. */
@@ -1496,7 +1500,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask,
-            AnimationProps animation, boolean fromDockGesture) {
+            AnimationProps animation, boolean fromDockGesture, boolean dismissRecentsIfAllRemoved) {
         if (mFocusedTask == removedTask) {
             resetFocusedTask(removedTask);
         }
@@ -1527,9 +1531,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // If there are no remaining tasks, then just close recents
         if (mStack.getTaskCount() == 0) {
-            EventBus.getDefault().send(new AllTaskViewsDismissedEvent(fromDockGesture
-                    ? R.string.recents_empty_message
-                    : R.string.recents_empty_message_dismissed_all));
+            if (dismissRecentsIfAllRemoved) {
+                EventBus.getDefault().send(new AllTaskViewsDismissedEvent(fromDockGesture
+                        ? R.string.recents_empty_message
+                        : R.string.recents_empty_message_dismissed_all));
+            } else {
+                EventBus.getDefault().send(new ShowEmptyViewEvent());
+            }
         }
     }
 
@@ -1802,14 +1810,36 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             return;
         }
 
-        final Task launchTask = mStack.getNextLaunchTarget();
-        if (launchTask != null) {
-            launchTask(launchTask);
-            MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
-                    launchTask.key.getComponent().toString());
-        } else if (mStack.getTaskCount() == 0) {
-            // If there are no tasks, then just hide recents back to home.
-            EventBus.getDefault().send(new HideRecentsEvent(false, true));
+        if (mStack.getTaskCount() == 0) {
+            if (RecentsImpl.getLastPipTime() != -1) {
+                EventBus.getDefault().send(new ExpandPipEvent());
+                MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
+                        "pip");
+            } else {
+                // If there are no tasks, then just hide recents back to home.
+                EventBus.getDefault().send(new HideRecentsEvent(false, true));
+            }
+            return;
+        }
+
+        if (!Recents.getConfiguration().getLaunchState().launchedFromPipApp
+                && mStack.isNextLaunchTargetPip(RecentsImpl.getLastPipTime())) {
+            // If the launch task is in the pinned stack, then expand the PiP now
+            EventBus.getDefault().send(new ExpandPipEvent());
+            MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK, "pip");
+        } else {
+            final Task launchTask = mStack.getNextLaunchTarget();
+            if (launchTask != null) {
+                // Defer launching the task until the PiP menu has been dismissed (if it is
+                // showing at all)
+                HidePipMenuEvent hideMenuEvent = new HidePipMenuEvent();
+                hideMenuEvent.addPostAnimationCallback(() -> {
+                    launchTask(launchTask);
+                });
+                EventBus.getDefault().send(hideMenuEvent);
+                MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
+                        launchTask.key.getComponent().toString());
+            }
         }
     }
 
@@ -1871,7 +1901,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         R.string.accessibility_recents_all_items_dismissed));
 
                 // Remove all tasks and delete the task data for all tasks
-                mStack.removeAllTasks();
+                mStack.removeAllTasks(true /* notifyStackChanges */);
                 for (int i = tasks.size() - 1; i >= 0; i--) {
                     EventBus.getDefault().send(new DeleteTaskDataEvent(tasks.get(i)));
                 }
@@ -2217,11 +2247,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    public final void onBusEvent(ActivityPinnedEvent event) {
+        // If an activity enters PiP while Recents is open, remove the stack task associated with
+        // the new PiP task
+        Task removeTask = mStack.findTaskWithId(event.taskId);
+        if (removeTask != null) {
+            // In this case, we remove the task, but if the last task is removed, don't dismiss
+            // Recents to home
+            mStack.removeTask(removeTask, AnimationProps.IMMEDIATE, false /* fromDockGesture */,
+                    false /* dismissRecentsIfAllRemoved */);
+        }
+        updateLayoutAlgorithm(false /* boundScroll */);
+        updateToInitialState();
+    }
+
     public void reloadOnConfigurationChange() {
         mStableLayoutAlgorithm.reloadOnConfigurationChange(getContext());
         mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
-
-        boolean hasDockedTask = Recents.getSystemServices().hasDockedTask();
     }
 
     /**
