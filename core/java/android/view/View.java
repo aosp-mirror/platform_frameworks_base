@@ -20506,6 +20506,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @throws IllegalStateException if the drawable could not be found.
      */
     @Nullable private Drawable getAutofilledDrawable() {
+        if (mAttachInfo == null) {
+            return null;
+        }
         // Lazily load the isAutofilled drawable.
         if (mAttachInfo.mAutofilledDrawable == null) {
             Context rootContext = getRootView().getContext();
