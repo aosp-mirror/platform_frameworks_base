@@ -10129,7 +10129,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     @Override
                     public void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs) {
-                        final Uid u = getUidStatsLocked(uid);
+                        final Uid u = getUidStatsLocked(mapUid(uid));
                         if (u.mCpuFreqTimeMs == null) {
                             u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
                         }

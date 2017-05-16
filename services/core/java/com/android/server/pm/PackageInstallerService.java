@@ -1093,7 +1093,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         PackageInfo packageInfo = null;
         try {
             packageInfo = AppGlobals.getPackageManager().getPackageInfo(
-                    basePackageName, 0, userId);
+                    basePackageName, PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
         } catch (RemoteException ignored) {
         }
         if (packageInfo == null || packageInfo.applicationInfo == null) {

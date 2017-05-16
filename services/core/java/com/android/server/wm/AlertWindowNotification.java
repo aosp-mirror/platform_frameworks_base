@@ -16,15 +16,14 @@
 
 package com.android.server.wm;
 
-import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION;
+import static com.android.internal.notification.SystemNotificationChannels.ALERT_WINDOW;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -41,7 +40,7 @@ import com.android.server.policy.IconUtilities;
 
 /** Displays an ongoing notification for a process displaying an alert window */
 class AlertWindowNotification {
-    private static final String CHANNEL_PREFIX = "com.android.server.wm.AlertWindowNotification - ";
+    private static final String TAG_PREFIX = "com.android.server.wm.AlertWindowNotification: ";
     private static final int NOTIFICATION_ID = 0;
 
     private static int sNextRequestCode = 0;
@@ -58,7 +57,7 @@ class AlertWindowNotification {
         mPackageName = packageName;
         mNotificationManager =
                 (NotificationManager) mService.mContext.getSystemService(NOTIFICATION_SERVICE);
-        mNotificationTag = CHANNEL_PREFIX + mPackageName;
+        mNotificationTag = TAG_PREFIX + mPackageName;
         mRequestCode = sNextRequestCode++;
         mIconUtilities = new IconUtilities(mService.mContext);
     }
@@ -100,11 +99,9 @@ class AlertWindowNotification {
         final String appName = (aInfo != null)
                 ? pm.getApplicationLabel(aInfo).toString() : mPackageName;
 
-        createNotificationChannelIfNeeded(context, appName);
-
         final String message = context.getString(R.string.alert_windows_notification_message,
                 appName);
-        final Notification.Builder builder = new Notification.Builder(context, mNotificationTag)
+        final Notification.Builder builder = new Notification.Builder(context, ALERT_WINDOW)
                 .setOngoing(true)
                 .setContentTitle(
                         context.getString(R.string.alert_windows_notification_title, appName))
@@ -133,20 +130,6 @@ class AlertWindowNotification {
         // Calls into activity manager...
         return PendingIntent.getActivity(context, mRequestCode, intent, FLAG_CANCEL_CURRENT);
     }
-
-    private void createNotificationChannelIfNeeded(Context context, String appName) {
-        if (mNotificationManager.getNotificationChannel(mNotificationTag) != null) {
-            return;
-        }
-        final String nameChannel =
-                context.getString(R.string.alert_windows_notification_channel_name, appName);
-        final NotificationChannel channel =
-                new NotificationChannel(mNotificationTag, nameChannel, IMPORTANCE_MIN);
-        channel.enableLights(false);
-        channel.enableVibration(false);
-        mNotificationManager.createNotificationChannel(channel);
-    }
-
 
     private ApplicationInfo getApplicationInfo(PackageManager pm, String packageName) {
         try {

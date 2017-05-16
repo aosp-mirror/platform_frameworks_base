@@ -478,7 +478,7 @@ public class ApplicationPackageManager extends PackageManager {
     public @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(int flags, int userId) {
         try {
             ParceledListSlice<SharedLibraryInfo> sharedLibs = mPM.getSharedLibraries(
-                    flags, userId);
+                    mContext.getOpPackageName(), flags, userId);
             if (sharedLibs == null) {
                 return Collections.emptyList();
             }
