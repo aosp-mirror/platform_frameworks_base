@@ -1685,6 +1685,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 // re-factor.
                 atoken.firstWindowDrawn = false;
                 atoken.clearAllDrawn();
+                final TaskStack stack = atoken.getStack();
+                if (stack != null) {
+                    stack.mExitingAppTokens.remove(atoken);
+                }
             }
         }
 
