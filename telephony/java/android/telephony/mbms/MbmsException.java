@@ -27,16 +27,14 @@ public class MbmsException extends Exception {
     public static final int ERROR_CONCURRENT_SERVICE_LIMIT_REACHED = 6;
     public static final int ERROR_MIDDLEWARE_NOT_BOUND = 7;
     public static final int ERROR_UNABLE_TO_START_SERVICE = 8;
-    public static final int ERROR_INVALID_SERVICE_ID = 9;
+    public static final int ERROR_STREAM_ALREADY_STARTED = 9;
     public static final int ERROR_END_OF_SESSION = 10;
-    public static final int ERROR_NOT_YET_INITIALIZED = 11;
-    public static final int ERROR_APP_PERMISSIONS_NOT_GRANTED = 12;
 
     private final int mErrorCode;
 
     /** @hide
      * TODO: future systemapi
-     * */
+     */
     public MbmsException(int errorCode) {
         super();
         mErrorCode = errorCode;

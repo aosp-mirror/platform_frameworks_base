@@ -618,7 +618,6 @@ aidl_files := \
         frameworks/base/telephony/java/android/telephony/mbms/FileInfo.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/FileServiceInfo.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/ServiceInfo.aidl \
-	frameworks/base/telephony/java/android/telephony/mbms/StreamingService.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/StreamingServiceInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/android/telephony/SubscriptionInfo.aidl \

@@ -19,45 +19,60 @@ package android.telephony.mbms;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.telephony.mbms.vendor.IMbmsStreamingService;
+import android.util.Log;
 
 /**
  * @hide
  */
 public class StreamingService {
-
+    private static final String LOG_TAG = "MbmsStreamingService";
     public final static int STATE_STOPPED = 1;
     public final static int STATE_STARTED = 2;
     public final static int STATE_STALLED = 3;
 
+    private final String mAppName;
+    private final int mSubscriptionId;
+    private final IMbmsStreamingService mService;
+    private final StreamingServiceInfo mServiceInfo;
+    private final IStreamingServiceCallback mCallback;
     /**
+     * @hide
      */
-    StreamingService(StreamingServiceInfo streamingServiceInfo,
-            IStreamingServiceCallback listener) {
+    public StreamingService(String appName,
+            int subscriptionId,
+            IMbmsStreamingService service,
+            StreamingServiceInfo streamingServiceInfo,
+            IStreamingServiceCallback callback) {
+        mAppName = appName;
+        mSubscriptionId = subscriptionId;
+        mService = service;
+        mServiceInfo = streamingServiceInfo;
+        mCallback = callback;
     }
 
     /**
      * Retreive the Uri used to play this stream.
      *
-     * This may throw a RemoteException.
+     * This may throw a {@link MbmsException} with the error code
+     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
+     * @return The {@link Uri} to pass to the streaming client.
      */
-    public Uri getPlaybackUri() {
-        return null;
+    public Uri getPlaybackUri() throws MbmsException {
+        try {
+            return mService.getPlaybackUri(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Caught remote exception calling getPlaybackUri: " + e);
+            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
+        }
     }
 
     /**
      * Retreive the info for this StreamingService.
      */
     public StreamingServiceInfo getInfo() {
-        return null;
-    }
-
-    /**
-     * Retreive the current state of this stream.
-     *
-     * This may throw a RemoteException.
-     */
-    public int getState() {
-        return STATE_STOPPED;
+        return mServiceInfo;
     }
 
     /**
@@ -68,30 +83,13 @@ public class StreamingService {
     public void stopStreaming() {
     }
 
-    public void dispose() {
-    }
-
-    public static final Parcelable.Creator<StreamingService> CREATOR =
-            new Parcelable.Creator<StreamingService>() {
-        @Override
-        public StreamingService createFromParcel(Parcel in) {
-            return new StreamingService(in);
+    public void dispose() throws MbmsException {
+        try {
+            mService.disposeStream(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Caught remote exception calling disposeStream: " + e);
+            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
-
-        @Override
-        public StreamingService[] newArray(int size) {
-            return new StreamingService[size];
-        }
-    };
-
-    private StreamingService(Parcel in) {
-    }
-
-    public void writeToParcel(Parcel dest, int flags) {
-    }
-
-    public int describeContents() {
-        return 0;
     }
 }
 
