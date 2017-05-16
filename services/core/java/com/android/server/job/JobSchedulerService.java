@@ -1270,6 +1270,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private void stopNonReadyActiveJobsLocked() {
+        for (int i=0; i<mActiveServices.size(); i++) {
+            JobServiceContext serviceContext = mActiveServices.get(i);
+            final JobStatus running = serviceContext.getRunningJobLocked();
+            if (running != null && !running.isReady()) {
+                serviceContext.cancelExecutingJobLocked(
+                        JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
+            }
+        }
+    }
+
     /**
      * Run through list of jobs and execute all possible - at least one is expired so we do
      * as many as we can.
@@ -1280,6 +1291,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
         noteJobsNonpending(mPendingJobs);
         mPendingJobs.clear();
+        stopNonReadyActiveJobsLocked();
         mJobs.forEachJob(mReadyQueueFunctor);
         mReadyQueueFunctor.postProcess();
 
@@ -1306,9 +1318,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     newReadyJobs = new ArrayList<JobStatus>();
                 }
                 newReadyJobs.add(job);
-            } else if (areJobConstraintsNotSatisfiedLocked(job)) {
-                stopJobOnServiceContextLocked(job,
-                        JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
             }
         }
 
@@ -1387,9 +1396,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     runnableJobs = new ArrayList<>();
                 }
                 runnableJobs.add(job);
-            } else if (areJobConstraintsNotSatisfiedLocked(job)) {
-                stopJobOnServiceContextLocked(job,
-                        JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
             }
         }
 
@@ -1439,6 +1445,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         noteJobsNonpending(mPendingJobs);
         mPendingJobs.clear();
+        stopNonReadyActiveJobsLocked();
         mJobs.forEachJob(mMaybeQueueFunctor);
         mMaybeQueueFunctor.postProcess();
     }
@@ -1513,15 +1520,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         // Everything else checked out so far, so this is the final yes/no check
         return componentPresent;
-    }
-
-    /**
-     * Criteria for cancelling an active job:
-     *      - It's not ready
-     *      - It's running on a JSC.
-     */
-    private boolean areJobConstraintsNotSatisfiedLocked(JobStatus job) {
-        return !job.isReady() && isCurrentlyActiveLocked(job);
     }
 
     /**
@@ -2088,6 +2086,83 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    int getJobState(PrintWriter pw, String pkgName, int userId, int jobId) {
+        try {
+            final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
+                    userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
+            if (uid < 0) {
+                pw.print("unknown("); pw.print(pkgName); pw.println(")");
+                return JobSchedulerShellCommand.CMD_ERR_NO_PACKAGE;
+            }
+
+            synchronized (mLock) {
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
+                if (DEBUG) Slog.d(TAG, "get-job-state " + uid + "/" + jobId + ": " + js);
+                if (js == null) {
+                    pw.print("unknown("); UserHandle.formatUid(pw, uid);
+                    pw.print("/jid"); pw.print(jobId); pw.println(")");
+                    return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
+                }
+
+                boolean printed = false;
+                if (mPendingJobs.contains(js)) {
+                    pw.print("pending");
+                    printed = true;
+                }
+                if (isCurrentlyActiveLocked(js)) {
+                    if (printed) {
+                        pw.print(" ");
+                    }
+                    printed = true;
+                    pw.println("active");
+                }
+                if (!ArrayUtils.contains(mStartedUsers, js.getUserId())) {
+                    if (printed) {
+                        pw.print(" ");
+                    }
+                    printed = true;
+                    pw.println("user-stopped");
+                }
+                if (mBackingUpUids.indexOfKey(js.getSourceUid()) >= 0) {
+                    if (printed) {
+                        pw.print(" ");
+                    }
+                    printed = true;
+                    pw.println("backing-up");
+                }
+                boolean componentPresent = false;
+                try {
+                    componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
+                            js.getServiceComponent(),
+                            PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                            js.getUserId()) != null);
+                } catch (RemoteException e) {
+                }
+                if (!componentPresent) {
+                    if (printed) {
+                        pw.print(" ");
+                    }
+                    printed = true;
+                    pw.println("no-component");
+                }
+                if (js.isReady()) {
+                    if (printed) {
+                        pw.print(" ");
+                    }
+                    printed = true;
+                    pw.println("ready");
+                }
+                if (!printed) {
+                    pw.print("waiting");
+                }
+                pw.println();
+            }
+        } catch (RemoteException e) {
+            // can't happen
+        }
+        return 0;
+    }
+
     private String printContextIdToJobMap(JobStatus[] map, String initial) {
         StringBuilder s = new StringBuilder(initial + ": ");
         for (int i=0; i<map.length; i++) {
@@ -2152,7 +2227,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         final int filterUidFinal = UserHandle.getAppId(filterUid);
-        final long now = SystemClock.elapsedRealtime();
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long nowUptime = SystemClock.uptimeMillis();
         synchronized (mLock) {
             mConstants.dump(pw);
             pw.println();
@@ -2184,7 +2260,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         continue;
                     }
 
-                    job.dump(pw, "    ", true, now);
+                    job.dump(pw, "    ", true, nowElapsed);
                     pw.print("    Ready: ");
                     pw.print(isReadyToBeExecutedLocked(job));
                     pw.print(" (job=");
@@ -2254,14 +2330,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 JobStatus job = mPendingJobs.get(i);
                 pw.print("  Pending #"); pw.print(i); pw.print(": ");
                 pw.println(job.toShortString());
-                job.dump(pw, "    ", false, now);
+                job.dump(pw, "    ", false, nowElapsed);
                 int priority = evaluateJobPriorityLocked(job);
                 if (priority != JobInfo.PRIORITY_DEFAULT) {
                     pw.print("    Evaluated priority: "); pw.println(priority);
                 }
                 pw.print("    Tag: "); pw.println(job.getTag());
                 pw.print("    Enq: ");
-                TimeUtils.formatDuration(job.madePending - now, pw);
+                TimeUtils.formatDuration(job.madePending - nowUptime, pw);
                 pw.println();
             }
             pw.println();
@@ -2276,17 +2352,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 } else {
                     pw.println(job.toShortString());
                     pw.print("    Running for: ");
-                    TimeUtils.formatDuration(now - jsc.getExecutionStartTimeElapsed(), pw);
+                    TimeUtils.formatDuration(nowElapsed - jsc.getExecutionStartTimeElapsed(), pw);
                     pw.print(", timeout at: ");
-                    TimeUtils.formatDuration(jsc.getTimeoutElapsed() - now, pw);
+                    TimeUtils.formatDuration(jsc.getTimeoutElapsed() - nowElapsed, pw);
                     pw.println();
-                    job.dump(pw, "    ", false, now);
+                    job.dump(pw, "    ", false, nowElapsed);
                     int priority = evaluateJobPriorityLocked(jsc.getRunningJobLocked());
                     if (priority != JobInfo.PRIORITY_DEFAULT) {
                         pw.print("    Evaluated priority: "); pw.println(priority);
                     }
                     pw.print("    Active at ");
-                    TimeUtils.formatDuration(job.madeActive - now, pw);
+                    TimeUtils.formatDuration(job.madeActive - nowUptime, pw);
                     pw.print(", pending for ");
                     TimeUtils.formatDuration(job.madeActive - job.madePending, pw);
                     pw.println();

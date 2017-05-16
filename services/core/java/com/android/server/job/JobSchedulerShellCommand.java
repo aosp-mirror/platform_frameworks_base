@@ -60,6 +60,8 @@ public class JobSchedulerShellCommand extends ShellCommand {
                     return getStorageSeq(pw);
                 case "get-storage-not-low":
                     return getStorageNotLow(pw);
+                case "get-job-state":
+                    return getJobState(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -80,6 +82,43 @@ public class JobSchedulerShellCommand extends ShellCommand {
         if (perm != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Uid " + uid
                     + " not permitted to " + operation);
+        }
+    }
+
+    private boolean printError(int errCode, String pkgName, int userId, int jobId) {
+        PrintWriter pw;
+        switch (errCode) {
+            case CMD_ERR_NO_PACKAGE:
+                pw = getErrPrintWriter();
+                pw.print("Package not found: ");
+                pw.print(pkgName);
+                pw.print(" / user ");
+                pw.println(userId);
+                return true;
+
+            case CMD_ERR_NO_JOB:
+                pw = getErrPrintWriter();
+                pw.print("Could not find job ");
+                pw.print(jobId);
+                pw.print(" in package ");
+                pw.print(pkgName);
+                pw.print(" / user ");
+                pw.println(userId);
+                return true;
+
+            case CMD_ERR_CONSTRAINTS:
+                pw = getErrPrintWriter();
+                pw.print("Job ");
+                pw.print(jobId);
+                pw.print(" in package ");
+                pw.print(pkgName);
+                pw.print(" / user ");
+                pw.print(userId);
+                pw.println(" has functional constraints but --force not specified");
+                return true;
+
+            default:
+                return false;
         }
     }
 
@@ -114,42 +153,17 @@ public class JobSchedulerShellCommand extends ShellCommand {
         final long ident = Binder.clearCallingIdentity();
         try {
             int ret = mInternal.executeRunCommand(pkgName, userId, jobId, force);
-            switch (ret) {
-                case CMD_ERR_NO_PACKAGE:
-                    pw.print("Package not found: ");
-                    pw.print(pkgName);
-                    pw.print(" / user ");
-                    pw.println(userId);
-                    break;
-
-                case CMD_ERR_NO_JOB:
-                    pw.print("Could not find job ");
-                    pw.print(jobId);
-                    pw.print(" in package ");
-                    pw.print(pkgName);
-                    pw.print(" / user ");
-                    pw.println(userId);
-                    break;
-
-                case CMD_ERR_CONSTRAINTS:
-                    pw.print("Job ");
-                    pw.print(jobId);
-                    pw.print(" in package ");
-                    pw.print(pkgName);
-                    pw.print(" / user ");
-                    pw.print(userId);
-                    pw.println(" has functional constraints but --force not specified");
-                    break;
-
-                default:
-                    // success!
-                    pw.print("Running job");
-                    if (force) {
-                        pw.print(" [FORCED]");
-                    }
-                    pw.println();
-                    break;
+            if (printError(ret, pkgName, userId, jobId)) {
+                return ret;
             }
+
+            // success!
+            pw.print("Running job");
+            if (force) {
+                pw.print(" [FORCED]");
+            }
+            pw.println();
+
             return ret;
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -244,6 +258,43 @@ public class JobSchedulerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int getJobState(PrintWriter pw) throws Exception {
+        checkPermission("force timeout jobs");
+
+        int userId = UserHandle.USER_SYSTEM;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-u":
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
+        }
+
+        final String pkgName = getNextArgRequired();
+        final String jobIdStr = getNextArgRequired();
+        final int jobId = Integer.parseInt(jobIdStr);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            int ret = mInternal.getJobState(pw, pkgName, userId, jobId);
+            printError(ret, pkgName, userId, jobId);
+            return ret;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -277,6 +328,18 @@ public class JobSchedulerShellCommand extends ShellCommand {
         pw.println("    Return the last storage update sequence number that was received.");
         pw.println("  get-storage-not-low");
         pw.println("    Return whether storage is currently considered to not be low.");
+        pw.println("  get-job-state [-u | --user USER_ID] PACKAGE JOB_ID");
+        pw.println("    Return the current state of a job, may be any combination of:");
+        pw.println("      pending: currently on the pending list, waiting to be active");
+        pw.println("      active: job is actively running");
+        pw.println("      user-stopped: job can't run because its user is stopped");
+        pw.println("      backing-up: job can't run because app is currently backing up its data");
+        pw.println("      no-component: job can't run because its component is not available");
+        pw.println("      ready: job is ready to run (all constraints satisfied or bypassed)");
+        pw.println("      waiting: if nothing else above is printed, job not ready to run");
+        pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's job is to be run; the default is");
+        pw.println("         the primary or system user");
         pw.println();
     }
 
