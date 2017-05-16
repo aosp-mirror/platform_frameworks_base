@@ -2165,7 +2165,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
-                allowTaskSnapshot());
+                allowTaskSnapshot(),
+                state.ordinal() >= RESUMED.ordinal() && state.ordinal() <= STOPPED.ordinal());
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
