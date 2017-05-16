@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
 import android.app.ActivityManager.StackId;
 import android.app.RemoteAction;
@@ -285,13 +286,16 @@ public class StackWindowController
             if (StackId.tasksAreFloating(mStackId)) {
                 // Floating tasks should not be resized to the screen's bounds.
 
-                if (bounds.width() == mTmpDisplayBounds.width() &&
+                if (mStackId == PINNED_STACK_ID && bounds.width() == mTmpDisplayBounds.width() &&
                         bounds.height() == mTmpDisplayBounds.height()) {
                     // If the bounds we are animating is the same as the fullscreen stack
                     // dimensions, then apply the same inset calculations that we normally do for
                     // the fullscreen stack, without intersecting it with the display bounds
                     stableBounds.inset(mTmpStableInsets);
                     nonDecorBounds.inset(mTmpNonDecorInsets);
+                    // Move app bounds to zero to apply intersection with parent correctly. They are
+                    // used only for evaluating width and height, so it's OK to move them around.
+                    config.appBounds.offsetTo(0, 0);
                     intersectParentBounds = true;
                 }
                 width = (int) (stableBounds.width() / density);

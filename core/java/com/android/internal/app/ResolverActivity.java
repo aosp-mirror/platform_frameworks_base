@@ -1341,6 +1341,8 @@ public class ResolverActivity extends Activity {
             mPlaceholderCount = count;
         }
 
+        public int getPlaceholderCount() { return mPlaceholderCount; }
+
         @Nullable
         public DisplayResolveInfo getFilteredItem() {
             if (mFilterLastUsed && mLastChosenPosition >= 0) {
@@ -1447,7 +1449,11 @@ public class ResolverActivity extends Activity {
                 }
 
                 if (currentResolveList.size() > 1) {
-                    setPlaceholderCount(currentResolveList.size());
+                    int placeholderCount = currentResolveList.size();
+                    if (useLayoutWithDefault()) {
+                        --placeholderCount;
+                    }
+                    setPlaceholderCount(placeholderCount);
                     AsyncTask<List<ResolvedComponentInfo>,
                             Void,
                             List<ResolvedComponentInfo>> sortingTask =

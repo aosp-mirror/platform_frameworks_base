@@ -629,6 +629,9 @@
     <!-- Text shown when viewing channel settings for notifications related to network alerts -->
     <string name="notification_channel_network_alerts">Network alerts</string>
 
+    <!-- Text shown when viewing the channel settings for notification about open nearby wireless networks. -->
+    <string name="notification_channel_network_available">Network available</string>
+
     <!-- Text shown when viewing channel settings for notifications related to vpn status -->
     <string name="notification_channel_vpn">VPN status</string>
 
@@ -1332,6 +1335,8 @@
     <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
     <string name="fingerprint_error_lockout">Too many attempts. Try again later.</string>
+    <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
+    <string name="fingerprint_error_lockout_permanent">Too many attempts. Fingerprint sensor disabled.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Try again.</string>
 
@@ -2993,6 +2998,17 @@
     <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
     <string name="ringtone_unknown">Unknown</string>
 
+    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's title. -->
+    <plurals name="wifi_available">
+        <item quantity="one">Wi-Fi network available</item>
+        <item quantity="other">Wi-Fi networks available</item>
+    </plurals>
+    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's message. -->
+    <plurals name="wifi_available_detailed">
+        <item quantity="one">Open Wi-Fi network available</item>
+        <item quantity="other">Open Wi-Fi networks available</item>
+    </plurals>
+
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
 
@@ -3214,7 +3230,7 @@
     <skip />
     <!-- Name of notification channel the system post notification to inform the use about apps
          that are drawing ui on-top of other apps (alert-windows) [CHAR LIMIT=NONE] -->
-    <string name="alert_windows_notification_channel_name"><xliff:g id="name" example="Google Maps">%s</xliff:g> displaying over other apps</string>
+    <string name="alert_windows_notification_channel_name">App activity</string>
     <!-- Notification title when an application is displaying ui on-top of other apps
          [CHAR LIMIT=30] -->
     <string name="alert_windows_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> is displaying over other apps</string>

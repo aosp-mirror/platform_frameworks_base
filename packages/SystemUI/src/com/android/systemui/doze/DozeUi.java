@@ -130,6 +130,7 @@ public class DozeUi implements DozeMachine.Part {
         }
         verifyLastTimeTick();
         mAlarmManager.cancel(mTimeTick);
+        mTimeTickScheduled = false;
     }
 
     private void verifyLastTimeTick() {

@@ -25,8 +25,8 @@ import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
-import static com.android.server.autofill.Helper.findViewNodeById;
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.ViewState.STATE_AUTOFILLED;
 import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
@@ -79,7 +79,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -164,6 +163,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private boolean mIsSaving;
 
+
     /**
      * Receiver of assist data from the app's {@link Activity}.
      */
@@ -212,7 +212,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 final int numContexts = mContexts.size();
                 for (int i = 0; i < numContexts; i++) {
-                    fillStructureWithAllowedValues(mContexts.get(i).getStructure(), flags);
+                    fillContextWithAllowedValues(mContexts.get(i), flags);
                 }
 
                 request = new FillRequest(requestId, mContexts, mClientState, flags);
@@ -223,20 +223,35 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     };
 
     /**
-     * Updates values of the nodes in the structure so that:
+     * Returns the ids of all entries in {@link #mViewStates} in the same order.
+     */
+    private AutofillId[] getIdsOfAllViewStates() {
+        final int numViewState = mViewStates.size();
+        final AutofillId[] ids = new AutofillId[numViewState];
+        for (int i = 0; i < numViewState; i++) {
+            ids[i] = mViewStates.valueAt(i).id;
+        }
+
+        return ids;
+    }
+
+    /**
+     * Updates values of the nodes in the context's structure so that:
      * - proper node is focused
      * - autofillValue is sent back to service when it was previously autofilled
      * - autofillValue is sent in the view used to force a request
      *
-     * @param structure The structure to be filled
+     * @param fillContext The context to be filled
      * @param flags The flags that started the session
      */
-    private void fillStructureWithAllowedValues(@NonNull AssistStructure structure, int flags) {
-        final int numViewStates = mViewStates.size();
-        for (int i = 0; i < numViewStates; i++) {
+    private void fillContextWithAllowedValues(@NonNull FillContext fillContext, int flags) {
+        final ViewNode[] nodes = fillContext.findViewNodesByAutofillIds(getIdsOfAllViewStates());
+
+        final int numViewState = mViewStates.size();
+        for (int i = 0; i < numViewState; i++) {
             final ViewState viewState = mViewStates.valueAt(i);
 
-            final ViewNode node = findViewNodeById(structure, viewState.id);
+            final ViewNode node = nodes[i];
             if (node == null) {
                 Slog.w(TAG, "fillStructureWithAllowedValues(): no node for " + viewState.id);
                 continue;
@@ -803,6 +818,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
             if (atLeastOneChanged) {
+                if (sDebug) Slog.d(TAG, "at least one field changed - showing save UI");
                 mService.setSaveShown();
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName,
                         this);
@@ -841,19 +857,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final int numContexts = mContexts.size();
 
-        for (int i = 0; i < numContexts; i++) {
-            final FillContext context = mContexts.get(i);
+        for (int contextNum = 0; contextNum < numContexts; contextNum++) {
+            final FillContext context = mContexts.get(contextNum);
+
+            final ViewNode[] nodes = context.findViewNodesByAutofillIds(getIdsOfAllViewStates());
 
             if (sVerbose) Slog.v(TAG, "callSaveLocked(): updating " + context);
 
-            for (Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
-                final AutofillValue value = entry.getValue().getCurrentValue();
+            for (int viewStateNum = 0; viewStateNum < mViewStates.size(); viewStateNum++) {
+                final ViewState state = mViewStates.valueAt(viewStateNum);
+
+                final AutofillId id = state.id;
+                final AutofillValue value = state.getCurrentValue();
                 if (value == null) {
-                    if (sVerbose) Slog.v(TAG, "callSaveLocked(): skipping " + entry.getKey());
+                    if (sVerbose) Slog.v(TAG, "callSaveLocked(): skipping " + id);
                     continue;
                 }
-                final AutofillId id = entry.getKey();
-                final ViewNode node = findViewNodeById(context.getStructure(), id);
+                final ViewNode node = nodes[viewStateNum];
                 if (node == null) {
                     Slog.w(TAG, "callSaveLocked(): did not find node with id " + id);
                     continue;
@@ -868,7 +888,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
             if (sVerbose) {
                 Slog.v(TAG, "Dumping structure of " + context + " before calling service.save()");
-                context.getStructure().dump();
+                context.getStructure().dump(false);
             }
         }
 
@@ -916,7 +936,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private static final int PARTITION_MAX_COUNT = 64;
     /**
      * Determines if a new partition should be started for an id.
      *
@@ -930,8 +949,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final int numResponses = mResponses.size();
-        if (numResponses >= PARTITION_MAX_COUNT) {
-            Slog.e(TAG, "Cannot create more than 64 partitions. Not creating a new partition.");
+        if (numResponses >= sPartitionMaxCount) {
+            Slog.e(TAG, "Not starting a new partition on " + id + " because session " + this.id
+                    + " reached maximum of " + sPartitionMaxCount);
             return false;
         }
 
@@ -1103,7 +1123,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void notifyUnavailableToClient() {
         synchronized (mLock) {
-            if (!mHasCallback) return;
+            if (!mHasCallback || mCurrentViewId == null) return;
             try {
                 mClient.notifyNoFillUi(id, mCurrentViewId);
             } catch (RemoteException e) {
@@ -1352,10 +1372,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
-        pw.print(prefix); pw.print("mResponses: "); pw.println(mResponses.size());
-        for (int i = 0; i < mResponses.size(); i++) {
-            pw.print(prefix2); pw.print('#'); pw.print(i); pw.print(' ');
-                pw.println(mResponses.valueAt(i));
+        pw.print(prefix); pw.print("mResponses: ");
+        if (mResponses == null) {
+            pw.println("null");
+        } else {
+            pw.println(mResponses.size());
+            for (int i = 0; i < mResponses.size(); i++) {
+                pw.print(prefix2); pw.print('#'); pw.print(i);
+                pw.print(' '); pw.println(mResponses.valueAt(i));
+            }
         }
         pw.print(prefix); pw.print("mCurrentViewId: "); pw.println(mCurrentViewId);
         pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
@@ -1377,7 +1402,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     pw.println(context.getStructure() + " (look at logcat)");
 
                     // TODO: add method on AssistStructure to dump on pw
-                    context.getStructure().dump();
+                    context.getStructure().dump(false);
                 }
             }
         } else {

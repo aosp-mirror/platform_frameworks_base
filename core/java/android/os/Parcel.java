@@ -204,6 +204,8 @@ public final class Parcel {
     private boolean mOwnsNativeParcelObject;
     private long mNativeSize;
 
+    private ArrayMap<Class, Object> mClassCookies;
+
     private RuntimeException mStack;
 
     private static final int POOL_SIZE = 6;
@@ -293,6 +295,7 @@ public final class Parcel {
     private static native long nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
+    private static native boolean nativeReadByteArray(long nativePtr, byte[] dest, int destLen);
     private static native byte[] nativeReadBlob(long nativePtr);
     @FastNative
     private static native int nativeReadInt(long nativePtr);
@@ -495,6 +498,24 @@ public final class Parcel {
     /** @hide */
     public final int compareData(Parcel other) {
         return nativeCompareData(mNativePtr, other.mNativePtr);
+    }
+
+    /** @hide */
+    public final void setClassCookie(Class clz, Object cookie) {
+        if (mClassCookies == null) {
+            mClassCookies = new ArrayMap<>();
+        }
+        mClassCookies.put(clz, cookie);
+    }
+
+    /** @hide */
+    public final Object getClassCookie(Class clz) {
+        return mClassCookies != null ? mClassCookies.get(clz) : null;
+    }
+
+    /** @hide */
+    public final void adoptClassCookies(Parcel from) {
+        mClassCookies = from.mClassCookies;
     }
 
     /**
@@ -2197,11 +2218,8 @@ public final class Parcel {
      * given byte array.
      */
     public final void readByteArray(byte[] val) {
-        // TODO: make this a native method to avoid the extra copy.
-        byte[] ba = createByteArray();
-        if (ba.length == val.length) {
-           System.arraycopy(ba, 0, val, 0, ba.length);
-        } else {
+        boolean valid = nativeReadByteArray(mNativePtr, val, (val != null) ? val.length : 0);
+        if (!valid) {
             throw new RuntimeException("bad array lengths");
         }
     }

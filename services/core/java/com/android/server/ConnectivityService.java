@@ -91,6 +91,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -470,7 +471,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             new ArrayDeque<ValidationLog>(MAX_VALIDATION_LOGS);
 
     private void addValidationLogs(ReadOnlyLocalLog log, Network network, String networkExtraInfo) {
-        synchronized(mValidationLogs) {
+        synchronized (mValidationLogs) {
             while (mValidationLogs.size() >= MAX_VALIDATION_LOGS) {
                 mValidationLogs.removeLast();
             }
@@ -1576,7 +1577,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void sendStickyBroadcast(Intent intent) {
-        synchronized(this) {
+        synchronized (this) {
             if (!mSystemReady) {
                 mInitialBroadcast = new Intent(intent);
             }
@@ -1617,7 +1618,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     void systemReady() {
         loadGlobalProxy();
 
-        synchronized(this) {
+        synchronized (this) {
             mSystemReady = true;
             if (mInitialBroadcast != null) {
                 mContext.sendStickyBroadcastAsUser(mInitialBroadcast, UserHandle.ALL);
@@ -3380,7 +3381,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceCrossUserPermission(userId);
         throwIfLockdownEnabled();
 
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
                 return vpn.prepare(oldPackage, newPackage);
@@ -3407,7 +3408,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void setVpnPackageAuthorization(String packageName, int userId, boolean authorized) {
         enforceCrossUserPermission(userId);
 
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
                 vpn.setPackageAuthorization(packageName, authorized);
@@ -3426,7 +3427,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public ParcelFileDescriptor establishVpn(VpnConfig config) {
         throwIfLockdownEnabled();
         int user = UserHandle.getUserId(Binder.getCallingUid());
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             return mVpns.get(user).establish(config);
         }
     }
@@ -3443,7 +3444,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throw new IllegalStateException("Missing active network connection");
         }
         int user = UserHandle.getUserId(Binder.getCallingUid());
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             mVpns.get(user).startLegacyVpn(profile, mKeyStore, egress);
         }
     }
@@ -3457,7 +3458,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public LegacyVpnInfo getLegacyVpnInfo(int userId) {
         enforceCrossUserPermission(userId);
 
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             return mVpns.get(userId).getLegacyVpnInfo();
         }
     }
@@ -3473,7 +3474,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return new VpnInfo[0];
         }
 
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             List<VpnInfo> infoList = new ArrayList<>();
             for (int i = 0; i < mVpns.size(); i++) {
                 VpnInfo info = createVpnInfo(mVpns.valueAt(i));
@@ -3521,7 +3522,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public VpnConfig getVpnConfig(int userId) {
         enforceCrossUserPermission(userId);
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
                 return vpn.getVpnConfig();
@@ -3555,7 +3556,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return true;
             }
             int user = UserHandle.getUserId(Binder.getCallingUid());
-            synchronized(mVpns) {
+            synchronized (mVpns) {
                 Vpn vpn = mVpns.get(user);
                 if (vpn == null) {
                     Slog.w(TAG, "VPN for user " + user + " not ready yet. Skipping lockdown");
@@ -3790,7 +3791,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void onUserStart(int userId) {
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn != null) {
                 loge("Starting user already has a VPN");
@@ -3805,7 +3806,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void onUserStop(int userId) {
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn == null) {
                 loge("Stopped user has no VPN");
@@ -3817,7 +3818,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void onUserAdded(int userId) {
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             final int vpnsSize = mVpns.size();
             for (int i = 0; i < vpnsSize; i++) {
                 Vpn vpn = mVpns.valueAt(i);
@@ -3827,7 +3828,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void onUserRemoved(int userId) {
-        synchronized(mVpns) {
+        synchronized (mVpns) {
             final int vpnsSize = mVpns.size();
             for (int i = 0; i < vpnsSize; i++) {
                 Vpn vpn = mVpns.valueAt(i);
@@ -3951,7 +3952,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (mUidToNetworkRequestCount) {
                 int networkRequests = mUidToNetworkRequestCount.get(mUid, 0) + 1;
                 if (networkRequests >= MAX_NETWORK_REQUESTS_PER_UID) {
-                    throw new IllegalArgumentException("Too many NetworkRequests filed");
+                    throw new ServiceSpecificException(
+                            ConnectivityManager.Errors.TOO_MANY_REQUESTS);
                 }
                 mUidToNetworkRequestCount.put(mUid, networkRequests);
             }

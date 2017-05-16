@@ -16,18 +16,6 @@
 
 package com.android.settingslib.drawer;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -50,8 +38,8 @@ import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SuggestionParser;
 import com.android.settingslib.TestConfig;
+import com.android.settingslib.suggestions.SuggestionParser;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,6 +56,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(RobolectricTestRunner.class)
@@ -209,8 +208,8 @@ public class TileUtilsTest {
         }), anyInt(), anyInt())).thenReturn(info);
 
         List<DashboardCategory> categoryList = TileUtils.getCategories(
-            mContext, cache, false /* categoryDefinedInManifest */, testAction,
-            TileUtils.SETTING_PKG);
+                mContext, cache, false /* categoryDefinedInManifest */, testAction,
+                TileUtils.SETTING_PKG);
         assertThat(categoryList.get(0).tiles.get(0).category).isEqualTo(testCategory);
     }
 
@@ -226,13 +225,13 @@ public class TileUtilsTest {
         when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
 
         TileUtils.getCategories(
-            mContext, cache, false /* categoryDefinedInManifest */, null /* action */,
-            TileUtils.SETTING_PKG);
+                mContext, cache, false /* categoryDefinedInManifest */, null /* action */,
+                TileUtils.SETTING_PKG);
         verify(mPackageManager, atLeastOnce()).queryIntentActivitiesAsUser(
-            intentCaptor.capture(), anyInt(), anyInt());
+                intentCaptor.capture(), anyInt(), anyInt());
 
         assertThat(intentCaptor.getAllValues().get(0).getPackage())
-            .isEqualTo(TileUtils.SETTING_PKG);
+                .isEqualTo(TileUtils.SETTING_PKG);
     }
 
     @Test

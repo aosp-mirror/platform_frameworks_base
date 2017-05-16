@@ -17,7 +17,8 @@ LOCAL_JNI_SHARED_LIBRARIES := libmemoryintarraytest libcutils libc++
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     frameworks-base-testutils \
-    mockito-target-minus-junit4
+    mockito-target-minus-junit4 \
+    legacy-android-tests
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
@@ -28,3 +29,4 @@ LOCAL_CERTIFICATE := platform
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 include $(BUILD_PACKAGE)
+

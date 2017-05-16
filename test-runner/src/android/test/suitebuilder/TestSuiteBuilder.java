@@ -21,7 +21,6 @@ import android.test.AndroidTestRunner;
 import android.test.TestCaseUtil;
 import android.util.Log;
 import com.android.internal.util.Predicate;
-import com.google.android.collect.Lists;
 import static android.test.suitebuilder.TestGrouping.SORT_BY_FULLY_QUALIFIED_NAME;
 import static android.test.suitebuilder.TestPredicates.REJECT_SUPPRESSED;
 
@@ -69,7 +68,7 @@ public class TestSuiteBuilder {
     public TestSuiteBuilder(String name, ClassLoader classLoader) {
         this.suiteName = name;
         this.testGrouping.setClassLoader(classLoader);
-        this.testCases = Lists.newArrayList();
+        this.testCases = new ArrayList<>();
         addRequirements(REJECT_SUPPRESSED);
     }
 

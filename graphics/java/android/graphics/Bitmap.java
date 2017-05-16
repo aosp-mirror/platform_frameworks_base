@@ -1879,15 +1879,22 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Rebuilds any caches associated with the bitmap that are used for
-     * drawing it. In the case of purgeable bitmaps, this call will attempt to
-     * ensure that the pixels have been decoded.
-     * If this is called on more than one bitmap in sequence, the priority is
-     * given in LRU order (i.e. the last bitmap called will be given highest
-     * priority).
+     * Builds caches associated with the bitmap that are used for drawing it.
      *
-     * For bitmaps with no associated caches, this call is effectively a no-op,
-     * and therefore is harmless.
+     * <p>Starting in {@link android.os.Build.VERSION_CODES#N}, this call initiates an asynchronous
+     * upload to the GPU on RenderThread, if the Bitmap is not already uploaded. With Hardware
+     * Acceleration, Bitmaps must be uploaded to the GPU in order to be rendered. This is done by
+     * default the first time a Bitmap is drawn, but the process can take several milliseconds,
+     * depending on the size of the Bitmap. Each time a Bitmap is modified and drawn again, it must
+     * be re-uploaded.</p>
+     *
+     * <p>Calling this method in advance can save time in the first frame it's used. For example, it
+     * is recommended to call this on an image decoding worker thread when a decoded Bitmap is about
+     * to be displayed. It is recommended to make any pre-draw modifications to the Bitmap before
+     * calling this method, so the cached, uploaded copy may be reused without re-uploading.</p>
+     *
+     * In {@link android.os.Build.VERSION_CODES#KITKAT} and below, for purgeable bitmaps, this call
+     * would attempt to ensure that the pixels have been decoded.
      */
     public void prepareToDraw() {
         checkRecycled("Can't prepareToDraw on a recycled bitmap!");

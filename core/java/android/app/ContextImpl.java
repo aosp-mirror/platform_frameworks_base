@@ -65,6 +65,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
+import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -375,7 +376,9 @@ class ContextImpl extends Context {
         checkMode(mode);
         if (getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.O) {
             if (isCredentialProtectedStorage()
-                    && !getSystemService(UserManager.class).isUserUnlocked() && !isBuggy()) {
+                    && !getSystemService(StorageManager.class).isUserKeyUnlocked(
+                            UserHandle.myUserId())
+                    && !isBuggy()) {
                 throw new IllegalStateException("SharedPreferences in credential encrypted "
                         + "storage are not available until after user is unlocked");
             }

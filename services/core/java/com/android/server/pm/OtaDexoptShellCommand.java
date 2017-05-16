@@ -21,6 +21,7 @@ import android.os.RemoteException;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
+import java.util.Locale;
 
 class OtaDexoptShellCommand extends ShellCommand {
     final IOtaDexopt mInterface;
@@ -93,7 +94,10 @@ class OtaDexoptShellCommand extends ShellCommand {
     private int runOtaProgress() throws RemoteException {
         final float progress = mInterface.getProgress();
         final PrintWriter pw = getOutPrintWriter();
-        pw.format("%.2f", progress);
+        // Note: The float output is parsed by update_engine. It does needs to be non-localized,
+        //       as it's always expected to be "0.xy," never "0,xy" or similar. So use the ROOT
+        //       Locale for formatting. (b/37760573)
+        pw.format(Locale.ROOT, "%.2f", progress);
         return 0;
     }
 

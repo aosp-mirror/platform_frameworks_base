@@ -92,6 +92,7 @@ public class StatusBarManager {
 
     public static final int CAMERA_LAUNCH_SOURCE_WIGGLE = 0;
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;
+    public static final int CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER = 2;
 
     private Context mContext;
     private IStatusBarService mService;

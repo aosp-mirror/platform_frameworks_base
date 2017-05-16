@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -151,6 +150,21 @@ public class RadioTest {
         mRadioTuner = null;
         Thread.sleep(100);  // TODO(b/36122635): force reopen
         openTuner();
+    }
+
+    @Test
+    public void testDoubleClose() {
+        openTuner();
+        mRadioTuner.close();
+        mRadioTuner.close();
+    }
+
+    @Test
+    public void testUseAfterClose() {
+        openTuner();
+        mRadioTuner.close();
+        int ret = mRadioTuner.cancel();
+        assertEquals(RadioManager.STATUS_INVALID_OPERATION, ret);
     }
 
     @Test

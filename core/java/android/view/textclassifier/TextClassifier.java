@@ -140,4 +140,14 @@ public interface TextClassifier {
     @WorkerThread
     LinksInfo getLinks(
             @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales);
+
+    /**
+     * Logs a TextClassifier event.
+     *
+     * @param source the text classifier used to generate this event
+     * @param event the text classifier related event
+     * @hide
+     */
+    @WorkerThread
+    default void logEvent(String source, String event) {}
 }

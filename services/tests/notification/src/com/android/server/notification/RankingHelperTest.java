@@ -49,12 +49,16 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableContext;
+import android.testing.TestableSettingsProvider;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.util.Xml;
 
 import java.io.BufferedInputStream;
@@ -80,16 +84,19 @@ import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class RankingHelperTest {
+public class RankingHelperTest extends NotificationTestCase {
     private static final String PKG = "com.android.server.notification";
     private static final int UID = 0;
+    private static final UserHandle USER = UserHandle.getUserHandleForUid(UID);
     private static final String UPDATED_PKG = "updatedPkg";
     private static final int UID2 = 1111111;
+    private static final UserHandle USER2 = UserHandle.getUserHandleForUid(UID2);
     private static final String TEST_CHANNEL_ID = "test_channel_id";
 
     @Mock NotificationUsageStats mUsageStats;
     @Mock RankingHandler mHandler;
     @Mock PackageManager mPm;
+    @Mock Context mContext;
 
     private Notification mNotiGroupGSortA;
     private Notification mNotiGroupGSortB;
@@ -104,68 +111,10 @@ public class RankingHelperTest {
     private RankingHelper mHelper;
     private AudioAttributes mAudioAttributes;
 
-    private Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         UserHandle user = UserHandle.ALL;
-
-        mHelper = new RankingHelper(getContext(), mPm, mHandler, mUsageStats,
-                new String[] {ImportanceExtractor.class.getName()});
-
-        mNotiGroupGSortA = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
-                .setContentTitle("A")
-                .setGroup("G")
-                .setSortKey("A")
-                .setWhen(1205)
-                .build();
-        mRecordGroupGSortA = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, mNotiGroupGSortA, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
-
-        mNotiGroupGSortB = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
-                .setContentTitle("B")
-                .setGroup("G")
-                .setSortKey("B")
-                .setWhen(1200)
-                .build();
-        mRecordGroupGSortB = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, mNotiGroupGSortB, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
-
-        mNotiNoGroup = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
-                .setContentTitle("C")
-                .setWhen(1201)
-                .build();
-        mRecordNoGroup = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, mNotiNoGroup, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
-
-        mNotiNoGroup2 = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
-                .setContentTitle("D")
-                .setWhen(1202)
-                .build();
-        mRecordNoGroup2 = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, mNotiNoGroup2, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
-
-        mNotiNoGroupSortA = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
-                .setContentTitle("E")
-                .setWhen(1201)
-                .setSortKey("A")
-                .build();
-        mRecordNoGroupSortA = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, mNotiNoGroupSortA, user,
-                null, System.currentTimeMillis()), getDefaultChannel());
-
-        mAudioAttributes = new AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
-                .build();
 
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -174,6 +123,67 @@ public class RankingHelperTest {
         when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(legacy);
         when(mPm.getApplicationInfoAsUser(eq(UPDATED_PKG), anyInt(), anyInt())).thenReturn(upgrade);
         when(mPm.getPackageUidAsUser(eq(PKG), anyInt())).thenReturn(UID);
+        when(mContext.getResources()).thenReturn(
+                InstrumentationRegistry.getContext().getResources());
+        when(mContext.getPackageManager()).thenReturn(mPm);
+        when(mContext.getApplicationInfo()).thenReturn(legacy);
+        // most tests assume badging is enabled
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 1, UserHandle.getUserId(UID));
+
+        mHelper = new RankingHelper(getContext(), mPm, mHandler, mUsageStats,
+                new String[] {ImportanceExtractor.class.getName()});
+
+        mNotiGroupGSortA = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentTitle("A")
+                .setGroup("G")
+                .setSortKey("A")
+                .setWhen(1205)
+                .build();
+        mRecordGroupGSortA = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, null, 0, 0, mNotiGroupGSortA, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
+
+        mNotiGroupGSortB = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentTitle("B")
+                .setGroup("G")
+                .setSortKey("B")
+                .setWhen(1200)
+                .build();
+        mRecordGroupGSortB = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, null, 0, 0, mNotiGroupGSortB, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
+
+        mNotiNoGroup = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentTitle("C")
+                .setWhen(1201)
+                .build();
+        mRecordNoGroup = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, null, 0, 0, mNotiNoGroup, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
+
+        mNotiNoGroup2 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentTitle("D")
+                .setWhen(1202)
+                .build();
+        mRecordNoGroup2 = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, null, 0, 0, mNotiNoGroup2, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
+
+        mNotiNoGroupSortA = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentTitle("E")
+                .setWhen(1201)
+                .setSortKey("A")
+                .build();
+        mRecordNoGroupSortA = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 1, null, 0, 0, mNotiNoGroupSortA, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
+
+        mAudioAttributes = new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                .build();
     }
 
     private NotificationChannel getDefaultChannel() {
@@ -227,6 +237,10 @@ public class RankingHelperTest {
     private void compareGroups(NotificationChannelGroup expected, NotificationChannelGroup actual) {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getName(), actual.getName());
+    }
+
+    private NotificationChannel getChannel() {
+        return new NotificationChannel("id", "name", IMPORTANCE_LOW);
     }
 
     @Test
@@ -644,14 +658,119 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testClearLockedFields() throws Exception {
+        final NotificationChannel channel = getChannel();
+        mHelper.clearLockedFields(channel);
+        assertEquals(0, channel.getUserLockedFields());
+
+        channel.lockFields(NotificationChannel.USER_LOCKED_PRIORITY
+                | NotificationChannel.USER_LOCKED_IMPORTANCE);
+        mHelper.clearLockedFields(channel);
+        assertEquals(0, channel.getUserLockedFields());
+    }
+
+    @Test
+    public void testLockFields_soundAndVibration() throws Exception {
+        mHelper.createNotificationChannel(PKG, UID, getChannel(), true);
+
+        final NotificationChannel update1 = getChannel();
+        update1.setSound(new Uri.Builder().scheme("test").build(),
+                new AudioAttributes.Builder().build());
+        update1.lockFields(NotificationChannel.USER_LOCKED_PRIORITY); // should be ignored
+        mHelper.updateNotificationChannel(PKG, UID, update1);
+        assertEquals(NotificationChannel.USER_LOCKED_SOUND,
+                mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
+                        .getUserLockedFields());
+
+        NotificationChannel update2 = getChannel();
+        update2.enableVibration(true);
+        mHelper.updateNotificationChannel(PKG, UID, update2);
+        assertEquals(NotificationChannel.USER_LOCKED_SOUND
+                        | NotificationChannel.USER_LOCKED_VIBRATION,
+                mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
+                        .getUserLockedFields());
+    }
+
+    @Test
+    public void testLockFields_vibrationAndLights() throws Exception {
+        mHelper.createNotificationChannel(PKG, UID, getChannel(), true);
+
+        final NotificationChannel update1 = getChannel();
+        update1.setVibrationPattern(new long[]{7945, 46 ,246});
+        mHelper.updateNotificationChannel(PKG, UID, update1);
+        assertEquals(NotificationChannel.USER_LOCKED_VIBRATION,
+                mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
+                        .getUserLockedFields());
+
+        final NotificationChannel update2 = getChannel();
+        update2.enableLights(true);
+        mHelper.updateNotificationChannel(PKG, UID, update2);
+        assertEquals(NotificationChannel.USER_LOCKED_VIBRATION
+                        | NotificationChannel.USER_LOCKED_LIGHTS,
+                mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
+                        .getUserLockedFields());
+    }
+
+    @Test
+    public void testLockFields_lightsAndImportance() throws Exception {
+        mHelper.createNotificationChannel(PKG, UID, getChannel(), true);
+
+        final NotificationChannel update1 = getChannel();
+        update1.setLightColor(Color.GREEN);
+        mHelper.updateNotificationChannel(PKG, UID, update1);
+        assertEquals(NotificationChannel.USER_LOCKED_LIGHTS,
+                mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
+                        .getUserLockedFields());
+
+        final NotificationChannel update2 = getChannel();
+        update2.setImportance(IMPORTANCE_DEFAULT);
+        mHelper.updateNotificationChannel(PKG, UID, update2);
+        assertEquals(NotificationChannel.USER_LOCKED_LIGHTS
+                        | NotificationChannel.USER_LOCKED_IMPORTANCE,
+                mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
+                        .getUserLockedFields());
+    }
+
+    @Test
+    public void testLockFields_visibilityAndDndAndBadge() throws Exception {
+        mHelper.createNotificationChannel(PKG, UID, getChannel(), true);
+        assertEquals(0,
+                mHelper.getNotificationChannel(PKG, UID, getChannel().getId(), false)
+                        .getUserLockedFields());
+
+        final NotificationChannel update1 = getChannel();
+        update1.setBypassDnd(true);
+        mHelper.updateNotificationChannel(PKG, UID, update1);
+        assertEquals(NotificationChannel.USER_LOCKED_PRIORITY,
+                mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
+                        .getUserLockedFields());
+
+        final NotificationChannel update2 = getChannel();
+        update2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        mHelper.updateNotificationChannel(PKG, UID, update2);
+        assertEquals(NotificationChannel.USER_LOCKED_PRIORITY
+                        | NotificationChannel.USER_LOCKED_VISIBILITY,
+                mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
+                        .getUserLockedFields());
+
+        final NotificationChannel update3 = getChannel();
+        update3.setShowBadge(false);
+        mHelper.updateNotificationChannel(PKG, UID, update3);
+        assertEquals(NotificationChannel.USER_LOCKED_PRIORITY
+                        | NotificationChannel.USER_LOCKED_VISIBILITY
+                        | NotificationChannel.USER_LOCKED_SHOW_BADGE,
+                mHelper.getNotificationChannel(PKG, UID, update3.getId(), false)
+                        .getUserLockedFields());
+    }
+
+    @Test
     public void testDeleteNonExistentChannel() throws Exception {
         mHelper.deleteNotificationChannelGroup(PKG, UID, "does not exist");
     }
 
     @Test
     public void testGetDeletedChannel() throws Exception {
-        NotificationChannel channel =
-                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        NotificationChannel channel = getChannel();
         channel.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
         channel.enableLights(true);
         channel.setBypassDnd(true);
@@ -751,6 +870,15 @@ public class RankingHelperTest {
         // No long deleted, using old settings
         compareChannels(channel,
                 mHelper.getNotificationChannel(PKG, UID, newChannel.getId(), false));
+    }
+
+    @Test
+    public void testOnlyHasDefaultChannel() throws Exception {
+        assertTrue(mHelper.onlyHasDefaultChannel(PKG, UID));
+        assertFalse(mHelper.onlyHasDefaultChannel(UPDATED_PKG, UID2));
+
+        mHelper.createNotificationChannel(PKG, UID, getChannel(), true);
+        assertFalse(mHelper.onlyHasDefaultChannel(PKG, UID));
     }
 
     @Test
@@ -1084,4 +1212,36 @@ public class RankingHelperTest {
                     object.getInt("channelCount"));
         }
     }
+
+    @Test
+    public void testBadgingOverrideTrue() throws Exception {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 1,
+                USER.getIdentifier());
+        mHelper.updateBadgingEnabled(); // would be called by settings observer
+        assertTrue(mHelper.badgingEnabled(USER));
+    }
+
+    @Test
+    public void testBadgingOverrideFalse() throws Exception {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 0,
+                USER.getIdentifier());
+        mHelper.updateBadgingEnabled(); // would be called by settings observer
+        assertFalse(mHelper.badgingEnabled(USER));
+    }
+
+    @Test
+    public void testBadgingOverrideUserIsolation() throws Exception {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 0,
+                USER.getIdentifier());
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BADGING, 1,
+                USER2.getIdentifier());
+        mHelper.updateBadgingEnabled(); // would be called by settings observer
+        assertFalse(mHelper.badgingEnabled(USER));
+        assertTrue(mHelper.badgingEnabled(USER2));
+    }
+
 }

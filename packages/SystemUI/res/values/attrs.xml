@@ -128,5 +128,8 @@
         <!-- The initial color for the scrim. -->
         <attr name="scrimColor" format="color" />
     </declare-styleable>
+
+    <attr name="lightIconTheme" format="reference" />
+    <attr name="darkIconTheme" format="reference" />
 </resources>
 

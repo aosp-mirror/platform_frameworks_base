@@ -650,11 +650,13 @@ interface IPackageManager {
 
     int getInstallReason(String packageName, int userId);
 
-    ParceledListSlice getSharedLibraries(int flags, int userId);
+    ParceledListSlice getSharedLibraries(in String packageName, int flags, int userId);
 
     boolean canRequestPackageInstalls(String packageName, int userId);
 
     void deletePreloadsFileCache();
+
+    ComponentName getInstantAppResolverComponent();
 
     ComponentName getInstantAppResolverSettingsComponent();
 

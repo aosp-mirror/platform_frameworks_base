@@ -25,7 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Result of a {@link EuiccService#getDownloadableSubscriptionMetadata} operation.
+ * Result of a {@link EuiccService#onGetDownloadableSubscriptionMetadata} operation.
  * @hide
  *
  * TODO(b/35851809): Make this a SystemApi.
@@ -92,7 +92,7 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
         dest.writeInt(detailedCode);
     }
 
-    /** Return a result indicating that the download was successful. */
+    /** Return a result indicating that the lookup was successful. */
     public static GetDownloadableSubscriptionMetadataResult success(
             DownloadableSubscription subscription) {
         return new GetDownloadableSubscriptionMetadataResult(RESULT_OK, subscription,

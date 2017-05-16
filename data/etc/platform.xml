@@ -45,6 +45,7 @@
     <permission name="android.permission.BLUETOOTH_STACK" >
         <group gid="bluetooth" />
         <group gid="wakelock" />
+        <group gid="uhid" />
     </permission>
 
     <permission name="android.permission.NET_TUNNELING" >
@@ -180,9 +181,6 @@
     <!-- This is a core platform component that needs to freely run in the background -->
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
-
-    <!-- STOPSHIP(b/36856786): Revert this once it is fixed properly -->
-    <allow-in-power-save package="com.google.android.apps.enterprise.dmagent" />
 
     <!-- These are the packages that are white-listed to be able to run as system user -->
     <system-user-whitelisted-app package="com.android.settings" />

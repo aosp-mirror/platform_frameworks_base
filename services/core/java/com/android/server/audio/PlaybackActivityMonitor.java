@@ -286,23 +286,20 @@ public final class PlaybackActivityMonitor
                         && loser.hasSameUid(apc.getClientUid())
                         && apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED)
                 {
-                    if (MediaFocusControl.ENFORCE_DUCKING
-                            && MediaFocusControl.ENFORCE_DUCKING_FOR_NEW
-                            && loser.getSdkTarget() <= MediaFocusControl.DUCKING_IN_APP_SDK_LEVEL) {
-                        // legacy behavior, apps used to be notified when they should be ducking
-                        if (DEBUG) {Log.v(TAG, "not ducking player " + apc.getPlayerInterfaceId()
-                                + ": old SDK"); }
-                        return false;
-                    } else if (apc.getAudioAttributes().getContentType() ==
+                    if (apc.getAudioAttributes().getContentType() ==
                             AudioAttributes.CONTENT_TYPE_SPEECH) {
                         // the player is speaking, ducking will make the speech unintelligible
                         // so let the app handle it instead
-                        if (DEBUG) { Log.v(TAG, "not ducking player " + apc.getPlayerInterfaceId()
-                                + ": SPEECH"); }
+                        Log.v(TAG, "not ducking player " + apc.getPlayerInterfaceId()
+                                + " uid:" + apc.getClientUid() + " pid:" + apc.getClientPid()
+                                + " - SPEECH");
                         return false;
                     } else if (apc.getPlayerType()
                             == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
                         // TODO support ducking of SoundPool players
+                        Log.v(TAG, "not ducking player " + apc.getPlayerInterfaceId()
+                                + " uid:" + apc.getClientUid() + " pid:" + apc.getClientPid()
+                                + " - SoundPool");
                         return false;
                     }
                     apcsToDuck.add(apc);
@@ -351,7 +348,7 @@ public final class PlaybackActivityMonitor
                 }
                 if (mute) {
                     try {
-                        Log.v(TAG, "call: muting player" + piid);
+                        Log.v(TAG, "call: muting player" + piid + " uid:" + apc.getClientUid());
                         apc.getPlayerProxy().setVolume(0.0f);
                         mMutedPlayers.add(new Integer(piid));
                     } catch (Exception e) {
@@ -375,10 +372,11 @@ public final class PlaybackActivityMonitor
                 final AudioPlaybackConfiguration apc = mPlayers.get(piid);
                 if (apc != null) {
                     try {
-                        Log.v(TAG, "call: unmuting player" + piid);
+                        Log.v(TAG, "call: unmuting player" + piid + " uid:" + apc.getClientUid());
                         apc.getPlayerProxy().setVolume(1.0f);
                     } catch (Exception e) {
-                        Log.e(TAG, "call: error unmuting player " + piid, e);
+                        Log.e(TAG, "call: error unmuting player " + piid + " uid:"
+                                + apc.getClientUid(), e);
                     }
                 }
             }
@@ -559,13 +557,13 @@ public final class PlaybackActivityMonitor
                     return;
                 }
                 try {
-                    Log.v(TAG, "ducking player " + apc.getPlayerInterfaceId());
+                    Log.v(TAG, "ducking player " + apc.getPlayerInterfaceId() + " uid:" + mUid);
                     apc.getPlayerProxy().applyVolumeShaper(
                             DUCK_VSHAPE,
                             PLAY_CREATE_IF_NEEDED);
                     mDuckedPlayers.add(piid);
                 } catch (Exception e) {
-                    Log.e(TAG, "Error ducking player " + piid, e);
+                    Log.e(TAG, "Error ducking player " + piid + " uid:" + mUid, e);
                 }
             }
 
@@ -574,12 +572,12 @@ public final class PlaybackActivityMonitor
                     final AudioPlaybackConfiguration apc = players.get(piid);
                     if (apc != null) {
                         try {
-                            Log.v(TAG, "unducking player " + piid);
+                            Log.v(TAG, "unducking player " + piid + " uid:" + mUid);
                             apc.getPlayerProxy().applyVolumeShaper(
                                     DUCK_ID,
                                     VolumeShaper.Operation.REVERSE);
                         } catch (Exception e) {
-                            Log.e(TAG, "Error unducking player " + piid, e);
+                            Log.e(TAG, "Error unducking player " + piid + " uid:" + mUid, e);
                         }
                     } else {
                         // this piid was in the list of ducked players, but wasn't found

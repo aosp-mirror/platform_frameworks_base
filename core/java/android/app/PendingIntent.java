@@ -93,6 +93,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class PendingIntent implements Parcelable {
     private final IIntentSender mTarget;
+    private IBinder mWhitelistToken;
 
     /** @hide */
     @IntDef(flag = true,
@@ -656,7 +657,7 @@ public final class PendingIntent implements Parcelable {
      *
      */
     public IntentSender getIntentSender() {
-        return new IntentSender(mTarget);
+        return new IntentSender(mTarget, mWhitelistToken);
     }
 
     /**
@@ -870,7 +871,7 @@ public final class PendingIntent implements Parcelable {
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
             int res = ActivityManager.getService().sendIntentSender(
-                    mTarget, code, intent, resolvedType,
+                    mTarget, mWhitelistToken, code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
                             : null,
@@ -1085,7 +1086,9 @@ public final class PendingIntent implements Parcelable {
             = new Parcelable.Creator<PendingIntent>() {
         public PendingIntent createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();
-            return target != null ? new PendingIntent(target) : null;
+            return target != null
+                    ? new PendingIntent(target, in.getClassCookie(PendingIntent.class))
+                    : null;
         }
 
         public PendingIntent[] newArray(int size) {
@@ -1108,31 +1111,39 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
-     * Convenience function for reading either a Messenger or null pointer from
-     * a Parcel.  You must have previously written the Messenger with
+     * Convenience function for reading either a PendingIntent or null pointer from
+     * a Parcel.  You must have previously written the PendingIntent with
      * {@link #writePendingIntentOrNullToParcel}.
      *
-     * @param in The Parcel containing the written Messenger.
+     * @param in The Parcel containing the written PendingIntent.
      *
-     * @return Returns the Messenger read from the Parcel, or null if null had
+     * @return Returns the PendingIntent read from the Parcel, or null if null had
      * been written.
      */
     @Nullable
     public static PendingIntent readPendingIntentOrNullFromParcel(@NonNull Parcel in) {
         IBinder b = in.readStrongBinder();
-        return b != null ? new PendingIntent(b) : null;
+        return b != null ? new PendingIntent(b, in.getClassCookie(PendingIntent.class)) : null;
     }
 
     /*package*/ PendingIntent(IIntentSender target) {
         mTarget = target;
     }
 
-    /*package*/ PendingIntent(IBinder target) {
+    /*package*/ PendingIntent(IBinder target, Object cookie) {
         mTarget = IIntentSender.Stub.asInterface(target);
+        if (cookie != null) {
+            mWhitelistToken = (IBinder)cookie;
+        }
     }
 
     /** @hide */
     public IIntentSender getTarget() {
         return mTarget;
+    }
+
+    /** @hide */
+    public IBinder getWhitelistToken() {
+        return mWhitelistToken;
     }
 }

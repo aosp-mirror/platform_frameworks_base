@@ -18,6 +18,7 @@ package com.android.server.notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.content.pm.ParceledListSlice;
+import android.os.UserHandle;
 
 import java.util.Collection;
 
@@ -27,6 +28,7 @@ public interface RankingConfig {
     int getImportance(String packageName, int uid);
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
+    boolean badgingEnabled(UserHandle userHandle);
 
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid);

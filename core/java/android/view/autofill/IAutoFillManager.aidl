@@ -39,6 +39,9 @@ interface IAutoFillManager {
     boolean restoreSession(int sessionId, in IBinder activityToken, in IBinder appCallback);
     void updateSession(int sessionId, in AutofillId id, in Rect bounds,
             in AutofillValue value, int action, int flags, int userId);
+    int updateOrRestartSession(IBinder activityToken, in IBinder appCallback,
+            in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
+            boolean hasCallback, int flags, String packageName, int sessionId, int action);
     void finishSession(int sessionId, int userId);
     void cancelSession(int sessionId, int userId);
     void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId, int userId);

@@ -124,19 +124,40 @@ public class TextClassificationManagerTest {
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
         assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
-                isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_EMAIL,
+                        "mailto:" + classifiedText));
     }
 
     @Test
     public void testTextClassifyText_url() {
         if (isTextClassifierDisabled()) return;
 
-        String text = "Visit http://www.android.com for more information";
+        String text = "Visit www.android.com for more information";
         String classifiedText = "www.android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
         assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
-                isTextClassification(classifiedText, TextClassifier.TYPE_URL));
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_URL,
+                        "http://" + classifiedText));
+    }
+
+    @Test
+    public void testTextClassifyText_url_inCaps() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Visit HTTP://ANDROID.COM for more information";
+        String classifiedText = "HTTP://ANDROID.COM";
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+        assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_URL,
+                        "http://ANDROID.COM"));
     }
 
     @Test
@@ -149,7 +170,10 @@ public class TextClassificationManagerTest {
         int endIndex = startIndex + classifiedText.length();
         LocaleList nullLocales = null;
         assertThat(mClassifier.classifyText(text, startIndex, endIndex, nullLocales),
-                isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_EMAIL,
+                        "mailto:" + classifiedText));
     }
 
     @Test
@@ -206,18 +230,23 @@ public class TextClassificationManagerTest {
     }
 
     private static Matcher<TextClassification> isTextClassification(
-            final String text, final String type) {
+            final String text, final String type, final String intentUri) {
         return new BaseMatcher<TextClassification>() {
             @Override
             public boolean matches(Object o) {
                 if (o instanceof TextClassification) {
                     TextClassification result = (TextClassification) o;
                     final boolean typeRequirementSatisfied;
+                    String scheme;
                     switch (type) {
+                        case TextClassifier.TYPE_EMAIL:
+                            scheme = result.getIntent().getData().getScheme();
+                            typeRequirementSatisfied = "mailto".equals(scheme);
+                            break;
                         case TextClassifier.TYPE_URL:
-                            String scheme = result.getIntent().getData().getScheme();
-                            typeRequirementSatisfied = "http".equalsIgnoreCase(scheme)
-                                    || "https".equalsIgnoreCase(scheme);
+                            scheme = result.getIntent().getData().getScheme();
+                            typeRequirementSatisfied = "http".equals(scheme)
+                                    || "https".equals(scheme);
                             break;
                         default:
                             typeRequirementSatisfied = true;
@@ -226,7 +255,8 @@ public class TextClassificationManagerTest {
                     return typeRequirementSatisfied
                             && text.equals(result.getText())
                             && result.getEntityCount() > 0
-                            && type.equals(result.getEntity(0));
+                            && type.equals(result.getEntity(0))
+                            && intentUri.equals(result.getIntent().getDataString());
                     // TODO: Include other properties.
                 }
                 return false;
@@ -235,7 +265,8 @@ public class TextClassificationManagerTest {
             @Override
             public void describeTo(Description description) {
                 description.appendText("text=").appendValue(text)
-                        .appendText(", type=").appendValue(type);
+                        .appendText(", type=").appendValue(type)
+                        .appendText(", intent.data=").appendValue(intentUri);
             }
         };
     }

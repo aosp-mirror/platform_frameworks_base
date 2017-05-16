@@ -41,6 +41,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Debug;
 import android.os.Trace;
 import android.util.ArraySet;
@@ -683,9 +684,11 @@ class WindowSurfacePlacer {
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
 
             // Create a new surface for the thumbnail
+            WindowState window = appToken.findMainWindow();
             SurfaceControl surfaceControl = new SurfaceControl(mService.mFxSession,
                     "thumbnail anim", dirty.width(), dirty.height(),
-                    PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+                    PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN,
+                    appToken.windowType, window.mOwnerUid);
             surfaceControl.setLayerStack(display.getLayerStack());
             if (SHOW_TRANSACTIONS) {
                 Slog.i(TAG, "  THUMBNAIL " + surfaceControl + ": CREATE");

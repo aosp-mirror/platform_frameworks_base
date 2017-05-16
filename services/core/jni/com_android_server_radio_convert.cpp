@@ -94,7 +94,7 @@ static bool ThrowIfFailed(JNIEnv *env, const Result halResult) {
         case Result::OK:
             return false;
         case Result::NOT_INITIALIZED:
-            jniThrowException(env, "java/lang/RuntimeException", "Result::NOT_INITIALIZED");
+            jniThrowRuntimeException(env, "Result::NOT_INITIALIZED");
             return true;
         case Result::INVALID_ARGUMENTS:
             jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -104,8 +104,7 @@ static bool ThrowIfFailed(JNIEnv *env, const Result halResult) {
             jniThrowException(env, "java/lang/IllegalStateException", "Result::INVALID_STATE");
             return true;
         case Result::TIMEOUT:
-            jniThrowException(env, "java/lang/RuntimeException",
-                    "Result::TIMEOUT (unexpected here)");
+            jniThrowRuntimeException(env, "Result::TIMEOUT (unexpected here)");
             return true;
         default:
             jniThrowExceptionFmt(env, "java/lang/RuntimeException",

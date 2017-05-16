@@ -47,6 +47,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.backup.FileMetadata;
+import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.RestorePolicy;
 import com.android.server.backup.testutils.PackageManagerStub;
@@ -61,6 +62,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
@@ -71,6 +73,7 @@ public class TarBackupReaderTest {
     private static final String TELEPHONY_PACKAGE_SIGNATURE_SHA256 =
             "301aa3cb081134501c45f1422abc66c24224fd5ded5fdc8f17e697176fd866aa";
     private static final int TELEPHONY_PACKAGE_VERSION = 25;
+    private static final String TEST_PACKAGE_NAME = "com.android.backup.testing";
     private static final Signature FAKE_SIGNATURE_1 = new Signature("1234");
     private static final Signature FAKE_SIGNATURE_2 = new Signature("5678");
 
@@ -119,6 +122,45 @@ public class TarBackupReaderTest {
         assertThat(fileMetadata.size).isEqualTo(2438);
         assertThat(fileMetadata.domain).isEqualTo(null);
         assertThat(fileMetadata.path).isEqualTo("_manifest");
+    }
+
+    @Test
+    public void readTarHeaders_backupNotEncrypted_correctlyReadsPaxHeader() throws Exception {
+        // Files with long names (>100 chars) will force backup to add PAX header.
+        InputStream inputStream = mContext.getResources().openRawResource(
+                R.raw.backup_file_with_long_name);
+        InputStream tarInputStream = PerformAdbRestoreTask.parseBackupFileHeaderAndReturnTarStream(
+                inputStream, null);
+        TarBackupReader tarBackupReader = new TarBackupReader(tarInputStream,
+                mBytesReadListenerMock, mBackupManagerMonitorMock);
+
+        // Read manifest file.
+        FileMetadata fileMetadata = tarBackupReader.readTarHeaders();
+        Signature[] signatures = tarBackupReader.readAppManifestAndReturnSignatures(
+                fileMetadata);
+        RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
+                mPackageManagerStub, false /* allowApks */, fileMetadata, signatures);
+
+        assertThat(restorePolicy).isEqualTo(RestorePolicy.IGNORE);
+        assertThat(fileMetadata.packageName).isEqualTo(TEST_PACKAGE_NAME);
+        assertThat(fileMetadata.path).isEqualTo(
+                RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME);
+
+        tarBackupReader.skipTarPadding(fileMetadata.size);
+
+        // Read actual file (PAX header will only exist here).
+        fileMetadata = tarBackupReader.readTarHeaders();
+        signatures = tarBackupReader.readAppManifestAndReturnSignatures(
+                fileMetadata);
+        restorePolicy = tarBackupReader.chooseRestorePolicy(
+                mPackageManagerStub, false /* allowApks */, fileMetadata, signatures);
+
+        assertThat(restorePolicy).isEqualTo(RestorePolicy.IGNORE);
+        assertThat(fileMetadata.packageName).isEqualTo(TEST_PACKAGE_NAME);
+        char[] expectedFileNameChars = new char[200];
+        Arrays.fill(expectedFileNameChars, '1');
+        String expectedFileName = new String(expectedFileNameChars);
+        assertThat(fileMetadata.path).isEqualTo(expectedFileName);
     }
 
     @Test
@@ -331,7 +373,8 @@ public class TarBackupReaderTest {
     }
 
     @Test
-    public void chooseRestorePolicy_systemAppWithBackupAgentAndRestoreAnyVersion_returnsAccept() throws Exception {
+    public void chooseRestorePolicy_systemAppWithBackupAgentAndRestoreAnyVersion_returnsAccept()
+            throws Exception {
         InputStream inputStream = mContext.getResources().openRawResource(
                 R.raw.backup_telephony_no_password);
         InputStream tarInputStream = PerformAdbRestoreTask.parseBackupFileHeaderAndReturnTarStream(
@@ -486,5 +529,5 @@ public class TarBackupReaderTest {
         assertThat(bundleCaptor.getValue().get(EXTRA_LOG_EVENT_ID)).isEqualTo(
                 LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER);
     }
-
 }
+

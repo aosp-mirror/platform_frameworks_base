@@ -54,4 +54,6 @@
         <attr name="android:gravity" />
     </declare-styleable>
 
+    <attr name="footerPreferenceStyle" format="reference" />
+
 </resources>

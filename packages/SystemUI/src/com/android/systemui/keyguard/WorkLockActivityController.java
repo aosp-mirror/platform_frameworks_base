@@ -64,7 +64,7 @@ public class WorkLockActivityController {
         options.setTaskOverlay(true, false /* canResume */);
 
         final int result = startActivityAsUser(intent, options.toBundle(), UserHandle.USER_CURRENT);
-        if (result >= ActivityManager.START_SUCCESS) {
+        if (ActivityManager.isStartResultSuccessful(result)) {
             // OK
         } else {
             // Starting the activity inside the task failed. We can't be sure why, so to be

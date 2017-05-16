@@ -154,7 +154,7 @@ public class GestureLauncherServiceTest {
         withUserSetupCompleteValue(true);
 
         boolean useWakeLock = false;
-        assertTrue(mGestureLauncherService.handleCameraLaunchGesture(useWakeLock, FAKE_SOURCE));
+        assertTrue(mGestureLauncherService.handleCameraGesture(useWakeLock, FAKE_SOURCE));
         verify(mStatusBarManagerInternal).onCameraLaunchGestureDetected(FAKE_SOURCE);
     }
 
@@ -163,7 +163,7 @@ public class GestureLauncherServiceTest {
         withUserSetupCompleteValue(false);
 
         boolean useWakeLock = false;
-        assertFalse(mGestureLauncherService.handleCameraLaunchGesture(useWakeLock, FAKE_SOURCE));
+        assertFalse(mGestureLauncherService.handleCameraGesture(useWakeLock, FAKE_SOURCE));
     }
 
     @Test

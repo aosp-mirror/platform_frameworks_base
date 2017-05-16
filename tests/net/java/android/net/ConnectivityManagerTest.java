@@ -45,6 +45,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PendingIntent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.content.Context;
@@ -65,8 +66,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -294,6 +293,43 @@ public class ConnectivityManagerTest {
 
         // unregistering the callback should make it registrable again.
         manager.requestNetwork(request, callback);
+    }
+
+    @Test
+    public void testArgumentValidation() throws Exception {
+        ConnectivityManager manager = new ConnectivityManager(mCtx, mService);
+
+        NetworkRequest request = mock(NetworkRequest.class);
+        NetworkCallback callback = mock(NetworkCallback.class);
+        Handler handler = mock(Handler.class);
+        NetworkCallback nullCallback = null;
+        PendingIntent nullIntent = null;
+
+        mustFail(() -> { manager.requestNetwork(null, callback); });
+        mustFail(() -> { manager.requestNetwork(request, nullCallback); });
+        mustFail(() -> { manager.requestNetwork(request, callback, null); });
+        mustFail(() -> { manager.requestNetwork(request, callback, -1); });
+        mustFail(() -> { manager.requestNetwork(request, nullIntent); });
+
+        mustFail(() -> { manager.registerNetworkCallback(null, callback, handler); });
+        mustFail(() -> { manager.registerNetworkCallback(request, null, handler); });
+        mustFail(() -> { manager.registerNetworkCallback(request, callback, null); });
+        mustFail(() -> { manager.registerNetworkCallback(request, nullIntent); });
+
+        mustFail(() -> { manager.registerDefaultNetworkCallback(null, handler); });
+        mustFail(() -> { manager.registerDefaultNetworkCallback(callback, null); });
+
+        mustFail(() -> { manager.unregisterNetworkCallback(nullCallback); });
+        mustFail(() -> { manager.unregisterNetworkCallback(nullIntent); });
+        mustFail(() -> { manager.releaseNetworkRequest(nullIntent); });
+    }
+
+    static void mustFail(Runnable fn) {
+        try {
+            fn.run();
+            fail();
+        } catch (Exception expected) {
+        }
     }
 
     static Message makeMessage(NetworkRequest req, int messageType) {

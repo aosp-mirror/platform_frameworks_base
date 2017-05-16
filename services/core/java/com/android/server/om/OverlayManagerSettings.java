@@ -22,12 +22,14 @@ import static com.android.server.om.OverlayManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
+import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -266,32 +268,32 @@ final class OverlayManagerSettings {
         return true;
     }
 
-    private static final String TAB1 = "    ";
-    private static final String TAB2 = TAB1 + TAB1;
-    private static final String TAB3 = TAB2 + TAB1;
-
-    void dump(@NonNull final PrintWriter pw) {
+    void dump(@NonNull final PrintWriter p) {
+        final IndentingPrintWriter pw = new IndentingPrintWriter(p, "  ");
         pw.println("Settings");
-        pw.println(TAB1 + "Items");
+        pw.increaseIndent();
 
         if (mItems.isEmpty()) {
-            pw.println(TAB2 + "<none>");
+            pw.println("<none>");
             return;
         }
 
         final int N = mItems.size();
         for (int i = 0; i < N; i++) {
             final SettingsItem item = mItems.get(i);
-            final StringBuilder sb = new StringBuilder();
-            sb.append(TAB2 + item.mPackageName + ":" + item.getUserId() + " {\n");
-            sb.append(TAB3 + "mPackageName.......: " + item.mPackageName + "\n");
-            sb.append(TAB3 + "mUserId............: " + item.getUserId() + "\n");
-            sb.append(TAB3 + "mTargetPackageName.: " + item.getTargetPackageName() + "\n");
-            sb.append(TAB3 + "mBaseCodePath......: " + item.getBaseCodePath() + "\n");
-            sb.append(TAB3 + "mState.............: " + OverlayInfo.stateToString(item.getState()) + "\n");
-            sb.append(TAB3 + "mIsEnabled.........: " + item.isEnabled() + "\n");
-            sb.append(TAB2 + "}");
-            pw.println(sb.toString());
+            pw.println(item.mPackageName + ":" + item.getUserId() + " {");
+            pw.increaseIndent();
+
+            pw.print("mPackageName.......: "); pw.println(item.mPackageName);
+            pw.print("mUserId............: "); pw.println(item.getUserId());
+            pw.print("mTargetPackageName.: "); pw.println(item.getTargetPackageName());
+            pw.print("mBaseCodePath......: "); pw.println(item.getBaseCodePath());
+            pw.print("mState.............: "); pw.println(OverlayInfo.stateToString(item.getState()));
+            pw.print("mIsEnabled.........: "); pw.println(item.isEnabled());
+            pw.print("mIsStatic..........: "); pw.println(item.isStatic());
+
+            pw.decreaseIndent();
+            pw.println("}");
         }
     }
 
@@ -525,12 +527,6 @@ final class OverlayManagerSettings {
             final int userId) {
         return selectWhereUser(userId)
                 .filter(item -> item.getTargetPackageName().equals(targetPackageName));
-    }
-
-    private void assertNotNull(@Nullable final Object o) {
-        if (o == null) {
-            throw new AndroidRuntimeException("object must not be null");
-        }
     }
 
     static final class BadKeyException extends RuntimeException {

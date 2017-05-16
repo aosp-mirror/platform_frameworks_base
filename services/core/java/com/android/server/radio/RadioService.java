@@ -36,6 +36,8 @@ public class RadioService extends SystemService {
      */
     private final long mNativeContext = nativeInit();
 
+    private final Object mLock = new Object();
+
     public RadioService(Context context) {
         super(context);
     }
@@ -61,11 +63,13 @@ public class RadioService extends SystemService {
         @Override
         public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
                 boolean withAudio, ITunerCallback callback) {
-            // TODO(b/36863239): add death monitoring for binder
             if (callback == null) {
                 throw new IllegalArgumentException("Callback must not be empty");
             }
-            return nativeOpenTuner(mNativeContext, moduleId, bandConfig, withAudio, callback);
+            synchronized (mLock) {
+                // TODO(b/36863239): add death monitoring for binder
+                return nativeOpenTuner(mNativeContext, moduleId, bandConfig, withAudio, callback);
+            }
         }
     }
 }

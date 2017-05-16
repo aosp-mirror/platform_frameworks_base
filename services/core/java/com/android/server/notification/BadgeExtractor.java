@@ -41,9 +41,10 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             if (DBG) Slog.d(TAG, "missing config");
             return null;
         }
+        boolean userWantsBadges = mConfig.badgingEnabled(record.sbn.getUser());
         boolean appCanShowBadge =
                 mConfig.canShowBadge(record.sbn.getPackageName(), record.sbn.getUid());
-        if (!appCanShowBadge) {
+        if (!userWantsBadges || !appCanShowBadge) {
             record.setShowBadge(false);
         } else {
             record.setShowBadge(mConfig.getNotificationChannel(record.sbn.getPackageName(),

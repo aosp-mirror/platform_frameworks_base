@@ -164,7 +164,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
-
+    private boolean mKeyguardGoingAway;
     private boolean mGoingToSleep;
     private boolean mBouncer;
     private boolean mBootCompleted;
@@ -412,6 +412,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    /**
+     * Updates KeyguardUpdateMonitor's internal state to know if keyguard is goingAway
+     * @param goingAway
+     */
+    public void setKeyguardGoingAway(boolean goingAway) {
+        mKeyguardGoingAway = goingAway;
+    }
+
     private void onFingerprintAuthenticated(int userId) {
         Trace.beginSection("KeyGuardUpdateMonitor#onFingerPrintAuthenticated");
         mUserFingerprintAuthenticated.put(userId, true);
@@ -510,6 +518,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.removeCallbacks(mRetryFingerprintAuthentication);
                 mHandler.postDelayed(mRetryFingerprintAuthentication, HW_UNAVAILABLE_TIMEOUT);
             }
+        }
+
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
+            mLockPatternUtils.requireStrongAuth(
+                    LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
+                    getCurrentUser());
         }
 
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1117,7 +1131,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return (mKeyguardIsVisible || !mDeviceInteractive || mBouncer || mGoingToSleep)
+        return (mKeyguardIsVisible || !mDeviceInteractive ||
+                    (mBouncer && !mKeyguardGoingAway) || mGoingToSleep)
                 && (!mSwitchingUser && !isFingerprintDisabled(getCurrentUser()) ||
                 mEnableNextFingerprint);
     }

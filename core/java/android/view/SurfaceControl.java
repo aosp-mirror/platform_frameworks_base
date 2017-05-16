@@ -16,10 +16,13 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
@@ -302,7 +305,7 @@ public class SurfaceControl {
     public SurfaceControl(SurfaceSession session,
             String name, int w, int h, int format, int flags)
                     throws OutOfResourcesException {
-        this(session, name, w, h, format, flags, null, -1, -1);
+        this(session, name, w, h, format, flags, null, INVALID_WINDOW_TYPE, Binder.getCallingUid());
     }
 
     public SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,

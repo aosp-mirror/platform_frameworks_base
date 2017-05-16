@@ -27,6 +27,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
@@ -95,6 +96,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -143,6 +146,7 @@ public class SystemServicesProxy {
     Canvas mBgProtectionCanvas;
 
     private final Handler mHandler = new H();
+    private final ExecutorService mOnewayExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * An abstract class to track task stack changes.
@@ -466,13 +470,20 @@ public class SystemServicesProxy {
         if (mIam == null) return false;
 
         try {
-            ActivityManager.StackInfo homeStackInfo = mIam.getStackInfo(
-                    ActivityManager.StackId.HOME_STACK_ID);
-            ActivityManager.StackInfo fullscreenStackInfo = mIam.getStackInfo(
-                    ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID);
-            ActivityManager.StackInfo recentsStackInfo = mIam.getStackInfo(
-                    ActivityManager.StackId.RECENTS_STACK_ID);
-
+            List<StackInfo> stackInfos = mIam.getAllStackInfos();
+            ActivityManager.StackInfo homeStackInfo = null;
+            ActivityManager.StackInfo fullscreenStackInfo = null;
+            ActivityManager.StackInfo recentsStackInfo = null;
+            for (int i = 0; i < stackInfos.size(); i++) {
+                StackInfo stackInfo = stackInfos.get(i);
+                if (stackInfo.stackId == HOME_STACK_ID) {
+                    homeStackInfo = stackInfo;
+                } else if (stackInfo.stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                    fullscreenStackInfo = stackInfo;
+                } else if (stackInfo.stackId == RECENTS_STACK_ID) {
+                    recentsStackInfo = stackInfo;
+                }
+            }
             boolean homeStackVisibleNotOccluded = isStackNotOccluded(homeStackInfo,
                     fullscreenStackInfo);
             boolean recentsStackVisibleNotOccluded = isStackNotOccluded(recentsStackInfo,
@@ -755,10 +766,12 @@ public class SystemServicesProxy {
      * Sends a message to close other system windows.
      */
     public void sendCloseSystemWindows(String reason) {
-        try {
-            mIam.closeSystemDialogs(reason);
-        } catch (RemoteException e) {
-        }
+        mOnewayExecutor.submit(() -> {
+            try {
+                mIam.closeSystemDialogs(reason);
+            } catch (RemoteException e) {
+            }
+        });
     }
 
     /**
@@ -998,9 +1011,7 @@ public class SystemServicesProxy {
      * Returns the current user id.
      */
     public int getCurrentUser() {
-        if (mAm == null) return 0;
-
-        return mAm.getCurrentUser();
+        return KeyguardUpdateMonitor.getCurrentUser();
     }
 
     /**

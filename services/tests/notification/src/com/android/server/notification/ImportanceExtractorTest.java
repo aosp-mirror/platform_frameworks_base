@@ -24,10 +24,8 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
-import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -43,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ImportanceExtractorTest {
+public class ImportanceExtractorTest extends NotificationTestCase {
 
     @Mock RankingConfig mConfig;
 
@@ -73,10 +71,6 @@ public class ImportanceExtractorTest {
                 mPid, n, mUser, null, System.currentTimeMillis());
         NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
         return r;
-    }
-
-    private Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
     }
 
     //

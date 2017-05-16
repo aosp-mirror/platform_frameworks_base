@@ -2770,6 +2770,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
      *       1                           PFLAG3_NO_REVEAL_ON_FOCUS
+     *      1                            PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT
      * |-------|-------|-------|-------|
      */
 
@@ -3041,6 +3042,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getRevealOnFocusHint()
      */
     private static final int PFLAG3_NO_REVEAL_ON_FOCUS = 0x4000000;
+
+    /**
+     * Flag indicating that when layout is completed we should notify
+     * that the view was entered for autofill purposes. To minimize
+     * showing autofill for views not visible to the user we evaluate
+     * user visibility which cannot be done until the view is laid out.
+     */
+    static final int PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT = 0x8000000;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -4462,6 +4471,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
 
             Canvas.sCompatibilityRestore = targetSdkVersion < Build.VERSION_CODES.M;
+            Canvas.sCompatibilitySetBitmap = targetSdkVersion < Build.VERSION_CODES.O;
 
             // In M and newer, our widgets can pass a "hint" value in the size
             // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
@@ -6495,7 +6505,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
-                setFocusedInCluster();
+                updateFocusedInCluster(oldFocus, direction);
             }
 
             if (mAttachInfo != null) {
@@ -6844,8 +6854,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAutofillable() && isAttachedToWindow()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (enter && hasWindowFocus() && isFocused() && isVisibleToUser()) {
-                    afm.notifyViewEntered(this);
+                if (enter && hasWindowFocus() && isFocused()) {
+                    // We have not been laid out yet, hence cannot evaluate
+                    // whether this view is visible to the user, we will do
+                    // the evaluation once layout is complete.
+                    if (!isLaidOut()) {
+                        mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
+                    } else if (isVisibleToUser()) {
+                        afm.notifyViewEntered(this);
+                    }
                 } else if (!hasWindowFocus() || !isFocused()) {
                     afm.notifyViewExited(this);
                 }
@@ -9911,19 +9928,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public final void setFocusedInCluster() {
-        View top = findKeyboardNavigationCluster();
-        if (top == this) {
+        setFocusedInCluster(findKeyboardNavigationCluster());
+    }
+
+    private void setFocusedInCluster(View cluster) {
+        if (this instanceof ViewGroup) {
+            ((ViewGroup) this).mFocusedInCluster = null;
+        }
+        if (cluster == this) {
             return;
         }
         ViewParent parent = mParent;
         View child = this;
         while (parent instanceof ViewGroup) {
-            ((ViewGroup) parent).setFocusedInCluster(child);
-            if (parent == top) {
-                return;
+            ((ViewGroup) parent).mFocusedInCluster = child;
+            if (parent == cluster) {
+                break;
             }
             child = (View) parent;
             parent = parent.getParent();
+        }
+    }
+
+    private void updateFocusedInCluster(View oldFocus, @FocusDirection int direction) {
+        if (oldFocus != null) {
+            View oldCluster = oldFocus.findKeyboardNavigationCluster();
+            View cluster = findKeyboardNavigationCluster();
+            if (oldCluster != cluster) {
+                // Going from one cluster to another, so save last-focused.
+                // This covers cluster jumps because they are always FOCUS_DOWN
+                oldFocus.setFocusedInCluster(oldCluster);
+                if (direction == FOCUS_FORWARD || direction == FOCUS_BACKWARD) {
+                    // This is a result of ordered navigation so consider navigation through
+                    // the previous cluster "complete" and clear its last-focused memory.
+                    if (oldFocus.mParent instanceof ViewGroup) {
+                        ((ViewGroup) oldFocus.mParent).clearFocusedInCluster(oldFocus);
+                    }
+                }
+            }
         }
     }
 
@@ -17265,15 +17307,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * item in a list view.
      *
      * @return Returns a Parcelable object containing the view's current dynamic
-     *         state, or null if there is nothing interesting to save. The
-     *         default implementation returns null.
+     *         state, or null if there is nothing interesting to save.
      * @see #onRestoreInstanceState(android.os.Parcelable)
      * @see #saveHierarchyState(android.util.SparseArray)
      * @see #dispatchSaveInstanceState(android.util.SparseArray)
      * @see #setSaveEnabled(boolean)
      */
     @CallSuper
-    protected Parcelable onSaveInstanceState() {
+    @Nullable protected Parcelable onSaveInstanceState() {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
         if (mStartActivityRequestWho != null || isAutofilled()
                 || mAccessibilityViewId > LAST_APP_ACCESSIBILITY_ID) {
@@ -19304,6 +19345,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
         mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
+
+        if ((mPrivateFlags3 & PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT) != 0) {
+            mPrivateFlags3 &= ~PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
+            notifyEnterOrExitForAutoFillIfNeeded(true);
+        }
     }
 
     /**
