@@ -1232,6 +1232,15 @@ public class RankingHelperTest extends NotificationTestCase {
     }
 
     @Test
+    public void testBadgingForUserAll() throws Exception {
+        try {
+            mHelper.badgingEnabled(UserHandle.ALL);
+        } catch (Exception e) {
+            fail("just don't throw");
+        }
+    }
+
+    @Test
     public void testBadgingOverrideUserIsolation() throws Exception {
         Secure.putIntForUser(getContext().getContentResolver(),
                 Secure.NOTIFICATION_BADGING, 0,
