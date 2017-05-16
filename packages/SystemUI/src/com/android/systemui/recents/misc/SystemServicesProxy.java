@@ -26,6 +26,7 @@ import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
@@ -70,6 +71,7 @@ import android.util.ArraySet;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.MutableBoolean;
+import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
@@ -89,6 +91,7 @@ import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1116,31 +1119,44 @@ public class SystemServicesProxy {
     }
 
     /** Starts an activity from recents. */
-    public boolean startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
-            ActivityOptions options, int stackId) {
-        if (mIam != null) {
-            try {
-                if (taskKey.stackId == DOCKED_STACK_ID) {
-                    // We show non-visible docked tasks in Recents, but we always want to launch
-                    // them in the fullscreen stack.
-                    if (options == null) {
-                        options = ActivityOptions.makeBasic();
-                    }
-                    options.setLaunchStackId(FULLSCREEN_WORKSPACE_STACK_ID);
-                } else if (stackId != INVALID_STACK_ID){
-                    if (options == null) {
-                        options = ActivityOptions.makeBasic();
-                    }
-                    options.setLaunchStackId(stackId);
-                }
-                mIam.startActivityFromRecents(
-                        taskKey.id, options == null ? null : options.toBundle());
-                return true;
-            } catch (Exception e) {
-                Log.e(TAG, context.getString(R.string.recents_launch_error_message, taskName), e);
-            }
+    public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
+            ActivityOptions options, int stackId,
+            @Nullable final StartActivityFromRecentsResultListener resultListener) {
+        if (mIam == null) {
+            return;
         }
-        return false;
+        if (taskKey.stackId == DOCKED_STACK_ID) {
+            // We show non-visible docked tasks in Recents, but we always want to launch
+            // them in the fullscreen stack.
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            options.setLaunchStackId(FULLSCREEN_WORKSPACE_STACK_ID);
+        } else if (stackId != INVALID_STACK_ID) {
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            options.setLaunchStackId(stackId);
+        }
+        final ActivityOptions finalOptions = options;
+
+        // Execute this from another thread such that we can do other things (like caching the
+        // bitmap for the thumbnail) while AM is busy starting our activity.
+        mOnewayExecutor.submit(() -> {
+            try {
+                mIam.startActivityFromRecents(
+                        taskKey.id, finalOptions == null ? null : finalOptions.toBundle());
+                if (resultListener != null) {
+                    mHandler.post(() -> resultListener.onStartActivityResult(true));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, context.getString(
+                        R.string.recents_launch_error_message, taskName), e);
+                if (resultListener != null) {
+                    mHandler.post(() -> resultListener.onStartActivityResult(false));
+                }
+            }
+        });
     }
 
     /** Starts an in-place animation on the front most application windows. */
@@ -1256,6 +1272,10 @@ public class SystemServicesProxy {
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to reach window manager", e);
         }
+    }
+
+    public interface StartActivityFromRecentsResultListener {
+        void onStartActivityResult(boolean succeeded);
     }
 
     private final class H extends Handler {
