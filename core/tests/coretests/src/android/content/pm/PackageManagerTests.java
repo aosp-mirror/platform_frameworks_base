@@ -467,28 +467,17 @@ public class PackageManagerTests extends AndroidTestCase {
 
             int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
             if (rLoc == INSTALL_LOC_INT) {
-                if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                    assertTrue("The application should be installed forward locked",
-                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
-                    assertStartsWith("The APK path should point to the ASEC",
-                            SECURE_CONTAINERS_PREFIX, srcPath);
-                    assertStartsWith("The public APK path should point to the ASEC",
-                            SECURE_CONTAINERS_PREFIX, publicSrcPath);
-                    assertStartsWith("The native library path should point to the ASEC",
-                            SECURE_CONTAINERS_PREFIX, info.nativeLibraryDir);
-                } else {
-                    assertFalse(
-                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
-                    assertEquals(appInstallPath, srcPath);
-                    assertEquals(appInstallPath, publicSrcPath);
-                    assertStartsWith("Native library should point to shared lib directory",
-                            expectedLibPath, info.nativeLibraryDir);
-                    assertDirOwnerGroupPermsIfExists(
-                            "Native library directory should be owned by system:system and 0755",
-                            Process.SYSTEM_UID, Process.SYSTEM_UID,
-                            S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH,
-                            info.nativeLibraryDir);
-                }
+                assertFalse(
+                        (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
+                assertEquals(appInstallPath, srcPath);
+                assertEquals(appInstallPath, publicSrcPath);
+                assertStartsWith("Native library should point to shared lib directory",
+                        expectedLibPath, info.nativeLibraryDir);
+                assertDirOwnerGroupPermsIfExists(
+                        "Native library directory should be owned by system:system and 0755",
+                        Process.SYSTEM_UID, Process.SYSTEM_UID,
+                        S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH,
+                        info.nativeLibraryDir);
                 assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
 
                 // Make sure the native library dir is not a symlink
@@ -502,13 +491,8 @@ public class PackageManagerTests extends AndroidTestCase {
                     }
                 }
             } else if (rLoc == INSTALL_LOC_SD) {
-                if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                    assertTrue("The application should be installed forward locked",
-                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
-                } else {
-                    assertFalse("The application should not be installed forward locked",
-                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
-                }
+                assertFalse("The application should not be installed forward locked",
+                        (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                 assertTrue("Application flags (" + info.flags
                         + ") should contain FLAG_EXTERNAL_STORAGE",
                         (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
@@ -799,11 +783,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testInstallFwdLockedInternal() throws Exception {
-        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
-    }
-
-    @LargeTest
     public void testInstallSdcard() throws Exception {
         // Do not run on devices with emulated external storage.
         if (Environment.isExternalStorageEmulated()) {
@@ -907,11 +886,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testReplaceFailFwdLockedInternal() throws Exception {
-        sampleReplaceFromRawResource(PackageManager.INSTALL_FORWARD_LOCK);
-    }
-
-    @LargeTest
     public void testReplaceFailSdcard() throws Exception {
         // Do not run on devices with emulated external storage.
         if (Environment.isExternalStorageEmulated()) {
@@ -924,12 +898,6 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceNormalInternal() throws Exception {
         sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING);
-    }
-
-    @LargeTest
-    public void testReplaceFwdLockedInternal() throws Exception {
-        sampleReplaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING
-                | PackageManager.INSTALL_FORWARD_LOCK);
     }
 
     @LargeTest
@@ -1089,11 +1057,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testDeleteFwdLockedInternal() throws Exception {
-        deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, 0);
-    }
-
-    @LargeTest
     public void testDeleteSdcard() throws Exception {
         // Do not run on devices with emulated external storage.
         if (Environment.isExternalStorageEmulated()) {
@@ -1106,11 +1069,6 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testDeleteNormalInternalRetainData() throws Exception {
         deleteFromRawResource(0, PackageManager.DELETE_KEEP_DATA);
-    }
-
-    @LargeTest
-    public void testDeleteFwdLockedInternalRetainData() throws Exception {
-        deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, PackageManager.DELETE_KEEP_DATA);
     }
 
     @LargeTest
@@ -1421,31 +1379,6 @@ public class PackageManagerTests extends AndroidTestCase {
                 0, true, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
-    @LargeTest
-    public void testManifestInstallLocationFwdLockedFlagSdcard() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        installFromRawResource("install.apk", R.raw.install_loc_unspecified,
-                PackageManager.INSTALL_FORWARD_LOCK |
-                PackageManager.INSTALL_EXTERNAL, true, false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
-    @LargeTest
-    public void testManifestInstallLocationFwdLockedSdcard() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                PackageManager.INSTALL_FORWARD_LOCK, true, false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
     /*
      * Install a package on internal flash via PackageManager install flag. Replace
      * the package via flag to install on sdcard. Make sure the new flag overrides
@@ -1745,20 +1678,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testMoveAppForwardLocked() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int installFlags = PackageManager.INSTALL_FORWARD_LOCK;
-        int moveFlags = PackageManager.MOVE_EXTERNAL_MEDIA;
-        boolean fail = false;
-        int result = PackageManager.MOVE_SUCCEEDED;
-        sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
-    }
-
-    @LargeTest
     public void testMoveAppFailInternalToExternalDelete() throws Exception {
         // Do not run on devices with emulated external storage.
         if (Environment.isExternalStorageEmulated()) {
@@ -1885,63 +1804,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     /*
-     * Install an app forward-locked.
-     */
-    @LargeTest
-    public void testFlagF() throws Exception {
-        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
-    }
-
-    /*
-     * Install an app with both internal and external flags set. should fail
-     */
-    @LargeTest
-    public void testFlagIE() throws Exception {
-        installFromRawResource("install.apk", R.raw.install,
-                PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_INTERNAL,
-                false,
-                true, PackageInstaller.STATUS_FAILURE_STORAGE,
-                PackageInfo.INSTALL_LOCATION_AUTO);
-    }
-
-    /*
-     * Install an app with both internal and forward-lock flags set.
-     */
-    @LargeTest
-    public void testFlagIF() throws Exception {
-        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK
-                | PackageManager.INSTALL_INTERNAL, true);
-    }
-
-    /*
-     * Install an app with both external and forward-lock flags set.
-     */
-    @LargeTest
-    public void testFlagEF() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK
-                | PackageManager.INSTALL_EXTERNAL, true);
-    }
-
-    /*
-     * Install an app with both internal and external flags set with forward
-     * lock. Should fail.
-     */
-    @LargeTest
-    public void testFlagIEF() throws Exception {
-        installFromRawResource("install.apk", R.raw.install,
-                PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_INTERNAL |
-                PackageManager.INSTALL_EXTERNAL,
-                false,
-                true, PackageInstaller.STATUS_FAILURE_STORAGE,
-                PackageInfo.INSTALL_LOCATION_AUTO);
-    }
-
-    /*
      * Install an app with both internal and manifest option set.
      * should install on internal.
      */
@@ -2032,55 +1894,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     /*
-     * Install an app with fwd locked flag set and install location set to
-     * internal. should install internally.
-     */
-    @LargeTest
-    public void testFlagFManifestI() throws Exception {
-        installFromRawResource("install.apk", R.raw.install_loc_internal,
-                PackageManager.INSTALL_FORWARD_LOCK,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-    }
-
-    /*
-     * Install an app with fwd locked flag set and install location set to
-     * preferExternal. Should install externally.
-     */
-    @LargeTest
-    public void testFlagFManifestE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                PackageManager.INSTALL_FORWARD_LOCK,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-    }
-
-    /*
-     * Install an app with fwd locked flag set and install location set to auto.
-     * should install externally.
-     */
-    @LargeTest
-    public void testFlagFManifestA() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        installFromRawResource("install.apk", R.raw.install_loc_auto,
-                PackageManager.INSTALL_FORWARD_LOCK,
-                true,
-                false, -1,
-                PackageInfo.INSTALL_LOCATION_AUTO);
-    }
-
-    /*
      * The following test functions verify install location for existing apps.
      * ie existing app can be installed internally or externally. If install
      * flag is explicitly set it should override current location. If manifest location
@@ -2161,48 +1974,6 @@ public class PackageManagerTests extends AndroidTestCase {
 
         int iFlags = PackageManager.INSTALL_EXTERNAL;
         int rFlags = PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install,
-                rFlags,
-                true,
-                false, -1,
-                -1);
-    }
-
-    @Suppress
-    @LargeTest
-    public void testFlagFExistingI() throws Exception {
-        int iFlags = PackageManager.INSTALL_INTERNAL;
-        int rFlags = PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_REPLACE_EXISTING;
-        // First install.
-        installFromRawResource("install.apk", R.raw.install,
-                iFlags,
-                false,
-                false, -1,
-                -1);
-        // Replace now
-        installFromRawResource("install.apk", R.raw.install,
-                rFlags,
-                true,
-                false, -1,
-                -1);
-    }
-
-    @LargeTest
-    public void testFlagFExistingE() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        int iFlags = PackageManager.INSTALL_EXTERNAL;
-        int rFlags = PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_REPLACE_EXISTING;
         // First install.
         installFromRawResource("install.apk", R.raw.install,
                 iFlags,
