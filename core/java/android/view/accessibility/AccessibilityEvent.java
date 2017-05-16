@@ -21,6 +21,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Pools.SynchronizedPool;
 
+import com.android.internal.util.BitUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -852,6 +854,22 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         return mContentChangeTypes;
     }
 
+    private static String contentChangeTypesToString(int types) {
+        return BitUtils.flagsToString(types, AccessibilityEvent::singleContentChangeTypeToString);
+    }
+
+    private static String singleContentChangeTypeToString(int type) {
+        switch (type) {
+            case CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION: {
+                return "CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION";
+            }
+            case CONTENT_CHANGE_TYPE_SUBTREE: return "CONTENT_CHANGE_TYPE_SUBTREE";
+            case CONTENT_CHANGE_TYPE_TEXT: return "CONTENT_CHANGE_TYPE_TEXT";
+            case CONTENT_CHANGE_TYPE_UNDEFINED: return "CONTENT_CHANGE_TYPE_UNDEFINED";
+            default: return Integer.toHexString(type);
+        }
+    }
+
     /**
      * Sets the bit mask of node tree changes signaled by an
      * {@link #TYPE_WINDOW_CONTENT_CHANGED} event.
@@ -1187,7 +1205,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");
-            builder.append("; ContentChangeTypes: ").append(mContentChangeTypes);
+            builder.append("; ContentChangeTypes: ").append(
+                    contentChangeTypesToString(mContentChangeTypes));
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
             if (mSourceNode != null) {
                 builder.append("; mSourceNodeId: ").append(mSourceNode.getSourceNodeId());
