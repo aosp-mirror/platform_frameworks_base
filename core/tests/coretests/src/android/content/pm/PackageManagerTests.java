@@ -1317,24 +1317,8 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
         Runtime.getRuntime().gc();
-
-        final String packageName = ip.pkg.packageName;
-        Log.i(TAG, "Deleting package : " + packageName);
-
-        ApplicationInfo info = null;
         try {
-            info = getPm().getApplicationInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES);
-        } catch (NameNotFoundException ignored) {
-        }
-
-        DeleteObserver observer = new DeleteObserver(packageName);
-        getPm().deletePackage(packageName, observer, PackageManager.DELETE_ALL_USERS);
-        observer.waitForCompletion(MAX_WAIT_TIME);
-
-        try {
-            if (info != null) {
-                assertUninstalled(info);
-            }
+            cleanUpInstall(ip.pkg.packageName);
         } finally {
             File outFile = new File(ip.pkg.codePath);
             if (outFile != null && outFile.exists()) {
@@ -1349,16 +1333,15 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         Log.i(TAG, "Deleting package : " + pkgName);
         try {
-            ApplicationInfo info = getPm().getApplicationInfo(pkgName,
+            final ApplicationInfo info = getPm().getApplicationInfo(pkgName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES);
-
             if (info != null) {
                 DeleteObserver observer = new DeleteObserver(pkgName);
                 getPm().deletePackage(pkgName, observer, PackageManager.DELETE_ALL_USERS);
                 observer.waitForCompletion(MAX_WAIT_TIME);
                 assertUninstalled(info);
             }
-        } catch (NameNotFoundException e) {
+        } catch (IllegalArgumentException | NameNotFoundException e) {
         }
     }
 
