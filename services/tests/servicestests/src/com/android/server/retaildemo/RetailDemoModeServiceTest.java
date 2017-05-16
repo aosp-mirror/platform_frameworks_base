@@ -38,6 +38,7 @@ import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -59,6 +60,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.util.ArrayMap;
@@ -72,9 +74,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.compat.ArgumentMatcher;
 
@@ -82,7 +84,7 @@ import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class RetailDemoModeServiceTest {
     private static final int TEST_DEMO_USER = 111;
@@ -90,7 +92,7 @@ public class RetailDemoModeServiceTest {
     private static final String TEST_CAMERA_PKG = "test.cameraapp";
     private static final String TEST_PRELOADS_DIR_NAME = "test_preloads";
 
-    private @Mock Context mContext;
+    private Context mContext;
     private @Mock UserManager mUm;
     private @Mock PackageManager mPm;
     private @Mock IPackageManager mIpm;
@@ -113,12 +115,11 @@ public class RetailDemoModeServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        Context originalContext = InstrumentationRegistry.getContext();
-        when(mContext.getApplicationInfo()).thenReturn(originalContext.getApplicationInfo());
-        when(mContext.getResources()).thenReturn(originalContext.getResources());
+        mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         when(mContext.getSystemServiceName(eq(JobScheduler.class))).thenReturn(
                 Context.JOB_SCHEDULER_SERVICE);
         when(mContext.getSystemService(Context.JOB_SCHEDULER_SERVICE)).thenReturn(mJobScheduler);
+        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUm);
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mContactsProvider = new MockContactsProvider(mContext);
@@ -129,12 +130,10 @@ public class RetailDemoModeServiceTest {
         mTestPreloadsDir = new File(InstrumentationRegistry.getContext().getFilesDir(),
                 TEST_PRELOADS_DIR_NAME);
 
-        Settings.Global.putString(mContentResolver,
-                Settings.Global.RETAIL_DEMO_MODE_CONSTANTS, "");
-        Settings.Global.putInt(mContentResolver,
-                Settings.Global.DEVICE_PROVISIONED, 1);
-        Settings.Global.putInt(mContentResolver,
-                Settings.Global.DEVICE_DEMO_MODE, 1);
+        Settings.Global.putString(mContentResolver, Settings.Global.RETAIL_DEMO_MODE_CONSTANTS, "");
+        Settings.Global.putInt(mContentResolver, Settings.Global.DEVICE_PROVISIONED, 1);
+        Settings.Global.putInt(mContentResolver, Settings.Global.DEVICE_DEMO_MODE, 1);
+
         // Initialize RetailDemoModeService
         mInjector = new TestInjector();
         mService = new RetailDemoModeService(mInjector);
@@ -143,7 +142,9 @@ public class RetailDemoModeServiceTest {
 
     @After
     public void tearDown() {
-        FileUtils.deleteContentsAndDir(mTestPreloadsDir);
+        if (mTestPreloadsDir != null) {
+            FileUtils.deleteContentsAndDir(mTestPreloadsDir);
+        }
     }
 
     @Test
