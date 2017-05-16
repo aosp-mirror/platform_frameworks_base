@@ -1,0 +1,25 @@
+cc_library_shared {
+    name: "libaudioeffect_jni",
+
+    srcs: [
+        "android_media_AudioEffect.cpp",
+        "android_media_Visualizer.cpp",
+    ],
+
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libutils",
+        "libandroid_runtime",
+        "libnativehelper",
+        "libmedia",
+        "libaudioclient",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+}
