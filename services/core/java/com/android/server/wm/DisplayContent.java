@@ -1892,6 +1892,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return true;
     }
 
+    /** @return 'true' if removal of this display content is deferred due to active animation. */
+    boolean isRemovalDeferred() {
+        return mDeferredRemoval;
+    }
+
     boolean animateForIme(float interpolatedValue, float animationTarget,
             float dividerAnimationTarget) {
         boolean updated = false;
