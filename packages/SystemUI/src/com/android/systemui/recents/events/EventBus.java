@@ -810,6 +810,11 @@ public class EventBus extends BroadcastReceiver {
     private void queueEvent(final Event event) {
         ArrayList<EventHandler> eventHandlers = mEventTypeMap.get(event.getClass());
         if (eventHandlers == null) {
+            // This is just an optimization to return early if there are no handlers. However, we
+            // should still ensure that we call pre/post dispatch callbacks so that AnimatedEvents
+            // are still cleaned up correctly if a listener has not been registered to handle them
+            event.onPreDispatch();
+            event.onPostDispatch();
             return;
         }
 

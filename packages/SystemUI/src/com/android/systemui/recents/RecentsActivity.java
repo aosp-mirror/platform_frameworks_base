@@ -62,6 +62,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
+import com.android.systemui.recents.events.component.ActivityUnpinnedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
@@ -205,6 +206,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                         }
                         Settings.Secure.putLongForUser(RecentsActivity.this.getContentResolver(),
                                 Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, currentTime, currentUser);
+
+                        // Clear the last PiP task time, it's an edge case and we'd rather it
+                        // not relaunch the PiP task if the user double taps
+                        RecentsImpl.clearLastPipTime();
                     }
                 }
             }
@@ -395,6 +400,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * Reloads the stack views upon launching Recents.
      */
     private void reloadStackView() {
+
         // If the Recents component has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
         RecentsTaskLoader loader = Recents.getTaskLoader();
@@ -501,28 +507,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
 
-        // Reload the task stack completely
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        RecentsTaskLoader loader = Recents.getTaskLoader();
-        RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-        loader.preloadTasks(loadPlan, -1 /* runningTaskId */,
-                false /* includeFrontMostExcludedTask */);
-
-        RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
-        loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
-        loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
-        loader.loadTasks(this, loadPlan, loadOpts);
-
-        TaskStack stack = loadPlan.getTaskStack();
-        int numStackTasks = stack.getStackTaskCount();
-        boolean showDeferredAnimation = numStackTasks > 0;
-
-        EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
-                false /* fromDeviceOrientationChange */, false /* fromDisplayDensityChange */,
-                numStackTasks > 0));
-        EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode,
-                showDeferredAnimation, stack));
+        reloadTaskStack(isInMultiWindowMode, true /* sendConfigChangedEvent */);
     }
 
     @Override
@@ -819,6 +804,41 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public final void onBusEvent(final DockedTopTaskEvent event) {
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
         mRecentsView.invalidate();
+    }
+
+    public final void onBusEvent(final ActivityUnpinnedEvent event) {
+        if (mIsVisible) {
+            // Skip the configuration change event as the PiP activity does not actually affect the
+            // config of recents
+            reloadTaskStack(isInMultiWindowMode(), false /* sendConfigChangedEvent */);
+        }
+    }
+
+    private void reloadTaskStack(boolean isInMultiWindowMode, boolean sendConfigChangedEvent) {
+        // Reload the task stack completely
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
+        RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
+        loader.preloadTasks(loadPlan, -1 /* runningTaskId */,
+                false /* includeFrontMostExcludedTask */);
+
+        RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
+        loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
+        loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
+        loader.loadTasks(this, loadPlan, loadOpts);
+
+        TaskStack stack = loadPlan.getTaskStack();
+        int numStackTasks = stack.getStackTaskCount();
+        boolean showDeferredAnimation = numStackTasks > 0;
+
+        if (sendConfigChangedEvent) {
+            EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
+                    false /* fromDeviceOrientationChange */, false /* fromDisplayDensityChange */,
+                    numStackTasks > 0));
+        }
+        EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode,
+                showDeferredAnimation, stack));
     }
 
     @Override

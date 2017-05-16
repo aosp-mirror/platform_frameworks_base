@@ -57,6 +57,9 @@ import com.android.systemui.recents.events.activity.LaunchMostRecentTaskRequestE
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
+import com.android.systemui.recents.events.component.ActivityPinnedEvent;
+import com.android.systemui.recents.events.component.ActivityUnpinnedEvent;
+import com.android.systemui.recents.events.component.HidePipMenuEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
@@ -127,6 +130,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 // previous one.
                 VisibilityReport visibilityReport;
                 synchronized (mDummyStackView) {
+                    mDummyStackView.getStack().removeAllTasks(false /* notifyStackChanges */);
                     mDummyStackView.setTasks(plan.getTaskStack(), false /* allowNotify */);
                     updateDummyStackViewLayout(plan.getTaskStack(),
                             getWindowRect(null /* windowRectOverride */));
@@ -151,12 +155,31 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         @Override
+        public void onActivityPinned(String packageName, int taskId) {
+            // This time needs to be fetched the same way the last active time is fetched in
+            // {@link TaskRecord#touchActiveTime}
+            Recents.getConfiguration().getLaunchState().launchedFromPipApp = true;
+            Recents.getConfiguration().getLaunchState().launchedWithNextPipApp = false;
+            EventBus.getDefault().send(new ActivityPinnedEvent(taskId));
+            consumeInstanceLoadPlan();
+            sLastPipTime = System.currentTimeMillis();
+        }
+
+        @Override
+        public void onActivityUnpinned() {
+            EventBus.getDefault().send(new ActivityUnpinnedEvent());
+            sLastPipTime = -1;
+        }
+
+        @Override
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
             EventBus.getDefault().send(new TaskSnapshotChangedEvent(taskId, snapshot));
         }
     }
 
     protected static RecentsTaskLoadPlan sInstanceLoadPlan;
+    // Stores the last pinned task time
+    protected static long sLastPipTime = -1;
 
     protected Context mContext;
     protected Handler mHandler;
@@ -595,6 +618,20 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     /**
+     * @return the time at which a task last entered picture-in-picture.
+     */
+    public static long getLastPipTime() {
+        return sLastPipTime;
+    }
+
+    /**
+     * Clears the time at which a task last entered picture-in-picture.
+     */
+    public static void clearLastPipTime() {
+        sLastPipTime = -1;
+    }
+
+    /**
      * Reloads all the resources for the current configuration.
      */
     private void reloadResources() {
@@ -676,6 +713,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             updateDummyStackViewLayout(stack, windowRect);
             if (stack != null) {
                 TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
+                mDummyStackView.getStack().removeAllTasks(false /* notifyStackChanges */);
                 mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
                 // Get the width of a task view so that we know how wide to draw the header bar.
                 if (useGridLayout) {
@@ -921,6 +959,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchState.launchedFromHome = !useThumbnailTransition && !mLaunchedWhileDocking;
         launchState.launchedFromApp = useThumbnailTransition || mLaunchedWhileDocking;
         launchState.launchedFromBlacklistedApp = launchState.launchedFromApp && isBlacklisted;
+        launchState.launchedFromPipApp = false;
+        launchState.launchedWithNextPipApp =
+                stack.isNextLaunchTargetPip(RecentsImpl.getLastPipTime());
         launchState.launchedViaDockGesture = mLaunchedWhileDocking;
         launchState.launchedViaDragGesture = mDraggingInRecents;
         launchState.launchedToTaskId = runningTaskId;
@@ -988,12 +1029,16 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
 
-        if (opts != null) {
-            mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
-        } else {
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-        }
-        EventBus.getDefault().send(new RecentsActivityStartingEvent());
+        HidePipMenuEvent hideMenuEvent = new HidePipMenuEvent();
+        hideMenuEvent.addPostAnimationCallback(() -> {
+            if (opts != null) {
+                mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
+            } else {
+                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            }
+            EventBus.getDefault().send(new RecentsActivityStartingEvent());
+        });
+        EventBus.getDefault().send(hideMenuEvent);
     }
 
     /**** OnAnimationFinishedListener Implementation ****/

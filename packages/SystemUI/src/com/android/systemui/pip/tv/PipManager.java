@@ -612,7 +612,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onActivityPinned(String packageName) {
+        public void onActivityPinned(String packageName, int taskId) {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
             if (!checkCurrentUserId(DEBUG)) {
                 return;
