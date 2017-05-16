@@ -937,7 +937,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
                     long time = mNtpTime.getCachedNtpTime();
                     long timeReference = mNtpTime.getCachedNtpTimeReference();
                     long certainty = mNtpTime.getCacheCertainty();
-                    long now = System.currentTimeMillis();
+                    long now = SystemClock.elapsedRealtime();
 
                     if (DEBUG) {
                         Log.d(TAG, "NTP server returned: "
@@ -1444,7 +1444,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
             // reset SV count to zero
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
-            mFixRequestTime = System.currentTimeMillis();
+            mFixRequestTime = SystemClock.elapsedRealtime();
+
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
                 // and our fix interval is not short
@@ -1514,7 +1515,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
         }
 
-        mLastFixTime = System.currentTimeMillis();
+        mLastFixTime = SystemClock.elapsedRealtime();
         // report time to first fix
         if (mTimeToFirstFix == 0 && hasLatLong) {
             mTimeToFirstFix = (int)(mLastFixTime - mFixRequestTime);
@@ -1629,7 +1630,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         updateStatus(mStatus, usedInFixCount);
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
-            System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
+            SystemClock.elapsedRealtime() - mLastFixTime > RECENT_FIX_TIMEOUT) {
             // send an intent to notify that the GPS is no longer receiving fixes.
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
