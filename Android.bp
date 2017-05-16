@@ -15,6 +15,7 @@
 subdirs = [
     "core/jni",
     "libs/*",
+    "media/*",
     "native/android",
     "native/graphics/jni",
 ]
