@@ -208,7 +208,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mHidden;    // Used to determine if to show child windows.
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     private boolean mDragResizing;
-    private boolean mDragResizingChangeReported;
+    private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
 
     private RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
@@ -1155,11 +1155,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 return;
             }
 
-            mLastOverscanInsets.set(mOverscanInsets);
-            mLastContentInsets.set(mContentInsets);
-            mLastVisibleInsets.set(mVisibleInsets);
-            mLastStableInsets.set(mStableInsets);
-            mLastOutsets.set(mOutsets);
+            updateLastInsetValues();
             mService.makeWindowFreezingScreenIfNeededLocked(this);
 
             // If the orientation is changing, or we're starting or ending a drag resizing action,
@@ -4402,6 +4398,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             result |= RELAYOUT_RES_FIRST_TIME;
         }
         return result;
+    }
+
+    /**
+     * @return True if this window has been laid out at least once; false otherwise.
+     */
+    boolean isLaidOut() {
+        return mLayoutSeq != -1;
+    }
+
+    /**
+     * Updates the last inset values to the current ones.
+     */
+    void updateLastInsetValues() {
+        mLastOverscanInsets.set(mOverscanInsets);
+        mLastContentInsets.set(mContentInsets);
+        mLastVisibleInsets.set(mVisibleInsets);
+        mLastStableInsets.set(mStableInsets);
+        mLastOutsets.set(mOutsets);
     }
 
     // TODO: Hack to work around the number of states AppWindowToken needs to access without having
