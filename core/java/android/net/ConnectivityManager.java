@@ -44,7 +44,6 @@ import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.telephony.ITelephony;
