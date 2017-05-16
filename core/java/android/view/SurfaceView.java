@@ -245,6 +245,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         super.onAttachedToWindow();
 
         getViewRootImpl().addWindowStoppedCallback(this);
+        mWindowStopped = false;
 
         mParent.requestTransparentRegion(this);
         mViewVisibility = getVisibility() == VISIBLE;
