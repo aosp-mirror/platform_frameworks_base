@@ -2092,7 +2092,6 @@ public class Activity extends ContextThemeWrapper
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
             }
-            updatePictureInPictureParamsForContentInsets(params);
             return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, params);
         } catch (RemoteException e) {
             return false;
@@ -2116,7 +2115,6 @@ public class Activity extends ContextThemeWrapper
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
             }
-            updatePictureInPictureParamsForContentInsets(params);
             ActivityManagerNative.getDefault().setPictureInPictureParams(mToken, params);
         } catch (RemoteException e) {
         }
@@ -2133,21 +2131,6 @@ public class Activity extends ContextThemeWrapper
             return ActivityManagerNative.getDefault().getMaxNumPictureInPictureActions(mToken);
         } catch (RemoteException e) {
             return 0;
-        }
-    }
-
-    /**
-     * Updates the provided {@param params} with the last known content insets for this activity, to
-     * be used with the source hint rect for the transition into PiP.
-     */
-    private void updatePictureInPictureParamsForContentInsets(PictureInPictureParams params) {
-        if (params != null && params.hasSourceBoundsHint() && getWindow() != null &&
-                getWindow().peekDecorView() != null &&
-                getWindow().peekDecorView().getViewRootImpl() != null) {
-            params.setSourceRectHintInsets(
-                    getWindow().peekDecorView().getViewRootImpl().getLastContentInsets());
-        } else {
-            params.setSourceRectHintInsets(null);
         }
     }
 
