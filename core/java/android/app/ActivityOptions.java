@@ -38,6 +38,7 @@ import android.transition.TransitionManager;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -213,6 +214,7 @@ public class ActivityOptions {
 
     private static final String KEY_INSTANT_APP_VERIFICATION_BUNDLE
             = "android:instantapps.installerbundle";
+    private static final String KEY_SPECS_FUTURE = "android:activity.specsFuture";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -268,6 +270,7 @@ public class ActivityOptions {
     private AppTransitionAnimationSpec mAnimSpecs[];
     private int mRotationAnimationHint = -1;
     private Bundle mAppVerificationBundle;
+    private IAppTransitionAnimationSpecsFuture mSpecsFuture;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -492,33 +495,10 @@ public class ActivityOptions {
      * is not executed, the callback will happen immediately.
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
-     * @hide
      */
-    public static ActivityOptions makeThumbnailScaleUpAnimation(View source,
+    private static ActivityOptions makeThumbnailScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
         return makeThumbnailAnimation(source, thumbnail, startX, startY, listener, true);
-    }
-
-    /**
-     * Create an ActivityOptions specifying an animation where an activity window
-     * is scaled from a given position to a thumbnail at a specified location.
-     *
-     * @param source The View that this thumbnail is animating to.  This
-     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
-     * @param thumbnail The bitmap that will be shown as the final thumbnail
-     * of the animation.
-     * @param startX The x end location of the bitmap, relative to <var>source</var>.
-     * @param startY The y end location of the bitmap, relative to <var>source</var>.
-     * @param listener Optional OnAnimationStartedListener to find out when the
-     * requested animation has started running.  If for some reason the animation
-     * is not executed, the callback will happen immediately.
-     * @return Returns a new ActivityOptions object that you can use to
-     * supply these options as the options Bundle when starting an activity.
-     * @hide
-     */
-    public static ActivityOptions makeThumbnailScaleDownAnimation(View source,
-            Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
-        return makeThumbnailAnimation(source, thumbnail, startX, startY, listener, false);
     }
 
     private static ActivityOptions makeThumbnailAnimation(View source,
@@ -537,29 +517,21 @@ public class ActivityOptions {
     }
 
     /**
-     * Create an ActivityOptions specifying an animation where the new activity
-     * window and a thumbnail is aspect-scaled to a new location.
-     *
-     * @param source The View that this thumbnail is animating from.  This
-     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
-     * @param thumbnail The bitmap that will be shown as the initial thumbnail
-     * of the animation.
-     * @param startX The x starting location of the bitmap, relative to <var>source</var>.
-     * @param startY The y starting location of the bitmap, relative to <var>source</var>.
-     * @param handler If <var>listener</var> is non-null this must be a valid
-     * Handler on which to dispatch the callback; otherwise it should be null.
-     * @param listener Optional OnAnimationStartedListener to find out when the
-     * requested animation has started running.  If for some reason the animation
-     * is not executed, the callback will happen immediately.
-     * @return Returns a new ActivityOptions object that you can use to
-     * supply these options as the options Bundle when starting an activity.
+     * Create an ActivityOptions specifying an animation where a list of activity windows and
+     * thumbnails are aspect scaled to/from a new location.
      * @hide
      */
-    public static ActivityOptions makeThumbnailAspectScaleUpAnimation(View source,
-            Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
-            Handler handler, OnAnimationStartedListener listener) {
-        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
-                targetWidth, targetHeight, handler, listener, true);
+    public static ActivityOptions makeMultiThumbFutureAspectScaleAnimation(Context context,
+            Handler handler, IAppTransitionAnimationSpecsFuture specsFuture,
+            OnAnimationStartedListener listener, boolean scaleUp) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mPackageName = context.getPackageName();
+        opts.mAnimationType = scaleUp
+                ? ANIM_THUMBNAIL_ASPECT_SCALE_UP
+                : ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
+        opts.mSpecsFuture = specsFuture;
+        opts.setOnAnimationStartedListener(handler, listener);
+        return opts;
     }
 
     /**
@@ -891,6 +863,10 @@ public class ActivityOptions {
         }
         mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT);
         mAppVerificationBundle = opts.getBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE);
+        if (opts.containsKey(KEY_SPECS_FUTURE)) {
+            mSpecsFuture = IAppTransitionAnimationSpecsFuture.Stub.asInterface(opts.getBinder(
+                    KEY_SPECS_FUTURE));
+        }
     }
 
     /**
@@ -1027,6 +1003,11 @@ public class ActivityOptions {
 
     /** @hide */
     public AppTransitionAnimationSpec[] getAnimSpecs() { return mAnimSpecs; }
+
+    /** @hide */
+    public IAppTransitionAnimationSpecsFuture getSpecsFuture() {
+        return mSpecsFuture;
+    }
 
     /** @hide */
     public static ActivityOptions fromBundle(Bundle bOptions) {
@@ -1205,6 +1186,7 @@ public class ActivityOptions {
         }
         mAnimSpecs = otherOptions.mAnimSpecs;
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
+        mSpecsFuture = otherOptions.mSpecsFuture;
     }
 
     /**
@@ -1278,6 +1260,9 @@ public class ActivityOptions {
         }
         if (mAnimationFinishedListener != null) {
             b.putBinder(KEY_ANIMATION_FINISHED_LISTENER, mAnimationFinishedListener.asBinder());
+        }
+        if (mSpecsFuture != null) {
+            b.putBinder(KEY_SPECS_FUTURE, mSpecsFuture.asBinder());
         }
         b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
         if (mAppVerificationBundle != null) {
