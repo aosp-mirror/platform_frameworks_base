@@ -210,7 +210,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vil du tillade udviklingsindstillinger?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse indstillinger er kun beregnet til brug i forbindelse med udvikling. De kan forårsage, at din enhed og dens applikationer går ned eller ikke fungerer korrekt."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificer apps via USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollér apps, der er installeret via ADB/ADT, for skadelig adfærd."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Tjek apps, der er installeret via ADB/ADT, for skadelig adfærd."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Deaktiverer funktionen til absolut lydstyrke via Bluetooth i tilfælde af problemer med lydstyrken på eksterne enheder, f.eks. uacceptabel høj lyd eller manglende kontrol."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Tillad, at ringetoner på telefonen kan afspilles i Bluetooth-headset"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
@@ -298,7 +298,7 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Inaktiv. Tryk for at skifte."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Tryk for at skifte."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Kørende tjenester"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Vis og kontrollér kørende tjenester"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Vis og administrer kørende tjenester"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Konfigurer WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Dette valg er ikke længere gyldigt. Prøv igen."</string>
