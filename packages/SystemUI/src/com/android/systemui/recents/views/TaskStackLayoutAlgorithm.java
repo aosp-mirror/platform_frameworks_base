@@ -562,7 +562,8 @@ public class TaskStackLayoutAlgorithm {
             mMinScrollP = 0;
             mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
                     Math.max(0, mFocusedRange.getAbsoluteX(maxBottomNormX)));
-            if (launchState.launchedFromHome) {
+            if (launchState.launchedFromHome || launchState.launchedFromPipApp
+                    || launchState.launchedWithNextPipApp) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
             } else {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP, mMaxScrollP);
@@ -581,8 +582,8 @@ public class TaskStackLayoutAlgorithm {
             mMinScrollP = 0;
             mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
                     Math.max(0, mUnfocusedRange.getAbsoluteX(maxBottomNormX)));
-            boolean scrollToFront = launchState.launchedFromHome ||
-                    launchState.launchedViaDockGesture;
+            boolean scrollToFront = launchState.launchedFromHome || launchState.launchedFromPipApp
+                    || launchState.launchedWithNextPipApp || launchState.launchedViaDockGesture;
             if (launchState.launchedFromBlacklistedApp) {
                 mInitialScrollP = mMaxScrollP;
             } else if (launchState.launchedWithAltTab) {
@@ -608,6 +609,8 @@ public class TaskStackLayoutAlgorithm {
         mTaskIndexOverrideMap.clear();
 
         boolean scrollToFront = launchState.launchedFromHome ||
+                launchState.launchedFromPipApp ||
+                launchState.launchedWithNextPipApp ||
                 launchState.launchedFromBlacklistedApp ||
                 launchState.launchedViaDockGesture;
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {

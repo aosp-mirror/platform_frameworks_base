@@ -63,6 +63,8 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.component.HidePipMenuEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -231,6 +233,7 @@ public class PipMenuActivity extends Activity {
         super.onStop();
 
         cancelDelayedFinish();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -288,6 +291,19 @@ public class PipMenuActivity extends Activity {
     @Override
     public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
         // Do nothing
+    }
+
+    public final void onBusEvent(HidePipMenuEvent event) {
+        if (mMenuState != MENU_STATE_NONE) {
+            // If the menu is visible in either the closed or full state, then hide the menu and
+            // trigger the animation trigger afterwards
+            event.getAnimationTrigger().increment();
+            hideMenu(() -> {
+                mHandler.post(() -> {
+                    event.getAnimationTrigger().decrement();
+                });
+            }, true /* notifyMenuVisibility */);
+        }
     }
 
     private void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
@@ -373,11 +389,16 @@ public class PipMenuActivity extends Activity {
     private void updateFromIntent(Intent intent) {
         mToControllerMessenger = intent.getParcelableExtra(EXTRA_CONTROLLER_MESSENGER);
         notifyActivityCallback(mMessenger);
+
+        // Register for HidePipMenuEvents once we notify the controller of this activity
+        EventBus.getDefault().register(this);
+
         ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
         if (actions != null) {
             mActions.clear();
             mActions.addAll(actions.getList());
         }
+
         final int menuState = intent.getIntExtra(EXTRA_MENU_STATE, MENU_STATE_NONE);
         if (menuState != MENU_STATE_NONE) {
             Rect stackBounds = intent.getParcelableExtra(EXTRA_STACK_BOUNDS);

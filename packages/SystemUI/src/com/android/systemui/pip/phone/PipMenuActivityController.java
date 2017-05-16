@@ -36,6 +36,9 @@ import android.util.Log;
 import android.view.IWindowManager;
 
 import com.android.systemui.pip.phone.PipMediaController.ActionListener;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.component.HidePipMenuEvent;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -119,6 +122,7 @@ public class PipMenuActivityController {
     // The dismiss fraction update is sent frequently, so use a temporary bundle for the message
     private Bundle mTmpDismissFractionData = new Bundle();
 
+    private ReferenceCountedTrigger mOnAttachDecrementTrigger;
     private boolean mStartActivityRequested;
     private Messenger mToActivityMessenger;
     private Messenger mMessenger = new Messenger(new Handler() {
@@ -157,6 +161,10 @@ public class PipMenuActivityController {
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {
                     mToActivityMessenger = msg.replyTo;
                     mStartActivityRequested = false;
+                    if (mOnAttachDecrementTrigger != null) {
+                        mOnAttachDecrementTrigger.decrement();
+                        mOnAttachDecrementTrigger = null;
+                    }
                     // Mark the menu as invisible once the activity finishes as well
                     if (mToActivityMessenger == null) {
                         onMenuStateChanged(MENU_STATE_NONE, true /* resize */);
@@ -181,6 +189,8 @@ public class PipMenuActivityController {
         mActivityManager = activityManager;
         mMediaController = mediaController;
         mInputConsumerController = inputConsumerController;
+
+        EventBus.getDefault().register(this);
     }
 
     public void onActivityPinned() {
@@ -433,6 +443,15 @@ public class PipMenuActivityController {
             }
         }
         mMenuState = menuState;
+    }
+
+    public final void onBusEvent(HidePipMenuEvent event) {
+        if (mStartActivityRequested) {
+            // If the menu has been start-requested, but not actually started, then we defer the
+            // trigger callback until the menu has started and called back to the controller
+            mOnAttachDecrementTrigger = event.getAnimationTrigger();
+            mOnAttachDecrementTrigger.increment();
+        }
     }
 
     public void dump(PrintWriter pw, String prefix) {

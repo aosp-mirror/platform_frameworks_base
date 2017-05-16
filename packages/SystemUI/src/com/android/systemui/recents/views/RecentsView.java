@@ -57,7 +57,9 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.ShowEmptyViewEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
+import com.android.systemui.recents.events.component.ExpandPipEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
@@ -256,6 +258,12 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
 
     /** Launches the task that recents was launched from if possible */
     public boolean launchPreviousTask() {
+        if (Recents.getConfiguration().getLaunchState().launchedFromPipApp) {
+            // If the app auto-entered PiP on the way to Recents, then just re-expand it
+            EventBus.getDefault().send(new ExpandPipEvent());
+            return true;
+        }
+
         if (mTaskStackView != null) {
             Task task = getStack().getLaunchTarget();
             if (task != null) {
@@ -644,6 +652,10 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
 
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
         updateStack(event.stack, false /* setStackViewTasks */);
+    }
+
+    public final void onBusEvent(ShowEmptyViewEvent event) {
+        showEmptyView(R.string.recents_empty_message);
     }
 
     /**
