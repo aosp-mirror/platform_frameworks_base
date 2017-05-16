@@ -411,7 +411,9 @@ public class AppWindowAnimator {
         }
 
         if (DEBUG_ANIM) Slog.v(TAG, "Animation done in " + mAppToken
-                + ": reportedVisible=" + mAppToken.reportedVisible);
+                + ": reportedVisible=" + mAppToken.reportedVisible
+                + " okToDisplay=" + mService.okToDisplay()
+                + " startingDisplayed=" + mAppToken.startingDisplayed);
 
         transformation.clear();
 
