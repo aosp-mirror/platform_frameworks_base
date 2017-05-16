@@ -16,7 +16,6 @@
 
 package android.bluetooth;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -923,6 +922,31 @@ public final class BluetoothGatt implements BluetoothProfile {
             return false;
         }
 
+        return true;
+    }
+
+    /**
+     * Discovers a service by UUID. This is exposed only for passing PTS tests.
+     * It should never be used by real applications. The service is not searched
+     * for characteristics and descriptors, or returned in any callback.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @return true, if the remote service discovery has been started
+     * @hide
+     */
+    public boolean discoverServiceByUuid(UUID uuid) {
+        if (DBG) Log.d(TAG, "discoverServiceByUuid() - device: " + mDevice.getAddress());
+        if (mService == null || mClientIf == 0) return false;
+
+        mServices.clear();
+
+        try {
+            mService.discoverServiceByUuid(mClientIf, mDevice.getAddress(), new ParcelUuid(uuid));
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
         return true;
     }
 

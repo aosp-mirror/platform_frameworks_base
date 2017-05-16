@@ -80,6 +80,7 @@ interface IBluetoothGatt {
     void clientReadPhy(in int clientIf, in String address);
     void refreshDevice(in int clientIf, in String address);
     void discoverServices(in int clientIf, in String address);
+    void discoverServiceByUuid(in int clientIf, in String address, in ParcelUuid uuid);
     void readCharacteristic(in int clientIf, in String address, in int handle, in int authReq);
     void readUsingCharacteristicUuid(in int clientIf, in String address, in ParcelUuid uuid,
                            in int startHandle, in int endHandle, in int authReq);
