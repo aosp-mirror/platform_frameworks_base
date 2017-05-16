@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Ενημερώσεις"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Κατάσταση δικτύου"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Ειδοποιήσεις δικτύου"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"Το δίκτυο είναι διαθέσιμο"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Κατάσταση VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Διαχείριση συσκευής"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ειδοποιήσεις"</string>
@@ -492,6 +491,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Λήξη χρονικού ορίου μοναδικού χαρακτηριστικού. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Η λειτουργία μοναδικού χαρακτηριστικού ακυρώθηκε."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Δοκιμάστε ξανά."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Δάχτυλο <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
