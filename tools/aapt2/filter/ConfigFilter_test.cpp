@@ -109,4 +109,20 @@ TEST(ConfigFilterTest, MatchesConfigWithRegion) {
   EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("kok-rIN")));
 }
 
+TEST(ConfigFilterTest, MatchesScripts) {
+  AxisConfigFilter filter;
+
+  // "sr" gets automatically computed the script "Cyrl"
+  filter.AddConfig(test::ParseConfigOrDie("sr"));
+
+  // "sr" -> "b+sr+Cyrl"
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("b+sr+Cyrl")));
+
+  // The incoming "sr" is also auto-computed to "b+sr+Cyrl".
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("sr")));
+
+  // "sr" -> "b+sr+Cyrl", which doesn't match "Latn".
+  EXPECT_FALSE(filter.Match(test::ParseConfigOrDie("b+sr+Latn")));
+}
+
 }  // namespace aapt
