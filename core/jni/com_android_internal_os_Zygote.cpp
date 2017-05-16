@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
 #include <signal.h>
@@ -518,6 +519,9 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   if (pid == 0) {
     // The child process.
     gMallocLeakZygoteChild = 1;
+
+    // Set the jemalloc decay time to 1.
+    mallopt(M_DECAY_TIME, 1);
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
