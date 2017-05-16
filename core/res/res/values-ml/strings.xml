@@ -492,6 +492,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
