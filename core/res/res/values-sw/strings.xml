@@ -207,7 +207,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Inajiandaa kusasisha..."</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Inachakata kifurushi cha kusasisha…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Inazima na kuwasha upya..."</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Rejesha data ya mwanzo"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Rejesha mipangilio ya kiwandani"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Inazima na kuwasha upya..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Inafunga..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Kompyuta kibao yako itazima."</string>
@@ -258,8 +258,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Taarifa"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Hali ya mtandao"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Arifa za mtandao"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"Mtandao unapatikana"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Hali ya VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Udhibiti wa kifaa"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Arifa"</string>
@@ -490,6 +489,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kitambulisho umekwisha. Jaribu tena."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Utendaji wa kitambulisho imeghairiwa."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Majaribio mengi mno. Jaribu tena baadaye."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Jaribu tena."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Kitambulisho <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -569,7 +570,7 @@
     <string name="policylab_forceLock" msgid="2274085384704248431">"Kufunga skrini"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kudhibiti jinsi na wakati skrini inapofunga."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Kufuta data yote"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ya mwanzo."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ambayo kompyuta ilitoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Futa data ya runinga bila onyo kwa kurejesha katika hali iliyotoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Kufuta data ya simu bila ilani kwa kurejesha data ambayo kifaa kilitoka nayo kiwandani"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Futa data yote ya mtumiaji"</string>
@@ -749,9 +750,9 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> bila kufaulu, utaulizwa kufungua kompyuta yako ndogo kwa kuingia kwa Google.\n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Umekosea kuchora mchoro wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio mengine <xliff:g id="NUMBER_1">%2$d</xliff:g>, utaombwa ufungue runinga yako ukitumia Google.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> yasiyofaulu, utaulizwa kufungua simu kupitia kuingia Google.\n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya zaidi ya <xliff:g id="NUMBER_1">%2$d</xliff:g> majaribio yasiyofanikiwa, kompyuta ndogo itawekwa upya kwa kiwanda chaguo-msingi na data yote ya mtumiaji itapotea."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Umejaribu kufungua kompyuta kibao kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> bila mafanikio, kompyuta ndogo itarejeshwa kwenye mipangilio iliyotoka nayo kiwandani na data yote iliyomo itafutwa."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi, runinga itarejeshwa katika hali iliyotoka nayo kiwandani na data yote ya watumiaji itafutwa."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi yasiyofanikiwa, simu itawekwa upya kwa kiwanda chaguo-msingi na data yote ya mtumiaji itapotea."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> bila mafanikio, simu itarejeshwa kwenye mipangilio iliyotoka nayo kiwandani na data yote iliyomo itafutwa."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguo-msingi."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa runinga itarejeshwa katika mipangilio iliyotoka nayo kiwandani."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguo-msingi."</string>

@@ -492,6 +492,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指纹录入操作超时，请重试。"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"指纹操作已取消。"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"尝试次数过多，请稍后重试。"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"请重试。"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
