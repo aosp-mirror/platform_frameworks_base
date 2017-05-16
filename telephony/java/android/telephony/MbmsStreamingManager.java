@@ -24,10 +24,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.mbms.IMbmsStreamingManagerCallback;
-import android.telephony.mbms.IStreamingServiceCallback;
 import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsStreamingManagerCallback;
 import android.telephony.mbms.StreamingService;
+import android.telephony.mbms.StreamingServiceCallback;
 import android.telephony.mbms.StreamingServiceInfo;
 import android.telephony.mbms.vendor.IMbmsStreamingService;
 import android.util.Log;
@@ -77,14 +77,14 @@ public class MbmsStreamingManager {
     };
     private List<ServiceListener> mServiceListeners = new LinkedList<>();
 
-    private IMbmsStreamingManagerCallback mCallbackToApp;
+    private MbmsStreamingManagerCallback mCallbackToApp;
     private final String mAppName;
 
     private final Context mContext;
     private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
 
     /** @hide */
-    private MbmsStreamingManager(Context context, IMbmsStreamingManagerCallback listener,
+    private MbmsStreamingManager(Context context, MbmsStreamingManagerCallback listener,
                     String streamingAppName, int subscriptionId) {
         mContext = context;
         mAppName = streamingAppName;
@@ -106,7 +106,7 @@ public class MbmsStreamingManager {
      * @param subscriptionId The subscription ID to use.
      */
     public static MbmsStreamingManager create(Context context,
-            IMbmsStreamingManagerCallback listener, String streamingAppName, int subscriptionId)
+            MbmsStreamingManagerCallback listener, String streamingAppName, int subscriptionId)
             throws MbmsException {
         MbmsStreamingManager manager = new MbmsStreamingManager(context, listener,
                 streamingAppName, subscriptionId);
@@ -116,10 +116,10 @@ public class MbmsStreamingManager {
 
     /**
      * Create a new MbmsStreamingManager using the system default data subscription ID.
-     * See {@link #create(Context, IMbmsStreamingManagerCallback, String, int)}.
+     * See {@link #create(Context, MbmsStreamingManagerCallback, String, int)}.
      */
     public static MbmsStreamingManager create(Context context,
-            IMbmsStreamingManagerCallback listener, String streamingAppName)
+            MbmsStreamingManagerCallback listener, String streamingAppName)
             throws MbmsException {
         int subId = SubscriptionManager.getDefaultSubscriptionId();
         MbmsStreamingManager manager = new MbmsStreamingManager(context, listener,
@@ -155,13 +155,12 @@ public class MbmsStreamingManager {
      *
      * This may throw an {@link MbmsException} containing one of the following errors:
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
-     * {@link MbmsException#ERROR_NOT_YET_INITIALIZED}
+     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
      * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
      *
-     * Asynchronous error codes via the {@link IMbmsStreamingManagerCallback#error(int, String)}
+     * Asynchronous error codes via the {@link MbmsStreamingManagerCallback#error(int, String)}
      * callback can include any of the errors except:
      * {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}
-     * {@link MbmsException#ERROR_INVALID_SERVICE_ID}
      * {@link MbmsException#ERROR_END_OF_SESSION}
      */
     public void getStreamingServices(List<String> classList) throws MbmsException {
@@ -180,36 +179,37 @@ public class MbmsStreamingManager {
 
     /**
      * Starts streaming a requested service, reporting status to the indicated listener.
-     * Returns an object used to control that stream.
+     * Returns an object used to control that stream. The stream may not be ready for consumption
+     * immediately upon return from this method -- wait until the streaming state has been
+     * reported via {@link android.telephony.mbms.StreamingServiceCallback#streamStateChanged(int)}.
      *
-     * May throw an IllegalArgumentException or RemoteException.
+     * May throw an {@link MbmsException} containing any of the following error codes:
+     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
+     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
+     * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
+     *
+     * May also throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
      * Asynchronous errors through the listener include any of the errors
      */
     public StreamingService startStreaming(StreamingServiceInfo serviceInfo,
-            IStreamingServiceCallback listener) {
-        return null;
-    }
+            StreamingServiceCallback listener) throws MbmsException {
+        if (mService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
 
-    /**
-     * Lists all the services currently being streamed to the device by this application
-     * on this given subId.  Results are returned asynchronously through the previously
-     * registered callback.
-     *
-     * May throw a RemoteException.
-     *
-     * The return value is a success/error-code with the following possible values:
-     * <li>SUCCESS</li>
-     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
-     *
-     * Asynchronous errors through the listener include any of the errors except
-     * <li>ERROR_UNABLED_TO_START_SERVICE</li>
-     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
-     * <li>ERROR_MSDC_END_OF_SESSION</li>
-     *
-     */
-    public int getActiveStreamingServices() {
-        return 0;
+        try {
+            int returnCode = mService.startStreaming(
+                    mAppName, mSubscriptionId, serviceInfo.getServiceId(), listener);
+            if (returnCode != MbmsException.SUCCESS) {
+                throw new MbmsException(returnCode);
+            }
+        } catch (RemoteException e) {
+            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
+        }
+
+        return new StreamingService(
+                mAppName, mSubscriptionId, mService, serviceInfo, listener);
     }
 
     private void bindAndInitialize() throws MbmsException {
