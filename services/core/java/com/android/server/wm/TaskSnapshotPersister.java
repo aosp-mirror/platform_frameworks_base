@@ -209,11 +209,12 @@ class TaskSnapshotPersister {
                     SystemClock.sleep(DELAY_MS);
                 }
                 synchronized (mLock) {
-                    if (!mWriteQueue.isEmpty()) {
+                    final boolean writeQueueEmpty = mWriteQueue.isEmpty();
+                    if (!writeQueueEmpty && !mPaused) {
                         continue;
                     }
                     try {
-                        mQueueIdling = true;
+                        mQueueIdling = writeQueueEmpty;
                         mLock.wait();
                         mQueueIdling = false;
                     } catch (InterruptedException e) {
