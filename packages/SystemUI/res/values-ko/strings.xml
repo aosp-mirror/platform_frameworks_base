@@ -550,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"사용 안함"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"전원 알림 컨트롤을 사용하면 앱 알림 관련 중요도를 0부터 5까지로 설정할 수 있습니다. \n\n"<b>"레벨 5"</b>" \n- 알림 목록 상단에 표시 \n- 전체 화면일 경우 알림 표시 허용 \n- 항상 엿보기 표시 \n\n"<b>"레벨 4"</b>" \n- 전체 화면에 알림 표시 금지 \n- 항상 엿보기 표시 \n\n"<b>"레벨 3"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n\n"<b>"레벨 2"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n\n"<b>"레벨 1"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n- 잠금 화면 및 상태 표시줄에서 숨김 \n- 알림 목록 하단에 표시 \n\n"<b>"레벨 0"</b>" \n- 앱의 모든 알림 차단"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"알림"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"더 이상 다음의 알림을 받지 않습니다."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"더 이상 다음의 알림을 받지 않습니다."</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"알림 카테고리 <xliff:g id="NUMBER">%d</xliff:g>개"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"이 앱에는 알림 카테고리가 없습니다."</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

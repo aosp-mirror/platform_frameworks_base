@@ -552,7 +552,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Išjungta"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Naudodami pranešimų valdiklius galite nustatyti programos pranešimų svarbos lygį nuo 0 iki 5. \n\n"<b>"5 lygis"</b>" \n– Rodyti pranešimų sąrašo viršuje \n– Leisti pertraukti, kai veikia viso ekrano režimas \n– Visada rodyti pranešimus \n\n"<b>"4 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Visada rodyti pranešimus \n\n"<b>"3 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n\n"<b>"2 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n– Niekada neleisti garso ir nevibruoti \n\n"<b>"1 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n– Niekada neleisti garso ir nevibruoti \n– Slėpti užrakinimo ekrane ir būsenos juostoje \n– Rodyti pranešimų sąrašo apačioje \n\n"<b>"0 lygis"</b>" \n– Blokuoti visus programos pranešimus"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Pranešimai"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Nebegausite šių pranešimų."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Nebegausite šių pranešimų"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Pranešimų kategorijų: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Šioje programoje nėra pranešimų kategorijų"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

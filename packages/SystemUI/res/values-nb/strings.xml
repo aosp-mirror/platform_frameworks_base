@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Av"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Med effektive varselinnstillinger kan du angi viktighetsnivåer fra 0 til 5 for appvarsler. \n\n"<b>"Nivå 5"</b>" \n– Vis øverst på varsellisten \n– Tillat forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 4"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 3"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n\n"<b>"Nivå 2"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri fort \n– Tillat aldri lyder eller vibrering \n\n"<b>"Nivå 1"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n– Tillat aldri lyder eller vibrering \n– Skjul fra låseskjermen og statusfeltet \n– Vis nederst på varsellisten \n\n"<b>"Nivå 0"</b>" \n– Blokkér alle varsler fra appen"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Varsler"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Du får ikke disse varslene lenger."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Du får ikke disse varslene lenger"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> varselkategorier"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Denne appen har ikke varselkategorier"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -701,7 +701,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen støtter ikke delt skjerm."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Appen fungerer kanskje ikke på en sekundær skjerm."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Appen støtter ikke oppstart på sekundære skjermer."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Appen kan ikke kjøres på sekundære skjermer."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Åpne innstillingene."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Åpner hurtiginnstillingene."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Lukk hurtiginnstillingene."</string>

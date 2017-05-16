@@ -206,12 +206,12 @@
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"S\'ha desactivat el mode No molestis."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"S\'ha activat el mode No molestis."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
-    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"El Bluetooth està desactivat."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"El Bluetooth està activat."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth desactivat."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth activat."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"S\'està connectant el Bluetooth."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"El Bluetooth està connectat."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"El Bluetooth està desactivat."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"El Bluetooth està activat."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth connectat."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth desactivat."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth activat."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Informes d\'ubicació desactivats"</string>
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Informes d\'ubicació activats"</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Els informes d\'ubicació estan desactivats."</string>
@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desactivat"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Amb els controls de notificació millorats, pots establir un nivell d\'importància d\'entre 0 i 5 per a les notificacions d\'una aplicació. \n\n"<b>"Nivell 5"</b>" \n- Mostra les notificacions a la part superior de la llista \n- Permet la interrupció de la pantalla completa \n- Permet sempre la previsualització \n\n"<b>"Nivell 4"</b>" \n- No permet la interrupció de la pantalla completa \n- Permet sempre la previsualització \n\n"<b>"Nivell 3"</b>" \n- No permet la interrupció de la pantalla completa \n- No permet mai la previsualització \n\n"<b>"Nivell 2"</b>" \n- No permet la interrupció de la pantalla completa \n- No permet mai la previsualització \n- Les notificacions no poden emetre sons ni vibracions \n\n"<b>"Nivell 1"</b>" \n- No permet la interrupció de la pantalla completa \n- No permet mai la previsualització \n- No activa mai el so ni la vibració \n- Amaga les notificacions de la pantalla de bloqueig i de la barra d\'estat \n- Mostra les notificacions a la part inferior de la llista \n\n"<b>"Nivell 0"</b>" \n- Bloqueja totes les notificacions de l\'aplicació"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificacions"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Ja no rebràs aquestes notificacions."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Ja no rebràs aquestes notificacions"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categories de notificació"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Aquesta aplicació no té categories de notificació"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

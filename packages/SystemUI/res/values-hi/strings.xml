@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर नोटिफ़िकेशन नियंत्रण के द्वारा, आप किसी ऐप्लिकेशन के नोटिफ़िकेशन के लिए 0 से 5 तक महत्व का लेवल सेट कर सकते हैं. \n\n"<b>"लेवल 5"</b>" \n- नोटिफ़िकेशन सूची के शीर्ष पर दिखाएं \n- पूर्ण स्क्रीन बाधा की अनुमति दें \n- हमेशा तांक-झांक करें \n\n"<b>"लेवल 4"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- हमेशा तांक-झांक करें \n\n"<b>"लेवल 3"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- कभी भी तांक-झांक ना करें \n\n"<b>"लेवल 2"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- कभी भी तांक-झांक ना करें \n- कभी भी ध्वनि या कंपन ना करें \n\n"<b>"लेवल 1"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- कभी भी तांक-झांक ना करें \n- कभी भी ध्वनि या कंपन ना करें \n- लॉक स्क्रीन और स्थिति बार से छिपाएं \n- नोटिफ़िकेशन सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन के सभी नोटिफ़िकेशन अवरुद्ध कर दें"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"नोटिफ़िकेशन"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"अब आपको ये नोटिफ़िकेशन नहीं मिलेंगे."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"अब आपको ये नोटिफ़िकेशन नहीं मिलेंगे"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"नोटिफ़िकेशन की <xliff:g id="NUMBER">%d</xliff:g> श्रेणियां"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"इस ऐप्लिकेशन में नोटिफ़िकेशन श्रेणियां नहीं हैं"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

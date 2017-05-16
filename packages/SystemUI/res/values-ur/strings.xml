@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"آف"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"پاور اطلاع کنٹرولز کے ساتھ آپ کسی ایپ کی اطلاعات کیلئے 0 سے 5 تک اہمیت کی سطح سیٹ کر سکتے ہیں۔ \n\n"<b>"سطح 5"</b>\n"- اطلاعات کی فہرست کے اوپر دکھائیں \n- پوری اسکرین کی مداخلت کی اجازت دیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 4"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 3"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n\n"<b>"سطح 2"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n- کبھی آواز اور ارتعاش پیدا نہ کرنا \n\n"<b>" سطح 1"</b>\n"- پوری اسکرین کی مداخلت کو روکنا \n- کبھی نہ جھانکنا \n- کبھی بھی آواز یا ارتعاش پیدا نہ کرنا\n- مقفل اسکرین اور اسٹیٹس بار سے چھپانا \n - اطلاع کی فہرست کی نیچے دکھانا \n\n"<b>"سطح 0"</b>\n"- ایپ سے تمام اطلاعات مسدود کریں"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"اطلاعات"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"آپ کو یہ اطلاعات مزید نہیں ملیں گی۔"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"آپ کو یہ اطلاعات مزید نہیں ملیں گی"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"اطلاع کے <xliff:g id="NUMBER">%d</xliff:g> زمرے"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"اس ایپ میں اطلاعاتی زمرے نہیں ہیں"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
