@@ -19,7 +19,7 @@ package android.telephony.mbms;
 import android.net.Uri;
 
 /**
- * A Callback class for use when the applicaiton is actively streaming content.
+ * A Callback class for use when the application is actively streaming content.
  * @hide
  */
 public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
@@ -33,7 +33,6 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      */
     public static final int SIGNAL_STRENGTH_UNAVAILABLE = -1;
 
-
     public void error(int errorCode, String message) {
         // default implementation empty
     }
@@ -44,7 +43,7 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      * See {@link StreamingService#STATE_STOPPED}, {@link StreamingService#STATE_STARTED}
      * and {@link StreamingService#STATE_STALLED}.
      */
-    public void streamStateChanged(StreamingService service, int state) {
+    public void streamStateChanged(int state) {
         // default implementation empty
     }
 
