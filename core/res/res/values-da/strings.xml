@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Opdateringer"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Netværksstatus"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Netværksunderretninger"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"Tilgængeligt netværk"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-status"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Enhedsadministration"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Underretninger"</string>
@@ -301,7 +300,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere tekst, du skriver"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data såsom kreditkortnumre og adgangskoder."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"administrere skærmforstørrelsen"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrollér skærmens zoomniveau og position."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Tjek skærmens zoomniveau og position."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Udfør bevægelser"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, stryge, knibe sammen og udføre andre bevægelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingeraftryksbevægelser"</string>
@@ -408,8 +407,8 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tillader, at appen sender kommandoer til SIM-kortet. Dette er meget farligt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tage billeder og optage video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Med denne app kan du tage billeder og optage video med kameraet når som helst."</string>
-    <string name="permlab_vibrate" msgid="7696427026057705834">"kontrollere vibration"</string>
-    <string name="permdesc_vibrate" msgid="6284989245902300945">"Tillader, at appen kan kontrollere vibratoren."</string>
+    <string name="permlab_vibrate" msgid="7696427026057705834">"administrere vibration"</string>
+    <string name="permdesc_vibrate" msgid="6284989245902300945">"Tillader, at appen kan administrere vibratoren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe direkte op til telefonnumre"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede opkrævninger eller opkald. Bemærk, at appen med denne tilladelse ikke kan ringe til nødopkaldsnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"få adgang til chat-opkaldstjeneste"</string>
@@ -472,7 +471,7 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillader, at appen kan læse konfigurationen af ​​Bluetooth på tabletten samt kan oprette og acceptere forbindelser med parrede enheder."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Giver appen lov til at se fjernsynets Bluetooth-konfiguration og til at oprette og acceptere forbindelser til parrede enheder."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tillader, at appen kan læse konfigurationen af ​​Bluetooth på telefonen samt kan oprette og acceptere forbindelser med parrede enheder."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"kontrollere Near Field Communication"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"administrere Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Tillader, at appen kan kommunikere med NFC-tags (Near Field Communication), -kort og -læsere."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivere din skærmlås"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Tillader, at appen kan deaktivere tastaturlåsen og anden form for tilknyttet adgangskodesikkerhed. Telefonen deaktiverer f.eks. tastaturlåsen ved indgående telefonopkald og aktiverer tastaturlåsen igen, når opkaldet er afsluttet."</string>
@@ -492,6 +491,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Registrering af fingeraftryk fik timeout. Prøv igen."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingeraftrykshandlingen blev annulleret."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Du har prøvet for mange gange. Prøv igen senere."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Prøv igen."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Fingeraftryk <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -558,7 +559,7 @@
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"have adgang til Forstyr ikke"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og skrive konfigurationen af Forstyr ikke."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angiv regler for adgangskoder"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollér længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Overvåg forsøg på oplåsning af skærm"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Overvåg antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås din tablet, eller slet alle data i den, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Overvåg antallet af forkert indtastede adgangskoder ved oplåsning af skærmen, og lås tv\'et eller slet alle dets data, hvis der indtastes for mange forkerte adgangskoder."</string>
@@ -1291,7 +1292,7 @@
     <string name="vpn_text" msgid="1610714069627824309">"Tryk for at administrere netværket."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Forbundet til <xliff:g id="SESSION">%s</xliff:g>. Tryk for at administrere netværket."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til altid aktiveret VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Always-on VPN er forbundet"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Altid aktiveret VPN er forbundet"</string>
     <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Forbindelsen til altid aktiveret VPN er afbrudt"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i altid aktiveret VPN"</string>
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tryk for at konfigurere"</string>
