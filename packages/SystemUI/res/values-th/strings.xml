@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ปิด"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ส่วนควบคุมการแจ้งเตือนแบบเปิด/ปิดช่วยให้คุณตั้งค่าระดับความสำคัญสำหรับการแจ้งเตือนของแอปได้ตั้งแต่ระดับ 0-5 \n\n"<b>"ระดับ 5"</b>" \n- แสดงที่ด้านบนของรายการแจ้งเตือน \n- อนุญาตให้รบกวนแบบเต็มหน้าจอ \n- อนุญาตให้แสดงชั่วครู่ \n\n"<b>"ระดับ 4"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- แสดงชั่วครู่เสมอ \n\n"<b>"ระดับ 3"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n\n"<b>"ระดับ 2"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n\n"<b>"ระดับ 1"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n- ซ่อนจากหน้าจอล็อกและแถบสถานะ \n- แสดงที่ด้านล่างของรายการแจ้งเตือน \n\n"<b>"ระดับ 0"</b>" \n- บล็อกการแจ้งเตือนทั้งหมดจากแอป"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"การแจ้งเตือน"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"คุณจะไม่ได้รับการแจ้งเตือนเหล่านี้อีก"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"คุณจะไม่ได้รับการแจ้งเตือนเหล่านี้อีก"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"หมวดหมู่การแจ้งเตือน <xliff:g id="NUMBER">%d</xliff:g> หมวด"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"แอปนี้ไม่มีหมวดหมู่การแจ้งเตือน"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

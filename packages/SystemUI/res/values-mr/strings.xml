@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पॉवर सूचना नियंत्रणांसह, आपण अॅपच्या सूचनांसाठी महत्त्व स्तर 0 ते 5 पर्यंत सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दर्शवा \n- पूर्ण स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n\n"<b>"स्तर 1"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना अवरोधित करा"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"आपल्याला यापुढे या सूचना प्राप्त होणार नाहीत."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"तुम्हाला यापुढे या सूचना प्राप्त होणार नाहीत"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> सूचना श्रेण्या"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"या अ‍ॅपला सूचना श्रेण्या नाहीत"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

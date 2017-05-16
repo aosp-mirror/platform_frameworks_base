@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ປິດ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ດ້ວຍການຄວບຄຸມການແຈ້ງເຕືອນ, ທ່ານສາມາດຕັ້ງລະດັບຄວາມສຳຄັນຈາກ 0 ຮອດ 5 ໃຫ້ກັບການແຈ້ງເຕືອນແອັບໃດໜຶ່ງໄດ້. \n\n"<b>"ລະດັບ 5"</b>" \n- ສະແດງຢູ່ເທິງສຸດຂອງລາຍການແຈ້ງເຕືອນ \n- ອະນຸຍາດໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 4"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 3"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n\n"<b>"ລະດັບ 2"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n\n"<b>"ລະດັບ 1"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n- ເຊື່ອງຈາກໜ້າຈໍລັອກ ແລະ ແຖບສະຖານະ \n- ສະແດງຢູ່ລຸ່ມສຸດຂອງລາຍການແຈ້ງເຕືອນ \n\n"<b>"ລະດັບ 0"</b>" \n- ປິດກັ້ນການແຈ້ງເຕືອນທັງໝົດຈາກແອັບ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ການແຈ້ງເຕືອນ"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ແອັບນີ້ບໍ່ມີໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Off"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications. \n\n"<b>"Level 5"</b>" \n- Show at the top of the notification list \n- Allow full screen interruption \n- Always peek \n\n"<b>"Level 4"</b>" \n- Prevent full screen interruption \n- Always peek \n\n"<b>"Level 3"</b>" \n- Prevent full screen interruption \n- Never peek \n\n"<b>"Level 2"</b>" \n- Prevent full screen interruption \n- Never peek \n- Never make sound and vibration \n\n"<b>"Level 1"</b>" \n- Prevent full screen interruption \n- Never peek \n- Never make sound or vibrate \n- Hide from lock screen and status bar \n- Show at the bottom of the notification list \n\n"<b>"Level 0"</b>" \n- Block all notifications from the app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifications"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"You won\'t get these notifications anymore."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"You won\'t get these notifications anymore"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> notification categories"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"This app doesn\'t have notification categories"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

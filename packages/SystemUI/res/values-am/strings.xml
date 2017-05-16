@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ጠፍቷል"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"በኃይል ማሳወቂያ መቆጣጠሪያዎች አማካኝነት የአንድ መተግበሪያ ማሳወቂያዎች የአስፈላጊነት ደረጃ ከ0 እስከ 5 ድረስ ማዘጋጀት ይችላሉ። \n\n"<b>"ደረጃ 5"</b>" \n- በማሳወቂያ ዝርዝሩ አናት ላይ አሳይ \n- የሙሉ ማያ ገጽ ማቋረጥን ፍቀድ \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 4"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 3"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- በፍጹም አጮልቀው አይምልከቱ \n\n"<b>"ደረጃ 2"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ እና ንዝረትን በፍጹም አይኑር \n\n"<b>"ደረጃ 1"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ ወይም ንዝረትን በፍጹም አያደርጉ \n- ከመቆለፊያ ገጽ እና የሁኔታ አሞሌ ይደብቁ \n- በማሳወቂያ ዝርዝር ግርጌ ላይ አሳይ \n\n"<b>"ደረጃ 0"</b>" \n- ሁሉንም የመተግበሪያው ማሳወቂያዎች ያግዱ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ማሳወቂያዎች"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"እነዚህን ማሳወቂያዎች ከእንግዲህ አያግኙዋቸውም።"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"እነዚህን ማሳወቂያዎች ከእንግዲህ አያገኟቸውም"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> የማሳወቂያ ምድቦች"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ይህ መተግበሪያ የማሳወቂያ ምድቦች የሉትም"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Valiwe"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ngezilawuli zesaziso zamandla, ungasetha ileveli ebalulekile kusuka ku-0 kuya ku-5 kusuka kuzaziso zohlelo lokusebenza. \n\n"<b>"Ileveli 5"</b>" \n- Ibonisa phezulu kuhlu lwesaziso \n- Vumela ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 4"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 3"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n\n"<b>"Ileveli 2"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo nokudlidliza \n\n"<b>"Ileveli 1"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo noma ukudlidliza \n- Fihla kusuka kusikrini sokukhiya nebha yesimo \n- Bonisa phansi kohlu lwesaziso \n\n"<b>"Ileveli 0"</b>" \n- Vimbela zonke izaziso kusuka kuhlelo lokusebenza"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Izaziso"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Ngeke usathola lezi zaziso."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Ngeke usathola izaziso"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> izigaba zesaziso"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Lolu hlelo lokusebenza alunazo izigaba zesaziso"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

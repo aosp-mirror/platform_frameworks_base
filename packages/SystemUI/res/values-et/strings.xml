@@ -550,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Väljas"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Toite märguannete juhtnuppudega saate määrata rakenduse märguannete tähtsuse taseme vahemikus 0–5. \n\n"<b>"5. tase"</b>" \n- Kuva märguannete loendi ülaosas\n- Luba täisekraanil häirimine \n- Kuva alati ekraani servas \n\n"<b>"4. tase"</b>" \n- Keela täisekraanil häirimine \n- Kuva alati ekraani servas \n\n"<b>"3. tase"</b>" \n- Keela täisekraanil häirimine \n- Ära kunagi kuva ekraani servas \n\n"<b>"2. tase"</b>" \n- Keela täisekraanil häirimine \n- Ära kunagi kuva ekraani servas \n- Ära kunagi helise ega vibreeri \n\n"<b>"1. tase"</b>" \n- Keela täisekraanil häirimine \n- Ära kunagi kuva ekraani servas \n- Ära kunagi helise ega vibreeri \n- Peida lukustuskuval ja olekuribal \n- Kuva märguannete loendi allosas \n\n"<b>"Tase 0"</b>" \n- Blokeeri kõik rakenduse märguanded"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Märguanded"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Te ei saa enam neid märguandeid."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Te ei saa enam neid märguandeid"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> märguandekategooriat"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Sellel rakendusel ei ole märguannete kategooriaid"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
