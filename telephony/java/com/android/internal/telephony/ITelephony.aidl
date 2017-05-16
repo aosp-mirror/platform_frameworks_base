@@ -1318,12 +1318,12 @@ interface ITelephony {
     List<ClientRequestStats> getClientRequestStats(String callingPackage, int subid);
 
     /**
-     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     * Set SIM card power state.
      * @param slotIndex SIM slot id
-     * @param powerUp True if powering up the SIM, otherwise powering down
+     * @param state  State of SIM (power down, power up, pass through)
      * @hide
      * */
-    void setSimPowerStateForSlot(int slotIndex, boolean powerUp);
+    void setSimPowerStateForSlot(int slotIndex, int state);
 
     /**
      * Returns a list of Forbidden PLMNs from the specified SIM App
