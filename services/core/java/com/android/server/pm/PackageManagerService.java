@@ -6491,18 +6491,22 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             } else {
                 final PackageParser.Package pkg = mPackages.get(pkgName);
+                result = null;
                 if (pkg != null) {
-                    return applyPostResolutionFilter(filterIfNotSystemUser(
+                    result = filterIfNotSystemUser(
                             mActivities.queryIntentForPackage(
                                     intent, resolvedType, flags, pkg.activities, userId),
-                            userId), instantAppPkgName);
-                } else {
+                            userId);
+                }
+                if (result == null || result.size() == 0) {
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
                     addEphemeral = !ephemeralDisabled
                             && isInstantAppAllowed(
                                     intent, null /*result*/, userId, true /*skipPackageCheck*/);
-                    result = new ArrayList<ResolveInfo>();
+                    if (result == null) {
+                        result = new ArrayList<>();
+                    }
                 }
             }
         }
