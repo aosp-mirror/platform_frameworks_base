@@ -449,6 +449,11 @@ public class Toast {
         public void handleShow(IBinder windowToken) {
             if (localLOGV) Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView
                     + " mNextView=" + mNextView);
+            // If a cancel/hide is pending - no need to show - at this point
+            // the window token is already invalid and no need to do any work.
+            if (mHandler.hasMessages(CANCEL) || mHandler.hasMessages(HIDE)) {
+                return;
+            }
             if (mView != mNextView) {
                 // remove the old view if necessary
                 handleHide();
@@ -483,8 +488,16 @@ public class Toast {
                     mWM.removeView(mView);
                 }
                 if (localLOGV) Log.v(TAG, "ADD! " + mView + " in " + this);
-                mWM.addView(mView, mParams);
-                trySendAccessibilityEvent();
+                // Since the notification manager service cancels the token right
+                // after it notifies us to cancel the toast there is an inherent
+                // race and we may attempt to add a window after the token has been
+                // invalidated. Let us hedge against that.
+                try {
+                    mWM.addView(mView, mParams);
+                    trySendAccessibilityEvent();
+                } catch (WindowManager.BadTokenException e) {
+                    /* ignore */
+                }
             }
         }
 
