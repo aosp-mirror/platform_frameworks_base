@@ -70,7 +70,6 @@ package android.app.admin {
   public class DevicePolicyManager {
     method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
-    method public void setAffiliationIds(android.content.ComponentName, java.util.List<java.lang.String>);
   }
 
 }

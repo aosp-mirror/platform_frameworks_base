@@ -72,7 +72,6 @@ package android.app.admin {
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
     method public deprecated java.lang.String getDeviceInitializerApp();
     method public deprecated android.content.ComponentName getDeviceInitializerComponent();
-    method public void setAffiliationIds(android.content.ComponentName, java.util.List<java.lang.String>);
   }
 
 }
