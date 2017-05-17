@@ -81,6 +81,7 @@ import com.android.server.connectivity.tethering.OffloadController;
 import com.android.server.connectivity.tethering.SimChangeListener;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.connectivity.tethering.TetheringConfiguration;
+import com.android.server.connectivity.tethering.TetheringDependencies;
 import com.android.server.connectivity.tethering.UpstreamNetworkMonitor;
 import com.android.server.net.BaseNetworkObserver;
 
@@ -178,7 +179,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
     public Tethering(Context context, INetworkManagementService nmService,
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            Looper looper, MockableSystemProperties systemProperties) {
+            Looper looper, MockableSystemProperties systemProperties,
+            TetheringDependencies deps) {
         mLocalLog.log("CONSTRUCTED");
         mContext = context;
         mNMService = nmService;
@@ -194,7 +196,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
-        mOffloadController = new OffloadController(mTetherMasterSM.getHandler());
+        mOffloadController = new OffloadController(mTetherMasterSM.getHandler(),
+                deps.getOffloadHardwareInterface());
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
                 mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new HashSet<>();
@@ -1474,7 +1477,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         handleInterfaceServingStateInactive(who);
 
                         if (mNotifyList.isEmpty()) {
-                            // transitions appropriately
+                            // This transitions us out of TetherModeAliveState,
+                            // either to InitialState or an error state.
                             turnOffMasterTetherSettings();
                             break;
                         }

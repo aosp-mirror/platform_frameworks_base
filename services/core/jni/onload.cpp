@@ -40,6 +40,7 @@ int register_android_server_VibratorService(JNIEnv* env);
 int register_android_server_location_GnssLocationProvider(JNIEnv* env);
 int register_android_server_location_FlpHardwareProvider(JNIEnv* env);
 int register_android_server_connectivity_Vpn(JNIEnv* env);
+int register_android_server_connectivity_tethering_OffloadHardwareInterface(JNIEnv*);
 int register_android_server_hdmi_HdmiCecController(JNIEnv* env);
 int register_android_server_tv_TvUinputBridge(JNIEnv* env);
 int register_android_server_tv_TvInputHal(JNIEnv* env);
@@ -78,6 +79,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_location_GnssLocationProvider(env);
     register_android_server_location_FlpHardwareProvider(env);
     register_android_server_connectivity_Vpn(env);
+    register_android_server_connectivity_tethering_OffloadHardwareInterface(env);
     register_android_server_AssetAtlasService(env);
     register_android_server_ConsumerIrService(env);
     register_android_server_BatteryStatsService(env);
