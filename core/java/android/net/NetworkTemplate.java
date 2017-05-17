@@ -18,8 +18,8 @@ package android.net;
 
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
-import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
@@ -34,8 +34,8 @@ import static android.telephony.TelephonyManager.getNetworkClass;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.BackupUtils;
+import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -52,14 +52,18 @@ import java.util.Objects;
  * @hide
  */
 public class NetworkTemplate implements Parcelable {
+    private static final String TAG = "NetworkTemplate";
+
     /**
      * Current Version of the Backup Serializer.
      */
     private static final int BACKUP_VERSION = 1;
 
     public static final int MATCH_MOBILE_ALL = 1;
+    /** @deprecated don't use this any more */
     @Deprecated
     public static final int MATCH_MOBILE_3G_LOWER = 2;
+    /** @deprecated don't use this any more */
     @Deprecated
     public static final int MATCH_MOBILE_4G = 3;
     public static final int MATCH_WIFI = 4;
@@ -69,9 +73,26 @@ public class NetworkTemplate implements Parcelable {
     public static final int MATCH_BLUETOOTH = 8;
     public static final int MATCH_PROXY = 9;
 
+    private static boolean isKnownMatchRule(final int rule) {
+        switch (rule) {
+            case MATCH_MOBILE_ALL:
+            case MATCH_MOBILE_3G_LOWER:
+            case MATCH_MOBILE_4G:
+            case MATCH_WIFI:
+            case MATCH_ETHERNET:
+            case MATCH_MOBILE_WILDCARD:
+            case MATCH_WIFI_WILDCARD:
+            case MATCH_BLUETOOTH:
+            case MATCH_PROXY:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
     private static boolean sForceAllNetworkTypes = false;
 
-    @VisibleForTesting
     public static void forceAllNetworkTypes() {
         sForceAllNetworkTypes = true;
     }
@@ -180,6 +201,11 @@ public class NetworkTemplate implements Parcelable {
         mSubscriberId = subscriberId;
         mMatchSubscriberIds = matchSubscriberIds;
         mNetworkId = networkId;
+
+        if (!isKnownMatchRule(matchRule)) {
+            Log.e(TAG, "Unknown network template rule " + matchRule
+                    + " will not match any identity.");
+        }
     }
 
     private NetworkTemplate(Parcel in) {
@@ -294,7 +320,9 @@ public class NetworkTemplate implements Parcelable {
             case MATCH_PROXY:
                 return matchesProxy(ident);
             default:
-                throw new IllegalArgumentException("unknown network template");
+                // We have no idea what kind of network template we are, so we
+                // just claim not to match anything.
+                return false;
         }
     }
 
@@ -428,7 +456,7 @@ public class NetworkTemplate implements Parcelable {
             case MATCH_PROXY:
                 return "PROXY";
             default:
-                return "UNKNOWN";
+                return "UNKNOWN(" + matchRule + ")";
         }
     }
 
@@ -495,6 +523,11 @@ public class NetworkTemplate implements Parcelable {
         int matchRule = in.readInt();
         String subscriberId = BackupUtils.readString(in);
         String networkId = BackupUtils.readString(in);
+
+        if (!isKnownMatchRule(matchRule)) {
+            throw new BackupUtils.BadVersionException(
+                    "Restored network template contains unknown match rule " + matchRule);
+        }
 
         return new NetworkTemplate(matchRule, subscriberId, networkId);
     }
