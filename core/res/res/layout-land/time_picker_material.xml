@@ -20,11 +20,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/time_header"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
         android:paddingStart="?attr/dialogPreferredPadding"
         android:paddingEnd="?attr/dialogPreferredPadding">
@@ -112,7 +111,7 @@
                 android:includeFontPadding="false"
                 android:button="@null" />
         </RadioGroup>
-    </LinearLayout>
+    </RelativeLayout>
 
     <TextView
         android:visibility="gone"
