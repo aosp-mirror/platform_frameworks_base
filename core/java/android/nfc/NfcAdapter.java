@@ -16,8 +16,6 @@
 
 package android.nfc;
 
-import java.util.HashMap;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -42,6 +40,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Represents the local NFC adapter.
@@ -623,6 +622,23 @@ public final class NfcAdapter {
     public INfcFCardEmulation getNfcFCardEmulationService() {
         isEnabled();
         return sNfcFCardEmulationService;
+    }
+
+    /**
+     * Returns the binder interface to the NFC-DTA test interface.
+     * @hide
+     */
+    public INfcDta getNfcDtaInterface() {
+        if (mContext == null) {
+            throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "
+                    + " NFC extras APIs");
+        }
+        try {
+            return sService.getNfcDtaInterface(mContext.getPackageName());
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return null;
+        }
     }
 
     /**
