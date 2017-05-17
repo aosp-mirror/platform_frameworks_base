@@ -279,7 +279,9 @@ public class CommandQueue extends IStatusBar.Stub {
     public void toggleRecentApps() {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_TOGGLE_RECENT_APPS);
-            mHandler.obtainMessage(MSG_TOGGLE_RECENT_APPS, 0, 0, null).sendToTarget();
+            Message msg = mHandler.obtainMessage(MSG_TOGGLE_RECENT_APPS, 0, 0, null);
+            msg.setAsynchronous(true);
+            msg.sendToTarget();
         }
     }
 

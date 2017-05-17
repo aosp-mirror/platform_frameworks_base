@@ -149,6 +149,7 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -220,8 +221,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.Handler;
-import android.service.dreams.DreamService;
-import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -778,8 +777,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
 
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
@@ -1532,13 +1529,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     void awakenDreams() {
-        if (mDreamManager != null) {
-            try {
-                mDreamManager.awaken();
-            } catch (RemoteException e) {
-                // fine, stay asleep then
-            }
-        }
+        SystemServicesProxy.getInstance(mContext).awakenDreamsAsync();
     }
 
     public UserHandle getCurrentUserHandle() {
@@ -5173,7 +5164,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected boolean mDisableNotificationAlerts = false;
 
     protected DevicePolicyManager mDevicePolicyManager;
-    protected IDreamManager mDreamManager;
     protected PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -6816,12 +6806,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn();
-        try {
-            inUse = inUse && !mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.d(TAG, "failed to query dream manager", e);
-        }
+        boolean inUse = mPowerManager.isScreenOn()
+                && !SystemServicesProxy.getInstance(mContext).isDreaming();
 
         if (!inUse && !isDozing()) {
             if (DEBUG) {
