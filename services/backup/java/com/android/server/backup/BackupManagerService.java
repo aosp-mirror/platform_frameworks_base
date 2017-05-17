@@ -839,6 +839,29 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         return !appGetsFullBackup(pkg);
     }
 
+    /*
+     * Construct a backup agent instance for the metadata pseudopackage.  This is a
+     * process-local non-lifecycle agent instance, so we manually set up the context
+     * topology for it.
+     */
+    PackageManagerBackupAgent makeMetadataAgent() {
+        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager);
+        pmAgent.attach(mContext);
+        pmAgent.onCreate();
+        return pmAgent;
+    }
+
+    /*
+     * Same as above but with the explicit package-set configuration.
+     */
+    PackageManagerBackupAgent makeMetadataAgent(List<PackageInfo> packages) {
+        PackageManagerBackupAgent pmAgent =
+                new PackageManagerBackupAgent(mPackageManager, packages);
+        pmAgent.attach(mContext);
+        pmAgent.onCreate();
+        return pmAgent;
+    }
+
     // ----- Asynchronous backup/restore handler thread -----
 
     private class BackupHandler extends Handler {
@@ -2893,8 +2916,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                     // because it's cheap and this way we guarantee that we don't get out of
                     // step even if we're selecting among various transports at run time.
                     if (mStatus == BackupTransport.TRANSPORT_OK) {
-                        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
-                                mPackageManager);
+                        PackageManagerBackupAgent pmAgent = makeMetadataAgent();
                         mStatus = invokeAgentForBackup(PACKAGE_MANAGER_SENTINEL,
                                 IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
                         addBackupTrace("PMBA invoke: " + mStatus);
@@ -7155,7 +7177,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             mObserver = observer;
             mLatchObject = latch;
             mAgent = null;
-            mPackageManagerBackupAgent = new PackageManagerBackupAgent(mPackageManager);
+            mPackageManagerBackupAgent = makeMetadataAgent();
             mAgentPackage = null;
             mTargetApp = null;
             mObbConnection = new FullBackupObbConnection();
@@ -8817,7 +8839,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // Pull the Package Manager metadata from the restore set first
                 mCurrentPackage = new PackageInfo();
                 mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
-                mPmAgent = new PackageManagerBackupAgent(mPackageManager, null);
+                mPmAgent = makeMetadataAgent(null);
                 mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
                 if (MORE_DEBUG) {
                     Slog.v(TAG, "initiating restore for PMBA");

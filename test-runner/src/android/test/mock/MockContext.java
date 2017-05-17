@@ -149,6 +149,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void reloadSharedPreferences() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public boolean moveSharedPreferencesFrom(Context sourceContext, String name) {
         throw new UnsupportedOperationException();

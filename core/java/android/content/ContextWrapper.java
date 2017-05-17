@@ -19,7 +19,6 @@ package android.content;
 import android.annotation.SystemApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
-import android.app.Notification;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -171,6 +170,12 @@ public class ContextWrapper extends Context {
     @Override
     public SharedPreferences getSharedPreferences(File file, int mode) {
         return mBase.getSharedPreferences(file, mode);
+    }
+
+    /** @hide */
+    @Override
+    public void reloadSharedPreferences() {
+        mBase.reloadSharedPreferences();
     }
 
     @Override
