@@ -182,26 +182,38 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public boolean startBackgroundScan() {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            return mTuner.startBackgroundScan();
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
     }
 
     @Override
     public @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            return mTuner.getProgramList(filter);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
     }
 
     @Override
     public boolean isAnalogForced() {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            return mTuner.isAnalogForced();
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
     }
 
     @Override
     public void setAnalogForced(boolean isForced) {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            mTuner.setAnalogForced(isForced);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
     }
 
     @Override

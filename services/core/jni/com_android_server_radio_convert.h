@@ -34,15 +34,29 @@ namespace convert {
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
-bool ThrowIfFailed(JNIEnv *env, const hardware::Return<V1_0::Result> &hidlResult);
-bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult, V1_0::Result halResult);
-
 JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
 V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
 
 V1_0::Direction DirectionToHal(bool directionDown);
 
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info);
+
+
+// These three are only for internal use by template functions below.
+bool __ThrowIfFailedHidl(JNIEnv *env,
+        const hardware::details::return_status &hidlResult);
+bool __ThrowIfFailed(JNIEnv *env, const V1_0::Result halResult);
+bool __ThrowIfFailed(JNIEnv *env, const V1_1::ProgramListResult halResult);
+
+template <typename T>
+bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult, const T halResult) {
+    return __ThrowIfFailedHidl(env, hidlResult) || __ThrowIfFailed(env, halResult);
+}
+
+template <typename T>
+bool ThrowIfFailed(JNIEnv *env, const hardware::Return<T> &hidlResult) {
+    return __ThrowIfFailedHidl(env, hidlResult) || __ThrowIfFailed(env, static_cast<T>(hidlResult));
+}
 
 } // namespace convert
 } // namespace radio
