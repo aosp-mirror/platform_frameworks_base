@@ -85,7 +85,6 @@ public abstract class RemovalClient extends ClientMonitor {
         IFingerprintServiceReceiver receiver = getReceiver();
         try {
             if (receiver != null) {
-                // TODO: plumb remaining
                 receiver.onRemoved(getHalDeviceId(), fingerId, groupId, remaining);
             }
         } catch (RemoteException e) {
