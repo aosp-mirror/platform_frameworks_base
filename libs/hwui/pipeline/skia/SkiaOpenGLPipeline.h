@@ -46,8 +46,6 @@ public:
     bool isContextReady() override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
-    static sk_sp<SkImage> makeTextureImage(
-            const uirenderer::renderthread::RenderThread& renderThread, Bitmap* bitmap);
 
 private:
     renderthread::EglManager& mEglManager;

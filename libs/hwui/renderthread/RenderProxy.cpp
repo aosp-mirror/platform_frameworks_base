@@ -693,18 +693,6 @@ int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) 
     }
 }
 
-CREATE_BRIDGE2(makeTextureImage, RenderThread* thread, Bitmap* bitmap) {
-    return args->thread->makeTextureImage(args->bitmap).release();
-}
-
-sk_sp<SkImage> RenderProxy::makeTextureImage(Bitmap* bitmap) {
-    SETUP_TASK(makeTextureImage);
-    args->bitmap = bitmap;
-    args->thread = &RenderThread::getInstance();
-    sk_sp<SkImage> hardwareImage(reinterpret_cast<SkImage*>(staticPostAndWait(task)));
-    return hardwareImage;
-}
-
 void RenderProxy::post(RenderTask* task) {
     mRenderThread.queue(task);
 }
