@@ -137,9 +137,8 @@ public class RadioTest {
     }
 
     private void checkAntenna() {
-        // TODO(b/36863239): enable check when isAntennaConnected is implemented
-        //boolean isConnected = mRadioTuner.isAntennaConnected();
-        //assertTrue(isConnected);
+        boolean isConnected = mRadioTuner.isAntennaConnected();
+        assertTrue(isConnected);
     }
 
     @Test
