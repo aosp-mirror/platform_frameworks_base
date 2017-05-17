@@ -100,8 +100,8 @@ public class FingerprintManager {
     public static final int FINGERPRINT_ERROR_CANCELED = 5;
 
     /**
-     * The {@link FingerprintManager#remove(Fingerprint, RemovalCallback)} call failed. Typically
-     * this will happen when the provided fingerprint id was incorrect.
+     * The {@link FingerprintManager#remove} call failed. Typically this will happen when the
+     * provided fingerprint id was incorrect.
      *
      * @hide
      */
@@ -398,10 +398,10 @@ public class FingerprintManager {
     };
 
     /**
-     * Callback structure provided to {@link FingerprintManager#remove(int). Users of
-     * {@link #FingerprintManager()} may optionally provide an implementation of this to
-     * {@link FingerprintManager#remove(int, int, RemovalCallback)} for listening to
-     * fingerprint template removal events.
+     * Callback structure provided to {@link #remove}. Users of {@link FingerprintManager} may
+     * optionally provide an implementation of this to
+     * {@link #remove(Fingerprint, int, RemovalCallback)} for listening to fingerprint template
+     * removal events.
      *
      * @hide
      */
@@ -416,9 +416,13 @@ public class FingerprintManager {
 
         /**
          * Called when a given fingerprint is successfully removed.
-         * @param fingerprint the fingerprint template that was removed.
+         * @param fp The fingerprint template that was removed.
+         * @param remaining The number of fingerprints yet to be removed in this operation. If
+         *         {@link #remove} is called on one fingerprint, this should be 0. If
+         *         {@link #remove} is called on a group, this should be the number of remaining
+         *         fingerprints in the group, and 0 after the last fingerprint is removed.
          */
-        public void onRemovalSucceeded(Fingerprint fingerprint) { }
+        public void onRemovalSucceeded(Fingerprint fp, int remaining) { }
     };
 
     /**
@@ -878,8 +882,7 @@ public class FingerprintManager {
                             msg.arg2 /* vendorCode */);
                     break;
                 case MSG_REMOVED:
-                    sendRemovedResult((Long) msg.obj /* deviceId */, msg.arg1 /* fingerId */,
-                            msg.arg2 /* groupId */);
+                    sendRemovedResult((Fingerprint) msg.obj, msg.arg1 /* remaining */);
                     break;
                 case MSG_ENUMERATED:
                     sendEnumeratedResult((Long) msg.obj /* deviceId */, msg.arg1 /* fingerId */,
@@ -888,21 +891,29 @@ public class FingerprintManager {
             }
         }
 
-        private void sendRemovedResult(long deviceId, int fingerId, int groupId) {
-            if (mRemovalCallback != null) {
-                int reqFingerId = mRemovalFingerprint.getFingerId();
-                int reqGroupId = mRemovalFingerprint.getGroupId();
-                if (reqFingerId != 0 && fingerId != 0  &&  fingerId != reqFingerId) {
-                    Log.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
-                    return;
-                }
-                if (groupId != reqGroupId) {
-                    Log.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
-                    return;
-                }
-                mRemovalCallback.onRemovalSucceeded(new Fingerprint(null, groupId, fingerId,
-                        deviceId));
+        private void sendRemovedResult(Fingerprint fingerprint, int remaining) {
+            if (mRemovalCallback == null) {
+                return;
             }
+            if (fingerprint == null) {
+                Log.e(TAG, "Received MSG_REMOVED, but fingerprint is null");
+                return;
+            }
+
+            int fingerId = fingerprint.getFingerId();
+            int reqFingerId = mRemovalFingerprint.getFingerId();
+            if (reqFingerId != 0 && fingerId != 0 && fingerId != reqFingerId) {
+                Log.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
+                return;
+            }
+            int groupId = fingerprint.getGroupId();
+            int reqGroupId = mRemovalFingerprint.getGroupId();
+            if (groupId != reqGroupId) {
+                Log.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
+                return;
+            }
+
+            mRemovalCallback.onRemovalSucceeded(fingerprint, remaining);
         }
 
         private void sendEnumeratedResult(long deviceId, int fingerId, int groupId) {
@@ -1100,8 +1111,8 @@ public class FingerprintManager {
 
         @Override // binder call
         public void onRemoved(long deviceId, int fingerId, int groupId, int remaining) {
-            // TODO: propagate remaining
-            mHandler.obtainMessage(MSG_REMOVED, fingerId, groupId, deviceId).sendToTarget();
+            mHandler.obtainMessage(MSG_REMOVED, remaining, 0,
+                    new Fingerprint(null, groupId, fingerId, deviceId)).sendToTarget();
         }
 
         @Override // binder call
