@@ -79,13 +79,22 @@ static struct {
         jmethodID putBitmapFromNative;
         jmethodID putClockFromNative;
     } RadioMetadata;
+
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+    } RuntimeException;
+
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+    } ParcelableException;
 } gjni;
 
 bool __ThrowIfFailedHidl(JNIEnv *env, const hardware::details::return_status &hidlResult) {
     if (hidlResult.isOk()) return false;
 
-    jniThrowExceptionFmt(env, "java/lang/RuntimeException",
-            "HIDL call failed: %s", hidlResult.description().c_str());
+    ThrowParcelableRuntimeException(env, "HIDL call failed: " + hidlResult.description());
     return true;
 }
 
@@ -94,7 +103,7 @@ bool __ThrowIfFailed(JNIEnv *env, const Result halResult) {
         case Result::OK:
             return false;
         case Result::NOT_INITIALIZED:
-            jniThrowRuntimeException(env, "Result::NOT_INITIALIZED");
+            ThrowParcelableRuntimeException(env, "Result::NOT_INITIALIZED");
             return true;
         case Result::INVALID_ARGUMENTS:
             jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -104,11 +113,11 @@ bool __ThrowIfFailed(JNIEnv *env, const Result halResult) {
             jniThrowException(env, "java/lang/IllegalStateException", "Result::INVALID_STATE");
             return true;
         case Result::TIMEOUT:
-            jniThrowRuntimeException(env, "Result::TIMEOUT (unexpected here)");
+            ThrowParcelableRuntimeException(env, "Result::TIMEOUT (unexpected here)");
             return true;
         default:
-            jniThrowExceptionFmt(env, "java/lang/RuntimeException",
-                    "Unknown failure, result: %d", halResult);
+            ThrowParcelableRuntimeException(env, "Unknown failure, result: "
+                    + std::to_string(static_cast<int32_t>(halResult)));
             return true;
     }
 }
@@ -122,11 +131,25 @@ bool __ThrowIfFailed(JNIEnv *env, const ProgramListResult halResult) {
             jniThrowException(env, "java/lang/IllegalStateException", "Scan has not been started");
             return true;
         case ProgramListResult::UNAVAILABLE:
-            jniThrowRuntimeException(env, "ProgramListResult::UNAVAILABLE (unexpected here)");
+            ThrowParcelableRuntimeException(env,
+                    "ProgramListResult::UNAVAILABLE (unexpected here)");
             return true;
         default:
             return __ThrowIfFailed(env, static_cast<Result>(halResult));
     }
+}
+
+void ThrowParcelableRuntimeException(JNIEnv *env, const std::string& msg) {
+    EnvWrapper wrap(env);
+
+    auto jMsg = wrap(env->NewStringUTF(msg.c_str()));
+    auto runtimeExc = wrap(env->NewObject(gjni.RuntimeException.clazz,
+            gjni.RuntimeException.cstor, jMsg.get()));
+    auto parcelableExc = wrap(env->NewObject(gjni.ParcelableException.clazz,
+            gjni.ParcelableException.cstor, runtimeExc.get()));
+
+    auto res = env->Throw(static_cast<jthrowable>(parcelableExc.get()));
+    ALOGE_IF(res != JNI_OK, "Couldn't throw parcelable runtime exception");
 }
 
 static Rds RdsForRegion(bool rds, Region region) {
@@ -285,19 +308,27 @@ static JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaDa
     return jMetadata;
 }
 
-JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info11) {
+static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info10,
+        const V1_1::ProgramInfo *info11) {
     ALOGV("ProgramInfoFromHal()");
     EnvWrapper wrap(env);
 
-    auto& info10 = info11.base;
     auto jMetadata = MetadataFromHal(env, info10.metadata);
-    auto jVendorExtension = wrap(env->NewStringUTF(info11.vendorExension.c_str()));
+    auto jVendorExtension = info11 ?
+            wrap(env->NewStringUTF(info11->vendorExension.c_str())) : nullptr;
 
     return wrap(env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor, info10.channel,
             info10.subChannel, info10.tuned, info10.stereo, info10.digital, info10.signalStrength,
-            jMetadata.get(), info11.flags, jVendorExtension.get()));
+            jMetadata.get(), info11 ? info11->flags : 0, jVendorExtension.get()));
 }
 
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info) {
+    return ProgramInfoFromHal(env, info, nullptr);
+}
+
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info) {
+    return ProgramInfoFromHal(env, info.base, &info);
+}
 
 } // namespace convert
 } // namespace radio
@@ -351,6 +382,16 @@ void register_android_server_radio_convert(JNIEnv *env) {
             "putBitmapFromNative", "(I[B)I");
     gjni.RadioMetadata.putClockFromNative = GetMethodIDOrDie(env, radioMetadataClass,
             "putClockFromNative", "(IJI)I");
+
+    auto runtimeExcClass = FindClassOrDie(env, "java/lang/RuntimeException");
+    gjni.RuntimeException.clazz = MakeGlobalRefOrDie(env, runtimeExcClass);
+    gjni.RuntimeException.cstor = GetMethodIDOrDie(env, runtimeExcClass, "<init>",
+            "(Ljava/lang/String;)V");
+
+    auto parcelableExcClass = FindClassOrDie(env, "android/os/ParcelableException");
+    gjni.ParcelableException.clazz = MakeGlobalRefOrDie(env, parcelableExcClass);
+    gjni.ParcelableException.cstor = GetMethodIDOrDie(env, parcelableExcClass, "<init>",
+            "(Ljava/lang/Throwable;)V");
 }
 
 } // namespace android
