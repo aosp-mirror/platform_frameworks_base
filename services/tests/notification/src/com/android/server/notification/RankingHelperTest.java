@@ -119,7 +119,7 @@ public class RankingHelperTest extends NotificationTestCase {
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
         final ApplicationInfo upgrade = new ApplicationInfo();
-        upgrade.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        upgrade.targetSdkVersion = Build.VERSION_CODES.O;
         when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(legacy);
         when(mPm.getApplicationInfoAsUser(eq(UPDATED_PKG), anyInt(), anyInt())).thenReturn(upgrade);
         when(mPm.getPackageUidAsUser(eq(PKG), anyInt())).thenReturn(UID);
