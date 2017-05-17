@@ -22,8 +22,6 @@
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
 #include <ui/GraphicBuffer.h>
-#include <utils/Mutex.h>
-#include <SkImage.h>
 
 namespace android {
 
@@ -107,13 +105,6 @@ public:
     }
 
     GraphicBuffer* graphicBuffer();
-
-    // makeImage creates or returns a cached SkImage. Can be invoked from UI or render thread.
-    // If invoked on the render thread, then RenderThread* argument is required.
-    // If not invoked on the render thread, then RenderThread* must be nullptr.
-    // makeImage is wrapping a gralloc buffer with an EGLImage and is passing a texture to Skia.
-    // This is a temporary implementation until Skia can wrap the gralloc buffer in a SkImage.
-    sk_sp<SkImage> makeImage(const uirenderer::renderthread::RenderThread*);
 private:
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
     virtual ~Bitmap();
@@ -144,9 +135,6 @@ private:
             GraphicBuffer* buffer;
         } hardware;
     } mPixelStorage;
-
-    sk_sp<SkImage> mImage;
-    static Mutex gLock;
 };
 
 } //namespace android
