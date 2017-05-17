@@ -87,7 +87,7 @@ public class RecentsTaskLoadPlan {
         mCurrentQuietProfiles.clear();
 
         if (currentUserId == UserHandle.USER_CURRENT) {
-            currentUserId = KeyguardUpdateMonitor.getCurrentUser();
+            currentUserId = SystemServicesProxy.getInstance(mContext).getCurrentUser();
         }
         UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         List<UserInfo> profiles = userManager.getProfiles(currentUserId);
