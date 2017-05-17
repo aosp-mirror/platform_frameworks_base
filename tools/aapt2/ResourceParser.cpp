@@ -34,40 +34,41 @@ using android::StringPiece;
 
 namespace aapt {
 
-constexpr const char* sXliffNamespaceUri =
-    "urn:oasis:names:tc:xliff:document:1.2";
+constexpr const char* sXliffNamespaceUri = "urn:oasis:names:tc:xliff:document:1.2";
 
-/**
- * Returns true if the element is <skip> or <eat-comment> and can be safely
- * ignored.
- */
-static bool ShouldIgnoreElement(const StringPiece& ns,
-                                const StringPiece& name) {
+// Returns true if the element is <skip> or <eat-comment> and can be safely ignored.
+static bool ShouldIgnoreElement(const StringPiece& ns, const StringPiece& name) {
   return ns.empty() && (name == "skip" || name == "eat-comment");
 }
 
-static uint32_t ParseFormatType(const StringPiece& piece) {
-  if (piece == "reference")
+static uint32_t ParseFormatTypeNoEnumsOrFlags(const StringPiece& piece) {
+  if (piece == "reference") {
     return android::ResTable_map::TYPE_REFERENCE;
-  else if (piece == "string")
+  } else if (piece == "string") {
     return android::ResTable_map::TYPE_STRING;
-  else if (piece == "integer")
+  } else if (piece == "integer") {
     return android::ResTable_map::TYPE_INTEGER;
-  else if (piece == "boolean")
+  } else if (piece == "boolean") {
     return android::ResTable_map::TYPE_BOOLEAN;
-  else if (piece == "color")
+  } else if (piece == "color") {
     return android::ResTable_map::TYPE_COLOR;
-  else if (piece == "float")
+  } else if (piece == "float") {
     return android::ResTable_map::TYPE_FLOAT;
-  else if (piece == "dimension")
+  } else if (piece == "dimension") {
     return android::ResTable_map::TYPE_DIMENSION;
-  else if (piece == "fraction")
+  } else if (piece == "fraction") {
     return android::ResTable_map::TYPE_FRACTION;
-  else if (piece == "enum")
-    return android::ResTable_map::TYPE_ENUM;
-  else if (piece == "flags")
-    return android::ResTable_map::TYPE_FLAGS;
+  }
   return 0;
+}
+
+static uint32_t ParseFormatType(const StringPiece& piece) {
+  if (piece == "enum") {
+    return android::ResTable_map::TYPE_ENUM;
+  } else if (piece == "flags") {
+    return android::ResTable_map::TYPE_FLAGS;
+  }
+  return ParseFormatTypeNoEnumsOrFlags(piece);
 }
 
 static uint32_t ParseFormatAttribute(const StringPiece& str) {
@@ -83,9 +84,7 @@ static uint32_t ParseFormatAttribute(const StringPiece& str) {
   return mask;
 }
 
-/**
- * A parsed resource ready to be added to the ResourceTable.
- */
+// A parsed resource ready to be added to the ResourceTable.
 struct ParsedResource {
   ResourceName name;
   ConfigDescription config;
@@ -416,8 +415,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     can_be_bag = false;
 
     // Items have their type encoded in the type attribute.
-    if (Maybe<StringPiece> maybe_type =
-            xml::FindNonEmptyAttribute(parser, "type")) {
+    if (Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type")) {
       resource_type = maybe_type.value().to_string();
     } else {
       diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
@@ -425,13 +423,11 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       return false;
     }
 
-    if (Maybe<StringPiece> maybe_format =
-            xml::FindNonEmptyAttribute(parser, "format")) {
+    if (Maybe<StringPiece> maybe_format = xml::FindNonEmptyAttribute(parser, "format")) {
       // An explicit format for this resource was specified. The resource will
-      // retain
-      // its type in its name, but the accepted value for this type is
+      // retain its type in its name, but the accepted value for this type is
       // overridden.
-      resource_format = ParseFormatType(maybe_format.value());
+      resource_format = ParseFormatTypeNoEnumsOrFlags(maybe_format.value());
       if (!resource_format) {
         diag_->Error(DiagMessage(out_resource->source)
                      << "'" << maybe_format.value()
@@ -1157,21 +1153,25 @@ bool ResourceParser::ParseStyle(const ResourceType type, xml::XmlPullParser* par
   return true;
 }
 
-bool ResourceParser::ParseArray(xml::XmlPullParser* parser,
-                                ParsedResource* out_resource) {
-  return ParseArrayImpl(parser, out_resource, android::ResTable_map::TYPE_ANY);
+bool ResourceParser::ParseArray(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  uint32_t resource_format = android::ResTable_map::TYPE_ANY;
+  if (Maybe<StringPiece> format_attr = xml::FindNonEmptyAttribute(parser, "format")) {
+    resource_format = ParseFormatTypeNoEnumsOrFlags(format_attr.value());
+    if (resource_format == 0u) {
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                   << "'" << format_attr.value() << "' is an invalid format");
+      return false;
+    }
+  }
+  return ParseArrayImpl(parser, out_resource, resource_format);
 }
 
-bool ResourceParser::ParseIntegerArray(xml::XmlPullParser* parser,
-                                       ParsedResource* out_resource) {
-  return ParseArrayImpl(parser, out_resource,
-                        android::ResTable_map::TYPE_INTEGER);
+bool ResourceParser::ParseIntegerArray(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  return ParseArrayImpl(parser, out_resource, android::ResTable_map::TYPE_INTEGER);
 }
 
-bool ResourceParser::ParseStringArray(xml::XmlPullParser* parser,
-                                      ParsedResource* out_resource) {
-  return ParseArrayImpl(parser, out_resource,
-                        android::ResTable_map::TYPE_STRING);
+bool ResourceParser::ParseStringArray(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  return ParseArrayImpl(parser, out_resource, android::ResTable_map::TYPE_STRING);
 }
 
 bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,

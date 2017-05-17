@@ -571,12 +571,37 @@ TEST_F(ResourceParserTest, ParseArray) {
 }
 
 TEST_F(ResourceParserTest, ParseStringArray) {
-  std::string input =
-      "<string-array name=\"foo\">\n"
-      "  <item>\"Werk\"</item>\n"
-      "</string-array>\n";
+  std::string input = R"EOF(
+      <string-array name="foo">
+        <item>"Werk"</item>"
+      </string-array>)EOF";
   ASSERT_TRUE(TestParse(input));
   EXPECT_NE(nullptr, test::GetValue<Array>(&table_, "array/foo"));
+}
+
+TEST_F(ResourceParserTest, ParseArrayWithFormat) {
+  std::string input = R"EOF(
+      <array name="foo" format="string">
+        <item>100</item>
+      </array>)EOF";
+  ASSERT_TRUE(TestParse(input));
+
+  Array* array = test::GetValue<Array>(&table_, "array/foo");
+  ASSERT_NE(nullptr, array);
+
+  ASSERT_EQ(1u, array->items.size());
+
+  String* str = ValueCast<String>(array->items[0].get());
+  ASSERT_NE(nullptr, str);
+  EXPECT_EQ(std::string("100"), *str->value);
+}
+
+TEST_F(ResourceParserTest, ParseArrayWithBadFormat) {
+  std::string input = R"EOF(
+      <array name="foo" format="integer">
+        <item>Hi</item>
+      </array>)EOF";
+  ASSERT_FALSE(TestParse(input));
 }
 
 TEST_F(ResourceParserTest, ParsePlural) {
