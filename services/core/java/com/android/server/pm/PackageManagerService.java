@@ -2026,15 +2026,17 @@ public class PackageManagerService extends IPackageManager.Stub
             EventLog.writeEvent(EventLogTags.UNKNOWN_SOURCES_ENABLED,
                     getUnknownSourcesSettings());
 
-            // Force a gc to clear up things
-            Runtime.getRuntime().gc();
-
             // Remove the replaced package's older resources safely now
             // We delete after a gc for applications  on sdcard.
             if (res.removedInfo != null && res.removedInfo.args != null) {
+                Runtime.getRuntime().gc();
                 synchronized (mInstallLock) {
                     res.removedInfo.args.doPostDeleteLI(true);
                 }
+            } else {
+                // Force a gc to clear up things. Ask for a background one, it's fine to go on
+                // and not block here.
+                VMRuntime.getRuntime().requestConcurrentGC();
             }
 
             // Notify DexManager that the package was installed for new users.
