@@ -52,6 +52,7 @@ public class WindowAnimator {
 
     /** Is any window animating? */
     private boolean mAnimating;
+    private boolean mLastAnimating;
 
     /** Is any app window animating? */
     boolean mAppWindowAnimating;
@@ -158,7 +159,6 @@ public class WindowAnimator {
      */
     private void animate(long frameTimeNs) {
         boolean transactionOpen = false;
-        boolean wasAnimating = false;
         try {
             synchronized (mService.mWindowMap) {
                 if (!mInitialized) {
@@ -167,8 +167,7 @@ public class WindowAnimator {
 
                 mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
                 mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
-                wasAnimating = mAnimating;
-                setAnimating(false);
+                mAnimating = false;
                 mAppWindowAnimating = false;
                 if (DEBUG_WINDOW_TRACE) {
                     Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
@@ -269,24 +268,21 @@ public class WindowAnimator {
                 mWindowPlacerLocked.requestTraversal();
             }
 
-            if (mAnimating && !wasAnimating) {
+            if (mAnimating && !mLastAnimating) {
 
                 // Usually app transitions but quite a load onto the system already (with all the
                 // things happening in app), so pause task snapshot persisting to not increase the
                 // load.
                 mService.mTaskSnapshotController.setPersisterPaused(true);
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
-                    Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
-                }
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }
-
-            if (!mAnimating && wasAnimating) {
+            if (!mAnimating && mLastAnimating) {
                 mWindowPlacerLocked.requestTraversal();
                 mService.mTaskSnapshotController.setPersisterPaused(false);
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
-                    Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
-                }
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }
+
+            mLastAnimating = mAnimating;
 
             if (mRemoveReplacedWindows) {
                 mService.mRoot.removeReplacedWindows();

@@ -655,8 +655,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>
      * Your provider should return a reliable {@link ParcelFileDescriptor} to
      * detect when the remote caller has finished reading or writing the
-     * document. You may return a pipe or socket pair if the mode is exclusively
-     * "r" or "w", but complex modes like "rw" imply a normal file on disk that
+     * document.
+     * <p>
+     * Mode "r" should always be supported. Provider should throw
+     * {@link UnsupportedOperationException} if the passing mode is not supported.
+     * You may return a pipe or socket pair if the mode is exclusively "r" or
+     * "w", but complex modes like "rw" imply a normal file on disk that
      * supports seeking.
      * <p>
      * If you block while downloading content, you should periodically check

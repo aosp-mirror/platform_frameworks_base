@@ -116,7 +116,6 @@ class TaskSnapshotSurface implements StartingSurface {
     private final TaskSnapshot mSnapshot;
     private final CharSequence mTitle;
     private boolean mHasDrawn;
-    private boolean mReportNextDraw;
     private long mShownTime;
     private final Handler mHandler;
     private boolean mSizeMismatch;
@@ -263,15 +262,11 @@ class TaskSnapshotSurface implements StartingSurface {
         } else {
             drawSizeMatchSnapshot(buffer);
         }
-        final boolean reportNextDraw;
         synchronized (mService.mWindowMap) {
             mShownTime = SystemClock.uptimeMillis();
             mHasDrawn = true;
-            reportNextDraw = mReportNextDraw;
         }
-        if (reportNextDraw) {
-            reportDrawn();
-        }
+        reportDrawn();
     }
 
     private void drawSizeMatchSnapshot(GraphicBuffer buffer) {
@@ -356,9 +351,6 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void reportDrawn() {
-        synchronized (mService.mWindowMap) {
-            mReportNextDraw = false;
-        }
         try {
             mSession.finishDrawing(mWindow);
         } catch (RemoteException e) {
@@ -376,9 +368,6 @@ class TaskSnapshotSurface implements StartingSurface {
                     final TaskSnapshotSurface surface = (TaskSnapshotSurface) msg.obj;
                     synchronized (surface.mService.mWindowMap) {
                         hasDrawn = surface.mHasDrawn;
-                        if (!hasDrawn) {
-                            surface.mReportNextDraw = true;
-                        }
                     }
                     if (hasDrawn) {
                         surface.reportDrawn();

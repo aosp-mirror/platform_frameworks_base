@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"යාවත්කාලීන කිරීම්"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"ජාල තත්ත්වය"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ජාල ඇඟවීම්"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"ජාලය ලබා ගැනීමට හැකිය"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN තත්ත්වය"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"උපාංග පරිපාලනය"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ඇඟවීම්"</string>
@@ -492,6 +491,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ඇඟිලි සලකුණු කාල නිමාව ළඟා විය. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">

@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"အပ်ဒိတ်များ"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"ကွန်ရက် အခြေအနေ"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ကွန်ရက် သတိပေးချက်များ"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"ကွန်ရက်ချိတ်ဆက်မှု ရရှိနိုင်ပါသည်"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN အခြေအနေ"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"စက်ပစ္စည်း စီမံခန့်ခွဲမှု"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"သတိပေးချက်များ"</string>
@@ -492,6 +491,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"လက်ဗွေရာအချိန်ကုန် သွားပါသည်။ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"လက်ဗွေရာ လုပ်ငန်း ဖျက်သိမ်းခဲ့၏။"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ကြိုးစာမှု အကြိမ်များနေ၏။ နောက်မှ ထပ်မံကြိုးစားပါ။"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ပြန်ကြိုးစားပါ"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">

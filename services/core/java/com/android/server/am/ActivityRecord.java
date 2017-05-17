@@ -149,6 +149,7 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.WindowManager.LayoutParams;
 
@@ -1437,7 +1438,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
                 case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
                     final AppTransitionAnimationSpec[] specs = pendingOptions.getAnimSpecs();
-                    if (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
+                    final IAppTransitionAnimationSpecsFuture specsFuture =
+                            pendingOptions.getSpecsFuture();
+                    if (specsFuture != null) {
+                        service.mWindowManager.overridePendingAppTransitionMultiThumbFuture(
+                                specsFuture, pendingOptions.getOnAnimationStartListener(),
+                                animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
+                    } else if (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
                             && specs != null) {
                         service.mWindowManager.overridePendingAppTransitionMultiThumb(
                                 specs, pendingOptions.getOnAnimationStartListener(),
@@ -2165,7 +2172,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
-                allowTaskSnapshot());
+                allowTaskSnapshot(),
+                state.ordinal() >= RESUMED.ordinal() && state.ordinal() <= STOPPED.ordinal());
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }

@@ -492,6 +492,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"আঙ্গুলের ছাপ নেওয়ার সময়সীমা শেষ হযেছে৷ আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"অনেকবার প্রচেষ্টা করা হয়েছে৷ পরে আবার চেষ্টা করুন৷"</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"আঙ্গুল <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">

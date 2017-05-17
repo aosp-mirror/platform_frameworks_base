@@ -254,54 +254,11 @@ package android.net {
     field public static final int BADGING_SD = 10; // 0xa
   }
 
-  public abstract class NetworkRecommendationProvider {
-    ctor public deprecated NetworkRecommendationProvider(android.os.Handler);
-    method public deprecated void onRequestRecommendation(android.net.RecommendationRequest, android.net.NetworkRecommendationProvider.ResultCallback);
-    field public static final deprecated java.lang.String EXTRA_RECOMMENDATION_RESULT = "android.net.extra.RECOMMENDATION_RESULT";
-    field public static final deprecated java.lang.String EXTRA_SEQUENCE = "android.net.extra.SEQUENCE";
-  }
-
-  public static deprecated class NetworkRecommendationProvider.ResultCallback {
-    ctor public NetworkRecommendationProvider.ResultCallback(android.os.IRemoteCallback, int);
-    method public void onResult(android.net.RecommendationResult);
-  }
-
   public abstract class PskKeyManager {
     ctor public PskKeyManager();
     field public static final int MAX_IDENTITY_HINT_LENGTH_BYTES = 128; // 0x80
     field public static final int MAX_IDENTITY_LENGTH_BYTES = 128; // 0x80
     field public static final int MAX_KEY_LENGTH_BYTES = 256; // 0x100
-  }
-
-  public final deprecated class RecommendationRequest implements android.os.Parcelable {
-    ctor protected RecommendationRequest(android.os.Parcel);
-    method public android.net.wifi.WifiConfiguration[] getConnectableConfigs();
-    method public android.net.wifi.WifiConfiguration getConnectedConfig();
-    method public android.net.wifi.WifiConfiguration getDefaultWifiConfig();
-    method public int getLastSelectedNetworkId();
-    method public long getLastSelectedNetworkTimestamp();
-    method public android.net.wifi.ScanResult[] getScanResults();
-    method public void setConnectableConfigs(android.net.wifi.WifiConfiguration[]);
-    method public void setConnectedConfig(android.net.wifi.WifiConfiguration);
-    field public static final android.os.Parcelable.Creator<android.net.RecommendationRequest> CREATOR;
-  }
-
-  public static final deprecated class RecommendationRequest.Builder {
-    ctor public RecommendationRequest.Builder();
-    method public android.net.RecommendationRequest build();
-    method public android.net.RecommendationRequest.Builder setConnectableConfigs(android.net.wifi.WifiConfiguration[]);
-    method public android.net.RecommendationRequest.Builder setConnectedWifiConfig(android.net.wifi.WifiConfiguration);
-    method public android.net.RecommendationRequest.Builder setDefaultWifiConfig(android.net.wifi.WifiConfiguration);
-    method public android.net.RecommendationRequest.Builder setLastSelectedNetwork(int, long);
-    method public android.net.RecommendationRequest.Builder setScanResults(android.net.wifi.ScanResult[]);
-  }
-
-  public final deprecated class RecommendationResult implements android.os.Parcelable {
-    method public static android.net.RecommendationResult createConnectRecommendation(android.net.wifi.WifiConfiguration);
-    method public static android.net.RecommendationResult createDoNotConnectRecommendation();
-    method public android.net.wifi.WifiConfiguration getWifiConfiguration();
-    method public boolean hasRecommendation();
-    field public static final android.os.Parcelable.Creator<android.net.RecommendationResult> CREATOR;
   }
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {

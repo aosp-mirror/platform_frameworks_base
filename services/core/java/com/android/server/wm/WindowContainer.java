@@ -16,6 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.res.Configuration.EMPTY;
+
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
 import android.util.Pools;
@@ -26,11 +31,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.res.Configuration.EMPTY;
 
 /**
  * Defines common functionality for classes that can hold windows directly or through their
@@ -52,7 +52,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
-    protected final LinkedList<E> mChildren = new LinkedList();
+    protected final WindowList<E> mChildren = new WindowList<E>();
 
     /** Contains override configuration settings applied to this window container. */
     private Configuration mOverrideConfiguration = new Configuration();
@@ -258,7 +258,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
             case POSITION_TOP:
                 if (mChildren.peekLast() != child) {
                     mChildren.remove(child);
-                    mChildren.addLast(child);
+                    mChildren.add(child);
                 }
                 if (includingParents && getParent() != null) {
                     getParent().positionChildAt(POSITION_TOP, this /* child */,
@@ -649,7 +649,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         }
 
         if (mParent != null && mParent == other.mParent) {
-            final LinkedList<WindowContainer> list = mParent.mChildren;
+            final WindowList<WindowContainer> list = mParent.mChildren;
             return list.indexOf(this) > list.indexOf(other) ? 1 : -1;
         }
 
@@ -685,7 +685,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
         // The position of the first non-common ancestor in the common ancestor list determines
         // which is greater the which.
-        final LinkedList<WindowContainer> list = commonAncestor.mChildren;
+        final WindowList<WindowContainer> list = commonAncestor.mChildren;
         return list.indexOf(thisParentChain.peekLast()) > list.indexOf(otherParentChain.peekLast())
                 ? 1 : -1;
     }

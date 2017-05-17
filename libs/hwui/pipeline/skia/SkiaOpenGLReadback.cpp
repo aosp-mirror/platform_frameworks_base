@@ -61,7 +61,6 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);
 
     CopyResult copyResult = CopyResult::UnknownError;
-    // TODO: add color correctness - pass null color space for now
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), textureDescription));
     if (image) {
         SkAutoLockPixels alp(*bitmap);

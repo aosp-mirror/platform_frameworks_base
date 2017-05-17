@@ -341,4 +341,7 @@ public abstract class PackageManagerInternal {
      * Return the taget SDK version for the app with the given UID.
      */
     public abstract int getUidTargetSdkVersion(int uid);
+
+    /** Whether the binder caller can access instant apps. */
+    public abstract boolean canAccessInstantApps(int callingUid);
 }

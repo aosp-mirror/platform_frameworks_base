@@ -26,7 +26,10 @@ import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
+import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Log;
+import android.util.LogWriter;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -35,6 +38,8 @@ import java.net.ProtocolException;
  * UsageStats reader/writer for version 1 of the XML format.
  */
 final class UsageStatsXmlV1 {
+    private static final String TAG = "UsageStatsXmlV1";
+
     private static final String PACKAGES_TAG = "packages";
     private static final String PACKAGE_TAG = "package";
 
@@ -51,6 +56,7 @@ final class UsageStatsXmlV1 {
 
     // Attributes
     private static final String PACKAGE_ATTR = "package";
+    private static final String FLAGS_ATTR = "flags";
     private static final String CLASS_ATTR = "class";
     private static final String TOTAL_TIME_ACTIVE_ATTR = "timeActive";
     private static final String COUNT_ATTR = "count";
@@ -70,7 +76,6 @@ final class UsageStatsXmlV1 {
         if (pkg == null) {
             throw new ProtocolException("no " + PACKAGE_ATTR + " attribute present");
         }
-
         final UsageStats stats = statsOut.getOrCreateUsageStats(pkg);
 
         // Apply the offset to the beginTime to find the absolute time.
@@ -149,10 +154,11 @@ final class UsageStatsXmlV1 {
         if (packageName == null) {
             throw new ProtocolException("no " + PACKAGE_ATTR + " attribute present");
         }
-
         final String className = XmlUtils.readStringAttribute(parser, CLASS_ATTR);
 
         final UsageEvents.Event event = statsOut.buildEvent(packageName, className);
+
+        event.mFlags = XmlUtils.readIntAttribute(parser, FLAGS_ATTR, 0);
 
         // Apply the offset to the beginTime to find the absolute time of this event.
         event.mTimeStamp = statsOut.beginTime + XmlUtils.readLongAttribute(parser, TIME_ATTR);
@@ -256,6 +262,7 @@ final class UsageStatsXmlV1 {
         if (event.mClass != null) {
             XmlUtils.writeStringAttribute(xml, CLASS_ATTR, event.mClass);
         }
+        XmlUtils.writeIntAttribute(xml, FLAGS_ATTR, event.mFlags);
         XmlUtils.writeIntAttribute(xml, TYPE_ATTR, event.mEventType);
 
         switch (event.mEventType) {

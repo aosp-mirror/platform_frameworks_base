@@ -294,7 +294,7 @@
     <item msgid="8280754435979370728">"നമ്മൾ കാണുന്നത് പോലെയുള്ള സ്വാഭാവിക വർണ്ണങ്ങൾ"</item>
     <item msgid="5363960654009010371">"ഡിജിറ്റൽ ഉള്ളടക്കത്തിനായി വർണ്ണങ്ങൾ ഒപ്റ്റിമൈസ് ചെയ്തു"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"നിഷ്‌ക്രിയ ആപ്പ്‌സ്"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"നിഷ്‌ക്രിയ ആപ്പുകൾ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"നിഷ്‌ക്രിയം. മാറ്റുന്നതിനു ടാപ്പുചെയ്യുക."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"സജീവം. മാറ്റുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
