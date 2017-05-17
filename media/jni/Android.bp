@@ -74,4 +74,5 @@ cc_library_shared {
 
 subdirs = [
     "audioeffect",
+    "soundpool",
 ]
