@@ -12,10 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The headers module is in frameworks/media/native/midi/Android.bp.
-ndk_library {
-    name: "libmidi.ndk",
-    symbol_file: "libmidi.map.txt",
-    first_version: "26",
-//    unversioned_until: "current",
+cc_library_shared {
+    name: "libmidi",
+
+    srcs: [
+        "midi.cpp",
+        ":IMidiDeviceServer.aidl",
+    ],
+
+    aidl: {
+        include_dirs: ["frameworks/base/media/java"],
+        export_aidl_headers: true,
+    },
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-O0",
+    ],
+
+    shared_libs: [
+        "liblog",
+        "libbinder",
+        "libutils",
+        "libmedia",
+    ],
+
+    export_include_dirs: ["."],
 }
