@@ -938,7 +938,12 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
         if (pointerIdBits == ALL_POINTER_ID_BITS) {
             event = prototype;
         } else {
-            event = prototype.split(pointerIdBits);
+            try {
+                event = prototype.split(pointerIdBits);
+            } catch (IllegalArgumentException e) {
+                Slog.e(LOG_TAG, "sendMotionEvent: Failed to split motion event: " + e);
+                return;
+            }
         }
         if (action == MotionEvent.ACTION_DOWN) {
             event.setDownTime(event.getEventTime());
